@@ -76,10 +76,6 @@ def main():
 
     applications = args.applications
 
-    # parser.add_argument('-seq', '--sequence', nargs='*', help="protein id and sequence")
-    # id = args.sequence[0]
-    # seq = args.sequence[1]
-
     sequences = get_sequences(args.fastafile)
     for id, seq in sequences.items():
         matches = match_lookup(seq)
