@@ -1,0 +1,990 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<protein-matches xmlns="http://www.ebi.ac.uk/interpro/resources/schemas/interproscan5" interproscan-version="5.31-70.0">
+    <protein>
+        <sequence md5="92e4b89dd86f8ab828f57121f6d7d460">MSILFYVIFLAYLRGIQSTNMDQRTLPEDSINSLIIKLIQADILKNKLSKQMVDIKENYQNTAQKADTQQDMDADDNVKSDFQPVVSVDTDLLRQQRRYNSPRVLLSDNTPLEPPPLYLMEDYIGNSVMVNRTSRRKRYAEHKSHRGEYSVCDSESLWVTDKSSAIDIRGHQVTVLGEIKTGNSPVKQYFYETRCKEAKPVKNGCRGIDDKHWNSQCKTSQTYVRALTSENNKLVGWRWIRIDTSCVCALSRKIGRT</sequence>
+        <xref id="UPI0004FABBC5" name="UPI0004FABBC5"/>
+        <matches>
+            <coils-match>
+                <signature ac="Coil" name="Coil">
+                    <signature-library-release library="COILS" version="2.2.1"/>
+                </signature>
+                <model-ac>Coil</model-ac>
+                <locations>
+                    <coils-location start="45" end="65">
+                        <location-fragments>
+                            <coils-location-fragment start="45" end="65" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </coils-location>
+                </locations>
+            </coils-match>
+            <hmmer2-match evalue="2.6E-86" score="302.7">
+                <signature ac="SM00140" name="NGF_2">
+                    <entry ac="IPR002072" desc="Nerve growth factor-related" name="Nerve_growth_factor-rel" type="DOMAIN">
+                        <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0005102" name="signaling receptor binding"/>
+                    </entry>
+                    <signature-library-release library="SMART" version="7.1"/>
+                </signature>
+                <model-ac>SM00140</model-ac>
+                <locations>
+                    <hmmer2-location score="302.7" evalue="2.6E-86" hmm-start="1" hmm-end="131" hmm-length="131" hmm-bounds="COMPLETE" start="144" end="249">
+                        <location-fragments>
+                            <hmmer2-location-fragment start="144" end="249" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </hmmer2-location>
+                </locations>
+            </hmmer2-match>
+            <hmmer3-match evalue="7.3E-52" score="174.3">
+                <signature ac="PF00243" desc="Nerve growth factor family" name="NGF">
+                    <entry ac="IPR002072" desc="Nerve growth factor-related" name="Nerve_growth_factor-rel" type="DOMAIN">
+                        <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0005102" name="signaling receptor binding"/>
+                    </entry>
+                    <signature-library-release library="PFAM" version="31.0"/>
+                </signature>
+                <model-ac>PF00243</model-ac>
+                <locations>
+                    <hmmer3-location env-end="255" env-start="144" post-processed="true" score="173.6" evalue="1.2E-51" hmm-start="2" hmm-end="110" hmm-length="112" hmm-bounds="INCOMPLETE" start="145" end="253">
+                        <location-fragments>
+                            <hmmer3-location-fragment start="145" end="253" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </hmmer3-location>
+                </locations>
+            </hmmer3-match>
+            <hmmer3-match evalue="2.9E-105" score="339.4">
+                <signature ac="PIRSF001789" name="NGFB">
+                    <entry ac="IPR020408" desc="Nerve growth factor-like" name="Nerve_growth_factor-like" type="FAMILY"/>
+                    <signature-library-release library="PIRSF" version="3.02"/>
+                </signature>
+                <model-ac>PIRSF001789</model-ac>
+                <locations>
+                    <hmmer3-location env-end="257" env-start="1" post-processed="false" score="339.3" evalue="3.2E-105" hmm-start="1" hmm-end="256" hmm-length="253" hmm-bounds="N_TERMINAL_COMPLETE" start="1" end="257">
+                        <location-fragments>
+                            <hmmer3-location-fragment start="1" end="257" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </hmmer3-location>
+                </locations>
+            </hmmer3-match>
+            <panther-match evalue="8.2E-152" familyName="NEUROTROPHIN-3" score="506.1">
+                <signature ac="PTHR11589" name="NERVE GROWTH FACTOR  NGF -RELATED">
+                    <entry ac="IPR020408" desc="Nerve growth factor-like" name="Nerve_growth_factor-like" type="FAMILY"/>
+                    <signature-library-release library="PANTHER" version="12.0"/>
+                </signature>
+                <model-ac>PTHR11589</model-ac>
+                <locations>
+                    <panther-location env-start="1" env-end="257" hmm-start="1" hmm-end="257" hmm-length="257" hmm-bounds="COMPLETE" start="1" end="257">
+                        <location-fragments>
+                            <panther-location-fragment start="1" end="257" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </panther-location>
+                </locations>
+            </panther-match>
+            <panther-match evalue="8.2E-152" familyName="NEUROTROPHIN-3" score="506.1">
+                <signature ac="PTHR11589:SF4" name="NEUROTROPHIN-3">
+                    <entry ac="IPR015578" desc="Neurotrophin-3" name="Neurotrophin-3" type="FAMILY">
+                        <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0005165" name="neurotrophin receptor binding"/>
+                        <pathway-xref db="Reactome" id="R-HSA-9025046" name="NTF3 activates NTRK2 (TRKB) signaling"/>
+                    </entry>
+                    <signature-library-release library="PANTHER" version="12.0"/>
+                </signature>
+                <model-ac>PTHR11589:SF4</model-ac>
+                <locations>
+                    <panther-location env-start="1" env-end="257" hmm-start="1" hmm-end="257" hmm-length="257" hmm-bounds="COMPLETE" start="1" end="257">
+                        <location-fragments>
+                            <panther-location-fragment start="1" end="257" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </panther-location>
+                </locations>
+            </panther-match>
+            <phobius-match>
+                <signature ac="NON_CYTOPLASMIC_DOMAIN" desc="Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region." name="Non cytoplasmic domain">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>NON_CYTOPLASMIC_DOMAIN</model-ac>
+                <locations>
+                    <phobius-location start="19" end="257">
+                        <location-fragments>
+                            <phobius-location-fragment start="19" end="257" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <phobius-match>
+                <signature ac="SIGNAL_PEPTIDE" desc="Signal peptide region" name="Signal Peptide">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>SIGNAL_PEPTIDE</model-ac>
+                <locations>
+                    <phobius-location start="1" end="18">
+                        <location-fragments>
+                            <phobius-location-fragment start="1" end="18" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <phobius-match>
+                <signature ac="SIGNAL_PEPTIDE_C_REGION" desc="C-terminal region of a signal peptide." name="Signal peptide C-region">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>SIGNAL_PEPTIDE_C_REGION</model-ac>
+                <locations>
+                    <phobius-location start="14" end="18">
+                        <location-fragments>
+                            <phobius-location-fragment start="14" end="18" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <phobius-match>
+                <signature ac="SIGNAL_PEPTIDE_N_REGION" desc="N-terminal region of a signal peptide." name="Signal peptide N-region">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>SIGNAL_PEPTIDE_N_REGION</model-ac>
+                <locations>
+                    <phobius-location start="1" end="2">
+                        <location-fragments>
+                            <phobius-location-fragment start="1" end="2" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <phobius-match>
+                <signature ac="SIGNAL_PEPTIDE_H_REGION" desc="Hydrophobic region of a signal peptide." name="Signal peptide H-region">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>SIGNAL_PEPTIDE_H_REGION</model-ac>
+                <locations>
+                    <phobius-location start="3" end="13">
+                        <location-fragments>
+                            <phobius-location-fragment start="3" end="13" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <signalp-match>
+                <signature ac="SignalP-noTM" name="SignalP-noTM">
+                    <signature-library-release library="SIGNALP_EUK" version="4.1"/>
+                </signature>
+                <model-ac>SignalP-noTM</model-ac>
+                <locations>
+                    <signalp-location score="0.76" start="1" end="18">
+                        <location-fragments>
+                            <signalp-location-fragment start="1" end="18" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </signalp-location>
+                </locations>
+            </signalp-match>
+        </matches>
+    </protein>
+    <protein>
+        <sequence md5="f91cb3cf61f2d7c7f5aaf6ea04e07868">MKKNFYLYVALFVAAIVAISAIASSFSAKANNENVTVNNENNNEQKEELPNVVILATGGTIAGTGSSSTQTTGYKSGDLGIETLIEAVPEMKELANITGEQIVKVDSTDITNEILLKLGKRVNELLASDDVDGIVITHGTDTLEETAYFLNLVVKSDKPVVLTAAMRPATAMSADGPFNLYNAVLLASHESSKGKGVLVTLNDRIASARNITKTNTTATDAFKSFENGYLGAIVAGKPYYYNNVERLHTTETPFDISKIKKLPQVDIIYGYQNSPTYMYKAAVQNGAKGIIVAAPGDGTLSAKSVEGVKYAMNKGVKVVLSSRVGTGTVSPKEGYITSDSLNPQKARILLMLALTVTNDPQEIQSFFDKY</sequence>
+        <xref id="UPI0002E0D40B" name="UPI0002E0D40B status=active"/>
+        <matches>
+            <coils-match>
+                <signature ac="Coil" name="Coil">
+                    <signature-library-release library="COILS" version="2.2.1"/>
+                </signature>
+                <model-ac>Coil</model-ac>
+                <locations>
+                    <coils-location start="27" end="47">
+                        <location-fragments>
+                            <coils-location-fragment start="27" end="47" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </coils-location>
+                </locations>
+            </coils-match>
+            <hmmer3-match evalue="1.9E-34" score="120.0">
+                <signature ac="G3DSA:3.40.50.40">
+                    <entry ac="IPR027473" desc="L-asparaginase, C-terminal" name="L-asparaginase_C" type="HOMOLOGOUS_SUPERFAMILY">
+                        <pathway-xref db="Reactome" id="R-HSA-70614" name="Amino acid synthesis and interconversion (transamination)"/>
+                    </entry>
+                    <signature-library-release library="GENE3D" version="4.2.0"/>
+                </signature>
+                <model-ac>2wltA02</model-ac>
+                <locations>
+                    <hmmer3-location env-end="369" env-start="264" post-processed="true" score="117.7" evalue="9.6E-34" hmm-start="2" hmm-end="111" hmm-length="112" hmm-bounds="COMPLETE" start="264" end="369">
+                        <location-fragments>
+                            <hmmer3-location-fragment start="264" end="369" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </hmmer3-location>
+                </locations>
+            </hmmer3-match>
+            <hmmer3-match evalue="6.3E-79" score="253.3">
+                <signature ac="PIRSF500176" name="L_ASNase">
+                    <signature-library-release library="PIRSF" version="3.02"/>
+                </signature>
+                <model-ac>PIRSF500176</model-ac>
+                <locations>
+                    <hmmer3-location env-end="370" env-start="48" post-processed="false" score="252.9" evalue="8.3E-79" hmm-start="50" hmm-end="367" hmm-length="330" hmm-bounds="INCOMPLETE" start="48" end="370">
+                        <location-fragments>
+                            <hmmer3-location-fragment start="48" end="370" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </hmmer3-location>
+                </locations>
+            </hmmer3-match>
+            <hmmer3-match evalue="1.1E-87" score="294.9">
+                <signature ac="G3DSA:3.40.50.1170">
+                    <entry ac="IPR037152" desc="L-asparaginase, N-terminal domain superfamily" name="L-asparaginase_N_sf" type="HOMOLOGOUS_SUPERFAMILY">
+                        <pathway-xref db="Reactome" id="R-HSA-70614" name="Amino acid synthesis and interconversion (transamination)"/>
+                    </entry>
+                    <signature-library-release library="GENE3D" version="4.2.0"/>
+                </signature>
+                <model-ac>1o7jA01</model-ac>
+                <locations>
+                    <hmmer3-location env-end="263" env-start="46" post-processed="true" score="294.1" evalue="2.0E-87" hmm-start="3" hmm-end="218" hmm-length="218" hmm-bounds="COMPLETE" start="46" end="263">
+                        <location-fragments>
+                            <hmmer3-location-fragment start="46" end="263" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </hmmer3-location>
+                </locations>
+            </hmmer3-match>
+            <hmmer3-match evalue="4.0E-92" score="296.5">
+                <signature ac="PIRSF001220" name="L-ASNase_gatD">
+                    <entry ac="IPR006034" desc="Asparaginase/glutaminase-like" name="Asparaginase/glutaminase-like" type="FAMILY">
+                        <pathway-xref db="Reactome" id="R-HSA-70614" name="Amino acid synthesis and interconversion (transamination)"/>
+                    </entry>
+                    <signature-library-release library="PIRSF" version="3.02"/>
+                </signature>
+                <model-ac>PIRSF001220</model-ac>
+                <locations>
+                    <hmmer3-location env-end="370" env-start="46" post-processed="false" score="296.3" evalue="4.8E-92" hmm-start="48" hmm-end="365" hmm-length="331" hmm-bounds="INCOMPLETE" start="46" end="370">
+                        <location-fragments>
+                            <hmmer3-location-fragment start="46" end="370" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </hmmer3-location>
+                </locations>
+            </hmmer3-match>
+            <hmmer3-match-with-sites evalue="0.0" score="234.9">
+                <signature ac="SFLDS00057" desc="Glutaminase/Asparaginase" name="Glutaminase/Asparaginase">
+                    <signature-library-release library="SFLD" version="4"/>
+                </signature>
+                <model-ac>SFLDS00057</model-ac>
+                <locations>
+                    <hmmer3-location-with-sites env-end="370" env-start="44" score="234.7" evalue="0.0" hmm-start="3" hmm-end="332" hmm-length="343" hmm-bounds="INCOMPLETE" start="46" end="367">
+                        <location-fragments>
+                            <hmmer3-location-fragment-with-sites start="46" end="367" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                        <sites>
+                            <hmmer3-site description=" general acid/base" numLocations="1">
+                                <site-locations>
+                                    <site-location residue="T" start="163" end="163"/>
+                                </site-locations>
+                            </hmmer3-site>
+                            <hmmer3-site description=" nucleophile" numLocations="1">
+                                <site-locations>
+                                    <site-location residue="T" start="60" end="60"/>
+                                </site-locations>
+                            </hmmer3-site>
+                        </sites>
+                    </hmmer3-location-with-sites>
+                </locations>
+            </hmmer3-match-with-sites>
+            <panther-match evalue="4.5E-107" familyName="L-ASPARAGINASE 2" score="360.4">
+                <signature ac="PTHR43828:SF3" name="L-ASPARAGINASE 2">
+                    <signature-library-release library="PANTHER" version="12.0"/>
+                </signature>
+                <model-ac>PTHR43828:SF3</model-ac>
+                <locations>
+                    <panther-location env-start="45" env-end="370" hmm-start="4" hmm-end="330" hmm-length="330" hmm-bounds="C_TERMINAL_COMPLETE" start="49" end="370">
+                        <location-fragments>
+                            <panther-location-fragment start="49" end="370" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </panther-location>
+                </locations>
+            </panther-match>
+            <panther-match evalue="4.5E-107" familyName="L-ASPARAGINASE 2" score="360.4">
+                <signature ac="PTHR43828" name="FAMILY NOT NAMED">
+                    <signature-library-release library="PANTHER" version="12.0"/>
+                </signature>
+                <model-ac>PTHR43828</model-ac>
+                <locations>
+                    <panther-location env-start="45" env-end="370" hmm-start="4" hmm-end="330" hmm-length="330" hmm-bounds="C_TERMINAL_COMPLETE" start="49" end="370">
+                        <location-fragments>
+                            <panther-location-fragment start="49" end="370" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </panther-location>
+                </locations>
+            </panther-match>
+            <phobius-match>
+                <signature ac="SIGNAL_PEPTIDE_N_REGION" desc="N-terminal region of a signal peptide." name="Signal peptide N-region">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>SIGNAL_PEPTIDE_N_REGION</model-ac>
+                <locations>
+                    <phobius-location start="1" end="6">
+                        <location-fragments>
+                            <phobius-location-fragment start="1" end="6" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <phobius-match>
+                <signature ac="SIGNAL_PEPTIDE" desc="Signal peptide region" name="Signal Peptide">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>SIGNAL_PEPTIDE</model-ac>
+                <locations>
+                    <phobius-location start="1" end="27">
+                        <location-fragments>
+                            <phobius-location-fragment start="1" end="27" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <phobius-match>
+                <signature ac="SIGNAL_PEPTIDE_C_REGION" desc="C-terminal region of a signal peptide." name="Signal peptide C-region">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>SIGNAL_PEPTIDE_C_REGION</model-ac>
+                <locations>
+                    <phobius-location start="20" end="27">
+                        <location-fragments>
+                            <phobius-location-fragment start="20" end="27" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <phobius-match>
+                <signature ac="NON_CYTOPLASMIC_DOMAIN" desc="Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region." name="Non cytoplasmic domain">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>NON_CYTOPLASMIC_DOMAIN</model-ac>
+                <locations>
+                    <phobius-location start="28" end="370">
+                        <location-fragments>
+                            <phobius-location-fragment start="28" end="370" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <phobius-match>
+                <signature ac="SIGNAL_PEPTIDE_H_REGION" desc="Hydrophobic region of a signal peptide." name="Signal peptide H-region">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>SIGNAL_PEPTIDE_H_REGION</model-ac>
+                <locations>
+                    <phobius-location start="7" end="19">
+                        <location-fragments>
+                            <phobius-location-fragment start="7" end="19" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <profilescan-match>
+                <signature ac="PS51732" desc="Asparaginase / glutaminase domain profile." name="ASN_GLN_ASE_3">
+                    <entry ac="IPR006034" desc="Asparaginase/glutaminase-like" name="Asparaginase/glutaminase-like" type="FAMILY">
+                        <pathway-xref db="Reactome" id="R-HSA-70614" name="Amino acid synthesis and interconversion (transamination)"/>
+                    </entry>
+                    <signature-library-release library="PROSITE_PROFILES" version="2018_02"/>
+                </signature>
+                <model-ac>PS51732</model-ac>
+                <locations>
+                    <profilescan-location score="87.665" start="50" end="370">
+                        <location-fragments>
+                            <profilescan-location-fragment start="50" end="370" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                        <alignment>PNVVILATGGTIAGTGSSSTQTTgykSGDLGIETLIEAVPEMKELANITGEQIVKVDSTDITNEILLKLGKRVNELLASDDVDGIVITHGTDTLEETAYFLNLVVKSDKPVVLTAAMRPATAMSADGPFNLYNAVLLASHESSKGKGVLVTLNDRIASARNITKTNTTATDAFKSFENGYLGAIVAGkpyyyNNVERLHTTETP------FDISKIKkLPQVDIIYGY-QNSPTYMYKAAVQNGAKGIIVAAPGDGTLSAKSVEGVKYAMNKGVKVVLSSRVGTGTVSPKEG----------YITSDSLNPQKARILLMLALTVTNDPQEIQSFFDKY</alignment>
+                    </profilescan-location>
+                </locations>
+            </profilescan-match>
+            <signalp-match>
+                <signature ac="SignalP-noTM" name="SignalP-noTM">
+                    <signature-library-release library="SIGNALP_GRAM_NEGATIVE" version="4.1"/>
+                </signature>
+                <model-ac>SignalP-noTM</model-ac>
+                <locations>
+                    <signalp-location score="0.853" start="1" end="30">
+                        <location-fragments>
+                            <signalp-location-fragment start="1" end="30" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </signalp-location>
+                </locations>
+            </signalp-match>
+            <signalp-match>
+                <signature ac="SignalP-TM" name="SignalP-TM">
+                    <signature-library-release library="SIGNALP_GRAM_POSITIVE" version="4.1"/>
+                </signature>
+                <model-ac>SignalP-TM</model-ac>
+                <locations>
+                    <signalp-location score="0.735" start="1" end="30">
+                        <location-fragments>
+                            <signalp-location-fragment start="1" end="30" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </signalp-location>
+                </locations>
+            </signalp-match>
+            <signalp-match>
+                <signature ac="SignalP-noTM" name="SignalP-noTM">
+                    <signature-library-release library="SIGNALP_EUK" version="4.1"/>
+                </signature>
+                <model-ac>SignalP-noTM</model-ac>
+                <locations>
+                    <signalp-location score="0.705" start="1" end="25">
+                        <location-fragments>
+                            <signalp-location-fragment start="1" end="25" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </signalp-location>
+                </locations>
+            </signalp-match>
+            <tmhmm-match>
+                <signature ac="TMhelix" desc="Region of a membrane-bound protein predicted to be embedded in the membrane.">
+                    <signature-library-release library="TMHMM" version="2.0c"/>
+                </signature>
+                <model-ac>TMhelix</model-ac>
+                <locations>
+                    <tmhmm-location start="5" end="27">
+                        <location-fragments>
+                            <tmhmm-location-fragment start="5" end="27" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </tmhmm-location>
+                </locations>
+            </tmhmm-match>
+        </matches>
+    </protein>
+    <protein>
+        <sequence md5="5f052143dad9be4819a7e9c14e53611d">MKAQGETEESEKLSKMSSLLERLHAKFNQNRPWSETIKLVRQVMEKRVVMSSGGHQHLVSCLETLQKALKVTSLPAMTDRLESIARQNGLGSHLSASGTECYITSDMFYVEVQLDPAGQLCDVKVAHHGENPVSCPELVQQLREKNFDEFSKHLKGLVNLYNLPGDNKLKTKMYLALQSLEQDLSKMAIMYWKATNAGPLDKILHGSVGYLTPRSGGHLMNLKYYVSPSDLLDDKTASPIILHENNVSRSLGMNASVTIEGTSAVYKLPIAPLIMGSHPVDNKWTPSFSSITSANSVDLPACFFLKFPQPIPVSRAFVQKLQNCTGIPLFETQPTYAPLYELITQFELSKDPDPIPLNHNMRFYAALPGQQHCYFLNKDAPLPDGRSLQGTLVSKITFQHPGRVPLILNLIRHQVAYNTLIGSCVKRTILKEDSPGLLQFEVCPLSESRFSVSFQHPVNDSLVCVVMDVQDSTHVSCKLYKGLSDALICTDDFIAKVVQRCMSIPVTMRAIRRKAETIQADTPALSLIAETVEDMVKKNLPPASSPGYGMTTGNNPMSGTTTPTNTFPGGPITTLFNMSMSIKDRHESVGHGEDFSKVSQNPILTSLLQITGNGGSTIGSSPTPPHHTPPPVSSMAGNTKNHPMLMNLLKDNPAQDFSTLYGSSPLERQNSSSGSPRMEICSGSNKTKKKKSSRLPPEKPKHQTEDDFQRELFSMDVDSQNPIFDVNMTADTLDTPHITPAPSQCSTPPTTYPQPVPHPQPSIQRMVRLSSSDSIGPDVTDILSDIAEEASKLPSTSDDCPAIGTPLRDSSSSGHSQSTLFDSDVFQTNNNENPYTDPADLIADAAGSPSSDSPTNHFFHDGVDFNPDLLNSQSQSGFGEEYFDESSQSGDNDDFKGFASQALNTLGVPMLGGDNGETKFKGNNQADTVDFSIISVAGKALAPADLMEHHSGSQGPLLTTGDLGKEKTQKRVKEGNGTSNSTLSGPGLDSKPGKRSRTPSNDGKSKDKPPKRKKADTEGKSPSHSSSNRPFTPPTSTGGSKSPGSAGRSQTPPGVATPPIPKITIQIPKGTVMVGKPSSHSQYTSSGSVSSSGSKSHHSHSSSSSSSASTSGKMKSSKSEGSSSSKLSSSMYSSQGSSGSSQSKNSSQSGGKPGSSPITKHGLSSGSSSTKMKPQGKPSSLMNPSLSKPNISPSHSRPPGGSDKLASPMKPVPGTPPSSKAKSPISSGSGGSHMSGTSSSSGMKSSSGLGSSGSLSQKTPPSSNSCTASSSSFSSSGSSMSSSQNQHGSSKGKSPSRNKKPSLTAVIDKLKHGVVTSGPGGEDPLDGQMGVSTNSSSHPMSSKHNMSGGEFQGKREKSDKDKSKVSTSGSSVDSSKKTSESKNVGSTGVAKIIISKHDGGSPSIKAKVTLQKPGESSGEGLRPQMASSKNYGSPLISGSTPKHERGSPSHSKSPAYTPQNLDSESESGSSIAEKSYQNSPSSDDGIRPLPEYSTEKHKKHKKEKKKVKDKDRDRDRDKDRDKKKSHSIKPESWSKSPISSDQSLSMTSNTILSADRPSRLSPDFMIGEEDDDLMDVALIGN</sequence>
+        <xref id="UPI0000167F57" name="UPI0000167F57"/>
+        <matches>
+            <coils-match>
+                <signature ac="Coil" name="Coil">
+                    <signature-library-release library="COILS" version="2.2.1"/>
+                </signature>
+                <model-ac>Coil</model-ac>
+                <locations>
+                    <coils-location start="1579" end="1581">
+                        <location-fragments>
+                            <coils-location-fragment start="1579" end="1581" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </coils-location>
+                </locations>
+            </coils-match>
+            <mobidblite-match>
+                <signature ac="mobidb-lite" desc="consensus disorder prediction" name="disorder_prediction">
+                    <signature-library-release library="MOBIDB_LITE" version="1.5"/>
+                </signature>
+                <model-ac>mobidb-lite</model-ac>
+                <locations>
+                    <mobidblite-location sequence-feature="Polyampholyte" start="1349" end="1366">
+                        <location-fragments>
+                            <mobidblite-location-fragment start="1349" end="1366" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </mobidblite-location>
+                </locations>
+            </mobidblite-match>
+            <mobidblite-match>
+                <signature ac="mobidb-lite" desc="consensus disorder prediction" name="disorder_prediction">
+                    <signature-library-release library="MOBIDB_LITE" version="1.5"/>
+                </signature>
+                <model-ac>mobidb-lite</model-ac>
+                <locations>
+                    <mobidblite-location sequence-feature="Polar" start="1531" end="1556">
+                        <location-fragments>
+                            <mobidblite-location-fragment start="1531" end="1556" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </mobidblite-location>
+                </locations>
+            </mobidblite-match>
+            <mobidblite-match>
+                <signature ac="mobidb-lite" desc="consensus disorder prediction" name="disorder_prediction">
+                    <signature-library-release library="MOBIDB_LITE" version="1.5"/>
+                </signature>
+                <model-ac>mobidb-lite</model-ac>
+                <locations>
+                    <mobidblite-location sequence-feature="Polar" start="1367" end="1388">
+                        <location-fragments>
+                            <mobidblite-location-fragment start="1367" end="1388" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </mobidblite-location>
+                </locations>
+            </mobidblite-match>
+            <mobidblite-match>
+                <signature ac="mobidb-lite" desc="consensus disorder prediction" name="disorder_prediction">
+                    <signature-library-release library="MOBIDB_LITE" version="1.5"/>
+                </signature>
+                <model-ac>mobidb-lite</model-ac>
+                <locations>
+                    <mobidblite-location sequence-feature="Polar" start="1021" end="1052">
+                        <location-fragments>
+                            <mobidblite-location-fragment start="1021" end="1052" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </mobidblite-location>
+                </locations>
+            </mobidblite-match>
+            <mobidblite-match>
+                <signature ac="mobidb-lite" desc="consensus disorder prediction" name="disorder_prediction">
+                    <signature-library-release library="MOBIDB_LITE" version="1.5"/>
+                </signature>
+                <model-ac>mobidb-lite</model-ac>
+                <locations>
+                    <mobidblite-location sequence-feature="Polar" start="1421" end="1484">
+                        <location-fragments>
+                            <mobidblite-location-fragment start="1421" end="1484" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </mobidblite-location>
+                </locations>
+            </mobidblite-match>
+            <mobidblite-match>
+                <signature ac="mobidb-lite" desc="consensus disorder prediction" name="disorder_prediction">
+                    <signature-library-release library="MOBIDB_LITE" version="1.5"/>
+                </signature>
+                <model-ac>mobidb-lite</model-ac>
+                <locations>
+                    <mobidblite-location sequence-feature="Polyampholyte" start="995" end="1020">
+                        <location-fragments>
+                            <mobidblite-location-fragment start="995" end="1020" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </mobidblite-location>
+                </locations>
+            </mobidblite-match>
+            <mobidblite-match>
+                <signature ac="mobidb-lite" desc="consensus disorder prediction" name="disorder_prediction">
+                    <signature-library-release library="MOBIDB_LITE" version="1.5"/>
+                </signature>
+                <model-ac>mobidb-lite</model-ac>
+                <locations>
+                    <mobidblite-location sequence-feature="Polar" start="1075" end="1197">
+                        <location-fragments>
+                            <mobidblite-location-fragment start="1075" end="1197" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </mobidblite-location>
+                </locations>
+            </mobidblite-match>
+            <mobidblite-match>
+                <signature ac="mobidb-lite" desc="consensus disorder prediction" name="disorder_prediction">
+                    <signature-library-release library="MOBIDB_LITE" version="1.5"/>
+                </signature>
+                <model-ac>mobidb-lite</model-ac>
+                <locations>
+                    <mobidblite-location sequence-feature="Polar" start="1328" end="1348">
+                        <location-fragments>
+                            <mobidblite-location-fragment start="1328" end="1348" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </mobidblite-location>
+                </locations>
+            </mobidblite-match>
+            <mobidblite-match>
+                <signature ac="mobidb-lite" desc="consensus disorder prediction" name="disorder_prediction">
+                    <signature-library-release library="MOBIDB_LITE" version="1.5"/>
+                </signature>
+                <model-ac>mobidb-lite</model-ac>
+                <locations>
+                    <mobidblite-location sequence-feature="Polyampholyte" start="1508" end="1530">
+                        <location-fragments>
+                            <mobidblite-location-fragment start="1508" end="1530" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </mobidblite-location>
+                </locations>
+            </mobidblite-match>
+            <mobidblite-match>
+                <signature ac="mobidb-lite" desc="consensus disorder prediction" name="disorder_prediction">
+                    <signature-library-release library="MOBIDB_LITE" version="1.5"/>
+                </signature>
+                <model-ac>mobidb-lite</model-ac>
+                <locations>
+                    <mobidblite-location sequence-feature="Polar" start="1219" end="1301">
+                        <location-fragments>
+                            <mobidblite-location-fragment start="1219" end="1301" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </mobidblite-location>
+                </locations>
+            </mobidblite-match>
+            <mobidblite-match>
+                <signature ac="mobidb-lite" desc="consensus disorder prediction" name="disorder_prediction">
+                    <signature-library-release library="MOBIDB_LITE" version="1.5"/>
+                </signature>
+                <model-ac>mobidb-lite</model-ac>
+                <locations>
+                    <mobidblite-location sequence-feature="" start="948" end="1566">
+                        <location-fragments>
+                            <mobidblite-location-fragment start="948" end="1566" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </mobidblite-location>
+                </locations>
+            </mobidblite-match>
+            <panther-match evalue="0.0" familyName="PEROXISOME PROLIFERATOR-ACTIVATED RECEPTOR BINDING PROTEIN" score="2003.8">
+                <signature ac="PTHR12881" name="PEROXISOME PROLIFERATOR-ACTIVATED RECEPTOR BINDING PROTEIN">
+                    <signature-library-release library="PANTHER" version="12.0"/>
+                </signature>
+                <model-ac>PTHR12881</model-ac>
+                <locations>
+                    <panther-location env-start="1" env-end="1581" hmm-start="3" hmm-end="1555" hmm-length="1557" hmm-bounds="C_TERMINAL_COMPLETE" start="2" end="1581">
+                        <location-fragments>
+                            <panther-location-fragment start="2" end="1581" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </panther-location>
+                </locations>
+            </panther-match>
+        </matches>
+    </protein>
+    <protein>
+        <sequence md5="01fc3e45dc1becaa05a6f90addf31888">MGNYLSVAVELVCGLGILFIILKLLGKTQFSQITPFDFISALILGELVGNAVYDHEIKIKEIIFASLLWGVLIYIIEFITQKMKSSRKFLEGEPNIVIRKGELQYKVMKKNKIDINQLQSLLRQAGSFSIQEVEYAILETNGMVSVLPKSDFDKPTNKDLQIPSKSVSLPITLIIDGEIVRDNLKEAGVDEQWLKQELKKKNIDKTEDVLFAEWHKNKPLYTVTYEQSRST</sequence>
+        <xref id="O31533" name="O31533"/>
+        <matches>
+            <phobius-match>
+                <signature ac="TRANSMEMBRANE" desc="Region of a membrane-bound protein predicted to be embedded in the membrane." name="Transmembrane region">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>TRANSMEMBRANE</model-ac>
+                <locations>
+                    <phobius-location start="6" end="26">
+                        <location-fragments>
+                            <phobius-location-fragment start="6" end="26" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <phobius-match>
+                <signature ac="NON_CYTOPLASMIC_DOMAIN" desc="Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region." name="Non cytoplasmic domain">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>NON_CYTOPLASMIC_DOMAIN</model-ac>
+                <locations>
+                    <phobius-location start="1" end="5">
+                        <location-fragments>
+                            <phobius-location-fragment start="1" end="5" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <phobius-match>
+                <signature ac="TRANSMEMBRANE" desc="Region of a membrane-bound protein predicted to be embedded in the membrane." name="Transmembrane region">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>TRANSMEMBRANE</model-ac>
+                <locations>
+                    <phobius-location start="59" end="79">
+                        <location-fragments>
+                            <phobius-location-fragment start="59" end="79" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <phobius-match>
+                <signature ac="NON_CYTOPLASMIC_DOMAIN" desc="Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region." name="Non cytoplasmic domain">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>NON_CYTOPLASMIC_DOMAIN</model-ac>
+                <locations>
+                    <phobius-location start="54" end="58">
+                        <location-fragments>
+                            <phobius-location-fragment start="54" end="58" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <phobius-match>
+                <signature ac="TRANSMEMBRANE" desc="Region of a membrane-bound protein predicted to be embedded in the membrane." name="Transmembrane region">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>TRANSMEMBRANE</model-ac>
+                <locations>
+                    <phobius-location start="33" end="53">
+                        <location-fragments>
+                            <phobius-location-fragment start="33" end="53" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <phobius-match>
+                <signature ac="CYTOPLASMIC_DOMAIN" desc="Region of a membrane-bound protein predicted to be outside the membrane, in the cytoplasm." name="Cytoplasmic domain">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>CYTOPLASMIC_DOMAIN</model-ac>
+                <locations>
+                    <phobius-location start="80" end="231">
+                        <location-fragments>
+                            <phobius-location-fragment start="80" end="231" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <phobius-match>
+                <signature ac="CYTOPLASMIC_DOMAIN" desc="Region of a membrane-bound protein predicted to be outside the membrane, in the cytoplasm." name="Cytoplasmic domain">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>CYTOPLASMIC_DOMAIN</model-ac>
+                <locations>
+                    <phobius-location start="27" end="32">
+                        <location-fragments>
+                            <phobius-location-fragment start="27" end="32" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <tmhmm-match>
+                <signature ac="TMhelix" desc="Region of a membrane-bound protein predicted to be embedded in the membrane.">
+                    <signature-library-release library="TMHMM" version="2.0c"/>
+                </signature>
+                <model-ac>TMhelix</model-ac>
+                <locations>
+                    <tmhmm-location start="62" end="79">
+                        <location-fragments>
+                            <tmhmm-location-fragment start="62" end="79" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </tmhmm-location>
+                </locations>
+            </tmhmm-match>
+            <tmhmm-match>
+                <signature ac="TMhelix" desc="Region of a membrane-bound protein predicted to be embedded in the membrane.">
+                    <signature-library-release library="TMHMM" version="2.0c"/>
+                </signature>
+                <model-ac>TMhelix</model-ac>
+                <locations>
+                    <tmhmm-location start="4" end="26">
+                        <location-fragments>
+                            <tmhmm-location-fragment start="4" end="26" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </tmhmm-location>
+                </locations>
+            </tmhmm-match>
+            <tmhmm-match>
+                <signature ac="TMhelix" desc="Region of a membrane-bound protein predicted to be embedded in the membrane.">
+                    <signature-library-release library="TMHMM" version="2.0c"/>
+                </signature>
+                <model-ac>TMhelix</model-ac>
+                <locations>
+                    <tmhmm-location start="33" end="52">
+                        <location-fragments>
+                            <tmhmm-location-fragment start="33" end="52" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </tmhmm-location>
+                </locations>
+            </tmhmm-match>
+        </matches>
+    </protein>
+    <protein>
+        <sequence md5="31a57ad53f7438a75c8ae2a0a0f6ca90">MAPPCSASHLLITASLPKPTSSSLRPPRLPHHKTPLPAVLLALAAAPTLPALADAPAPSPPPAPTQDVQVLEAPSPAANPFSNALLTAPKPTSSDLPDGAQWRYSEFLNAVKKGKVERVRFSKDGGLLQLTAIDGRRATVVVPNDPDLIDILATNGVDISVAEGDAAGPGGFLAFVGNLLFPFLAFAGLFFLFRRAQGGPGAGPGGLGGPMDFGRSKSKFQEVPETGVTFVDVAGADQAKLELQEVVDFLKNPDKYTALGAKIPKGCLLVGPPGTGKTLLARAVAGEAGVPFFSCAASEFVELFVGVGASRVRDLFEKAKAKAPCIVFIDEIDAVGRQRGAGLGGGNDEREQTINQLLTEMDGFAGNSGVIVLAATNRPDVLDAALLRPGRFDRQVTVDRPDVAGRVKILEVHSRGKALAKDVDFEKIARRTPGFTGADLQNLMNEAAILAARRDLKEISKDEISDALERIIAGPEKKNAVVSEEKKRLVAYHEAGHALVGALMPEYDPVAKISIIPRGQAGGLTFFAPSEERLESGLYSRSYLENQMAVALGGRVAEEVIFGQENVTTGASNDFMQVSRVARQMVERFGFSKKIGQIAIGGPGGNPFLGQQMSSQKDYSMATADVVDAEVRELVEKAYSRATQIITTHIDILHKLAQLLMEKETVDGEEFMSLFIDGQAELFPTSSDLPDGAQWRYSEFLNAVKKGKVERVRFSKDGGLLQLTAIDGRRATVVEVPETGVTFVDVAGADQAKLELQEVVDFLKNPDKYTALGAKIPKGCLLVGPPGTGKTLLARALFVGVGASRVRDLFEKAKAKAPCIVFIDEIDAVGRQRGAGLGGGNDEREQTINQLLTEMDGFAGNSGVIVLAATNRPDVLDAALLRPGRFDRQVTVDRPDVAGRVKILEVHSRGKALAKDVDFEKIARRTPGFTGADLQNLMNEAAILAARRDLKEISKDEISDALERIIAGPEKKNAVVSEEKKRLVAYHEAGHALVGALMPEYDPVAKISIIPRGQAGGLTFFAPSEERLESGLYSRSYLENQMAVALGGRVAEEVIFGQENVTTGASNDFMQVSRVARQMVERFGFSKKIGQIAIGGPGGNPFLGQQMSSQKDYSMATADVVDAEVRELVEKAYSRATQIITTHIDILHKLAQLLMEKETVDGEEFMSLFIDGQAELFVA</sequence>
+        <xref id="UPI00043D6473" name="UPI00043D6473 tr|A0A0E0LFU2|A0A0E0LFU2_ORYPU Uncharacterized protein OS=Oryza punctata PE=3 SV=1"/>
+        <matches>
+            <hmmer2-match evalue="3.0E-43" score="159.7">
+                <signature ac="SM00382" name="AAA_5">
+                    <entry ac="IPR003593" desc="AAA+ ATPase domain" name="AAA+_ATPase" type="DOMAIN"/>
+                    <signature-library-release library="SMART" version="7.1"/>
+                </signature>
+                <model-ac>SM00382</model-ac>
+                <locations>
+                    <hmmer2-location score="67.0" evalue="2.5E-15" hmm-start="1" hmm-end="92" hmm-length="92" hmm-bounds="COMPLETE" start="776" end="896">
+                        <location-fragments>
+                            <hmmer2-location-fragment start="776" end="896" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </hmmer2-location>
+                    <hmmer2-location score="92.7" evalue="4.3E-23" hmm-start="1" hmm-end="92" hmm-length="92" hmm-bounds="COMPLETE" start="263" end="402">
+                        <location-fragments>
+                            <hmmer2-location-fragment start="263" end="402" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </hmmer2-location>
+                </locations>
+            </hmmer2-match>
+            <hmmer3-match evalue="2.8E-78" score="260.7">
+                <signature ac="PF00004" desc="ATPase family associated with various cellular activities (AAA)" name="AAA">
+                    <entry ac="IPR003959" desc="ATPase, AAA-type, core" name="ATPase_AAA_core" type="DOMAIN">
+                        <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0005524" name="ATP binding"/>
+                    </entry>
+                    <signature-library-release library="PFAM" version="31.0"/>
+                </signature>
+                <model-ac>PF00004</model-ac>
+                <locations>
+                    <hmmer3-location env-end="894" env-start="797" post-processed="true" score="91.1" evalue="7.1E-26" hmm-start="38" hmm-end="131" hmm-length="132" hmm-bounds="INCOMPLETE" start="798" end="893">
+                        <location-fragments>
+                            <hmmer3-location-fragment start="798" end="893" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </hmmer3-location>
+                    <hmmer3-location env-end="400" env-start="267" post-processed="true" score="146.6" evalue="5.0E-43" hmm-start="2" hmm-end="131" hmm-length="132" hmm-bounds="INCOMPLETE" start="268" end="399">
+                        <location-fragments>
+                            <hmmer3-location-fragment start="268" end="399" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </hmmer3-location>
+                </locations>
+            </hmmer3-match>
+            <hmmer3-match evalue="0.0" score="1362.8">
+                <signature ac="TIGR01241" desc="FtsH_fam: ATP-dependent metallopeptidase HflB" name="TIGR01241">
+                    <entry ac="IPR005936" desc="Peptidase, FtsH" name="FtsH" type="FAMILY">
+                        <go-xref category="CELLULAR_COMPONENT" db="GO" id="GO:0016020" name="membrane"/>
+                        <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0004222" name="metalloendopeptidase activity"/>
+                        <pathway-xref db="Reactome" id="R-HSA-8949664" name="Processing of SMDT1"/>
+                    </entry>
+                    <signature-library-release library="TIGRFAM" version="15.0"/>
+                </signature>
+                <model-ac>TIGR01241</model-ac>
+                <locations>
+                    <hmmer3-location env-end="676" env-start="171" post-processed="false" score="727.6" evalue="1.7E-219" hmm-start="4" hmm-end="494" hmm-length="496" hmm-bounds="INCOMPLETE" start="174" end="674">
+                        <location-fragments>
+                            <hmmer3-location-fragment start="174" end="674" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </hmmer3-location>
+                    <hmmer3-location env-end="1170" env-start="710" post-processed="false" score="630.6" evalue="4.5E-190" hmm-start="36" hmm-end="494" hmm-length="496" hmm-bounds="INCOMPLETE" start="724" end="1168">
+                        <location-fragments>
+                            <hmmer3-location-fragment start="724" end="1168" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </hmmer3-location>
+                </locations>
+            </hmmer3-match>
+            <panther-match evalue="0.0" familyName="METALLOPROTEASE M41 FTSH" score="1367.4">
+                <signature ac="PTHR23076" name="METALLOPROTEASE M41 FTSH">
+                    <signature-library-release library="PANTHER" version="12.0"/>
+                </signature>
+                <model-ac>PTHR23076</model-ac>
+                <locations>
+                    <panther-location env-start="72" env-end="688" hmm-start="251" hmm-end="751" hmm-length="777" hmm-bounds="INCOMPLETE" start="157" end="677">
+                        <location-fragments>
+                            <panther-location-fragment start="157" end="677" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </panther-location>
+                    <panther-location env-start="705" env-end="1176" hmm-start="285" hmm-end="750" hmm-length="777" hmm-bounds="INCOMPLETE" start="722" end="1170">
+                        <location-fragments>
+                            <panther-location-fragment start="722" end="1170" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </panther-location>
+                </locations>
+            </panther-match>
+            <patternscan-match>
+                <signature ac="PS00674" desc="AAA-protein family signature." name="AAA">
+                    <entry ac="IPR003960" desc="ATPase, AAA-type, conserved site" name="ATPase_AAA_CS" type="CONSERVED_SITE">
+                        <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0005524" name="ATP binding"/>
+                    </entry>
+                    <signature-library-release library="PROSITE_PATTERNS" version="2018_02"/>
+                </signature>
+                <model-ac>PS00674</model-ac>
+                <locations>
+                    <patternscan-location level="STRONG" start="864" end="882">
+                        <location-fragments>
+                            <patternscan-location-fragment start="864" end="882" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                        <alignment>ViVLaATNrpdvLDaALlR</alignment>
+                    </patternscan-location>
+                </locations>
+            </patternscan-match>
+            <patternscan-match>
+                <signature ac="PS00674" desc="AAA-protein family signature." name="AAA">
+                    <entry ac="IPR003960" desc="ATPase, AAA-type, conserved site" name="ATPase_AAA_CS" type="CONSERVED_SITE">
+                        <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0005524" name="ATP binding"/>
+                    </entry>
+                    <signature-library-release library="PROSITE_PATTERNS" version="2018_02"/>
+                </signature>
+                <model-ac>PS00674</model-ac>
+                <locations>
+                    <patternscan-location level="STRONG" start="370" end="388">
+                        <location-fragments>
+                            <patternscan-location-fragment start="370" end="388" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                        <alignment>ViVLaATNrpdvLDaALlR</alignment>
+                    </patternscan-location>
+                </locations>
+            </patternscan-match>
+            <phobius-match>
+                <signature ac="TRANSMEMBRANE" desc="Region of a membrane-bound protein predicted to be embedded in the membrane." name="Transmembrane region">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>TRANSMEMBRANE</model-ac>
+                <locations>
+                    <phobius-location start="172" end="193">
+                        <location-fragments>
+                            <phobius-location-fragment start="172" end="193" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <phobius-match>
+                <signature ac="NON_CYTOPLASMIC_DOMAIN" desc="Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region." name="Non cytoplasmic domain">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>NON_CYTOPLASMIC_DOMAIN</model-ac>
+                <locations>
+                    <phobius-location start="194" end="1179">
+                        <location-fragments>
+                            <phobius-location-fragment start="194" end="1179" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <phobius-match>
+                <signature ac="CYTOPLASMIC_DOMAIN" desc="Region of a membrane-bound protein predicted to be outside the membrane, in the cytoplasm." name="Cytoplasmic domain">
+                    <signature-library-release library="PHOBIUS" version="1.01"/>
+                </signature>
+                <model-ac>CYTOPLASMIC_DOMAIN</model-ac>
+                <locations>
+                    <phobius-location start="1" end="171">
+                        <location-fragments>
+                            <phobius-location-fragment start="1" end="171" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </phobius-location>
+                </locations>
+            </phobius-match>
+            <profilescan-match>
+                <signature ac="MF_01458" desc="ATP-dependent zinc metalloprotease FtsH [ftsH]." name="FtsH">
+                    <entry ac="IPR005936" desc="Peptidase, FtsH" name="FtsH" type="FAMILY">
+                        <go-xref category="CELLULAR_COMPONENT" db="GO" id="GO:0016020" name="membrane"/>
+                        <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0004222" name="metalloendopeptidase activity"/>
+                        <pathway-xref db="Reactome" id="R-HSA-8949664" name="Processing of SMDT1"/>
+                    </entry>
+                    <signature-library-release library="HAMAP" version="2018_03"/>
+                </signature>
+                <model-ac>MF_01458</model-ac>
+                <locations>
+                    <profilescan-location score="36.366" start="9" end="693">
+                        <location-fragments>
+                            <profilescan-location-fragment start="9" end="693" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                        <alignment>HLLITasLpkptsssLrpprLphhktpLpaVLLaLaaapTLpaLadapapspppaptqdvqvLeapspaanpFsnaLL---TapkpTSS--DLPdgaqwrYSEFLNAVKKGKV-ErVrfskdggllqlTaI--D---G-------RrA-----T-VvvP---NdPDLIDILaT-NGV---------DiS-----VaegdaagpggfLAFvgnLLfPFLAFAGLF-FLFRRAQGGPGAgpgglGGPMDFG--RSKSKFQEVPETGVTFVDVAGADQAKLELQEVVDFLKNPDKYTALGAKIPKGCLLVGPPGTGKTLLARAVAGEAGVPFFSCAASEFVELFVGVGASRVRDLFEKAKAKAPCIVFIDEIDAVGRQRGAGLGGGNDEREQTINQLLTEMDGFAGNSGVIVLAATNRPDVLDAALLRPGRFDRQVTVDRPDVAGRVKILEVHSRGKALAKDVDFEKIARRTPGFTGADLQNLMNEAAILAARRDLKEISKDEISDALERIIAGPEKKNAVVSEEKKRLVAYHEAGHALVGALMPEYDPVAKISIIPRGQAGGLTFFAPSEerlESGLYSRSYLENQMAVALGGRVAEEVIFGqENVTTGASNDFMQVSRVARQMVERFGFSKKIGQIAIG-GPGGNPFLGQQMssQKDYSMATADVVDAEVRELVEKAYSRATQIITTHIDILHKLAQLLMEKETVDGEEFmslfiDgqaELF-----PtssdlP-----DGA</alignment>
+                    </profilescan-location>
+                </locations>
+            </profilescan-match>
+            <profilescan-match>
+                <signature ac="MF_01458" desc="ATP-dependent zinc metalloprotease FtsH [ftsH]." name="FtsH">
+                    <entry ac="IPR005936" desc="Peptidase, FtsH" name="FtsH" type="FAMILY">
+                        <go-xref category="CELLULAR_COMPONENT" db="GO" id="GO:0016020" name="membrane"/>
+                        <go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0004222" name="metalloendopeptidase activity"/>
+                        <pathway-xref db="Reactome" id="R-HSA-8949664" name="Processing of SMDT1"/>
+                    </entry>
+                    <signature-library-release library="HAMAP" version="2018_03"/>
+                </signature>
+                <model-ac>MF_01458</model-ac>
+                <locations>
+                    <profilescan-location score="32.022" start="658" end="1179">
+                        <location-fragments>
+                            <profilescan-location-fragment start="658" end="1179" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                        <alignment>QLLMeketvdgeefmslfidgqaelfptssdlpdgA-----------------------QwR--YSEFLNAVKKGKV-ErVRF-SkD---G----G----------------------------------------------L--LqLtAI------------------------D-GR-RATVVE--VPETGVTFVDVAGADQAKLELQEVVDFLKNPDKYTALGAKIPKGCLLVGPPGTGKTLLARA-------------------LFVGVGASRVRDLFEKAKAKAPCIVFIDEIDAVGRQRGAGLGGGNDEREQTINQLLTEMDGFAGNSGVIVLAATNRPDVLDAALLRPGRFDRQVTVDRPDVAGRVKILEVHSRGKALAKDVDFEKIARRTPGFTGADLQNLMNEAAILAARRDLKEISKDEISDALERIIAGPEKKNAVVSEEKKRLVAYHEAGHALVGALMPEYDPVAKISIIPRGQAGGLTFFAPSEerlESGLYSRSYLENQMAVALGGRVAEEVIFGqENVTTGASNDFMQVSRVARQMVERFGFSKKIGQIAIG-GPGGNPFLGQQMssQKDYSMATADVVDAEVRELVEKAYSRATQIITTHIDILHKLAQLLMEKETVDGEEFmslfiDgqaELfV--------------A</alignment>
+                    </profilescan-location>
+                </locations>
+            </profilescan-match>
+            <signalp-match>
+                <signature ac="SignalP-TM" name="SignalP-TM">
+                    <signature-library-release library="SIGNALP_GRAM_POSITIVE" version="4.1"/>
+                </signature>
+                <model-ac>SignalP-TM</model-ac>
+                <locations>
+                    <signalp-location score="0.456" start="1" end="53">
+                        <location-fragments>
+                            <signalp-location-fragment start="1" end="53" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </signalp-location>
+                </locations>
+            </signalp-match>
+            <signalp-match>
+                <signature ac="SignalP-noTM" name="SignalP-noTM">
+                    <signature-library-release library="SIGNALP_GRAM_NEGATIVE" version="4.1"/>
+                </signature>
+                <model-ac>SignalP-noTM</model-ac>
+                <locations>
+                    <signalp-location score="0.584" start="1" end="53">
+                        <location-fragments>
+                            <signalp-location-fragment start="1" end="53" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </signalp-location>
+                </locations>
+            </signalp-match>
+            <tmhmm-match>
+                <signature ac="TMhelix" desc="Region of a membrane-bound protein predicted to be embedded in the membrane.">
+                    <signature-library-release library="TMHMM" version="2.0c"/>
+                </signature>
+                <model-ac>TMhelix</model-ac>
+                <locations>
+                    <tmhmm-location start="171" end="193">
+                        <location-fragments>
+                            <tmhmm-location-fragment start="171" end="193" dc-status="CONTINUOUS"/>
+                        </location-fragments>
+                    </tmhmm-location>
+                </locations>
+            </tmhmm-match>
+        </matches>
+    </protein>
+</protein-matches>
