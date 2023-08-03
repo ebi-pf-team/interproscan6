@@ -28,21 +28,6 @@ if (params.help) {
     exit 0
 }
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    VALIDATE INPUTS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-// def valid_params = [
-//     input         : ['*.fasta'],
-//     applications  : ['antifam', 'cdd', 'coils', 'funfam', 'gene3d', 'hamap', 'mobidblite', 'ncbifam', 'panther',
-//                      'pfam', 'phobius', 'pirsf', 'pirsr', 'prints', 'prositepatterns', 'prositeprofiles', 'sfld',
-//                      'signalp_euk', 'signalp_gram_negative', 'signalp_gram_positive', 'smart', 'super_family', 'tmhmm'],
-//     formats       : ['tsv', 'xml', 'json', 'gff3'],
-//     goterms       : [true, false],
-//     pathways      : [true, false]
-// ]
-
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -67,11 +52,6 @@ workflow {
     Channel.fromPath( ch_input )
     .splitFasta( by: params.batchsize, file: true )
     .set { fasta_file }
-
-//      .splitFasta( record: [id: true, seqString: true] )
-//      .map { record -> record.id + " " + record.seqString }
-//      .set { sequence }
-//     MATCHLOOKUP(sequence, applications)
 
     entries_path = params.data.entries
 
