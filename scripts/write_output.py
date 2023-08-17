@@ -7,44 +7,32 @@ SERIAL_GROUP = "PROTEIN"
 # Default for protein sequences are TSV, XML and GFF3, for nucleotide sequences GFF3 and XML.
 
 
-def xml_output(members_info):
-    # TODO filter xml infos
-    with open(f"lookup.xml", "w") as file:
-        root = ET.Element("results")
-        for result in members_info:
-            elemento = ET.SubElement(root, "result")
-            elemento.text = result
-        tree = ET.ElementTree(root)
-        tree.write(file)
+def xml_output(matches_parsed):
+    pass
+    # it will change! will receive a dict with all infos and parse to each output format in this script
 
 
-def tsv_output(members_info):
-    # TODO filter tsv infos
-    with open("output.tsv", "w") as file:
-        for entry in members_info:
-            writer = csv.writer(file, delimiter="\t")
-            writer.writerow(entry.values())
-            writer.writerow("\n")
+def tsv_output(matches_parsed):
+    pass
+    # it will change! will receive a dict with all infos and parse to each output format in this script
 
 
 def json_output(members_info):
-    # TODO filter json infos
-    with open("output.json", "w") as file:
-        json.dump(members_info, file)
+    pass  # focusing in xml and tsv for now (similar output info)
 
 
 def gff3_output(members_info):
-    pass
+    pass  # focusing in xml and tsv for now (similar output info)
 
 
 def write_results(members_info: list[dict], output_format: list):
-    if len(output_format) == 0:
+    if len(output_format) > 0:
+        output_format = list(map(lambda x: x.upper(), output_format))
+    else:
         if SERIAL_GROUP == "PROTEIN":
             output_format = ["TSV", "XML", "GFF3"]
         else:
             output_format = ["XML", "GFF3"]
-    else:
-        output_format = list(map(lambda x: x.upper(), output_format))
 
     if "TSV" in output_format:
         tsv_output(members_info)
@@ -59,10 +47,10 @@ def write_results(members_info: list[dict], output_format: list):
 def main():
     parser = argparse.ArgumentParser(description="Write result file(s)")
     parser.add_argument(
-        "results_txt", metavar="results_txt", type=str, help="result file"
+        "results", metavar="results", type=str, help="matches result parsed"
     )
     parser.add_argument(
-        "output_formats", metavar="output_formats", type=str, help="the output formats"
+        "formats", metavar="formats", type=str, help="output format(s)"
     )
 
     args = parser.parse_args()

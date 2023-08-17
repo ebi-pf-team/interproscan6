@@ -50,8 +50,9 @@ if (params.help) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 include { MATCHLOOKUP } from "$projectDir/modules/lookup/match_lookup"
+include { MEMBERS_HMM } from "$projectDir/modules/search_homologous/hmm_members"
 include { XREFS } from "$projectDir/modules/xrefs"
-include { WRITERESULTS } from "$projectDir/modules/lookup/write_results"
+include { WRITERESULTS } from "$projectDir/modules/write_results"
 
 
 /*
@@ -74,6 +75,9 @@ workflow {
 //     MATCHLOOKUP(sequence, applications)
 
     entries_path = params.data.entries
+    applications = []
+    goterms_path = false
+    pathways_path = false
 
     if (params.goterms) {
         goterms_path = params.data.goterms
@@ -81,9 +85,19 @@ workflow {
     if (params.pathways) {
         pathways_path = params.data.pathways
     }
+    if (params.applications) {
+        applications = params.applications
+    }
 
-    MATCHLOOKUP(fasta_file, params.applications)
-    XREFS(MATCHLOOKUP.out, entries_path, goterms_path, pathways_path)
+    if (params.disable_precalc){
+        MEMBERS_HMM(fasta_file, applications)
+        input_xrefs = MEMBERS_HMM.out
+    }
+    else{
+        MATCHLOOKUP(fasta_file, applications)
+        input_xrefs = MATCHLOOKUP.out
+    }
 
+    XREFS(input_xrefs, entries_path, goterms_path, pathways_path)
 //     WRITERESULTS(XREFS.out, params.formats)
 }

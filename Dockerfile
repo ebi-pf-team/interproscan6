@@ -12,4 +12,4 @@ RUN python3 -m pip install --upgrade pip && \
 
 WORKDIR /opt/interproscan6
 COPY . .
-ENTRYPOINT ["python3", "scripts/members/cdd.py"]
+ENTRYPOINT ["python3", "scripts/search_homologous/cdd.py"]
