@@ -1,3 +1,4 @@
+
 process XREFS {
     input:
     val match_lookup
@@ -10,6 +11,6 @@ process XREFS {
 
     script:
     """
-    python $projectDir/scripts/lookup/xrefs.py -matches ${match_lookup} -entries ${entries} -go ${goterms} -pa ${pathways} > match_lookup_xrefs
+    python $projectDir/scripts/xrefs.py -matches ${match_lookup} -entries ${entries} -go ${goterms} -pa ${pathways} > match_lookup_xrefs
     """
 }

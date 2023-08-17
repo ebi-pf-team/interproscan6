@@ -1,5 +1,5 @@
-applications: CDD PFAM NCBIFAM
-disable-precalc: false
+applications: PFAM ANTIFAM NCBIFAM PIRSF PIRSR HAMAP CDD
+disable_precalc: false
 formats: TSV XML
 goterms: true
 help: false

@@ -52,7 +52,7 @@ def add_pathways_info(matches_info, pathway_path: str):
                     pa_ids = ipr2pa[acc]
                     for pa_id in pa_ids:
                         matches2pa[pa_id] = pa_info[pa_id]
-                        match["PATHWAYS"] = matches2pa
+                        match["GOTERMS"] = matches2pa
                 except KeyError:
                     pass
     return matches_info
@@ -72,9 +72,9 @@ def main():
 
     matches_info = add_entries_info(args.matches, args.entries)
 
-    if args.goterms:
+    if args.goterms != "false":  # I need to improve this...
         matches_info = add_goterms_info(matches_info, args.goterms)
-    if args.pathways:
+    if args.pathways != "false":  # I need to improve this...
         matches_info = add_pathways_info(matches_info, args.pathways)
 
     print(matches_info)

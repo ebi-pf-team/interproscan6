@@ -73,12 +73,11 @@ def main():
     parser = argparse.ArgumentParser(
         description="Request to precalculated match lookup"
     )
-    parser.add_argument("-fasta", "--fastafile", type=str, help="list of analysis")
+    parser.add_argument("-fasta", "--fastafile", type=str, help="fasta file with sequences")
     parser.add_argument("-appl", "--applications", nargs="*", help="list of analysis")
     args = parser.parse_args()
 
     applications = args.applications
-
     sequences = get_sequences(args.fastafile)
     for id, seq in sequences.items():
         matches = match_lookup(seq)
