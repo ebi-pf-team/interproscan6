@@ -5,6 +5,7 @@ process MATCHLOOKUP {
 
     output:
     path 'parsed_match_lookup'
+    path 'fasta_to_scan'
 
     script:
     """
