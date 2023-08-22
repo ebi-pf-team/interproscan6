@@ -10,7 +10,7 @@ import argparse
 # hmmpress prepare profile database for hmmscan
 
 # [AntiFam-7.0,CDD-3.20,Coils-2.2.1,FunFam-4.3.0,Gene3D-4.3.0,Hamap-2023_01,MobiDBLite-2.0,NCBIfam-12.0,PANTHER-17.0,Pfam-35.0,PIRSF-3.10,PIRSR-2021_05,PRINTS-42.0,ProSitePatterns-2022_05,ProSiteProfiles-2022_05,SFLD-4,SMART-9.0,SUPERFAMILY-1.75]
-# hmmsearch -Z 61295632 --cut_ga --cpu 1 -o output_hmmer.json ./data/pfam/35.0/pfam_a.search_homologous ./files_test/test_all_appl.fasta
+# hmmsearch -Z 61295632 --cut_ga --cpu 1 -o output_hmmer.json ./data/pfam/35.0/pfam_a.scan_sequences ./files_test/test_all_appl.fasta
 
 # WHEN TESTS WITH THIS MEMBER FINISH THIS PARAMETERS WILL GO TO nextflow.config
 project_dir = "/Users/lcf/interproscan6"
@@ -72,7 +72,7 @@ def get_sequences(fasta_path: str) -> dict:
     return sequences
 
 
-def search_matches(fasta_file, member_list: set):
+def search_matches(fasta_file, member_list: set, hmm_type: str, switches: str):
     alphabet = Alphabet.amino()
     # background = pyhmmer.plan7.Background(alphabet)
     # pipeline = pyhmmer.plan7.Pipeline(alphabet, background=background)
@@ -83,6 +83,14 @@ def search_matches(fasta_file, member_list: set):
     homologs_result = {}
     for appl in member_list:
         appl_result = {}
+        # with HMMFile(hmm_paths[appl]) as hmm_file:
+        #     if hmm_type == "search":
+        #         all_hits = pyhmmer.hmmsearch(hmm_file, sequencesD, cpus=1)
+        #     elif hmm_type == "scan":
+        #         all_hits = pyhmmer.hmmscan(sequencesD, hmm_file, cpus=1)
+        #     else:
+        #         break
+
         with HMMFile(hmm_paths[appl]) as f:
             hmm_list = list(f)
         for sequence in pyhmmer.hmmsearch(hmm_list, sequencesD):
@@ -192,20 +200,20 @@ def format_domain(domain):
 
 
 def main():
-    members_with_hmm = ["pfam", "antifam", "ncbifam", "pirsf", "pirsr", "hamap"]
+    members_with_hmm = ["antifam", "ncbifam"]  # there are more, just testing
 
-    parser = argparse.ArgumentParser(
-        description="Request to calc matches for members with hmm"
-    )
-    parser.add_argument("-fasta", "--fastafile", type=str, help="fasta file with sequences")
-    parser.add_argument("-appl", "--applications", nargs="*", help="list of analysis")
-    args = parser.parse_args()
-
-    applications = args.applications
-    applications_hmm = set(applications) & set(members_with_hmm)
+    # parser = argparse.ArgumentParser(
+    #     description="Request to calc matches for members with hmm"
+    # )
+    # parser.add_argument("-fasta", "--fastafile", type=str, help="fasta file with sequences")
+    # parser.add_argument("-appl", "--applications", nargs="*", help="list of analysis")
+    # args = parser.parse_args()
+    #
+    # applications = args.applications
+    # applications_hmm = set(applications) & set(members_with_hmm)
 
     sequences = get_sequences(all_appl)
-    homologs_found = search_matches(all_appl, applications_hmm)
+    homologs_found = search_matches(all_appl, set(members_with_hmm), "search", "")
     print(sequences)
     print(homologs_found)
 
