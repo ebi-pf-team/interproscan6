@@ -1,11 +1,18 @@
-applications: PFAM ANTIFAM NCBIFAM PIRSF PIRSR HAMAP CDD
-disable_precalc: false
+applications: ANTIFAM NCBIFAM
+disable_precalc: true
 formats: TSV XML
-goterms: true
+goterms: false
 help: false
 input: $projectDir/files_test/test_all_appl.fasta
 outfile: $projectDir/results/lookup
-pathways: true
+pathways: false
+
+
+
+
+
+
+
 
 
 #-appl,--applications <ANALYSES>                           Optional, comma separated list of analyses.  If this option
