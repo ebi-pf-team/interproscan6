@@ -18,5 +18,6 @@ How to run (example):
 Temporary (scripts that still not in nextflow flow to make easy the test):
     CDD:
         If want to run cdd.py build docker and run:
+        
             docker build -t interproscan6 .
             docker run -v ./results:/opt/interproscan6/results interproscan6
