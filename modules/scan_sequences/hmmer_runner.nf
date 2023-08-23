@@ -7,6 +7,6 @@ process HMMER_RUNNER {
 
     script:
     """
-    ${params.hmmsearch_bin} ${hmm_path} ${fasta_path} ${options} > ${hmm_path}_${fasta_path}.out
+    ${params.hmmsearch_bin} ${hmm} ${sequences} ${switches} > ${hmm}_${sequences}.out
     """
 }
