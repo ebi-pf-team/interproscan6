@@ -1,10 +1,10 @@
-applications: ANTIFAM NCBIFAM
+applications: ["antifam", "ncbifam"]
 disable_precalc: true
 formats: TSV XML
 goterms: false
 help: false
-input: $projectDir/files_test/test_all_appl.fasta
-outfile: $projectDir/results/lookup
+input: files_test/test_all_appl.fasta
+outfile: results/lookup
 pathways: false
 
 

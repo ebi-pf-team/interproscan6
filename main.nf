@@ -1,4 +1,5 @@
 nextflow.enable.dsl=2
+import org.yaml.snakeyaml.Yaml
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -28,6 +29,7 @@ if (params.help) {
     exit 0
 }
 
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     VALIDATE INPUTS
@@ -50,7 +52,7 @@ if (params.help) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 include { MATCHLOOKUP } from "$projectDir/modules/lookup/match_lookup"
-include { MAIN_SCAN } from "$projectDir/modules/scan_sequences/main_scan"
+include { MAIN_SCAN } from "$projectDir/modules/scan_sequences/main"
 include { XREFS } from "$projectDir/modules/xrefs"
 include { WRITERESULTS } from "$projectDir/modules/write_results"
 
@@ -60,36 +62,41 @@ include { WRITERESULTS } from "$projectDir/modules/write_results"
     MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+def f = file('input_opt.yaml')
+def input_yaml = new Yaml().load(f)
+def all_appl = ['AntiFam', 'CDD', 'Coils', 'FunFam', 'Gene3d', 'HAMAP', 'MobiDBLite', 'NCBIfam', 'Panther', 'Pfam',
+                'Phobius', 'PIRSF', 'PIRSR', 'PRINTS', 'PrositePatterns', 'PrositeProfiles', 'SFLD', 'SignalP_EUK',
+                'SignalP_GRAM_NEGATIVE', 'SignalP_GRAM_POSITIVE', 'SMART', 'SuperFamily', 'TMHMM']
+
 workflow {
-    ch_input = file(params.input, checkIfExists: true)
-    if (ch_input.isEmpty()) {
-        exit 1, "File provided with --input is empty: ${ch_input.getName()}!"
-    }
-    Channel.fromPath( ch_input )
+    Channel.fromPath( input_yaml.input )
+    .unique()
     .splitFasta( by: params.batchsize, file: true )
-    .set { fasta_file }
+    .set { sequences_channel }
 
     entries_path = params.xref.entries
-    applications = []
-    goterms_path = false
-    pathways_path = false
-
-    if (params.goterms) {
+    if (input_yaml.goterms) {
         goterms_path = params.xref.goterms
     }
-    if (params.pathways) {
+    if (input_yaml.pathways) {
         pathways_path = params.xref.pathways
     }
-    if (params.applications) {
-        applications = Channel.of(params.applications)
+
+    if (input_yaml.applications) {
+        applications = input_yaml.applications
+    }
+    else {
+        applications = all_appl
     }
 
-    if (params.disable_precalc){
-        MAIN_SCAN(fasta_file, applications)
-        input_xrefs = MAIN_SCAN.out
+    if (input_yaml.disable_precalc){
+        applications_channel = Channel.fromList(applications)
+        sequences_application = sequences_channel.combine(applications_channel)
+        MAIN_SCAN(sequences_application)
+//         input_xrefs = MAIN_SCAN.out
     }
     else{
-        MATCHLOOKUP(fasta_file, applications)
+        MATCHLOOKUP(sequences_channel, applications)
         input_xrefs = MATCHLOOKUP.out
     }
 
