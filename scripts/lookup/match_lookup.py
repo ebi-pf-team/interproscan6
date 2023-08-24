@@ -7,6 +7,7 @@ from datetime import datetime
 import requests
 
 URL_PRECALC_MATCHLOOKUP = "https://www.ebi.ac.uk/interpro/match-lookup/matches"
+URL_IS_PRECALC = "https://www.ebi.ac.uk/interpro/match-lookup/isPrecalculated"
 
 
 def get_sequences(fasta_file: str) -> dict:
@@ -23,8 +24,18 @@ def get_sequences(fasta_file: str) -> dict:
     return sequences
 
 
-def match_lookup(sequence: str) -> str:
+def check_precalc(sequence: str) -> str|None:
     sequence_md5 = hashlib.md5(sequence.encode()).hexdigest().upper()
+    checkout = requests.get(f"{URL_IS_PRECALC}?md5={sequence_md5}")
+    print(checkout.text)
+    # if checkout.text == '':
+    #     match_result = match_lookup(sequence_md5)
+    #     return match_result
+    # else:
+    #     return None
+
+
+def match_lookup(sequence_md5: str) -> str:
     matches = requests.get(f"{URL_PRECALC_MATCHLOOKUP}?md5={sequence_md5}")
     return matches.text
 
@@ -79,11 +90,17 @@ def main():
 
     applications = args.applications
     sequences = get_sequences(args.fastafile)
+    not_precalc = []
+
     for id, seq in sequences.items():
-        matches = match_lookup(seq)
-        match_parsed = parse_match(id, seq, matches)
-        match_filtered = filter_analysis(match_parsed, applications)
-        print(json.dumps(match_filtered))
+        matches = check_precalc(seq)
+        if matches:
+            match_parsed = parse_match(id, seq, matches)
+            match_filtered = filter_analysis(match_parsed, applications)
+            print(json.dumps(match_filtered))
+        else:
+            not_precalc.append(sequences)
+    return not_precalc
 
 
 if __name__ == "__main__":

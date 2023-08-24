@@ -52,6 +52,7 @@ if (params.help) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 include { MATCHLOOKUP } from "$projectDir/modules/lookup/match_lookup"
+include { CHECK_PRECALC } from "$projectDir/modules/lookup/check_precalc"
 include { MAIN_SCAN } from "$projectDir/modules/scan_sequences/main"
 include { XREFS } from "$projectDir/modules/xrefs"
 include { WRITERESULTS } from "$projectDir/modules/write_results"
@@ -96,6 +97,7 @@ workflow {
 //         input_xrefs = MAIN_SCAN.out
     }
     else{
+        CHECK_PRECALC(sequences_channel, applications)
         MATCHLOOKUP(sequences_channel, applications)
         input_xrefs = MATCHLOOKUP.out
     }

@@ -12,5 +12,5 @@ workflow MAIN_SCAN {
     .set{params_hmmer}
 
     HMMER_RUNNER(params_hmmer)
-//     PARSER(sequences_appl, HMMER_RUNNER.out)
+    PARSER(params_hmmer, HMMER_RUNNER.out)
 }

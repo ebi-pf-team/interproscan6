@@ -1,12 +1,14 @@
 process HMMER_RUNNER {
+    container 'interproscan6'
+
     input:
     tuple path(sequences), path(hmm), val(switches)
 
     output:
-    path "${hmm_path}_${fasta_path}.out"
+    path "hmmer_${hmm}_${sequences}.out"
 
     script:
     """
-    ${params.hmmsearch_bin} ${hmm} ${sequences} ${switches} > ${hmm}_${sequences}.out
+    ${params.hmmsearch_bin} ${switches} ${hmm} ${sequences} > hmmer_${hmm}_${sequences}.out
     """
 }
