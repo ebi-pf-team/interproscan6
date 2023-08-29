@@ -9,6 +9,7 @@ hmm_path = f"{project_dir}/data/hamap/2023_01/hamap.hmm.lib"
 # hmmer3_hmmsearch_switches.hmmfilter=-E 100 --domE 100 --incE 100 --incdomE 100
 # pfsearchv3_hamap_binary.switches=-f -o 7
 
+
 def check_parser():
     Accession = re.compile("^Accession:\\s+(ANF\\d{5})\\s*$")
     # protected AntiFamHmmer3RawMatch createMatch(final String signatureLibraryRelease,
@@ -46,5 +47,5 @@ def check_parser():
 # <property name="outputFileNameTbloutTemplate" ref="rawAnalysisOutputTbloutFileTemplate"/>
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

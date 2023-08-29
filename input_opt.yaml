@@ -3,7 +3,7 @@ disable_precalc: true
 formats: TSV XML
 goterms: false
 help: false
-input: files_test/test_all_appl.fasta
+input: files_test/best_to_test.fasta
 outfile: results/lookup
 pathways: false
 

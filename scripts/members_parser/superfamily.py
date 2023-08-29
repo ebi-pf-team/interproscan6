@@ -1,11 +1,11 @@
-import subprocess
-import pyhmmer
-from pyhmmer.easel import SequenceFile, Alphabet
-from pyhmmer.plan7 import HMMFile
-from Bio import SeqIO
 import hashlib
+import subprocess
 from typing import TextIO
 
+import pyhmmer
+from Bio import SeqIO
+from pyhmmer.easel import Alphabet, SequenceFile
+from pyhmmer.plan7 import HMMFile
 
 project_dir = "/Users/lcf/interproscan6"
 hmm_superfamily_path = f"{project_dir}/data/superfamily/1.75/hmmlib_1.75"
@@ -99,14 +99,18 @@ def run_pl_script(hmm_result, output_path):
         hmm_superfamily_path,
         hmmer3_hmmsearch_cpu_switch,
         hmmer3_hmmsearch_switches,
-        "-s", self_hits_path,
-        "-r", cla_path,
-        "-m", model_tab_path,
-        "-p", pdbj95d_path,
+        "-s",
+        self_hits_path,
+        "-r",
+        cla_path,
+        "-m",
+        model_tab_path,
+        "-p",
+        pdbj95d_path,
         all_appl,
         hmm_result,
-        output_path
-        ]
+        output_path,
+    ]
 
     try:
         subprocess.run(command, check=True)
@@ -114,8 +118,10 @@ def run_pl_script(hmm_result, output_path):
         print(e)
 
 
-if __name__ == '__main__':
-    output_pl_path = "/Users/lcf/PycharmProjects/interproscan6/results/output_superfamily_pl.txt"
+if __name__ == "__main__":
+    output_pl_path = (
+        "/Users/lcf/PycharmProjects/interproscan6/results/output_superfamily_pl.txt"
+    )
     output_hmmscan_path = "/Users/lcf/PycharmProjects/interproscan6/results/output_superfamily_hmm_scan.txt"
     sequences = get_sequences(all_appl)
     hmm_result = run_hmm(all_appl, hmm_superfamily_path, output_hmmscan_path)

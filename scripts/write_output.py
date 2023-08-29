@@ -49,9 +49,7 @@ def main():
     parser.add_argument(
         "results", metavar="results", type=str, help="matches result parsed"
     )
-    parser.add_argument(
-        "formats", metavar="formats", type=str, help="output format(s)"
-    )
+    parser.add_argument("formats", metavar="formats", type=str, help="output format(s)")
 
     args = parser.parse_args()
     write_results(args.results_txt, args.output_formats)

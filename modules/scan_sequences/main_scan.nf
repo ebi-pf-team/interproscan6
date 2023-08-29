@@ -11,6 +11,15 @@ workflow MAIN_SCAN {
     }
     .set{params_hmmer}
 
+    sequences_application.map { sequences, application ->
+        tuple(sequences, application)
+    }
+    .set{params_parser}
+
+
     HMMER_RUNNER(params_hmmer)
-    PARSER(params_hmmer, HMMER_RUNNER.out)
+    PARSER(params_parser, HMMER_RUNNER.out)
+
+    emit:
+      PARSER.out
 }

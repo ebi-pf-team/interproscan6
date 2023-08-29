@@ -12,7 +12,6 @@
 # <property name="fullPathToHmmFile" value="${pfam-a.hmm.path}"/>
 
 
-
 # Hmmer3SearchMatchParser
 
 
@@ -53,7 +52,6 @@
 #                     );
 #                     rawProtein.addMatch(match);
 #                 }
-
 
 
 # GaValuesRetriever

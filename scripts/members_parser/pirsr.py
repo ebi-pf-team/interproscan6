@@ -1,4 +1,3 @@
-
 # pirsr.binary.path=${bin.directory}/pirsr/0.1/pirsr.py
 # pirsr.srhmm.path=${data.directory}/pirsr/2021_05/sr_hmm_all
 # pirsr.data.path=${data.directory}/pirsr/2021_05/

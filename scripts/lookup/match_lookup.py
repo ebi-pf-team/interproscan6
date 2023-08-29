@@ -24,15 +24,14 @@ def get_sequences(fasta_file: str) -> dict:
     return sequences
 
 
-def check_precalc(sequence: str) -> str|None:
+def check_precalc(sequence: str) -> str | None:
     sequence_md5 = hashlib.md5(sequence.encode()).hexdigest().upper()
     checkout = requests.get(f"{URL_IS_PRECALC}?md5={sequence_md5}")
-    print(checkout.text)
-    # if checkout.text == '':
-    #     match_result = match_lookup(sequence_md5)
-    #     return match_result
-    # else:
-    #     return None
+    if checkout.text == "":
+        return None
+    else:
+        match_result = match_lookup(sequence_md5)
+        return match_result
 
 
 def match_lookup(sequence_md5: str) -> str:
@@ -84,7 +83,9 @@ def main():
     parser = argparse.ArgumentParser(
         description="Request to precalculated match lookup"
     )
-    parser.add_argument("-fasta", "--fastafile", type=str, help="fasta file with sequences")
+    parser.add_argument(
+        "-fasta", "--fastafile", type=str, help="fasta file with sequences"
+    )
     parser.add_argument("-appl", "--applications", nargs="*", help="list of analysis")
     args = parser.parse_args()
 
@@ -100,7 +101,7 @@ def main():
             print(json.dumps(match_filtered))
         else:
             not_precalc.append(sequences)
-    return not_precalc
+    return not_precalc  # I still need to think how the best way to get this and put in the scan flow
 
 
 if __name__ == "__main__":

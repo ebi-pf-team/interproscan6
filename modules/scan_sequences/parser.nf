@@ -1,7 +1,6 @@
 process PARSER {
     input:
-    val sequences
-    val application
+    tuple path(sequences), val(application)
     val preproc
 
     output:

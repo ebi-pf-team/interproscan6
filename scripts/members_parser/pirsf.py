@@ -1,4 +1,3 @@
-
 # binary.pirsf.pl.path=${bin.directory}/pirsf/3.10/pirsf.pl
 # pirsf.sfhmm.path=${data.directory}/pirsf/3.10/sf_hmm_all
 # pirsf.dat.path=${data.directory}/pirsf/3.10/pirsf.dat
