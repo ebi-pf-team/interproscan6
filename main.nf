@@ -75,6 +75,8 @@ workflow {
     .set { sequences_channel }
 
     entries_path = params.xref.entries
+    goterms_path = "false"
+    pathways_path = "false"
     if (input_yaml.goterms) {
         goterms_path = params.xref.goterms
     }
@@ -100,6 +102,13 @@ workflow {
         input_xrefs = MATCHLOOKUP.out
     }
 
-//     XREFS(input_xrefs, entries_path, goterms_path, pathways_path)
-//     WRITERESULTS(XREFS.out, params.formats)
+    // I need to have all forked(case of lookup with no precalc)/splitted(case of MAIN_SCAN) outputs before follow to XREFS
+    input_xrefs
+        .collect()
+        .set { collected_outputs }
+
+    XREFS(collected_outputs, entries_path, goterms_path, pathways_path)
+
+    output_path = input_yaml.outfile
+//     WRITERESULTS(XREFS.out, params.formats, output_path)
 }

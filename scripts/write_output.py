@@ -9,12 +9,12 @@ SERIAL_GROUP = "PROTEIN"
 
 def xml_output(matches_parsed):
     pass
-    # it will change! will receive a dict with all infos and parse to each output format in this script
+    # A lot of changes! Need to be recreated. It will receive a dict with all infos and parse to each output format in this script
 
 
 def tsv_output(matches_parsed):
     pass
-    # it will change! will receive a dict with all infos and parse to each output format in this script
+    # A lot of changes! Need to be recreated! It will receive a dict with all infos and parse to each output format in this script
 
 
 def json_output(members_info):
@@ -25,7 +25,7 @@ def gff3_output(members_info):
     pass  # focusing in xml and tsv for now (similar output info)
 
 
-def write_results(members_info: list[dict], output_format: list):
+def write_results(members_info: list[dict], output_format: list, output_path: str):
     if len(output_format) > 0:
         output_format = list(map(lambda x: x.upper(), output_format))
     else:
@@ -50,9 +50,10 @@ def main():
         "results", metavar="results", type=str, help="matches result parsed"
     )
     parser.add_argument("formats", metavar="formats", type=str, help="output format(s)")
+    parser.add_argument("output_path", metavar="output_path", type=str, help="output path")
 
     args = parser.parse_args()
-    write_results(args.results_txt, args.output_formats)
+    write_results(args.results_txt, args.output_formats, args.output_path)
 
 
 if __name__ == "__main__":

@@ -36,20 +36,20 @@ def ncbifam_parse(hmmer_parse_result):
 
 
 def main():
-    # parser = argparse.ArgumentParser(
-    #     description="NCBIfam parser"
-    # )
-    # parser.add_argument(
-    #     "-seq", "--sequences", type=str, help="fasta file with sequences"
-    # )
-    # parser.add_argument("-preproc", "--preproc", type=str, help="file result of hmmer preproc")
-    # args = parser.parse_args()
-    #
-    # accession_regex = re.compile("^Accession:\\s+((TIGR|NF)\\d+)\\.\\d+$")
-    # hmmer_parse_result = parse(args.preproc, accession_regex)
-    # #ncbifam_parse = ncbifam_parse(hmmer_parse_result)
+    parser = argparse.ArgumentParser(
+        description="NCBIfam parser"
+    )
+    parser.add_argument(
+        "-seq", "--sequences", type=str, help="fasta file with sequences"
+    )
+    parser.add_argument("-preproc", "--preproc", type=str, help="file result of hmmer preproc")
+    args = parser.parse_args()
+
+    accession_regex = re.compile("^Accession:\\s+((TIGR|NF)\\d+)\\.\\d+$")
+    hmmer_parse_result = parse(args.preproc, accession_regex)
+    #ncbifam_parse = ncbifam_parse(hmmer_parse_result)
     print("NCBIFAM:")
-    # print(json.dumps(hmmer_parse_result))
+    print(json.dumps(hmmer_parse_result))
 
 
 if __name__ == "__main__":

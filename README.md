@@ -2,22 +2,23 @@
 
 
 !! WORK IN PROGRESS !! 
-PS: The code still need to be refactored (the focus now is in obtain the correct results for all members in all flows)
 
-Before run you need to upload:
-- members bin 
-- members data
-- xref files (entries, goterms and pathways) 
+Before to run you need to upload:
+- members bin (you can find in interproscan5 on path "interproscan/core/jms-implementation/target/interproscan-5-dist/bin")
+- members data (curl ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.62-94.0/alt/interproscan-data-5.62-94.0.tar.gz --output interproscan-data-5.62-94.0.tar.gz)
+- xref (entries, goterms and pathways) files (Use this script: interproscan6/files_test/get_data_to_i6.py)
 
-Change the input params in input_opt.yaml file if want to test different flows (see in main.nf)
+PS: we will keep in the project the bin and xrefs files? the user just need to upload the data
 
-How to run (example):
 
-     nextflow run main.nf --input files_test/test_all_appl.fasta -params-file input_opt.yaml
+IMPORTANT: Change the input params in input_opt.yaml file if you want to test different flows (see in main.nf)
 
-Temporary (scripts that still not in nextflow flow to make easy the test):
-    CDD:
-        If want to run cdd.py build docker and run:
+remember to build docker (necessary to hmmer process):
+
+    docker build -t interproscan6 .
+
+How to run:
+
+     nextflow run main.nf
         
-            docker build -t interproscan6 .
-            docker run -v ./results:/opt/interproscan6/results interproscan6
+            
