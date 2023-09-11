@@ -122,7 +122,7 @@ if __name__ == "__main__":
     output_pl_path = (
         "/Users/lcf/PycharmProjects/interproscan6/results/output_superfamily_pl.txt"
     )
-    output_hmmscan_path = "/Users/lcf/PycharmProjects/interproscan6/results/output_superfamily_hmm_scan.txt"
+    output_hmmscan_path = "/results/output_superfamily_hmm_scan.txt"
     sequences = get_sequences(all_appl)
     hmm_result = run_hmm(all_appl, hmm_superfamily_path, output_hmmscan_path)
     # run_pl_script(hmm_result, output_pl_path)

@@ -1,24 +1,29 @@
 import re
+import argparse
+import json
+import members_parser.members_regex as members_regex
 
 COMMENT_LINE = "#"
 END_OF_OUTPUT_FILE = "[ok]"
-
 END_OF_RECORD = "//"
 DOMAIN_SECTION_START = ">> "
 START_OF_DOMAIN_ALIGNMENT_SECTION = "Alignments for each domain"
-DOMAIN_ALIGNMENT_SECTION_START = "  =="
+DOMAIN_ALIGNMENT_SECTION_START = "=="
 
 DOMAIN_SECTION_START_PATTERN = re.compile(r"^>>\s+(\S+).*$")
 DOMAIN_ALIGNMENT_LINE_PATTERN = re.compile("^\\s+==\\s+domain\\s+(\\d+)\\s+.*$")
 ALIGNMENT_SEQUENCE_PATTERN = re.compile("^\\s+(\\w+)\\s+(\\S+)\\s+([-a-zA-Z]+)\\s+(\\S+)\\s*$")
+MODEL_ACCESSION_LINE_PATTERN = re.compile("^[^:]*:\\s+(\\w+)\\s+\\[M=(\\d+)\\].*$")
 
 
-def parse(rpsbproc_file, accession_re):
+def parse(rpsbproc_file, appl):
     search_record = {}
-    current_sequence_identifier = None
+    current_domain = None
     domains = {}
-    stage = 'LOOKING_FOR_METHOD_ACCESSION'
+    sequences = {}
     hmmer3ParserSupport = []
+    stage = 'LOOKING_FOR_METHOD_ACCESSION'
+    member_accession = members_regex.get_accession_regex(appl)
 
     with open(rpsbproc_file, "r") as f:
         for line in f.readlines():
@@ -30,47 +35,54 @@ def parse(rpsbproc_file, accession_re):
                 if stage == 'LOOKING_FOR_DOMAIN_DATA_LINE' and line.startswith(DOMAIN_SECTION_START):
                     stage = 'LOOKING_FOR_DOMAIN_SECTION'
                 if line.startswith(END_OF_RECORD):
+                    search_record["model_id"] = model_id
+                    search_record["model_length"] = model_length
+                    search_record["sequence_match"] = sequences
                     if search_record:
                         hmmer3ParserSupport.append(search_record)
-                        search_record = {}
+                    search_record = {}
                     stage = "LOOKING_FOR_METHOD_ACCESSION"
                 else:
                     if stage == 'LOOKING_FOR_METHOD_ACCESSION':
-                        if line.startswith(DOMAIN_SECTION_START):
+                        if line.startswith("Accession:") or line.startswith("Query sequence:"):
+                            model_ident_pattern = member_accession.match(line)
+                            if model_ident_pattern:
+                                model_id = model_ident_pattern.group(1)
+                                model_length = model_ident_pattern.group(2)
                             stage = 'LOOKING_FOR_SEQUENCE_MATCHES'
-                            match = DOMAIN_SECTION_START_PATTERN.match(line)
-                            if match:
-                                current_sequence_identifier = match.group(1)
                     elif stage == 'LOOKING_FOR_SEQUENCE_MATCHES':
                         if line.strip() == "":
                             if search_record:
                                 stage = 'LOOKING_FOR_DOMAIN_SECTION'
-                                current_sequence_identifier = None
                             else:
                                 stage = 'FINISHED_SEARCHING_RECORD'
+                            current_domain = None
+                        else:
+                            sequence_match = get_sequence_match(line)
+                            if sequence_match:
+                                current_sequence = sequence_match["sequenceIdentifier"]
+                                try:
+                                    sequences[current_sequence].append(sequence_match)
+                                except:
+                                    sequences[current_sequence] = [sequence_match]
+
+                    elif stage == 'LOOKING_FOR_DOMAIN_SECTION':
+                        if line.startswith(DOMAIN_SECTION_START):
+                            match = DOMAIN_SECTION_START_PATTERN.match(line)
+                            if match:
+                                current_domain = match.group(1)
+                            stage = 'LOOKING_FOR_DOMAIN_DATA_LINE'
+                    elif stage == 'LOOKING_FOR_DOMAIN_DATA_LINE':
+                        if line == START_OF_DOMAIN_ALIGNMENT_SECTION:
+                            stage = 'LOOKING_FOR_DOMAIN_SECTION'
                         else:
                             domain_match = get_domain_match(line)
-                            if domain_match:
-                                try:
-                                    search_record[current_sequence_identifier].append(domain_match)
-                                except:
-                                    search_record[current_sequence_identifier] = [domain_match]
-                    # elif stage == 'LOOKING_FOR_DOMAIN_SECTION':
-                    #     if line.startswith(DOMAIN_SECTION_START):
-                    #         match = DOMAIN_SECTION_START_PATTERN.match(line)
-                    #         if match:
-                    #             domains.clear()
-                    #             current_sequence_identifier = match.group(1)
-                    #             stage = 'LOOKING_FOR_DOMAIN_DATA_LINE'
-                    # elif stage == 'LOOKING_FOR_DOMAIN_DATA_LINE':
-                    #     match = get_domain_match(line)
-                        # if line.strip() == START_OF_DOMAIN_ALIGNMENT_SECTION:
-                        #     stage = 'LOOKING_FOR_DOMAIN_SECTION'
-                        # elif match:
-                        #     domain_match = get_domain_match(match)
-                        #     domain_line_id = match.group(1)
-                        #     search_record["domain_match"] = (current_sequence_identifier, domain_match)
-                        #     domains[domain_line_id] = domain_match
+                            current_domain = match.group(1)
+                        if domain_match:
+                            try:
+                                domains[current_domain].append(domain_match)
+                            except:
+                                domains[current_domain] = [domain_match]
     return hmmer3ParserSupport
 
 
@@ -107,8 +119,27 @@ def get_sequence_match(sequence_line):
     return sequence_match
 
 
+def main():
+    parser = argparse.ArgumentParser(
+        description="hmmer parser"
+    )
+    parser.add_argument(
+        "-seq", "--sequences", type=str, help="fasta file with sequences"
+    )
+    parser.add_argument(
+        "-preproc", "--preproc", type=str, help="file result of hmmer preproc")
+    parser.add_argument(
+        "-appl", "--application", type=str, help="name of member database")
+    args = parser.parse_args()
+
+    hmmer_parse_result = parse(args.preproc, args.appl)
+
+    print(f"MEMBER: {args.appl}")
+    print(json.dumps(hmmer_parse_result))
+
+
 if __name__ == "__main__":  # this main now is just to test directly, on the flow of nextflow we don't need
-    result = parse("./work/b7/cf22b37d1c9adfc5c676dabb3c8142/hmmer_ncbifam.hmm_best_to_test.1.fasta.out")
+    result = parse("./work/20/5d405d4f383c1f9d3bc1b2d6570405/hmmer_ncbifam.hmm_best_to_test.5.fasta.out", "ncbifam")
     print(result)
 #     the output now is like this:
 #       [{'Q97R95': [{'score': '446.0', 'bias': '3.0', 'cEvalue': '5.5e-138', 'iEvalue': '8.5e-134', 'hmmfrom': '1', 'hmmto': '359', 'hmmBounds': '[.', 'aliFrom': '4', 'aliTo': '361', 'envFrom': '4', 'envTo': '365', 'acc': '0.98'}]},

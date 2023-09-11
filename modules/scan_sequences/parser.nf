@@ -8,6 +8,6 @@ process PARSER {
 
     script:
     """
-    python $projectDir/scripts/members_parser/${application}.py -seq ${sequences} -preproc ${preproc} > parse_${application}_${sequences}.out
+    python $projectDir/scripts/members_parser/hmmer_parser.py -appl ${application} -seq ${sequences} -preproc ${preproc} > parse_${application}_${sequences}.out
     """
 }
