@@ -31,7 +31,3 @@ def antifam_parse(hmmer_parse_result):
     #     );
     # }
 
-
-def get_accession_regex():
-    accession_regex = re.compile("^Accession:\\s+(ANF\\d{5})\\s*$")
-    return accession_regex

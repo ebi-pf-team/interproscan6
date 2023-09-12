@@ -138,9 +138,9 @@ def main():
     print(json.dumps(hmmer_parse_result))
 
 
-if __name__ == "__main__":  # this main now is just to test directly, on the flow of nextflow we don't need
-    result = parse("./work/20/5d405d4f383c1f9d3bc1b2d6570405/hmmer_ncbifam.hmm_best_to_test.5.fasta.out", "ncbifam")
-    print(result)
+# if __name__ == "__main__":  # this main now is just to test directly, on the flow of nextflow we don't need
+#     result = parse("./work/20/5d405d4f383c1f9d3bc1b2d6570405/hmmer_ncbifam.hmm_best_to_test.5.fasta.out", "ncbifam")
+#     print(result)
 #     the output now is like this:
 #       [{'Q97R95': [{'score': '446.0', 'bias': '3.0', 'cEvalue': '5.5e-138', 'iEvalue': '8.5e-134', 'hmmfrom': '1', 'hmmto': '359', 'hmmBounds': '[.', 'aliFrom': '4', 'aliTo': '361', 'envFrom': '4', 'envTo': '365', 'acc': '0.98'}]},
 #       {'UPI00043D6473': [{'score': '773.5', 'bias': '0.0', 'cEvalue': '1.7e-236', 'iEvalue': '1.3e-232', 'hmmfrom': '24', 'hmmto': '597', 'hmmBounds': '..', 'aliFrom': '100', 'aliTo': '670', 'envFrom': '83', 'envTo': '671', 'acc': '0.92'},
