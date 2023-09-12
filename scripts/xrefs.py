@@ -10,8 +10,8 @@ def add_entries_info(matches_path: str, entries_path: str) -> list[dict]:
             for m in matches:
                 matches_info = json.loads(m)
                 for info in matches_info:
-                    acc = info["signature_acc"]
                     try:
+                        acc = info["signature_acc"]
                         entry = entries[acc]
                         info["interpro_annotations_desc"] = entry[0]
                         info["signature_desc"] = entry[1]
@@ -29,8 +29,8 @@ def add_goterms_info(matches_info: list[dict], goterm_path: str):
             ipr2go = json.load(ipr)
             go_info = json.load(go)
             for match in matches_info:
-                acc = match["interpro_annotations_acc"]
                 try:
+                    acc = match["interpro_annotations_acc"]
                     go_ids = ipr2go[acc]
                     for go_id in go_ids:
                         matches2go[go_id] = go_info[go_id]
@@ -47,12 +47,12 @@ def add_pathways_info(matches_info, pathway_path: str):
             ipr2pa = json.load(ipr)
             pa_info = json.load(pa)
             for match in matches_info:
-                acc = match["interpro_annotations_acc"]
                 try:
+                    acc = match["interpro_annotations_acc"]
                     pa_ids = ipr2pa[acc]
                     for pa_id in pa_ids:
                         matches2pa[pa_id] = pa_info[pa_id]
-                        match["GOTERMS"] = matches2pa
+                        match["PATHWAY"] = matches2pa
                 except KeyError:
                     pass
     return matches_info

@@ -102,13 +102,28 @@ workflow {
         input_xrefs = MATCHLOOKUP.out
     }
 
-    // I need to have all forked(case of lookup with no precalc)/splitted(case of MAIN_SCAN) outputs before follow to XREFS
-    input_xrefs
-        .collect()
-        .set { collected_outputs }
+    XREFS(input_xrefs, entries_path, goterms_path, pathways_path)
 
-    XREFS(collected_outputs, entries_path, goterms_path, pathways_path)
+    XREFS.out
+    .collect()
+    .set { collected_outputs }
 
     output_path = input_yaml.outfile
-//     WRITERESULTS(XREFS.out, params.formats, output_path)
+
+// SERIAL_GROUP = "PROTEIN"
+//  Default for protein sequences are TSV, XML and GFF3, for nucleotide sequences GFF3 and XML.
+//     if (input_yaml.formats) {
+//         output_format = input_yaml.formats
+//     }
+//     else {
+//         if SERIAL_GROUP == "PROTEIN" {
+//             output_format = ["TSV", "XML", "GFF3"]
+//         } else {
+//             output_format = ["XML", "GFF3"]
+//         }
+//     }
+
+    Channel.fromList(input_yaml.formats)
+    .set { formats_channel }
+    WRITERESULTS(collected_outputs, formats_channel, output_path)
 }

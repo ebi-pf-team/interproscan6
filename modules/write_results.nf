@@ -3,11 +3,11 @@ process WRITERESULTS {
 
     input:
     val xref_results
-    val formats
+    val format
     val output_path
 
     script:
     """
-    python $projectDir/scripts/write_output.py --results ${xref_results} --format ${formats} --output_path ${output_path}
+    python3 $projectDir/scripts/write_output.py --results ${xref_results} --format ${format} --output_path $projectDir/${output_path}
     """
 }

@@ -35,9 +35,6 @@ def parse(rpsbproc_file, appl):
                 if stage == 'LOOKING_FOR_DOMAIN_DATA_LINE' and line.startswith(DOMAIN_SECTION_START):
                     stage = 'LOOKING_FOR_DOMAIN_SECTION'
                 if line.startswith(END_OF_RECORD):
-                    search_record["model_id"] = model_id
-                    search_record["model_length"] = model_length
-                    search_record["sequence_match"] = sequences
                     if search_record:
                         hmmer3ParserSupport.append(search_record)
                     search_record = {}
@@ -45,11 +42,13 @@ def parse(rpsbproc_file, appl):
                 else:
                     if stage == 'LOOKING_FOR_METHOD_ACCESSION':
                         if line.startswith("Accession:") or line.startswith("Query sequence:"):
+                            stage = 'LOOKING_FOR_SEQUENCE_MATCHES'
                             model_ident_pattern = member_accession.match(line)
                             if model_ident_pattern:
                                 model_id = model_ident_pattern.group(1)
-                                model_length = model_ident_pattern.group(2)
-                            stage = 'LOOKING_FOR_SEQUENCE_MATCHES'
+                                search_record["signature_acc"] = model_id
+                                # model_length = model_ident_pattern.group(2)
+                                # search_record["model_length"] = model_length
                     elif stage == 'LOOKING_FOR_SEQUENCE_MATCHES':
                         if line.strip() == "":
                             if search_record:
@@ -57,6 +56,7 @@ def parse(rpsbproc_file, appl):
                             else:
                                 stage = 'FINISHED_SEARCHING_RECORD'
                             current_domain = None
+                            current_sequence = None
                         else:
                             sequence_match = get_sequence_match(line)
                             if sequence_match:
@@ -65,9 +65,10 @@ def parse(rpsbproc_file, appl):
                                     sequences[current_sequence].append(sequence_match)
                                 except:
                                     sequences[current_sequence] = [sequence_match]
-
+                            search_record["sequence_match"] = sequences
                     elif stage == 'LOOKING_FOR_DOMAIN_SECTION':
                         if line.startswith(DOMAIN_SECTION_START):
+                            domains = {}
                             match = DOMAIN_SECTION_START_PATTERN.match(line)
                             if match:
                                 current_domain = match.group(1)
@@ -78,11 +79,13 @@ def parse(rpsbproc_file, appl):
                         else:
                             domain_match = get_domain_match(line)
                             current_domain = match.group(1)
+
                         if domain_match:
                             try:
                                 domains[current_domain].append(domain_match)
                             except:
                                 domains[current_domain] = [domain_match]
+                        search_record["domain_match"] = domains
     return hmmer3ParserSupport
 
 
@@ -132,17 +135,9 @@ def main():
         "-appl", "--application", type=str, help="name of member database")
     args = parser.parse_args()
 
-    hmmer_parse_result = parse(args.preproc, args.appl)
-
-    print(f"MEMBER: {args.appl}")
+    hmmer_parse_result = parse(args.preproc, args.application)
     print(json.dumps(hmmer_parse_result))
 
 
-# if __name__ == "__main__":  # this main now is just to test directly, on the flow of nextflow we don't need
-#     result = parse("./work/20/5d405d4f383c1f9d3bc1b2d6570405/hmmer_ncbifam.hmm_best_to_test.5.fasta.out", "ncbifam")
-#     print(result)
-#     the output now is like this:
-#       [{'Q97R95': [{'score': '446.0', 'bias': '3.0', 'cEvalue': '5.5e-138', 'iEvalue': '8.5e-134', 'hmmfrom': '1', 'hmmto': '359', 'hmmBounds': '[.', 'aliFrom': '4', 'aliTo': '361', 'envFrom': '4', 'envTo': '365', 'acc': '0.98'}]},
-#       {'UPI00043D6473': [{'score': '773.5', 'bias': '0.0', 'cEvalue': '1.7e-236', 'iEvalue': '1.3e-232', 'hmmfrom': '24', 'hmmto': '597', 'hmmBounds': '..', 'aliFrom': '100', 'aliTo': '670', 'envFrom': '83', 'envTo': '671', 'acc': '0.92'},
-#                           {'score': '662.3', 'bias': '7.9', 'cEvalue': '8.1e-203', 'iEvalue': '6.3e-199', 'hmmfrom': '141', 'hmmto': '597', 'hmmBounds': '..', 'aliFrom': '723', 'aliTo': '1164', 'envFrom': '709', 'envTo': '1165', 'acc': '0.96'}]},
-#       {'A0B6J9': [{'score': '370.1', 'bias': '2.4', 'cEvalue': '3.3e-115', 'iEvalue': '5.1e-111', 'hmmfrom': '1', 'hmmto': '253', 'hmmBounds': '[.', 'aliFrom': '4', 'aliTo': '260', 'envFrom': '4', 'envTo': '262', 'acc': '0.99'}]}]
+if __name__ == "__main__":
+    main()

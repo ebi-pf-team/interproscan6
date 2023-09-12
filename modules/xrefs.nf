@@ -11,6 +11,6 @@ process XREFS {
 
     script:
     """
-    python $projectDir/scripts/xrefs.py -matches ${match_results} -entries ${entries} -go ${goterms} -pa ${pathways} > xrefs_results
+    python3 $projectDir/scripts/xrefs.py -matches ${match_results} -entries ${entries} -go ${goterms} -pa ${pathways} > xrefs_results
     """
 }

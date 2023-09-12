@@ -19,6 +19,6 @@ remember to build docker (necessary to hmmer process):
 
 How to run:
 
-     nextflow run main.nf
+     nextflow run main.nf [-resume]
         
             

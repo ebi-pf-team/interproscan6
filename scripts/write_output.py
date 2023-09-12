@@ -1,59 +1,53 @@
 import argparse
-import csv
 import json
+import os
+import csv
 import xml.etree.ElementTree as ET
 
-SERIAL_GROUP = "PROTEIN"
-# Default for protein sequences are TSV, XML and GFF3, for nucleotide sequences GFF3 and XML.
 
-
-def xml_output(matches_parsed):
+def xml_output(matches: list, output_path: str):
+    # A lot of changes! Need to be recreated!
     pass
-    # A lot of changes! Need to be recreated. It will receive a dict with all infos and parse to each output format in this script
 
-
-def tsv_output(matches_parsed):
+def tsv_output(matches: list, output_path: str):
     pass
-    # A lot of changes! Need to be recreated! It will receive a dict with all infos and parse to each output format in this script
+    # A lot of changes! Need to be recreated!
 
 
-def json_output(members_info):
-    pass  # focusing in xml and tsv for now (similar output info)
+def json_output(matches: list, output_path: str):
+    output_with_format = output_path + '.json'
+    with open(output_with_format, 'wb') as o:
+        for match in matches:
+            with open(match, "r") as m:
+                o.write(json.load(m))
 
 
-def gff3_output(members_info):
-    pass  # focusing in xml and tsv for now (similar output info)
+def gff3_output(matches: list, output_path: str):
+    pass
 
 
-def write_results(members_info: list[dict], output_format: list, output_path: str):
-    if len(output_format) > 0:
-        output_format = list(map(lambda x: x.upper(), output_format))
-    else:
-        if SERIAL_GROUP == "PROTEIN":
-            output_format = ["TSV", "XML", "GFF3"]
-        else:
-            output_format = ["XML", "GFF3"]
-
+def write_results(matches: list, output_format: str, output_path: str):
+    output_format = output_format.upper()
     if "TSV" in output_format:
-        tsv_output(members_info)
+        tsv_output(matches, output_path)
     if "XML" in output_format:
-        xml_output(members_info)
+        xml_output(matches, output_path)
     if "JSON" in output_format:
-        json_output(members_info)
+        json_output(matches, output_path)
     if "GFF3" in output_format:
-        gff3_output(members_info)
+        gff3_output(matches, output_path)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Write result file(s)")
+    parser = argparse.ArgumentParser(description="Write result file")
     parser.add_argument(
-        "results", metavar="results", type=str, help="matches result parsed"
+        "-results", "--results", nargs="*", help="matches result parsed"
     )
-    parser.add_argument("formats", metavar="formats", type=str, help="output format(s)")
-    parser.add_argument("output_path", metavar="output_path", type=str, help="output path")
+    parser.add_argument("-format", "--format", type=str, help="output format")
+    parser.add_argument("-output_path", "--output_path", type=str, help="output path")
 
     args = parser.parse_args()
-    write_results(args.results_txt, args.output_formats, args.output_path)
+    write_results(args.results, args.format, args.output_path)
 
 
 if __name__ == "__main__":
