@@ -5,7 +5,7 @@ ENV TZ=Europe/London
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
     apt-get update -y && \
-    apt-get install -y wget python3.10 python3-pip hmmer unzip
+    apt-get install -y wget python3.10 python3-pip hmmer unzip python3-requests
 
 WORKDIR /opt/interproscan6
 COPY . .
