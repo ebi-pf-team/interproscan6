@@ -8,6 +8,6 @@ process MATCHLOOKUP {
 
     script:
     """
-    python $projectDir/scripts/lookup/match_lookup.py -fasta ${fasta} -appl ${applications} > parsed_match_lookup.out
+    python3 $projectDir/scripts/lookup/match_lookup.py -fasta ${fasta} -appl ${applications} > parsed_match_lookup.out
     """
 }

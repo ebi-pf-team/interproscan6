@@ -66,15 +66,15 @@ def main():
     parser.add_argument(
         "-entries", "--entries", type=str, help="entries xref file path"
     )
-    parser.add_argument("-go", "--goterms", type=str, help="goterms xref file path")
-    parser.add_argument("-pa", "--pathways", type=str, help="pathways xref file path")
+    parser.add_argument("-go", "--goterms", type=str, default="", help="goterms xref file path")
+    parser.add_argument("-pa", "--pathways", type=str, default="", help="pathways xref file path")
     args = parser.parse_args()
 
     matches_info = add_entries_info(args.matches, args.entries)
 
-    if args.goterms != "false":  # I need to improve this...
+    if args.goterms:
         matches_info = add_goterms_info(matches_info, args.goterms)
-    if args.pathways != "false":  # I need to improve this...
+    if args.pathways:
         matches_info = add_pathways_info(matches_info, args.pathways)
 
     print(matches_info)

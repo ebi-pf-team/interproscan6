@@ -16,7 +16,6 @@ workflow MAIN_SCAN {
     }
     .set{params_parser}
 
-
     HMMER_RUNNER(params_hmmer)
     PARSER(params_parser, HMMER_RUNNER.out)
 

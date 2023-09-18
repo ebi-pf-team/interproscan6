@@ -1,32 +1,34 @@
 import argparse
 import json
 import os
-import csv
 import xml.etree.ElementTree as ET
 
 
-def xml_output(matches: list, output_path: str):
+def xml_output(matches: str, output_path: str):
     # A lot of changes! Need to be recreated!
     pass
 
-def tsv_output(matches: list, output_path: str):
+def tsv_output(matches: str, output_path: str):
     pass
     # A lot of changes! Need to be recreated!
 
 
-def json_output(matches: list, output_path: str):
+def json_output(matches: str, output_path: str):
+    with open(matches, 'r') as file:
+        data = file.read()
+
     output_with_format = output_path + '.json'
-    with open(output_with_format, 'wb') as o:
-        for match in matches:
-            with open(match, "r") as m:
-                o.write(json.load(m))
+    concatenated_data = {"interproscan-version": "6.0.0", 'results': eval(data)}
+
+    with open(output_with_format, 'w') as json_file:
+        json.dump(concatenated_data, json_file, indent=2)
 
 
-def gff3_output(matches: list, output_path: str):
+def gff3_output(matches: str, output_path: str):
     pass
 
 
-def write_results(matches: list, output_format: str, output_path: str):
+def write_results(matches: str, output_format: str, output_path: str):
     output_format = output_format.upper()
     if "TSV" in output_format:
         tsv_output(matches, output_path)
@@ -41,7 +43,7 @@ def write_results(matches: list, output_format: str, output_path: str):
 def main():
     parser = argparse.ArgumentParser(description="Write result file")
     parser.add_argument(
-        "-results", "--results", nargs="*", help="matches result parsed"
+        "-results", "--results", type=str, help="matches result parsed"
     )
     parser.add_argument("-format", "--format", type=str, help="output format")
     parser.add_argument("-output_path", "--output_path", type=str, help="output path")

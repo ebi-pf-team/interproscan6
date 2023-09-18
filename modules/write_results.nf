@@ -2,12 +2,12 @@ process WRITERESULTS {
     publishDir "${params.projectDir}/results", mode: 'copy'
 
     input:
-    val xref_results
+    val collected_outputs
     val format
     val output_path
 
     script:
     """
-    python3 $projectDir/scripts/write_output.py --results ${xref_results} --format ${format} --output_path $projectDir/${output_path}
-    """
+    cat ${collected_outputs.join(" ")} > $projectDir/${output_path}.tmp
+    python3 $projectDir/scripts/write_output.py --results $projectDir/${output_path}.tmp --format ${format} --output_path $projectDir/${output_path}    """
 }

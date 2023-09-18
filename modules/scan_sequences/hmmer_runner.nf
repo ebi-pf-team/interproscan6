@@ -6,6 +6,7 @@ process HMMER_RUNNER {
 
     output:
     path "hmmer_${hmm}_${sequences}.out"
+    path "hmmer_${hmm}_${sequences}.tbl"
 
     script:
     """

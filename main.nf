@@ -75,8 +75,8 @@ workflow {
     .set { sequences_channel }
 
     entries_path = params.xref.entries
-    goterms_path = "false"
-    pathways_path = "false"
+    goterms_path = ""
+    pathways_path = ""
     if (input_yaml.goterms) {
         goterms_path = params.xref.goterms
     }
@@ -122,6 +122,10 @@ workflow {
 //             output_format = ["XML", "GFF3"]
 //         }
 //     }
+
+    XREFS.out
+    .collect()
+    .set { collected_outputs }
 
     Channel.fromList(input_yaml.formats)
     .set { formats_channel }
