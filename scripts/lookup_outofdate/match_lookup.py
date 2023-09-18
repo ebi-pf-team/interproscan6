@@ -92,16 +92,17 @@ def main():
     applications = args.applications
     sequences = get_sequences(args.fastafile)
     not_precalc = []
+    json_output = []
 
     for id, seq in sequences.items():
         matches = check_precalc(seq)
         if matches:
             match_parsed = parse_match(id, seq, matches)
             match_filtered = filter_analysis(match_parsed, applications)
-            print(json.dumps(match_filtered))
+            json_output = json.dumps(match_filtered)
         else:
             not_precalc.append(sequences)
-    return not_precalc  # I still need to think how the best way to get this and put in the scan flow
+    return json_output, not_precalc  # I still need to think how the best way to get this and put in the scan flow
 
 
 if __name__ == "__main__":

@@ -5,12 +5,13 @@ process PARSER {
     val preproc_out
 
     output:
-    tuple path("parse_seq_${sequences}.json"), path("parse_${application}_${sequences}.tbl"), path("parse_${application}_${sequences}.out")
+    path "parsed_result_${application}.json"
 
     script:
     """
-    python3 $projectDir/scripts/sequences_parse.py -seq ${sequences} > parse_seq_${sequences}.json
-    python3 $projectDir/scripts/hmm_parser/hmmer_tbl_parser.py -appl ${application} -preproc ${preproc_tbl} > parse_${application}_${sequences}.tbl
-    python3 $projectDir/scripts/hmm_parser/hmmer_out_parser.py -appl ${application} -preproc ${preproc_out} > parse_${application}_${sequences}.out
+    python3 $projectDir/scripts/sequences_parse.py -seq ${sequences} > parsed_seq.json
+    python3 $projectDir/scripts/hmm_parser/hmmer_tbl_parser.py -appl ${application} -preproc ${preproc_tbl} > parsed_${application}.tbl
+    python3 $projectDir/scripts/hmm_parser/hmmer_out_parser.py -appl ${application} -preproc ${preproc_out} > parsed_${application}.out
+    python3 $projectDir/scripts/hmm_parser/build_parsed_output.py -seq parsed_seq.json -tbl parsed_${application}.tbl -out parsed_${application}.json > parsed_result_${application}.json
     """
 }

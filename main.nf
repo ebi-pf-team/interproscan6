@@ -110,9 +110,7 @@ workflow {
         applications_channel = Channel.fromList(applications)
         sequences_application = sequences_channel.combine(applications_channel)
         MAIN_SCAN(sequences_application)
-        seq_parsed = MAIN_SCAN.out.map { it.first() }
-        input_xrefs = MAIN_SCAN.out.map { it[1] }
-        tbl_parsed = MAIN_SCAN.out.map { it.last() }
+        input_xrefs = MAIN_SCAN.out
     }
     else{
         MATCHLOOKUP(sequences_channel, applications)
