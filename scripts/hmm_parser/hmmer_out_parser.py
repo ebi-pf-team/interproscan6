@@ -16,7 +16,7 @@ ALIGNMENT_SEQUENCE_PATTERN = re.compile("^\\s+(\\w+)\\s+(\\S+)\\s+([-a-zA-Z]+)\\
 MODEL_ACCESSION_LINE_PATTERN = re.compile("^[^:]*:\\s+(\\w+)\\s+\\[M=(\\d+)\\].*$")
 
 
-def parse(rpsbproc_file, appl):
+def parse(out_file, appl):
     search_record = {}
     current_domain = None
     domains = {}
@@ -25,7 +25,7 @@ def parse(rpsbproc_file, appl):
     stage = 'LOOKING_FOR_METHOD_ACCESSION'
     member_accession = members_regex.get_accession_regex(appl)
 
-    with open(rpsbproc_file, "r") as f:
+    with open(out_file, "r") as f:
         for line in f.readlines():
             if line.startswith(COMMENT_LINE):
                 pass
@@ -127,15 +127,12 @@ def main():
         description="hmmer parser"
     )
     parser.add_argument(
-        "-seq", "--sequences", type=str, help="fasta file with sequences"
-    )
-    parser.add_argument(
-        "-preproc", "--preproc", type=str, help="file result of hmmer preproc")
+        "-preproc", "--preproc_out", type=str, help="out file result of hmmer preproc")
     parser.add_argument(
         "-appl", "--application", type=str, help="name of member database")
     args = parser.parse_args()
 
-    hmmer_parse_result = parse(args.preproc, args.application)
+    hmmer_parse_result = parse(args.preproc_out, args.application)
     print(json.dumps(hmmer_parse_result))
 
 

@@ -75,6 +75,21 @@ workflow {
     .set { sequences_channel }
 
     entries_path = params.xref.entries
+    output_path = input_yaml.outfile
+
+// SERIAL_GROUP = "PROTEIN"
+//  Default for protein sequences are TSV, XML and GFF3, for nucleotide sequences GFF3 and XML.
+//     if (input_yaml.formats) {
+//         output_format = input_yaml.formats
+//     }
+//     else {
+//         if SERIAL_GROUP == "PROTEIN" {
+//             output_format = ["TSV", "XML", "GFF3"]
+//         } else {
+//             output_format = ["XML", "GFF3"]
+//         }
+//     }
+
     goterms_path = ""
     pathways_path = ""
     if (input_yaml.goterms) {
@@ -95,7 +110,9 @@ workflow {
         applications_channel = Channel.fromList(applications)
         sequences_application = sequences_channel.combine(applications_channel)
         MAIN_SCAN(sequences_application)
-        input_xrefs = MAIN_SCAN.out
+        seq_parsed = MAIN_SCAN.out.map { it.first() }
+        input_xrefs = MAIN_SCAN.out.map { it[1] }
+        tbl_parsed = MAIN_SCAN.out.map { it.last() }
     }
     else{
         MATCHLOOKUP(sequences_channel, applications)
@@ -103,25 +120,6 @@ workflow {
     }
 
     XREFS(input_xrefs, entries_path, goterms_path, pathways_path)
-
-    XREFS.out
-    .collect()
-    .set { collected_outputs }
-
-    output_path = input_yaml.outfile
-
-// SERIAL_GROUP = "PROTEIN"
-//  Default for protein sequences are TSV, XML and GFF3, for nucleotide sequences GFF3 and XML.
-//     if (input_yaml.formats) {
-//         output_format = input_yaml.formats
-//     }
-//     else {
-//         if SERIAL_GROUP == "PROTEIN" {
-//             output_format = ["TSV", "XML", "GFF3"]
-//         } else {
-//             output_format = ["XML", "GFF3"]
-//         }
-//     }
 
     XREFS.out
     .collect()
