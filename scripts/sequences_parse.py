@@ -18,17 +18,16 @@ def get_sequences(fasta_file: str) -> dict:
 
 
 def parse(sequences):
-    results = []
+    results = {}
     for key, sequence in sequences.items():
-        sequence_info = {}
-        id_desc = key.split(" ", 1)
-        sequence_info["id"] = id_desc[0]
-        sequence_info["id_desc"] = key
-        sequence_info["sequence"] = sequence
-        sequence_info["md5"] = hashlib.md5(sequence.encode()).hexdigest()
-        sequence_info["length"] = len(sequence)
+        sequence_info = []
+        acc = key.split(" ", 1)[0]
+        sequence_info.append(key)
+        sequence_info.append(sequence)
+        sequence_info.append(hashlib.md5(sequence.encode()).hexdigest())
+        sequence_info.append(len(sequence))
 
-        results.append(sequence_info)
+        results[acc] = sequence_info
     return results
 
 

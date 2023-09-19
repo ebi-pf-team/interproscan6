@@ -77,7 +77,7 @@ def main():
     if args.pathways:
         matches_info = add_pathways_info(matches_info, args.pathways)
 
-    print(matches_info)
+    print(json.dumps(matches_info))
     return matches_info
 
 

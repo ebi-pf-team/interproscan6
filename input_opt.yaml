@@ -1,4 +1,4 @@
-applications: ["ncbifam"]
+applications: ["antifam", "ncbifam"]
 disable_precalc: true
 formats: ["TSV", "JSON"]
 goterms: false
