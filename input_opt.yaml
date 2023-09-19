@@ -1,11 +1,11 @@
-applications: ["antifam", "ncbifam"]
+applications: ["ncbifam"]
 disable_precalc: true
 formats: ["TSV", "JSON"]
-goterms: true
+goterms: false
 help: false
 input: files_test/best_to_test.fasta
 outfile: results/matches_final_result
-pathways: true
+pathways: false
 
 
 

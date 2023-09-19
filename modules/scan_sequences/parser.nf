@@ -1,8 +1,8 @@
 process PARSER {
     input:
     tuple path(sequences), val(application)
-    val preproc_tbl
     val preproc_out
+    val preproc_tbl
 
     output:
     path "parsed_result_${application}.json"
