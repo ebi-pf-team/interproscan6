@@ -111,12 +111,12 @@ workflow {
 
     if (input_yaml.disable_precalc){
         applications_channel = Channel.fromList(applications)
-        sequences_application = sequences_channel.combine(applications_channel)
+        sequences_application = HASH_SEQUENCE.out.combine(applications_channel)
         MAIN_SCAN(sequences_application)
         input_xrefs = MAIN_SCAN.out
     }
     else{
-        MATCHLOOKUP(sequences_channel, applications)
+        MATCHLOOKUP(HASH_SEQUENCE.out, applications)
         input_xrefs = MATCHLOOKUP.out
     }
 

@@ -1,15 +1,12 @@
 process XREFS {
     input:
-    val match_results
-    val entries
-    val goterms
-    val pathways
+    val fasta
 
     output:
-    path 'xrefs_results'
+    path 'parsed_sequences.json'
 
     script:
     """
-    python3 $projectDir/scripts/xrefs.py -matches ${match_results} -entries ${entries} ${goterms ? "-go ${goterms}" : ""} ${pathways ? "-pa ${pathways}" : ""} > xrefs_results
+    python3 $projectDir/scripts/sequences_parse.py -fasta ${fasta} > parsed_sequences.json
     """
 }

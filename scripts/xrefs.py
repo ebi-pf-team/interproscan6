@@ -11,7 +11,7 @@ def add_entries_info(matches_path: str, entries_path: str) -> list[dict]:
                 matches_info = json.loads(m)
                 for info in matches_info:
                     try:
-                        acc = info["signature_acc"]
+                        acc = info["matches"]["signature_acc"]
                         entry = entries[acc]
                         info["interpro_annotations_desc"] = entry[0]
                         info["signature_desc"] = entry[1]
