@@ -55,6 +55,7 @@ include { MATCHLOOKUP } from "$projectDir/modules/lookup/match_lookup"
 include { MAIN_SCAN } from "$projectDir/modules/scan_sequences/main_scan"
 include { XREFS } from "$projectDir/modules/xrefs"
 include { WRITERESULTS } from "$projectDir/modules/write_results"
+include { HASH_SEQUENCE } from "$projectDir/modules/hash_sequence"
 
 
 /*
@@ -73,6 +74,8 @@ workflow {
     .unique()
     .splitFasta( by: params.batchsize, file: true )
     .set { sequences_channel }
+
+    HASH_SEQUENCE(sequences_channel)
 
     entries_path = params.xref.entries
     output_path = input_yaml.outfile

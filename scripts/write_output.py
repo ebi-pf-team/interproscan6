@@ -21,7 +21,7 @@ def tsv_output(matches: str, output_path: str):
                 for match in member_matches:
                     tsv_output = csv.writer(tsv_file, delimiter='\t')
                     output_line = match["tbl"] + match["sequence"]
-                    # tsv_file.write(output_line)
+                    output_line.append(match["appl"])
                     tsv_output.writerow(output_line)
 
 

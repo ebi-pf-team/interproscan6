@@ -19,8 +19,8 @@ MODEL_ACCESSION_LINE_PATTERN = re.compile("^[^:]*:\\s+(\\w+)\\s+\\[M=(\\d+)\\].*
 def parse(out_file, appl):
     search_record = {}
     current_domain = None
+    current_sequence = None
     domains = {}
-    sequences = {}
     hmmer3ParserSupport = []
     stage = 'LOOKING_FOR_METHOD_ACCESSION'
     member_accession = members_regex.get_accession_regex(appl)
@@ -47,8 +47,6 @@ def parse(out_file, appl):
                             if model_ident_pattern:
                                 model_id = model_ident_pattern.group(1)
                                 search_record["signature_acc"] = model_id
-                                # model_length = model_ident_pattern.group(2)
-                                # search_record["model_length"] = model_length
                     elif stage == 'LOOKING_FOR_SEQUENCE_MATCHES':
                         if line.strip() == "":
                             if search_record:
@@ -56,16 +54,14 @@ def parse(out_file, appl):
                             else:
                                 stage = 'FINISHED_SEARCHING_RECORD'
                             current_domain = None
-                            current_sequence = None
                         else:
                             sequence_match = get_sequence_match(line)
                             if sequence_match:
                                 current_sequence = sequence_match["sequenceIdentifier"]
                                 try:
-                                    sequences[current_sequence].append(sequence_match)
+                                    search_record[current_sequence].append(sequence_match)
                                 except:
-                                    sequences[current_sequence] = [sequence_match]
-                            search_record["sequence_match"] = sequences
+                                    search_record[current_sequence] = [sequence_match]
                     elif stage == 'LOOKING_FOR_DOMAIN_SECTION':
                         if line.startswith(DOMAIN_SECTION_START):
                             domains = {}

@@ -5,32 +5,17 @@ import json
 def build(parsed_sequence, parsed_tbl, parsed_out):
     agg_result = []
     with open(parsed_sequence, "r") as seq_file:
-        with open(parsed_tbl, "r") as tbl_file:
-            seq = json.load(seq_file)
-            tbl = json.load(tbl_file)
-            for match in tbl:
-                match["sequence"] = seq[match["id"]]
-                agg_result.append(match)
-    return tbl
+        seq = json.load(seq_file)
+    with open(parsed_tbl, "r") as tbl_file:
+        tbl = json.load(tbl_file)
+    with open(parsed_out, "r") as out_file:
+        out = json.load(out_file)
 
-# def build(parsed_sequence, parsed_tbl, parsed_out):
-#     agg_result = []
-#
-#     with open(parsed_sequence, "r") as seq_file:
-#         seq = json.load(seq_file)
-#     with open(parsed_tbl, "r") as tbl_file:
-#         tbl = json.load(tbl_file)
-#     with open(parsed_out, "r") as out_file:
-#         out = json.load(out_file)
-#
-#     for match_tbl in tbl:
-#         for match_out in out:
-#             id = match_out["sequence_match"].keys()
-#             if match_tbl["id"] == next(iter(id)):
-#                 match_tbl["sequence"] = seq[match_tbl["id"]]
-#                 match_tbl["out"] = match_out
-#                 agg_result.append(match_tbl)
-#     return tbl
+    for match in tbl:
+        match["sequence"] = seq[match["id"]]
+        # match["out"] = out[match["id"]]
+        agg_result.append(match)
+    return tbl
 
 
 def main():

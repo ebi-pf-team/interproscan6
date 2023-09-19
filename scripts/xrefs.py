@@ -17,7 +17,7 @@ def add_entries_info(matches_path: str, entries_path: str) -> list[dict]:
                         info["signature_desc"] = entry[1]
                         info["interpro_annotations_acc"] = entry[2]
                     except KeyError:
-                        pass
+                        print(info)
                     matches2entries.append(info)
     return matches2entries
 
