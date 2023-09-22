@@ -51,11 +51,11 @@ if (params.help) {
     IMPORT MODULES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+include { HASH_SEQUENCE } from "$projectDir/modules/hash_sequence"
 include { MATCHLOOKUP } from "$projectDir/modules/lookup/match_lookup"
 include { MAIN_SCAN } from "$projectDir/modules/scan_sequences/main_scan"
 include { XREFS } from "$projectDir/modules/xrefs"
 include { WRITERESULTS } from "$projectDir/modules/write_results"
-include { HASH_SEQUENCE } from "$projectDir/modules/hash_sequence"
 
 
 /*
@@ -70,28 +70,13 @@ def all_appl = ['AntiFam', 'CDD', 'Coils', 'FunFam', 'Gene3d', 'HAMAP', 'MobiDBL
                 'SignalP_GRAM_NEGATIVE', 'SignalP_GRAM_POSITIVE', 'SMART', 'SuperFamily', 'TMHMM']
 
 workflow {
-    Channel.fromPath( input_yaml.input )
-    .unique()
-    .splitFasta( by: params.batchsize, file: true )
-    .set { sequences_channel }
-
-    HASH_SEQUENCE(sequences_channel)
-
     entries_path = params.xref.entries
     output_path = input_yaml.outfile
 
-// SERIAL_GROUP = "PROTEIN"
-//  Default for protein sequences are TSV, XML and GFF3, for nucleotide sequences GFF3 and XML.
-//     if (input_yaml.formats) {
-//         output_format = input_yaml.formats
-//     }
-//     else {
-//         if SERIAL_GROUP == "PROTEIN" {
-//             output_format = ["TSV", "XML", "GFF3"]
-//         } else {
-//             output_format = ["XML", "GFF3"]
-//         }
-//     }
+    Channel.fromPath( input_yaml.input )
+    .unique()
+    .splitFasta( by: params.batchsize, file: true )
+    .set { fasta_channel }
 
     goterms_path = ""
     pathways_path = ""
@@ -109,24 +94,52 @@ workflow {
         applications = all_appl
     }
 
-    if (input_yaml.disable_precalc){
-        applications_channel = Channel.fromList(applications)
-        sequences_application = HASH_SEQUENCE.out.combine(applications_channel)
-        MAIN_SCAN(sequences_application)
-        input_xrefs = MAIN_SCAN.out
-    }
-    else{
+    HASH_SEQUENCE(fasta_channel)
+
+    lookup_to_scan = null
+    matches_lookup = []
+    if (!input_yaml.disable_precalc) {
         MATCHLOOKUP(HASH_SEQUENCE.out, applications)
-        input_xrefs = MATCHLOOKUP.out
+        matches_lookup = MATCHLOOKUP.out.map { it.first() }
+        lookup_to_scan = MATCHLOOKUP.out.map { it.last() }
     }
 
-    XREFS(input_xrefs, entries_path, goterms_path, pathways_path)
+    if (input_yaml.disable_precalc || lookup_to_scan) {
+        applications_channel = Channel.fromList(applications)
+        if (lookup_to_scan) {
+            fasta_application = lookup_to_scan.combine(applications_channel)
+        }
+        else {
+            fasta_application = fasta_channel
+            .combine(applications_channel)
+        }
+        MAIN_SCAN(fasta_application)
+    }
+
+    XREFS(HASH_SEQUENCE.out, MAIN_SCAN.out, entries_path, goterms_path, pathways_path)
+    //     XREFS(HASH_SEQUENCE.out, matches_lookup, entries_path, goterms_path, pathways_path)
+
+    Channel.fromList(input_yaml.formats)
+    .set { formats_channel }
 
     XREFS.out
     .collect()
     .set { collected_outputs }
 
-    Channel.fromList(input_yaml.formats)
-    .set { formats_channel }
     WRITERESULTS(collected_outputs, formats_channel, output_path)
 }
+
+
+
+// SERIAL_GROUP = "PROTEIN"
+//  Default for protein sequences are TSV, XML and GFF3, for nucleotide sequences GFF3 and XML.
+//     if (input_yaml.formats) {
+//         output_format = input_yaml.formats
+//     }
+//     else {
+//         if SERIAL_GROUP == "PROTEIN" {
+//             output_format = ["TSV", "XML", "GFF3"]
+//         } else {
+//             output_format = ["XML", "GFF3"]
+//         }
+//     }

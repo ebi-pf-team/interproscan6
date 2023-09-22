@@ -1,12 +1,12 @@
-process XREFS {
+process HASH_SEQUENCE {
     input:
     val fasta
 
     output:
-    path 'parsed_sequences.json'
+    path "parsed_sequences.json"
 
     script:
     """
-    python3 $projectDir/scripts/sequences_parse.py -fasta ${fasta} > parsed_sequences.json
+    python3 $projectDir/scripts/hash_sequence.py -seq ${fasta} > parsed_sequences.json
     """
 }

@@ -3,21 +3,16 @@ include { PARSER } from "$projectDir/modules/scan_sequences/parser"
 
 workflow MAIN_SCAN {
     take:
-    sequences_application
+    fasta_application
 
     main:
-    sequences_application.map { sequences, application ->
-        tuple(sequences, "${params.members_hmm[application]}", "${params.members_switches[application]}")
+    fasta_application.map { fasta, appl ->
+        tuple(fasta, "${params.members_hmm[appl]}", "${params.members_switches[appl]}")
     }
     .set{params_hmmer}
 
-    sequences_application.map { sequences, application ->
-        tuple(sequences, application)
-    }
-    .set{params_parser}
-
     HMMER_RUNNER(params_hmmer)
-    PARSER(params_parser, HMMER_RUNNER.out)
+    PARSER(HMMER_RUNNER.out)
 
     emit:
       PARSER.out

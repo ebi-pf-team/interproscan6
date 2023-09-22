@@ -1,6 +1,7 @@
 process XREFS {
     input:
-    val match_results
+    val hash_seq
+    val matches
     val entries
     val goterms
     val pathways
@@ -10,6 +11,6 @@ process XREFS {
 
     script:
     """
-    python3 $projectDir/scripts/xrefs.py -matches ${match_results} -entries ${entries} ${goterms ? "-go ${goterms}" : ""} ${pathways ? "-pa ${pathways}" : ""} > xrefs_results
+    python3 $projectDir/scripts/xrefs.py -seq ${hash_seq} -matches ${matches} -entries ${entries} ${goterms ? "-go ${goterms}" : ""} ${pathways ? "-pa ${pathways}" : ""} > xrefs_results
     """
 }

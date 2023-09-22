@@ -10,20 +10,6 @@ URL_PRECALC_MATCHLOOKUP = "https://www.ebi.ac.uk/interpro/match-lookup/matches"
 URL_IS_PRECALC = "https://www.ebi.ac.uk/interpro/match-lookup/isPrecalculated"
 
 
-def get_sequences(fasta_file: str) -> dict:
-    sequences = {}
-    with open(fasta_file, "r") as f:
-        lines = f.readlines()
-        for line in lines:
-            line = line.strip()
-            if line.startswith(">"):
-                seq_id = line.split(" ")[0][1:]
-                sequences[seq_id] = ""
-            else:
-                sequences[seq_id] += line
-    return sequences
-
-
 def check_precalc(sequence: str) -> str | None:
     sequence_md5 = hashlib.md5(sequence.encode()).hexdigest().upper()
     checkout = requests.get(f"{URL_IS_PRECALC}?md5={sequence_md5}")
@@ -84,13 +70,13 @@ def main():
         description="Request to precalculated match lookup"
     )
     parser.add_argument(
-        "-fasta", "--fastafile", type=str, help="fasta file with sequences"
+        "-seq", "--sequences", type=str, help="sequences hash parsed"
     )
     parser.add_argument("-appl", "--applications", nargs="*", help="list of analysis")
     args = parser.parse_args()
 
     applications = args.applications
-    sequences = get_sequences(args.fastafile)
+    sequences = args.sequences
     not_precalc = []
     json_output = []
 

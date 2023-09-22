@@ -2,23 +2,27 @@ import argparse
 import json
 
 
-def add_entries_info(matches_path: str, entries_path: str) -> list[dict]:
+def assemble_info(sequences_path: str, matches_path: str, entries_path: str) -> list[dict]:
     matches2entries = []
     with open(matches_path, "r") as matches:
-        with open(entries_path + ".ipr.json", "r") as fh:
-            entries = json.load(fh)
-            for m in matches:
-                matches_info = json.loads(m)
-                for info in matches_info:
+        with open(sequences_path, "r") as sequences:
+            sequences_info = json.load(sequences)
+            with open(entries_path + ".ipr.json", "r") as fh:
+                entries = json.load(fh)
+                matches_info = json.load(matches)
+                for seq_id, match_info in matches_info.items():
+                    match_info["sequence"] = sequences_info[seq_id]
                     try:
-                        acc = info["matches"]["signature_acc"]
-                        entry = entries[acc]
-                        info["interpro_annotations_desc"] = entry[0]
-                        info["signature_desc"] = entry[1]
-                        info["interpro_annotations_acc"] = entry[2]
+                        acc_matches = match_info["acc_matches"]
+                        for acc in acc_matches:
+                            acc_id = acc["accession"].split(".")[0]
+                            entry = entries[acc_id]
+                            acc["interpro_annotations_desc"] = entry[0]
+                            acc["signature_desc"] = entry[1]
+                            acc["interpro_annotations_acc"] = entry[2]
                     except KeyError:
-                        print(info)
-                    matches2entries.append(info)
+                        pass
+                    matches2entries.append(match_info)
     return matches2entries
 
 
@@ -62,6 +66,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="complement match lookup with external files infos"
     )
+    parser.add_argument("-seq", "--hash_sequences", type=str, help="Sequences parsed with md5 hash")
     parser.add_argument("-matches", "--matches", type=str, help="Match lookup parsed")
     parser.add_argument(
         "-entries", "--entries", type=str, help="entries xref file path"
@@ -70,7 +75,7 @@ def main():
     parser.add_argument("-pa", "--pathways", type=str, default="", help="pathways xref file path")
     args = parser.parse_args()
 
-    matches_info = add_entries_info(args.matches, args.entries)
+    matches_info = assemble_info(args.hash_sequences, args.matches, args.entries)
 
     if args.goterms:
         matches_info = add_goterms_info(matches_info, args.goterms)

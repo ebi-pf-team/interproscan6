@@ -17,7 +17,7 @@ def get_sequences(fasta_file: str) -> dict:
     return sequences
 
 
-def parse(sequences):
+def parse(sequences: dict):
     results = {}
     for key, sequence in sequences.items():
         sequence_info = []
