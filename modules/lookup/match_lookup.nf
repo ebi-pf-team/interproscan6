@@ -1,13 +1,13 @@
 process MATCHLOOKUP {
     input:
-    val fasta
-    val applications
+    val hash_seq
+    val appl
 
     output:
     path 'parsed_match_lookup.out'
 
     script:
     """
-    python3 $projectDir/scripts/lookup/match_lookup.py -fasta ${fasta} -appl ${applications} > parsed_match_lookup.out
+    python3 $projectDir/scripts/lookup/match_lookup.py -seq ${hash_seq} -appl ${appl} > parsed_match_lookup.out
     """
 }
