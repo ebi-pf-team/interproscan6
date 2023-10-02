@@ -7,6 +7,6 @@ process HASH_SEQUENCE {
 
     script:
     """
-    python3 $projectDir/scripts/hash_sequence.py -seq ${fasta} > parsed_sequences.json
+    python3 $projectDir/scripts/hmm_parser/hash_sequence.py -seq ${fasta} > parsed_sequences.json
     """
 }

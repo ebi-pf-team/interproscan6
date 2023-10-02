@@ -1,5 +1,4 @@
 import argparse
-import hashlib
 import json
 import xml.etree.ElementTree as ET
 from datetime import datetime

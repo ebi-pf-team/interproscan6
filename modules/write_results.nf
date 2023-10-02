@@ -1,13 +1,15 @@
 process WRITERESULTS {
-    publishDir "${params.projectDir}/results", mode: 'copy'
-
     input:
+    val collected_sequences
     val collected_outputs
     val format
     val output_path
 
     script:
     """
-    cat ${collected_outputs.join(" ")} > $projectDir/${output_path}.tmp
-    python3 $projectDir/scripts/write_output.py --results $projectDir/${output_path}.tmp --format ${format} --output_path $projectDir/${output_path}    """
+    cat ${collected_sequences.join(" ")} > $projectDir/results/sequences_hash.tmp
+    cat ${collected_outputs.join(" ")} > $projectDir/results/matches_result.tmp
+    python3 $projectDir/scripts/write_output.py -matches $projectDir/results/matches_result.tmp -seq $projectDir/results/sequences_hash.tmp -format ${format} -out $projectDir/results/${output_path}
+    """
 }
+

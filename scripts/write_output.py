@@ -6,27 +6,28 @@ from datetime import datetime
 import xml.etree.ElementTree as ET
 
 
-def tsv_output(matches: str, output_path: str):
+def tsv_output(seq_matches: dict, output_path: str):
     tsv_output = os.path.join(output_path + '.tsv')
     with open(tsv_output, 'w') as tsv_file:
         current_date = datetime.now().strftime('%d-%m-%Y')
-        for match in matches:
-            seq_id = match["sequence"][0].split()[0]
-            md5 = match["sequence"][2]
-            seq_len = match["sequence"][3]
-            for acc_match in match["acc_matches"]:
-                acc = acc_match["accession"].split(".")[0]
-                try:
-                    signature_desc = acc_match["signature_desc"]
-                    interpro_acc = acc_match["interpro_annotations_acc"]
-                except:
-                    signature_desc = "-"
-                    interpro_acc = "-"
-                for domain in acc_match["domains"]:
-                    ali_from = domain["ali_from"]
-                    ali_to = domain["ali_to"]
-                    i_evalue = domain["iEvalue"]
-                tsv_file.write(f"{seq_id}\t{md5}\t{seq_len}\t{acc}\t{signature_desc}\t{ali_from}\t{ali_to}\t{i_evalue}\t{current_date}\t{interpro_acc}\n")
+        tsv_file.write(json.dumps(seq_matches, indent=4))
+        # for match in matches:
+            # seq_id = match["sequence"][0].split()[0]
+            # md5 = match["sequence"][2]
+            # seq_len = match["sequence"][3]
+            # for acc_match in match["acc_matches"]:
+            #     acc = acc_match["accession"].split(".")[0]
+            #     try:
+            #         signature_desc = acc_match["signature_desc"]
+            #         interpro_acc = acc_match["interpro_annotations_acc"]
+            #     except:
+            #         signature_desc = "-"
+            #         interpro_acc = "-"
+            #     for domain in acc_match["domains"]:
+            #         ali_from = domain["ali_from"]
+            #         ali_to = domain["ali_to"]
+            #         i_evalue = domain["iEvalue"]
+            #     tsv_file.write(f"{seq_id}\t{md5}\t{seq_len}\t{acc}\t{signature_desc}\t{ali_from}\t{ali_to}\t{i_evalue}\t{current_date}\t{interpro_acc}\n")
         # tsv_output = csv.writer(tsv_file, delimiter='\t')
         # tsv_output.writerow(info)
 
@@ -48,30 +49,44 @@ def gff3_output(matches: str, output_path: str):
     pass
 
 
-def write_results(matches_path: str, output_format: str, output_path: str):
+def write_results(matches_path: str, sequences_path: str, output_format: str, output_path: str):
     output_format = output_format.upper()
-    with open(matches_path, 'r') as data:
-        matches = json.load(data)
+
+    all_matches = {}
+    all_sequences = {}
+    with open(matches_path, 'r') as match_data:
+        for line in match_data:
+            match = json.loads(line)
+            all_matches.update(match)
+    with open(sequences_path, 'r') as seq_data:
+        for line in seq_data:
+            sequence = json.loads(line)
+            all_sequences.update(sequence)
+    seq_matches = {key: all_sequences[key] + all_matches.get(key, []) for key in all_sequences}
+
     if "TSV" in output_format:
-        tsv_output(matches, output_path)
-    if "XML" in output_format:
-        xml_output(matches, output_path)
-    if "JSON" in output_format:
-        json_output(matches, output_path)
-    if "GFF3" in output_format:
-        gff3_output(matches, output_path)
+        tsv_output(seq_matches, output_path)
+    # if "XML" in output_format:
+    #     xml_output(all_matches, all_sequences, output_path)
+    # if "JSON" in output_format:
+    #     json_output(all_matches, all_sequences, output_path)
+    # if "GFF3" in output_format:
+    #     gff3_output(all_matches, all_sequences, output_path)
 
 
 def main():
     parser = argparse.ArgumentParser(description="Write result file")
     parser.add_argument(
-        "-results", "--results", type=str, help="matches result parsed"
+        "-matches", "--matches", type=str, help="all matches result parsed"
+    )
+    parser.add_argument(
+        "-seq", "--sequences", type=str, help="all sequences parsed"
     )
     parser.add_argument("-format", "--format", type=str, help="output format")
-    parser.add_argument("-output_path", "--output_path", type=str, help="output path")
+    parser.add_argument("-out", "--output_path", type=str, help="output path")
 
     args = parser.parse_args()
-    write_results(args.results, args.format, args.output_path)
+    write_results(args.matches, args.sequences, args.format, args.output_path)
 
 
 if __name__ == "__main__":

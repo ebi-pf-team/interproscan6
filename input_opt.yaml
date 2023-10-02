@@ -4,7 +4,7 @@ formats: ["TSV", "JSON"]
 goterms: false
 help: false
 input: files_test/best_to_test.fasta
-outfile: results/matches_final_result
+outfile: matches_final_result
 pathways: false
 
 

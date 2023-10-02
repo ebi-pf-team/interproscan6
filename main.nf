@@ -9,9 +9,12 @@ import org.yaml.snakeyaml.Yaml
 
 def helpMessage() {
   log.info """
+        !!!!!!!!!! OUTOFDATE !!!!!!!!!!!!
+        SEE README!
+
         Usage:
         The typical command for running the pipeline is as follows:
-        nextflow run main.nf --input ./files_test/test_all_appl.fasta -params-file input_opt.yaml
+        nextflow run main.nf --input ./files_test/test_all_appl.fasta
 
         Mandatory arguments:
         --input                     Directory to input fasta file
@@ -28,22 +31,6 @@ if (params.help) {
     helpMessage()
     exit 0
 }
-
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    VALIDATE INPUTS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-// def valid_params = [
-//     input         : ['*.fasta'],
-//     applications  : ['antifam', 'cdd', 'coils', 'funfam', 'gene3d', 'hamap', 'mobidblite', 'ncbifam', 'panther',
-//                      'pfam', 'phobius', 'pirsf', 'pirsr', 'prints', 'prositepatterns', 'prositeprofiles', 'sfld',
-//                      'signalp_euk', 'signalp_gram_negative', 'signalp_gram_positive', 'smart', 'super_family', 'tmhmm'],
-//     formats       : ['tsv', 'xml', 'json', 'gff3'],
-//     goterms       : [true, false],
-//     pathways      : [true, false]
-// ]
 
 
 /*
@@ -116,8 +103,8 @@ workflow {
         MAIN_SCAN(fasta_application)
     }
 
-    XREFS(HASH_SEQUENCE.out, MAIN_SCAN.out, entries_path, goterms_path, pathways_path)
-    //     XREFS(HASH_SEQUENCE.out, matches_lookup, entries_path, goterms_path, pathways_path)
+    // I need to improve matches_lookup output and join it with MAIN_SCAN.out before XREFS!!
+    XREFS(MAIN_SCAN.out, entries_path, goterms_path, pathways_path)
 
     Channel.fromList(input_yaml.formats)
     .set { formats_channel }
@@ -126,8 +113,14 @@ workflow {
     .collect()
     .set { collected_outputs }
 
-    WRITERESULTS(collected_outputs, formats_channel, output_path)
+    HASH_SEQUENCE.out
+    .collect()
+    .set { collected_sequences }
+
+    WRITERESULTS(collected_sequences, collected_outputs, formats_channel, output_path)
 }
+
+
 
 
 

@@ -9,9 +9,9 @@ workflow MAIN_SCAN {
     fasta_application.map { fasta, appl ->
         tuple(fasta, "${params.members_hmm[appl]}", "${params.members_switches[appl]}")
     }
-    .set{params_hmmer}
+    .set{hmmer_params}
 
-    HMMER_RUNNER(params_hmmer)
+    HMMER_RUNNER(hmmer_params)
     PARSER(HMMER_RUNNER.out)
 
     emit:

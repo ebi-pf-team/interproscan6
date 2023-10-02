@@ -119,13 +119,13 @@ def get_sequence_match(sequence_line):
     return sequence_match
 
 
-def parse_domtbl(domtbl_file):
+def parse_domtbl(domtbl_file: str):
     sequence_matches = {}
-    with open(domtbl_file, "r") as f:
+    with open(domtbl_file, "r") as dtbl_f:
         current_seq = None
         acc = []
         domains = []
-        for line in f.readlines():
+        for line in dtbl_f.readlines():
             if not line.startswith(COMMENT_LINE):
                 info = line.split()
                 if info[0] != current_seq:
@@ -188,7 +188,6 @@ def main():
     parser = argparse.ArgumentParser(
         description="hmmer parser"
     )
-
     parser.add_argument(
         "-out", "--preproc_out", type=str, help="out file result of hmmer preproc")
     parser.add_argument(
