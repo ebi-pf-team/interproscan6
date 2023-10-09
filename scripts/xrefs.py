@@ -9,10 +9,8 @@ def assemble_info(matches_path: str, entries_path: str) -> dict:
             entries = json.load(fh)
             matches_info = json.load(matches)
             for seq_id, match_info in matches_info.items():
-                match_info["sequence_id"] = seq_id
                 try:
-                    acc_matches = match_info["acc_matches"]
-                    for acc in acc_matches:
+                    for acc in match_info:
                         acc_id = acc["accession"].split(".")[0]
                         entry = entries[acc_id]
                         acc["interpro_annotations_desc"] = entry[0]
@@ -20,10 +18,7 @@ def assemble_info(matches_path: str, entries_path: str) -> dict:
                         acc["interpro_annotations_acc"] = entry[2]
                 except KeyError:
                     pass
-                try:
-                    matches2entries[seq_id].append(match_info)
-                except KeyError:
-                    matches2entries[seq_id] = [match_info]
+                matches2entries[seq_id] = match_info
     return matches2entries
 
 

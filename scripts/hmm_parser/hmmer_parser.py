@@ -130,11 +130,7 @@ def parse_domtbl(domtbl_file: str):
                 info = line.split()
                 if info[0] != current_seq:
                     if current_seq:
-                        sequence_matches[current_seq] = {
-                            "accession": info[1],
-                            "tlen": int(info[2]),
-                            "acc_matches": acc
-                        }
+                        sequence_matches[current_seq] = acc
                     acc = []
                     current_seq = info[0]
                 if info[9] == info[10]:
@@ -145,11 +141,7 @@ def parse_domtbl(domtbl_file: str):
                     domains.append(get_domain(info))
 
             if current_seq:
-                sequence_matches[current_seq] = {
-                    "accession": info[1],
-                    "tlen": int(info[2]),
-                    "acc_matches": acc
-                }
+                sequence_matches[current_seq] = acc
     return sequence_matches
 
 

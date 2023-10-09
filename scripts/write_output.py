@@ -10,25 +10,23 @@ def tsv_output(seq_matches: dict, output_path: str):
     tsv_output = os.path.join(output_path + '.tsv')
     with open(tsv_output, 'w') as tsv_file:
         current_date = datetime.now().strftime('%d-%m-%Y')
-        for key, match in seq_matches.items():
-            seq_id = match[1]
-            md5 = match[3]
-            seq_len = match[4]
-            for acc_match in match[0]["acc_matches"]:
-                acc = acc_match["accession"].split(".")[0]
+        seq_info_index = 4
+        for seq_id, match in seq_matches.items():
+            seq_len = match[-1]
+            md5 = match[-2]
+            for n in range(0, len(match)-seq_info_index):
+                acc = match[n]["accession"].split(".")[0]
                 try:
-                    signature_desc = acc_match["signature_desc"]
-                    interpro_acc = acc_match["interpro_annotations_acc"]
+                    signature_desc = match[n]["signature_desc"]
+                    interpro_acc = match[n]["interpro_annotations_acc"]
                 except:
                     signature_desc = "-"
                     interpro_acc = "-"
-                for domain in acc_match["domains"]:
+                for domain in match[n]["domains"]:
                     ali_from = domain["ali_from"]
                     ali_to = domain["ali_to"]
                     i_evalue = domain["iEvalue"]
                 tsv_file.write(f"{seq_id}\t{md5}\t{seq_len}\t{acc}\t{signature_desc}\t{ali_from}\t{ali_to}\t{i_evalue}\t{current_date}\t{interpro_acc}\n")
-        # tsv_output = csv.writer(tsv_file, delimiter='\t')
-        # tsv_output.writerow(info)
 
 
 def json_output(seq_matches: dict, output_path: str):
@@ -61,7 +59,7 @@ def write_results(matches_path: str, sequences_path: str, output_format: str, ou
         for line in seq_data:
             sequence = json.loads(line)
             all_sequences.update(sequence)
-    seq_matches = {key: all_sequences[key] + all_matches.get(key, []) for key in all_sequences}
+    seq_matches = {key: all_sequences[key] + all_matches[key] for key in all_sequences}
 
     if "TSV" in output_format:
         tsv_output(seq_matches, output_path)
