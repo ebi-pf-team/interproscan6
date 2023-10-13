@@ -1,4 +1,6 @@
-process WRITERESULTS {
+process WRITE_RESULTS {
+    publishDir "$projectDir/results/", mode: 'copy'
+
     input:
     val collected_sequences
     val collected_outputs

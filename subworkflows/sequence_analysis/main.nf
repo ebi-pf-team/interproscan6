@@ -1,9 +1,10 @@
-include { HMMER_RUNNER } from "$projectDir/modules/scan_sequences/hmmer_runner"
-include { PARSER } from "$projectDir/modules/scan_sequences/parser"
+include { HMMER_RUNNER } from "$projectDir/modules/hmmer_runner/main"
+include { HMMER_PARSER } from "$projectDir/modules/hmmer_parser/main"
 
-workflow MAIN_SCAN {
+workflow SEQUENCE_ANALYSIS {
     take:
     fasta_application
+    tsv_pro
 
     main:
     fasta_application.map { fasta, appl ->
@@ -12,7 +13,7 @@ workflow MAIN_SCAN {
     .set{hmmer_params}
 
     HMMER_RUNNER(hmmer_params)
-    PARSER(HMMER_RUNNER.out)
+    PARSER(HMMER_RUNNER.out, tsv_pro)
 
     emit:
       PARSER.out

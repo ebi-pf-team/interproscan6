@@ -38,11 +38,11 @@ if (params.help) {
     IMPORT MODULES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { HASH_SEQUENCE } from "$projectDir/modules/hash_sequence"
-include { MATCHLOOKUP } from "$projectDir/modules/lookup/match_lookup"
-include { MAIN_SCAN } from "$projectDir/modules/scan_sequences/main_scan"
-include { XREFS } from "$projectDir/modules/xrefs"
-include { WRITERESULTS } from "$projectDir/modules/write_results"
+include { HASH_SEQUENCE } from "$projectDir/modules/hash_sequence/main"
+include { MATCH_LOOKUP } from "$projectDir/modules/match_lookup/main"
+include { XREFS } from "$projectDir/modules/xrefs/main"
+include { WRITE_RESULTS } from "$projectDir/modules/write_results/main"
+include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
 
 
 /*
@@ -81,14 +81,16 @@ workflow {
         applications = all_appl
     }
 
+    check_tsv_pro = input_yaml.formats.contains("TSV-PRO")
+
     HASH_SEQUENCE(fasta_channel)
 
     lookup_to_scan = null
     matches_lookup = []
     if (!input_yaml.disable_precalc) {
-        MATCHLOOKUP(HASH_SEQUENCE.out, applications)
-        matches_lookup = MATCHLOOKUP.out.map { it.first() }
-        lookup_to_scan = MATCHLOOKUP.out.map { it.last() }
+        MATCH_LOOKUP(HASH_SEQUENCE.out, applications)
+        matches_lookup = MATCH_LOOKUP.out.map { it.first() }
+        lookup_to_scan = MATCH_LOOKUP.out.map { it.last() }
     }
 
     if (input_yaml.disable_precalc || lookup_to_scan) {
@@ -100,11 +102,11 @@ workflow {
             fasta_application = fasta_channel
             .combine(applications_channel)
         }
-        MAIN_SCAN(fasta_application)
+        SEQUENCE_ANALYSIS(fasta_application, check_tsv_pro)
     }
 
     // I need to improve matches_lookup output and join it with MAIN_SCAN.out before XREFS!!
-    XREFS(MAIN_SCAN.out, entries_path, goterms_path, pathways_path)
+    XREFS(SEQUENCE_ANALYSIS.out, entries_path, goterms_path, pathways_path)
 
     Channel.fromList(input_yaml.formats)
     .set { formats_channel }
@@ -117,7 +119,7 @@ workflow {
     .collect()
     .set { collected_sequences }
 
-    WRITERESULTS(collected_sequences, collected_outputs, formats_channel, output_path)
+    WRITE_RESULTS(collected_sequences, collected_outputs, formats_channel, output_path)
 }
 
 

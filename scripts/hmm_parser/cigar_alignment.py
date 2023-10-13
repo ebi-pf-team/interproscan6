@@ -1,6 +1,3 @@
-import re
-
-
 MATCH_CHAR = 'M'
 INSERT_CHAR = 'I'
 DELETE_CHAR = 'D'
@@ -40,20 +37,8 @@ def encode(cigar_alignment: str) -> str:
     return encoded_alignment
 
 
-def decode(sequence: str, encoded_alignment: str) -> str:
-    decoded_alignment = ""
-    matches = re.findall(r'(\d+)([MID])', encoded_alignment)
-
-    for count, operation in matches:
-        count = int(count)
-        if operation == MATCH_CHAR:
-            decoded_alignment += sequence[:count]
-            sequence = sequence[count:]
-        elif operation == INSERT_CHAR:
-            decoded_alignment += sequence[:count].lower()
-        elif operation == DELETE_CHAR:
-            decoded_alignment += DELETE_SYMBOL * count
-        else:
-            raise ValueError(f"Invalid CIGAR operation: {operation}")
-
-    return decoded_alignment
+if __name__ == '__main__':
+    seq = "QEFHRKPQPPPKDGNFGAD"
+    hmmer_align = "QEFHRK-----KDgnfGAD"
+    cigar = cigar_alignment_parser(hmmer_align)
+    cigar_encoded = encode(cigar)

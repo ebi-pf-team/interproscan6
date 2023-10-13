@@ -1,4 +1,4 @@
-process MATCHLOOKUP {
+process MATCH_LOOKUP {
     input:
     val hash_seq
     val appl

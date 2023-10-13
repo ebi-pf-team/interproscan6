@@ -6,11 +6,12 @@ from datetime import datetime
 import xml.etree.ElementTree as ET
 
 
-def tsv_output(seq_matches: dict, output_path: str):
+def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
     tsv_output = os.path.join(output_path + '.tsv')
     with open(tsv_output, 'w') as tsv_file:
         current_date = datetime.now().strftime('%d-%m-%Y')
         seq_info_index = 4
+        cigar_alignment = ""
         for seq_id, match in seq_matches.items():
             seq_len = match[-1]
             md5 = match[-2]
@@ -26,7 +27,7 @@ def tsv_output(seq_matches: dict, output_path: str):
                     ali_from = domain["ali_from"]
                     ali_to = domain["ali_to"]
                     i_evalue = domain["iEvalue"]
-                tsv_file.write(f"{seq_id}\t{md5}\t{seq_len}\t{acc}\t{signature_desc}\t{ali_from}\t{ali_to}\t{i_evalue}\t{current_date}\t{interpro_acc}\n")
+                tsv_file.write(f"{seq_id}\t{md5}\t{seq_len}\t{acc}\t{signature_desc}\t{ali_from}\t{ali_to}\t{i_evalue}\t{current_date}\t{interpro_acc}\t{cigar_alignment}\n")
 
 
 def json_output(seq_matches: dict, output_path: str):
@@ -62,7 +63,9 @@ def write_results(matches_path: str, sequences_path: str, output_format: str, ou
     seq_matches = {key: all_sequences[key] + all_matches[key] for key in all_sequences}
 
     if "TSV" in output_format:
-        tsv_output(seq_matches, output_path)
+        tsv_output(seq_matches, output_path, False)
+    if "TSV-PRO" in output_format:
+        tsv_output(seq_matches, output_path, True)
     if "JSON" in output_format:
         json_output(seq_matches, output_path)
     # if "XML" in output_format:
