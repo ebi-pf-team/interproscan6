@@ -13,8 +13,8 @@ workflow SEQUENCE_ANALYSIS {
     .set{hmmer_params}
 
     HMMER_RUNNER(hmmer_params)
-    PARSER(HMMER_RUNNER.out, tsv_pro)
+    HMMER_PARSER(HMMER_RUNNER.out, tsv_pro)
 
     emit:
-      PARSER.out
+      HMMER_PARSER.out
 }

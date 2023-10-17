@@ -3,7 +3,6 @@ import argparse
 import json
 import members_parser.members_regex as members_regex
 
-COMMENT_LINE = "#"
 END_OF_OUTPUT_FILE = "[ok]"
 END_OF_RECORD = "//"
 DOMAIN_SECTION_START = ">> "
@@ -11,34 +10,34 @@ START_OF_DOMAIN_ALIGNMENT_SECTION = "Alignments for each domain"
 DOMAIN_ALIGNMENT_SECTION_START = "=="
 
 DOMAIN_SECTION_START_PATTERN = re.compile(r"^>>\s+(\S+).*$")
-DOMAIN_ALIGNMENT_LINE_PATTERN = re.compile("^\\s+==\\s+domain\\s+(\\d+)\\s+.*$")
-ALIGNMENT_SEQUENCE_PATTERN = re.compile("^\\s+(\\w+)\\s+(\\S+)\\s+([-a-zA-Z]+)\\s+(\\S+)\\s*$")
-MODEL_ACCESSION_LINE_PATTERN = re.compile("^[^:]*:\\s+(\\w+)\\s+\\[M=(\\d+)\\].*$")
+DOMAIN_ALIGNMENT_LINE_PATTERN = re.compile("^\s+==\s+domain\s+(\d+)\s+.*$")
+ALIGNMENT_SEQUENCE_PATTERN = re.compile("^\s+(\w+)\s+(\S+)\s+([-a-zA-Z]+)\s+(\S+)\s*$")
+# MODEL_ACCESSION_LINE_PATTERN = re.compile("^[^:]*:\\s+(\\w+)\\s+\\[M=(\\d+)\\].*$")
 
 
 def parse(out_file):
-    # TODO: this parse is based on i5 parser, maybe it can be simplified (similar to domtbl parser)
-    search_record = {}
+    search_record = []
+    current_sequence = None
     current_domain = None
-    domains = {}
-    hmmer3ParserSupport = []
+    domains = []
+    hmmer3ParserSupport = {}
     stage = 'LOOKING_FOR_METHOD_ACCESSION'
     appl = out_file.split("_")[1].split(".")[0]
     member_accession = members_regex.get_accession_regex(appl)
 
     with open(out_file, "r") as f:
         for line in f.readlines():
-            if line.startswith(COMMENT_LINE):
-                pass
-            elif line.startswith(END_OF_OUTPUT_FILE):
+            if line.startswith(END_OF_OUTPUT_FILE):
                 break
             else:
                 if stage == 'LOOKING_FOR_DOMAIN_DATA_LINE' and line.startswith(DOMAIN_SECTION_START):
                     stage = 'LOOKING_FOR_DOMAIN_SECTION'
                 if line.startswith(END_OF_RECORD):
-                    if search_record:
-                        hmmer3ParserSupport.append(search_record)
-                    search_record = {}
+                    sequence_match["accession"] = model_id
+                    sequence_match["domains"] = domains
+                    search_record.append(sequence_match)
+                    hmmer3ParserSupport[current_sequence] = search_record
+                    search_record = []
                     stage = "LOOKING_FOR_METHOD_ACCESSION"
                 else:
                     if stage == 'LOOKING_FOR_METHOD_ACCESSION':
@@ -47,42 +46,40 @@ def parse(out_file):
                             model_ident_pattern = member_accession.match(line)
                             if model_ident_pattern:
                                 model_id = model_ident_pattern.group(1)
-                                search_record["signature_acc"] = model_id
                     elif stage == 'LOOKING_FOR_SEQUENCE_MATCHES':
                         if line.strip() == "":
-                            if search_record:
-                                stage = 'LOOKING_FOR_DOMAIN_SECTION'
-                            else:
-                                stage = 'FINISHED_SEARCHING_RECORD'
-                            current_domain = None
+                            stage = 'LOOKING_FOR_DOMAIN_SECTION'
                         else:
                             sequence_match = get_sequence_match(line)
                             if sequence_match:
-                                current_sequence = sequence_match["sequenceIdentifier"]
-                                try:
-                                    search_record[current_sequence].append(sequence_match)
-                                except:
-                                    search_record[current_sequence] = [sequence_match]
+                                current_sequence = sequence_match["sequence_identifier"]
                     elif stage == 'LOOKING_FOR_DOMAIN_SECTION':
                         if line.startswith(DOMAIN_SECTION_START):
-                            domains = {}
-                            match = DOMAIN_SECTION_START_PATTERN.match(line)
-                            if match:
-                                current_domain = match.group(1)
+                            domain_section_header_matcher = DOMAIN_SECTION_START_PATTERN.match(line)
+                            if domain_section_header_matcher:
+                                domains = []
+                                current_sequence_identifier = domain_section_header_matcher.group(1)
                             stage = 'LOOKING_FOR_DOMAIN_DATA_LINE'
+                        # if is_tsv_pro:
+                        if line.strip().startswith(DOMAIN_ALIGNMENT_SECTION_START):
+                            domain_alignment_matcher = DOMAIN_ALIGNMENT_LINE_PATTERN.match(line)
+                            if domain_alignment_matcher:
+                                align_seq = []
+                                domain_number = domain_alignment_matcher.group(1)
+                                current_domain = domain_number  # modifiquei aqui
+                        if current_domain and current_sequence:
+                            alignment_sequence_pattern = ALIGNMENT_SEQUENCE_PATTERN.match(line)
+                            if alignment_sequence_pattern and alignment_sequence_pattern.group(1) == current_sequence:
+                                align_seq.append(alignment_sequence_pattern.group(3))
+                                domain_match["alignment"] = ("".join(align_seq))
+
                     elif stage == 'LOOKING_FOR_DOMAIN_DATA_LINE':
-                        if line == START_OF_DOMAIN_ALIGNMENT_SECTION:
+                        if START_OF_DOMAIN_ALIGNMENT_SECTION in line:
                             stage = 'LOOKING_FOR_DOMAIN_SECTION'
                         else:
                             domain_match = get_domain_match(line)
-                            current_domain = match.group(1)
-
-                        if domain_match:
-                            try:
-                                domains[current_domain].append(domain_match)
-                            except:
-                                domains[current_domain] = [domain_match]
-                        search_record["domain_match"] = domains
+                            if domain_match:
+                                domains.append(domain_match)
     return hmmer3ParserSupport
 
 
@@ -96,13 +93,13 @@ def get_domain_match(domain_line):
         domain_match["bias"] = match.group(3)
         domain_match["cEvalue"] = match.group(4)
         domain_match["iEvalue"] = match.group(5)
-        domain_match["hmmfrom"] = match.group(6)
-        domain_match["hmmto"] = match.group(7)
-        domain_match["hmmBounds"] = match.group(8)
-        domain_match["aliFrom"] = match.group(9)
-        domain_match["aliTo"] = match.group(10)
-        domain_match["envFrom"] = match.group(11)
-        domain_match["envTo"] = match.group(12)
+        domain_match["hmm_from"] = match.group(6)
+        domain_match["hmm_to"] = match.group(7)
+        domain_match["hmm_bounds"] = match.group(8)
+        domain_match["ali_from"] = match.group(9)
+        domain_match["ali_to"] = match.group(10)
+        domain_match["env_from"] = match.group(11)
+        domain_match["env_to"] = match.group(12)
         domain_match["acc"] = match.group(13)
     return domain_match
 
@@ -112,22 +109,23 @@ def get_sequence_match(sequence_line):
     SEQUENCE_LINE_PATTERN = re.compile("^\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\d+\\s+(\\S+).*$")
     match = SEQUENCE_LINE_PATTERN.match(sequence_line)
     if match:
-        sequence_match["eValue"] = match.group(1)
+        sequence_match["e_value"] = match.group(1)
         sequence_match["score"] = match.group(2)
         sequence_match["bias"] = match.group(3)
-        sequence_match["sequenceIdentifier"] = match.group(4)
+        sequence_match["sequence_identifier"] = match.group(4)
     return sequence_match
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="hmmer out parser"
-    )
-    parser.add_argument(
-        "-out", "--preproc_out", type=str, help="out file result of hmmer preproc")
-    args = parser.parse_args()
-
-    parse_result = parse(args.preproc_domtbl)
+    # parser = argparse.ArgumentParser(
+    #     description="hmmer out parser"
+    # )
+    # parser.add_argument(
+    #     "-hmmer_file", "--hmmer_file", type=str, help="out file result of hmmer preproc")
+    # args = parser.parse_args()
+    #
+    # parse_result = parse(args.hmmer_file)
+    parse_result = parse("/Users/lcf/PycharmProjects/interproscan6/work/64/b68848f49495bf141bec4fd93e2122/hmmer_ncbifam.hmm.out")
     print(json.dumps(parse_result, indent=2))
 
 

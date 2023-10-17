@@ -60,7 +60,7 @@ def write_results(matches_path: str, sequences_path: str, output_format: str, ou
         for line in seq_data:
             sequence = json.loads(line)
             all_sequences.update(sequence)
-    seq_matches = {key: all_sequences[key] + all_matches[key] for key in all_sequences}
+    seq_matches = {key: all_sequences[key] + all_matches[key] for key in all_sequences if key != 'null'}
 
     if "TSV" in output_format:
         tsv_output(seq_matches, output_path, False)

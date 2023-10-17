@@ -67,10 +67,10 @@ def main():
     )
 
     parser.add_argument(
-        "-domtbl", "--preproc_domtbl", type=str, help="dtbl file result of hmmer preproc")
+        "-hmmer_file", "--hmmer_file", type=str, help="dtbl file result of hmmer preproc")
     args = parser.parse_args()
 
-    parse_result = parse(args.preproc_domtbl)
+    parse_result = parse(args.hmmer_file)
     print(json.dumps(parse_result, indent=2))
 
 
