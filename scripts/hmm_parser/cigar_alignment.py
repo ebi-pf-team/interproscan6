@@ -35,10 +35,3 @@ def encode(cigar_alignment: str) -> str:
     encoded_alignment += str(count) + prev_char
 
     return encoded_alignment
-
-
-if __name__ == '__main__':
-    seq = "QEFHRKPQPPPKDGNFGAD"
-    hmmer_align = "QEFHRK-----KDgnfGAD"
-    cigar = cigar_alignment_parser(hmmer_align)
-    cigar_encoded = encode(cigar)
