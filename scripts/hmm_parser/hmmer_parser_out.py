@@ -23,6 +23,7 @@ def parse(out_file):
     current_sequence = None
     domain_number = None
     domains = []
+    domain_match = {}
     hmmer_parser_support = {}
     stage = 'LOOKING_FOR_METHOD_ACCESSION'
     appl = out_file.split("_")[1].split(".")[0]
@@ -85,12 +86,11 @@ def parse(out_file):
                         else:
                             match = DOMAIN_LINE_PATTERN.match(line)
                             if match:
-                                domain_match = get_domain_match(match)
+                                domain_match = get_domain_match(match, domain_match)
     return hmmer_parser_support
 
 
-def get_domain_match(match):
-    domain_match = {}
+def get_domain_match(match, domain_match):
     domain_match["score"] = match.group(2)
     domain_match["bias"] = match.group(3)
     domain_match["cEvalue"] = match.group(4)
