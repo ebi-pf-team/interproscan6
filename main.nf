@@ -42,6 +42,7 @@ include { HASH_SEQUENCE } from "$projectDir/modules/hash_sequence/main"
 include { MATCH_LOOKUP } from "$projectDir/modules/match_lookup/main"
 include { XREFS } from "$projectDir/modules/xrefs/main"
 include { WRITE_RESULTS } from "$projectDir/modules/write_results/main"
+include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
 include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
 
 
@@ -88,9 +89,9 @@ workflow {
     lookup_to_scan = null
     matches_lookup = []
     if (!input_yaml.disable_precalc) {
-        MATCH_LOOKUP(HASH_SEQUENCE.out, applications)
-        matches_lookup = MATCH_LOOKUP.out.map { it.first() }
-        lookup_to_scan = MATCH_LOOKUP.out.map { it.last() }
+        SEQUENCE_PRECALC(HASH_SEQUENCE.out, applications)
+        matches_lookup = SEQUENCE_PRECALC.out.map { it.first() }
+        lookup_to_scan = SEQUENCE_PRECALC.out.map { it.last() }
     }
 
     if (input_yaml.disable_precalc || lookup_to_scan) {

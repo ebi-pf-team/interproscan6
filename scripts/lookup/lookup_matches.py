@@ -5,25 +5,9 @@ from datetime import datetime
 
 import requests
 
-URL_PRECALC_MATCHLOOKUP = "https://www.ebi.ac.uk/interpro/match-lookup/matches"
-URL_IS_PRECALC = "https://www.ebi.ac.uk/interpro/match-lookup/isPrecalculated"
 
-
-def check_precalc(md5: list) -> list:
-    all_matches = []
-    for i in range(0, len(md5), 4):
-        sequences_md5 = ', '.join(md5[i:i + 4])
-        checkout = requests.get(f"{URL_IS_PRECALC}?md5={sequences_md5}")
-        is_precalc = checkout.text
-        if is_precalc:
-            match_result = match_lookup(is_precalc)
-            all_matches.append(match_result)
-    return all_matches
-
-
-def match_lookup(sequences_md5: str) -> str:
-    sequences_input = ('"' + ', '.join(sequences_md5.splitlines()) + '"')
-    matches = requests.get(f"{URL_PRECALC_MATCHLOOKUP}?md5={sequences_input}")
+def match_lookup(sequences_md5: list, url: str) -> str:
+    matches = requests.get(f"{url}?md5={sequences_md5}")
     return matches.text
 
 
@@ -71,27 +55,22 @@ def main():
         description="Request to precalculated match lookup"
     )
     parser.add_argument(
-        "-seq", "--sequences", type=str, help="sequences hash parsed"
+        "-checked", "--checked_md5", nargs="*", help="list with sequences md5 with checked lookup matches"
     )
     parser.add_argument("-appl", "--applications", nargs="*", help="list of analysis")
+    parser.add_argument("-url", "--url", type=str, help="url to get sequences match lookup")
     args = parser.parse_args()
 
     applications = args.applications
-    sequences = args.sequences
-    not_precalc = []
-    json_output = []
-    md5 = []
-    for seq_id, seq_info in sequences.items():
-        md5.append(seq_info[-2])
-    md5_upper = [item.upper() for item in md5]
-    matches = check_precalc(md5_upper)
-    if matches:
-        match_parsed = parse_match(matches)
-        match_filtered = filter_analysis(match_parsed, applications)
-        json_output = json.dumps(match_filtered)
-    else:
-        not_precalc.append(sequences)
-    return json_output, not_precalc
+    checked_seq_md5 = args.checked_md5
+    url = args.url
+
+    match_results = match_lookup(checked_seq_md5, url)
+    match_parsed = parse_match(match_results)
+    match_filtered = filter_analysis(match_parsed, applications)
+    json_output = json.dumps(match_filtered)
+
+    return json_output
 
 
 if __name__ == "__main__":
