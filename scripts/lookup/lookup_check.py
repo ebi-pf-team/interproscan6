@@ -1,20 +1,14 @@
 import argparse
-
+import json
 import requests
 
 
-def check_precalc(md5: list, url: str) -> tuple[list, list]:
-    precalc = []
-    no_precalc = []
-    for i in range(0, len(md5), 4):
-        sequences_md5 = ', '.join(md5[i:i + 4])
-        checkout = requests.get(f"{url}?md5={sequences_md5}")
-        is_precalc = checkout.text
-        if is_precalc:
-            precalc.append(md5)
-        else:
-            no_precalc.append(md5)
-    return precalc, no_precalc
+def check_precalc(md5: list, url: str) -> list:
+    sequences_md5 = ', '.join(md5)
+    checkout = requests.get(f"{url}?md5={sequences_md5}")
+    is_precalc = checkout.text
+    precalc = is_precalc.strip().split("\n")
+    return precalc
 
 
 def main():
@@ -30,7 +24,10 @@ def main():
     sequences = args.sequences
     url = args.url
     md5 = []
-    for seq_id, seq_info in sequences.items():
+    with open(sequences, 'r') as seq_data:
+        for line in seq_data:
+            sequence = json.loads(line)
+    for seq_id, seq_info in sequence.items():
         md5.append(seq_info[-2])
     md5_upper = [item.upper() for item in md5]
     results = check_precalc(md5_upper, url)

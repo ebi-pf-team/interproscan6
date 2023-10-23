@@ -39,7 +39,6 @@ if (params.help) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 include { HASH_SEQUENCE } from "$projectDir/modules/hash_sequence/main"
-include { MATCH_LOOKUP } from "$projectDir/modules/match_lookup/main"
 include { XREFS } from "$projectDir/modules/xrefs/main"
 include { WRITE_RESULTS } from "$projectDir/modules/write_results/main"
 include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
@@ -109,9 +108,6 @@ workflow {
     // I need to improve matches_lookup output and join it with MAIN_SCAN.out before XREFS!!
     XREFS(SEQUENCE_ANALYSIS.out, entries_path, goterms_path, pathways_path)
 
-    Channel.fromList(input_yaml.formats)
-    .set { formats_channel }
-
     XREFS.out
     .collect()
     .set { collected_outputs }
@@ -119,6 +115,9 @@ workflow {
     HASH_SEQUENCE.out
     .collect()
     .set { collected_sequences }
+
+    Channel.fromList(input_yaml.formats)
+    .set { formats_channel }
 
     WRITE_RESULTS(collected_sequences, collected_outputs, formats_channel, output_path)
 }
