@@ -38,9 +38,9 @@ if (params.help) {
     IMPORT MODULES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { HASH_SEQUENCE } from "$projectDir/modules/hash_sequence/main"
-include { XREFS } from "$projectDir/modules/xrefs/main"
-include { WRITE_RESULTS } from "$projectDir/modules/write_results/main"
+include { PARSE_SEQUENCE } from "$projectDir/modules/local/parse_sequence/main"
+include { XREFS } from "$projectDir/modules/local/xrefs/main"
+include { WRITE_RESULTS } from "$projectDir/modules/local/write_results/main"
 include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
 include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
 
@@ -83,20 +83,20 @@ workflow {
 
     check_tsv_pro = input_yaml.formats.contains("TSV-PRO")
 
-    HASH_SEQUENCE(fasta_channel)
+    PARSE_SEQUENCE(fasta_channel)
 
     lookup_to_scan = null
-    matches_lookup = []
     if (!input_yaml.disable_precalc) {
-        SEQUENCE_PRECALC(HASH_SEQUENCE.out, applications)
-        matches_lookup = SEQUENCE_PRECALC.out.map { it.first() }
-        lookup_to_scan = SEQUENCE_PRECALC.out.map { it.last() }
+        SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications)
+        parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
+        check_matches_info = SEQUENCE_PRECALC.out.check_matches_info
+        sequences_to_analyse = PARSE_SEQUENCE(check_matches_info, hash_sequence)
     }
 
-    if (input_yaml.disable_precalc || lookup_to_scan) {
+    if (input_yaml.disable_precalc || sequences_to_analyse) {
         applications_channel = Channel.fromList(applications)
-        if (lookup_to_scan) {
-            fasta_application = lookup_to_scan.combine(applications_channel)
+        if (sequences_to_analyse) {
+            fasta_application = sequences_to_analyse.combine(applications_channel)
         }
         else {
             fasta_application = fasta_channel
@@ -105,6 +105,7 @@ workflow {
         SEQUENCE_ANALYSIS(fasta_application, check_tsv_pro)
     }
 
+
     // I need to improve matches_lookup output and join it with MAIN_SCAN.out before XREFS!!
     XREFS(SEQUENCE_ANALYSIS.out, entries_path, goterms_path, pathways_path)
 
@@ -112,7 +113,7 @@ workflow {
     .collect()
     .set { collected_outputs }
 
-    HASH_SEQUENCE.out
+    PARSE_SEQUENCE.out
     .collect()
     .set { collected_sequences }
 

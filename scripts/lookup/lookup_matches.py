@@ -11,29 +11,29 @@ def match_lookup(sequences_md5: list, url: str) -> str:
     return matches.text
 
 
-def parse_match(matches: list) -> list[dict]:
+def parse_match(matches: str) -> list[dict]:
     members_info = []
-    for match_info in matches:
-        tree = ET.fromstring(match_info)
+    # for match_info in matches:
+    tree = ET.fromstring(matches)
 
-        for match in tree.findall(".//match"):
-            protein_md5 = match.find("proteinMD5").text
-            for hit in match.findall("hit"):
-                hit_data = hit.text.split(",")
-                info = {
-                    "seq_md5": protein_md5,
-                    "analysis": hit_data[0],
-                    "signature_acc": hit_data[2],
-                    "signature_desc": "",
-                    "start": hit_data[4],
-                    "stop": hit_data[5],
-                    "score": hit_data[16],
-                    "date": datetime.today().strftime("%d-%m-%Y"),
-                    "match_status": "T",
-                    "interpro_annotations_acc": "",
-                    "interpro_annotations_desc": "",
-                }
-                members_info.append(info)
+    for match in tree.findall(".//match"):
+        protein_md5 = match.find("proteinMD5").text
+        for hit in match.findall("hit"):
+            hit_data = hit.text.split(",")
+            info = {
+                "seq_md5": protein_md5,
+                "analysis": hit_data[0],
+                "signature_acc": hit_data[2],
+                "signature_desc": "",
+                "start": hit_data[4],
+                "stop": hit_data[5],
+                "score": hit_data[16],
+                "date": datetime.today().strftime("%d-%m-%Y"),
+                "match_status": "T",
+                "interpro_annotations_acc": "",
+                "interpro_annotations_desc": "",
+            }
+            members_info.append(info)
 
     return members_info
 
@@ -61,16 +61,16 @@ def main():
     parser.add_argument("-url", "--url", type=str, help="url to get sequences match lookup")
     args = parser.parse_args()
 
-    applications = args.applications
     checked_seq_md5 = args.checked_md5
+    applications = args.applications
     url = args.url
 
-    match_results = match_lookup(checked_seq_md5, url)
+    matches = checked_seq_md5["matches"]
+    match_results = match_lookup(matches, url)
     match_parsed = parse_match(match_results)
     match_filtered = filter_analysis(match_parsed, applications)
     json_output = json.dumps(match_filtered)
-
-    return json_output
+    print(json_output)
 
 
 if __name__ == "__main__":

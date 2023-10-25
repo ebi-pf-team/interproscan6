@@ -23,15 +23,16 @@ def main():
 
     sequences = args.sequences
     url = args.url
-    md5 = []
+    seq_md5 = []
     with open(sequences, 'r') as seq_data:
         for line in seq_data:
             sequence = json.loads(line)
     for seq_id, seq_info in sequence.items():
-        md5.append(seq_info[-2])
-    md5_upper = [item.upper() for item in md5]
-    results = check_precalc(md5_upper, url)
-    return results
+        seq_md5.append(seq_info[-2])
+    md5_checked_matches = check_precalc(seq_md5, url)
+    no_matches_md5 = set(seq_md5) - set(md5_checked_matches)
+    check_result = {"matches": md5_checked_matches, "no_matches": no_matches_md5}
+    print(check_result)
 
 
 if __name__ == "__main__":

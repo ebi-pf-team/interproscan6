@@ -1,15 +1,16 @@
-include { LOOKUP_CHECK } from "$projectDir/modules/lookup_check/main"
-include { LOOKUP_MATCHES } from "$projectDir/modules/lookup_matches/main"
+include { LOOKUP_CHECK } from "$projectDir/modules/local/lookup_check/main"
+include { LOOKUP_MATCHES } from "$projectDir/modules/local/lookup_matches/main"
 
 workflow SEQUENCE_PRECALC {
     take:
-    fasta_application
+    hash_sequence
+    applications
 
     main:
-    LOOKUP_CHECK(fasta_application.map { it.first() })
-    LOOKUP_MATCHES(fasta_application.map { it.last() }, LOOKUP_CHECK.out.map { it.first() })
+    LOOKUP_CHECK(hash_sequence)
+    LOOKUP_MATCHES(LOOKUP_CHECK.out, applications)
 
     emit:
-      LOOKUP_CHECK.out.map { it.last() }
-      LOOKUP_MATCHES.out
+    check_matches_info = PARSE_SEQUENCE.out
+    parsed_matches = LOOKUP_MATCHES.out
 }

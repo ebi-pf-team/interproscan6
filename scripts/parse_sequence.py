@@ -24,11 +24,28 @@ def parse(sequences: dict):
         acc = key.split(" ", 1)[0]
         sequence_info.append(key)
         sequence_info.append(sequence)
-        sequence_info.append(hashlib.md5(sequence.encode()).hexdigest())
+        sequence_info.append(hashlib.md5(sequence.encode()).hexdigest().upper())
         sequence_info.append(len(sequence))
 
         results[acc] = sequence_info
     return results
+
+
+def reverse_parse(md5: dict, seq_info: str):
+    with open(seq_info, 'r') as seq_data:
+        for line in seq_data:
+            sequence = json.loads(line)
+
+    no_matches_md5 = md5["no_matches"]
+
+    md52seqinfo = {}
+    for seq_id, seq_info in sequence.items():
+        md52seqinfo[seq_info[-2]] = f"{seq_info[0]} {seq_info[1]}"
+
+    seq_fasta = ""
+    for md5 in no_matches_md5:
+        seq_fasta += f"{md52seqinfo[md5]}\n"
+    return seq_fasta
 
 
 def main():
@@ -36,12 +53,18 @@ def main():
         description="sequences parser"
     )
     parser.add_argument(
-        "-seq", "--sequences", type=str, help="fasta file with sequences"
+        "-file", "--input_file", type=str, help="file to process parse/reverse parse"
+    )
+    parser.add_argument(
+        "-reverse", "--reverse", type=bool, help="flag to normal or reverse parse process"
     )
     args = parser.parse_args()
 
-    sequences = get_sequences(args.sequences)
-    sequence_info = parse(sequences)
+    if args.reverse:
+        sequence_info = reverse_parse(args.input_file)
+    else:
+        sequences = get_sequences(args.input_file)
+        sequence_info = parse(sequences)
     print(json.dumps(sequence_info))
 
 
