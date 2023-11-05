@@ -39,6 +39,7 @@ if (params.help) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 include { PARSE_SEQUENCE } from "$projectDir/modules/local/parse_sequence/main"
+include { REVERSE_PARSE_SEQUENCE } from "$projectDir/modules/local/reverse_parse_sequence/main"
 include { XREFS } from "$projectDir/modules/local/xrefs/main"
 include { WRITE_RESULTS } from "$projectDir/modules/local/write_results/main"
 include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
@@ -60,11 +61,6 @@ workflow {
     entries_path = params.xref.entries
     output_path = input_yaml.outfile
 
-    Channel.fromPath( input_yaml.input )
-    .unique()
-    .splitFasta( by: params.batchsize, file: true )
-    .set { fasta_channel }
-
     goterms_path = ""
     pathways_path = ""
     if (input_yaml.goterms) {
@@ -83,14 +79,19 @@ workflow {
 
     check_tsv_pro = input_yaml.formats.contains("TSV-PRO")
 
+    Channel.fromPath( input_yaml.input )
+    .unique()
+    .splitFasta( by: params.batchsize, file: true )
+    .set { fasta_channel }
+
     PARSE_SEQUENCE(fasta_channel)
 
     lookup_to_scan = null
     if (!input_yaml.disable_precalc) {
         SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications)
         parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
-        check_matches_info = SEQUENCE_PRECALC.out.check_matches_info
-        sequences_to_analyse = PARSE_SEQUENCE(check_matches_info, hash_sequence)
+        sequences_to_analyse = REVERSE_PARSE_SEQUENCE(SEQUENCE_PRECALC.out.check_matches_info,
+                                                      SEQUENCE_PRECALC.out.seq_info)
     }
 
     if (input_yaml.disable_precalc || sequences_to_analyse) {

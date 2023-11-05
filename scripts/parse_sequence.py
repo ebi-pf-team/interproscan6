@@ -1,6 +1,7 @@
 import argparse
 import hashlib
 import json
+import ast
 
 
 def get_sequences(fasta_file: str) -> dict:
@@ -31,20 +32,23 @@ def parse(sequences: dict):
     return results
 
 
-def reverse_parse(md5: dict, seq_info: str):
+def reverse_parse(md5: str, seq_info: str):
     with open(seq_info, 'r') as seq_data:
         for line in seq_data:
             sequence = json.loads(line)
 
-    no_matches_md5 = md5["no_matches"]
+    with open(md5, 'r') as md5_data:
+        md5_info = md5_data.read()
+    checked_seq_md5 = ast.literal_eval(md5_info)
+    md5_no_matches = checked_seq_md5['no_matches']
 
     md52seqinfo = {}
     for seq_id, seq_info in sequence.items():
         md52seqinfo[seq_info[-2]] = f"{seq_info[0]} {seq_info[1]}"
 
     seq_fasta = ""
-    for md5 in no_matches_md5:
-        seq_fasta += f"{md52seqinfo[md5]}\n"
+    for hash_key in md5_no_matches:
+        seq_fasta += f"{md52seqinfo[hash_key]}\n"
     return seq_fasta
 
 
@@ -53,18 +57,23 @@ def main():
         description="sequences parser"
     )
     parser.add_argument(
-        "-file", "--input_file", type=str, help="file to process parse/reverse parse"
+        "-file", "--input_file", type=str, help="lookup checked md5 dict"
     )
     parser.add_argument(
-        "-reverse", "--reverse", type=bool, help="flag to normal or reverse parse process"
+        "-seq_info", "--seq_info", type=str, required=False, default="", help="sequences parsed"
     )
     args = parser.parse_args()
 
-    if args.reverse:
-        sequence_info = reverse_parse(args.input_file)
+    print(f"args input file: {args.input_file}")
+    print(f"args seq info: {args.seq_info}")
+    if args.seq_info:
+        sequence_info = reverse_parse(args.input_file, args.seq_info)
+        print(f"sequence info do reverse: {sequence_info}")
     else:
         sequences = get_sequences(args.input_file)
         sequence_info = parse(sequences)
+        print(f"sequences do get sequences: {sequences}")
+        print(f"sequence info do parse normal: {sequence_info}")
     print(json.dumps(sequence_info))
 
 

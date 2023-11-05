@@ -1,13 +1,12 @@
 process PARSE_SEQUENCE {
     input:
-    val input_file
-    val reverse
+    val fasta_file
 
     output:
     path "parsed_sequences"
 
     script:
     """
-    python3 $projectDir/scripts/parse_sequence.py -file ${input_file} -reverse ${reverse} > parsed_sequences
+    python3 $projectDir/scripts/parse_sequence.py -file ${fasta_file} > parsed_sequences
     """
 }
