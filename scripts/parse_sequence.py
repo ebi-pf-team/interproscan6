@@ -64,16 +64,11 @@ def main():
     )
     args = parser.parse_args()
 
-    print(f"args input file: {args.input_file}")
-    print(f"args seq info: {args.seq_info}")
     if args.seq_info:
         sequence_info = reverse_parse(args.input_file, args.seq_info)
-        print(f"sequence info do reverse: {sequence_info}")
     else:
         sequences = get_sequences(args.input_file)
         sequence_info = parse(sequences)
-        print(f"sequences do get sequences: {sequences}")
-        print(f"sequence info do parse normal: {sequence_info}")
     print(json.dumps(sequence_info))
 
 
