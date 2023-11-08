@@ -65,8 +65,7 @@ def main():
     args = parser.parse_args()
 
     if args.md5:
-        md5, seq_info = args.sequence_info
-        sequence_parsed = reverse_parse(md5, seq_info)
+        sequence_parsed = reverse_parse(args.md5, args.sequence_info)
     else:
         sequences = get_sequences(args.sequence_info)
         sequence_parsed = parse(sequences)

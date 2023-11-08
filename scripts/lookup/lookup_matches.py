@@ -36,9 +36,6 @@ def parse_match(matches: str) -> list[dict]:
                 "stop": hit_data[5],
                 "score": hit_data[16],
                 "date": datetime.today().strftime("%d-%m-%Y"),
-                "match_status": "T",
-                "interpro_annotations_acc": "",
-                "interpro_annotations_desc": "",
             }
             members_info.append(info)
 
@@ -64,13 +61,14 @@ def main():
     parser.add_argument(
         "-checked", "--checked_lookup", type=str, help="dict with md5 lookup matches checked"
     )
-    parser.add_argument("-appl", "--applications", nargs="*", help="list of analysis")
+    parser.add_argument("-appl", "--applications", type=str, help="list of analysis")
     parser.add_argument("-url", "--url", type=str, help="url to get sequences match lookup")
     args = parser.parse_args()
 
+    applications = args.applications[1: -1].split(', ')
     match_results = match_lookup(args.checked_lookup, args.url)
     match_parsed = parse_match(match_results)
-    match_filtered = filter_analysis(match_parsed, args.applications)
+    match_filtered = filter_analysis(match_parsed, applications)
     json_output = json.dumps(match_filtered)
     print(json_output)
 

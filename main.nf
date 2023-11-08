@@ -39,7 +39,6 @@ if (params.help) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 include { PARSE_SEQUENCE } from "$projectDir/modules/local/parse_sequence/main"
-include { REVERSE_PARSE_SEQUENCE } from "$projectDir/modules/local/reverse_parse_sequence/main"
 include { XREFS } from "$projectDir/modules/local/xrefs/main"
 include { WRITE_RESULTS } from "$projectDir/modules/local/write_results/main"
 include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
@@ -90,7 +89,7 @@ workflow {
     if (!input_yaml.disable_precalc) {
         SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications)
         parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
-//         sequences_to_analyse = REVERSE_PARSE_SEQUENCE(SEQUENCE_PRECALC.out.checked_info)
+        sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
     }
 
 //     if (input_yaml.disable_precalc || sequences_to_analyse) {

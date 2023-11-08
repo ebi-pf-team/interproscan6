@@ -8,6 +8,6 @@ process LOOKUP_MATCHES {
 
     script:
     """
-    python3 $projectDir/scripts/lookup/lookup_matches.py -checked ${checked_lookup} -appl ${appl} -url ${params.url_precalc}${params.matches} > parsed_match_lookup
+    python3 $projectDir/scripts/lookup/lookup_matches.py -checked ${checked_lookup} -appl '${appl}' -url ${params.url_precalc}${params.matches} > parsed_match_lookup
     """
 }
