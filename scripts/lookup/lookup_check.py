@@ -31,8 +31,8 @@ def main():
         seq_md5.append(seq_info[-2])
     md5_checked_matches = check_precalc(seq_md5, url)
     no_matches_md5 = set(seq_md5) - set(md5_checked_matches)
-    check_result = {"matches": md5_checked_matches, "no_matches": no_matches_md5}
-    print(check_result)
+    checked_result = {"matches": md5_checked_matches, "no_matches": no_matches_md5}
+    print(checked_result)
 
 
 if __name__ == "__main__":

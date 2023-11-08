@@ -90,38 +90,37 @@ workflow {
     if (!input_yaml.disable_precalc) {
         SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications)
         parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
-        sequences_to_analyse = REVERSE_PARSE_SEQUENCE(SEQUENCE_PRECALC.out.check_matches_info,
-                                                      SEQUENCE_PRECALC.out.seq_info)
+//         sequences_to_analyse = REVERSE_PARSE_SEQUENCE(SEQUENCE_PRECALC.out.checked_info)
     }
 
-    if (input_yaml.disable_precalc || sequences_to_analyse) {
-        applications_channel = Channel.fromList(applications)
-        if (sequences_to_analyse) {
-            fasta_application = sequences_to_analyse.combine(applications_channel)
-        }
-        else {
-            fasta_application = fasta_channel
-            .combine(applications_channel)
-        }
-        SEQUENCE_ANALYSIS(fasta_application, check_tsv_pro)
-    }
-
-
-    // I need to improve matches_lookup output and join it with MAIN_SCAN.out before XREFS!!
-    XREFS(SEQUENCE_ANALYSIS.out, entries_path, goterms_path, pathways_path)
-
-    XREFS.out
-    .collect()
-    .set { collected_outputs }
-
-    PARSE_SEQUENCE.out
-    .collect()
-    .set { collected_sequences }
-
-    Channel.fromList(input_yaml.formats)
-    .set { formats_channel }
-
-    WRITE_RESULTS(collected_sequences, collected_outputs, formats_channel, output_path)
+//     if (input_yaml.disable_precalc || sequences_to_analyse) {
+//         applications_channel = Channel.fromList(applications)
+//         if (sequences_to_analyse) {
+//             fasta_application = sequences_to_analyse.combine(applications_channel)
+//         }
+//         else {
+//             fasta_application = fasta_channel
+//             .combine(applications_channel)
+//         }
+//         SEQUENCE_ANALYSIS(fasta_application, check_tsv_pro)
+//     }
+//
+//
+//     // I need to improve matches_lookup output and join it with MAIN_SCAN.out before XREFS!!
+//     XREFS(SEQUENCE_ANALYSIS.out, entries_path, goterms_path, pathways_path)
+//
+//     XREFS.out
+//     .collect()
+//     .set { collected_outputs }
+//
+//     PARSE_SEQUENCE.out
+//     .collect()
+//     .set { collected_sequences }
+//
+//     Channel.fromList(input_yaml.formats)
+//     .set { formats_channel }
+//
+//     WRITE_RESULTS(collected_sequences, collected_outputs, formats_channel, output_path)
 }
 
 

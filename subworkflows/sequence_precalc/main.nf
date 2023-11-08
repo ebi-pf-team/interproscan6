@@ -11,7 +11,6 @@ workflow SEQUENCE_PRECALC {
     LOOKUP_MATCHES(LOOKUP_CHECK.out, applications)
 
     emit:
-    check_matches_info = LOOKUP_CHECK.out
+    checked_info = tuple(LOOKUP_CHECK.out, hash_sequence)
     parsed_matches = LOOKUP_MATCHES.out
-    seq_info = hash_sequence
 }

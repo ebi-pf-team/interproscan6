@@ -7,6 +7,6 @@ process PARSE_SEQUENCE {
 
     script:
     """
-    python3 $projectDir/scripts/parse_sequence.py -file ${fasta_file} > parsed_sequences
+    python3 $projectDir/scripts/parse_sequence.py -seq_info ${fasta_file} > parsed_sequences
     """
 }

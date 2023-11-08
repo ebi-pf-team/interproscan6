@@ -57,19 +57,20 @@ def main():
         description="sequences parser"
     )
     parser.add_argument(
-        "-file", "--input_file", type=str, help="lookup checked md5 dict"
+        "-seq_info", "--sequence_info", type=str, help="sequences to be parsed"
     )
     parser.add_argument(
-        "-seq_info", "--seq_info", type=str, required=False, default="", help="sequences parsed"
+        "-md5", "--md5",  type=str, required=False, help="md5 list to reverse parse"
     )
     args = parser.parse_args()
 
-    if args.seq_info:
-        sequence_info = reverse_parse(args.input_file, args.seq_info)
+    if args.md5:
+        md5, seq_info = args.sequence_info
+        sequence_parsed = reverse_parse(md5, seq_info)
     else:
-        sequences = get_sequences(args.input_file)
-        sequence_info = parse(sequences)
-    print(json.dumps(sequence_info))
+        sequences = get_sequences(args.sequence_info)
+        sequence_parsed = parse(sequences)
+    print(json.dumps(sequence_parsed))
 
 
 if __name__ == "__main__":

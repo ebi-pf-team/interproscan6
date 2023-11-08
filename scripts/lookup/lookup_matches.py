@@ -12,8 +12,9 @@ def match_lookup(sequences_md5: str, url: str) -> str:
         md5_info = md5_data.read()
     checked_seq_md5 = ast.literal_eval(md5_info)
     matches = checked_seq_md5["matches"]
+    url_input = ','.join(matches)
 
-    matches = requests.get(f"{url}?md5={matches}")
+    matches = requests.get(f"{url}?md5={url_input}")
     return matches.text
 
 
@@ -61,13 +62,13 @@ def main():
         description="Request to precalculated match lookup"
     )
     parser.add_argument(
-        "-checked", "--checked_md5", type=str, help="list with sequences md5 with checked lookup matches"
+        "-checked", "--checked_lookup", type=str, help="dict with md5 lookup matches checked"
     )
     parser.add_argument("-appl", "--applications", nargs="*", help="list of analysis")
     parser.add_argument("-url", "--url", type=str, help="url to get sequences match lookup")
     args = parser.parse_args()
 
-    match_results = match_lookup(args.checked_md5, args.url)
+    match_results = match_lookup(args.checked_lookup, args.url)
     match_parsed = parse_match(match_results)
     match_filtered = filter_analysis(match_parsed, args.applications)
     json_output = json.dumps(match_filtered)

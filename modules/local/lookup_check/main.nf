@@ -3,10 +3,10 @@ process LOOKUP_CHECK {
     val hash_seq
 
     output:
-    path checked_precalc_matches
+    path checked_md5
 
     script:
     """
-    python3 $projectDir/scripts/lookup/lookup_check.py -seq ${hash_seq} -url ${params.url_precalc}${params.check_precalc} > checked_precalc_matches
+    python3 $projectDir/scripts/lookup/lookup_check.py -seq ${hash_seq} -url ${params.url_precalc}${params.check_precalc} > checked_md5
     """
 }
