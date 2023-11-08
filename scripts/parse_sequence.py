@@ -1,7 +1,6 @@
 import argparse
 import hashlib
 import json
-import ast
 
 
 def get_sequences(fasta_file: str) -> dict:
@@ -32,43 +31,17 @@ def parse(sequences: dict):
     return results
 
 
-def reverse_parse(md5: str, seq_info: str):
-    with open(seq_info, 'r') as seq_data:
-        for line in seq_data:
-            sequence = json.loads(line)
-
-    with open(md5, 'r') as md5_data:
-        md5_info = md5_data.read()
-    checked_seq_md5 = ast.literal_eval(md5_info)
-    md5_no_matches = checked_seq_md5['no_matches']
-
-    md52seqinfo = {}
-    for seq_id, seq_info in sequence.items():
-        md52seqinfo[seq_info[-2]] = f"{seq_info[0]} {seq_info[1]}"
-
-    seq_fasta = ""
-    for hash_key in md5_no_matches:
-        seq_fasta += f"{md52seqinfo[hash_key]}\n"
-    return seq_fasta
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="sequences parser"
     )
     parser.add_argument(
-        "-seq_info", "--sequence_info", type=str, help="sequences to be parsed"
-    )
-    parser.add_argument(
-        "-md5", "--md5",  type=str, required=False, help="md5 list to reverse parse"
+        "-fasta", "--fasta_file", type=str, help="fasta sequences to be parsed"
     )
     args = parser.parse_args()
 
-    if args.md5:
-        sequence_parsed = reverse_parse(args.md5, args.sequence_info)
-    else:
-        sequences = get_sequences(args.sequence_info)
-        sequence_parsed = parse(sequences)
+    sequences = get_sequences(args.fasta_file)
+    sequence_parsed = parse(sequences)
     print(json.dumps(sequence_parsed))
 
 

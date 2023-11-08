@@ -92,19 +92,19 @@ workflow {
         sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
     }
 
-//     if (input_yaml.disable_precalc || sequences_to_analyse) {
-//         applications_channel = Channel.fromList(applications)
-//         if (sequences_to_analyse) {
-//             fasta_application = sequences_to_analyse.combine(applications_channel)
-//         }
-//         else {
-//             fasta_application = fasta_channel
-//             .combine(applications_channel)
-//         }
-//         SEQUENCE_ANALYSIS(fasta_application, check_tsv_pro)
-//     }
-//
-//
+    if (input_yaml.disable_precalc || sequences_to_analyse) {
+        applications_channel = Channel.fromList(applications)
+        if (sequences_to_analyse) {
+            fasta_application = sequences_to_analyse.combine(applications_channel)
+        }
+        else {
+            fasta_application = fasta_channel
+            .combine(applications_channel)
+        }
+        SEQUENCE_ANALYSIS(fasta_application, check_tsv_pro)
+    }
+
+
 //     // I need to improve matches_lookup output and join it with MAIN_SCAN.out before XREFS!!
 //     XREFS(SEQUENCE_ANALYSIS.out, entries_path, goterms_path, pathways_path)
 //
