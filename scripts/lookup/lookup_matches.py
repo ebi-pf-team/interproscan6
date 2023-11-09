@@ -2,44 +2,63 @@ import argparse
 import ast
 import json
 import xml.etree.ElementTree as ET
-from datetime import datetime
 
 import requests
 
 
-def match_lookup(sequences_md5: str, url: str) -> str:
-    with open(sequences_md5, 'r') as md5_data:
-        md5_info = md5_data.read()
-    checked_seq_md5 = ast.literal_eval(md5_info)
-    matches = checked_seq_md5["matches"]
-    url_input = ','.join(matches)
-
+def match_lookup(matches_checked: list, url: str) -> str:
+    url_input = ','.join(matches_checked)
     matches = requests.get(f"{url}?md5={url_input}")
     return matches.text
 
 
-def parse_match(matches: str) -> list[dict]:
-    members_info = []
-    # for match_info in matches:
+def parse_match(matches: str, member: str, md52seq_id: dict, match_parsed: dict) -> list:
+    member_matches = []
     tree = ET.fromstring(matches)
 
     for match in tree.findall(".//match"):
+        match_id = match.find("matchId").text
         protein_md5 = match.find("proteinMD5").text
-        for hit in match.findall("hit"):
-            hit_data = hit.text.split(",")
-            info = {
-                "seq_md5": protein_md5,
-                "analysis": hit_data[0],
-                "signature_acc": hit_data[2],
-                "signature_desc": "",
-                "start": hit_data[4],
-                "stop": hit_data[5],
-                "score": hit_data[16],
-                "date": datetime.today().strftime("%d-%m-%Y"),
-            }
-            members_info.append(info)
+        hits = []
 
-    return members_info
+        for hit in match.findall(f".//hit[.//{member}]"):
+            hit_data = hit.text.split(',')
+            domain = {
+                "version": hit_data[1],
+                "accession": hit_data[2],
+                "accession2": hit_data[3],
+                "ali_from": hit_data[4],
+                "ali_to": hit_data[5],
+                "aliwS": hit_data[6],
+                "score": hit_data[7],
+                "bias": hit_data[8],
+                "..": hit_data[9],
+                "hmm_from": hit_data[10],
+                "hmm_to": hit_data[11],
+                "qlen": hit_data[12],
+                "env_from": hit_data[13],
+                "env_to": hit_data[14],
+                "score_hit": hit_data[15],
+                "e_value": hit_data[16],
+                "cigar_alignment": hit_data[17],
+            }
+            hits.append(domain)
+
+        match_dict = {
+            "application": member,
+            "query_name": match_id,
+            "md5": protein_md5,
+            "domains": hits
+        }
+
+        member_matches.append(match_dict)
+        seq_id = md52seq_id[protein_md5]
+        try:
+            match_parsed[seq_id].append(member_matches)
+        except:
+            match_parsed[seq_id] = member_matches
+
+    return match_parsed
 
 
 def filter_analysis(members_info: list[dict], applications: list) -> list[dict]:
@@ -65,12 +84,24 @@ def main():
     parser.add_argument("-url", "--url", type=str, help="url to get sequences match lookup")
     args = parser.parse_args()
 
-    applications = args.applications[1: -1].split(', ')
-    match_results = match_lookup(args.checked_lookup, args.url)
-    match_parsed = parse_match(match_results)
-    match_filtered = filter_analysis(match_parsed, applications)
-    json_output = json.dumps(match_filtered)
-    print(json_output)
+    applications = list(map(lambda x: x.upper(), args.applications[1: -1].split(', ')))
+    match_parsed = {}
+
+    with open(args.checked_lookup, 'r') as md5_data:
+        checked_data = md5_data.read()
+    checked_info = ast.literal_eval(checked_data)
+    matches = checked_info["matches"]
+    seq_info = checked_info["sequences_info"]
+
+    md52seq_id = {}
+    for seq_id, match in seq_info.items():
+        md52seq_id[match[-2]] = seq_id
+
+    match_results = match_lookup(matches, args.url)
+    for member in applications:
+        match_parsed = parse_match(match_results, member, md52seq_id, match_parsed)
+
+    print(json.dumps(match_parsed))
 
 
 if __name__ == "__main__":

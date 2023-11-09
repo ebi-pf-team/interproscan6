@@ -10,11 +10,6 @@ process HMMER_RUNNER {
 
     script:
     """
-    if [ -s fasta ]; then
-        ${params.hmmsearch_bin} ${switches} -o hmmer_${hmm}.out --domtblout hmmer_${hmm}.dtbl ${hmm} ${fasta}
-    else
-        echo "" > hmmer_${hmm}.out
-        echo "" > hmmer_${hmm}.dtbl
-    fi
+    ${params.hmmsearch_bin} ${switches} -o hmmer_${hmm}.out --domtblout hmmer_${hmm}.dtbl ${hmm} ${fasta}
     """
 }
