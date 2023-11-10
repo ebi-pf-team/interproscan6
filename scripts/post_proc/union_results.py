@@ -6,13 +6,14 @@ def union_results(pre_calc: list, analysis: list):
     all_results = {}
     results = pre_calc + analysis
     for file_path in results:
-        with open(file_path, 'r') as file:
-            data = json.load(file)
-        for seq_id, match_info in data.items():
-            try:
-                all_results[seq_id].append(match_info)
-            except:
-                all_results[seq_id] = match_info
+        if file_path:
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+            for seq_id, match_info in data.items():
+                try:
+                    all_results[seq_id].append(match_info)
+                except:
+                    all_results[seq_id] = match_info
     return all_results
 
 
