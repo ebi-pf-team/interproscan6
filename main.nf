@@ -107,13 +107,23 @@ workflow {
         analysis_result = SEQUENCE_ANALYSIS(fasta_application, check_tsv_pro)
     }
 
-    parsed_matches
-    .collect()
-    .set { all_parsed_lookup }
+    if (parsed_matches) {
+        parsed_matches
+        .collect()
+        .set { all_parsed_lookup }
+    }
+    else {
+        all_parsed_lookup = []
+    }
 
-    analysis_result
-    .collect()
-    .set { all_parsed_analysis }
+    if (analysis_result) {
+        analysis_result
+        .collect()
+        .set { all_parsed_analysis }
+    }
+    else {
+        all_parsed_analysis = []
+    }
 
     UNION_RESULTS(all_parsed_lookup, all_parsed_analysis)
     XREFS(UNION_RESULTS.out, entries_path, goterms_path, pathways_path)
