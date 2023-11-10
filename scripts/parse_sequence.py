@@ -24,7 +24,7 @@ def parse(sequences: dict):
         acc = key.split(" ", 1)[0]
         sequence_info.append(key)
         sequence_info.append(sequence)
-        sequence_info.append(hashlib.md5(sequence.encode()).hexdigest())
+        sequence_info.append(hashlib.md5(sequence.encode()).hexdigest().upper())
         sequence_info.append(len(sequence))
 
         results[acc] = sequence_info
@@ -36,13 +36,13 @@ def main():
         description="sequences parser"
     )
     parser.add_argument(
-        "-seq", "--sequences", type=str, help="fasta file with sequences"
+        "-fasta", "--fasta_file", type=str, help="fasta sequences to be parsed"
     )
     args = parser.parse_args()
 
-    sequences = get_sequences(args.sequences)
-    sequence_info = parse(sequences)
-    print(json.dumps(sequence_info))
+    sequences = get_sequences(args.fasta_file)
+    sequence_parsed = parse(sequences)
+    print(json.dumps(sequence_parsed))
 
 
 if __name__ == "__main__":

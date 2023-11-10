@@ -38,9 +38,10 @@ if (params.help) {
     IMPORT MODULES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { HASH_SEQUENCE } from "$projectDir/modules/hash_sequence/main"
-include { XREFS } from "$projectDir/modules/xrefs/main"
-include { WRITE_RESULTS } from "$projectDir/modules/write_results/main"
+include { PARSE_SEQUENCE } from "$projectDir/modules/local/parse_sequence/main"
+include { UNION_RESULTS } from "$projectDir/modules/local/union_results/main"
+include { XREFS } from "$projectDir/modules/local/xrefs/main"
+include { WRITE_RESULTS } from "$projectDir/modules/local/write_results/main"
 include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
 include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
 
@@ -60,11 +61,6 @@ workflow {
     entries_path = params.xref.entries
     output_path = input_yaml.outfile
 
-    Channel.fromPath( input_yaml.input )
-    .unique()
-    .splitFasta( by: params.batchsize, file: true )
-    .set { fasta_channel }
-
     goterms_path = ""
     pathways_path = ""
     if (input_yaml.goterms) {
@@ -83,46 +79,54 @@ workflow {
 
     check_tsv_pro = input_yaml.formats.contains("TSV-PRO")
 
-    HASH_SEQUENCE(fasta_channel)
+    Channel.fromPath( input_yaml.input )
+    .unique()
+    .splitFasta( by: params.batchsize, file: true )
+    .set { fasta_channel }
 
-    lookup_to_scan = null
-    matches_lookup = []
+    PARSE_SEQUENCE(fasta_channel)
+
+    sequences_to_analyse = null
+    parsed_matches = null
     if (!input_yaml.disable_precalc) {
-        SEQUENCE_PRECALC(HASH_SEQUENCE.out, applications)
-        matches_lookup = SEQUENCE_PRECALC.out.map { it.first() }
-        lookup_to_scan = SEQUENCE_PRECALC.out.map { it.last() }
+        SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications)
+        parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
+        sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
     }
 
-    if (input_yaml.disable_precalc || lookup_to_scan) {
+    analysis_result = null
+    if (input_yaml.disable_precalc || sequences_to_analyse) {
         applications_channel = Channel.fromList(applications)
-        if (lookup_to_scan) {
-            fasta_application = lookup_to_scan.combine(applications_channel)
+        if (sequences_to_analyse) {
+            fasta_application = sequences_to_analyse.combine(applications_channel)
         }
         else {
             fasta_application = fasta_channel
             .combine(applications_channel)
         }
-        SEQUENCE_ANALYSIS(fasta_application, check_tsv_pro)
+        analysis_result = SEQUENCE_ANALYSIS(fasta_application, check_tsv_pro)
     }
 
-    // I need to improve matches_lookup output and join it with MAIN_SCAN.out before XREFS!!
-    XREFS(SEQUENCE_ANALYSIS.out, entries_path, goterms_path, pathways_path)
-
-    XREFS.out
+    parsed_matches
     .collect()
-    .set { collected_outputs }
+    .set { all_parsed_lookup }
 
-    HASH_SEQUENCE.out
+    analysis_result
     .collect()
-    .set { collected_sequences }
+    .set { all_parsed_analysis }
+
+    UNION_RESULTS(all_parsed_lookup, all_parsed_analysis)
+    XREFS(UNION_RESULTS.out, entries_path, goterms_path, pathways_path)
+
+    PARSE_SEQUENCE.out
+    .collect()
+    .set { all_sequences_parsed }
 
     Channel.fromList(input_yaml.formats)
     .set { formats_channel }
 
-    WRITE_RESULTS(collected_sequences, collected_outputs, formats_channel, output_path)
+    WRITE_RESULTS(all_sequences_parsed, XREFS.out, formats_channel, output_path)
 }
-
-
 
 
 
