@@ -109,13 +109,13 @@ workflow {
 
     parsed_matches
     .collect()
-    .set { all_parsed_matches }
+    .set { all_parsed_lookup }
 
     analysis_result
     .collect()
-    .set { all_analysis_result }
+    .set { all_parsed_analysis }
 
-    UNION_RESULTS(all_parsed_matches, all_analysis_result)
+    UNION_RESULTS(all_parsed_lookup, all_parsed_analysis)
     XREFS(UNION_RESULTS.out, entries_path, goterms_path, pathways_path)
 
     PARSE_SEQUENCE.out
