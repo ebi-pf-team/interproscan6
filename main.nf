@@ -39,6 +39,7 @@ if (params.help) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 include { PARSE_SEQUENCE } from "$projectDir/modules/local/parse_sequence/main"
+include { UNION_RESULTS } from "$projectDir/modules/local/union_results/main"
 include { XREFS } from "$projectDir/modules/local/xrefs/main"
 include { WRITE_RESULTS } from "$projectDir/modules/local/write_results/main"
 include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
@@ -85,13 +86,15 @@ workflow {
 
     PARSE_SEQUENCE(fasta_channel)
 
-    lookup_to_scan = null
+    sequences_to_analyse = null
+    parsed_matches = null
     if (!input_yaml.disable_precalc) {
         SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications)
         parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
         sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
     }
 
+    analysis_result = null
     if (input_yaml.disable_precalc || sequences_to_analyse) {
         applications_channel = Channel.fromList(applications)
         if (sequences_to_analyse) {
@@ -101,28 +104,29 @@ workflow {
             fasta_application = fasta_channel
             .combine(applications_channel)
         }
-        SEQUENCE_ANALYSIS(fasta_application, check_tsv_pro)
+        analysis_result = SEQUENCE_ANALYSIS(fasta_application, check_tsv_pro)
     }
 
+    parsed_matches
+    .collect()
+    .set { all_parsed_matches }
 
-//     // I need to improve matches_lookup output and join it with MAIN_SCAN.out before XREFS!!
-//     XREFS(SEQUENCE_ANALYSIS.out, entries_path, goterms_path, pathways_path)
-//
-//     XREFS.out
-//     .collect()
-//     .set { collected_outputs }
-//
-//     PARSE_SEQUENCE.out
-//     .collect()
-//     .set { collected_sequences }
-//
-//     Channel.fromList(input_yaml.formats)
-//     .set { formats_channel }
-//
-//     WRITE_RESULTS(collected_sequences, collected_outputs, formats_channel, output_path)
+    analysis_result
+    .collect()
+    .set { all_analysis_result }
+
+    UNION_RESULTS(all_parsed_matches, all_analysis_result)
+    XREFS(UNION_RESULTS.out, entries_path, goterms_path, pathways_path)
+
+    PARSE_SEQUENCE.out
+    .collect()
+    .set { all_sequences_parsed }
+
+    Channel.fromList(input_yaml.formats)
+    .set { formats_channel }
+
+    WRITE_RESULTS(all_sequences_parsed, XREFS.out, formats_channel, output_path)
 }
-
-
 
 
 

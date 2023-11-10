@@ -1,6 +1,6 @@
-applications: ["ncbifam", "antifam"]
+applications: ["ncbifam"]
 disable_precalc: false
-formats: ["TSV-PRO", "JSON"]
+formats: ["JSON"]
 goterms: false
 help: false
 input: files_test/best_to_test.fasta
