@@ -21,4 +21,6 @@ How to run:
 
      nextflow run main.nf [-resume]
         
-            
+Diagram:
+
+![i6Flow10112023.drawio.png](..%2F..%2FDesktop%2Fi6Flow10112023.drawio.png)

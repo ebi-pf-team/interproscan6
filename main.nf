@@ -6,36 +6,23 @@ import org.yaml.snakeyaml.Yaml
     HELP MESSAGE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-
 def helpMessage() {
   log.info """
-        !!!!!!!!!! OUTOFDATE !!!!!!!!!!!!
-        SEE README!
-
+        [Just a example]
         Usage:
+        Fill out  input.yaml file
         The typical command for running the pipeline is as follows:
-        nextflow run main.nf --input ./files_test/test_all_appl.fasta
-
-        Mandatory arguments:
-        --input                     Directory to input fasta file
-
-        Optional arguments:
-        --help                      This usage statement.
-        --input-opt                 YAML file with analyses and output options
-        --goterms                   Switch on lookup of corresponding Gene Ontology.
-        --pathways                  Switch on lookup of corresponding Pathway.
+        nextflow run main.nf
         """
 }
-
 if (params.help) {
     helpMessage()
     exit 0
 }
 
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT MODULES
+    IMPORT MODULES AND SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 include { PARSE_SEQUENCE } from "$projectDir/modules/local/parse_sequence/main"
@@ -45,13 +32,12 @@ include { WRITE_RESULTS } from "$projectDir/modules/local/write_results/main"
 include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
 include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
 
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-def f = file('input_opt.yaml')
+def f = file('input.yaml')
 def input_yaml = new Yaml().load(f)
 def all_appl = ['AntiFam', 'CDD', 'Coils', 'FunFam', 'Gene3d', 'HAMAP', 'MobiDBLite', 'NCBIfam', 'Panther', 'Pfam',
                 'Phobius', 'PIRSF', 'PIRSR', 'PRINTS', 'PrositePatterns', 'PrositeProfiles', 'SFLD', 'SignalP_EUK',
@@ -137,18 +123,3 @@ workflow {
 
     WRITE_RESULTS(all_sequences_parsed, XREFS.out, formats_channel, output_path)
 }
-
-
-
-// SERIAL_GROUP = "PROTEIN"
-//  Default for protein sequences are TSV, XML and GFF3, for nucleotide sequences GFF3 and XML.
-//     if (input_yaml.formats) {
-//         output_format = input_yaml.formats
-//     }
-//     else {
-//         if SERIAL_GROUP == "PROTEIN" {
-//             output_format = ["TSV", "XML", "GFF3"]
-//         } else {
-//             output_format = ["XML", "GFF3"]
-//         }
-//     }
