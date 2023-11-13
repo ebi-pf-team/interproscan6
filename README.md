@@ -17,7 +17,7 @@ How to run:
 
      nextflow run main.nf [-resume]
 
-The results will apear in result/ folder.
-You can debug seen work/ dir.
+The results will apear in ```result/``` folder.
+You can debug seen ```work/``` dir.
 
 PS: batchsize parameter on nextflow.config define the quantity of threads of parallelism
