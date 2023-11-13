@@ -20,7 +20,3 @@ How to run:
 The results will apear in result/ folder
 You can debug seen work/ dir
 PS: batchsize parameter on nextflow.config define the quantity of threads of parallelism
-
-Diagram:
-
-![i6Flow10112023.drawio.png](..%2F..%2FDesktop%2Fi6Flow10112023.drawio.png)
