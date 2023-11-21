@@ -10,12 +10,13 @@ def assemble_info(matches_path: str, entries_path: str) -> dict:
             matches_info = json.load(matches)
             for seq_id, match_info in matches_info.items():
                 try:
-                    for acc in match_info:
-                        acc_id = acc["accession"].split(".")[0]
-                        entry = entries[acc_id]
-                        acc["interpro_annotations_desc"] = entry[0]
-                        acc["signature_desc"] = entry[1]
-                        acc["interpro_annotations_acc"] = entry[2]
+                    for match in match_info:
+                        for domain in match["domains"]:
+                            acc_id = domain["accession"].split(".")[0]
+                            entry = entries[acc_id]
+                            domain["interpro_annotations_desc"] = entry[0]
+                            domain["signature_desc"] = entry[1]
+                            domain["interpro_annotations_acc"] = entry[2]
                 except KeyError:
                     pass
                 matches2entries[seq_id] = match_info
@@ -28,15 +29,17 @@ def add_goterms_info(matches_info: dict, goterm_path: str):
         with open(goterm_path + ".json", "r") as go:
             ipr2go = json.load(ipr)
             go_info = json.load(go)
-            for match in matches_info:
-                try:
-                    acc = match["interpro_annotations_acc"]
-                    go_ids = ipr2go[acc]
-                    for go_id in go_ids:
-                        matches2go[go_id] = go_info[go_id]
-                        match["GOTERMS"] = matches2go
-                except KeyError:
-                    pass
+            for seq_id, matches in matches_info.items():
+                for match in matches:
+                    for domain in match["domains"]:
+                        try:
+                            acc = domain["interpro_annotations_acc"]
+                            go_ids = ipr2go[acc]
+                            for go_id in go_ids:
+                                matches2go[go_id] = go_info[go_id]
+                                domain["GOTERMS"] = matches2go
+                        except KeyError:
+                            pass
     return matches_info
 
 
@@ -46,15 +49,17 @@ def add_pathways_info(matches_info: dict, pathway_path: str):
         with open(pathway_path + ".json", "r") as pa:
             ipr2pa = json.load(ipr)
             pa_info = json.load(pa)
-            for match in matches_info:
-                try:
-                    acc = match["interpro_annotations_acc"]
-                    pa_ids = ipr2pa[acc]
-                    for pa_id in pa_ids:
-                        matches2pa[pa_id] = pa_info[pa_id]
-                        match["PATHWAY"] = matches2pa
-                except KeyError:
-                    pass
+            for seq_id, matches in matches_info.items():
+                for match in matches:
+                    for domain in match["domains"]:
+                        try:
+                            acc = domain["interpro_annotations_acc"]
+                            pa_ids = ipr2pa[acc]
+                            for pa_id in pa_ids:
+                                matches2pa[pa_id] = pa_info[pa_id]
+                                domain["PATHWAY"] = matches2pa
+                        except KeyError:
+                            pass
     return matches_info
 
 
@@ -78,7 +83,6 @@ def main():
         matches_info = add_pathways_info(matches_info, args.pathways)
 
     print(json.dumps(matches_info))
-    return matches_info
 
 
 if __name__ == "__main__":
