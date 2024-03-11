@@ -1,5 +1,4 @@
 import argparse
-import ast
 import json
 import xml.etree.ElementTree as ET
 

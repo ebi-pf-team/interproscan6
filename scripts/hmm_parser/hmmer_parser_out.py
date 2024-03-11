@@ -102,7 +102,7 @@ def get_domain_match(match, domain_match):
     domain_match["ali_to"] = match.group(10)
     domain_match["env_from"] = match.group(11)
     domain_match["env_to"] = match.group(12)
-    domain_match["acc"] = match.group(13)
+    domain_match["accession"] = match.group(13)
     return domain_match
 
 

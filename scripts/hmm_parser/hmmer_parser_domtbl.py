@@ -55,7 +55,7 @@ def get_domain(info):
         "ali_to": info[18],
         "env_from": info[19],
         "env_to": info[20],
-        "acc": info[21],
+        "accession": info[21],
         "description_of_target": info[22]
     }
     return domain_info

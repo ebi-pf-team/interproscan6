@@ -3,25 +3,6 @@ import org.yaml.snakeyaml.Yaml
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    HELP MESSAGE
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-def helpMessage() {
-  log.info """
-        [Just a example]
-        Usage:
-        Fill out input.yaml file
-        The typical command for running the pipeline is as follows:
-        nextflow run main.nf [-resume]
-        """
-}
-if (params.help) {
-    helpMessage()
-    exit 0
-}
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT MODULES AND SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
@@ -37,8 +18,18 @@ include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/m
     MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-def f = file('input.yaml')
+def helpMessage() {
+      log.info """
+            Usage:
+            Fill out input.yaml file
+            The typical command for running the pipeline is as follows:
+            nextflow run main.nf [-resume]
+            """
+    }
+
+def f = file('input.yaml', chechifexists: true)
 def input_yaml = new Yaml().load(f)
+
 def all_appl = ['AntiFam', 'CDD', 'Coils', 'FunFam', 'Gene3d', 'HAMAP', 'MobiDBLite', 'NCBIfam', 'Panther', 'Pfam',
                 'Phobius', 'PIRSF', 'PIRSR', 'PRINTS', 'PrositePatterns', 'PrositeProfiles', 'SFLD', 'SignalP_EUK',
                 'SignalP_GRAM_NEGATIVE', 'SignalP_GRAM_POSITIVE', 'SMART', 'SuperFamily', 'TMHMM']
