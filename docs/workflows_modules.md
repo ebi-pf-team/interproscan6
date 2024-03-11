@@ -15,7 +15,7 @@ All parameters (noted by their `params` prefix) are stored in `./nextflow.config
 
 The values of these parameters can also be configured from their default values (defined in `./nextflow.config`) through the input YAML file.
 
-# Preparing the data for analysis
+# Prepare data
 
 The first task for `interproscan-6` is to prepare the input data for thedownstream analyses.
 
