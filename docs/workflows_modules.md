@@ -1,6 +1,6 @@
 # Workflows, Modules and Executables
 
-This file contains a description of the current workflows, modules and executables in `interproscan-6`. This file aims to introduce and describe the workflows and modules in the order they are implemented in the main (or overall) workflow of `interproscan-6`.
+This file contains a description of the current workflows, modules and executables in `interproscan-6`. This file aims to introduce and describe the workflows and modules in the order they are implemented in the `interproscan-6` pipeline.
 
 # Main Workflow
 
@@ -50,7 +50,7 @@ The subworkflow is configured using the `subworkdlows/sequence_precalc/lookup.co
 **Input**:
 * Path to JSON file containing the hashed sequences
 
-**Subworkflows:**
+**Modules:**
 
 The subworkflows incorporates three modules (in order):
 1. `LOOKUP_CHECK`
@@ -92,5 +92,22 @@ For example, `https://www.ebi.ac.uk/interpro/match-lookup/matches/?md5=SOMEMD5WE
 * Sequences to be analysed because pre-calculated matches are not available
 * Retrieved pre-calculated match and site data
 
+# Analyse sequences
+
+Calculate matches if there are sequences to be analysed (if `sequence_precalc` was disabled or the input FASTA file contains sequences not previously analysed by InterPro).
+
+## `applications_channel` Channel
+
+## `SEQUENCE_ANALYSIS` Module
+
+# Build Output
+
+...
+
+## `UNION_RESULTS` Module
+
+## `XREFS` Module
+
+## `WRITE_RESULTS` Module
 
 
