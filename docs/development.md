@@ -60,3 +60,7 @@ python my_script.py arg1 arg2
 - [ ] Docs - make note on handling of ambigous amino acids, and accepted symbols
 - [ ] Consider building a metamodel
 - If `applications` in `input.yaml` is None, run all tools. This will make it easier for users, saving them from having to write all the names of all the tools
+
+### Input
+
+- [ ] Standard FASTA ID/description string format. The formatting of the ID/description can vary. Some tools use tabs to separate the values, others "|", for example. Therefore, proteins could be submitted with the same sequence and ID as a record in InterPro, but the addition of different or additional characters (e.g. "|" instead of "\t") could lead to (arguably) unecessary reanalysis of a seq already in InterPro.
