@@ -9,9 +9,13 @@ Before to run you need to download:
 
 IMPORTANT: Change the input params in input.yaml file if you want to test different flows (see in main.nf)
 
-remember to build docker interproscan6 image (necessary to hmmer process):
+remember to build docker interproscan6 base image:
 
     docker build -t interproscan6 .
+
+and download the additional images we use:
+    
+    docker pull staphb/hmmer
 
 How to run:
 

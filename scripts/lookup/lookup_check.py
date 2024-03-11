@@ -45,7 +45,7 @@ def main():
     if no_matches_md5:
         fasta_to_analyse = md52fasta(no_matches_md5, sequences_data)
     checked_result = {"matches": md5_checked_matches, "no_matches": fasta_to_analyse, "sequences_info": sequences_data}
-    print(checked_result)
+    print(json.dumps(checked_result))
 
 
 if __name__ == "__main__":

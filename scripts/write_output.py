@@ -26,10 +26,10 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                         interpro_acc = "-"
                     ali_from = domain["ali_from"]
                     ali_to = domain["ali_to"]
-                    i_evalue = domain["iEvalue"]
+                    # evalue = domain["iEvalue"]
                     if is_pro:
                         alignment_encoded = domain["alignment_encoded"]
-                    tsv_file.write(f"{seq_id}\t{md5}\t{seq_len}\t{acc}\t{signature_desc}\t{ali_from}\t{ali_to}\t{i_evalue}\t{current_date}\t{interpro_acc}\t{alignment_encoded}\n")
+                    tsv_file.write(f"{seq_id}\t{md5}\t{seq_len}\t{acc}\t{signature_desc}\t{ali_from}\t{ali_to}\t{current_date}\t{interpro_acc}\t{alignment_encoded}\n")
 
 
 def json_output(seq_matches: dict, output_path: str):
@@ -40,7 +40,7 @@ def json_output(seq_matches: dict, output_path: str):
         json_file.write(json.dumps(seq_matches, indent=2))
 
 
-def xml_output(matches: str, output_path: str):
+def xml_output(seq_matches: dict, output_path: str):
     # A lot of changes! Need to be recreated!
     pass
 
@@ -63,8 +63,8 @@ def write_results(sequences_path: str, matches_path: str, output_format: str, ou
         tsv_output(seq_matches, output_path, True)
     if "JSON" in output_format:
         json_output(seq_matches, output_path)
-    # if "XML" in output_format:
-    #     xml_output(all_matches, all_sequences, output_path)
+    if "XML" in output_format:
+        xml_output(seq_matches, output_path)
 
 
 def main():

@@ -10,9 +10,9 @@ def helpMessage() {
   log.info """
         [Just a example]
         Usage:
-        Fill out  input.yaml file
+        Fill out input.yaml file
         The typical command for running the pipeline is as follows:
-        nextflow run main.nf
+        nextflow run main.nf [-resume]
         """
 }
 if (params.help) {

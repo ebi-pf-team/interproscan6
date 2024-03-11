@@ -1,5 +1,5 @@
 process HMMER_RUNNER {
-    container 'interproscan6'
+    container 'docker.io/staphb/hmmer:latest'
 
     input:
     tuple val(fasta), path(hmm), val(switches)

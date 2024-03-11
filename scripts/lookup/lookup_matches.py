@@ -79,10 +79,9 @@ def main():
     match_parsed = {}
 
     with open(args.checked_lookup, 'r') as md5_data:
-        checked_data = md5_data.read()
-    checked_info = ast.literal_eval(checked_data)
-    matches = checked_info["matches"]
-    seq_info = checked_info["sequences_info"]
+        checked_data = json.load(md5_data)
+    matches = checked_data["matches"]
+    seq_info = checked_data["sequences_info"]
 
     md52seq_id = {}
     for seq_id, match in seq_info.items():
