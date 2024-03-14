@@ -2,7 +2,7 @@
 
 This file contains a description of the current workflows, modules and executables in `interproscan-6`. This file aims to introduce and describe the workflows and modules in the order they are implemented in the `interproscan-6` pipeline.
 
-# Main Workflow
+# Configuration and Main Workflow
 
 The main workflow can be found in `./main.nf`.
 
@@ -17,23 +17,31 @@ The values of these parameters can also be configured from their default values 
 
 # Prepare data
 
-The first task for `interproscan-6` is to prepare the input data for thedownstream analyses.
+The first task for `interproscan-6` is to prepare the input data for the downstream analyses.
 
 ## `fasta_channel` Channel
 
 The first step is to initalise the `fasta_channel`.
 
-The channel takes in the path to the input multi-sequence FASTA file, removes duplicate sequences and splits up the file into smaller multi-sequence FASTA files, from here on referred to as "working-FASTA files".
+* Input:
+    * Path to multi-sequence FASTA file
+* Executes:
+    * Removes duplicates
+    * Splits input file into multiple, smaller FASTA files
+* Output:
+    * Paths to FASTA files
 
 The maximum number of sequences in each of these working-FASTA files is set up be the `batchsize` parameter `params` in `./nextflow.config`.
 
 ## `PARSE_SEQUENCE` Module
 
-* Input: path to FASTA file of sequences to be analysed
-* Executes: python script `scripts/parse_sequence.py`
-    * Loads sequences into memory
-    * hashes (MD5) sequences (including their metadata: ID, desc, etc)
-* Output: JSON file of hashed sequences
+* Input:
+    * Path to FASTA files (from the `fasta_channel`)
+* Executes:
+    * Python script `scripts/parse_sequence.py`
+        * Hashes (MD5) sequences (including their metadata: ID, desc, etc)
+* Output:
+    * `JSON` file of hashed sequences
 
 # Check for pre-calculations
 
@@ -45,35 +53,41 @@ This operation can be by-passed by `disable_precalc` in the configuration YAML f
 
 The subworkflow is defined in `subworkflows/sequence_precalc/main.nf`.
 
+**Configuration:**
 The subworkflow is configured using the `subworkdlows/sequence_precalc/lookup.config` file, which is pre-populated with the URL to the InterPro match-lookup service and its slugs.
 
 **Input**:
-* Path to JSON file containing the hashed sequences
+* Path to `JSON` file containing the hashed sequences
 
 **Modules:**
-
 The subworkflows incorporates three modules (in order):
 1. `LOOKUP_CHECK`
-    * Input: hashed sequences
-    * Executes: Python script `scripts/lookup/lookup_check.py`
-        * Look up if pre-calculated matches from any member database in InterPro
-    * Output: `dict` of seqs with matches in InterPro, seqs without matches in InterPro, and all seq data
+    * Input:
+        * Hashed sequences
+    * Executes:
+        * Python script `scripts/lookup/lookup_check.py`
+            * Look up if pre-calculated matches from any member database in InterPro
+    * Output:
+        * `dict` of seqs with matches in InterPro, seqs without matches in InterPro, and all seq data
 2. `LOOKUP_MATCHES`
     * Input:
         * `dict` from `LOOKUP_CHECK`
         * List of applications to use in analysis
-    * Executes: Python script `scripts/lookup/lookup_matches.py`
-        * Retrieves pre-calculated match data for only the specified application
+    * Executes:
+        * Python script `scripts/lookup/lookup_matches.py`
+            * Retrieves pre-calculated match data for only the specified application
     * Output: 
-        * ???
+        * `JSON` dump of parsed matches
 3. `LOOKUP_NO_MATCHES`
-    * Input: `dict` from `LOOKUP_CHECK`
-    * Executes: scripts/lookup/lookup_no_matches.py
-        * Writes out FASTA seqs of hashed seqs where 
-    * Output: FASTA file of sequences to be analysed by InterProScan (`no_match_lookup_fasta.fasta`)
+    * Input:
+        * `dict` from `LOOKUP_CHECK`
+    * Executes:
+        * Python script `scripts/lookup/lookup_no_matches.py`
+            * Writes out FASTA seqs of hashed seqs where 
+    * Output:
+        * FASTA file of sequences to be analysed by InterProScan (`no_match_lookup_fasta.fasta`)
 
 **Note:**
-
 Sometimes a sequence has been analysed during the InterPro release process and no matches or sites were found. This is still counted as pre-calculated matches/sites.
 
 The results for an MD5 that is not in InterPro and an MD5 hash that is in InterPro but no matches were found in the last release are identical.
@@ -99,17 +113,20 @@ Calculate matches if there are sequences to be analysed, i.e. if `sequence_preca
 
 ## `applications_channel` Channel
 
-* Input: The channel takes in all sequences that were identified as having not been previously analysed by InterPro.
+* Input:
+    * The channel takes in all sequences that were identified as having not been previously analysed by InterPro.
 * Output:
+    * ???
 
 ### `SEQUENCE_ANALYSIS` Subworkflow
 
 If `input_yaml.disable_precalc` is true, and/or there are sequences to analyse following checking for precalculated matches, the module `SEQUENCE_ANALYSIS` is used to coordinate checking for matches against the user specified applications (i.e. member databases).
 
+* Configuration:
+    * `subworkflows/sequence_analysis/members.config` - define opertional parameters, e.g. number of the cpus
 * Input:
     * Sequences to be analysed and the names of the applications to be included in the analysis.
     * `TSV_PRO`: ????
-* Configured by `subworkflows/sequence_analysis/members.config`
 * Executes:
     * Module `HMMER_RUNNER`
     * Module `HMMER_PARSER`
@@ -122,7 +139,8 @@ If `input_yaml.disable_precalc` is true, and/or there are sequences to analyse f
     1. FASTA sequences to be analysed
     2. Path to HMM profiles
     3. `switches`: operational arguments, e.g. the number cpus to use and thresholds for matches
-* Executes: `HMMer`
+* Executes:
+    * `HMMer`
 * Output: 
     1. Path to `HMMer` `.out` file
     2. Path to `HMMer` `.dtbl` file
