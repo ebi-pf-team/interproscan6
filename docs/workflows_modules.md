@@ -45,7 +45,7 @@ This operation can be by-passed by `disable_precalc` in the configuration YAML f
 
 The subworkflow is defined in `subworkflows/sequence_precalc/main.nf`.
 
-The subworkflow is configured using the `subworkdlows/sequence_precalc/lookup.config` file, which is pre-populated with the URL to the InterPro match-lookup service, and paths to directories.... ????
+The subworkflow is configured using the `subworkdlows/sequence_precalc/lookup.config` file, which is pre-populated with the URL to the InterPro match-lookup service and its slugs.
 
 **Input**:
 * Path to JSON file containing the hashed sequences
