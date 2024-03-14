@@ -65,6 +65,7 @@ The subworkflows incorporates three modules (in order):
     * Executes: Python script `scripts/lookup/lookup_matches.py`
         * Retrieves pre-calculated match data for only the specified application
     * Output: 
+        * ???
 3. `LOOKUP_NO_MATCHES`
     * Input: `dict` from `LOOKUP_CHECK`
     * Executes: scripts/lookup/lookup_no_matches.py
@@ -94,20 +95,87 @@ For example, `https://www.ebi.ac.uk/interpro/match-lookup/matches/?md5=SOMEMD5WE
 
 # Analyse sequences
 
-Calculate matches if there are sequences to be analysed (if `sequence_precalc` was disabled or the input FASTA file contains sequences not previously analysed by InterPro).
+Calculate matches if there are sequences to be analysed, i.e. if `sequence_precalc` was disabled or the input FASTA file contains sequences not previously analysed by InterPro.
 
 ## `applications_channel` Channel
 
-## `SEQUENCE_ANALYSIS` Module
+* Input: The channel takes in all sequences that were identified as having not been previously analysed by InterPro.
+* Output:
+
+### `SEQUENCE_ANALYSIS` Subworkflow
+
+If `input_yaml.disable_precalc` is true, and/or there are sequences to analyse following checking for precalculated matches, the module `SEQUENCE_ANALYSIS` is used to coordinate checking for matches against the user specified applications (i.e. member databases).
+
+* Input:
+    * Sequences to be analysed and the names of the applications to be included in the analysis.
+    * `TSV_PRO`: ????
+* Configured by `subworkflows/sequence_analysis/members.config`
+* Executes:
+    * Module `HMMER_RUNNER`
+    * Module `HMMER_PARSER`
+* Output:
+    * Output from `HMMer`
+
+#### `HMMER_RUNNER` Module
+
+* Input:
+    1. FASTA sequences to be analysed
+    2. Path to HMM profiles
+    3. `switches`: operational arguments, e.g. the number cpus to use and thresholds for matches
+* Executes: `HMMer`
+* Output: 
+    1. Path to `HMMer` `.out` file
+    2. Path to `HMMer` `.dtbl` file
+
+#### `HMMER_PARSER` Module
+
+* Input:
+    1. The output from `HMMER_RUNNER` (path to the `HMMer` output files)
+    2. `tsv_pro` - ????
+* Executes:
+    * If `tsv_pro` is true: `hmmer_parser_out`
+    * If `tsv_pro` is false: `hmmer_parser_domtbl`
+    * Both scripts parse the output from `HMMer` into  `JSON` file
+* Output:
+    * `hmmer_parsed_<output>.json`
 
 # Build Output
 
-...
+Compile and write the outputs from the precalculated analyses from InterPro releases with the matches calculated during the sequence analysis stage.
 
 ## `UNION_RESULTS` Module
 
+* Input:
+    * Pre-calculated results
+    * Output from analysis
+* Executes:
+    * `scripts/post_proc/union_results.py`
+        * Combines results into a `JSON` file
+* Output:
+    * `JSON` file
+
 ## `XREFS` Module
+
+* Input:
+    * Path to matches?
+    * Path to InterPro entries
+    * Path to goterms files
+    * Path to pathways???
+* Executes:
+    * `scripts/xrefs.py`
+    * ???
+* Output:
+    * Path to xref results
 
 ## `WRITE_RESULTS` Module
 
-
+* Input:
+    * Collected sequences
+    * Matches
+    * Output file format - defined by user at the configuration stage
+    * Path for output files
+* Executes:
+    * Collect input sequences
+    * `scripts/write_output.py` ....
+* Output:
+    * One file per output file format
