@@ -1,4 +1,4 @@
-# Development
+# Development and Observations
 
 This document is for tracking development of `interproscan-6`. This includes implementation of new features, enhancing existing features, and bus fixing.
 
@@ -64,3 +64,11 @@ python my_script.py arg1 arg2
 ### Input
 
 - [ ] Standard FASTA ID/description string format. The formatting of the ID/description can vary. Some tools use tabs to separate the values, others "|", for example. Therefore, proteins could be submitted with the same sequence and ID as a record in InterPro, but the addition of different or additional characters (e.g. "|" instead of "\t") could lead to (arguably) unecessary reanalysis of a seq already in InterPro.
+
+# Observations
+
+Food for thoughts - direct actions are necessarily defined but these observations may lead to changes in the future.
+
+## Match lookup
+
+In the lookup we have to filter in the script because when we make the request we don't have the option of passing the applications we want first, the lookup match will return all the applications that have match, only then I can filter (using the `applications` variable).
