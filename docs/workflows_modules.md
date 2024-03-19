@@ -182,25 +182,24 @@ Compile and write the outputs from the precalculated analyses from InterPro rele
 ## `XREFS` Module
 
 * Input:
-    * Path to matches?
-    * Path to InterPro entries
-    * Path to goterms files
-    * Path to pathways???
+    * Path to all matches resulted from the previous steps
+    * Path to InterPro entries file
+    * Path to goterms file (if `true` in input.yaml)
+    * Path to pathways file (if `true` in input.yaml)
 * Executes:
     * `scripts/xrefs.py`
-    * ???
 * Output:
-    * Path to xref results
+    * Path to file containing the matches with the xref results
 
 ## `WRITE_RESULTS` Module
 
 * Input:
-    * Collected sequences
-    * Matches
-    * Output file format - defined by user at the configuration stage
+    * All sequences
+    * All matches
+    * Output file formats - defined by user at the configuration stage (e.g. json, xml, tsv)
     * Path for output files
 * Executes:
     * Collect input sequences
-    * `scripts/write_output.py` ....
+    * `scripts/write_output.py`
 * Output:
-    * One file per output file format
+    * One file per output file extension
