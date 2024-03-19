@@ -25,7 +25,6 @@ The first step is to initalise the `fasta_channel`.
 
 * Input:
     * Path to multi-sequence FASTA file
-    * Applications (member databases) the user wants
 * Executes:
     * Removes duplicates
     * Splits input file into multiple, smaller FASTA files
@@ -59,6 +58,7 @@ The subworkflow is configured using the `subworkdlows/sequence_precalc/lookup.co
 
 **Input**:
 * Path to `JSON` file containing the hashed sequences
+* Applications (member databases) the user wants
 
 **Modules:**
 The subworkflows incorporates three modules (in order):
