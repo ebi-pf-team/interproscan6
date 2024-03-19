@@ -13,7 +13,7 @@ All parameters (noted by their `params` prefix) are stored in `./nextflow.config
 * `goterms`: Gene Ontologoy terms from InterPro release
 * `pathways`: ??? 
 
-The values of these parameters can also be configured from their default values (defined in `./nextflow.config`) through the input YAML file.
+The use of `entries` is mandatory in the workflow, but if the user wants to have the `goterms` or `pathways` informations, it is necessary indicate it in the input YAML by setting the respective values to true.
 
 # Prepare data
 
