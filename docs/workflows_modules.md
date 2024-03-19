@@ -84,7 +84,7 @@ The subworkflows incorporates three modules (in order):
         * `dict` from `LOOKUP_CHECK`
     * Executes:
         * Python script `scripts/lookup/lookup_no_matches.py`
-            * Writes out FASTA seqs of hashed seqs where 
+            * Writes out FASTA seqs of hashed seqs not pre-calculated by InterPro
     * Output:
         * FASTA file of sequences to be analysed by InterProScan (`no_match_lookup_fasta.fasta`)
 
