@@ -125,15 +125,15 @@ This way we parallelize the workflow in `number_of_applications x number_of_spli
 If `input_yaml.disable_precalc` is true, and/or there are sequences to analyse following checking for precalculated matches, the module `SEQUENCE_ANALYSIS` is used to coordinate checking for matches against the user specified applications (i.e. member databases).
 
 * Configuration:
-    * `subworkflows/sequence_analysis/members.config` - define opertional parameters, e.g. number of the cpus
+    * `subworkflows/sequence_analysis/members.config` - define operational parameters to members databases, e.g. binary paths, switches commands, ...
 * Input:
     * Sequences to be analysed and the names of the applications to be included in the analysis.
-    * `TSV_PRO`: ????
+    * `TSV_PRO`: true/false to generate a .tsv-pro file (adding the cigar alignment in the analysis)
 * Executes:
-    * Module `HMMER_RUNNER`
-    * Module `HMMER_PARSER`
+    * Module `RUNNER`
+    * Module `PARSER`
 * Output:
-    * Output from `HMMer`
+    * Parsed output from sequence analysis tools used for each members
 
 #### `HMMER_RUNNER` Module
 
