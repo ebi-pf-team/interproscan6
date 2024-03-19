@@ -1,6 +1,6 @@
 # Workflows, Modules and Executables
 
-This file contains a description of the current workflows, modules and executables in `interproscan-6`. This file aims to introduce and describe the workflows and modules in the order they are implemented in the `interproscan-6` pipeline.
+This file contains a description of the current workflows, modules and executables in `interproscan-6`, and aims to introduce and describe the workflows and modules in the order they are implemented in the `interproscan-6` pipeline.
 
 # Configuration and Main Workflow
 
@@ -9,10 +9,11 @@ The main workflow can be found in `./main.nf`.
 Input is a YAML configuration file, which contains the bash parameters from `interproscan-5`.
 
 All parameters (noted by their `params` prefix) are stored in `./nextflow.config`, under `params`, these are:
-* `entries`: XML release of InterPro entries
-* `goterms`: Gene Ontologoy terms from InterPro release
-* `pathways`: ??? 
+* `entries`: path to XML release of InterPro entries
+* `goterms`: path to file containing Gene Ontologoy terms from InterPro release
+* `pathways`: path to InterPro release `pathways` file
 
+(These files are typically found in the `data_xref/` dir)  
 The values of these parameters can also be configured from their default values (defined in `./nextflow.config`) through the input YAML file.
 
 # Prepare data
