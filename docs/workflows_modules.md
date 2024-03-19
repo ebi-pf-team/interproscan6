@@ -114,7 +114,7 @@ Calculate matches if there are sequences to be analysed, i.e. if `sequence_preca
 
 ## Combine `applications_channel` and (`fasta_channel` OR `sequences_to_analyse`)
 
-Here we takes in all sequences that were identified as having not been previously analysed by InterPro and combine with an applications_channel to get a cartesian product of all applications we will analyse and the subset of fasta files. 
+Here, we takes all sequences that were identified as having not been previously analysed by InterPro (or all them, in case of disable_precalc) and combine with an applications_channel to get a cartesian product of all applications we will analyse and the subsets of fasta files. 
 This way we parallelize the workflow in `number_of_applications x number_of_splitted_fasta_files` flows. You can better visualize what happens in the example below:
 
 ![image](https://github.com/ebi-pf-team/interproscan6/assets/17861151/7310f97d-cec3-4d63-8c13-a399a5fb9ef4)
