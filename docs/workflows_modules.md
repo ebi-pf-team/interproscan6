@@ -135,6 +135,9 @@ If `input_yaml.disable_precalc` is true, and/or there are sequences to analyse f
 * Output:
     * Parsed output from sequence analysis tools used for each members
 
+-----------------------------------------------------------------------------------------------------------------------------
+PS: This block is being refactored to be more generic and to support different analysis tools (some members don't use hmmer)
+
 #### `HMMER_RUNNER` Module
 
 * Input:
@@ -158,6 +161,8 @@ If `input_yaml.disable_precalc` is true, and/or there are sequences to analyse f
     * Both scripts parse the output from `HMMer` into  `JSON` file
 * Output:
     * `hmmer_parsed_<output>.json`
+ 
+-----------------------------------------------------------------------------------------------------------------------------
 
 # Build Output
 
