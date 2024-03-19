@@ -27,7 +27,7 @@ def helpMessage() {
             """
     }
 
-def f = file('input.yaml', chechifexists: true)
+def f = file('input.yaml', checkifexists: true)
 def input_yaml = new Yaml().load(f)
 
 def all_appl = ['AntiFam', 'CDD', 'Coils', 'FunFam', 'Gene3d', 'HAMAP', 'MobiDBLite', 'NCBIfam', 'Panther', 'Pfam',
