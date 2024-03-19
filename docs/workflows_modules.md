@@ -25,6 +25,7 @@ The first step is to initalise the `fasta_channel`.
 
 * Input:
     * Path to multi-sequence FASTA file
+    * Applications (member databases) the user wants
 * Executes:
     * Removes duplicates
     * Splits input file into multiple, smaller FASTA files
