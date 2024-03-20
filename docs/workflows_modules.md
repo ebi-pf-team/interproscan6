@@ -46,16 +46,16 @@ The maximum number of sequences in each of these working-FASTA files is set up b
 
 # Check for pre-calculations
 
-InterPro already contains a series of pre-calculated matches. `interproscan-6` can check the provided InterPro release to see if any of the input/submitted sequences have already been parsed by InterPro. Where an existing match is found, the associated annotation data is retrieved and the sequence is not queried against the models by `interproscan` to generate _de novo_ annotations.
+InterPro already contains a series of pre-calculated matches. `interproscan-6` can check the provided InterPro release to see if any of the input/submitted sequences have already been parsed by InterPro. Where an analysis has been previously performed by InterPro (matches may not always be found), the associated annotation data is retrieved, and the sequence is **not** queried against the models by `interproscan` with the aim generate _de novo_ annotations.
 
-This operation can be by-passed by `disable_precalc` in the configuration YAML file to "true".
+This operation can be by-passed by setting `disable_precalc` to `true` in the configuration YAML file.
 
 ## `sequence_precalc` Subworkflow
 
 The subworkflow is defined in `subworkflows/sequence_precalc/main.nf`.
 
 **Configuration:**
-The subworkflow is configured using the `subworkdlows/sequence_precalc/lookup.config` file, which is pre-populated with the URL to the InterPro match-lookup service and its slugs.
+The subworkflow is configured using the `subworkflows/sequence_precalc/lookup.config` file, which is pre-populated with the URL to the InterPro match-lookup service and its slugs.
 
 **Input**:
 * Path to `JSON` file containing the hashed sequences
@@ -67,7 +67,7 @@ The subworkflows incorporates three modules (in order):
         * Hashed sequences
     * Executes:
         * Python script `scripts/lookup/lookup_check.py`
-            * Look up if pre-calculated matches from any member database in InterPro
+            * Look up to see if there are any pre-calculated matches from any member database in InterPro
     * Output:
         * `dict` of seqs with matches in InterPro, seqs without matches in InterPro, and all seq data
 2. `LOOKUP_MATCHES`
@@ -84,7 +84,7 @@ The subworkflows incorporates three modules (in order):
         * `dict` from `LOOKUP_CHECK`
     * Executes:
         * Python script `scripts/lookup/lookup_no_matches.py`
-            * Writes out FASTA seqs of hashed seqs where 
+            * Writes out FASTA seqs of hashed seqs where
     * Output:
         * FASTA file of sequences to be analysed by InterProScan (`no_match_lookup_fasta.fasta`)
 
