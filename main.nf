@@ -6,7 +6,7 @@ import org.yaml.snakeyaml.Yaml
     IMPORT MODULES AND SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-
+include { PARSE_SEQUENCE } from "$projectDir/modules/local/parse_sequence/main"
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -22,4 +22,10 @@ def all_appl = ['AntiFam', 'CDD', 'Coils', 'FunFam', 'Gene3d', 'HAMAP', 'MobiDBL
                 'SignalP_GRAM_NEGATIVE', 'SignalP_GRAM_POSITIVE', 'SMART', 'SuperFamily', 'TMHMM']
 
 workflow {
+    Channel.fromPath( input_yaml.input )
+    .unique()
+    .splitFasta( by: params.batchsize, file: true )
+    .set { fasta_channel }
+
+    PARSE_SEQUENCE(fasta_channel)
 }
