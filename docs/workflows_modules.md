@@ -13,8 +13,7 @@ All parameters (noted by their `params` prefix) are stored in `./nextflow.config
 * `goterms`: path to file containing Gene Ontologoy terms from InterPro release
 * `pathways`: path to InterPro release `pathways` file
 
-(These files are typically found in the `data_xref/` dir)  
-The values of these parameters can also be configured from their default values (defined in `./nextflow.config`) through the input YAML file.
+The use of `entries` is mandatory in the workflow, but if the user wants to have the `goterms` or `pathways` informations, it is necessary indicate it in the input YAML by setting the respective values to "true".
 
 # Prepare data
 
@@ -59,6 +58,7 @@ The subworkflow is configured using the `subworkflows/sequence_precalc/lookup.co
 
 **Input**:
 * Path to `JSON` file containing the hashed sequences
+* Applications (member databases) the user wants
 
 **Modules:**
 The subworkflows incorporates three modules (in order):
@@ -84,7 +84,7 @@ The subworkflows incorporates three modules (in order):
         * `dict` from `LOOKUP_CHECK`
     * Executes:
         * Python script `scripts/lookup/lookup_no_matches.py`
-            * Writes out FASTA seqs of hashed seqs where
+            * Writes out FASTA seqs of hashed seqs not pre-calculated by InterPro
     * Output:
         * FASTA file of sequences to be analysed by InterProScan (`no_match_lookup_fasta.fasta`)
 
@@ -112,27 +112,32 @@ For example, `https://www.ebi.ac.uk/interpro/match-lookup/matches/?md5=SOMEMD5WE
 
 Calculate matches if there are sequences to be analysed, i.e. if `sequence_precalc` was disabled or the input FASTA file contains sequences not previously analysed by InterPro.
 
-## `applications_channel` Channel
+## Combine `applications_channel` and (`fasta_channel` OR `sequences_to_analyse`)
 
-* Input:
-    * The channel takes in all sequences that were identified as having not been previously analysed by InterPro.
-* Output:
-    * ???
+**Input**: All sequences that were identified as having not been previously analysed by InterPro (or all them, in case of `disable_precalc`) and combines these with an `applications_channel` to get a cartesian product of all applications we will analyse and the subsets of fasta files. 
+
+This way we parallelize the workflow as `number_of_applications x number_of_splitted_fasta_files` flows. You can better visualize what happens in the example below:
+
+![image](https://github.com/ebi-pf-team/interproscan6/assets/17861151/7310f97d-cec3-4d63-8c13-a399a5fb9ef4)
+
 
 ### `SEQUENCE_ANALYSIS` Subworkflow
 
 If `input_yaml.disable_precalc` is true, and/or there are sequences to analyse following checking for precalculated matches, the module `SEQUENCE_ANALYSIS` is used to coordinate checking for matches against the user specified applications (i.e. member databases).
 
 * Configuration:
-    * `subworkflows/sequence_analysis/members.config` - define opertional parameters, e.g. number of the cpus
+    * `subworkflows/sequence_analysis/members.config` - define operational parameters to members databases, e.g. binary paths, switches commands, ...
 * Input:
     * Sequences to be analysed and the names of the applications to be included in the analysis.
-    * `TSV_PRO`: ????
+    * `TSV_PRO`: true/false to generate a .tsv-pro file (adding the cigar alignment in the analysis)
 * Executes:
-    * Module `HMMER_RUNNER`
-    * Module `HMMER_PARSER`
+    * Module `RUNNER`
+    * Module `PARSER`
 * Output:
-    * Output from `HMMer`
+    * Parsed output from sequence analysis tools used for each members
+
+-----------------------------------------------------------------------------------------------------------------------------
+PS: This block is being refactored to be more generic and to support different analysis tools (some members don't use hmmer).
 
 #### `HMMER_RUNNER` Module
 
@@ -157,6 +162,8 @@ If `input_yaml.disable_precalc` is true, and/or there are sequences to analyse f
     * Both scripts parse the output from `HMMer` into  `JSON` file
 * Output:
     * `hmmer_parsed_<output>.json`
+ 
+-----------------------------------------------------------------------------------------------------------------------------
 
 # Build Output
 
@@ -176,25 +183,24 @@ Compile and write the outputs from the precalculated analyses from InterPro rele
 ## `XREFS` Module
 
 * Input:
-    * Path to matches?
-    * Path to InterPro entries
-    * Path to goterms files
-    * Path to pathways???
+    * Path to all matches resulted from the previous steps
+    * Path to InterPro entries file
+    * Path to goterms file (if `true` in input.yaml)
+    * Path to pathways file (if `true` in input.yaml)
 * Executes:
     * `scripts/xrefs.py`
-    * ???
 * Output:
-    * Path to xref results
+    * Path to file containing the matches with the xref results
 
 ## `WRITE_RESULTS` Module
 
 * Input:
-    * Collected sequences
-    * Matches
-    * Output file format - defined by user at the configuration stage
+    * All sequences
+    * All matches
+    * Output file formats - defined by user at the configuration stage (e.g. json, xml, tsv)
     * Path for output files
 * Executes:
     * Collect input sequences
-    * `scripts/write_output.py` ....
+    * `scripts/write_output.py`
 * Output:
-    * One file per output file format
+    * One file per output file extension
