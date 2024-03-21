@@ -7,6 +7,10 @@ process PARSE_SEQUENCE {
 
     script:
     """
+    if [[ ! -f ${fasta_file} ]]; then
+        echo "File not found: ${fasta_file}"
+        exit 1
+    fi
     python3 $projectDir/scripts/parse_sequence.py ${fasta_file} > parsed_sequences
     """
 }

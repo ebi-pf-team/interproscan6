@@ -19,7 +19,8 @@ and download the additional images we use:
 
 How to run:
 
-     nextflow run main.nf [-resume]
+    nextflow run interproscan.nf --input <path to fasta file>
+
 
 The results will apear in ```result/``` folder.
 You can debug seen ```work/``` dir.
