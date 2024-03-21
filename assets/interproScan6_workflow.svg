@@ -27,8 +27,8 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      inkscape:zoom="0.70710678"
-     inkscape:cx="342.94679"
-     inkscape:cy="247.48737"
+     inkscape:cx="221.32442"
+     inkscape:cy="1680.0857"
      inkscape:window-width="1850"
      inkscape:window-height="1016"
      inkscape:window-x="0"
@@ -4642,6 +4642,17 @@
          x="164.27182"
          y="621.91638"
          id="tspan9-6-65-4-1">Write output files</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:2.16402px;fill:#000000;stroke-width:0.180335"
+       x="164.04253"
+       y="544.40771"
+       id="text1-9-5-5-2-8-1"><tspan
+         sodipodi:role="line"
+         style="font-style:italic;stroke-width:0.180335"
+         x="164.04253"
+         y="544.40771"
+         id="tspan9-6-65-4-1-8">* If `true` in input.yaml</tspan></text>
     <g
        id="g46-9-4-6"
        transform="translate(73.097785,553.10463)">
@@ -4825,7 +4836,7 @@
          y="31.348143" /></text>
     <g
        id="g118"
-       transform="matrix(0.82385043,0,0,0.82385043,-5.7642911,7.6726509)">
+       transform="matrix(0.82385043,0,0,0.82385043,-1.0139929,10.382513)">
       <text
          xml:space="preserve"
          style="font-size:3.175px;fill:#000000;stroke-width:0.264583"
