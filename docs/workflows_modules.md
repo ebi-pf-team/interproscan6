@@ -2,6 +2,8 @@
 
 This file contains a description of the current workflows, modules and executables in `interproscan-6`, and aims to introduce and describe the workflows and modules in the order they are implemented in the `interproscan-6` pipeline.
 
+A visual summary of the workflow is presented in [`interproScan6_workflow.pdf`](https://github.com/ebi-pf-team/interproscan6/blob/main/assets/interproScan6_workflow.pdf).
+
 # Configuration and Main Workflow
 
 The main workflow can be found in `./main.nf`.
