@@ -38,7 +38,7 @@ Batchsize parameter in `nextflow.config` defines the number maximum number of se
 
 #### YAML file
 
-Configuration of the `interproscan-6` pipeline is achieved via a YAML file. A template configuation is provided within `interproscan-6`: `input.yaml`.
+Configuration of the `interproscan-6` pipeline could be achieved via a YAML file. A template configuation is provided within `interproscan-6`: `input.yaml`.
 
 **Configuration parameters:**
 
