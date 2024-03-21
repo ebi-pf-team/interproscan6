@@ -27,10 +27,10 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      inkscape:zoom="0.70710678"
-     inkscape:cx="221.32442"
-     inkscape:cy="1680.0857"
-     inkscape:window-width="1850"
-     inkscape:window-height="1016"
+     inkscape:cx="548.00776"
+     inkscape:cy="1700.5918"
+     inkscape:window-width="1920"
+     inkscape:window-height="1043"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -5041,7 +5041,7 @@
          id="tspan1-5-1-4-5-1-1"
          style="stroke-width:0.264583"
          x="151.44046"
-         y="108.08242">JSON MDS path</tspan></text>
+         y="108.08242">JSON MD5 path</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:3.175px;fill:#000000;stroke-width:0.264583"
@@ -5186,7 +5186,7 @@
          id="tspan1-5-1-4-5-1-7"
          style="stroke-width:0.264583"
          x="180.27287"
-         y="123.09743">JSON MDS path</tspan></text>
+         y="123.09743">JSON MD5 path</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:2.5947px;fill:#000000;stroke-width:0.216225"
@@ -5700,14 +5700,14 @@
     <text
        xml:space="preserve"
        style="font-size:3.175px;fill:#000000;stroke-width:0.264583"
-       x="82.341995"
-       y="429.28516"
+       x="80.109581"
+       y="428.93326"
        id="text1-1-8-7-8-6-3-9-9-4-4"><tspan
          sodipodi:role="line"
          id="tspan1-5-1-4-5-1-7-4-4-7-9"
          style="stroke-width:0.264583"
-         x="82.341995"
-         y="429.28516">TSV Pro</tspan></text>
+         x="80.109581"
+         y="428.93326">is_tsv_pro</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:3.175px;fill:#000000;stroke-width:0.264583"
