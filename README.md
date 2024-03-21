@@ -9,11 +9,15 @@ Before running you need to download:
 - members data (`curl ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.62-94.0/alt/interproscan-data-5.62-94.0.tar.gz --output interproscan-data-5.62-94.0.tar.gz`)
 - xref (entries, goterms and pathways) files (Use this script: `interproscan6/files_test/get_data_to_i6.py`)
 
-**IMPORTANT:** Change the input params in input.yaml file if you want to test different flows (see in main.nf)
+**IMPORTANT:** Change the input params in the `input.yaml` file if you want to test different flows (see in `main.nf`)
 
-Remember to build a docker interproscan6 image (necessary for the HMMer process):
+Remember to build a docker `interproscan6` image (this is necessary for the HMMer process):
 
     docker build -t interproscan6 .
+    
+and download the additional images we use:
+    
+    docker pull staphb/hmmer
 
 ## Quick start
 
