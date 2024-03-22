@@ -11,6 +11,8 @@ Before running you need to download:
 
 **IMPORTANT:** Change the input params in the `input.yaml` file if you want to test different flows (see in `main.nf`)
 
+**IMPORTANT:** Please ensure `Java` (version >= 11) is installed.
+
 Remember to build a docker `interproscan6` image (this is necessary for the HMMer process):
 
     docker build -t interproscan6 .
