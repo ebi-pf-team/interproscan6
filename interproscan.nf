@@ -20,6 +20,7 @@ if (!params.input) {
             The typical command for running the pipeline is as follows:
             nextflow run interproscan.nf --input <path to fasta file>
             """
+            exit 1
 }
 
 workflow {
