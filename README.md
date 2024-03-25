@@ -41,32 +41,29 @@ Batchsize parameter in `nextflow.config` defines the number maximum number of se
 
 ### Configuration
 
-#### YAML file
+#### Parameters
 
-Configuration of the `interproscan-6` pipeline could be achieved via a YAML file. A template configuation is provided within `interproscan-6`: `input.yaml`.
+Parameters can be set on command line using two dashes. 
+The only mandatory parameter is the input parameter, the other parameters are optional.
+
+`IMPORTANT: Parameters that have more than one value must be separated by comma and without space (e.g. --applications antifam,ncbifam,pfam)`
 
 **Configuration parameters:**
 
-* `applications` - a list of member databases/applications to be inclued in the analysis. For example:
+* `--applications` - a list of member databases/applications to be inclued in the analysis. For example:
 
 ```yaml
-applications: ['AntiFam', 'CDD', 'Coils', 'FunFam', 'Gene3d',
-                'HAMAP','MobiDBLite', 'NCBIfam', 'Panther', 'Pfam',
-                'Phobius', 'PIRSF', 'PIRSR', 'PRINTS',
-                'PrositePatterns', 'PrositeProfiles', 'SFLD',
-                'SignalP_EUK', 'SignalP_GRAM_NEGATIVE',
-                'SignalP_GRAM_POSITIVE', 'SMART',
-                'SuperFamily', 'TMHMM']
+applications: AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,Pfam,Phobius,PIRSF,PIRSR,PRINTS,PrositePatterns,PrositeProfiles,SFLD,SignalP_EUK,SignalP_GRAM_NEGATIVE,SignalP_GRAM_POSITIVE,SMART,SuperFamily,TMHMM
 ```
 
-* `disable_precalc` - Do not run comparison against an InterPro release to retrive precalculated matches, instead run `interproscan` for all input sequences. [Boolean]
-* `formats` - List output file formats. Supported: JSON, TSV, GFF, XML
-* `goterms` - Whether to retrieve and include Gene Ontology terms from InterPro in the output files. [Boolean]
-* `help` - Whether to disble the help message - `interproscan-6` will not run any analysis when `help` is set to true. [Boolean]
-* `input` - Path to input FASTA file
-* `outfile` - Path and prefix for output files
-* `pathways` - Optional, switch on lookup of corresponding Pathway annotation (IMPLIES - `lookup_file` is defined) [Boolean]
-* `lookup_file` - Lookup of corresponding InterPro annotation in the TSV and GFF3 output formats.
+* `--disable_precalc` - Do not run comparison against an InterPro release to retrive precalculated matches, instead run `interproscan` for all input sequences. [Boolean]
+* `--formats` - List output file formats. Supported: JSON, TSV, GFF, XML
+* `--goterms` - Whether to retrieve and include Gene Ontology terms from InterPro in the output files. [Boolean]
+* `--help` - Whether to disble the help message - `interproscan-6` will not run any analysis when `help` is set to true. [Boolean]
+* `--input` - Path to input FASTA file
+* `--outfile` - Path and prefix for output files
+* `--pathways` - Optional, switch on lookup of corresponding Pathway annotation (IMPLIES - `lookup_file` is defined) [Boolean]
+* `--lookup_file` - Lookup of corresponding InterPro annotation in the TSV and GFF3 output formats.
 
 #### Nextflow configuration
 
