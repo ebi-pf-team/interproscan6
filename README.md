@@ -56,7 +56,7 @@ applications: AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,P
 ```
 
 * `--disable_precalc` - Do not run comparison against an InterPro release to retrive precalculated matches, instead run `interproscan` for all input sequences. [Boolean]
-* `--formats` - List output file formats. Supported: JSON, TSV, GFF, XML
+* `--formats` - List output file formats. Supported: JSON,TSV,GFF,XML
 * `--goterms` - Whether to retrieve and include Gene Ontology terms from InterPro in the output files. [Boolean]
 * `--help` - Whether to disble the help message - `interproscan-6` will not run any analysis when `help` is set to true. [Boolean]
 * `--input` - Path to input FASTA file
