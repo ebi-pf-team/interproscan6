@@ -66,7 +66,6 @@ def parse_match(matches: str, applications: list, md52seq_id: dict, match_parsed
 def main():
     args = sys.argv[1:]
 
-    print(args[1])
     applications = list(map(lambda x: x.upper(), args[1].split(',')))
     match_parsed = {}
 
