@@ -21,8 +21,8 @@ def printHelp() {
         nextflow run interproscan.nf --input <path to fasta file>
 
     Params options:
-        --applications <ANALYSES>          Optional, comma separated list of analyses. If this option is not set,
-                                            All analyses will be run.
+        --applications <ANALYSES>          Optional, comma separated - without spaces - list of analyses.
+                                            If this option is not set, ALL analyses will be run.
         --disable-precalc                  Optional. Disables use of the precalculated match lookup service.
                                             All match calculations will be run locally.
         --help                             Optional, display help information
@@ -61,6 +61,7 @@ workflow {
 
     sequences_to_analyse = null
     parsed_matches = null
+
     if (!params.disable_precalc) {
         log.info "Using precalculated match lookup service"
         SEQUENCE_PRECALC(PARSE_SEQUENCE.out, params.applications)
@@ -69,6 +70,7 @@ workflow {
     }
 
     //  Just temporary to see in which folders are the partial results
+    log.info "Applications: ${params.applications}"
     SEQUENCE_PRECALC.out.parsed_matches.view()
     SEQUENCE_PRECALC.out.sequences_to_analyse.view()
 }

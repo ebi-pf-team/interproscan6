@@ -1,5 +1,5 @@
-import argparse
 import json
+import sys
 import xml.etree.ElementTree as ET
 
 import requests
@@ -64,20 +64,13 @@ def parse_match(matches: str, applications: list, md52seq_id: dict, match_parsed
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Parse to match lookup"
-    )
-    parser.add_argument(
-        "-checked", "--checked_lookup", type=str, help="dict with md5 lookup matches checked"
-    )
-    parser.add_argument("-appl", "--applications", type=str, help="list of analysis")
-    parser.add_argument("-url", "--url", type=str, help="url to get sequences match lookup")
-    args = parser.parse_args()
+    args = sys.argv[1:]
 
-    applications = list(map(lambda x: x.upper(), args.applications[1: -1].split(', ')))
+    print(args[1])
+    applications = list(map(lambda x: x.upper(), args[1].split(',')))
     match_parsed = {}
 
-    with open(args.checked_lookup, 'r') as md5_data:
+    with open(args[0], 'r') as md5_data:
         checked_data = json.load(md5_data)
     matches = checked_data["matches"]
     seq_info = checked_data["sequences_info"]
@@ -86,7 +79,7 @@ def main():
     for seq_id, match in seq_info.items():
         md52seq_id[match[-2]] = seq_id
 
-    match_results = match_lookup(matches, args.url)
+    match_results = match_lookup(matches, args[2])
     match_parsed = parse_match(match_results, applications, md52seq_id, match_parsed)
 
     print(match_parsed)
