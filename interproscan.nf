@@ -21,7 +21,7 @@ def printHelp() {
         nextflow run interproscan.nf --input <path to fasta file>
 
     Params options:
-        --applications <ANALYSES>          Optional, comma separated - without spaces - list of analyses.
+        --applications <ANALYSES>          Optional, comma separated - without spaces - list of analysis methods (i.e. member databases/applications).
                                             If this option is not set, ALL analyses will be run.
         --disable-precalc                  Optional. Disables use of the precalculated match lookup service.
                                             All match calculations will be run locally.
