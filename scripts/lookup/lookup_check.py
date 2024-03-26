@@ -2,7 +2,10 @@ import json
 import requests
 import sys
 
-
+"""
+Checks for pre-calculated matches from any of the member dbs/applications.
+This differentiates between cases where the previous calculations found not matches and when a previous calculation has not been performed during LOOKUP_MATCH.
+"""
 def check_precalc(md5: list, url: str) -> list:
     sequences_md5 = ', '.join(md5)
     checkout = requests.get(f"{url}?md5={sequences_md5}")
