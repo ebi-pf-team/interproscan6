@@ -26,7 +26,7 @@ def printHelp() {
         --disable-precalc                  Optional. Disables use of the precalculated match lookup service.
                                             All match calculations will be run locally.
         --help                             Optional, display help information
-        --input <INPUT-FILE-PATH>          Path to fasta file that should be loaded on Master startup.
+        --input <INPUT-FILE-PATH>          [REQUIRED] Path to fasta file that should be loaded on Master startup.
     """
 }
 
