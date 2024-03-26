@@ -50,7 +50,9 @@ Batchsize parameter in `nextflow.config` defines the number maximum number of se
 
 **Configuration parameters:**
 
-* `--applications` - a list of member databases/applications to be inclued in the analysis. For example:
+* `--applications` - a list of member databases/applications to be employed in the analysis. By default, `InterProScan6` employs all member databases and applications, use this flag to run only a subset of applications. For example:
+```bash
+nextflow run interproscan.nf --input <fasta file> --applications NCBIfam,Panther,Pfam
 
 ```yaml
 applications: AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,Pfam,Phobius,PIRSF,PIRSR,PRINTS,PrositePatterns,PrositeProfiles,SFLD,SignalP_EUK,SignalP_GRAM_NEGATIVE,SignalP_GRAM_POSITIVE,SMART,SuperFamily,TMHMM
