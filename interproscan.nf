@@ -44,7 +44,7 @@ if (params.help) {
 if (!params.input) {
     log.info """
             Please provide an input file.
-            The typical command for running the pipeline is as follows:
+            The typical command for running the pipeline is:
                 nextflow run interproscan.nf --input <path to fasta file>
             For more information, please use the --help flag.
             """
