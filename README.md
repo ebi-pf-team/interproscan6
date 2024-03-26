@@ -46,7 +46,7 @@ Batchsize parameter in `nextflow.config` defines the number maximum number of se
 
 Parameters can be set on command line using double dashes. The only mandatory parameter is the --input one.
 
-`IMPORTANT: Parameters that have more than one value must be separated by comma and without space (e.g. --applications antifam,ncbifam,pfam)`
+**IMPORTANT:** For parameters that have more than one value, separate values using a comma (not spaces) (e.g. `--applications antifam,ncbifam,pfam)`
 
 **Configuration parameters:**
 
