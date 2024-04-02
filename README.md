@@ -46,7 +46,7 @@ Batchsize parameter in `nextflow.config` defines the number maximum number of se
 
 `InterProScan6` is configured via the command-line. The only mandatory parameter is `--input`.
 
-**IMPORTANT:** For parameters that have more than one value, separate values using a comma (not spaces) (e.g. `--applications antifam,ncbifam,pfam)`
+**IMPORTANT:** For parameters that have more than one value, separate values using a comma (not spaces) (e.g. `--applications antifam,ncbifam,pfam)`)
 
 **Configuration parameters:**
 
