@@ -6,7 +6,7 @@ This doc lists the member databases (and associated applications), as well as ho
 
 - [`HMMER`](https://academic.oup.com/nar/article-lookup/doi/10.1093/nar/gky448) - Assesses alignment between query sequence and Hidden Markov Models (HMMs)
 - [`cath-resolve-hits`](https://doi.org/10.1093/bioinformatics/bty863) - helps to resolve domain matches
-- [`TreeGrafter](https://doi.org/10.1093/bioinformatics/bty625) - a tool for annotating uncharacterised protein sequences, using annotated phylogenetic trees.
+- [`TreeGrafter`](https://doi.org/10.1093/bioinformatics/bty625) - a tool for annotating uncharacterised protein sequences, using annotated phylogenetic trees.
 - [`rpsblast`](https://www.animalgenome.org/blast/doc/rpsblast.html) - reversed position specific BLAST.
 - [`nCoils`](https://doi.org/10.1016/S0076-6879(96)66032-7) - tool for the prediction and analysis of coiled-coil structures
 - [`modidb`](https://doi.org/10.1093/nar/gkac1065) - Database and software for intrinsically disordered proteins
