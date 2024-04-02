@@ -12,6 +12,10 @@ This document is for tracking development of `interproscan-6`. This includes imp
 
 - [x] Add description of configuration file
 
+### Scripts
+
+- [ ] Re-write `ps_scan.pl` in Python in order to remove the perl dependency
+
 # Should haves and Should do
 
 ### Performance
