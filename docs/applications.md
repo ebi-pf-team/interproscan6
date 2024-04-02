@@ -78,7 +78,10 @@ Each member databases requires its own HMMs.
 ## SFLD
 
 - `HMMER`
-- Post-processing ....
+- Additional data files:
+    - site annotation file
+    - hierarchy file
+- Post-processing achieved using an in house C (`sfld_postprocess.h`, `sfld_postprocess.c`)
 
 ## SMART
 
@@ -88,7 +91,10 @@ Each member databases requires its own HMMs.
 
 - `HMMER`
 - Additional data files:
-    - 
+    - `self_hits.tab`
+    - `cla.scop`
+    - `model.tab`
+    - `pdbj95d`
 
 # Member db specific tools
 
