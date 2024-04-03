@@ -2,7 +2,7 @@ process HMMER_RUNNER {
     container 'docker.io/staphb/hmmer:latest'
 
     input:
-    tuple val(fasta), path(hmm), val(switches)
+    tuple path(fasta), path(hmm), val(switches)
 
     output:
     path "hmmer_${hmm}.out"
@@ -10,6 +10,6 @@ process HMMER_RUNNER {
 
     script:
     """
-    ${params.hmmsearch_bin} ${switches} -o hmmer_${hmm}.out --domtblout hmmer_${hmm}.dtbl ${hmm} ${fasta}
+    ${params.bin.hmmer.hmmsearch} ${switches} -o hmmer_${hmm}.out --domtblout hmmer_${hmm}.dtbl ${hmm} ${fasta}
     """
 }

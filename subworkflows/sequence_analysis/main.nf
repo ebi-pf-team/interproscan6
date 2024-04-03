@@ -3,24 +3,27 @@ include { HMMER_PARSER } from "$projectDir/modules/local/hmmer_parser/main"
 
 workflow SEQUENCE_ANALYSIS {
     take:
-    fasta_application
+    fasta
+    applications
 
     main:
-        fasta_application.map { fasta, appl ->
-            runner: $params.members[appl].runner
-            fasta_path: fasta
-            member_configs: $params.members[appl]
-        }.set {runner_params}
+    Channel.from(applications.split(','))
+    .branch { member ->
+        def runner = ''
+        if (params.members."${member}".runner == "hmmer") {
+            runner = 'hmmer'
+        }
 
-       if (runner_params.runner == "hmmer") {
-            HMMER_RUNNER(runner_params.fasta_path, runner_params.member_configs)
-            HMMER_PARSER(HMMER_RUNNER.out)
-            result = HMMER_PARSER.out
-        }
-        else {
-            error "Runner not supported"
-        }
+        hmmer: runner == 'hmmer'
+            return [ params.members."${member}".data, params.members."${member}".switches ]
+        other: true
+            log.info "Application ${member} (still) not supported"
+    }.set { member_params }
+
+    runner_hmmer_params = fasta.combine(member_params.hmmer)
+    HMMER_RUNNER(runner_hmmer_params)
+    HMMER_PARSER(HMMER_RUNNER.out, params.tsv_pro)
 
     emit:
-      result
+    HMMER_PARSER.out
 }
