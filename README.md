@@ -11,7 +11,7 @@
 
 1. Download data files:
 - members bin (you can find this in interproscan5 on path `interproscan/core/jms-implementation/target/interproscan-5-dist/bin`)
-- members data (`curl ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.62-94.0/alt/interproscan-data-5.62-94.0.tar.gz --output interproscan-data-5.62-94.0.tar.gz`)
+- members data [Get InterProScan data](https://interproscan-docs.readthedocs.io/en/latest/HowToUseViaContainer.html?highlight=ftp%3A%2F%2Fftp.ebi.ac.uk%2Fpub%2Fsoftware%2Funix%2Fiprscan%2F5#get-interproscan-data)
 - xref (entries, goterms and pathways) files (Use this script: `interproscan6/files_test/get_data_to_i6.py`)
 
 2. Build a docker `interproscan6` image (this is necessary for the HMMer process):
