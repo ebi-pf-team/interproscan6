@@ -53,7 +53,7 @@ if (!params.input) {
 }
 
 // Check if the input parameters are valid
-def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members']
+def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro']
 def parameter_diff = params.keySet() - parameters_expected
 if (parameter_diff.size() != 0){
     log.info printHelp()
@@ -64,9 +64,9 @@ workflow {
     Channel.fromPath( params.input , checkIfExists: true)
     .unique()
     .splitFasta( by: params.batchsize, file: true )
-    .set { fasta_channel }
+    .set { ch_fasta }
 
-    PARSE_SEQUENCE(fasta_channel)
+    PARSE_SEQUENCE(ch_fasta)
 
     sequences_to_analyse = null
     parsed_matches = null
@@ -80,14 +80,13 @@ workflow {
     analysis_result = null
     if (params.disable_precalc || sequences_to_analyse) {
         log.info "Running sequence analysis"
-        applications_list = Channel.from(params.applications).splitCsv()
         if (sequences_to_analyse) {
-            fasta_application = sequences_to_analyse.combine(applications_list)
+            fasta_to_runner = sequences_to_analyse
         }
         else {
-            fasta_application = fasta_channel.combine(applications_list)
+            fasta_to_runner = ch_fasta
         }
-        analysis_result = SEQUENCE_ANALYSIS(fasta_application)
+        SEQUENCE_ANALYSIS(fasta_to_runner, params.applications)
     }
 
     //  Just temporary to see in which folders are the results related to this PR

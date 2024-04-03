@@ -1,12 +1,14 @@
 process HMMER_PARSER {
     input:
-    path hmmer_result
+    path out
+    path domtbl
+    val tsv_pro
 
     output:
-    path "hmmer_parsed.json"
+    path "hmmer_parsed_*"
 
     script:
     """
-    python3 $projectDir/scripts/hmm_parser/hmmer_parser_domtbl.py hmmer_result > hmmer_parsed.json
+    python3 $projectDir/scripts/hmmer/${tsv_pro ? "parser_out" : "parser_domtbl"}.py ${tsv_pro ? "${out}" : "${domtbl}"} > hmmer_parsed_${out}.json
     """
 }
