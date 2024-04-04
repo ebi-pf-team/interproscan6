@@ -1,5 +1,5 @@
 process HMMER_RUNNER {
-    container 'docker.io/staphb/hmmer:latest'
+    container 'docker.io/biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1'
 
     input:
     tuple path(fasta), path(hmm), val(switches)

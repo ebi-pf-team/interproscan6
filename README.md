@@ -25,13 +25,13 @@ mkdir i6data
 python interproscan6/files_test/get_data_to_i6.py  # for devs
 ```
 
-3. Build a docker `interproscan6` image (this is necessary for the HMMer process):
+3. Build a docker `interproscan6` base image:
 
     docker build -t interproscan6 .
     
 4. Download the additional images we use:
     
-    docker pull staphb/hmmer
+    docker pull docker pull biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1
 
 ## Quick start
 
