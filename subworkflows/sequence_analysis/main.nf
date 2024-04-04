@@ -1,5 +1,5 @@
-include { HMMER_RUNNER } from "$projectDir/modules/local/hmmer_runner/main"
-include { HMMER_PARSER } from "$projectDir/modules/local/hmmer_parser/main"
+include { HMMER_RUNNER } from "$projectDir/modules/local/hmmer/runner/main"
+include { HMMER_PARSER } from "$projectDir/modules/local/hmmer/parser/main"
 
 workflow SEQUENCE_ANALYSIS {
     take:
