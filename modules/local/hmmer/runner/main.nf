@@ -10,6 +10,6 @@ process HMMER_RUNNER {
 
     script:
     """
-    ${params.bin.hmmer.hmmsearch} ${switches} -o hmmer_${hmm}.out --domtblout hmmer_${hmm}.dtbl ${hmm} ${fasta}
+    hmmsearch ${switches} -o hmmer_${hmm}.out --domtblout hmmer_${hmm}.dtbl ${hmm} ${fasta}
     """
 }
