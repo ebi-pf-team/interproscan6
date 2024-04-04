@@ -26,7 +26,6 @@
 
 How to run:
 
-
     nextflow run interproscan.nf --input <path to fasta file> [resume]
 
 _Note: you may need to run `nextflow` using root privileges_
@@ -46,7 +45,7 @@ Batchsize parameter in `nextflow.config` defines the number maximum number of se
 
 `InterProScan6` is configured via the command-line. The only mandatory parameter is `--input`.
 
-**IMPORTANT:** For parameters that have more than one value, separate values using a comma (not spaces) (e.g. `--applications antifam,ncbifam,pfam)`)
+**IMPORTANT:** For parameters that have more than one value, separate values using a comma (not spaces) (e.g. `--applications antifam,ncbifam,pfam)`
 
 **Configuration parameters:**
 
@@ -81,3 +80,38 @@ At the moment only protein (amino acid) sequences are supported.
 ## Outputs
 
 :TODO:
+
+# Trouble shooting
+
+## Permission denied
+
+On some systems, Nextflow requires root privileges to be able to create the output directories. 
+
+If you receive an error message such as:
+```bash
+ERROR ~ Error executing process > 'PARSE_SEQUENCE (1)'
+
+Caused by:
+  Unable to create directory=.../InterProScan6/work/56/c74d6bbc6637c201a68afd84b75d27 -- check file system permissions
+```
+
+Try running Nextflow with root privileges:
+```
+sudo nextflow run interproscan.nf --input <path to fasta file> 
+```
+
+## File not found
+
+If you recieve a file not found error:
+```bash
+FileNotFoundError: [Errno 2] No such file or directory
+```
+
+This may be due to the docker image not being built correctly. This can happen due to file permissions from preventing docker from reading the `interproscan6` files.
+
+Try running docker with root privileges:
+```
+sudo docker build -t interproscan6 .
+```
+
+Check the docker installtion is configured correctly, with all necessary privileges. [StackOverflow](https://stackoverflow.com/questions/48957195/how-to-fix-docker-got-permission-denied-issue)
