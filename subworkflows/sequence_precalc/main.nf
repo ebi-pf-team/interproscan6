@@ -1,6 +1,6 @@
-include { LOOKUP_CHECK } from "$projectDir/modules/local/lookup_check/main"
-include { LOOKUP_MATCHES } from "$projectDir/modules/local/lookup_matches/main"
-include { LOOKUP_NO_MATCHES } from "$projectDir/modules/local/lookup_no_matches/main"
+include { LOOKUP_CHECK } from "$projectDir/modules/local/lookup/check/main"
+include { LOOKUP_MATCHES } from "$projectDir/modules/local/lookup/matches/main"
+include { LOOKUP_NO_MATCHES } from "$projectDir/modules/local/lookup/no_matches/main"
 
 workflow SEQUENCE_PRECALC {
     take:
