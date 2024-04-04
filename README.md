@@ -14,8 +14,8 @@
 curl ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.67-99.0/alt/interproscan-data-5.67-99.0.tar.gz \
     --output interproscan-data-5.67-99.0.tar.gz
 tar -pxzf interproscan-data-5.67-99.0.tar.gz
-mv interproscan-data-5.67-99.0/data .
-rm interproscan-data-5.67-99.0 -rf
+mv interproscan-5.67-99.0/data .
+rm interproscan-5.67-99.0 -rf
 rm interproscan-data-5.67-99.0.tar.gz
 ```
 
