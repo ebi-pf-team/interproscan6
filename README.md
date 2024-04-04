@@ -9,16 +9,26 @@
 
 ## Set up
 
-1. Download data files:
-- members bin (you can find this in interproscan5 on path `interproscan/core/jms-implementation/target/interproscan-5-dist/bin`)
-- members data (`curl ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.62-94.0/alt/interproscan-data-5.62-94.0.tar.gz --output interproscan-data-5.62-94.0.tar.gz`)
-- xref (entries, goterms and pathways) files (Use this script: `interproscan6/files_test/get_data_to_i6.py`)
+1. Download member data files:
+```bash
+curl ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.67-99.0//alt/interproscan-data-5.67-99.0/.tar.gz \
+    --output interproscan-data-5.67-99.0/.tar.gz
+tar -pxzf interproscan-data-5.67-99.0.tar.gz
+mv interproscan-data-5.67-99.0/data .
+rm interproscan-data-5.67-99.0 -rf
+rm interproscan-data-5.67-99.0.tar.gz
+```
 
-2. Build a docker `interproscan6` image (this is necessary for the HMMer process):
+2. Download InterPro data files (xref (entries, goterms and pathways)):
+```bash
+python interproscan6/files_test/get_data_to_i6.py  # for devs
+```
+
+3. Build a docker `interproscan6` image (this is necessary for the HMMer process):
 
     docker build -t interproscan6 .
     
-3. Download the additional images we use:
+4. Download the additional images we use:
     
     docker pull staphb/hmmer
 
@@ -45,7 +55,7 @@ Batchsize parameter in `nextflow.config` defines the number maximum number of se
 
 `InterProScan6` is configured via the command-line. The only mandatory parameter is `--input`.
 
-**IMPORTANT:** For parameters that have more than one value, separate values using a comma (not spaces) (e.g. `--applications antifam,ncbifam,pfam)`
+**IMPORTANT:** For parameters that have more than one value, separate values using a comma (not spaces) (e.g. `--applications antifam,ncbifam,pfam)`)
 
 **Configuration parameters:**
 
