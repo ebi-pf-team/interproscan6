@@ -32,8 +32,9 @@ This document is for tracking development of `interproscan-6`. This includes imp
 - [ ] Write separate/additional requirements for dev (typically includes additional linters and doc builders, `requirements-dev.txt`) and running (for users `requirements.txt`)
 - [ ] Docs - make note on handling of ambigous amino acids, and accepted symbols
 - [ ] Consider building a metamodel
-- [X] If `applications` in `input.yaml` is None, run all tools. This will make it easier for users, saving them from having to write all the names of all the tools
+- If `applications` in `input.yaml` is None, run all tools. This will make it easier for users, saving them from having to write all the names of all the tools
 - [ ] Add singularity support - many clusters do not support docker, so many users may need to create their own Singulatiry images and have to alter the `interproscan6` code base to use Singulatiry. Either hardcode in Singulatiry support along side docker support, or write instructions on how to configure `interproscan6` to use Singulatiry
+- [ ] Simplify configuration. Instead of requiring the user to navigate several files and directories to find the write configuration files (e.g. while enabling `SignalP` analyses), confiuration files can be gathered into a single place.
 
 # Observations
 
