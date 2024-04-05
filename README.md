@@ -1,4 +1,4 @@
-# interproscan6
+# InterProScan6
 
 **!! UNDER DEVELOPMENT !!**
 
@@ -25,13 +25,43 @@ mkdir i6data
 python interproscan6/files_test/get_data_to_i6.py  # for devs
 ```
 
-3. Build a docker `interproscan6` base image:
+3. Build a docker `InterProScan6` base image:
 
     docker build -t interproscan6 .
     
 4. Download the additional images we use:
     
-    docker pull docker pull biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1
+    docker pull biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1
+
+## Installing licensed applications (`Phobius`, `SignalP`, `TMHMM`)
+
+By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
+because they contain licensed components. In order to activate these analyses please 
+obtain the relevant license and files from the provider (ensuring the software version 
+numbers are the same as those supported by your current `InterProScan6` installation).
+
+Files can be placed in any location as long as your `subworkflows/sequence_analysis/members.config` configuration is updated accordingly.
+
+### `SignalP`
+
+1. Follow the installation instructions for `SignalP` available [here](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md)
+    * Either fast or slow models can be implemented
+    * To install additional modes, please follow the `SignalP` [documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#installing-additional-modes)
+
+2. Update the `InterProScan6` configuration: update `subworkflows/sequence_analysis/members.config`:
+```yaml
+
+```
+
+### Converting from CPU to GPU, and back again
+
+:TODO: -- add support for GPU run
+
+The model weights that come with the `SignalP` installation by default run on your CPU.
+If you have a GPU available, you can convert your installation to use the GPU instead. 
+
+1. Convert the `SignalP` installation to GPU by following the `SignalP` [documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#converting-to-gpu)
+2. ....???....
 
 ## Quick start
 
@@ -116,7 +146,7 @@ If you recieve a file not found error:
 FileNotFoundError: [Errno 2] No such file or directory
 ```
 
-This may be due to the docker image not being built correctly. This can happen due to file permissions from preventing docker from reading the `interproscan6` files.
+This may be due to the docker image not being built correctly. This can happen due to file permissions from preventing docker from reading the `InterProScan6` files.
 
 Try running docker with root privileges:
 ```
