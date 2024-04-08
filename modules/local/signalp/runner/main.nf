@@ -1,6 +1,6 @@
 process SIGNALP_RUNNER {
     input:
-    tuple path(fasta), val(mode), val(model_dir), val(organism), val(switches)
+    tuple path(fasta), val(mode), path(model_dir), val(organism), val(switches)
 
     output:
     path "signalp_out"
