@@ -14,16 +14,11 @@ This document is for tracking development of `interproscan-6`. This includes imp
 
 # Should haves and Should do
 
+- [ ] Make applicaiton names case insensitivie for the user
 - [ ] Test batchsizes - access performance and resource cost
 - [ ] Validate input file format - e.g. if user fails to provide sequences in FASTA format, an error message that will be understandable to a none expert will be raised
 - [ ] If no sequences are provided, the program should automatically close without initialising the downstream analyses
-
-### Code
-
 - [X] Parse arguments directly to script, remove reliance on `argsparse`.
-
-### Documentation
-
 - [ ] Add description of workflows, modules and executables (for devs) - IN PROGRESS
 
 # Could haves and Could do
