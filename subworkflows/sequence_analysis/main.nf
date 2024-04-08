@@ -8,10 +8,8 @@ workflow SEQUENCE_ANALYSIS {
     applications
 
     main:
-    log.info "DEBUG params: ${params.members.signalp.data.mode},${params.members.signalp.data.model_dir},${params.members.signalp.data.organism},${params.members.signalp.switches}"
     Channel.from(applications.split(','))
     .branch { member ->
-        def runner = ''
         if (params.members."${member}".runner == "hmmer") {
             runner = 'hmmer'
         }
@@ -40,15 +38,18 @@ workflow SEQUENCE_ANALYSIS {
         runner_hmmer_params = fasta.combine(member_params.hmmer)
         HMMER_RUNNER(runner_hmmer_params)
         HMMER_PARSER(HMMER_RUNNER.out, params.tsv_pro)
-        result = HMMER_PARSER.out
-    }
+        return HMMER_PARSER.out
+    }.set { result }
+    else
     if (runner == 'signalp') {
         runner_signalp_params = fasta.combine(member_params.signalp)
-        log.info "signalp params: ${runner_signalp_params}"
         SIGNALP_RUNNER(runner_signalp_params)
 //         SIGNALP_PARSER(...)
 //         result = SIGNALP_PARSER.out
-        result = SIGNALP_RUNNER.out
+        return SIGNALP_RUNNER.out
+    }.set { result }
+    else {
+        log.info "Runner ${runner} (still) not supported"
     }
 
     emit:

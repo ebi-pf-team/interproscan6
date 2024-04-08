@@ -9,7 +9,6 @@ process SIGNALP_RUNNER {
 
     script:
     """
-    echo "Running SignalP with the following parameters: mode=${mode}, model_dir=${model_dir}, organism=${organism}, switches=${switches}"
     signalp6 --organism ${organism} --fastafile ${fasta} --output_dir signalp_out ${switches} --mode ${mode} --model_dir ${model_dir}
     """
 }
