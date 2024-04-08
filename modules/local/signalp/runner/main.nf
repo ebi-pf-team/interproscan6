@@ -9,6 +9,6 @@ process SIGNALP_RUNNER {
 
     script:
     """
-    signalp6 --organism ${organism} --fastafile ${fasta} --output_dir signalp_out --mode ${mode} --model_dir ${model_dir}
+    signalp6 --organism ${organism} --fastafile ${fasta} --output_dir signalp_out --mode ${mode}
     """
 }
