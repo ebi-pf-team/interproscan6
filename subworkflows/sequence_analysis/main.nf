@@ -20,7 +20,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members.signalp.data.mode,
                 params.members.signalp.data.model_dir, 
                 params.members.signalp.data.organism, 
-                params.members.signalp.switches 
+                params.members.signalp.switches
             ]
         other: true
             log.info "Application ${member} (still) not supported"
