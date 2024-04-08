@@ -14,52 +14,26 @@ This document is for tracking development of `interproscan-6`. This includes imp
 
 # Should haves and Should do
 
-### Performance
-
 - [ ] Test batchsizes - access performance and resource cost
-
-### Inputs
-
 - [ ] Validate input file format - e.g. if user fails to provide sequences in FASTA format, an error message that will be understandable to a none expert will be raised
 - [ ] If no sequences are provided, the program should automatically close without initialising the downstream analyses
 
 ### Code
 
-- [ ] Parse arguments directly to script, remove reliance on `argsparse`.
-
-This can be done using the `sys` module.
-
-```python
-import sys
-
-def my_function(arg1, arg2):
-    print(f"Argument 1: {arg1}, Argument 2: {arg2}")
-
-if __name__ == "__main__":
-    # sys.argv[0] is the script name itself, so we exclude it.
-    args = sys.argv[1:]
-    my_function(*args)
-```
-
-Then to run this script:
-
-```bash
-python my_script.py arg1 arg2
-```
+- [X] Parse arguments directly to script, remove reliance on `argsparse`.
 
 ### Documentation
 
-- [ ] Add description of workflows, modules and executables (for devs)
+- [ ] Add description of workflows, modules and executables (for devs) - IN PROGRESS
 
 # Could haves and Could do
 
-### Configuration
-
-- [ ] Remove `help: false/true` in input config yaml. If no yaml file provided, print help information, else parse input yaml and run workflow.
+- [X] Remove `help: false/true` in input config yaml. If no yaml file provided, print help information, else parse input yaml and run workflow.
 - [ ] Write separate/additional requirements for dev (typically includes additional linters and doc builders, `requirements-dev.txt`) and running (for users `requirements.txt`)
 - [ ] Docs - make note on handling of ambigous amino acids, and accepted symbols
 - [ ] Consider building a metamodel
-- If `applications` in `input.yaml` is None, run all tools. This will make it easier for users, saving them from having to write all the names of all the tools
+- [X] If `applications` in `input.yaml` is None, run all tools. This will make it easier for users, saving them from having to write all the names of all the tools
+- [ ] Add singularity support - many clusters do not support docker, so many users may need to create their own Singulatiry images and have to alter the `interproscan6` code base to use Singulatiry. Either hardcode in Singulatiry support along side docker support, or write instructions on how to configure `interproscan6` to use Singulatiry
 
 # Observations
 
