@@ -118,7 +118,7 @@ Files can be placed in any location as long as your `subworkflows/sequence_analy
     * Copy the `SignalP6` `Dockerfile` to your local `SignalP6` directory.
     * Build the docker image (with the terminal pointed at your local `SignalP6` directory)
 ```bash
-docker build -t signalp6
+docker build -t signalp6 .
 ```
 
 3. Update the `InterProScan6` configuration: specifically, update `subworkflows/sequence_analysis/members.config`:
