@@ -112,12 +112,12 @@ Files can be placed in any location as long as your `subworkflows/sequence_analy
     * Either fast or slow models can be implemented
     * To change the implemented mode please see the [Changing mode](#changing-mode) documentation
 
-2. Build a docker image.
-    * The Nextflow pipeline needs all third party tools to be stored within linux containers. 
-    * A docker file to build the necessary Docker image for `SignalP6` is available in the `docker_files/signalp/` directory.
-    * Copy the `SignalP6` `Dockerfile` to your local `SignalP6` directory.
-    * Build the docker image (with the terminal pointed at your local `SignalP6` directory)
+2. Build a docker image - _the Nextflow pipeline needs all third party tools to be stored within linux containers_. 
+    * Copy the docker file available in the `docker_files/signalp/` directory to your local `SignalP6` directory.
+    * Build the docker image (with the terminal pointed at your local `SignalP6` directory).
+
 ```bash
+cp docker_files/signalp/Dockerfile SIGNALP_DIR/Dockerfile
 docker build -t signalp6 .
 ```
 
@@ -133,9 +133,9 @@ signalp {
     switches = "-f summary -c 70"
 }
 ```
-Note: _Instead of updating the `model_dir` parameter, we recommend copying the models from your local `SignalP6` directory into the `InterProScan6/signalp/models` directory._
+**Note:** _Instead of updating the `model_dir` parameter, we recommend copying the models from your local `SignalP6` directory into the `InterProScan6/signalp/models` directory._
 
-Note: Organism: _Set `organism` to `"eukaryote"` or `"euk"` to limit the predictions to Sec/SPI, or leave as `"other"` to apply all models in `SignalP6`, as per the `SignalP6` documentation:_
+**Note:** Organism: _Set `organism` to `"eukaryote"` or `"euk"` to limit the predictions to Sec/SPI, or leave as `"other"` to apply all models in `SignalP6`, as per the `SignalP6` documentation:_
 
 > Specifying the eukarya method of `SignalP6` (`SignalP_EUK`) triggers post-processing of the SP predictions by `SignalP6` to prevent spurious results (only predicts type Sec/SPI).
 
@@ -147,7 +147,7 @@ Include `signalp` in the list of applications defined using `--applications` fla
 
 `SignalP6` supports 3 modes: `fast`, `slow` and `slow-sequential`. To change the mode of `SignalP6`:
 
-1. Incorporate the new mode into your `SignalP6` installtion, please follow the `SignalP6` [documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#installing-additional-modes).
+1. Incorporate the new mode into your `SignalP6` installtion as per the `SignalP6` [documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#installing-additional-modes).
 
 2. Update the `member.config` configuration (`subworkflows/sequence_analysis/members.config`)
 ```
@@ -161,6 +161,8 @@ signalp {
     switches = "-f summary -c 70" 70"
 }
 ```
+
+**Note:** _`InterProScan6` only supports the implementation of one `SignalP` mode at a time. A separate `InterProScan6` but be completed for each mode of interest, in order ro apply multiple modes to the same dataset_.
 
 ### Converting from CPU to GPU, and back again
 
