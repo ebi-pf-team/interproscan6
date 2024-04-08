@@ -208,3 +208,17 @@ sudo docker build -t interproscan6 .
 ```
 
 Check the docker installtion is configured correctly, with all necessary privileges. [StackOverflow](https://stackoverflow.com/questions/48957195/how-to-fix-docker-got-permission-denied-issue)
+
+## Cannot access output files for writing
+
+This is most likely a file permission error.
+
+A potential fix is to provide root privilges to the docker contains run by Nextflow, in `nextflow.config`:
+
+```bash
+process.container = 'interproscan6'
+docker {
+    enabled = true
+    runOptions = '--user root'
+}
+```
