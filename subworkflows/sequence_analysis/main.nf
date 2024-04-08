@@ -34,43 +34,15 @@ workflow SEQUENCE_ANALYSIS {
             log.info "Application ${member} (still) not supported"
     }.set { member_params }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> b332685 (generic analysis solved)
-    log.info "Running HMMER"
     runner_hmmer_params = fasta.combine(member_params.hmmer)
     HMMER_RUNNER(runner_hmmer_params)
     HMMER_PARSER(HMMER_RUNNER.out, params.tsv_pro)
 
-    log.info "Running SignalP"
     runner_signalp_params = fasta.combine(member_params.signalp)
     SIGNALP_RUNNER(runner_signalp_params)
 
     HMMER_PARSER.out.concat(SIGNALP_RUNNER.out)
     .set { parsed_results }
-<<<<<<< HEAD
-=======
-    if (runner == 'hmmer') {
-        runner_hmmer_params = fasta.combine(member_params.hmmer)
-        HMMER_RUNNER(runner_hmmer_params)
-        HMMER_PARSER(HMMER_RUNNER.out, params.tsv_pro)
-        return HMMER_PARSER.out
-    }.set { result }
-    else
-    if (runner == 'signalp') {
-        runner_signalp_params = fasta.combine(member_params.signalp)
-        SIGNALP_RUNNER(runner_signalp_params)
-//         SIGNALP_PARSER(...)
-//         result = SIGNALP_PARSER.out
-        return SIGNALP_RUNNER.out
-    }.set { result }
-    else {
-        log.info "Runner ${runner} (still) not supported"
-    }
->>>>>>> 6772592 (removing logs)
-=======
->>>>>>> b332685 (generic analysis solved)
 
     emit:
     parsed_results
