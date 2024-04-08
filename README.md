@@ -33,35 +33,10 @@ python interproscan6/files_test/get_data_to_i6.py  # for devs
     
     docker pull biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1
 
-## Installing licensed applications (`Phobius`, `SignalP`, `TMHMM`)
+5. [Optional] install licensed software
 
 By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
-because they contain licensed components. In order to activate these analyses please 
-obtain the relevant license and files from the provider (ensuring the software version 
-numbers are the same as those supported by your current `InterProScan6` installation).
-
-Files can be placed in any location as long as your `subworkflows/sequence_analysis/members.config` configuration is updated accordingly.
-
-### `SignalP`
-
-1. Follow the installation instructions for `SignalP` available [here](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md)
-    * Either fast or slow models can be implemented
-    * To install additional modes, please follow the `SignalP` [documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#installing-additional-modes)
-
-2. Update the `InterProScan6` configuration: update `subworkflows/sequence_analysis/members.config`:
-```yaml
-
-```
-
-### Converting from CPU to GPU, and back again
-
-:TODO: -- add support for GPU run
-
-The model weights that come with the `SignalP` installation by default run on your CPU.
-If you have a GPU available, you can convert your installation to use the GPU instead. 
-
-1. Convert the `SignalP` installation to GPU by following the `SignalP` [documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#converting-to-gpu)
-2. ....???....
+because they contain licensed components. In order to activate these analyses please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
 
 ## Quick start
 
@@ -119,6 +94,86 @@ At the moment only protein (amino acid) sequences are supported.
 ## Outputs
 
 :TODO:
+
+# Installing licensed applications (`Phobius`, `SignalP`, `TMHMM`)
+
+By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
+because they contain licensed components. In order to activate these analyses please 
+obtain the relevant license and files from the provider (ensuring the software version 
+numbers are the same as those supported by your current `InterProScan6` installation).
+
+Files can be placed in any location as long as your `subworkflows/sequence_analysis/members.config` configuration is updated accordingly.
+
+## `SignalP`
+
+### Adding `SignalP` (version 6) to `InterProScan6`
+
+1. Follow the installation instructions for `SignalP` (version 6) available [here](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md)
+    * Either fast or slow models can be implemented
+    * To change the implemented mode please see the [Changing mode](#changing-mode) documentation
+
+2. Update the `InterProScan6` configuration: update `subworkflows/sequence_analysis/members.config`:
+```
+signalp {
+    runner = "signalp"
+    mode = "fast"   <--- UPDATE MODE
+    data = {
+        model_dir = "$projectDir/bin/signalp/models"  <--- UPDATE PATH TO models DIR
+    }
+    switches = {
+        other = "--organism other -f summary -c 70"
+        euk = "--organism euk -f summary -c 70"
+    }
+}
+```
+Note: _Instead of updating the `model_dir` parameter, you could copy the models directory contents into the `InterProScan6/signalp/models` directory._
+
+### Running `InterProScan6` with `SignalP6` enabled
+
+Include `SignalP_OTHER` (to see all models in `SignalP6`) or `SignalP_EUK` (to limit predictions to Sec/SPI) to the `applications` parameter in `nextflow.config`
+
+```
+params {
+    batchsize = 100
+    help = false
+    applications = 'SignalP_OTHER'  <---
+    disable_precalc = false
+    tsv_pro = false
+}
+```
+
+Specifying the eukarya method of `SignalP6` (`SignalP_EUK`) triggers post-processing of the SP predictions by `SignalP6` to prevent spurious results (only predicts type Sec/SPI).
+
+### Changing mode
+
+`SignalP6` supports 3 modes: `fast`, `slow` and `slow-sequential`. To change the mode of `SignalP6`:
+
+1. Incorporate the new mode into your `SignalP6` installtion, please follow the `SignalP6` [documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#installing-additional-modes).
+
+2. Update the `member.config` configuration (`subworkflows/sequence_analysis/members.config`)
+```
+signalp {
+    runner = "signalp"
+    mode = "fast"   <--- UPDATE MODE
+    data = {
+        model_dir = "$projectDir/bin/signalp/models"
+    }
+    switches = {
+        other = "--organism other -f summary -c 70"
+        euk = "--organism euk -f summary -c 70"
+    }
+}
+```
+
+### Converting from CPU to GPU, and back again
+
+:TODO: -- add support for GPU run
+
+The model weights that come with the `SignalP` installation by default run on your CPU.
+If you have a GPU available, you can convert your installation to use the GPU instead. 
+
+1. Convert the `SignalP` installation to GPU by following the `SignalP` [documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#converting-to-gpu)
+2. ....???....
 
 # Trouble shooting
 
