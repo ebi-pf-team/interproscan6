@@ -17,7 +17,7 @@ workflow SEQUENCE_ANALYSIS {
             runner = 'signalp'
         }
 
-        log.info "Running ${runner}"
+        log.info "runner: $runner"
         hmmer: runner == 'hmmer'
             return [
                 params.members."${member}".data,
@@ -26,32 +26,26 @@ workflow SEQUENCE_ANALYSIS {
         signalp: runner == 'signalp'
             return [
                 params.members.signalp.data.mode,
-                params.members.signalp.data.model_dir, 
-                params.members.signalp.data.organism, 
+                params.members.signalp.data.model_dir,
+                params.members.signalp.data.organism,
                 params.members.signalp.switches
             ]
         other: true
             log.info "Application ${member} (still) not supported"
     }.set { member_params }
 
-    if (runner == 'hmmer') {
-        runner_hmmer_params = fasta.combine(member_params.hmmer)
-        HMMER_RUNNER(runner_hmmer_params)
-        HMMER_PARSER(HMMER_RUNNER.out, params.tsv_pro)
-        return HMMER_PARSER.out
-    }.set { result }
-    else
-    if (runner == 'signalp') {
-        runner_signalp_params = fasta.combine(member_params.signalp)
-        SIGNALP_RUNNER(runner_signalp_params)
-//         SIGNALP_PARSER(...)
-//         result = SIGNALP_PARSER.out
-        return SIGNALP_RUNNER.out
-    }.set { result }
-    else {
-        log.info "Runner ${runner} (still) not supported"
-    }
+    log.info "Running HMMER"
+    runner_hmmer_params = fasta.combine(member_params.hmmer)
+    HMMER_RUNNER(runner_hmmer_params)
+    HMMER_PARSER(HMMER_RUNNER.out, params.tsv_pro)
+
+    log.info "Running SignalP"
+    runner_signalp_params = fasta.combine(member_params.signalp)
+    SIGNALP_RUNNER(runner_signalp_params)
+
+    HMMER_PARSER.out.concat(SIGNALP_RUNNER.out)
+    .set { parsed_results }
 
     emit:
-    result
+    parsed_results
 }
