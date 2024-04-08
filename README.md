@@ -108,41 +108,40 @@ Files can be placed in any location as long as your `subworkflows/sequence_analy
 
 ### Adding `SignalP` (version 6) to `InterProScan6`
 
-1. Follow the installation instructions for `SignalP` (version 6) available [here](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md)
+1. Follow the installation instructions for `SignalP` (version 6) available [here](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md) to download the lates `SignalP6` files.
     * Either fast or slow models can be implemented
     * To change the implemented mode please see the [Changing mode](#changing-mode) documentation
 
-2. Update the `InterProScan6` configuration: update `subworkflows/sequence_analysis/members.config`:
+2. Build a docker image.
+    * The Nextflow pipeline needs all third party tools to be stored within linux containers. 
+    * A docker file to build the necessary Docker image for `SignalP6` is available in the `docker_files/signalp/` directory.
+    * Copy the `SignalP6` `Dockerfile` to your local `SignalP6` directory.
+    * Build the docker image (with the terminal pointed at your local `SignalP6` directory)
+```bash
+docker build -t signalp6
+```
+
+3. Update the `InterProScan6` configuration: specifically, update `subworkflows/sequence_analysis/members.config`:
 ```
 signalp {
     runner = "signalp"
-    mode = "fast"   <--- UPDATE MODE
-    data = {
+    data {
+        mode = "fast"    <--- UPDATE MODE: fast, slow, or slow-sequential
         model_dir = "$projectDir/bin/signalp/models"  <--- UPDATE PATH TO models DIR
+        organism = "other"    <--- define which set up to use
     }
-    switches = {
-        other = "--organism other -f summary -c 70"
-        euk = "--organism euk -f summary -c 70"
-    }
+    switches = "-f summary -c 70"
 }
 ```
-Note: _Instead of updating the `model_dir` parameter, you could copy the models directory contents into the `InterProScan6/signalp/models` directory._
+Note: _Instead of updating the `model_dir` parameter, we recommend copying the models from your local `SignalP6` directory into the `InterProScan6/signalp/models` directory._
+
+Note: Organism: _Set `organism` to `"eukaryote"` or `"euk"` to limit the predictions to Sec/SPI, or leave as `"other"` to apply all models in `SignalP6`, as per the `SignalP6` documentation:_
+
+> Specifying the eukarya method of `SignalP6` (`SignalP_EUK`) triggers post-processing of the SP predictions by `SignalP6` to prevent spurious results (only predicts type Sec/SPI).
 
 ### Running `InterProScan6` with `SignalP6` enabled
 
-Include `SignalP_OTHER` (to see all models in `SignalP6`) or `SignalP_EUK` (to limit predictions to Sec/SPI) to the `applications` parameter in `nextflow.config`
-
-```
-params {
-    batchsize = 100
-    help = false
-    applications = 'SignalP_OTHER'  <---
-    disable_precalc = false
-    tsv_pro = false
-}
-```
-
-Specifying the eukarya method of `SignalP6` (`SignalP_EUK`) triggers post-processing of the SP predictions by `SignalP6` to prevent spurious results (only predicts type Sec/SPI).
+Include `signalp` in the list of applications defined using `--applications` flag.
 
 ### Changing mode
 
@@ -154,14 +153,12 @@ Specifying the eukarya method of `SignalP6` (`SignalP_EUK`) triggers post-proces
 ```
 signalp {
     runner = "signalp"
-    mode = "fast"   <--- UPDATE MODE
-    data = {
+    data {
+        mode = "fast"    <--- UPDATE MODE: fast, slow, or slow-sequential
         model_dir = "$projectDir/bin/signalp/models"
+        organism = "other"
     }
-    switches = {
-        other = "--organism other -f summary -c 70"
-        euk = "--organism euk -f summary -c 70"
-    }
+    switches = "-f summary -c 70" 70"
 }
 ```
 
