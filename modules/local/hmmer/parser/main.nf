@@ -3,6 +3,8 @@ process HMMER_PARSER {
     path out
     path domtbl
     val tsv_pro
+    val alignment
+    // alignment is used for the post-processing of some member databases
 
     output:
     path "hmmer_parsed_*"
