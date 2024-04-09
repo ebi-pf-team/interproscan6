@@ -11,7 +11,7 @@ process HMMER_RUNNER {
     output:
     path "hmmer_${hmm}.out"
     path "hmmer_${hmm}.dtbl"
-    path "hmmer_alignment"
+    path "hmmer_alignment", optional: true
 
     script:
     """
