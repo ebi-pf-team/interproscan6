@@ -10,8 +10,7 @@ THRESHOLD = 0.95
 def main():
     args = sys.argv[1:]
     parsed_results = parse(args[0])
-    print(parsed_results)
-    # print(json.dumps(parse_result, indent=2))
+    print(json.dumps(parsed_results, indent=2))
 
 
 def parse(signalp_out: str):
