@@ -1,6 +1,10 @@
 process SFLD_POST_PROCESSER {
     input:
-    path out
+    path out_file
+    path out_dtbl
+    path out_alignment
+    path site_annotation
+    path post_process
     val tsv_pro
 
     output:
@@ -8,12 +12,12 @@ process SFLD_POST_PROCESSER {
 
     script:
     """
-    ... > ???
+    ${post_process} -O ${out_file} -d ${out_dtbl} -a ${out_alignment} -s ${site_annotation} > hmmer_sfld_processed
     """
 }
 
 
-process FUNFAM_PSOT_PROCESSER {
+process FUNFAM_POST_PROCESSER {
     input:
     path out
     val tsv_pro
