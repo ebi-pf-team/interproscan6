@@ -8,6 +8,7 @@ nextflow.enable.dsl=2
 include { PARSE_SEQUENCE } from "$projectDir/modules/local/parse_sequence/main"
 include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
 include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
+include { AGGREGATE_RESULTS } from "$projectDir/modules/local/write_output/aggregate_results/main"
 
 
 /*
@@ -69,7 +70,7 @@ workflow {
     PARSE_SEQUENCE(ch_fasta)
 
     sequences_to_analyse = null
-    parsed_matches = null
+    parsed_matches = []
     if (!params.disable_precalc) {
         log.info "Using precalculated match lookup service"
         SEQUENCE_PRECALC(PARSE_SEQUENCE.out, params.applications)
@@ -77,7 +78,7 @@ workflow {
         sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
     }
 
-    analysis_result = null
+    analysis_result = []
     if (params.disable_precalc || sequences_to_analyse) {
         log.info "Running sequence analysis"
         if (sequences_to_analyse) {
@@ -86,9 +87,10 @@ workflow {
         else {
             fasta_to_runner = ch_fasta
         }
-        SEQUENCE_ANALYSIS(fasta_to_runner, params.applications)
+        analysis_result = SEQUENCE_ANALYSIS(fasta_to_runner, params.applications)
     }
 
-    //  Just temporary to see in which folders are the results related to this PR
-    SEQUENCE_ANALYSIS.out.view()
+    all_results = parsed_matches.concat(analysis_result)
+    AGGREGATE_RESULTS(all_results.collect())
+    AGGREGATE_RESULTS.out.view()
 }

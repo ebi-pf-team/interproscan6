@@ -81,7 +81,7 @@ def main():
     match_results = match_lookup(matches, args[2])
     match_parsed = parse_match(match_results, applications, md52seq_id, match_parsed)
 
-    print(match_parsed)
+    print(json.dumps(match_parsed, indent=2))
 
 
 if __name__ == "__main__":
