@@ -82,6 +82,8 @@ Each member databases requires its own HMMs.
     - site annotation file
     - hierarchy file
 - Post-processing achieved using an in house C (`sfld_postprocess.h`, `sfld_postprocess.c`)
+    - The executable binary is kept in th `bin/sfld/` directory
+    - The C scripts are kept in `scripts/members/sfld/`
 
 ## SMART
 
