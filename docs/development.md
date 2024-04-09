@@ -30,6 +30,7 @@ This document is for tracking development of `interproscan-6`. This includes imp
 - If `applications` in `input.yaml` is None, run all tools. This will make it easier for users, saving them from having to write all the names of all the tools
 - [ ] Add singularity support - many clusters do not support docker, so many users may need to create their own Singulatiry images and have to alter the `interproscan6` code base to use Singulatiry. Either hardcode in Singulatiry support along side docker support, or write instructions on how to configure `interproscan6` to use Singulatiry
 - [ ] Simplify configuration. Instead of requiring the user to navigate several files and directories to find the write configuration files (e.g. while enabling `SignalP` analyses), confiuration files can be gathered into a single place.
+- [ ] Increased acceptance of FASTA file formatting, e.g. protein sequence FASTA downloads from NCBI include spaces between each record, other systems do not.
 
 # Observations
 
