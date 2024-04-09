@@ -21,8 +21,8 @@ workflow SEQUENCE_ANALYSIS {
         }
 
         /*
-        The post processing of SFLD, FunFam and Gene3D HMMER hits requires the alignment file
-        But only generate alignmnets for these tool to reduce volume and computational requirements
+        The post processing of SFLD, FunFam and Gene3D HMMER hits requires additional files
+        and parameters relative to the generic hmmer runner and parser in IPS6
         */
         hmmer: runner == 'hmmer'
             return [ 
