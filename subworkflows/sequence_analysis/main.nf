@@ -1,6 +1,8 @@
 include { HMMER_RUNNER } from "$projectDir/modules/local/hmmer/runner/main"
 include { HMMER_PARSER } from "$projectDir/modules/local/hmmer/parser/main"
 include { SIGNALP_RUNNER } from "$projectDir/modules/local/signalp/runner/main"
+include { SIGNALP_PARSER } from "$projectDir/modules/local/signalp/parser/main"
+
 
 workflow SEQUENCE_ANALYSIS {
     take:
@@ -42,6 +44,7 @@ workflow SEQUENCE_ANALYSIS {
     log.info "Running SignalP"
     runner_signalp_params = fasta.combine(member_params.signalp)
     SIGNALP_RUNNER(runner_signalp_params)
+    SIGNALP_PARSER(SIGNALP_RUNNER.out, params.tsv_pro)
 
     HMMER_PARSER.out.concat(SIGNALP_RUNNER.out)
     .set { parsed_results }
