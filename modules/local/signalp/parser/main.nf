@@ -4,10 +4,10 @@ process SIGNALP_PARSER {
     val tsv_pro
 
     output:
-    path "signalp_parsed"
+    path "signalp_parsed.json"
 
     script:
     """
-    python3 $projectDir/scripts/signalp/???? > signalp_parsed.json
+    python3 $projectDir/scripts/signalp/parser.py ${out}/prediction_results.txt > signalp_parsed.json
     """
 }
