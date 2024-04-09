@@ -139,6 +139,16 @@ signalp {
 
 > Specifying the eukarya method of `SignalP6` (`SignalP_EUK`) triggers post-processing of the SP predictions by `SignalP6` to prevent spurious results (only predicts type Sec/SPI).
 
+4. Update the application list in `nextflow.config`: add `SignalP` to the application parameter:
+
+params {
+    batchsize = 100
+    help = false
+    applications = 'AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,Pfam,PIRSF,PIRSR,PRINTS,PrositePatterns,PrositeProfiles,SFLD,SMART,SuperFamily,SignalP' <--- Add new application
+    disable_precalc = false
+    tsv_pro = false
+}
+
 ### Running `InterProScan6` with `SignalP6` enabled
 
 Include `signalp` in the list of applications defined using `--applications` flag.
