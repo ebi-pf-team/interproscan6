@@ -27,12 +27,16 @@ workflow SEQUENCE_ANALYSIS {
         hmmer: runner == 'hmmer'
             return [ 
                 params.members."${member}".data, params.members."${member}".switches, 
-                false , file("placeholder1"), file("placeholder2")
+                false , []
             ]
         sfld : runner == 'sfld'
             return [
                 params.members."${member}".data, params.members."${member}".switches,
-                true, params.members."${member}".data.sites_annotation, params.members."${member}".postprocess.bin
+                true, [
+                    params.members."${member}".postprocess.sites_annotation,
+                    params.members."${member}".postprocess.bin,
+                    params.members."${member}".postprocess.hierarchy
+                ]
             ]
         other: true
             log.info "Application ${member} (still) not supported"
@@ -44,7 +48,8 @@ workflow SEQUENCE_ANALYSIS {
 
     runner_hmmer_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_hmmer_sfld_params)
-    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out, params.tsv_pro)
+    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out, member_params.sfld, params.tsv_pro)
+    SFLD_PARSER(SFLD_POST_PROCESSER.out, member_params.sfld, params.tsv_pro)
 
     emit:
     "HMMER_PARSER.out"
