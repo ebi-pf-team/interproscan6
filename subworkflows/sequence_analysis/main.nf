@@ -30,7 +30,8 @@ workflow SEQUENCE_ANALYSIS {
                 params.members.signalp.data.mode,
                 params.members.signalp.data.model_dir,
                 params.members.signalp.data.organism,
-                params.members.signalp.switches
+                params.members.signalp.switches,
+                params.members.signalp.data.pvalue
             ]
         other: true
             log.info "Application ${member} (still) not supported"
@@ -46,7 +47,7 @@ workflow SEQUENCE_ANALYSIS {
     SIGNALP_RUNNER(runner_signalp_params)
     SIGNALP_PARSER(SIGNALP_RUNNER.out, params.tsv_pro)
 
-    HMMER_PARSER.out.concat(SIGNALP_RUNNER.out)
+    HMMER_PARSER.out.concat(SIGNALP_PARSER.out)
     .set { parsed_results }
 
     emit:
