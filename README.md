@@ -230,11 +230,16 @@ FileNotFoundError: [Errno 2] No such file or directory
 This may be due to the docker image not being built correctly. This can happen due to file permissions from preventing docker from reading the `InterProScan6` files.
 
 Try running docker with root privileges:
-```
-sudo docker build -t interproscan6 .
-```
+
+    sudo docker build -t interproscan6 .
+
 
 Check the docker installtion is configured correctly, with all necessary privileges. [StackOverflow](https://stackoverflow.com/questions/48957195/how-to-fix-docker-got-permission-denied-issue)
+
+For example, check root privileges have been provided to the docker socket
+
+    sudo chmod 666 /var/run/docker.sock
+
 
 ## Cannot access output files for writing
 
