@@ -3,16 +3,15 @@ process SFLD_POST_PROCESSER {
     path out_file
     path out_dtbl
     path out_alignment
-    path site_annotation
-    path post_process
-    val tsv_pro
+    val sfld_params  // contains bin and site_annotations file path
+    // val tsv_pro
 
     output:
     path "hmmer_sfld_processed"
 
     script:
     """
-    ${post_process} -O ${out_file} -d ${out_dtbl} -a ${out_alignment} -s ${site_annotation} > hmmer_sfld_processed
+    # ${sfld_params.bin} -O ${out_file} -d ${out_dtbl} -a ${out_alignment} -s ${sfld_params.site_annotation} > hmmer_sfld_processed
     """
 }
 
