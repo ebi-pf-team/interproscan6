@@ -22,6 +22,40 @@ This section lists all the tools whose primary analysis is completed using `HMME
 
 Each member databases requires its own HMMs.
 
+Here is the minimum data required in the `members.config` file required for a member database that uses `HMMER`:
+```
+member_name {
+    release = "version number"
+    runner = "hmmer"
+    hmm = "path to hmm"
+    switches = "hmmer operational flags"
+}
+```
+For example:
+```
+antifam {
+    release = "7.0"
+    runner = "hmmer"
+    hmm = "$projectDir/data/antifam/7.0/AntiFam.hmm"
+    switches = "--cut_ga --cpu 1"
+}
+```
+All data related to post processing should be stored under the post_process key. For example:
+```
+sfld {
+    release = "4"
+    runner = "hmmer"
+    hmm = "$projectDir/data/sfld/4/sfld.hmm"
+    switches = "-Z 378 --acc --cut_ga --cpu 1"
+    postprocess {
+        bin = "$projectDir/bin/sfld/sfld_postprocess"
+        hmmsearch_force = true
+        sites_annotation = "$projectDir/data/sfld/4/sfld_sites.annot"
+        hierarchy = "$projectDir/data/sfld/4/sfld_hierarchy_flat.txt"
+    }
+}
+```
+
 ## AntiFam
 
 - `HMMER`
