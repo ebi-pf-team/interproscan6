@@ -36,7 +36,7 @@ workflow SEQUENCE_ANALYSIS {
         hmmer: runner == 'hmmer'
             return [ 
                 params.members."${member}".hmm, params.members."${member}".switches, 
-                false , []
+                false, []
             ]
         sfld : runner == 'sfld'
             return [
@@ -57,7 +57,7 @@ workflow SEQUENCE_ANALYSIS {
 
     runner_hmmer_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_hmmer_sfld_params)
-    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out, member_params.sfld, params.tsv_pro)
+    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out, params.tsv_pro)
     // SFLD_PARSER(SFLD_POST_PROCESSER.out, member_params.sfld, params.tsv_pro)
 
     emit:
