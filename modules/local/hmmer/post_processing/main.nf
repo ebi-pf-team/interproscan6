@@ -2,9 +2,8 @@ process SFLD_POST_PROCESSER {
     input:
     path out_file
     path out_dtbl
-    path out_alignment
     val sfld_params  // contains bin and site_annotations file path
-    // val tsv_pro
+    val tsv_pro
 
     output:
     path "hmmer_sfld_processed"

@@ -11,10 +11,9 @@ process HMMER_RUNNER {
     output:
     path "hmmer_${hmm}.out"
     path "hmmer_${hmm}.dtbl"
-    path "hmmer_alignment", optional: true
 
     script:
     """
-    hmmsearch ${switches} -o hmmer_${hmm}.out --domtblout hmmer_${hmm}.dtbl ${alignment ? "-a hmmer_alignment" : ""} ${hmm} ${fasta}
+    hmmsearch ${switches} -o hmmer_${hmm}.out --domtblout hmmer_${hmm}.dtbl ${alignment ? "-A hmmer_alignment" : ""} ${hmm} ${fasta}
     """
 }
