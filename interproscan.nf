@@ -55,11 +55,19 @@ if (!params.input) {
 
 // Check if the input parameters are valid
 def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro']
-def applications_expected = []
 def parameter_diff = params.keySet() - parameters_expected
 if (parameter_diff.size() != 0){
     log.info printHelp()
     exit 1, "Input not valid: $parameter_diff"
+}
+
+// Check if the applications are valid
+params.applications = params.applications.toLowerCase()
+def applications_expected = ['antifam', 'cdd', 'coils', 'funfam', 'gene3d', 'hamap', 'mobidblite', 'ncbifam', 'panther', 'pfam', 'phobius', 'pirsf', 'pirsr', 'prints', 'prositepatterns', 'prositeprofiles', 'sfld', 'signalp', 'smart', 'superfamily', 'tmhmm']
+def applications_diff = params.applications.split(',') - applications_expected
+if (applications_diff.size() != 0){
+    log.info printHelp()
+    exit 1, "Applications not valid: $applications_diff"
 }
 
 workflow {
