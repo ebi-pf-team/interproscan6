@@ -19,7 +19,7 @@ workflow SEQUENCE_ANALYSIS {
             runner = 'signalp'
         }
 
-        log.info "runner: $runner"
+        log.info "Running $runner"
         hmmer: runner == 'hmmer'
             return [
                 params.members."${member}".data,
@@ -37,12 +37,10 @@ workflow SEQUENCE_ANALYSIS {
             log.info "Application ${member} (still) not supported"
     }.set { member_params }
 
-    log.info "Running HMMER"
     runner_hmmer_params = fasta.combine(member_params.hmmer)
     HMMER_RUNNER(runner_hmmer_params)
     HMMER_PARSER(HMMER_RUNNER.out, params.tsv_pro)
 
-    log.info "Running SignalP"
     runner_signalp_params = fasta.combine(member_params.signalp)
     SIGNALP_RUNNER(runner_signalp_params)
     SIGNALP_PARSER(SIGNALP_RUNNER.out, params.tsv_pro)
