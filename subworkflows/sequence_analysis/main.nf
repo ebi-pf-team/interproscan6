@@ -13,11 +13,11 @@ workflow SEQUENCE_ANALYSIS {
     Channel.from(applications.split(','))
     .branch { member ->
         def runner = ''
-        if (member == 'sfld') {
-            runner = 'sfld'
-        }
         if (params.members."${member}".runner == "hmmer") {
             runner = 'hmmer'
+        }
+        if (member == 'sfld') {
+            runner = 'sfld'
         }
 
         /*
