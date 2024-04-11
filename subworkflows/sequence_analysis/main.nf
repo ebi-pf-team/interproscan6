@@ -33,8 +33,8 @@ workflow SEQUENCE_ANALYSIS {
             return [
                 params.members."${member}".data, params.members."${member}".switches,
                 true, [
-                    params.members."${member}".postprocess.sites_annotation,
                     params.members."${member}".postprocess.bin,
+                    params.members."${member}".postprocess.sites_annotation,
                     params.members."${member}".postprocess.hierarchy
                 ]
             ]
@@ -49,7 +49,7 @@ workflow SEQUENCE_ANALYSIS {
     runner_hmmer_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_hmmer_sfld_params)
     SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out, member_params.sfld, params.tsv_pro)
-    SFLD_PARSER(SFLD_POST_PROCESSER.out, member_params.sfld, params.tsv_pro)
+    // SFLD_PARSER(SFLD_POST_PROCESSER.out, member_params.sfld, params.tsv_pro)
 
     emit:
     "HMMER_PARSER.out"
