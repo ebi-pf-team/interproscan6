@@ -26,12 +26,12 @@ workflow SEQUENCE_ANALYSIS {
         */
         hmmer: runner == 'hmmer'
             return [ 
-                params.members."${member}".data, params.members."${member}".switches, 
+                params.members."${member}".hmm, params.members."${member}".switches, 
                 false , []
             ]
         sfld : runner == 'sfld'
             return [
-                params.members."${member}".data, params.members."${member}".switches,
+                params.members."${member}".hmm, params.members."${member}".switches,
                 true, [
                     params.members."${member}".postprocess.bin,
                     params.members."${member}".postprocess.sites_annotation,
