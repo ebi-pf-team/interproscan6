@@ -67,7 +67,7 @@ def applications_expected = ['antifam', 'cdd', 'coils', 'funfam', 'gene3d', 'ham
 def applications_diff = params.applications.split(',') - applications_expected
 if (applications_diff.size() != 0){
     log.info printHelp()
-    exit 1, "Applications not valid: $applications_diff"
+    exit 1, "Applications not valid: $applications_diff. Valid applications are: $applications_expected"
 }
 
 workflow {
