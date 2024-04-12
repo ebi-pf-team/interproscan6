@@ -12,6 +12,7 @@ workflow SEQUENCE_ANALYSIS {
     main:
     Channel.from(applications.split(','))
     .branch { member ->
+        runner = ''
         if (params.members."${member}".runner == "hmmer") {
             runner = 'hmmer'
         }
@@ -19,7 +20,7 @@ workflow SEQUENCE_ANALYSIS {
             runner = 'signalp'
         }
 
-        log.info "Running $runner"
+        log.info "Running $runner for $member"
         hmmer: runner == 'hmmer'
             return [
                 params.members."${member}".data,

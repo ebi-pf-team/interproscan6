@@ -62,15 +62,30 @@ if (parameter_diff.size() != 0){
 }
 
 // Check if the applications are valid
-params.applications = params.applications.toLowerCase()
 def applications_expected = ['antifam', 'cdd', 'coils', 'funfam', 'gene3d', 'hamap', 'mobidblite', 'ncbifam', 'panther', 'pfam', 'phobius', 'pirsf', 'pirsr', 'prints', 'prositepatterns', 'prositeprofiles', 'sfld', 'signalp', 'smart', 'superfamily', 'tmhmm']
-def applications_diff = params.applications.split(',') - applications_expected
+def applications_diff = params.applications.toLowerCase().split(',') - applications_expected
 if (applications_diff.size() != 0){
     log.info printHelp()
     exit 1, "Applications not valid: $applications_diff. Valid applications are: $applications_expected"
 }
 
+// Check if the input file is a fasta file and if it contains sequences
+if (!params.input.toLowerCase().endsWith('.fasta') && !params.input.toLowerCase().endsWith('.fa')) {
+    log.error "The input file is not a FASTA file"
+    exit 1
+}
+
+def seq_count = file(params.input).countFasta()
+    if (seq_count == 0) {
+        log.info "No sequence found in the input file"
+        exit 1
+    }
+
+log.info "Number of sequences to analyse: ${seq_count}"
+
 workflow {
+    applications = params.applications.toLowerCase()
+
     Channel.fromPath( params.input , checkIfExists: true)
     .unique()
     .splitFasta( by: params.batchsize, file: true )
@@ -82,7 +97,7 @@ workflow {
     parsed_matches = []
     if (!params.disable_precalc) {
         log.info "Using precalculated match lookup service"
-        SEQUENCE_PRECALC(PARSE_SEQUENCE.out, params.applications)
+        SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications)
         parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
         sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
     }
@@ -96,7 +111,7 @@ workflow {
         else {
             fasta_to_runner = ch_fasta
         }
-        analysis_result = SEQUENCE_ANALYSIS(fasta_to_runner, params.applications)
+        analysis_result = SEQUENCE_ANALYSIS(fasta_to_runner, applications)
     }
 
     all_results = parsed_matches.concat(analysis_result)
