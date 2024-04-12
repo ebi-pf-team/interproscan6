@@ -94,7 +94,7 @@ workflow {
     PARSE_SEQUENCE(ch_fasta)
 
     sequences_to_analyse = null
-    parsed_matches = []
+    parsed_matches = null
     if (!params.disable_precalc) {
         log.info "Using precalculated match lookup service"
         SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications)
@@ -102,7 +102,7 @@ workflow {
         sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
     }
 
-    analysis_result = []
+    analysis_result = null
     if (params.disable_precalc || sequences_to_analyse) {
         log.info "Running sequence analysis"
         if (sequences_to_analyse) {
@@ -114,7 +114,16 @@ workflow {
         analysis_result = SEQUENCE_ANALYSIS(fasta_to_runner, applications)
     }
 
-    all_results = parsed_matches.concat(analysis_result)
-    AGGREGATE_RESULTS(all_results.collect())
+    if (parsed_matches.collect() && analysis_result.collect()) {
+        all_results = parsed_matches.concat(analysis_result)
+    }
+    else if (parsed_matches) {
+        all_results = parsed_matches
+    }
+    else {
+        all_results = analysis_result
+    }
+
+    AGGREGATE_RESULTS(all_results)
     AGGREGATE_RESULTS.out.view()
 }
