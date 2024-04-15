@@ -8,11 +8,7 @@ from pathlib import Path
 
 from sfld_post_process_utilities import (
     Family,
-    Feature,
-    SeqMatches,
     SiteMatch,
-    NoHit,
-    HmmerDom,
     SFLD_POSTPROCESSOR_VERSION,
     build_parser,
 )
@@ -22,20 +18,7 @@ logger = logging.getLogger()
 
 
 def main():
-    # define default/starting values
-    families = None
-    dom_hits = None  # list of hits parsed from tblout
-    site_hits = None  # list of hits parsed from tblout
-    no_hits = None  # list of hits parsed from tblout
-    fout = None
-    hmmerout_fn = tblout_fn = alignments_fn = site_info_fn = output_fn = None
-    n_dom_hits = 0
-    n_site_hits = 0
-    n_no_hits = 0
     ali_present = None
-    n_families = 0
-    n_matched_families = 0
-    matched_family_ids = None
 
     parser = build_parser()
     args = parser.parse_args()
@@ -56,10 +39,12 @@ def main():
         sys.exit(1)
 
     if not check_hmmsearch_status(args.hmmer_out):
-        print(f"Failed to see [ok] in file '{args.hmmer_out}': hmmsearch failed?")
+        print(
+            f"Failed to see [ok] in file '{args.hmmer_out}': hmmsearch failed?")
         sys.exit(1)
 
-    # Parse HMMER output to find which families have alignments reported
+    # Parse HMMER output to find which interpro families have alignments reported
+    # {acc: 1 = alignment, 0 = no alignemnt}
     ali_present = retrieve_families_with_ali(args.hmmer_out)
 
     # Read list of residue-level features
@@ -67,15 +52,14 @@ def main():
 
     # Process alignments and check per residue matches
     site_hits, n_site_hits, no_hits, n_no_hits = identify_site_matches(
-        args.alignment,
         interpro_families,
         ali_present
     )
 
-    print(site_hits)
-    print(n_site_hits)
-    print(no_hits)
-    print(n_no_hits)
+    # # print(site_hits)
+    # # print(n_site_hits)
+    # # print(no_hits)
+    # # print(n_no_hits)
 
     # # # Parse domain matches
     # # dom_hits, n_dom_hits = read_domtblout(dom_file)
@@ -111,22 +95,24 @@ def check_hmmsearch_status(hmmer_out: Path) -> bool:
         return False
 
 
-def retrieve_families_with_ali(hmmer_out: Path) -> list[int]:
-    """Parse HMMER output to find which families have alignments reported
+def retrieve_families_with_ali(hmmer_out: Path) -> dict[str, dict[str, dict[str, list[str]]]]:
+    """Parse HMMER output to find which interpro families have alignments reported
 
     :param hmmer_out: path to HMMER output (.out) file
 
-    Marks if alignment is present for accession --> list of boolean results
-    One item per accession. 1 = alignment present. 0 = no alignment present.
-    No alignment will be generated if no targets met the reporting threshold
-    e.g. [0, 1, 0, 0, 0, 1, 1]
+    Marks if alignment is present for accession -- retrieves lies containing alignemnt
+    sequence for the interpro family and the query protein sequence into a list
+    E.g. {'SFLDS00029':
+        {'family': {'query_acc1': ['2 vvtrgC 7']}, 'query': {'query_acc1': ['144 VVcarGC 150']}}}
     """
-    ali_present = []
+    ali_present = {}
+    acc, query_acc = 'accession_placeholder', 'query_acc_placeholder'
 
     with open(hmmer_out, 'r') as fp:
         line = fp.readline()
         if not line.startswith('# hmmsearch'):
-            print("This does not look like a hmmer output file; expecting '# hmmsearch' at start")
+            print(
+                "This does not look like a hmmer output file; expecting '# hmmsearch' at start")
             sys.exit(1)
 
         while True:
@@ -134,22 +120,50 @@ def retrieve_families_with_ali(hmmer_out: Path) -> list[int]:
             if not line:
                 break
             if line.startswith('Accession:'):
-                ali_present.append(1)  # by default mark as alignment present
-            elif line.strip().startswith('[No hits detected that satisfy reporting thresholds]'):
-                ali_present[-1] = 0  # change to no alignment available
+                acc = line.split(" ")[-1].strip("\n")
+                # + one key per query protein with a sig hit#
+                ali_present[acc] = {'family': {}, 'query': {}}
+
+            elif line.startswith('>> '):
+                query_acc = line.split()[1]
+
+            elif line.strip().startswith(acc):
+                try:
+                    ali_present[acc]['family'][query_acc].append(
+                        " ".join(line.strip().split()[1:]))
+                except KeyError:
+                    ali_present[acc]['family'][query_acc] = [
+                        " ".join(line.strip().split()[1:])]
+
+            elif line.strip().startswith(query_acc):
+                try:
+                    ali_present[acc]['query'][query_acc].append(
+                        " ".join(line.strip().split()[1:]))
+                except KeyError:
+                    ali_present[acc]['query'][query_acc] = [
+                        " ".join(line.strip().split()[1:])]
 
     return ali_present
 
 
-def read_site_data(site_info: Path) -> list[Family]:
+def read_site_data(site_info: Path) -> dict[str, Family]:
     """Read list of residue-level features.
 
     Returns a list of Family objects, which represent as family
     as described in the site_info file.
 
     :param site_info: path to SFLD site annotation file
+
+    Example Family:
+        NAME: SFLDG01108
+        n_sites: 3
+        n_features: 1
+        site_pos: [37, 41, 44]
+        site_desc: ['Binds [4Fe-4S]-AdoMet cluster', 'Binds [4Fe-4S]-AdoMet cluster', 'Binds [4Fe-4S]-AdoMet cluster']
+        site_residue: ['C', 'C', 'C']
+        sequence: [<start pos> <seq> <end pos>]
     """
-    families = []
+    families = {}
     nf = 0  # number of families read from the file
 
     with open(site_info, 'r') as fp:
@@ -174,93 +188,82 @@ def read_site_data(site_info: Path) -> list[Family]:
             if not line:
                 break
             if line.startswith('ACC'):
-                families.append(Family())
                 fields = line.split()  # e.g. ['ACC', 'SFLDS00001', '3', '8']
+                name = fields[1]
                 n_sites = int(fields[2])
                 n_features = int(fields[3])
 
-                families[nf].name = fields[1]
-                families[nf].n_sites = n_sites
-                families[nf].n_features = n_features
-                families[nf].site_pos = [0] * families[nf].n_sites
-                families[nf].site_desc = [None] * families[nf].n_sites
-                families[nf].site_residue = [[None] * families[nf].n_sites for _ in range(families[nf].n_features)]
+                families[name] = Family()
+                families[name].name = fields[1]
+                families[name].n_sites = n_sites
+                families[name].n_features = n_features
+                families[name].site_pos = [0] * families[name].n_sites
+                families[name].site_desc = [None] * families[name].n_sites
+                families[name].site_residue = [None] * families[name].n_sites
                 nf += 1
 
                 for i in range(n_sites):
                     line = fp.readline()
                     if not line.startswith('SITE'):
-                        logger.error("Error reading residue annotation file: %s", line)
+                        logger.error(
+                            "Error reading residue annotation file: %s", line)
                         sys.exit(1)
                     fields = line.split()
-                    families[nf-1].site_pos[i] = int(fields[1]) - 1
-                    families[nf-1].site_desc[i] = ' '.join(fields[2:])
+                    families[name].site_pos[i] = int(fields[1]) - 1
+                    families[name].site_desc[i] = ' '.join(fields[2:])
                 for i in range(n_features):
                     line = fp.readline()
                     if not line.startswith('FEATURE'):
-                        logger.error("Error reading residue annotation file: %s", line)
+                        logger.error(
+                            "Error reading residue annotation file: %s", line)
                         sys.exit(1)
-                    families[nf-1].site_residue[i] = list(line[8:8+n_sites])
+                    families[name].site_residue = list(line[8:8+n_sites])
 
     return families, nf
 
 
 def identify_site_matches(
-    alignment: Path,
-    interpro_families: list[Family],
-    ali_present: list[int]
-) -> tuple[list, int, list, int]:
-    """"""
-    site_hits = []
-    n_site_hits = 0
-    no_hits = []
-    n_no_hits = 0
-
-    with open(alignment, 'r') as msaf:
-        msa = None
-        nfam = 0
-        while True:
-            msa = read_msa(msaf)  # namedtuple representing one MSA
-            print("MSA:", msa)
-            if msa is None:
-                break
-            while ali_present[nfam] == 0:  # no alignment available so skip to next acc
-                nfam += 1
-            if interpro_families[nfam].n_features > 0:
-                get_site_matches(interpro_families[nfam], msa, site_hits, n_site_hits, no_hits, n_no_hits)
-            nfam += 1
-
-    site_hits.sort(key=lambda x: (x.query_ac, x.model_ac))
-    no_hits.sort(key=lambda x: (x.query_ac, x.model_ac))
-    return site_hits, n_site_hits, no_hits, n_no_hits
-
-
-def read_msa(fp) -> namedtuple:
+    interpro_families: dict[str, Family],
+    ali_present: dict[str, list[str]]
+) -> list[SiteMatch]:
     """
-    Reads MSA for one query protein, and represents the MSA
-    as a named tuple.
+    Screen the domain hits retrieved from the hmmer.out file, and see if any of the sites
+    retrieved from the site annotation file are conserved in the domain hits --> SiteMatch
 
-    :param fp: open file handle
+    :param interpro_families: dict of families from the site annotation file
+    :param ali_present: marks for each protein if alignment is present in the hmmer.out file
     """
-    MSA = namedtuple('MSA', ['sequences', 'reference_info', 'alignment_length'])
-    sequences = []
-    reference_info = []
-    alignment_len = 0
-    while True:
-        line = fp.readline()
+    matches = []
 
-        if line.startswith('//'):
-            return None if not sequences else MSA(sequences, reference_info, alignment_len)
-        if line.startswith('#=GF AC'):
-            print("ref:", line)
-            reference_info.append(line.split(" ")[2])
-        elif line.startswith(('#=GF', '#=GS', "#=GC", "# ")) or len(line.strip()) == 0:
+    for family in interpro_families:
+        # no alignments = no significant hits found
+        if len(ali_present[family]['family']) == 0:
             continue
-        else:
-            print("sequence:", line)
-            alignment_len = line.strip().split()[0].split("/")[1].split("-")[1] - line.strip().split()[0].split("/")[1].split("-")[0]
-            sequences.append(line.strip().split()[1])
 
+        # check if domain hit contains site hits
+        for i, (site_pos, site_residue) in enumerate(
+            zip(interpro_families[family].site_pos, interpro_families[family].site_residue)
+        ):
+            for query_acc in ali_present[family]['family']:  # query protein ID
+                for j, algn_line in enumerate(ali_present[family]['family'][query_acc]):
+                    algn_start, algn_end = int(algn_line.split()[0]), int(algn_line.split()[-1])
+
+                    if algn_start <= site_pos <= algn_end:
+                        # check if interpro site in alignment line
+                        site_index = site_pos - algn_start + 1
+                        query_algn = ali_present[family]['query'][query_acc][j]
+                        query_residue = query_algn.split()[1][site_index]
+
+                        if query_residue.lower() == site_residue.lower():
+                            hit = SiteMatch()
+                            hit.query_ac = query_acc
+                            hit.model_ac = family
+                            hit.site_pos = site_index + int(query_algn.split()[0])
+                            hit.site_desc = interpro_families[family].site_desc[i]
+                            hit.site_residue = query_residue
+                            matches.append(hit)
+
+    return matches
 
 def get_site_matches(
     family: Family,
@@ -270,6 +273,9 @@ def get_site_matches(
     no_hits: list,
     n_no_hits: int
 ) -> tuple[list, int, list, int]:
+    """
+    Get per residue matches using alignments for this family
+    """
     rf_array = rf_to_array(msa)
     n_seq = len(msa.sequences)
     pos_map = [get_seq_pos_map(msa.sequences[i]) for i in range(n_seq)]
@@ -323,7 +329,6 @@ def get_site_matches(
     return site_hits, n_site_hits, no_hits, n_no_hits
 
 
-
 def rf_to_array(msa: namedtuple) -> list[int]:
     rf_array = [0] * msa.alignment_length
     c = 0
@@ -372,12 +377,6 @@ def build_site_match_strings(
     return len(lines), lines
 
 
-
-
-
-
-
-
 def output_dom_sites_by_query(dom_hits, n_dom_hits, site_hits, n_site_hits):
     dom_hits.sort(key=lambda x: (x.query_ac, x.model_ac))
     site_hits.sort(key=lambda x: (x.query_ac, x.model_ac))
@@ -391,7 +390,8 @@ def output_dom_sites_by_query(dom_hits, n_dom_hits, site_hits, n_site_hits):
     this_query = ""
 
     while h < n_dom_hits and s < n_site_hits:
-        cmp = cmp_match_pair(dom_hits[h].query_ac, site_hits[s].query_ac, dom_hits[h].model_ac, site_hits[s].model_ac)
+        cmp = cmp_match_pair(
+            dom_hits[h].query_ac, site_hits[s].query_ac, dom_hits[h].model_ac, site_hits[s].model_ac)
         if cmp < 0:  # Next query in alphabetical order is a domain hit
             this_query = dom_hits[h].query_ac
             print(f"Sequence: {this_query}")
@@ -455,7 +455,6 @@ def output_dom_sites_as_tab(dom_hits, n_dom_hits, site_hits, n_site_hits):
         output_site_hit(hit, True)
 
 
-
 def get_seq_pos_map(seq):
     pos_map = [0] * len(seq)
     pos = 0
@@ -481,7 +480,8 @@ def get_options_post(argv):
     ]
 
     try:
-        opts, args = getopt.getopt(argv, "mp:a:f:d:O:s:o:hv", [o[0] for o in long_options])
+        opts, args = getopt.getopt(argv, "mp:a:f:d:O:s:o:hv", [
+                                   o[0] for o in long_options])
     except getopt.GetoptError:
         show_help(sys.argv[0])
         sys.exit(2)
@@ -573,13 +573,11 @@ def parse_hmmer_dom(line):
     return pd
 
 
-
-
-
 def filter_no_hits(dom_hits, n_dom_hits, no_hits, n_no_hits):
     n, h = 0, 0
     while h < n_dom_hits:
-        cmp = cmp_match_pair(dom_hits[h].query_ac, no_hits[n].query_ac, dom_hits[h].model_ac, no_hits[n].model_ac)
+        cmp = cmp_match_pair(
+            dom_hits[h].query_ac, no_hits[n].query_ac, dom_hits[h].model_ac, no_hits[n].model_ac)
         if cmp > 0:
             n += 1
         elif cmp == 0:
@@ -588,6 +586,12 @@ def filter_no_hits(dom_hits, n_dom_hits, no_hits, n_no_hits):
             n += 1
         else:
             h += 1
+
+
+def cmp_match_pair(query_1, query_2, model_1, model_2):
+    cmp1 = 0 if query_1 == query_2 else 1 if query_1 > query_2 else -1
+    cmp2 = 0 if model_1 == model_2 else 1 if model_1 > model_2 else -1
+    return cmp1 if cmp1 != 0 else cmp2
 
 
 def strip_dom_se(dom_hits):
@@ -615,10 +619,6 @@ def output_dom_hit(hit, w_query):
         print()
 
 
-def cmp_match_pair(query_1, query_2, model_1, model_2):
-    cmp1 = 0 if query_1 == query_2 else 1 if query_1 > query_2 else -1
-    cmp2 = 0 if model_1 == model_2 else 1 if model_1 > model_2 else -1
-    return cmp1 if cmp1 != 0 else cmp2
 
 
 def cmp_nohit_query_model(p1, p2):
