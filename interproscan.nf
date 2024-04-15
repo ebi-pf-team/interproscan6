@@ -95,7 +95,9 @@ workflow {
 
     if (params.seqtype == 'n') {
         GET_ORFS(ch_fasta)
-        PARSE_SEQUENCE(GET_ORFS.out)
+        GET_ORFS.out.splitFasta( by: params.batchsize, file: true )
+        .set { orfs_fasta }
+        PARSE_SEQUENCE(orfs_fasta)
     }
     else {
         PARSE_SEQUENCE(ch_fasta)
@@ -122,8 +124,8 @@ workflow {
         analysis_result = SEQUENCE_ANALYSIS(fasta_to_runner, applications)
     }
 
-    all_results = parsed_matches.concat(analysis_result)
+    all_results = parsed_matches.collect().concat(analysis_result.collect())
 
-    AGGREGATE_RESULTS(all_results)
+    AGGREGATE_RESULTS(all_results.collect())
     AGGREGATE_RESULTS.out.view()
 }
