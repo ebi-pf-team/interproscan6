@@ -30,6 +30,7 @@ def printHelp() {
                                             All match calculations will be run locally.
         --help                             Optional, display help information
         --input <INPUT-FILE-PATH>          [REQUIRED] Path to fasta file that should be loaded on Master startup.
+        --seqtype <SEQUENCE-TYPE>          Optional. Optional, the type of the input sequences (dna/rna (n) or protein (p)). The default sequence type is protein.
     """
 }
 
