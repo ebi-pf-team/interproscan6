@@ -10,20 +10,20 @@
 ## Set up
 
 1. Download member data files:
-```bash
-curl ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.67-99.0/alt/interproscan-data-5.67-99.0.tar.gz \
-    --output interproscan-data-5.67-99.0.tar.gz
-tar -pxzf interproscan-data-5.67-99.0.tar.gz
-mv interproscan-5.67-99.0/data .
-rm interproscan-5.67-99.0 -rf
-rm interproscan-data-5.67-99.0.tar.gz
-```
+
+    curl ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.67-99.0/alt/interproscan-data-5.67-99.0.tar.gz \
+        --output interproscan-data-5.67-99.0.tar.gz
+    tar -pxzf interproscan-data-5.67-99.0.tar.gz
+    mv interproscan-5.67-99.0/data .
+    rm interproscan-5.67-99.0 -rf
+    rm interproscan-data-5.67-99.0.tar.gz
+
 
 2. Download InterPro data files (xref (entries, goterms and pathways)):
-```bash
-mkdir i6data
-python interproscan6/files_test/get_data_to_i6.py  # for devs
-```
+
+    mkdir i6data
+    python interproscan6/files_test/get_data_to_i6.py  # for devs
+
 
 3. Build a docker `InterProScan6` base image:
 
@@ -51,6 +51,10 @@ Batchsize parameter in `nextflow.config` defines the number maximum number of se
 
 **IMPORTANT:** Change the input params in the `input.yaml` file if you want to test different flows (see in `main.nf`)
 
+An example command to run `InterProScan6`, only using the `AntiFam` member database and `SignalP`, without checking for pre-calculated matches in InterPro (using an example input file):
+
+    nextflow run interproscan.nf --input files_test/best_to_test.fasta --applications signalp,antifam --disable_precalc
+
 ## Inputs
 
 ### Configuration
@@ -64,8 +68,8 @@ Batchsize parameter in `nextflow.config` defines the number maximum number of se
 **Configuration parameters:**
 
 * `--applications` - a list of member databases/applications to be employed in the analysis. By default, `InterProScan6` employs all member databases and applications, use this flag to run only a subset of applications. For example:
-```bash
-nextflow run interproscan.nf --input <fasta file> --applications NCBIfam,Panther,Pfam
+
+    nextflow run interproscan.nf --input <fasta file> --applications NCBIfam,Panther,Pfam
 
 ```yaml
 applications: AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,Pfam,Phobius,PIRSF,PIRSR,PRINTS,PrositePatterns,PrositeProfiles,SFLD,SignalP_EUK,SignalP_GRAM_NEGATIVE,SignalP_GRAM_POSITIVE,SMART,SuperFamily,TMHMM
@@ -74,7 +78,7 @@ applications: AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,P
 * `--disable_precalc` - Do not run comparison against an InterPro release to retrive precalculated matches, instead run `interproscan` for all input sequences. [Boolean]
 * `--formats` - List output file formats. Supported: JSON,TSV,GFF,XML
 * `--goterms` - Whether to retrieve and include Gene Ontology terms from InterPro in the output files. [Boolean]
-* `--help` - Whether to disble the help message - `interproscan-6` will not run any analysis when `help` is set to true. [Boolean]
+* `--help` - Whether to disble the help message - `InterProScan6` will not run any analysis when `help` is set to true. [Boolean]
 * `--input` - Path to input FASTA file
 * `--outfile` - Path and prefix for output files
 * `--pathways` - Optional, switch on lookup of corresponding Pathway annotation (IMPLIES - `lookup_file` is defined) [Boolean]
@@ -82,14 +86,17 @@ applications: AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,P
 
 #### Nextflow configuration
 
-The batch sizes, and paths to the InterPro release datasets are defined in the `./nextflow.config` file. 
+Configure the `InterProScan6` utility operations by updating `./nextflow.config`:
+
+* Define the batch size (number of sequences included in each batch job)
+* Change the accepted member databases (important if including `SignalP`, `TMHMM` and `Phobius`)
+* Update the paths to the InterPro release files
 
 ### Sequences
 
-The input sequences to be analysed by `interproscan-6`must be provided in FASTA format. All input sequences must be provided in a multi-sequence FASTA file.
+The input sequences to be analysed by `InterProScan6`must be provided in FASTA format. All input sequences must be provided in a multi-sequence FASTA file.
 
 At the moment only protein (amino acid) sequences are supported.
-
 
 ## Outputs
 
@@ -102,23 +109,32 @@ because they contain licensed components. In order to activate these analyses pl
 obtain the relevant license and files from the provider (ensuring the software version 
 numbers are the same as those supported by your current `InterProScan6` installation).
 
-Files can be placed in any location as long as your `subworkflows/sequence_analysis/members.config` configuration is updated accordingly.
+Files can be placed in any location.
 
 ## `SignalP`
 
 ### Adding `SignalP` (version 6) to `InterProScan6`
 
-1. Follow the installation instructions for `SignalP` (version 6) available [here](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md) to download the lates `SignalP6` files.
+1. Obtain a license and download `SignalP6` (`SignalP` version 6) from the `SignalP6` [server](https://services.healthtech.dtu.dk/services/SignalP-6.0/) (under 'Downloads').
     * Either fast or slow models can be implemented
     * To change the implemented mode please see the [Changing mode](#changing-mode) documentation
 
-2. Build a docker image.
-    * The Nextflow pipeline needs all third party tools to be stored within linux containers. 
-    * A docker file to build the necessary Docker image for `SignalP6` is available in the `docker_files/signalp/` directory.
-    * Copy the `SignalP6` `Dockerfile` to your local `SignalP6` directory.
-    * Build the docker image (with the terminal pointed at your local `SignalP6` directory)
+2. Unpackage the `SignalP6` `tar` file
+
+    tar -xzf signalp-6.0h.fast.tar.gz -C <SIGNALP-DIR>
+
+3. Copy the docker file available in the `./docker_files/signalp/` directory to your local `SignalP6` directory
+
 ```bash
-docker build -t signalp6
+# with the terminal point at the root of this repo
+cp docker_files/signalp/Dockerfile <SIGNALP-DIR>/Dockerfile
+```
+
+4. Build a docker image - _the Nextflow pipeline needs all third party tools to be stored within linux containers_. 
+
+```bash
+# with the terminal pointed at your local signalp dir
+docker build -t signalp6 .
 ```
 
 3. Update the `InterProScan6` configuration: specifically, update `subworkflows/sequence_analysis/members.config`:
@@ -128,26 +144,38 @@ signalp {
     data {
         mode = "fast"    <--- UPDATE MODE: fast, slow, or slow-sequential
         model_dir = "$projectDir/bin/signalp/models"  <--- UPDATE PATH TO models DIR
-        organism = "other"    <--- define which set up to use
+        organism = "other"
     }
-    switches = "-f summary -c 70"
 }
 ```
-Note: _Instead of updating the `model_dir` parameter, we recommend copying the models from your local `SignalP6` directory into the `InterProScan6/signalp/models` directory._
 
-Note: Organism: _Set `organism` to `"eukaryote"` or `"euk"` to limit the predictions to Sec/SPI, or leave as `"other"` to apply all models in `SignalP6`, as per the `SignalP6` documentation:_
+**Note:** _Set `organism` in `nextflow.config` to `"eukaryote"` or `"euk"` to limit the predictions to Sec/SPI, or leave as `"other"` to apply all models in `SignalP6`, as per the `SignalP6` documentation:_
 
 > Specifying the eukarya method of `SignalP6` (`SignalP_EUK`) triggers post-processing of the SP predictions by `SignalP6` to prevent spurious results (only predicts type Sec/SPI).
+
+4. Add `SignalP` to the application list in `nextflow.config`:
+
+params {
+    batchsize = 100
+    help = false
+    applications = 'AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,Pfam,PIRSF,PIRSR,PRINTS,PrositePatterns,PrositeProfiles,SFLD,SMART,SuperFamily,SignalP' <--- ADD NEW APPLICATION
+    disable_precalc = false
+    tsv_pro = false
+}
 
 ### Running `InterProScan6` with `SignalP6` enabled
 
 Include `signalp` in the list of applications defined using `--applications` flag.
 
+For example:
+
+    nextflow run interproscan.nf --input files_test/best_to_test.fasta --applications signalp --disable_precalc
+
 ### Changing mode
 
 `SignalP6` supports 3 modes: `fast`, `slow` and `slow-sequential`. To change the mode of `SignalP6`:
 
-1. Incorporate the new mode into your `SignalP6` installtion, please follow the `SignalP6` [documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#installing-additional-modes).
+1. Incorporate the new mode into your `SignalP6` installtion as per the `SignalP6` [documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#installing-additional-modes).
 
 2. Update the `member.config` configuration (`subworkflows/sequence_analysis/members.config`)
 ```
@@ -158,9 +186,10 @@ signalp {
         model_dir = "$projectDir/bin/signalp/models"
         organism = "other"
     }
-    switches = "-f summary -c 70" 70"
 }
 ```
+
+**Note:** _`InterProScan6` only supports the implementation of one `SignalP` mode at a time. A separate `InterProScan6` but be completed for each mode of interest, in order ro apply multiple modes to the same dataset_.
 
 ### Converting from CPU to GPU, and back again
 
@@ -201,8 +230,27 @@ FileNotFoundError: [Errno 2] No such file or directory
 This may be due to the docker image not being built correctly. This can happen due to file permissions from preventing docker from reading the `InterProScan6` files.
 
 Try running docker with root privileges:
-```
-sudo docker build -t interproscan6 .
-```
+
+    sudo docker build -t interproscan6 .
+
 
 Check the docker installtion is configured correctly, with all necessary privileges. [StackOverflow](https://stackoverflow.com/questions/48957195/how-to-fix-docker-got-permission-denied-issue)
+
+For example, check root privileges have been provided to the docker socket
+
+    sudo chmod 666 /var/run/docker.sock
+
+
+## Cannot access output files for writing
+
+This is most likely a file permission error.
+
+A potential fix is to provide root privilges to the docker contains run by Nextflow, in `nextflow.config`:
+
+```bash
+process.container = 'interproscan6'
+docker {
+    enabled = true
+    runOptions = '--user root'
+}
+```

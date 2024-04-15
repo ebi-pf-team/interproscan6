@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 
 
@@ -7,7 +8,11 @@ def aggregate_results(result_files: list):
     for file_path in result_files:
         if file_path:
             with open(file_path, 'r') as file:
-                data = json.load(file)
+                if os.path.getsize(file_path) > 0:
+                    try:
+                        data = json.load(file)
+                    except json.JSONDecodeError:
+                        pass
             for seq_id, match_info in data.items():
                 try:
                     all_results[seq_id].append(match_info)
