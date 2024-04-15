@@ -42,3 +42,7 @@ Food for thoughts - direct actions are necessarily defined but these observation
 ## Match lookup
 
 In the lookup we have to filter in the script because when we make the request we don't have the option of passing the applications we want first, the lookup match will return all the applications that have match, only then I can filter (using the `applications` variable).
+
+## Optional inputs
+
+....TO DO...
