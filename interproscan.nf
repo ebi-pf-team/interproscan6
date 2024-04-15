@@ -93,7 +93,7 @@ workflow {
     .splitFasta( by: params.batchsize, file: true )
     .set { ch_fasta }
 
-    if (params.seqtype == 'n') {
+    if (params.seqtype) {
         GET_ORFS(ch_fasta)
         GET_ORFS.out.splitFasta( by: params.batchsize, file: true )
         .set { orfs_fasta }
