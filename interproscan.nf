@@ -56,7 +56,7 @@ if (!params.input) {
 }
 
 // Check if the input parameters are valid
-def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro', 'seqtype', 'orfs']
+def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro', 'seqtype', 'orfs', 'nucleic']
 def parameter_diff = params.keySet() - parameters_expected
 if (parameter_diff.size() != 0){
     log.info printHelp()
