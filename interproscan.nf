@@ -114,8 +114,8 @@ workflow {
         analysis_result = SEQUENCE_ANALYSIS(fasta_to_runner, applications)
     }
 
-    all_results = parsed_matches.concat(analysis_result)
+    all_results = parsed_matches.collect().concat(analysis_result.collect())
 
-    AGGREGATE_RESULTS(all_results)
+    AGGREGATE_RESULTS(all_results.collect())
     AGGREGATE_RESULTS.out.view()
 }
