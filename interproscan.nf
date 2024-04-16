@@ -8,6 +8,7 @@ nextflow.enable.dsl=2
 include { PARSE_SEQUENCE } from "$projectDir/modules/local/parse_sequence/main"
 include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
 include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
+include { AGGREGATE_RESULTS } from "$projectDir/modules/local/write_output/aggregate_results/main"
 
 
 /*
@@ -60,7 +61,31 @@ if (parameter_diff.size() != 0){
     exit 1, "Input not valid: $parameter_diff"
 }
 
+// Check if the applications are valid
+def applications_expected = ['antifam', 'cdd', 'coils', 'funfam', 'gene3d', 'hamap', 'mobidblite', 'ncbifam', 'panther', 'pfam', 'phobius', 'pirsf', 'pirsr', 'prints', 'prositepatterns', 'prositeprofiles', 'sfld', 'signalp', 'smart', 'superfamily', 'tmhmm']
+def applications_diff = params.applications.toLowerCase().split(',') - applications_expected
+if (applications_diff.size() != 0){
+    log.info printHelp()
+    exit 1, "Applications not valid: $applications_diff. Valid applications are: $applications_expected"
+}
+
+// Check if the input file is a fasta file and if it contains sequences
+if (!params.input.toLowerCase().endsWith('.fasta') && !params.input.toLowerCase().endsWith('.fa')) {
+    log.error "The input file is not a FASTA file"
+    exit 1
+}
+
+def seq_count = file(params.input).countFasta()
+    if (seq_count == 0) {
+        log.info "No sequence found in the input file"
+        exit 1
+    }
+
+log.info "Number of sequences to analyse: ${seq_count}"
+
 workflow {
+    applications = params.applications.toLowerCase()
+
     Channel.fromPath( params.input , checkIfExists: true)
     .unique()
     .splitFasta( by: params.batchsize, file: true )
@@ -69,15 +94,15 @@ workflow {
     PARSE_SEQUENCE(ch_fasta)
 
     sequences_to_analyse = null
-    parsed_matches = null
+    parsed_matches = Channel.empty()
     if (!params.disable_precalc) {
         log.info "Using precalculated match lookup service"
-        SEQUENCE_PRECALC(PARSE_SEQUENCE.out, params.applications)
+        SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications)
         parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
         sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
     }
 
-    analysis_result = null
+    analysis_result = Channel.empty()
     if (params.disable_precalc || sequences_to_analyse) {
         log.info "Running sequence analysis"
         if (sequences_to_analyse) {
@@ -86,9 +111,11 @@ workflow {
         else {
             fasta_to_runner = ch_fasta
         }
-        SEQUENCE_ANALYSIS(fasta_to_runner, params.applications)
+        analysis_result = SEQUENCE_ANALYSIS(fasta_to_runner, applications)
     }
 
-    //  Just temporary to see in which folders are the results related to this PR
-    SEQUENCE_ANALYSIS.out.view()
+    all_results = parsed_matches.collect().concat(analysis_result.collect())
+
+    AGGREGATE_RESULTS(all_results.collect())
+    AGGREGATE_RESULTS.out.view()
 }
