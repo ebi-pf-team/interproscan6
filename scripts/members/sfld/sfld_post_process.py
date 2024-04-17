@@ -40,7 +40,8 @@ def main():
 
     if not check_hmmsearch_status(args.hmmer_out):
         print(
-            f"Failed to see [ok] in file '{args.hmmer_out}': hmmsearch failed?")
+            f"Failed to see [ok] in file '{args.hmmer_out}': hmmsearch failed?"
+        )
         sys.exit(1)
 
     # Parse HMMER output to find which interpro families have alignments reported
@@ -48,7 +49,7 @@ def main():
     ali_present = retrieve_families_with_ali(args.hmmer_out)
 
     # Read list of residue-level features
-    interpro_families, n_families = read_site_data(args.site_info)
+    interpro_families = read_site_data(args.site_info)
 
     # Process alignments and check per residue matches
     site_hits, n_site_hits, no_hits, n_no_hits = identify_site_matches(
@@ -164,7 +165,6 @@ def read_site_data(site_info: Path) -> dict[str, Family]:
         sequence: [<start pos> <seq> <end pos>]
     """
     families = {}
-    nf = 0  # number of families read from the file
 
     with open(site_info, 'r') as fp:
         line = fp.readline()
@@ -200,7 +200,6 @@ def read_site_data(site_info: Path) -> dict[str, Family]:
                 families[name].site_pos = [0] * families[name].n_sites
                 families[name].site_desc = [None] * families[name].n_sites
                 families[name].site_residue = [None] * families[name].n_sites
-                nf += 1
 
                 for i in range(n_sites):
                     line = fp.readline()
@@ -219,7 +218,7 @@ def read_site_data(site_info: Path) -> dict[str, Family]:
                         sys.exit(1)
                     families[name].site_residue = list(line[8:8+n_sites])
 
-    return families, nf
+    return families
 
 
 def identify_site_matches(
@@ -264,6 +263,7 @@ def identify_site_matches(
                             matches.append(hit)
 
     return matches
+
 
 def get_site_matches(
     family: Family,
