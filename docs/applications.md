@@ -118,6 +118,9 @@ sfld {
 - Post-processing achieved using an in house C (`sfld_postprocess.h`, `sfld_postprocess.c`)
     - The executable binary is kept in th `bin/sfld/` directory
     - The C scripts are kept in `scripts/members/sfld/`
+    - The aim of the post-processing is to:
+        - Identify site matches
+        - Reduce the occurence of spurious results: Domain and Site matches only count if all sites when a domain are matched in the query sequence
 
 ## SMART
 
