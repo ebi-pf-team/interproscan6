@@ -224,28 +224,30 @@ def read_site_data(site_info: Path) -> dict[str, Family]:
 def identify_site_matches(
     interpro_families: dict[str, Family],
     ali_present: dict[str, list[str]]
-) -> list[SiteMatch]:
+) -> tuple[list[SiteMatch], dict[str, str]]:
     """
     Screen the domain hits retrieved from the hmmer.out file, and see if any of the sites
-    retrieved from the site annotation file are conserved in the domain hits --> SiteMatch
+    retrieved from the site annotation file are conserved in the domain hits.
+
+    Site Matches only count if all sites within the domain hit are conserved.
 
     :param interpro_families: dict of families from the site annotation file
     :param ali_present: marks for each protein if alignment is present in the hmmer.out file
     """
-    matches = []
+    site_matches = []
+    failed_domain_hits = {}  # family: [query_acc]  -- where not all sites are conserved
 
     for family in interpro_families:
-        # no alignments = no significant hits found
-        if len(ali_present[family]['family']) == 0:
-            continue
+        # for each domain hit, check all sites match the interpro family
+        for query_acc in ali_present[family]['family']:  # query protein ID
+            matches = 0   # used to check all sites in the domain are matched
 
-        # check if domain hit contains site hits
-        for i, (site_pos, site_residue) in enumerate(
-            zip(interpro_families[family].site_pos, interpro_families[family].site_residue)
-        ):
-            for query_acc in ali_present[family]['family']:  # query protein ID
-                for j, algn_line in enumerate(ali_present[family]['family'][query_acc]):
-                    algn_start, algn_end = int(algn_line.split()[0]), int(algn_line.split()[-1])
+            for i, (site_pos, site_residue) in enumerate(
+                zip(interpro_families[family].site_pos, interpro_families[family].site_residue)
+            ):
+                # each fam_algn and query_algn is one line of an alignment
+                for j, fam_algn in enumerate(ali_present[family]['family'][query_acc]):
+                    algn_start, algn_end = int(fam_algn.split()[0]), int(fam_algn.split()[-1])
 
                     if algn_start <= site_pos <= algn_end:
                         # check if interpro site in alignment line
@@ -254,15 +256,32 @@ def identify_site_matches(
                         query_residue = query_algn.split()[1][site_index]
 
                         if query_residue.lower() == site_residue.lower():
-                            hit = SiteMatch()
-                            hit.query_ac = query_acc
-                            hit.model_ac = family
-                            hit.site_pos = site_index + int(query_algn.split()[0])
-                            hit.site_desc = interpro_families[family].site_desc[i]
-                            hit.site_residue = query_residue
-                            matches.append(hit)
+                            matches += 1
 
-    return matches
+            if matches == len(interpro_families[family].site_pos):
+                # all sites matched
+                hit = SiteMatch()
+                hit.query_ac = query_acc
+                hit.model_ac = family
+                site_data = tuple()
+                for i, (site_pos, site_residue, site_desc) in enumerate(
+                    zip(
+                        interpro_families[family].site_pos,
+                        interpro_families[family].site_residue,
+                        interpro_families[family].site_desc,
+                    )
+                ):
+                    site_data += (site_pos, site_residue, site_desc)
+                hit.sites = site_data
+                site_matches.append(hit)
+
+            else:  # not all sites match in domain hit - so mark as needing to drop domain hit
+                try:
+                    failed_domain_hits[family].append(query_acc)
+                except KeyError:
+                    failed_domain_hits[family] = [query_acc]
+
+    return site_matches, failed_domain_hits
 
 
 def get_site_matches(
