@@ -10,20 +10,15 @@ This document is for tracking development of `interproscan-6`. This includes imp
 
 ### Documentation
 
-- [x] Add description of configuration file
+- [X] Add description of configuration file
 
 # Should haves and Should do
 
+- [X] Make applicaiton names case insensitivie for the user
 - [ ] Test batchsizes - access performance and resource cost
-- [ ] Validate input file format - e.g. if user fails to provide sequences in FASTA format, an error message that will be understandable to a none expert will be raised
-- [ ] If no sequences are provided, the program should automatically close without initialising the downstream analyses
-
-### Code
-
+- [X] Validate input file format - e.g. if user fails to provide sequences in FASTA format, an error message that will be understandable to a none expert will be raised
+- [X] If no sequences are provided, the program should automatically close without initialising the downstream analyses
 - [X] Parse arguments directly to script, remove reliance on `argsparse`.
-
-### Documentation
-
 - [ ] Add description of workflows, modules and executables (for devs) - IN PROGRESS
 
 # Could haves and Could do
@@ -34,6 +29,8 @@ This document is for tracking development of `interproscan-6`. This includes imp
 - [ ] Consider building a metamodel
 - [X] If `applications` in `input.yaml` is None, run all tools. This will make it easier for users, saving them from having to write all the names of all the tools
 - [ ] Add singularity support - many clusters do not support docker, so many users may need to create their own Singulatiry images and have to alter the `interproscan6` code base to use Singulatiry. Either hardcode in Singulatiry support along side docker support, or write instructions on how to configure `interproscan6` to use Singulatiry
+- [ ] Simplify configuration. Instead of requiring the user to navigate several files and directories to find the write configuration files (e.g. while enabling `SignalP` analyses), confiuration files can be gathered into a single place.
+- [ ] Increased acceptance of FASTA file formatting, e.g. protein sequence FASTA downloads from NCBI include spaces between each record, other systems do not.
 
 # Observations
 

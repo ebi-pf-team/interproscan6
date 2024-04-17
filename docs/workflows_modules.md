@@ -8,14 +8,17 @@ A visual summary of the workflow is presented in [`interproScan6_workflow.pdf`](
 
 The main workflow can be found in `./main.nf`.
 
-Input is a YAML configuration file, which contains the bash parameters from `interproscan-5`.
+`InterProScan6` is operated via the commandline, although some utilities are configured via `.config` files.
 
-All parameters (noted by their `params` prefix) are stored in `./nextflow.config`, under `params`, these are:
-* `entries`: path to XML release of InterPro entries
-* `goterms`: path to file containing Gene Ontologoy terms from InterPro release
-* `pathways`: path to InterPro release `pathways` file
+Parameters (noted by their `params` prefix) are stored in `./nextflow.config`, under `params`, these are:
+* `entries`: path to XML release of InterPro entries [REQUIRED]
+* `goterms`: path to file containing Gene Ontologoy terms from InterPro release [OPTIONAL]
+* `pathways`: path to InterPro release `pathways` file [OPTIONAL]
 
-The use of `entries` is mandatory in the workflow, but if the user wants to have the `goterms` or `pathways` informations, it is necessary indicate it in the input YAML by setting the respective values to "true".
+The use of `entries` is mandatory in the workflow.
+
+If the user wants to include the `goterms` or `pathways` information in their outputs, the paths must be defined in the `./nextflow.config` file. If these paths are not defined, these data will not be 
+included in the output files.
 
 # Prepare data
 
@@ -33,7 +36,7 @@ The first step is to initalise the `fasta_channel`.
 * Output:
     * Paths to FASTA files
 
-The maximum number of sequences in each of these working-FASTA files is set up be the `batchsize` parameter `params` in `./nextflow.config`.
+The maximum number of sequences in each of these working-FASTA files is set up be the `batchsize` parameter (`params`) in `./nextflow.config`.
 
 ## `PARSE_SEQUENCE` Module
 
@@ -41,15 +44,15 @@ The maximum number of sequences in each of these working-FASTA files is set up b
     * Path to FASTA files (from the `fasta_channel`)
 * Executes:
     * Python script `scripts/parse_sequence.py`
-        * Hashes (MD5) sequences (including their metadata: ID, desc, etc)
+        * Hashes (MD5) protein sequences
 * Output:
     * `JSON` file of hashed sequences
 
 # Check for pre-calculations
 
-InterPro already contains a series of pre-calculated matches. `interproscan-6` can check the provided InterPro release to see if any of the input/submitted sequences have already been parsed by InterPro. Where an analysis has been previously performed by InterPro (matches may not always be found), the associated annotation data is retrieved, and the sequence is **not** queried against the models by `interproscan` with the aim generate _de novo_ annotations.
+InterPro already contains a series of pre-calculated matches. `interproscan-6` can check the provided InterPro release to see if any of the input/submitted sequences have already been parsed by InterPro. Where an analysis has been previously performed by InterPro (matches may not always be found), the associated annotation data is retrieved, and the sequence is **not** queried against the models by `interproscan` with the aim to generate _de novo_ annotations.
 
-This operation can be by-passed by setting `disable_precalc` to `true` in the configuration YAML file.
+This operation can be by-passed by using the `--disable_precalc` flag when running `InterProScan-6`.
 
 ## `sequence_precalc` Subworkflow
 
@@ -93,7 +96,7 @@ The subworkflows incorporates three modules (in order):
 **Note:**
 Sometimes a sequence has been analysed during the InterPro release process and no matches or sites were found. This is still counted as pre-calculated matches/sites.
 
-The results for an MD5 that is not in InterPro and an MD5 hash that is in InterPro but no matches were found in the last release are identical.
+The results for an MD5 that is not in InterPro and an MD5 hash that is in InterPro but no matches were found in the last release are identical. `LOOKUP_CHECK` is used to differentiate between these two cases.
 
 For example, `https://www.ebi.ac.uk/interpro/match-lookup/matches/?md5=SOMEMD5WEDONTHAVEINOURDATABASE` returns:
 
@@ -102,8 +105,6 @@ For example, `https://www.ebi.ac.uk/interpro/match-lookup/matches/?md5=SOMEMD5WE
 <matches/>
 </kvSequenceEntryXML>
 ```
-
-`LOOKUP_CHECK` is used to differentiate between these two cases.
 
 **Output:**
 
@@ -116,16 +117,15 @@ Calculate matches if there are sequences to be analysed, i.e. if `sequence_preca
 
 ## Combine `applications_channel` and (`fasta_channel` OR `sequences_to_analyse`)
 
-**Input**: All sequences that were identified as having not been previously analysed by InterPro (or all them, in case of `disable_precalc`) and combines these with an `applications_channel` to get a cartesian product of all applications we will analyse and the subsets of fasta files. 
+**Input**: All sequences that were identified as having not been previously analysed by InterPro (or all them, in case of `--disable_precalc`) and combines these with an `applications_channel` to get a cartesian product of all applications we will analyse and the subsets of fasta files. 
 
 This way we parallelize the workflow as `number_of_applications x number_of_splitted_fasta_files` flows. You can better visualize what happens in the example below:
 
 ![image](https://github.com/ebi-pf-team/interproscan6/assets/17861151/7310f97d-cec3-4d63-8c13-a399a5fb9ef4)
 
-
 ### `SEQUENCE_ANALYSIS` Subworkflow
 
-If `input_yaml.disable_precalc` is true, and/or there are sequences to analyse following checking for precalculated matches, the module `SEQUENCE_ANALYSIS` is used to coordinate checking for matches against the user specified applications (i.e. member databases).
+The module `SEQUENCE_ANALYSIS` is used to coordinate checking for matches against the user specified applications (i.e. member databases).
 
 * Configuration:
     * `subworkflows/sequence_analysis/members.config` - define operational parameters to members databases, e.g. binary paths, switches commands, ...
@@ -133,31 +133,45 @@ If `input_yaml.disable_precalc` is true, and/or there are sequences to analyse f
     * Sequences to be analysed and the names of the applications to be included in the analysis.
     * `TSV_PRO`: true/false to generate a .tsv-pro file (adding the cigar alignment in the analysis)
 * Executes:
-    * Module `RUNNER`
-    * Module `PARSER`
+    * The specific modules are dependent on the application but in general this entails:
+        * Module `RUNNER` 
+        * Module `POST_PROCESS` -- _only some member databases_
+        * Module `PARSER`
+    * Module `AGGREGATE_RESULTS`
+        * Once all `RUNNER`, `POST_PROCESS` and `PARSER` modules are executed, all results are aggregated into a single JSON object.
 * Output:
     * Parsed output from sequence analysis tools used for each members
 
 -----------------------------------------------------------------------------------------------------------------------------
 PS: This block is being refactored to be more generic and to support different analysis tools (some members don't use hmmer).
 
-#### `HMMER_RUNNER` Module
+#### For nenbers that use `HMMER`
+
+##### `HMMER_RUNNER` Module
+
+All membmer databases that use `HMMER` use the same generic `HMMER_RUNNER` module to execute HMMER.
 
 * Input:
     1. FASTA sequences to be analysed
-    2. Path to HMM profiles
-    3. `switches`: operational arguments, e.g. the number cpus to use and thresholds for matches
+    2. Path to HMM profiles (defined in the `members.config` file)
+    3. `switches`: operational arguments, e.g. the number cpus to use and thresholds for matches (defined in the `members.config` file)
 * Executes:
     * `HMMer`
 * Output: 
     1. Path to `HMMer` `.out` file
     2. Path to `HMMer` `.dtbl` file
 
-#### `HMMER_PARSER` Module
+##### `POST_PROCESS` Module
+
+Some member databases require post-processing of the `HMMER` hits to minimise spurious results. These modules run third party tools and in-house post-processing scripts (see `docs/applications.md`). These scripts write the output out in the `HMMER.dtbl` format so that the same generic `HMMER_PARSER` can be used for all applications that run `HMMER`.
+
+##### `HMMER_PARSER` Module
+
+All membmer databases that use `HMMER` use the same generic `HMMER_PARSER` module to parse and standardise the output from `HMMER`.
 
 * Input:
     1. The output from `HMMER_RUNNER` (path to the `HMMer` output files)
-    2. `tsv_pro`
+    2. `tsv_pro` - boolean, whether to write out tsv_pro output
 * Executes:
     * If `tsv_pro` is true: `hmmer_parser_out`
     * If `tsv_pro` is false: `hmmer_parser_domtbl`
