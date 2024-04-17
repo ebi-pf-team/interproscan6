@@ -157,7 +157,7 @@ PS: This block is being refactored to be more generic and to support different a
 
 * Input:
     1. The output from `HMMER_RUNNER` (path to the `HMMer` output files)
-    2. `tsv_pro` - ????
+    2. `tsv_pro`
 * Executes:
     * If `tsv_pro` is true: `hmmer_parser_out`
     * If `tsv_pro` is false: `hmmer_parser_domtbl`
