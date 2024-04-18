@@ -69,7 +69,7 @@ An example command to run `InterProScan6`, only using the `AntiFam` member datab
 
 `InterProScan6` takes advantage of the Open Reading Frame (ORF) prediction tool `esl-translate` within the [`easel` tool suite](https://github.com/EddyRivasLab/easel).
 
-The `easel` application itself and all of its dependencies are integrated in InterProScan via a [docker image](#set-up).
+The `easel` application itself and all of its dependencies are integrated in InterProScan via a docker image (see [set-up](#set-up)).
 
 ### Quick start
 
