@@ -73,7 +73,7 @@ if (applications_diff.size() != 0){
 
 // Check if the input file is a fasta file and if it contains sequences
 if (!params.input.toLowerCase().find(/.fasta$|.faa$|.fna$/)) {
-    log.error "The input file is not a FASTA file"
+    log.error "The input file is not a FASTA file (it does not end in .fasta, .faa or .fna)"
     exit 1
 }
 
@@ -94,7 +94,7 @@ workflow {
     .set { ch_fasta }
 
     if (params.seqtype) {
-        GET_ORFS(ch_fasta)
+        GET_ORFS(ch_fasta, params.translate)
         GET_ORFS.out.splitFasta( by: params.batchsize, file: true )
         .set { orfs_fasta }
         PARSE_SEQUENCE(orfs_fasta)
