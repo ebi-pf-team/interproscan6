@@ -81,6 +81,8 @@ Run `InterProScan6` with the `--nucleic` flag
 
 By default `InterProScan6` will assume the input FASTA file contains protein sequences. The `--nucleic` flag instructs `InterProScan6` to retrieve all possible ORFs using the `easel` tool suite.
 
+**Note:** The input FASTA file must contain sequences of the same type, i.e. _all_ protein sequences or _all_ nucleic acid sequences.
+
 ### Configure
 
 You can configure the prediction of ORFs by updating the relevant `translate` parameters in `nextflow.config`:
