@@ -36,11 +36,11 @@ Users who have novel nucleotide or protein sequences that they wish to functiona
     
     docker pull biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1
 
-5. [Optional: required for ORF extract] Build a docker image for [`easel`](https://github.com/EddyRivasLab/easel)
+5. [Optional] Build a docker image for [`easel`](https://github.com/EddyRivasLab/easel) for the prediction of Open Reading Frames:
 
     docker build -t easel docker_files/easel
 
-5. [Optional] install licensed software
+6. [Optional] install licensed software
 
 By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
 because they contain licensed components. In order to activate these analyses please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
