@@ -3,20 +3,25 @@ process GET_ORFS {
 
     input:
     val fasta_file
-    val(strand)
-    val(methionine)
-    val(min_len)
-    val(genetic_code)
+    val strand
+    val methionine
+    val min_len
+    val genetic_code
 
     output:
     path "orfs_sequences.fasta"
 
     script:
+    def analysed_strand = (strand == "both") ? "" : (strand == "plus") ? "--watson" : "--crick"
+
     """
-    /opt/easel/easel/miniapps/esl-translate \
-        -c ${genetic_code} \
-        -l ${min_len} \
-        ${fasta_file} \
-        > orfs_sequences.fasta
+    echo ${strand}
+    echo ${analysed_strand}
+    /opt/easel/easel/miniapps/esl-translate \\
+    -c ${genetic_code} \\
+    -l ${min_len} \\
+    ${analysed_strand} \\
+    ${fasta_file} \\
+    > orfs_sequences.fasta
     """
 }
