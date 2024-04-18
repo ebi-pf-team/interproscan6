@@ -94,6 +94,10 @@ workflow {
     .set { ch_fasta }
 
     if (params.nucleic) {
+        if (params.translate.strand.toLowerCase() !in ['both','plus','minus']) {
+            log.info "Strand option '${params.translate.strand.toLowerCase()}' in nextflow.config not recognised. Accepted: 'both', 'plus', 'minus'"
+            exit 1
+        }
         GET_ORFS(ch_fasta, params.translate.strand, params.translate.methionine, params.translate.min_len, params.translate.genetic_code)
         GET_ORFS.out.splitFasta( by: params.batchsize, file: true )
         .set { orfs_fasta }
