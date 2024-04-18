@@ -10,6 +10,7 @@ Users who have novel nucleotide or protein sequences that they wish to functiona
 
 * `Java` (version >= 11)
 * `Nextflow` (version >=23.04.02)
+* `Docker` (version >= 24.0.5)
 
 ## Set up
 
