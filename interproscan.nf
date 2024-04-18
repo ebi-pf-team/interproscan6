@@ -56,7 +56,7 @@ if (!params.input) {
 }
 
 // Check if the input parameters are valid
-def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro', 'translate', 'nucleic']
+def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro', 'translate', 'nucleic', 'orfs']
 def parameter_diff = params.keySet() - parameters_expected
 if (parameter_diff.size() != 0){
     log.info printHelp()
@@ -93,8 +93,8 @@ workflow {
     .splitFasta( by: params.batchsize, file: true )
     .set { ch_fasta }
 
-    if (params.seqtype) {
-        GET_ORFS(ch_fasta, params.translate)
+    if (params.nucleic) {
+        GET_ORFS(ch_fasta, params.translate.strand, params.translate.methionine, params.translate.min_len, params.translate.genetic_code)
         GET_ORFS.out.splitFasta( by: params.batchsize, file: true )
         .set { orfs_fasta }
         PARSE_SEQUENCE(orfs_fasta)
