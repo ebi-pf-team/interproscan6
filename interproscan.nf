@@ -9,7 +9,8 @@ include { PARSE_SEQUENCE } from "$projectDir/modules/local/parse_sequence/main"
 include { GET_ORFS } from "$projectDir/modules/local/get_orfs/main"
 include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
 include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
-include { AGGREGATE_RESULTS } from "$projectDir/modules/local/write_output/aggregate_results/main"
+include { AGGREGATE_RESULTS } from "$projectDir/modules/local/output/aggregate_results/main"
+include { WRITE_RESULTS } from "$projectDir/modules/local/output/write_results/main"
 
 
 /*
@@ -28,9 +29,13 @@ def printHelp() {
                                             If this option is not set, ALL analyses will be run.
         --disable-precalc                  Optional. Disables use of the precalculated match lookup service.
                                             All match calculations will be run locally.
+        --formats <FORMATS>                Optional, comma separated - without spaces - list of output formats.
+                                            If this option is not set, the default output format is JSON.
         --help                             Optional, display help information
         --input <INPUT-FILE-PATH>          [REQUIRED] Path to fasta file that should be loaded on Master startup.
         --nucleic                          Optional. Input comprises nucleic acid sequences.
+        --output <OUTPUT-FILE-PATH>        Optional. Path to the output file.
+                                            If this option is not set, the output will be write on results/ folder.
     """
 }
 
@@ -56,7 +61,7 @@ if (!params.input) {
 }
 
 // Check if the input parameters are valid
-def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro', 'translate', 'nucleic', 'orfs']
+def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro', 'translate', 'nucleic', 'formats', 'output']
 def parameter_diff = params.keySet() - parameters_expected
 if (parameter_diff.size() != 0){
     log.info printHelp()
@@ -131,5 +136,10 @@ workflow {
     all_results = parsed_matches.collect().concat(analysis_result.collect())
 
     AGGREGATE_RESULTS(all_results.collect())
-    AGGREGATE_RESULTS.out.view()
+
+    formats = params.formats.toLowerCase()
+    Channel.from(formats.split(','))
+    .set { ch_format }
+
+    WRITE_RESULTS(PARSE_SEQUENCE.out, AGGREGATE_RESULTS.out, ch_format, params.output)
 }
