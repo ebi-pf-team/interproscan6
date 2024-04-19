@@ -11,7 +11,7 @@ process SFLD_POST_PROCESSER {
 
     script:
     """
-    ${postprocessing_params.last()[0]} -O ${out_file} -d ${out_dtbl} -a ${alignment} -s ${postprocessing_params.last()[1]} -o hmmer_sfld_processed
+    ${postprocessing_params[0]} -O ${out_file} -d ${out_dtbl} -a ${alignment} -s ${postprocessing_params[1]} -o hmmer_sfld_processed
     """
 }
 

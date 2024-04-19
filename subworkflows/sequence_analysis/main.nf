@@ -1,7 +1,7 @@
 include { HMMER_RUNNER as GENERIC_HMMER_RUNNER; HMMER_RUNNER as SFLD_HMMER_RUNNER } from "$projectDir/modules/local/hmmer/runner/main"
 include { HMMER_PARSER } from "$projectDir/modules/local/hmmer/parser/main"
 include { GENE3D_POST_PROCESSER; FUNFAM_POST_PROCESSER; SFLD_POST_PROCESSER } from "$projectDir/modules/local/hmmer/post_processing/main"
-include { SFLD_PARSER } from "$projectDir/modules/local/hmmer/parser/slfd"
+// include { SFLD_PARSER } from "$projectDir/modules/local/hmmer/parser/slfd"
 include { SIGNALP_RUNNER } from "$projectDir/modules/local/signalp/runner/main"
 include { SIGNALP_PARSER } from "$projectDir/modules/local/signalp/parser/main"
 
@@ -18,6 +18,9 @@ workflow SEQUENCE_ANALYSIS {
         runner = ''
         if (params.members."${member}".runner == "hmmer") {
             runner = 'hmmer'
+        }
+        if (params.members."${member}".runner == "signalp") {
+            runner = 'signalp'
         }
         // funfam
         // gene3d
@@ -37,8 +40,8 @@ workflow SEQUENCE_ANALYSIS {
         and parameters relative to the generic hmmer runner and parser in IPS6
         */
         hmmer: runner == 'hmmer'
-            return [ 
-                params.members."${member}".hmm, params.members."${member}".switches, 
+            return [
+                params.members."${member}".hmm, params.members."${member}".switches,
                 false, []
             ]
         sfld: runner == 'sfld'
@@ -49,9 +52,7 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."${member}".postprocess.sites_annotation,
                     params.members."${member}".postprocess.hierarchy
                 ]
-        if (params.members."${member}".runner == "signalp") {
-            runner = 'signalp'
-        }
+            ]
         signalp: runner == 'signalp'
             return [
                 params.members.signalp.data.mode,
@@ -62,7 +63,7 @@ workflow SEQUENCE_ANALYSIS {
             ]
         other: true
             log.info "Application ${member} (still) not supported"
-            
+
         log.info "Running $runner for $member"
     }.set { member_params }
 
