@@ -9,6 +9,7 @@ process WRITE_RESULTS {
 
     script:
     """
-    python3 $projectDir/scripts/output/write_results.py ${sequences} ${matches} ${format} $projectDir/${output_path} > debug_out
+    cat ${sequences.join(" ")} > $projectDir/results/temp/sequences_hash.tmp
+    python3 $projectDir/scripts/output/write_results.py $projectDir/results/temp/sequences_hash.tmp ${matches} ${format} $projectDir/${output_path} > debug_out
     """
 }

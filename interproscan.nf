@@ -141,5 +141,5 @@ workflow {
     Channel.from(formats.split(','))
     .set { ch_format }
 
-    WRITE_RESULTS(PARSE_SEQUENCE.out, AGGREGATE_RESULTS.out, ch_format, params.output)
+    WRITE_RESULTS(PARSE_SEQUENCE.out.collect(), AGGREGATE_RESULTS.out.collect(), ch_format, params.output)
 }
