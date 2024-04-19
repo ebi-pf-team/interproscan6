@@ -2,10 +2,15 @@
 
 **!! UNDER DEVELOPMENT !!**
 
+[InterPro](http://www.ebi.ac.uk/interpro/) is a database which integrates together predictive information about proteins’ function from a number of partner resources, giving an overview of the families that a protein belongs to and the domains and sites it contains.
+
+Users who have novel nucleotide or protein sequences that they wish to functionally characterise can use the software package `InterProScan` to run the scanning algorithms from the InterPro database in an integrated way. Sequences are submitted in FASTA format. Matches are then calculated against all of the required member database’s signatures and the results are then output in a variety of formats.
+
 ## Requirements
 
 * `Java` (version >= 11)
 * `Nextflow` (version >=23.04.02)
+* `Docker` (version >= 24.0.5)
 
 ## Set up
 
@@ -24,7 +29,6 @@
     mkdir i6data
     python interproscan6/files_test/get_data_to_i6.py  # for devs
 
-
 3. Build a docker `InterProScan6` base image:
 
     docker build -t interproscan6 .
@@ -33,10 +37,16 @@
     
     docker pull biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1
 
-5. [Optional] install licensed software
+5. [Optional] Build a docker image for [`easel`](https://github.com/EddyRivasLab/easel) for the prediction of Open Reading Frames:
+
+    docker build -t easel docker_files/easel
+
+6. [Optional] install licensed software
 
 By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
 because they contain licensed components. In order to activate these analyses please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
+
+# Using `InterProScan6`
 
 ## Quick start
 
@@ -54,6 +64,133 @@ Batchsize parameter in `nextflow.config` defines the number maximum number of se
 An example command to run `InterProScan6`, only using the `AntiFam` member database and `SignalP`, without checking for pre-calculated matches in InterPro (using an example input file):
 
     nextflow run interproscan.nf --input files_test/best_to_test.fasta --applications signalp,antifam --disable_precalc
+
+## Using DNA sequences
+
+`InterProScan6` takes advantage of the Open Reading Frame (ORF) prediction tool `esl-translate` within the [`easel` tool suite](https://github.com/EddyRivasLab/easel).
+
+The `easel` application itself and all of its dependencies are integrated in InterProScan via a docker image (see [set-up](#set-up)).
+
+### Quick start
+
+Run `InterProScan6` with the `--nucleic` flag
+
+    nextflow run interproscan.nf \
+        --input <path to fasta file> \
+        --nucleic
+
+By default `InterProScan6` will assume the input FASTA file contains protein sequences. The `--nucleic` flag instructs `InterProScan6` to retrieve all possible ORFs using the `easel` tool suite.
+
+**Note:** The input FASTA file must contain sequences of the same type, i.e. _all_ protein sequences or _all_ nucleic acid sequences.
+
+### Configure
+
+You can configure the prediction of ORFs by updating the relevant `translate` parameters in `nextflow.config`:
+
+```groovy
+    translate { 
+        strand = 'both'  
+        methionine = false  
+        min_len = 20
+        genetic_code = 1
+    }
+```
+
+* `strand` - DNA strand(s) to be translated
+    - `'both'`
+    - `'plus'`
+    - `'minus'`
+* `methionine` - predicted ORFs start with M (methionine)
+    - `false` - use initation codon
+    - `true` - all ORFs start with M
+* `min_len` - minimum length of predicted ORFs [any interger]
+* `genetic_code` - ID of the genetic code to use
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Standard</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Vertebrate mitochondrial</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Yeast mitochondrial</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Mold, protozoan, coelenterate mitochondrial; Mycoplasma/Spiroplasma</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Invertebrate mitochondrial</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Ciliate, dasycladacean, Hexamita nuclear</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>Echinoderm and flatworm mitochondrial</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>Euplotid nuclear</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td>Bacterial, archaeal; and plant plastid</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>Alternative yeast</td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td>Ascidian mitochondrial</td>
+    </tr>
+    <tr>
+      <td>14</td>
+      <td>Alternative flatworm mitochondrial</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>Chlorophycean mitochondrial</td>
+    </tr>
+    <tr>
+      <td>21</td>
+      <td>Trematode mitochondrial</td>
+    </tr>
+    <tr>
+      <td>22</td>
+      <td>Scenedesmus obliquus mitochondrial</td>
+    </tr>
+    <tr>
+      <td>23</td>
+      <td>Thraustochytrium mitochondrial</td>
+    </tr>
+    <tr>
+      <td>24</td>
+      <td>Pterobranchia mitochondrial</td>
+    </tr>
+    <tr>
+      <td>25</td>
+      <td>Candidate Division SR1 and Gracilibacteria</td>
+    </tr>
+  </tbody>
+</table>
+
+
+### Configuration
 
 ## Inputs
 
@@ -241,13 +378,21 @@ For example, check root privileges have been provided to the docker socket
     sudo chmod 666 /var/run/docker.sock
 
 
-## Cannot access output files for writing
+## Cannot access or failed to open output files for writing
+
+For example:
+
+```bash
+Command error:
+  
+  Error: Failed to open output file hmmer_AntiFam.hmm.out for writing
+```
 
 This is most likely a file permission error.
 
-A potential fix is to provide root privilges to the docker contains run by Nextflow, in `nextflow.config`:
+A potential fix is to provide root privilges to the docker contains run by Nextflow in `nextflow.config`:
 
-```bash
+```groovy
 process.container = 'interproscan6'
 docker {
     enabled = true
