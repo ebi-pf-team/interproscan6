@@ -9,6 +9,18 @@ NO_HIT_MSGS = [
     "[No targets detected that satisfy reporting thresholds]"
 ]
 
+METADATA_LINES = (
+    "# Program:"
+    "# Version:"
+    "# Pipeline mode:"
+    "# Query file:"
+    "# Target file:"
+    "# Option settings:"
+    "# Current dir:"
+    "# Date:"
+    "# [ok]"
+)
+
 
 class SfldHit:
     def __init__(self):
@@ -40,7 +52,7 @@ class SiteMatch:
 
 class HmmerHit:
     """Represent record in the hmmer.out file
-    
+
     :field include: to include in output [bool]
     :field lines: list of lines from hmmer.out file"""
     def __init__(self):
@@ -97,7 +109,7 @@ def main():
     hits = parse_sfld(args.sfld)
 
     if args.dom:
-        parse_dtbl(args.dom, hits)
+        update_dtbl(args.dom, hits)
 
     # if args.hmmer_out:
     #     print()
@@ -144,20 +156,23 @@ def parse_sfld(sfld: Path) -> list[SfldHit]:
     return hits
 
 
-def parse_dtbl(dtbl: Path, hits: dict[str, SfldHit]):
+def update_dtbl(dtbl: Path, hits: dict[str, SfldHit]):
     """Parse hmmer.dtbl output, removing hits not in 
-    slfd-post-processed, and adding site data
+    slfd-post-processed, and adding site annotation data
 
     :param dtbl: Path to hmmer.dtbl file
     :param hits: dict of hits from sfld post-processed
     """
     processed_file = Path(dtbl.parent) / dtbl.name.replace(".dtbl", ".processed.dtbl")
-
+    closing_lines = ["#\n"]
     with open(processed_file, "w") as out_fh:
         with open(dtbl, "r") as in_fh:
             for line in in_fh:
                 if line.startswith("#"):
-                    out_fh.write(line)
+                    if line.startswith(METADATA_LINES):
+                        closing_lines.append(line)
+                    else:
+                        out_fh.write(line)
                 else:
                     # check if domain hit in sfld processed
                     prot_id = line.split()[0]
@@ -170,17 +185,26 @@ def parse_dtbl(dtbl: Path, hits: dict[str, SfldHit]):
                         continue  # not in sfld-processed file
 
         # add site annotations
-        out_fh.write("#\n# Sites\n# target name\taccession\tsite residue\tsite description\n")
-        out_fh.write("#------------------- ---------- ------------ ----------------\n")
+        out_fh.write((
+            "[I6-SITES]\n"
+            "[I6-SITES] target name\taccession\tsite residue\tsite description\n"
+            "[I6-SITES]------------------- ---------- ------------ ----------------\n"
+        ))
         for prot_id in hits:
             for _site in hits[prot_id].sites:
                 out_fh.write(
-                    f"{prot_id}\t{_site.model_ac}\t{_site.site_residues}\t{_site.site_desc}\n"
+                    f"[site] {prot_id}\t{_site.model_ac}\t{_site.site_residues}\t{_site.site_desc}\n"
                 )
+
+        closing_lines.append("#")
+
+        for line in closing_lines:
+            processed_file.write(line)
 
 
 def parse_hmmer_out(hmmer: Path, hits: dict[str, SfldHit]):
-    """Parse hmmer.dtbl output, removing hits not in 
+    """[WORK IN PROGRESS]
+    Parse hmmer.dtbl output, removing hits not in 
     slfd-post-processed, and adding site data
 
     :param hmmer: Path to hmmer.out file
