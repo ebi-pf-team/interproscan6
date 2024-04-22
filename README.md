@@ -220,7 +220,7 @@ Try running Nextflow with root privileges:
 sudo nextflow run interproscan.nf --input <path to fasta file> 
 ```
 
-Also true providing root privileges to docker within Nextflow, by changing the the `runOptions` key in `nextflow.config`:
+Also try providing root privileges to docker within Nextflow, by changing the the `runOptions` key in `nextflow.config`:
 
 ```
  docker {
