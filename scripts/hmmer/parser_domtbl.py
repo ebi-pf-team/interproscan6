@@ -125,7 +125,7 @@ def main():
         from file [true for SFLD and CDD]
     """
     args = sys.argv[1:]
-    parse_result = parse(args[0], args[1])
+    parse_result = parse(args[0], True if args[1] == "true" else False)
     print(json.dumps(parse_result, indent=2))
 
 
