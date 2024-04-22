@@ -92,13 +92,6 @@ def build_parser() -> argparse.ArgumentParser:
         help="HMMER output file",
     )
 
-    parser.add_argument(
-        "-o", "--output",
-        type=Path,
-        default=sys.stdout,
-        help="output file (otherwise STDOUT)",
-    )
-
     return parser
 
 
@@ -199,7 +192,7 @@ def update_dtbl(dtbl: Path, hits: dict[str, SfldHit]):
         closing_lines.append("#")
 
         for line in closing_lines:
-            processed_file.write(line)
+            out_fh.write(line)
 
 
 def parse_hmmer_out(hmmer: Path, hits: dict[str, SfldHit]):
