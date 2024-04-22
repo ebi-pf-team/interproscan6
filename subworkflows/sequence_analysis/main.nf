@@ -49,6 +49,7 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."${member}".postprocess.sites_annotation,
                     params.members."${member}".postprocess.hierarchy
                 ]
+            ]
         if (params.members."${member}".runner == "signalp") {
             runner = 'signalp'
         }
