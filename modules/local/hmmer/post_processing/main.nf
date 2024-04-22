@@ -7,7 +7,10 @@ process SFLD_POST_PROCESSER {
     val tsv_pro
 
     output:
-    path "hmmer_sfld_processed"
+    path touch "${out_file}.processed.out"
+    path touch "${out_dtbl}.processed.dtbl"
+    path alignment
+    val postprocessing_params
 
     script:
     """
@@ -15,7 +18,13 @@ process SFLD_POST_PROCESSER {
         ${tsv_pro ? -O ${out_file} : -d ${out_dtbl}}
         -a ${alignment} \\
         -s ${postprocessing_params[1]} \\
-        -o hmmer_sfld_processed
+        -o ${tsv_pro ? -O "${out_file}.processed.out" : -d "${out_dtbl}.processed.dtbl"}
+    
+    if [tsv_pro]; then
+        touch "${out_dtbl}.processed.dtbl"
+    else
+        touch "${out_file}.processed.out"
+    fi
     """
 }
 
