@@ -7,8 +7,8 @@ process SFLD_POST_PROCESSER {
     val tsv_pro
 
     output:
-    path touch "${out_file}.processed.out"
-    path touch "${out_dtbl}.processed.dtbl"
+    path touch "${out_file}.post_processed.out"
+    path touch "${out_dtbl}.post_processed.dtbl"
     path alignment
     val postprocessing_params
 
@@ -20,10 +20,14 @@ process SFLD_POST_PROCESSER {
         -s ${postprocessing_params[1]} \\
         -o ${tsv_pro ? -O "${out_file}.processed.out" : -d "${out_dtbl}.processed.dtbl"}
     
+    python3 scripts/members/sfld/sfld_process_post_processed.py \\
+    ${tsv_pro ? -O "${out_file}.processed.out" : -d "${out_dtbl}.processed.dtbl"} \\
+    -o ${tsv_pro ? -O "${out_file}.post_processed.out" : -d "${out_dtbl}.post_processed.dtbl"}
+
     if [tsv_pro]; then
-        touch "${out_dtbl}.processed.dtbl"
+        touch "${out_dtbl}.post_processed.dtbl"
     else
-        touch "${out_file}.processed.out"
+        touch "${out_file}.post_processed.out"
     fi
     """
 }
