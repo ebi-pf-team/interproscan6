@@ -82,8 +82,7 @@ workflow SEQUENCE_ANALYSIS {
     SIGNALP_RUNNER(runner_signalp_params)
     SIGNALP_PARSER(SIGNALP_RUNNER.out, params.tsv_pro)
 
-    // TODO: concat SFLD results
-    GENERIC_HMMER_PARSER.out.concat(SIGNALP_PARSER.out)
+    GENERIC_HMMER_PARSER.out.concat(SIGNALP_PARSER.out, SFLD_PARSER.out)
     .set { parsed_results }
 
     emit:
