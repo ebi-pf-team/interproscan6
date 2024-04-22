@@ -1,7 +1,6 @@
 include { HMMER_RUNNER as GENERIC_HMMER_RUNNER; HMMER_RUNNER as SFLD_HMMER_RUNNER } from "$projectDir/modules/local/hmmer/runner/main"
-include { HMMER_PARSER } from "$projectDir/modules/local/hmmer/parser/main"
-include { GENE3D_POST_PROCESSER; FUNFAM_POST_PROCESSER; SFLD_POST_PROCESSER } from "$projectDir/modules/local/hmmer/post_processing/main"
-include { SFLD_PARSER } from "$projectDir/modules/local/hmmer/parser/slfd"
+include { HMMER_PARSER as GENERIC_HMMER_PARSER; HMMER_PARSER as SFLD_PARSER } from "$projectDir/modules/local/hmmer/parser/main"
+include { SFLD_POST_PROCESSER } from "$projectDir/modules/local/hmmer/post_processing/main"
 include { SIGNALP_RUNNER } from "$projectDir/modules/local/signalp/runner/main"
 include { SIGNALP_PARSER } from "$projectDir/modules/local/signalp/parser/main"
 
@@ -41,7 +40,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm, params.members."${member}".switches, 
                 false, []
             ]
-            
+
         sfld: runner == 'sfld'
             return [
                 params.members."${member}".hmm, params.members."${member}".switches,
@@ -72,7 +71,7 @@ workflow SEQUENCE_ANALYSIS {
 
     runner_hmmer_params = fasta.combine(member_params.hmmer)
     GENERIC_HMMER_RUNNER(runner_hmmer_params)
-    HMMER_PARSER(GENERIC_HMMER_RUNNER.out, params.tsv_pro)
+    GENERIC_HMMER_PARSER(GENERIC_HMMER_RUNNER.out, params.tsv_pro, false)
 
     runner_hmmer_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_hmmer_sfld_params)
@@ -83,7 +82,8 @@ workflow SEQUENCE_ANALYSIS {
     SIGNALP_RUNNER(runner_signalp_params)
     SIGNALP_PARSER(SIGNALP_RUNNER.out, params.tsv_pro)
 
-    HMMER_PARSER.out.concat(SIGNALP_PARSER.out)
+    // TODO: concat SFLD results
+    GENERIC_HMMER_PARSER.out.concat(SIGNALP_PARSER.out)
     .set { parsed_results }
 
     emit:
