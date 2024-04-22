@@ -21,16 +21,17 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                 for domain in info[n_match]["domains"]:
                     try:
                         sig_desc = domain["signature_desc"]
+                        interpro_desc = domain["interpro_annotations_desc"]
                         interpro_acc = domain["interpro_annotations_acc"]
                     except:
                         sig_desc = "-"
                         interpro_acc = "-"
                     ali_from = domain["ali_from"]
                     ali_to = domain["ali_to"]
-                    # evalue = domain["iEvalue"]
+                    evalue = domain["iEvalue"]
                     # if is_pro:
                     #     alignment_encoded = domain["alignment_encoded"]
-                    tsv_file.write(f"{prot_acc}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t{sig_desc}\t{ali_from}\t{ali_to}\t{status}\t{current_date}\t{interpro_acc}\t{alignment_encoded}\n")
+                    tsv_file.write(f"{prot_acc}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t{sig_desc}\t{ali_from}\t{ali_to}\t{evalue}\t{status}\t{current_date}\t{interpro_acc}\t{interpro_desc}\t{alignment_encoded}\n")
 
 
 def json_output(seq_matches: dict, output_path: str):

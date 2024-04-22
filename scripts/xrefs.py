@@ -9,16 +9,16 @@ def entries_info(matches_path: str, entries_path: str) -> dict:
             entries = json.load(fh)
             matches_info = json.load(matches)
             for seq_id, match_info in matches_info.items():
-                try:
-                    for match in match_info:
-                        for domain in match["domains"]:
-                            acc_id = domain["accession"].split(".")[0]
+                for match in match_info:
+                    for domain in match["domains"]:
+                        acc_id = match["accession"].split(".")[0]
+                        try:
                             entry = entries[acc_id]
                             domain["interpro_annotations_desc"] = entry[0]
                             domain["signature_desc"] = entry[1]
                             domain["interpro_annotations_acc"] = entry[2]
-                except KeyError:
-                    pass
+                        except KeyError:
+                            pass
                 matches2entries[seq_id] = match_info
     return matches2entries
 
@@ -82,7 +82,7 @@ def main():
     if args.pathways:
         matches_info = add_pathways_info(matches_info, args.pathways)
 
-    print(json.dumps(matches_info))
+    print(json.dumps(matches_info, indent=2))
 
 
 if __name__ == "__main__":
