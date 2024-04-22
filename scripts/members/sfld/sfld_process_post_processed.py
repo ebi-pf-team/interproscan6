@@ -10,14 +10,14 @@ NO_HIT_MSGS = [
 ]
 
 METADATA_LINES = (
-    "# Program:"
-    "# Version:"
-    "# Pipeline mode:"
-    "# Query file:"
-    "# Target file:"
-    "# Option settings:"
-    "# Current dir:"
-    "# Date:"
+    "# Program:",
+    "# Version:",
+    "# Pipeline mode:",
+    "# Query file:",
+    "# Target file:",
+    "# Option settings:",
+    "# Current dir:",
+    "# Date:",
     "# [ok]"
 )
 
