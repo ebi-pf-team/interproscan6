@@ -33,14 +33,15 @@ workflow SEQUENCE_ANALYSIS {
         }
 
         /*
-        The post processing of SFLD, FunFam and Gene3D HMMER hits requires additional files
-        and parameters relative to the generic hmmer runner and parser in IPS6
+        The post processing of some applications (e.g. SFLD) hits requires additional files
+        and parameters relative to the generic hmmer runner and parser
         */
         hmmer: runner == 'hmmer'
             return [ 
                 params.members."${member}".hmm, params.members."${member}".switches, 
                 false, []
             ]
+            
         sfld: runner == 'sfld'
             return [
                 params.members."${member}".hmm, params.members."${member}".switches,
@@ -53,6 +54,7 @@ workflow SEQUENCE_ANALYSIS {
         if (params.members."${member}".runner == "signalp") {
             runner = 'signalp'
         }
+
         signalp: runner == 'signalp'
             return [
                 params.members.signalp.data.mode,
@@ -61,6 +63,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members.signalp.switches,
                 params.members.signalp.data.pvalue
             ]
+
         other: true
             log.info "Application ${member} (still) not supported"
             
@@ -74,7 +77,7 @@ workflow SEQUENCE_ANALYSIS {
     runner_hmmer_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_hmmer_sfld_params)
     SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out, params.tsv_pro)
-    // SFLD_PARSER(SFLD_POST_PROCESSER.out, member_params.sfld, params.tsv_pro)
+    SFLD_PARSER(SFLD_POST_PROCESSER.out, params.tsv_pro, true)  // set sites to true for SFLD
 
     runner_signalp_params = fasta.combine(member_params.signalp)
     SIGNALP_RUNNER(runner_signalp_params)
