@@ -156,7 +156,7 @@ def update_dtbl(dtbl: Path, hits: dict[str, SfldHit]):
     :param dtbl: Path to hmmer.dtbl file
     :param hits: dict of hits from sfld post-processed
     """
-    processed_file = Path(dtbl.parent) / dtbl.name.replace(".dtbl", ".processed.dtbl")
+    processed_file = Path(dtbl.parent) / dtbl.name.replace(".dtbl", ".dtbl.post_processed.dtbl")
     closing_lines = ["#\n"]
     with open(processed_file, "w") as out_fh:
         with open(dtbl, "r") as in_fh:
@@ -169,7 +169,11 @@ def update_dtbl(dtbl: Path, hits: dict[str, SfldHit]):
                 else:
                     # check if domain hit in sfld processed
                     prot_id = line.split()[0]
-                    model_ac = line.split()[4]
+                    try:
+                        model_ac = line.split()[4]
+                    except IndexError:
+                        print("INDEX ERROR when line.split()[4]", line)
+                        sys.exit(5)
 
                     try:
                         if model_ac in hits[prot_id].domains:
