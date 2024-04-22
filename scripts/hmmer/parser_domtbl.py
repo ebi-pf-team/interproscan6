@@ -22,34 +22,37 @@ def parse(hmmer_domtbl: str, retrieve_sites: bool):
             if not line.startswith(COMMENT_LINE):
                 info = line.split()
 
-                if info[0] != current_seq:
-                    if current_seq:
-                        sequence_matches[current_seq] = models
-                    models = []
-                    current_seq = info[0]
-                if info[9] == info[10]:
-                    domains.append(get_domain_data(info))
-                    models.append(get_full_seq_data(info, domains))
-                    domains = []
-                else:
-                    domains.append(get_domain_data(info))
-
                 if line.startswith("[I6-SITES]"):
+                    # add last domain hit to be processed
+                    sequence_matches[current_seq] = models
+
                     if retrieve_sites:
                         continue
                     else:
                         break
 
                 if line.startswith("[site]") and retrieve_sites:
-                    # add last domain hit to be processe
-                    sequence_matches[current_seq] = models
-                    # then process the sites
                     current_seq = info[1]
                     for _site in get_site(info):
-                        try:
-                            sequence_matches[current_seq]["sites"].append(_site)
-                        except KeyError:
-                            sequence_matches[current_seq]["sites"] = [_site]
+                        for i, model in enumerate(sequence_matches[current_seq]):
+                            if model["model_ac"] == _site["model_ac"]:
+                                try:
+                                    sequence_matches[current_seq][i]["sites"].append(_site)
+                                except KeyError:
+                                    sequence_matches[current_seq][i]["sites"] = [_site]
+                    continue
+
+                if info[0] != current_seq:
+                    if current_seq:
+                        sequence_matches[current_seq] = models
+                    models = []
+                    current_seq = info[0]
+                if info[9] == info[10]:  # domain number == num of domains
+                    domains.append(get_domain_data(info))
+                    models.append(get_full_seq_data(info, domains))
+                    domains = []
+                else:
+                    domains.append(get_domain_data(info))
 
             if current_seq and retrieve_sites is False:
                 sequence_matches[current_seq] = models
@@ -67,7 +70,7 @@ def get_full_seq_data(info: list[str], domains: dict[str, str]) -> dict[str, str
     """
     model_info = {
         "query_name": info[3],
-        "modelaccession": info[4],
+        "model_ac": info[4],
         "qlen": int(info[5]),
         "e_value": float(info[6]),
         "score": float(info[7]),
