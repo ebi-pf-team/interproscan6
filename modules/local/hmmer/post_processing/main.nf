@@ -12,8 +12,7 @@ process SFLD_POST_PROCESSER {
     script:
     """
     ${postprocessing_params[0]} \\
-        -O ${out_file} \\
-        -d ${out_dtbl} \\
+        ${tsv_pro ? -O ${out_file} : -d ${out_dtbl}}
         -a ${alignment} \\
         -s ${postprocessing_params[1]} \\
         -o hmmer_sfld_processed
