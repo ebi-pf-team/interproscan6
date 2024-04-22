@@ -4,6 +4,12 @@ import sys
 from pathlib import Path
 
 
+NO_HIT_MSGS = [
+    "[No hits detected that satisfy reporting thresholds]",
+    "[No targets detected that satisfy reporting thresholds]"
+]
+
+
 class SfldHit:
     def __init__(self):
         self.sequence = None  # query protein id
@@ -30,6 +36,20 @@ class SiteMatch:
         self.model_ac = None
         self.site_residues = None
         self.site_desc = None
+
+
+class HmmerHit:
+    """Represent record in the hmmer.out file
+    
+    :field include: to include in output [bool]
+    :field lines: list of lines from hmmer.out file"""
+    def __init__(self):
+        self.query_ac = None
+        self.model_ac = None
+        self.desc = None
+        self.include = True
+        self.lines = []
+        self.domains = {}  # prot_id: lines from hmmer.out file
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -132,7 +152,7 @@ def parse_dtbl(dtbl: Path, hits: dict[str, SfldHit]):
     :param hits: dict of hits from sfld post-processed
     """
     processed_file = Path(dtbl.parent) / dtbl.name.replace(".dtbl", ".processed.dtbl")
-    print(processed_file)
+
     with open(processed_file, "w") as out_fh:
         with open(dtbl, "r") as in_fh:
             for line in in_fh:
@@ -157,6 +177,35 @@ def parse_dtbl(dtbl: Path, hits: dict[str, SfldHit]):
                 out_fh.write(
                     f"{prot_id}\t{_site.model_ac}\t{_site.site_residues}\t{_site.site_desc}\n"
                 )
+
+
+def parse_hmmer_out(hmmer: Path, hits: dict[str, SfldHit]):
+    """Parse hmmer.dtbl output, removing hits not in 
+    slfd-post-processed, and adding site data
+
+    :param hmmer: Path to hmmer.out file
+    :param hits: dict of hits from sfld post-processed
+    """
+    processed_file = Path(hmmer.parent) / hmmer.name.replace(".out", ".processed.out")
+
+    with open(processed_file, "w") as out_fh:
+        with open(hmmer, "r") as in_fh:
+            for line in in_fh:
+                record = HmmerHit()
+
+                if line.startswith("#"):
+                    if line.strip() == "":
+                        out_fh.write(line)
+
+                elif line.strip() == "//":
+                    record = HmmerHit()
+                elif line.strip() in NO_HIT_MSGS:
+                    record.include = False
+                elif line.strip().startswith("Accession:"):
+                    record.query_ac = line.split()[-1]
+                    record.lines.append(line.strip())
+                else:
+                    record.lines.append(line.strip())
 
 
 if __name__ == "__main__":
