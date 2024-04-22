@@ -73,7 +73,15 @@ def applications_expected = ['antifam', 'cdd', 'coils', 'funfam', 'gene3d', 'ham
 def applications_diff = params.applications.toLowerCase().split(',') - applications_expected
 if (applications_diff.size() != 0){
     log.info printHelp()
-    exit 1, "Applications not valid: $applications_diff. Valid applications are: $applications_expected"
+    exit 1, "Application not valid: $applications_diff. Valid applications are: $applications_expected"
+}
+
+// Check if the formats are valid
+def formats_expected = ['json', 'tsv', 'tsv-pro', 'xml', 'gff3']
+def formats_diff = params.formats.toLowerCase().split(',') - formats_expected
+if (formats_diff.size() != 0){
+    log.info printHelp()
+    exit 1, "Format not valid: $formats_diff. Valid formats are: $formats_expected"
 }
 
 // Check if the input file is a fasta file and if it contains sequences
