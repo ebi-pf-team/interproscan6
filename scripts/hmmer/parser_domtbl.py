@@ -10,6 +10,7 @@ def parse(hmmer_domtbl: str):
         current_seq = None
         acc = []
         domains = []
+        member_db = hmmer_domtbl.split("/")[-1].split(".")[0].split("_")[1]
         for line in dtbl_f.readlines():
             if not line.startswith(COMMENT_LINE):
                 info = line.split()
@@ -20,7 +21,7 @@ def parse(hmmer_domtbl: str):
                     current_seq = info[0]
                 if info[9] == info[10]:
                     domains.append(get_domain(info))
-                    acc.append(get_accession(info, domains))
+                    acc.append(get_accession(info, domains, member_db))
                     domains = []
                 else:
                     domains.append(get_domain(info))
@@ -30,7 +31,7 @@ def parse(hmmer_domtbl: str):
     return sequence_matches
 
 
-def get_accession(info, domains):
+def get_accession(info, domains, member_db):
     acc_info = {
         "query_name": info[3],
         "accession": info[4],
@@ -38,6 +39,7 @@ def get_accession(info, domains):
         "e_value": float(info[6]),
         "score": float(info[7]),
         "bias": float(info[8]),
+        "member_db": member_db,
         "domains": domains
     }
     return acc_info
@@ -55,7 +57,7 @@ def get_domain(info):
         "ali_to": info[18],
         "env_from": info[19],
         "env_to": info[20],
-        "accession": info[21],
+        "acc": info[21],
         "description_of_target": info[22]
     }
     return domain_info
