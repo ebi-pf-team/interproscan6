@@ -73,7 +73,8 @@ def parse(hmmer_domtbl: str, retrieve_sites: bool):
 
                 if info[9] == info[10]:
                     # domain number == num of domains, therefore parsed all domain hits for this protein
-                    domains.append(get_domain_hit_data(info))
+                    if domain not in domains:
+                        domains.append(get_domain_hit_data(info))
                     signatures.append(get_signature_data(info, domains))
                     domains = []
 
