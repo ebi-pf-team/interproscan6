@@ -54,7 +54,10 @@ def parse_match(matches: str, applications: list, md52seq_id: dict, match_parsed
             }
 
             member_matches.append(match_dict)
-            seq_id = md52seq_id[protein_md5]
+            try:
+                seq_id = md52seq_id[protein_md5]
+            except KeyError:
+                seq_id = md52seq_id[protein_md5.lower()]
             try:
                 match_parsed[seq_id].append(member_matches)
             except:
