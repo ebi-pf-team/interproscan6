@@ -148,8 +148,8 @@ def get_site(info: list[str]) -> dict:
 
     for residue in info[3].split(","):
         _site["siteLocations"].append({
-            "start": residue[1:],
-            "end": residue[1:],
+            "start": residue.split("-")[0][1:],
+            "end": residue.split("-")[1],
             "residue": residue[0]
         })
 
