@@ -54,6 +54,5 @@ For each input/query sequence:
                 * `end`: int
                 * `residue`: char
 
-
 Example output file: `ips5-sfld-output.json`
 example: A0A0H3E4R3_BACA1
