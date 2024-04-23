@@ -7,85 +7,18 @@ nextflow.enable.dsl=2
 */
 include { PARSE_SEQUENCE } from "$projectDir/modules/local/parse_sequence/main"
 include { GET_ORFS } from "$projectDir/modules/local/get_orfs/main"
-include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
-include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
 include { AGGREGATE_RESULTS } from "$projectDir/modules/local/write_output/aggregate_results/main"
 
+include { PRE_CHECKS } from "$projectDir/subworkflows/pre_checks/main"
+include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
+include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    HELP MESSAGE
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-def printHelp() {
-    """
-    Usage example:
-        nextflow run interproscan.nf --input <path to fasta file>
-
-    Params options:
-        --applications <ANALYSES>          Optional, comma separated - without spaces - list of analysis methods (i.e. member databases/applications).
-                                            If this option is not set, ALL analyses will be run.
-        --disable-precalc                  Optional. Disables use of the precalculated match lookup service.
-                                            All match calculations will be run locally.
-        --help                             Optional, display help information
-        --input <INPUT-FILE-PATH>          [REQUIRED] Path to fasta file that should be loaded on Master startup.
-        --nucleic                          Optional. Input comprises nucleic acid sequences.
-    """
-}
-
-if (params.help) {
-    log.info printHelp()
-    System.exit(0)
-}
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    MAIN WORKFLOW
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-if (!params.input) {
-    log.info """
-            Please provide an input file.
-            The typical command for running the pipeline is:
-                nextflow run interproscan.nf --input <path to fasta file>
-            For more information, please use the --help flag.
-            """
-            exit 1
-}
-
-// Check if the input parameters are valid
-def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro', 'translate', 'nucleic', 'orfs']
-def parameter_diff = params.keySet() - parameters_expected
-if (parameter_diff.size() != 0){
-    log.info printHelp()
-    exit 1, "Input not valid: $parameter_diff"
-}
-
-// Check if the applications are valid
-def applications_expected = ['antifam', 'cdd', 'coils', 'funfam', 'gene3d', 'hamap', 'mobidblite', 'ncbifam', 'panther', 'pfam', 'phobius', 'pirsf', 'pirsr', 'prints', 'prositepatterns', 'prositeprofiles', 'sfld', 'signalp', 'smart', 'superfamily', 'tmhmm']
-def applications_diff = params.applications.toLowerCase().split(',') - applications_expected
-if (applications_diff.size() != 0){
-    log.info printHelp()
-    exit 1, "Applications not valid: $applications_diff. Valid applications are: $applications_expected"
-}
-
-// Check if the input file is a fasta file and if it contains sequences
-if (!params.input.toLowerCase().find(/.fasta$|.faa$|.fna$/)) {
-    log.error "The input file is not a FASTA file (it does not end in .fasta, .faa or .fna)"
-    exit 1
-}
-
-def seq_count = file(params.input).countFasta()
-    if (seq_count == 0) {
-        log.info "No sequence found in the input file"
-        exit 1
-    }
-
-log.info "Number of sequences to analyse: ${seq_count}"
 
 workflow {
+    // Perform preliminary validation checks before running the analysis
+    PRE_CHECKS(params)
+    System.exit(0)
+
     applications = params.applications.toLowerCase()
 
     Channel.fromPath( params.input , checkIfExists: true)
