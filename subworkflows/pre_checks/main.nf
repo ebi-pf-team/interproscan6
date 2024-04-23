@@ -1,18 +1,18 @@
-    def printHelp() {
-        """
-        Usage example:
-            nextflow run interproscan.nf --input <path to fasta file>
+def printHelp() {
+    """
+    Usage example:
+        nextflow run interproscan.nf --input <path to fasta file>
 
-        Params options:
-            --applications <ANALYSES>          Optional, comma separated - without spaces - list of analysis methods (i.e. member databases/applications).
-                                                If this option is not set, ALL analyses will be run.
-            --disable-precalc                  Optional. Disables use of the precalculated match lookup service.
-                                                All match calculations will be run locally.
-            --help                             Optional, display help information
-            --input <INPUT-FILE-PATH>          [REQUIRED] Path to fasta file that should be loaded on Master startup.
-            --nucleic                          Optional. Input comprises nucleic acid sequences.
-        """
-    }
+    Params options:
+        --applications <ANALYSES>          Optional, comma separated - without spaces - list of analysis methods (i.e. member databases/applications).
+                                            If this option is not set, ALL analyses will be run.
+        --disable-precalc                  Optional. Disables use of the precalculated match lookup service.
+                                            All match calculations will be run locally.
+        --help                             Optional, display help information
+        --input <INPUT-FILE-PATH>          [REQUIRED] Path to fasta file that should be loaded on Master startup.
+        --nucleic                          Optional. Input comprises nucleic acid sequences.
+    """
+}
 
 
 workflow PRE_CHECKS {
@@ -52,11 +52,6 @@ workflow PRE_CHECKS {
     }
 
     // Check if the input file is a fasta file and if it contains sequences
-    if (!params.input.toLowerCase().find(/.fasta$|.faa$|.fna$/)) {
-        log.error "The input file is not a FASTA file (it does not end in .fasta, .faa or .fna)"
-        exit 1
-    }
-
     def seq_count = file(params.input).countFasta()
         if (seq_count == 0) {
             log.info "No sequence found in the input file"
