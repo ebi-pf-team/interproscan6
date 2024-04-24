@@ -11,6 +11,8 @@ include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/mai
 include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
 include { AGGREGATE_RESULTS } from "$projectDir/modules/local/output/aggregate_results/main"
 include { XREFS } from "$projectDir/modules/local/xrefs/main"
+include { GOTERMS } from "$projectDir/modules/local/goterms/main"
+include { PATHWAYS } from "$projectDir/modules/local/pathways/main"
 include { WRITE_RESULTS } from "$projectDir/modules/local/output/write_results/main"
 
 
@@ -104,15 +106,6 @@ log.info "Number of sequences to analyse: ${seq_count}"
 workflow {
     applications = params.applications.toLowerCase()
 
-    goterms_path = ""
-    pathways_path = ""
-    if (params.goterms) {
-        goterms_path = params.xrefs.goterms
-    }
-    if (params.pathways) {
-        pathways_path = params.xrefs.pathways
-    }
-
     Channel.fromPath( params.input , checkIfExists: true)
     .unique()
     .splitFasta( by: params.batchsize, file: true )
@@ -159,13 +152,20 @@ workflow {
     .collect()
     .set { results_aggregated }
 
-    XREFS(results_aggregated, params.xrefs.entries, goterms_path, pathways_path)
+    XREFS(results_aggregated, params.xrefs.entries)
     .collect()
-    .set { results_and_xrefs }
+    .set { matches_with_xrefs }
+
+    if goterms:
+        GOTERMS(matches_with_xrefs.collect(), params.xrefs.goterms)
+        .set { matches_with_xrefs }
+    if pathways:
+        PATHWAYS(matches_with_xrefs.collect(), params.xrefs.pathways)
+        .set { matches_with_xrefs }
 
     formats = params.formats.toLowerCase()
     Channel.from(formats.split(','))
     .set { ch_format }
 
-    WRITE_RESULTS(PARSE_SEQUENCE.out.collect(), results_and_xrefs, ch_format, params.output)
+    WRITE_RESULTS(PARSE_SEQUENCE.out.collect(), matches_with_xrefs, ch_format, params.output)
 }

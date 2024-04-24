@@ -25,12 +25,13 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                         interpro_acc = domain["interpro_annotations_acc"]
                     except:
                         sig_desc = "-"
+                        interpro_desc = "-"
                         interpro_acc = "-"
                     ali_from = domain["ali_from"]
                     ali_to = domain["ali_to"]
                     evalue = domain["iEvalue"]
-                    # if is_pro:
-                    #     alignment_encoded = domain["alignment_encoded"]
+                    if is_pro:
+                        alignment_encoded = domain["alignment_encoded"]
                     tsv_file.write(f"{prot_acc}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t{sig_desc}\t{ali_from}\t{ali_to}\t{evalue}\t{status}\t{current_date}\t{interpro_acc}\t{interpro_desc}\t{alignment_encoded}\n")
 
 
@@ -56,8 +57,8 @@ def write_results(sequences_path: str, matches_path: str, output_format: str, ou
 
     if "TSV" in output_format:
         tsv_output(seq_matches, output_path, False)
-    # if "TSV-PRO" in output_format:
-    #     tsv_output(seq_matches, output_path, True)
+    if "TSV-PRO" in output_format:
+        tsv_output(seq_matches, output_path, True)
     if "JSON" in output_format:
         json_output(seq_matches, output_path)
 

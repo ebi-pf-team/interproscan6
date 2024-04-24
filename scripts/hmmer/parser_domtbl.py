@@ -7,34 +7,43 @@ COMMENT_LINE = "#"
 def parse(hmmer_domtbl: str):
     sequence_matches = {}
     with open(hmmer_domtbl, "r") as dtbl_f:
-        current_seq = None
         acc = []
         domains = []
         member_db = hmmer_domtbl.split("/")[-1].split(".")[0].split("_")[1]
-        for line in dtbl_f.readlines():
-            if not line.startswith(COMMENT_LINE):
-                info = line.split()
-                if info[0] != current_seq:
-                    if current_seq:
-                        sequence_matches[current_seq] = acc
-                    acc = []
-                    current_seq = info[0]
-                if info[9] == info[10]:
-                    domains.append(get_domain(info))
-                    acc.append(get_accession(info, domains, member_db))
-                    domains = []
-                else:
-                    domains.append(get_domain(info))
 
-            if current_seq:
-                sequence_matches[current_seq] = acc
+        for line in dtbl_f.readlines():
+            if line.startswith(COMMENT_LINE):
+                continue
+
+            info = line.split()
+            seq_id = info[0]
+
+            try:
+                acc_info = get_accession(info, domains, member_db)
+                domain[] = get_domain(info)
+                sequence_matches[seq_id].append()
+            if seq_id != current_seq:
+                if current_seq:
+                    sequence_matches[current_seq] = acc
+                acc = []
+                current_seq = seq_id
+            if info[9] == info[10]:
+                domains.append(get_domain(info))
+                acc.append(get_accession(info, domains, member_db))
+                domains = []
+            else:
+                domains.append(get_domain(info))
+
+        if current_seq:
+            sequence_matches[current_seq] = acc
+
     return sequence_matches
 
 
 def get_accession(info, domains, member_db):
     acc_info = {
         "query_name": info[3],
-        "accession": info[4],
+        "accession": info[4].split(".")[0],
         "qlen": int(info[5]),
         "e_value": float(info[6]),
         "score": float(info[7]),
