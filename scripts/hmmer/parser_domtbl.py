@@ -73,13 +73,16 @@ def parse(hmmer_domtbl: str, retrieve_sites: bool):
 
                 if info[9] == info[10]:
                     # domain number == num of domains, therefore parsed all domain hits for this protein
+                    domain = get_domain_hit_data(info)
                     if domain not in domains:
-                        domains.append(get_domain_hit_data(info))
+                        domains.append(domain)
                     signatures.append(get_signature_data(info, domains))
                     domains = []
 
                 else:
-                    domains.append(get_domain_hit_data(info))
+                    domain = get_domain_hit_data(info)
+                    if domain not in domains:
+                        domains.append(domain)
 
             if current_seq and retrieve_sites is False:
                 sequence_matches[current_seq] = signatures
@@ -148,9 +151,14 @@ def get_site(info: list[str]) -> dict:
     }
 
     for residue in info[3].split(","):
+        if residue.find("-") != -1:
+            res_start = residue.split("-")[0][1:]
+            res_end = residue.split("-")[1]
+        else:
+            res_start = res_end = residue[1:]
         _site["siteLocations"].append({
-            "start": residue.split("-")[0][1:],
-            "end": residue.split("-")[1],
+            "start": res_start,
+            "end": res_end,
             "residue": residue[0]
         })
 
