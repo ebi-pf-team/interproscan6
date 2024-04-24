@@ -4,11 +4,9 @@ import sys
 COMMENT_LINE = "#"
 
 
-def parse(hmmer_domtbl: str):
+def parse(hmmer_domtbl: str) -> dict:
     with open(hmmer_domtbl, "r") as dtbl_f:
         matches = {}
-        signatures = {}  # accession is the unique key
-        locations = []
         member_db = hmmer_domtbl.split("/")[-1].split(".")[0]
 
         for line in dtbl_f.readlines():
@@ -20,17 +18,14 @@ def parse(hmmer_domtbl: str):
             signature = get_signature(info, member_db)
             location = get_domain(info)
 
-            if signatures.get(acc_key) is None:
-                signatures[acc_key] = signature
-                locations = []
-            else:
-                locations.append(location)
-                signatures[acc_key]["locations"] = locations
+            if target_key not in matches:
+                matches[target_key] = {}
 
-            try:
-                matches[target_key].append(signatures)
-            except KeyError:
-                matches[target_key] = [signatures]
+            if acc_key not in matches[target_key]:
+                matches[target_key][acc_key] = signature
+                matches[target_key][acc_key]["locations"] = [location]
+            else:
+                matches[target_key][acc_key]["locations"].append(location)
 
     return matches
 
@@ -42,6 +37,7 @@ def get_signature(info, member_db) -> dict:
         "description": "",   # just in hmm.out?
         "e_value": float(info[6]),
         "score": float(info[7]),
+        "bias": float(info[8]),
         "member_db": member_db
     }
     return signature_info
@@ -60,6 +56,7 @@ def get_domain(info) -> dict:
         "score": float((info[13])),
         "envelopeStart": int(info[19]),
         "envelopeEnd": int(info[20]),
+        "bias": info[14],
         "postProcessed": ""
     }
     return domain_info
