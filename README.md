@@ -357,6 +357,16 @@ Try running Nextflow with root privileges:
 sudo nextflow run interproscan.nf --input <path to fasta file> 
 ```
 
+Also try providing root privileges to docker within Nextflow, by changing the the `runOptions` key in `nextflow.config`:
+
+```
+ docker {
+     enabled = true
+-    mountFlags = 'Z'
++    runOptions = '--user root'  <<-- ADD
+ }
+```
+
 ## File not found
 
 If you recieve a file not found error:
