@@ -5,60 +5,62 @@ COMMENT_LINE = "#"
 
 
 def parse(hmmer_domtbl: str):
-    sequence_matches = {}
     with open(hmmer_domtbl, "r") as dtbl_f:
-        current_seq = None
-        acc = []
-        domains = []
-        member_db = hmmer_domtbl.split("/")[-1].split(".")[0].split("_")[1]
+        matches = {}
+        signatures = {}  # accession is the unique key
+        locations = []
+        member_db = hmmer_domtbl.split("/")[-1].split(".")[0]
+
         for line in dtbl_f.readlines():
-            if not line.startswith(COMMENT_LINE):
-                info = line.split()
-                if info[0] != current_seq:
-                    if current_seq:
-                        sequence_matches[current_seq] = acc
-                    acc = []
-                    current_seq = info[0]
-                if info[9] == info[10]:
-                    domains.append(get_domain(info))
-                    acc.append(get_accession(info, domains, member_db))
-                    domains = []
-                else:
-                    domains.append(get_domain(info))
+            if line.startswith(COMMENT_LINE):
+                continue
+            info = line.split()
+            target_key = str(info[0])
+            acc_key = str(info[4])
+            signature = get_signature(info, member_db)
+            location = get_domain(info)
 
-            if current_seq:
-                sequence_matches[current_seq] = acc
-    return sequence_matches
+            if signatures.get(acc_key) is None:
+                signatures[acc_key] = signature
+                locations = []
+            else:
+                locations.append(location)
+                signatures[acc_key]["locations"] = locations
+
+            try:
+                matches[target_key].append(signatures)
+            except KeyError:
+                matches[target_key] = [signatures]
+
+    return matches
 
 
-def get_accession(info, domains, member_db):
-    acc_info = {
-        "query_name": info[3],
+def get_signature(info, member_db) -> dict:
+    signature_info = {
         "accession": info[4],
-        "qlen": int(info[5]),
+        "name": info[3],
+        "description": "",   # just in hmm.out?
         "e_value": float(info[6]),
         "score": float(info[7]),
-        "bias": float(info[8]),
-        "member_db": member_db,
-        "domains": domains
+        "member_db": member_db
     }
-    return acc_info
+    return signature_info
 
 
-def get_domain(info):
+def get_domain(info) -> dict:
     domain_info = {
-        "cEvalue": info[11],
-        "iEvalue": info[12],
-        "score": info[13],
-        "bias": info[14],
-        "hmm_from": info[15],
-        "hmm_to": info[16],
-        "ali_from": info[17],
-        "ali_to": info[18],
-        "env_from": info[19],
-        "env_to": info[20],
-        "acc": info[21],
-        "description_of_target": info[22]
+        "start": int(info[17]),
+        "end": int(info[18]),
+        "representative": "",
+        "hmmStart": int(info[15]),
+        "hmmEnd": int(info[16]),
+        "hmmLength": int(info[5]),  # qlen?
+        "hmmBounds": "",
+        "evalue": float(info[12]),  # iEvalue?
+        "score": float((info[13])),
+        "envelopeStart": int(info[19]),
+        "envelopeEnd": int(info[20]),
+        "postProcessed": ""
     }
     return domain_info
 

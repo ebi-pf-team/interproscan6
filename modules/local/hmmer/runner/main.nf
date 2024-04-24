@@ -5,11 +5,11 @@ process HMMER_RUNNER {
     tuple path(fasta), path(hmm), val(switches)
 
     output:
-    path "hmmer_${hmm}.out"
-    path "hmmer_${hmm}.dtbl"
+    path "${hmm}.out"
+    path "${hmm}.dtbl"
 
     script:
     """
-    hmmsearch ${switches} -o hmmer_${hmm}.out --domtblout hmmer_${hmm}.dtbl ${hmm} ${fasta}
+    hmmsearch ${switches} -o ${hmm}.out --domtblout ${hmm}.dtbl ${hmm} ${fasta}
     """
 }
