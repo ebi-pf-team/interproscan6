@@ -26,11 +26,12 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                 interpro_acc = "-"  # it will be added on entries PR
                 interpro_desc = "-"  # it will be added on entries PR
                 for location in match["locations"]:
+                    evalue = location["evalue"]
                     ali_from = location["start"]
                     ali_to = location["end"]
 
                     tsv_file.write(
-                        f"{seq_id}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t{sig_desc}\t{ali_from}\t{ali_to}\t{status}\t{current_date}\t{interpro_acc}\t{interpro_desc}\n")
+                        f"{seq_id}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t{sig_desc}\t{ali_from}\t{ali_to}\t{evalue}\t{status}\t{current_date}\t{interpro_acc}\t{interpro_desc}\n")
 
 
 def json_output(seq_matches: dict, output_path: str):

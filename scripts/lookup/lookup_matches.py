@@ -60,7 +60,7 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                 if target_key not in matches:
                     matches[target_key] = {}
 
-                if accession not in matches:
+                if accession not in matches[target_key]:
                     matches[target_key][accession] = signature
                     matches[target_key][accession]["locations"] = [location]
                 else:
