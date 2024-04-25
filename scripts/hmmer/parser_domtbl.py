@@ -69,7 +69,8 @@ def parse(hmmer_domtbl: str, retrieve_sites: bool):
                     matches[target_key][acc_key] = signature
                     matches[target_key][acc_key]["locations"] = [location]
                 else:
-                    matches[target_key][acc_key]["locations"].append(location)
+                    if location not in matches[target_key][acc_key]["locations"]:
+                        matches[target_key][acc_key]["locations"].append(location)
 
         return matches
 
