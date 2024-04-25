@@ -10,9 +10,9 @@ include { GET_ORFS } from "$projectDir/modules/local/get_orfs/main"
 include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
 include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
 include { AGGREGATE_RESULTS } from "$projectDir/modules/local/output/aggregate_results/main"
-include { XREFS } from "$projectDir/modules/local/xrefs/main"
-include { GOTERMS } from "$projectDir/modules/local/goterms/main"
-include { PATHWAYS } from "$projectDir/modules/local/pathways/main"
+include { ENTRIES } from "$projectDir/modules/local/xrefs/entries/main"
+include { GOTERMS } from "$projectDir/modules/local/xrefs/goterms/main"
+include { PATHWAYS } from "$projectDir/modules/local/xrefs/pathways/main"
 include { WRITE_RESULTS } from "$projectDir/modules/local/output/write_results/main"
 
 
@@ -152,7 +152,7 @@ workflow {
     .collect()
     .set { results_aggregated }
 
-    XREFS(results_aggregated, params.xrefs.entries)
+    ENTRIES(results_aggregated, params.xrefs.entries)
     .collect()
     .set { matches_with_xrefs }
 
