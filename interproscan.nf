@@ -74,12 +74,14 @@ workflow {
     .collect()
     .set { matches_with_xrefs }
 
-    if goterms:
+    if (params.goterms) {
         GOTERMS(matches_with_xrefs.collect(), params.xrefs.goterms)
         .set { matches_with_xrefs }
-    if pathways:
+    }
+    if (params.pathways) {
         PATHWAYS(matches_with_xrefs.collect(), params.xrefs.pathways)
         .set { matches_with_xrefs }
+    }
 
     formats = params.formats.toLowerCase()
     Channel.from(formats.split(','))

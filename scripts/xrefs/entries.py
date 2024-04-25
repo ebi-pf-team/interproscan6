@@ -10,7 +10,7 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
             matches_info = json.load(matches)
             for seq_id, match_info in matches_info.items():
                 for match in match_info:
-                    for domain in match["domains"]:
+                    for domain in match["locations"]:
                         acc_id = match["accession"].split(".")[0]
                         try:
                             entry = entries[acc_id]

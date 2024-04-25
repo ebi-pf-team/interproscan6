@@ -71,6 +71,7 @@ def parse(hmmer_domtbl: str, retrieve_sites: bool):
                 else:
                     if location not in matches[target_key][acc_key]["locations"]:
                         matches[target_key][acc_key]["locations"].append(location)
+    return matches
 
 
 def get_signature(info: list[str], member_db: str) -> dict[str, str]:
