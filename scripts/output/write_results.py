@@ -8,17 +8,27 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
     tsv_output = os.path.join(output_path + '.tsv')
     if is_pro:
         tsv_output = tsv_output + "-pro"
+
     with open(tsv_output, 'w') as tsv_file:
         current_date = datetime.now().strftime('%d-%m-%Y')
         alignment_encoded = ""
-        for prot_acc, info in seq_matches.items():
-            md5 = info[2]
-            seq_len = info[3]
-            for n_match in range(4, len(info)):
+        for seq_target, info in seq_matches.items():
+            sequence_data = info['sequences']
+            matches = info["matches"]
+            seq_id = seq_target
+            md5 = sequence_data[2]
+            seq_len = sequence_data[3]
+            for match_acc, match in matches.items():
+                member_db = match["member_db"]
+                sig_acc = match["accession"]
+                sig_desc = ""  # info on DB or hmm.out (later step)
                 status = "T"
-                member_db = info[n_match]["member_db"]
-                sig_acc = info[n_match]["accession"]
-                for domain in info[n_match]["domains"]:
+                interpro_acc = "-"  # it will be added on entries PR
+                interpro_desc = "-"  # it will be added on entries PR
+                for location in match["locations"]:
+                    evalue = location["evalue"]
+                    ali_from = location["start"]
+                    ali_to = location["end"]
                     try:
                         sig_desc = domain["signature_desc"]
                         interpro_desc = domain["interpro_annotations_desc"]
@@ -27,23 +37,71 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                         sig_desc = "-"
                         interpro_desc = "-"
                         interpro_acc = "-"
-                    ali_from = domain["ali_from"]
-                    ali_to = domain["ali_to"]
-                    evalue = domain["iEvalue"]
-                    if is_pro:
-                        alignment_encoded = domain["alignment_encoded"]
-                    tsv_file.write(f"{prot_acc}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t{sig_desc}\t{ali_from}\t{ali_to}\t{evalue}\t{status}\t{current_date}\t{interpro_acc}\t{interpro_desc}\t{alignment_encoded}\n")
+
+                    tsv_file.write(
+                      f"{prot_acc}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t{sig_desc}\t{ali_from}\t{ali_to}\t{evalue}\t{status}\t{current_date}\t{interpro_acc}\t{interpro_desc}\t{alignment_encoded}\n")
 
 
 def json_output(seq_matches: dict, output_path: str):
     json_output = os.path.join(output_path + '.json')
-    final_data = {"interproscan-version": "6.0.0", 'results': seq_matches}
+    results = []
+
+    for seq_id, data in seq_matches.items():
+        sequence = data['sequences'][1]
+        md5 = data['sequences'][2]
+        matches = []
+        if 'matches' in data and data['matches']:
+            for match_key, match_data in data['matches'].items():
+                signature = {
+                    "accession": match_data['accession'],
+                    "description": match_data['name'],
+                    "signatureLibraryRelease": {
+                        "library": match_data['member_db'].upper(),
+                        "version": match_data['version']
+                    }
+                }
+
+                location = match_data['locations'][0]
+                location_result = {
+                    "start": location['start'],
+                    "end": location['end'],
+                    "representative": location['representative'],
+                    "hmmStart": location['hmmStart'],
+                    "hmmEnd": location['hmmEnd'],
+                    "hmmLength": location['hmmLength'],
+                    "hmmBounds": location['hmmBounds'],
+                    "evalue": location['evalue'],
+                    "score": location['score'],
+                    "envelopeStart": location['envelopeStart'],
+                    "envelopeEnd": location['envelopeEnd'],
+                    "postProcessed": location['postProcessed']
+                }
+                if 'sites' in location:
+                    location_result["sites"] = location['sites']
+
+                match = {
+                    "signature": signature,
+                    "locations": [location_result],
+                    "evalue": match_data['evalue'],
+                    "score": match_data['score'],
+                    "model-ac": match_key
+                }
+                matches.append(match)
+        result = {
+            "sequence": sequence,
+            "md5": md5,
+            "matches": matches
+        }
+        results.append(result)
+
+    final_data = {"interproscan-version": "6.0.0", 'results': results}
     with open(json_output, 'w') as json_file:
         json_file.write(json.dumps(final_data, indent=2))
 
 
 def write_results(sequences_path: str, matches_path: str, output_format: str, output_path: str):
     output_format = output_format.upper()
+    seq_matches = {}
 
     all_sequences = {}
     with open(matches_path, 'r') as match_data:
@@ -52,7 +110,19 @@ def write_results(sequences_path: str, matches_path: str, output_format: str, ou
         for line in seq_data:
             sequence = json.loads(line)
             all_sequences.update(sequence)
-    seq_matches = {key: all_sequences[key] + all_matches[key] for key in all_matches if key != 'null'}
+
+    for key in all_sequences:
+        if key in all_matches:
+            seq_matches[key] = {
+                'sequences': all_sequences[key],
+                'matches': all_matches[key]
+            }
+        else:
+            seq_matches[key] = {
+                'sequences': all_sequences[key],
+                'matches': {}
+            }
+
     print(json.dumps(seq_matches, indent=4))
 
     if "TSV" in output_format:

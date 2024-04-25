@@ -9,7 +9,10 @@ def md52fasta(md5: set, sequence: dict):
 
     seq_fasta = ""
     for hash_key in md5:
-        seq_fasta += f">{md52seqinfo[hash_key]}\n"
+        try:
+            seq_fasta += f">{md52seqinfo[hash_key]}\n"
+        except KeyError:
+            seq_fasta += f">{md52seqinfo[hash_key.lower()]}\n"
     return seq_fasta
 
 
