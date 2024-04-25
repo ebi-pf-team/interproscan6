@@ -27,7 +27,7 @@ def printHelp() {
     Params options:
         --applications <ANALYSES>          Optional, comma separated - without spaces - list of analysis methods (i.e. member databases/applications).
                                             If this option is not set, ALL analyses will be run.
-        --disable-precalc                  Optional. Disables use of the precalculated match lookup service.
+        --disable_precalc                  Optional. Disables use of the precalculated match lookup service.
                                             All match calculations will be run locally.
         --formats <FORMATS>                Optional, comma separated - without spaces - list of output formats.
                                             If this option is not set, the default output format is JSON.
