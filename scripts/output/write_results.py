@@ -36,6 +36,7 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
 def json_output(seq_matches: dict, output_path: str):
     json_output = os.path.join(output_path + '.json')
     results = []
+
     for seq_id, data in seq_matches.items():
         sequence = data['sequences'][1]
         md5 = data['sequences'][2]
@@ -52,29 +53,30 @@ def json_output(seq_matches: dict, output_path: str):
                 }
 
                 location = match_data['locations'][0]
+                location_result = {
+                    "start": location['start'],
+                    "end": location['end'],
+                    "representative": location['representative'],
+                    "hmmStart": location['hmmStart'],
+                    "hmmEnd": location['hmmEnd'],
+                    "hmmLength": location['hmmLength'],
+                    "hmmBounds": location['hmmBounds'],
+                    "evalue": location['evalue'],
+                    "score": location['score'],
+                    "envelopeStart": location['envelopeStart'],
+                    "envelopeEnd": location['envelopeEnd'],
+                    "postProcessed": location['postProcessed']
+                }
+                if 'sites' in location:
+                    location_result["sites"] = location['sites']
+
                 match = {
                     "signature": signature,
-                    "locations": [
-                        {
-                            "start": location['start'],
-                            "end": location['end'],
-                            "representative": location['representative'],
-                            "hmmStart": location['hmmStart'],
-                            "hmmEnd": location['hmmEnd'],
-                            "hmmLength": location['hmmLength'],
-                            "hmmBounds": location['hmmBounds'],
-                            "evalue": location['evalue'],
-                            "score": location['score'],
-                            "envelopeStart": location['envelopeStart'],
-                            "envelopeEnd": location['envelopeEnd'],
-                            "postProcessed": location['postProcessed']
-                        }
-                    ],
+                    "locations": [location_result],
                     "evalue": match_data['evalue'],
                     "score": match_data['score'],
                     "model-ac": match_key
                 }
-
                 matches.append(match)
         result = {
             "sequence": sequence,
