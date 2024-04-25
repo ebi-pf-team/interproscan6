@@ -11,32 +11,79 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
 
     with open(tsv_output, 'w') as tsv_file:
         current_date = datetime.now().strftime('%d-%m-%Y')
-        alignment_encoded = ""
         for seq_target, info in seq_matches.items():
-            sequence_data = info['sequence_data']
-            matches = info["match_data"]
+            sequence_data = info['sequences']
+            matches = info["matches"]
 
-            seq_id = sequence_data[0]
+            seq_id = seq_target
             md5 = sequence_data[2]
             seq_len = sequence_data[3]
             for match_acc, match in matches.items():
                 member_db = match["member_db"]
                 sig_acc = match["accession"]
-                sig_desc = match["description"]
+                sig_desc = ""  # info on DB or hmm.out (later step)
                 status = "T"
-                interpro_acc = "-"
-                alignment_encoded = ""
+                interpro_acc = "-"  # it will be added on entries PR
+                interpro_desc = "-"  # it will be added on entries PR
                 for location in match["locations"]:
                     ali_from = location["start"]
                     ali_to = location["end"]
 
                     tsv_file.write(
-                        f"{seq_id}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t{sig_desc}\t{ali_from}\t{ali_to}\t{status}\t{current_date}\t{interpro_acc}\t{alignment_encoded}\n")
+                        f"{seq_id}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t{sig_desc}\t{ali_from}\t{ali_to}\t{status}\t{current_date}\t{interpro_acc}\t{interpro_desc}\n")
 
 
 def json_output(seq_matches: dict, output_path: str):
     json_output = os.path.join(output_path + '.json')
-    final_data = {"interproscan-version": "6.0.0", 'results': seq_matches}
+    results = []
+    for seq_id, data in seq_matches.items():
+        sequence = data['sequences'][1]
+        md5 = data['sequences'][2]
+        matches = []
+        if 'matches' in data and data['matches']:
+            for match_key, match_data in data['matches'].items():
+                signature = {
+                    "accession": match_data['accession'],
+                    "description": match_data['name'],
+                    "signatureLibraryRelease": {
+                        "library": match_data['member_db'].upper(),
+                        "version": match_data['version']
+                    }
+                }
+
+                location = match_data['locations'][0]
+                match = {
+                    "signature": signature,
+                    "locations": [
+                        {
+                            "start": location['start'],
+                            "end": location['end'],
+                            "representative": location['representative'],
+                            "hmmStart": location['hmmStart'],
+                            "hmmEnd": location['hmmEnd'],
+                            "hmmLength": location['hmmLength'],
+                            "hmmBounds": location['hmmBounds'],
+                            "evalue": location['evalue'],
+                            "score": location['score'],
+                            "envelopeStart": location['envelopeStart'],
+                            "envelopeEnd": location['envelopeEnd'],
+                            "postProcessed": location['postProcessed']
+                        }
+                    ],
+                    "evalue": match_data['evalue'],
+                    "score": match_data['score'],
+                    "model-ac": match_key
+                }
+
+                matches.append(match)
+        result = {
+            "sequence": sequence,
+            "md5": md5,
+            "matches": matches
+        }
+        results.append(result)
+
+    final_data = {"interproscan-version": "6.0.0", 'results': results}
     with open(json_output, 'w') as json_file:
         json_file.write(json.dumps(final_data, indent=2))
 
@@ -56,13 +103,13 @@ def write_results(sequences_path: str, matches_path: str, output_format: str, ou
     for key in all_sequences:
         if key in all_matches:
             seq_matches[key] = {
-                'sequence_data': all_sequences[key],
-                'match_data': all_matches[key]
+                'sequences': all_sequences[key],
+                'matches': all_matches[key]
             }
         else:
             seq_matches[key] = {
-                'sequence_data': all_sequences[key],
-                'match_data': {}
+                'sequences': all_sequences[key],
+                'matches': {}
             }
 
     print(json.dumps(seq_matches, indent=4))

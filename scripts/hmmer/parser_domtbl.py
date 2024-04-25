@@ -14,7 +14,7 @@ def parse(hmmer_domtbl: str) -> dict:
                 continue
             info = line.split()
             target_key = str(info[0])
-            acc_key = str(info[4])
+            acc_key = str(info[4].split(".")[0])
             signature = get_signature(info, member_db)
             location = get_domain(info)
 
@@ -32,13 +32,13 @@ def parse(hmmer_domtbl: str) -> dict:
 
 def get_signature(info, member_db) -> dict:
     signature_info = {
-        "accession": info[4],
+        "accession": info[4].split(".")[0],
         "name": info[3],
-        "description": "",   # just in hmm.out?
-        "e_value": float(info[6]),
+        "evalue": float(info[6]),
         "score": float(info[7]),
         "bias": float(info[8]),
-        "member_db": member_db
+        "member_db": member_db,
+        "version": ""
     }
     return signature_info
 
