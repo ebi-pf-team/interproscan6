@@ -4,10 +4,10 @@ process PATHWAYS {
     val pathways
 
     output:
-    path "xrefs_pathways_${matches}"
+    path "pathways_${matches}"
 
     script:
     """
-    python3 $projectDir/scripts/xrefs/pathways.py ${matches} ${pathways} > xrefs_pathways_${matches}
+    python3 $projectDir/scripts/xrefs/pathways.py ${matches} ${pathways} > pathways_${matches}
     """
 }

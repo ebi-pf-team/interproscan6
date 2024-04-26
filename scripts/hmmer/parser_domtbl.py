@@ -19,7 +19,9 @@ def parse(hmmer_domtbl: str, retrieve_sites: bool):
     """
     with open(hmmer_domtbl, "r") as dtbl_f:
         matches = {}
-        member_db = hmmer_domtbl.split("/")[-1].split(".")[0]
+        version = hmmer_domtbl.split("/")[-1].split("_")[0]
+        member_db = hmmer_domtbl.split("/")[-1].split("_")[1].split(".")[0]
+
 
         for line in dtbl_f.readlines():
             if line.startswith("#"):
@@ -61,7 +63,7 @@ def parse(hmmer_domtbl: str, retrieve_sites: bool):
                 # Retrieve signature data
                 target_key = str(info[0])
                 acc_key = str(info[4].split(".")[0])
-                signature = get_signature(info, member_db)
+                signature = get_signature(info, member_db, version)
                 location = get_domain(info)
                 if target_key not in matches:
                     matches[target_key] = {}
@@ -74,7 +76,7 @@ def parse(hmmer_domtbl: str, retrieve_sites: bool):
     return matches
 
 
-def get_signature(info: list[str], member_db: str) -> dict[str, str]:
+def get_signature(info: list[str], member_db: str, version: str) -> dict[str, str]:
     """
     Retrieve data for the full sequence hit against the model:
         These are the data listed under --- full sequence ---
@@ -91,7 +93,7 @@ def get_signature(info: list[str], member_db: str) -> dict[str, str]:
         "qlen": int(info[5]),
         "bias": float(info[8]),
         "member_db": member_db,
-        "version": ""
+        "version": version
     }
     return signature_info
 

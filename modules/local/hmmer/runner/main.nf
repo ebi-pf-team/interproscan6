@@ -9,14 +9,14 @@ process HMMER_RUNNER {
     */
 
     output:
-    path "${hmm}_${release}.out"
-    path "${hmm}_${release}.dtbl"
+    path "${release}_${hmm}.out"
+    path "${release}_${hmm}.dtbl"
     path "${hmm}_alignment"
     val postprocessing_params
 
     script:
     """
-    hmmsearch ${switches} -o ${hmm}_${release}.out --domtblout ${hmm}_${release}.dtbl ${alignment ? "-A ${hmm}_alignment" : ""} ${hmm} ${fasta}
+    hmmsearch ${switches} -o ${release}_${hmm}.out --domtblout ${release}_${hmm}.dtbl ${alignment ? "-A ${hmm}_alignment" : ""} ${hmm} ${fasta}
     if [ ! -f ${hmm}_alignment ]; then
         touch ${hmm}_alignment
     fi

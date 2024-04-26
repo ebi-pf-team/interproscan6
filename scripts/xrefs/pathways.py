@@ -3,7 +3,6 @@ import sys
 
 
 def add_pathways(matches_path: str, pathway_path: str):
-    matches2pa = {}
     with open(matches_path, "r") as matches:
         matches_info = json.load(matches)
     with open(pathway_path + ".ipr.json", "r") as ipr:

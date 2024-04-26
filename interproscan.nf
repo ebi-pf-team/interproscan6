@@ -8,14 +8,12 @@ nextflow.enable.dsl=2
 include { PARSE_SEQUENCE } from "$projectDir/modules/local/parse_sequence/main"
 include { GET_ORFS } from "$projectDir/modules/local/get_orfs/main"
 include { AGGREGATE_RESULTS } from "$projectDir/modules/local/output/aggregate_results/main"
-include { ENTRIES } from "$projectDir/modules/local/xrefs/entries/main"
-include { GOTERMS } from "$projectDir/modules/local/xrefs/goterms/main"
-include { PATHWAYS } from "$projectDir/modules/local/xrefs/pathways/main"
 include { WRITE_RESULTS } from "$projectDir/modules/local/output/write_results/main"
 
 include { PRE_CHECKS } from "$projectDir/subworkflows/pre_checks/main"
 include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
 include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
+include { XREFS } from "$projectDir/subworkflows/xrefs/main"
 
 
 workflow {
@@ -48,10 +46,8 @@ workflow {
     if (!params.disable_precalc) {
         log.info "Using precalculated match lookup service"
         SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications)
-        ENTRIES(SEQUENCE_PRECALC.out.parsed_matches, params.xrefs.entries)
-        .collect()
-        .set { parsed_matches }
         sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
+        parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
     }
 
     analysis_result = Channel.empty()
@@ -63,25 +59,16 @@ workflow {
         else {
             fasta_to_runner = ch_fasta
         }
-        SEQUENCE_ANALYSIS(fasta_to_runner, applications)
-
-        ENTRIES(SEQUENCE_ANALYSIS.out, params.xrefs.entries)
-        .collect()
-        .set { parsed_analysis }
+        parsed_analysis = SEQUENCE_ANALYSIS(fasta_to_runner, applications)
     }
 
-    all_results = parsed_matches.collect().concat(parsed_analysis.collect())
+    all_results = parsed_matches.concat(parsed_analysis)
 
-//     if (params.goterms) {
-//         GOTERMS(all_results.collect(), params.xrefs.goterms)
-//         .set { all_results }
-//     }
-//     if (params.pathways) {
-//         PATHWAYS(all_results.collect(), params.xrefs.pathways)
-//         .set { all_results }
-//     }
+    XREFS(all_results)
+        .collect()
+        .set { results2entry }
 
-    AGGREGATE_RESULTS(all_results.collect())
+    AGGREGATE_RESULTS(results2entry.collect())
     .collect()
     .set { results_aggregated }
 

@@ -4,10 +4,10 @@ process ENTRIES {
     val entries
 
     output:
-    path "xrefs_entries_${matches}"
+    path "entries_${matches}"
 
     script:
     """
-    python3 $projectDir/scripts/xrefs/entries.py ${matches} ${entries} > xrefs_entries_${matches}
+    python3 $projectDir/scripts/xrefs/entries.py ${matches} ${entries} > entries_${matches}
     """
 }
