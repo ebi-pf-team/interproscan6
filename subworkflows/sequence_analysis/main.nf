@@ -55,7 +55,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members.signalp.data.organism,
                 params.members.signalp.switches,
                 params.members.signalp.data.pvalue,
-                params.members.signalp.data.release
+                params.members.signalp.release
             ]
 
         other: true

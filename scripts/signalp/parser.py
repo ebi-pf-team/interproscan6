@@ -28,14 +28,14 @@ def parse(signalp_out: str, threshold: float, signalp_version: str):
             acc = seq_identifer.split(" ")[0].strip()
             if acc.startswith("sp|"):
                 acc = acc.split("|")[1]
+            start_location = None
+            end_location = None
 
             cs_prediction = line.split("\t")[-1]
-            if len(cs_prediction) == 1:
-                start_location = None
-                end_location = None
-            elif float(cs_prediction.split("Pr:")[-1].strip()) >= threshold:
-                start_location = int(cs_prediction.split(". ")[0].strip("CS pos: ").split("-")[0].strip())
-                end_location = int(cs_prediction.split(". ")[0].strip("CS pos: ").split("-")[1].strip())
+            if len(cs_prediction) > 1:
+                if float(cs_prediction.split("Pr:")[-1].strip()) >= threshold:
+                    start_location = int(cs_prediction.split(". ")[0].strip("CS pos: ").split("-")[0].strip())
+                    end_location = int(cs_prediction.split(". ")[0].strip("CS pos: ").split("-")[1].strip())
 
             sequence_matches[acc] = {
                 "signal_peptide": {
