@@ -2,22 +2,22 @@ import json
 import sys
 
 
-def add_pathways(matches_path: str, pathway_path: str):
+def add_goterms(matches_path: str, goterm_path: str):
     with open(matches_path, "r") as matches:
         matches_info = json.load(matches)
-    with open(pathway_path + ".ipr.json", "r") as ipr:
-        ipr2pa = json.load(ipr)
-    with open(pathway_path + ".json", "r") as pa:
-        pa_info = json.load(pa)
+    with open(goterm_path + ".ipr.json", "r") as ipr:
+        ipr2go = json.load(ipr)
+    with open(goterm_path + ".json", "r") as go:
+        go_info = json.load(go)
 
     for seq_id, match_info in matches_info.items():
         for match_key, data in match_info.items():
             if data["entry"] is not None:
                 ipr_id = data["entry"]["accession"]
                 try:
-                    pa_ids = ipr2pa[ipr_id]
-                    for pa_id in pa_ids:
-                        match_info[match_key]["entry"]["goXRefs"].append({pa_id: pa_info[pa_id]})
+                    go_ids = ipr2go[ipr_id]
+                    for go_id in go_ids:
+                        match_info[match_key]["entry"]["goXRefs"].append({go_id: go_info[go_id]})
                 except KeyError:
                     pass
         matches_info[seq_id] = match_info
@@ -31,9 +31,9 @@ def main():
     matches = args[0]
     pathways = args[1]
 
-    matches2pathways = add_pathways(matches, pathways)
+    matches2goterms = add_goterms(matches, pathways)
 
-    print(json.dumps(matches2pathways, indent=2))
+    print(json.dumps(matches2goterms, indent=2))
 
 
 if __name__ == "__main__":
