@@ -23,8 +23,6 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                 sig_acc = match["accession"]
                 sig_desc = ""  # info on DB or hmm.out (later step)
                 status = "T"
-                interpro_acc = "-"  # it will be added on entries PR
-                interpro_desc = "-"  # it will be added on entries PR
                 for location in match["locations"]:
                     evalue = location["evalue"]
                     ali_from = location["start"]
@@ -50,17 +48,22 @@ def json_output(seq_matches: dict, output_path: str):
         sequence = data['sequences'][1]
         md5 = data['sequences'][2]
         matches = []
+        xrefs = {
+            "name": data['sequences'][0],
+            "id": seq_id
+        }
         if 'matches' in data and data['matches']:
             for match_key, match_data in data['matches'].items():
+                entry = match_data['entry']
                 signature = {
                     "accession": match_data['accession'],
                     "description": match_data['name'],
                     "signatureLibraryRelease": {
                         "library": match_data['member_db'].upper(),
                         "version": match_data['version']
-                    }
+                    },
+                    "entry": entry
                 }
-
                 location = match_data['locations'][0]
                 location_result = {
                     "start": location['start'],
@@ -90,7 +93,8 @@ def json_output(seq_matches: dict, output_path: str):
         result = {
             "sequence": sequence,
             "md5": md5,
-            "matches": matches
+            "matches": matches,
+            "xref": xrefs
         }
         results.append(result)
 

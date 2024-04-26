@@ -48,7 +48,9 @@ workflow {
     if (!params.disable_precalc) {
         log.info "Using precalculated match lookup service"
         SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications)
-        parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
+        ENTRIES(SEQUENCE_PRECALC.out.parsed_matches, params.xrefs.entries)
+        .collect()
+        .set { parsed_matches }
         sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
     }
 
@@ -61,31 +63,31 @@ workflow {
         else {
             fasta_to_runner = ch_fasta
         }
-        analysis_result = SEQUENCE_ANALYSIS(fasta_to_runner, applications)
+        SEQUENCE_ANALYSIS(fasta_to_runner, applications)
+
+        ENTRIES(SEQUENCE_ANALYSIS.out, params.xrefs.entries)
+        .collect()
+        .set { parsed_analysis }
     }
 
-    all_results = parsed_matches.collect().concat(analysis_result.collect())
+    all_results = parsed_matches.collect().concat(parsed_analysis.collect())
+
+//     if (params.goterms) {
+//         GOTERMS(all_results.collect(), params.xrefs.goterms)
+//         .set { all_results }
+//     }
+//     if (params.pathways) {
+//         PATHWAYS(all_results.collect(), params.xrefs.pathways)
+//         .set { all_results }
+//     }
 
     AGGREGATE_RESULTS(all_results.collect())
     .collect()
     .set { results_aggregated }
 
-    ENTRIES(results_aggregated, params.xrefs.entries)
-    .collect()
-    .set { matches_with_xrefs }
-
-    if (params.goterms) {
-        GOTERMS(matches_with_xrefs.collect(), params.xrefs.goterms)
-        .set { matches_with_xrefs }
-    }
-    if (params.pathways) {
-        PATHWAYS(matches_with_xrefs.collect(), params.xrefs.pathways)
-        .set { matches_with_xrefs }
-    }
-
     formats = params.formats.toLowerCase()
     Channel.from(formats.split(','))
     .set { ch_format }
 
-    WRITE_RESULTS(PARSE_SEQUENCE.out.collect(), matches_with_xrefs, ch_format, params.output)
+    WRITE_RESULTS(PARSE_SEQUENCE.out.collect(), results_aggregated, ch_format, params.output)
 }
