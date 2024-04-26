@@ -12,7 +12,7 @@ def add_pathways(matches_path: str, pathway_path: str):
 
     for seq_id, match_info in matches_info.items():
         for match_key, data in match_info.items():
-            if data["entry"] is not None:
+            if data["entry"]:
                 ipr_id = data["entry"]["accession"]
                 try:
                     pa_ids = ipr2pa[ipr_id]

@@ -12,7 +12,7 @@ def add_goterms(matches_path: str, goterm_path: str):
 
     for seq_id, match_info in matches_info.items():
         for match_key, data in match_info.items():
-            if data["entry"] is not None:
+            if data["entry"]:
                 ipr_id = data["entry"]["accession"]
                 try:
                     go_ids = ipr2go[ipr_id]

@@ -21,20 +21,23 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
             for match_acc, match in matches.items():
                 member_db = match["member_db"]
                 sig_acc = match["accession"]
-                sig_desc = ""  # info on DB or hmm.out (later step)
+                sig_desc = "-"  # info on DB or hmm.out (later step)
                 status = "T"
+
+                if match["entry"]:
+                    try:
+                        interpro_name = match["entry"]["name"]
+                        interpro_desc = match["entry"]["description"]
+                        interpro_acc = match["entry"]["accession"]
+                        sig_desc = interpro_name  # temporary until decide from where to get the description
+                    except:
+                        interpro_desc = "-"
+                        interpro_acc = "-"
+
                 for location in match["locations"]:
                     evalue = location["evalue"]
                     ali_from = location["start"]
                     ali_to = location["end"]
-                    try:
-                        sig_desc = location["signature_desc"]
-                        interpro_desc = location["interpro_annotations_desc"]
-                        interpro_acc = location["interpro_annotations_acc"]
-                    except:
-                        sig_desc = "-"
-                        interpro_desc = "-"
-                        interpro_acc = "-"
 
                     tsv_file.write(
                       f"{seq_id}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t{sig_desc}\t{ali_from}\t{ali_to}\t{evalue}\t{status}\t{current_date}\t{interpro_acc}\t{interpro_desc}\t{alignment_encoded}\n")
