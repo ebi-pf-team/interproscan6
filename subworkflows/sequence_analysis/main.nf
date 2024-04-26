@@ -18,17 +18,12 @@ workflow SEQUENCE_ANALYSIS {
         if (params.members."${member}".runner == "hmmer") {
             runner = 'hmmer'
         }
-        // funfam
-        // gene3d
-        // hamap
-        // panther
-        // pfam
-        // pirsf
-        // pirsr
-        // smart ?
-        // superfamily
         if (member == 'sfld') {
             runner = 'sfld'
+        } else if (member == 'signalp') {
+            runner = 'signalp'
+        } else if (params.members."${member}".runner == "signalp") {
+            runner = 'signalp'
         }
 
         /*
@@ -52,9 +47,6 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."${member}".postprocess.hierarchy
                 ]
             ]
-        if (params.members."${member}".runner == "signalp") {
-            runner = 'signalp'
-        }
 
         signalp: runner == 'signalp'
             return [
