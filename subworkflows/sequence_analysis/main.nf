@@ -4,7 +4,6 @@ include { SFLD_POST_PROCESSER } from "$projectDir/modules/local/hmmer/post_proce
 include { SIGNALP_RUNNER } from "$projectDir/modules/local/signalp/runner/main"
 include { SIGNALP_PARSER } from "$projectDir/modules/local/signalp/parser/main"
 
-
 workflow SEQUENCE_ANALYSIS {
     take:
     fasta
@@ -66,7 +65,7 @@ workflow SEQUENCE_ANALYSIS {
 
     runner_hmmer_params = fasta.combine(member_params.hmmer)
     GENERIC_HMMER_RUNNER(runner_hmmer_params)
-    GENERIC_HMMER_PARSER(GENERIC_HMMER_RUNNER.out, params.tsv_pro, false)
+    GENERIC_HMMER_PARSER(GENERIC_HMMER_RUNNER.out, params.tsv_pro, false)  // set sites to false
 
     runner_hmmer_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_hmmer_sfld_params)
@@ -78,7 +77,7 @@ workflow SEQUENCE_ANALYSIS {
     SIGNALP_PARSER(SIGNALP_RUNNER.out, params.tsv_pro)
 
     GENERIC_HMMER_PARSER.out.concat(SIGNALP_PARSER.out, SFLD_PARSER.out)
-    .set { parsed_results }
+    .set { parsed_results }  // gathers the paths of the output file from each process
 
     emit:
     parsed_results

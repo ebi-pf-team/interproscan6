@@ -5,6 +5,21 @@ from datetime import datetime
 
 
 def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
+    def write_to_tsv(
+            seq_id, md5, seq_len, member_db, sig_acc,
+            ali_from, ali_to, evalue, status, current_date,
+            sig_desc="", interpro_acc="-", interpro_desc="-"
+    ):
+        """
+        sig_desc is info from the DB or hmm.out, and added in a later step
+        interpro_acc and interpro_desc are added on entries PR
+        """
+        tsv_file.write((
+            f"{seq_id}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t"
+            f"{sig_desc}\t{ali_from}\t{ali_to}\t{evalue}\t{status}\t"
+            f"{current_date}\t{interpro_acc}\t{interpro_desc}\n"
+        ))
+
     tsv_output = os.path.join(output_path + '.tsv')
     if is_pro:
         tsv_output = tsv_output + "-pro"
@@ -19,19 +34,28 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
             md5 = sequence_data[2]
             seq_len = sequence_data[3]
             for match_acc, match in matches.items():
-                member_db = match["member_db"]
-                sig_acc = match["accession"]
-                sig_desc = ""  # info on DB or hmm.out (later step)
-                status = "T"
-                interpro_acc = "-"  # it will be added on entries PR
-                interpro_desc = "-"  # it will be added on entries PR
-                for location in match["locations"]:
-                    evalue = location["evalue"]
-                    ali_from = location["start"]
-                    ali_to = location["end"]
-
-                    tsv_file.write(
-                        f"{seq_id}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t{sig_desc}\t{ali_from}\t{ali_to}\t{evalue}\t{status}\t{current_date}\t{interpro_acc}\t{interpro_desc}\n")
+                if match_acc == "signal_peptide":
+                    member_db = match["member_db"]
+                    sig_acc, status = "Signal Peptide", ""
+                    ali_from = match["start"]
+                    ali_to = match["end"]
+                    evalue = match["pvalue"]
+                    write_to_tsv(
+                        seq_id, md5, seq_len, member_db,
+                        sig_acc, ali_from, ali_to, evalue,
+                        status, current_date)
+                else:
+                    member_db = match["member_db"]
+                    sig_acc = match["accession"]
+                    status = "T"
+                    for location in match["locations"]:
+                        evalue = location["evalue"]
+                        ali_from = location["start"]
+                        ali_to = location["end"]
+                        write_to_tsv(
+                            seq_id, md5, seq_len, member_db,
+                            sig_acc, ali_from, ali_to, evalue,
+                            status, current_date)
 
 
 def json_output(seq_matches: dict, output_path: str):
@@ -43,42 +67,53 @@ def json_output(seq_matches: dict, output_path: str):
         md5 = data['sequences'][2]
         matches = []
         if 'matches' in data and data['matches']:
-            for match_key, match_data in data['matches'].items():
-                signature = {
-                    "accession": match_data['accession'],
-                    "description": match_data['name'],
-                    "signatureLibraryRelease": {
-                        "library": match_data['member_db'].upper(),
-                        "version": match_data['version']
+            for match_key, match_data in data['matches'].items():  # match_key == sig_Acc
+                if match_key == "signal_peptide":
+                    match = {
+                        "signature": match_key,
+                        "SignalP_release": match_data["signalp_version"],
+                        "start": match_data["start"],
+                        "end": match_data["end"],
+                        "pvalue": match_data["pvalue"],
                     }
-                }
+                else:
+                    signature = {
+                        "accession": match_data['accession'],
+                        "description": match_data['name'],
+                        "signatureLibraryRelease": {
+                            "library": match_data['member_db'].upper(),
+                            "version": match_data['version']
+                        }
+                    }
 
-                location = match_data['locations'][0]
-                location_result = {
-                    "start": location['start'],
-                    "end": location['end'],
-                    "representative": location['representative'],
-                    "hmmStart": location['hmmStart'],
-                    "hmmEnd": location['hmmEnd'],
-                    "hmmLength": location['hmmLength'],
-                    "hmmBounds": location['hmmBounds'],
-                    "evalue": location['evalue'],
-                    "score": location['score'],
-                    "envelopeStart": location['envelopeStart'],
-                    "envelopeEnd": location['envelopeEnd'],
-                    "postProcessed": location['postProcessed']
-                }
-                if 'sites' in location:
-                    location_result["sites"] = location['sites']
+                    location = match_data['locations'][0]
+                    location_result = {
+                        "start": location['start'],
+                        "end": location['end'],
+                        "representative": location['representative'],
+                        "hmmStart": location['hmmStart'],
+                        "hmmEnd": location['hmmEnd'],
+                        "hmmLength": location['hmmLength'],
+                        "hmmBounds": location['hmmBounds'],
+                        "evalue": location['evalue'],
+                        "score": location['score'],
+                        "envelopeStart": location['envelopeStart'],
+                        "envelopeEnd": location['envelopeEnd'],
+                        "postProcessed": location['postProcessed']
+                    }
+                    if 'sites' in location:
+                        location_result["sites"] = location['sites']
 
-                match = {
-                    "signature": signature,
-                    "locations": [location_result],
-                    "evalue": match_data['evalue'],
-                    "score": match_data['score'],
-                    "model-ac": match_key
-                }
+                    match = {
+                        "signature": signature,
+                        "locations": [location_result],
+                        "evalue": match_data['evalue'],
+                        "score": match_data['score'],
+                        "model-ac": match_key
+                    }
+
                 matches.append(match)
+
         result = {
             "sequence": sequence,
             "md5": md5,
