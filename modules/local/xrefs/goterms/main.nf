@@ -4,7 +4,7 @@ process GOTERMS {
     val goterms
 
     output:
-    path "goterm_${matches}"
+    path "goterms_${matches}"
 
     script:
     """

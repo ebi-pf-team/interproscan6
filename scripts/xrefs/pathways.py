@@ -10,17 +10,17 @@ def add_pathways(matches_path: str, pathway_path: str):
     with open(pathway_path + ".json", "r") as pa:
         pa_info = json.load(pa)
 
-    for seq_id, matches in matches_info.items():
-        for match in matches:
-            for domain in match["domains"]:
-                try:
-                    acc = domain["interpro_annotations_acc"]
-                    pa_ids = ipr2pa[acc]
-                    for pa_id in pa_ids:
-                        matches2pa[pa_id] = pa_info[pa_id]
-                        domain["PATHWAY"] = matches2pa
-                except KeyError:
-                    pass
+    for seq_id, match_info in matches_info.items():
+        for match_key, data in match_info.items():
+            acc_id = match_key.split(".")[0]
+            try:
+                pa_ids = ipr2pa[acc_id]
+                for pa_id in pa_ids:
+                    match_info[match_key]["entry"]["goXRefs"].append({pa_id: pa_info[pa_id]})
+            except KeyError:
+                pass
+        matches_info[seq_id] = match_info
+
     return matches_info
 
 
