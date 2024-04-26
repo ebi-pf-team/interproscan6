@@ -17,7 +17,13 @@ def add_goterms(matches_path: str, goterm_path: str):
                 try:
                     go_ids = ipr2go[ipr_id]
                     for go_id in go_ids:
-                        match_info[match_key]["entry"]["goXRefs"].append({go_id: go_info[go_id]})
+                        go_dict = {
+                            "name": go_info[go_id][0],
+                            "databaseName": "GO",
+                            "category": go_info[go_id][1],
+                            "id": go_id
+                        }
+                        match_info[match_key]["entry"]["goXRefs"].append({go_id: go_dict})
                 except KeyError:
                     pass
         matches_info[seq_id] = match_info

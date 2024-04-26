@@ -26,8 +26,8 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
 
                 if match["entry"]:
                     try:
-                        interpro_name = match["entry"]["name"]
-                        interpro_desc = match["entry"]["description"]
+                        interpro_name = match["entry"]["name"] | "-"
+                        interpro_desc = match["entry"]["description"] | "-"
                         interpro_acc = match["entry"]["accession"]
                         sig_desc = interpro_name  # temporary until decide from where to get the description
                     except:
