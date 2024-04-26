@@ -189,14 +189,7 @@ You can configure the prediction of ORFs by updating the relevant `translate` pa
   </tbody>
 </table>
 
-
-### Configuration
-
-## Inputs
-
-### Configuration
-
-#### Parameters
+## Inputs, parameters and configuration
 
 `InterProScan6` is configured via the command-line. The only mandatory parameter is `--input`.
 
@@ -221,7 +214,7 @@ applications: AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,P
 * `--pathways` - Optional, switch on lookup of corresponding Pathway annotation (IMPLIES - `lookup_file` is defined) [Boolean]
 * `--lookup_file` - Lookup of corresponding InterPro annotation in the TSV and GFF3 output formats.
 
-#### Nextflow configuration
+### Nextflow configuration
 
 Configure the `InterProScan6` utility operations by updating `./nextflow.config`:
 
@@ -277,6 +270,7 @@ docker build -t signalp6 .
 3. Update the `InterProScan6` configuration: specifically, update `subworkflows/sequence_analysis/members.config`:
 ```
 signalp {
+    release = "6.0h"  <--- make sure the release is correct
     runner = "signalp"
     data {
         mode = "fast"    <--- UPDATE MODE: fast, slow, or slow-sequential
