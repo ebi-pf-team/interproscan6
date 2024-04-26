@@ -1,96 +1,81 @@
 import json
 import sys
 
-COMMENT_LINE = "#"
-
 
 def parse(hmmer_domtbl: str, retrieve_sites: bool):
     """Parse hmmer output into a JSON object.
 
-    In the resulting dict, each query protein is represented by its 
+    In the resulting dict, each query protein is represented by its
     query protein ID, extracted directly from the input FASTA file.
 
     The dict is keyed by protein IDs, and valued by lists of matches:
     one match (represented as a dict) per InterPro signature match
-    
+
     :param hmmer_domtbl: str repr of path to hmmer.dtbl file
     :param retrieve_sites: bool, if to retrieve site annotations
         [only true for SFLD and CDD.]
         [Site annotation is added to the hmmer output files by
         in house post-processing scripts.]
     """
-    sequence_matches = {}
     with open(hmmer_domtbl, "r") as dtbl_f:
-        current_seq = None
-        signatures = []
-        domains = []
+        matches = {}
+        member_db = hmmer_domtbl.split("/")[-1].split(".")[0]
+
         for line in dtbl_f.readlines():
-            if not line.startswith(COMMENT_LINE):
-                info = line.split()
-
-                if line.startswith("[I6-SITES]"):
-                    # add last domain hit to be processed
-                    sequence_matches[current_seq] = signatures
-
-                    if retrieve_sites:
-                        continue
-                    else:
-                        break
-
-                if line.startswith("[site]") and retrieve_sites:
-                    current_seq = info[1]
-                    site = get_site(info)
-                    sig_acc = info[2]
-                    # identify the corresponding signature and domain ('location') hit
-
-                    for signature in sequence_matches[current_seq]:
-                        if signature["signature_acc"] == sig_acc:
-                            if len(signature["locations"]) == 1:
-                                try:
-                                    if site not in signature["locations"][0]["sites"]:
-                                        signature["locations"][0]["sites"].append(site)
-                                except KeyError:
-                                    signature["locations"][0]["sites"] = [site]
-                            else:
-                                site_locations = []
-                                for _ in site["siteLocations"]:
-                                    site_locations.extend([int(_["start"]), int(_["end"])])
-                                site_range = (min(site_locations), max(site_locations))
-                                for i, domain in enumerate(signature["locations"]):
-                                    if (domain["start"] < site_range[0] < domain["end"]) and (domain["start"] < site_range[1] < domain["end"]):
-                                        try:
-                                            if site not in signature["locations"][i]["sites"]:
-                                                signature["locations"][i]["sites"].append(site)
-                                        except KeyError:
-                                            signature["locations"][i]["sites"] = [site]
+            if line.startswith("#"):
+                continue
+            if line.startswith("[I6-SITES]"):
+                if retrieve_sites:
                     continue
-
-                if info[0] != current_seq:
-                    if current_seq:
-                        sequence_matches[current_seq] = signatures
-                    signatures = []
-                    current_seq = info[0]
-
-                if info[9] == info[10]:
-                    # domain number == num of domains, therefore parsed all domain hits for this protein
-                    domain = get_domain_hit_data(info)
-                    if domain not in domains:
-                        domains.append(domain)
-                    signatures.append(get_signature_data(info, domains))
-                    domains = []
-
                 else:
-                    domain = get_domain_hit_data(info)
-                    if domain not in domains:
-                        domains.append(domain)
+                    break
 
-            if current_seq and retrieve_sites is False:
-                sequence_matches[current_seq] = signatures
+            info = line.split()
 
-    return sequence_matches
+            if line.startswith("[site]") and retrieve_sites:
+                # Retrieve site annotations
+                site = get_site(info)
+                target_key = str(info[1])
+                acc_key = str(info[2].split(".")[0])
+                signature = matches[target_key][acc_key]
+                if len(signature["locations"]) == 1:
+                    try:
+                        if site not in signature["locations"][0]["sites"]:
+                            signature["locations"][0]["sites"].append(site)
+                    except KeyError:
+                        signature["locations"][0]["sites"] = [site]
+                else:
+                    site_locations = []
+                    for _ in site["siteLocations"]:
+                        site_locations.extend([int(_["start"]), int(_["end"])])
+                    site_range = (min(site_locations), max(site_locations))
+                    for i, domain in enumerate(signature["locations"]):
+                        if (domain["start"] < site_range[0] < domain["end"]) and (
+                                domain["start"] < site_range[1] < domain["end"]):
+                            try:
+                                if site not in signature["locations"][i]["sites"]:
+                                    signature["locations"][i]["sites"].append(site)
+                            except KeyError:
+                                signature["locations"][i]["sites"] = [site]
+            else:
+                # Retrieve signature data
+                target_key = str(info[0])
+                acc_key = str(info[4].split(".")[0])
+                signature = get_signature(info, member_db)
+                location = get_domain(info)
+                if target_key not in matches:
+                    matches[target_key] = {}
+                if acc_key not in matches[target_key]:
+                    matches[target_key][acc_key] = signature
+                    matches[target_key][acc_key]["locations"] = [location]
+                else:
+                    if location not in matches[target_key][acc_key]["locations"]:
+                        matches[target_key][acc_key]["locations"].append(location)
+
+        return matches
 
 
-def get_signature_data(info: list[str], locations: dict[str, str]) -> dict[str, str]:
+def get_signature(info: list[str], member_db: str) -> dict[str, str]:
     """
     Retrieve data for the full sequence hit against the model:
         These are the data listed under --- full sequence ---
@@ -100,38 +85,43 @@ def get_signature_data(info: list[str], locations: dict[str, str]) -> dict[str, 
         against the query protein sequence
     """
     signature_info = {
-        "signature_acc": info[4],
-        "signature_name": info[3],
+        "accession": info[4].split(".")[0],
+        "name": info[3],
         "evalue": float(info[6]),
         "score": float(info[7]),
         "qlen": int(info[5]),
         "bias": float(info[8]),
-        "locations": locations,
+        "member_db": member_db,
+        "version": ""
     }
     return signature_info
 
 
-def get_domain_hit_data(info: list[str]) -> dict[str, str]:
+def get_domain(info: list[str]) -> dict[str, str]:
     """
     Retrieve the data for the specific domain hit:
         These are the data listed under --- this domain ---
-    These data are stored under locations in the output JSON, 
+    These data are stored under locations in the output JSON,
     and represent all the places where a InterPro signature matched
     the input query sequence
 
     :param info: list, line split by blankspace
     """
     domain_info = {
-        "start": info[17],  # ali coord from
-        "end": info[18],   # ali coord to
-        "hmmStart": info[15],  # hmm coord from
-        "hmmEnd": info[16],  # hmm coord to
-        "envelopeStart": info[19],  # env coord from
-        "envelopeEnd": info[20],  # env coord to
-        "cEvalue": info[11],  # Conditional e-value
-        "iEvalue": info[12],  # Independent e-value
-        "score": info[13],  # bit score
-        "bias": info[14],
+        "start": int(info[17]),  # ali coord from
+        "end": int(info[18]),   # ali coord to
+        "representative": "",
+        "hmmStart": int(info[15]),  # hmm coord from
+        "hmmEnd": int(info[16]),  # hmm coord to
+        "hmmLength": int(info[5]),  # qlen
+        "hmmBounds": "",
+        "evalue": float(info[12]),  # Independent e-value
+        "score": float(info[13]),  # bit score
+        "envelopeStart": int(info[19]),  # env coord from
+        "envelopeEnd": int(info[20]),  # env coord to
+        "bias": float(info[14]),
+        "postProcessed": "",
+        "cEvalue": float(info[11]),  # Conditional e-value
         "signature_accession": info[21],
         "description_of_target": info[22]
     }

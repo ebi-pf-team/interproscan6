@@ -36,14 +36,16 @@ workflow SEQUENCE_ANALYSIS {
         and parameters relative to the generic hmmer runner and parser
         */
         hmmer: runner == 'hmmer'
-            return [ 
-                params.members."${member}".hmm, params.members."${member}".switches, 
+            return [
+                params.members."${member}".hmm, params.members."${member}".switches,
+                params.members."${member}".release,
                 false, []
             ]
 
         sfld: runner == 'sfld'
             return [
                 params.members."${member}".hmm, params.members."${member}".switches,
+                params.members."${member}".release,
                 true, [
                     params.members."${member}".postprocess.bin,
                     params.members."${member}".postprocess.sites_annotation,
@@ -65,7 +67,7 @@ workflow SEQUENCE_ANALYSIS {
 
         other: true
             log.info "Application ${member} (still) not supported"
-            
+
         log.info "Running $runner for $member"
     }.set { member_params }
 

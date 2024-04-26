@@ -7,7 +7,8 @@ nextflow.enable.dsl=2
 */
 include { PARSE_SEQUENCE } from "$projectDir/modules/local/parse_sequence/main"
 include { GET_ORFS } from "$projectDir/modules/local/get_orfs/main"
-include { AGGREGATE_RESULTS } from "$projectDir/modules/local/write_output/aggregate_results/main"
+include { AGGREGATE_RESULTS } from "$projectDir/modules/local/output/aggregate_results/main"
+include { WRITE_RESULTS } from "$projectDir/modules/local/output/write_results/main"
 
 include { PRE_CHECKS } from "$projectDir/subworkflows/pre_checks/main"
 include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
@@ -17,7 +18,7 @@ include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/m
 workflow {
     // Perform preliminary validation checks before running the analysis
     PRE_CHECKS(params)
-    System.exit(0)
+//     System.exit(0)
 
     applications = params.applications.toLowerCase()
 
@@ -64,5 +65,10 @@ workflow {
     all_results = parsed_matches.collect().concat(analysis_result.collect())
 
     AGGREGATE_RESULTS(all_results.collect())
-    AGGREGATE_RESULTS.out.view()
+
+    formats = params.formats.toLowerCase()
+    Channel.from(formats.split(','))
+    .set { ch_format }
+
+    WRITE_RESULTS(PARSE_SEQUENCE.out.collect(), AGGREGATE_RESULTS.out.collect(), ch_format, params.output)
 }

@@ -11,63 +11,68 @@ def match_lookup(matches_checked: list, url: str) -> str:
     return matches.text
 
 
-def parse_match(matches: str, applications: list, md52seq_id: dict, match_parsed: dict) -> dict:
-    member_matches = []
-    tree = ET.fromstring(matches)
+def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
+    tree = ET.fromstring(match_data)
+    matches = {}
 
     for match in tree.findall(".//match"):
-        match_id = match.find("matchId").text
-        protein_md5 = match.find("proteinMD5").text
-        hits = []
-
         for hit in match.findall("hit"):
             hit_data = hit.text.split(',')
             hit_appl = hit_data[0]
             if hit_appl in applications:
-                domain = {
-                    "application": hit_appl,
+                protein_md5 = match.find("proteinMD5").text
+                if protein_md5.lower() in md52seq_id:
+                    target_key = md52seq_id[protein_md5.lower()]
+                else:
+                    target_key = protein_md5
+
+                accession = hit_data[2]
+
+                signature = {
+                    "accession": accession,
+                    "name": "",
+                    "evalue": float(hit_data[16]),
+                    "score": float(hit_data[7]),
+                    "bias": float(hit_data[8]),
                     "version": hit_data[1],
-                    "accession": hit_data[2],
-                    "accession2": hit_data[3],
-                    "ali_from": hit_data[4],
-                    "ali_to": hit_data[5],
+                    "member_db": hit_appl
+                }
+
+                location = {
+                    "start": int(hit_data[4]),
+                    "end": int(hit_data[5]),
+                    "representative": "",
+                    "hmmStart": int(hit_data[10]),
+                    "hmmEnd": int(hit_data[11]),
+                    "hmmLength": int(hit_data[12]),  # qlen?
+                    "hmmBounds": "",
+                    "envelopeStart": int(hit_data[13]),
+                    "envelopeEnd": int(hit_data[14]),
+                    "score": hit_data[15],
+                    "postProcessed": "",
+
+                    "evalue": float(hit_data[16]),
                     "aliwS": hit_data[6],
-                    "score": hit_data[7],
-                    "bias": hit_data[8],
                     "..": hit_data[9],
-                    "hmm_from": hit_data[10],
-                    "hmm_to": hit_data[11],
-                    "qlen": hit_data[12],
-                    "env_from": hit_data[13],
-                    "env_to": hit_data[14],
-                    "score_hit": hit_data[15],
-                    "e_value": hit_data[16],
                     "cigar_alignment": hit_data[17],
                 }
-                hits.append(domain)
 
-        if hits:
-            match_dict = {
-                "match_id": match_id,
-                "md5": protein_md5,
-                "domains": hits
-            }
+                if target_key not in matches:
+                    matches[target_key] = {}
 
-            member_matches.append(match_dict)
-            seq_id = md52seq_id[protein_md5]
-            try:
-                match_parsed[seq_id].append(member_matches)
-            except:
-                match_parsed[seq_id] = member_matches
+                if accession not in matches[target_key]:
+                    matches[target_key][accession] = signature
+                    matches[target_key][accession]["locations"] = [location]
+                else:
+                    matches[target_key][accession]["locations"].append(location)
 
-    return match_parsed
+    return matches
 
 
 def main():
     args = sys.argv[1:]
 
     applications = list(map(lambda x: x.upper(), args[1].split(',')))
-    match_parsed = {}
 
     with open(args[0], 'r') as md5_data:
         checked_data = json.load(md5_data)
@@ -79,7 +84,7 @@ def main():
         md52seq_id[match[-2]] = seq_id
 
     match_results = match_lookup(matches, args[2])
-    match_parsed = parse_match(match_results, applications, md52seq_id, match_parsed)
+    match_parsed = parse_match(match_results, applications, md52seq_id)
 
     print(json.dumps(match_parsed, indent=2))
 

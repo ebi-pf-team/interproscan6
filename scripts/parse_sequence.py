@@ -31,7 +31,7 @@ def parse(sequences: dict):
         acc = key.split(" ", 1)[0]
         sequence_info.append(key)
         sequence_info.append(sequence)
-        sequence_info.append(hashlib.md5(sequence.encode()).hexdigest().upper())
+        sequence_info.append(hashlib.md5(sequence.encode()).hexdigest())
         sequence_info.append(len(sequence))
         results[acc] = sequence_info
     return results
