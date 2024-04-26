@@ -23,7 +23,7 @@ def add_goterms(matches_path: str, goterm_path: str):
                             "category": go_info[go_id][1],
                             "id": go_id
                         }
-                        match_info[match_key]["entry"]["goXRefs"].append({go_id: go_dict})
+                        match_info[match_key]["entry"]["goXRefs"].append(go_dict)
                 except KeyError:
                     pass
         matches_info[seq_id] = match_info

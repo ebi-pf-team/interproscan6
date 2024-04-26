@@ -11,7 +11,6 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
 
     with open(tsv_output, 'w') as tsv_file:
         current_date = datetime.now().strftime('%d-%m-%Y')
-        alignment_encoded = ""
         for seq_target, info in seq_matches.items():
             sequence_data = info['sequences']
             matches = info["matches"]
@@ -23,16 +22,24 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                 sig_acc = match["accession"]
                 sig_desc = "-"  # info on DB or hmm.out (later step)
                 status = "T"
+                interpro_info = "-"
 
+                goterms = []
+                pathways = []
                 if match["entry"]:
                     try:
-                        interpro_name = match["entry"]["name"] | "-"
-                        interpro_desc = match["entry"]["description"] | "-"
+                        interpro_name = match["entry"]["name"]
+                        interpro_desc = match["entry"]["description"]
                         interpro_acc = match["entry"]["accession"]
                         sig_desc = interpro_name  # temporary until decide from where to get the description
                     except:
                         interpro_desc = "-"
                         interpro_acc = "-"
+                    for go_info in match["entry"]["goXRefs"]:
+                        goterms.append(go_info["id"])
+                    for pwy_info in match["entry"]["pathwayXRefs"]:
+                        pathways.append(pwy_info["id"])
+                    interpro_info = f"{interpro_acc}\t{interpro_desc}\t{'|'.join(goterms)}\t{'|'.join(pathways)}"
 
                 for location in match["locations"]:
                     evalue = location["evalue"]
@@ -40,7 +47,7 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                     ali_to = location["end"]
 
                     tsv_file.write(
-                      f"{seq_id}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t{sig_desc}\t{ali_from}\t{ali_to}\t{evalue}\t{status}\t{current_date}\t{interpro_acc}\t{interpro_desc}\t{alignment_encoded}\n")
+                      f"{seq_id}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t{sig_desc}\t{ali_from}\t{ali_to}\t{evalue}\t{status}\t{current_date}\t{interpro_info}\n")
 
 
 def json_output(seq_matches: dict, output_path: str):
