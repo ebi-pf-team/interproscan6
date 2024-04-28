@@ -1,10 +1,30 @@
 # InterProScan6
 
+[![CITATION.cff](https://github.com/HobnobMancer/cazy_webscraper/actions/workflows/main.yml/badge.svg)](https://github.com/HobnobMancer/cazy_webscraper/actions/workflows/main.yml)
+
 **!! UNDER DEVELOPMENT !!**
 
 [InterPro](http://www.ebi.ac.uk/interpro/) is a database which integrates together predictive information about proteins’ function from a number of partner resources, giving an overview of the families that a protein belongs to and the domains and sites it contains.
 
 Users who have novel nucleotide or protein sequences that they wish to functionally characterise can use the software package `InterProScan` to run the scanning algorithms from the InterPro database in an integrated way. Sequences are submitted in FASTA format. Matches are then calculated against all of the required member database’s signatures and the results are then output in a variety of formats.
+
+## Table of Contents
+<!-- TOC -->
+- [`InterProScan`](#interproscan6)
+- [Setup and Requirements](#set-up-and-requirements)
+  - [Requirements](#requirements)
+  - [Set up](#set-up)
+- [Using `InterProScan6`](#using-interproscan6)
+  - [Quick start](#quick-start)
+  - [Using DNA sequences](#using-dna-sequences)
+  - [Inputs and configuration](#inputs-parameters-and-configuration)
+  - [Outputs and results](#outputs)
+- [Installing licensed applications (`Phobius`, `SignalP`, `TMHMM`)](#installing-licensed-applications-phobius-signalp-tmhmm)
+- [Citing `InterProScan`](#citation)
+- [Trouble shooting](#trouble-shooting)
+<!-- /TOC -->
+
+# Set up and requirements
 
 ## Requirements
 
@@ -331,6 +351,20 @@ If you have a GPU available, you can convert your installation to use the GPU in
 
 1. Convert the `SignalP` installation to GPU by following the `SignalP` [documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#converting-to-gpu)
 2. ....???....
+
+# Citation
+
+If you use `InterProScan` or `InterPro` in your work, please cite the following publications:
+
+**`InterProScan`:**
+
+> Jones P, Binns D, Chang HY, Fraser M, Li W, McAnulla C, McWilliam H, Maslen J, Mitchell A, Nuka G, Pesseat S, Quinn AF, Sangrador-Vegas A, Scheremetjew M, Yong SY, Lopez R, Hunter S. InterProScan 5: genome-scale protein function classification. Bioinformatics. 2014 May 1;30(9):1236-40. doi: 10.1093/bioinformatics/btu031. Epub 2014 Jan 21. PMID: 24451626; PMCID: PMC3998142.
+
+**InterPro:**
+
+> Paysan-Lafosse T, Blum M, Chuguransky S, Grego T, Pinto BL, Salazar GA, Bileschi ML, Bork P, Bridge A, Colwell L, Gough J, Haft DH, Letunić I, Marchler-Bauer A, Mi H, Natale DA, Orengo CA, Pandurangan AP, Rivoire C, Sigrist CJA, Sillitoe I, Thanki N, Thomas PD, Tosatto SCE, Wu CH, Bateman A. InterPro in 2022. Nucleic Acids Res. 2023 Jan 6;51(D1):D418-D427. doi: 10.1093/nar/gkac993. PMID: 36350672; PMCID: PMC9825450.
+
+You can find more information about the InterPro consortium (including the member databases) on the [InterPro website](https://www.ebi.ac.uk/interpro/about/consortium/).
 
 # Trouble shooting
 
