@@ -23,6 +23,11 @@ workflow PRE_CHECKS {
     params
 
     main:
+    if ( !nextflow.version.matches('23.10+') ) {
+        println "This workflow requires Nextflow version 23.10 or greater -- You are running version $nextflow.version"
+        exit 1
+    }
+
     if (params.help) {
         log.info printHelp()
         exit 1
