@@ -18,6 +18,19 @@ def printHelp() {
 }
 
 
+process CHECK_NUCLEIC {
+    errorStrategy 'finish'
+
+    input:
+    path fasta_file
+
+    script:
+    """
+    python3 $projectDir/scripts/pre_checks/check_nucleic_seq.py ${fasta_file}
+    """
+}
+
+
 workflow PRE_CHECKS {
     take:
     params
@@ -41,6 +54,12 @@ workflow PRE_CHECKS {
                 For more information, please use the --help flag.
                 """
                 exit 1
+    }
+
+    // is user specifies the input is nucleic acid seqs
+    // check the input only contains nucleic acid seqs
+    if (params.nucleic){
+        CHECK_NUCLEIC(params.input)
     }
 
     // Check if the input parameters are valid
