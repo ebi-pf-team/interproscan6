@@ -68,7 +68,6 @@ workflow PRE_CHECKS {
             exit 1
         }
     }
-    exit 1
 
     // Check if the input parameters are valid
     def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro', 'translate', 'nucleic', 'formats', 'output']
