@@ -19,17 +19,16 @@ def printHelp() {
 
 
 process CHECK_NUCLEIC {
-    errorStrategy 'finish'
-
     input:
     path fasta_file
 
     script:
     """
+    asdfghj
     python3 $projectDir/scripts/pre_checks/check_nucleic_seq.py ${fasta_file}
+    exit 1
     """
 }
-
 
 
 workflow PRE_CHECKS {
@@ -59,12 +58,18 @@ workflow PRE_CHECKS {
 
     // is user specifies the input is nucleic acid seqs
     // check the input only contains nucleic acid seqs
+    def fasta = file(params.input)
+    CHECK_NUCLEIC(fasta)
     if (params.nucleic) {
         try {
-            Channel.fromPath( params.input ).unique().set { ch_seq_check }
-            CHECK_NUCLEIC(ch_seq_check)
+            CHECK_NUCLEIC(fasta)
         } catch (all) {
-            log.error "Potential non-nucleic acid sequence found in input FASTA file"
+            log.error """
+            The '--nucleic' flag was used, but the input FASTA file
+            appears to contain at least one sequence that contains a
+            non-nucleic acid residue ('A','G','C','T','*','-', case insensitive).
+            Please check your input is correct.
+            """
             exit 1
         }
     }
