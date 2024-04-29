@@ -21,8 +21,6 @@ workflow SEQUENCE_ANALYSIS {
             runner = 'sfld'
         } else if (member == 'signalp') {
             runner = 'signalp'
-        } else if (params.members."${member}".runner == "signalp") {
-            runner = 'signalp'
         }
 
         /*
