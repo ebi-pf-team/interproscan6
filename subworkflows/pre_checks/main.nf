@@ -24,9 +24,7 @@ process CHECK_NUCLEIC {
 
     script:
     """
-    asdfghj
     python3 $projectDir/scripts/pre_checks/check_nucleic_seq.py ${fasta_file}
-    exit 1
     """
 }
 
@@ -59,11 +57,11 @@ workflow PRE_CHECKS {
     // is user specifies the input is nucleic acid seqs
     // check the input only contains nucleic acid seqs
     def fasta = file(params.input)
-    CHECK_NUCLEIC(fasta)
     if (params.nucleic) {
         try {
             CHECK_NUCLEIC(fasta)
         } catch (all) {
+            println """Error in input sequences"""
             log.error """
             The '--nucleic' flag was used, but the input FASTA file
             appears to contain at least one sequence that contains a
