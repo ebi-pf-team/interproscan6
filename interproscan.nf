@@ -13,6 +13,7 @@ include { WRITE_RESULTS } from "$projectDir/modules/local/output/write_results/m
 include { PRE_CHECKS } from "$projectDir/subworkflows/pre_checks/main"
 include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
 include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
+include { XREFS } from "$projectDir/subworkflows/xrefs/main"
 
 
 workflow {
@@ -45,8 +46,8 @@ workflow {
     if (!params.disable_precalc) {
         log.info "Using precalculated match lookup service"
         SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications)
-        parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
         sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
+        parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
     }
 
     analysis_result = Channel.empty()
@@ -58,18 +59,24 @@ workflow {
         else {
             fasta_to_runner = ch_fasta
         }
-        analysis_result = SEQUENCE_ANALYSIS(fasta_to_runner, applications)
+        parsed_analysis = SEQUENCE_ANALYSIS(fasta_to_runner, applications)
     }
 
-    all_results = parsed_matches.collect().concat(analysis_result.collect())
+    all_results = parsed_matches.concat(parsed_analysis)
 
-    AGGREGATE_RESULTS(all_results.collect())
+    XREFS(all_results)
+        .collect()
+        .set { results2entry }
+
+    AGGREGATE_RESULTS(results2entry.collect())
+    .collect()
+    .set { results_aggregated }
 
     formats = params.formats.toLowerCase()
     Channel.from(formats.split(','))
     .set { ch_format }
 
-    WRITE_RESULTS(PARSE_SEQUENCE.out.collect(), AGGREGATE_RESULTS.out.collect(), ch_format, params.output)
+    WRITE_RESULTS(PARSE_SEQUENCE.out.collect(), results_aggregated, ch_format, params.output)
 }
 
 log.info """

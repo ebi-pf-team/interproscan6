@@ -29,7 +29,6 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
         for seq_target, info in seq_matches.items():
             sequence_data = info['sequences']
             matches = info["matches"]
-
             seq_id = seq_target
             md5 = sequence_data[2]
             seq_len = sequence_data[3]
@@ -66,6 +65,10 @@ def json_output(seq_matches: dict, output_path: str):
         sequence = data['sequences'][1]
         md5 = data['sequences'][2]
         matches = []
+        xrefs = {
+            "name": data['sequences'][0],
+            "id": seq_id
+        }
         if 'matches' in data and data['matches']:
             for match_key, match_data in data['matches'].items():  # match_key == sig_Acc
                 if match_key == "signal_peptide":
@@ -117,7 +120,8 @@ def json_output(seq_matches: dict, output_path: str):
         result = {
             "sequence": sequence,
             "md5": md5,
-            "matches": matches
+            "matches": matches,
+            "xref": xrefs
         }
         results.append(result)
 
@@ -154,8 +158,8 @@ def write_results(sequences_path: str, matches_path: str, output_format: str, ou
 
     if "TSV" in output_format:
         tsv_output(seq_matches, output_path, False)
-    # if "TSV-PRO" in output_format:
-    #     tsv_output(seq_matches, output_path, True)
+    if "TSV-PRO" in output_format:
+        tsv_output(seq_matches, output_path, True)
     if "JSON" in output_format:
         json_output(seq_matches, output_path)
 
