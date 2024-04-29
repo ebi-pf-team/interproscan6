@@ -18,7 +18,6 @@ include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/m
 workflow {
     // Perform preliminary validation checks before running the analysis
     PRE_CHECKS(params)
-//     System.exit(0)
 
     applications = params.applications.toLowerCase()
 

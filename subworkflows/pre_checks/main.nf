@@ -31,6 +31,7 @@ process CHECK_NUCLEIC {
 }
 
 
+
 workflow PRE_CHECKS {
     take:
     params
@@ -47,7 +48,7 @@ workflow PRE_CHECKS {
     }
 
     if (!params.input) {
-        log.info """
+        log.error """
                 Please provide an input file.
                 The typical command for running the pipeline is:
                     nextflow run interproscan.nf --input <path to fasta file>
@@ -58,9 +59,16 @@ workflow PRE_CHECKS {
 
     // is user specifies the input is nucleic acid seqs
     // check the input only contains nucleic acid seqs
-    if (params.nucleic){
-        CHECK_NUCLEIC(params.input)
+    if (params.nucleic) {
+        try {
+            Channel.fromPath( params.input ).unique().set { ch_seq_check }
+            CHECK_NUCLEIC(ch_seq_check)
+        } catch (all) {
+            log.error "Potential non-nucleic acid sequence found in input FASTA file"
+            exit 1
+        }
     }
+    exit 1
 
     // Check if the input parameters are valid
     def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro', 'translate', 'nucleic', 'formats', 'output']
