@@ -7,16 +7,17 @@ COMMENT_LINE = "#"
 
 def main():
     args = sys.argv[1:]
-    parsed_results = parse(args[0], float(args[1]))
+    parsed_results = parse(args[0], float(args[1]), args[2])
     print(json.dumps(parsed_results, indent=2))
 
 
-def parse(signalp_out: str, threshold: float):
+def parse(signalp_out: str, threshold: float, signalp_version: str):
     """Parse signalP output into JSON file standardised for InterProScan
 
     :param signalp_out: path to signalP output CSV file
         ('prediction_results.txt')
     :param threshold: p-value threshold that must be met or exceeded
+    :param signalp_version: str, version num of signalP e.g. '6.0h'
     """
     sequence_matches = {}
     with open(signalp_out, "r") as fh:
@@ -25,18 +26,27 @@ def parse(signalp_out: str, threshold: float):
                 continue
             seq_identifer = line.split("\t")[0]
             acc = seq_identifer.split(" ")[0].strip()
-            if acc.startswith("sp|"):
-                acc = acc.split("|")[1]
+            start_location = None
+            end_location = None
+            pvalue = None
 
             cs_prediction = line.split("\t")[-1]
-            if len(cs_prediction) == 1:
-                start_location = None
-                end_location = None
-            elif float(cs_prediction.split("Pr:")[-1].strip()) >= threshold:
-                start_location = int(cs_prediction.split(". ")[0].strip("CS pos: ").split("-")[0].strip())
-                end_location = int(cs_prediction.split(". ")[0].strip("CS pos: ").split("-")[1].strip())
+            if len(cs_prediction) > 1:
+                if float(cs_prediction.split("Pr:")[-1].strip()) >= threshold:
+                    start_location = int(cs_prediction.split(". ")[0].strip("CS pos: ").split("-")[0].strip())
+                    end_location = int(cs_prediction.split(". ")[0].strip("CS pos: ").split("-")[1].strip())
+                    pvalue = float(cs_prediction.split("Pr:")[-1].strip())
 
-            sequence_matches[acc] = {"start": start_location, "end": end_location}
+            if start_location:
+                sequence_matches[acc] = {
+                    "signal_peptide": {
+                        "member_db": "SignalP",
+                        "signalp_version": signalp_version,
+                        "start": start_location,
+                        "end": end_location,
+                        "pvalue": pvalue
+                    }
+                }
 
     return sequence_matches
 
