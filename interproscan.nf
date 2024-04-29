@@ -18,7 +18,6 @@ include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/m
 workflow {
     // Perform preliminary validation checks before running the analysis
     PRE_CHECKS(params)
-//     System.exit(0)
 
     applications = params.applications.toLowerCase()
 
@@ -72,3 +71,23 @@ workflow {
 
     WRITE_RESULTS(PARSE_SEQUENCE.out.collect(), AGGREGATE_RESULTS.out.collect(), ch_format, params.output)
 }
+
+log.info """
+If you use InterProScan in your work please cite:
+
+InterProScan:
+> Jones P, Binns D, Chang HY, Fraser M, Li W, McAnulla C, McWilliam H, 
+Maslen J, Mitchell A, Nuka G, Pesseat S, Quinn AF, Sangrador-Vegas A, 
+Scheremetjew M, Yong SY, Lopez R, Hunter S. 
+InterProScan 5: genome-scale protein function classification. 
+Bioinformatics. 2014 May 1;30(9):1236-40. doi: 10.1093/bioinformatics/btu031. 
+Epub 2014 Jan 21. PMID: 24451626; PMCID: PMC3998142.
+
+InterPro:
+> Paysan-Lafosse T, Blum M, Chuguransky S, Grego T, Pinto BL, Salazar GA, Bileschi ML, 
+Bork P, Bridge A, Colwell L, Gough J, Haft DH, Letunić I, Marchler-Bauer A, Mi H, 
+Natale DA, Orengo CA, Pandurangan AP, Rivoire C, Sigrist CJA, Sillitoe I, Thanki N, 
+Thomas PD, Tosatto SCE, Wu CH, Bateman A. 
+InterPro in 2022. Nucleic Acids Res. 2023 Jan 6;51(D1):D418-D427. 
+doi: 10.1093/nar/gkac993. PMID: 36350672; PMCID: PMC9825450.
+"""
