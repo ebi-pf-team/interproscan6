@@ -86,35 +86,17 @@ def json_output(seq_matches: dict, output_path: str):
                         "signatureLibraryRelease": {
                             "library": match_data['member_db'].upper(),
                             "version": match_data['version']
-                        }
+                        },
+                      "entry": match_data['entry']
                     }
-
-                    location = match_data['locations'][0]
-                    location_result = {
-                        "start": location['start'],
-                        "end": location['end'],
-                        "representative": location['representative'],
-                        "hmmStart": location['hmmStart'],
-                        "hmmEnd": location['hmmEnd'],
-                        "hmmLength": location['hmmLength'],
-                        "hmmBounds": location['hmmBounds'],
-                        "evalue": location['evalue'],
-                        "score": location['score'],
-                        "envelopeStart": location['envelopeStart'],
-                        "envelopeEnd": location['envelopeEnd'],
-                        "postProcessed": location['postProcessed']
-                    }
-                    if 'sites' in location:
-                        location_result["sites"] = location['sites']
-
+                
                     match = {
                         "signature": signature,
-                        "locations": [location_result],
+                        "locations": match_data['locations'],
                         "evalue": match_data['evalue'],
                         "score": match_data['score'],
                         "model-ac": match_key
                     }
-
                 matches.append(match)
 
         result = {
