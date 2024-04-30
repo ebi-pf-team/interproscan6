@@ -45,12 +45,23 @@ process PANTHER_TREEGRAFTER {
     output:
     path "processed_panther_hits"
 
+    /*
+    Input args for TreeGrafter:
+    1. input FASTA file
+    2. Out file from HMMSearch
+    3. TreeGrafter data dir?
+    4. -e is the evalue threshold (in the members.config0
+    5. -o output file to be created
+    6. --keep temp directory
+    */
     script:
     """
+    mkdir data
     python3 $projectDir/scripts/members/panther/treegrafter.py \
+        run \
         ${fasta} \
         ${out_file} \
-        <Treegradter data dir> \
+        data \
         -e ${postprocessing_params[0]} \
         -o processed_panther_hits \
         --keep
