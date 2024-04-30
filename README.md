@@ -56,6 +56,8 @@ Users who have novel nucleotide or protein sequences that they wish to functiona
 4. Download the additional images we use:
     
     docker pull biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1
+    docker pull quay.io/biocontainers/biopython:1.66--np112py36_0
+    docker pull docker pull evolbioinfo/epa-ng:v0.3.8
 
 5. [Optional] Build a docker image for [`easel`](https://github.com/EddyRivasLab/easel) for the prediction of Open Reading Frames:
 
