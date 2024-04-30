@@ -75,13 +75,13 @@ def json_output(seq_matches: dict, output_path: str, version:str):
                     },
                     "entry": entry
                 }
-                location_result = match_data['locations'][0]
-                if 'sites' in location_result:
-                    location_result["sites"] = location_result['sites']
+                locations = []
+                for location in match_data['locations']:
+                    locations.append(location)
 
                 match = {
                     "signature": signature,
-                    "locations": [location_result],
+                    "locations": locations,
                     "evalue": match_data['evalue'],
                     "score": match_data['score'],
                     "model-ac": match_key
@@ -130,6 +130,30 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     signature_elem.set("name", match_data['entry']['name'])
                 except TypeError:
                     signature_elem.set("name", "-")
+
+                if match_data['entry']:
+                    entry_elem = ET.SubElement(signature_elem, "entry")
+                    entry_elem.set("ac", match_data['entry']['accession'])
+                    entry_elem.set("desc", match_data['entry']['description'])
+                    entry_elem.set("name", match_data['entry']['name'])
+                    entry_elem.set("type", match_data['entry']['type'])
+                    if match_data['entry']['goXRefs']:
+                        for go_xref in match_data['entry']['goXRefs']:
+                            go_xref_elem = ET.SubElement(entry_elem, "go-xref")
+                            go_xref_elem.set("category", go_xref['category'])
+                            go_xref_elem.set("db", go_xref['databaseName'])
+                            go_xref_elem.set("id", go_xref['id'])
+                            go_xref_elem.set("name", go_xref['name'])
+                    if match_data['entry']['pathwayXRefs']:
+                        for pathway_xref in match_data['entry']['pathwayXRefs']:
+                            pathway_xref_elem = ET.SubElement(entry_elem, "pathway-xref")
+                            pathway_xref_elem.set("db", pathway_xref['databaseName'])
+                            pathway_xref_elem.set("id", pathway_xref['id'])
+                            pathway_xref_elem.set("name", pathway_xref['name'])
+
+                signature_library_elem = ET.SubElement(signature_elem, "signature-library-release")
+                signature_elem.set("library", match_data['member_db'].upper())
+                signature_library_elem.set("version", match_data['version'])
                 model_ac_elem = ET.SubElement(match_elem, "model-ac")
                 model_ac_elem.text = match_key
 
