@@ -8,7 +8,7 @@ Unit tests and integration tests are created using [`nf-test`](https://github.co
 
 The full `nf-test` documentation can be found [here](https://www.nf-test.com/).
 
-All tests are stored in the `tests/` dir.
+The in-house python scripts are tested using [`pytest`](https://docs.pytest.org/en/8.2.x/).
 
 ## Set up
 
@@ -16,9 +16,14 @@ Install using Conda
 
 ```
 conda install -c bioconda nf-test
+conda install anaconda::pytest
 ```
 
 ## Writing tests
+
+All tests are stored in the `tests/` dir:
+* Nextflow unit tests are written in subdirectories
+* Python pytests are written in the `tests/` dir
 
 ### Staging
 
@@ -65,7 +70,7 @@ nextflow_process {
 
 ## Running tests
 
-To run tests:
+To run Nextflow tests:
 ```
 nf-test test <path to test file / or path to dir containing test files>
 ```
@@ -74,3 +79,10 @@ Useful arguments:
 * `--debug` -- Show debugging infos and dump channels
 * `--updateSnapshot` -- Use this flag to re-record every snapshot that fails during this test run.
 * `--verbose` -- Show Nextflow Ouput -- Very handy when a test assertion is failing
+
+To run `pytests` use:
+```
+python3 -m pytest tests/
+```
+This method adds the current directory to `sys.path` which is essential for `pytest` to find the 
+scripts, owing to the structure of this repository.
