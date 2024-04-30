@@ -2,6 +2,7 @@ import json
 import os
 import sys
 from datetime import datetime
+import xml.etree.ElementTree as ET
 
 
 def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
@@ -38,7 +39,7 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                     for go_info in match["entry"]["goXRefs"]:
                         goterms.append(go_info["id"])
                     for pwy_info in match["entry"]["pathwayXRefs"]:
-                        pathways.append(pwy_info["id"])
+                        pathways.append(pwy_info["databaseName"]+":"+pwy_info["id"])
                     interpro_info = f"{interpro_acc}\t{interpro_desc}\t{'|'.join(goterms)}\t{'|'.join(pathways)}"
 
                 for location in match["locations"]:
@@ -50,7 +51,7 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                       f"{seq_id}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t{sig_desc}\t{ali_from}\t{ali_to}\t{evalue}\t{status}\t{current_date}\t{interpro_info}\n")
 
 
-def json_output(seq_matches: dict, output_path: str):
+def json_output(seq_matches: dict, output_path: str, version:str):
     json_output = os.path.join(output_path + '.json')
     results = []
 
@@ -74,23 +75,9 @@ def json_output(seq_matches: dict, output_path: str):
                     },
                     "entry": entry
                 }
-                location = match_data['locations'][0]
-                location_result = {
-                    "start": location['start'],
-                    "end": location['end'],
-                    "representative": location['representative'],
-                    "hmmStart": location['hmmStart'],
-                    "hmmEnd": location['hmmEnd'],
-                    "hmmLength": location['hmmLength'],
-                    "hmmBounds": location['hmmBounds'],
-                    "evalue": location['evalue'],
-                    "score": location['score'],
-                    "envelopeStart": location['envelopeStart'],
-                    "envelopeEnd": location['envelopeEnd'],
-                    "postProcessed": location['postProcessed']
-                }
-                if 'sites' in location:
-                    location_result["sites"] = location['sites']
+                location_result = match_data['locations'][0]
+                if 'sites' in location_result:
+                    location_result["sites"] = location_result['sites']
 
                 match = {
                     "signature": signature,
@@ -108,12 +95,64 @@ def json_output(seq_matches: dict, output_path: str):
         }
         results.append(result)
 
-    final_data = {"interproscan-version": "6.0.0", 'results': results}
+    final_data = {"interproscan-version": version, 'results': results}
     with open(json_output, 'w') as json_file:
         json_file.write(json.dumps(final_data, indent=2))
 
+    return final_data
 
-def write_results(sequences_path: str, matches_path: str, output_format: str, output_path: str):
+
+def xml_output(seq_matches: dict, output_path: str, version: str):
+    xml_output = os.path.join(output_path + '.xml')
+    root = ET.Element("protein-matches", xmlns="https://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/schemas")
+    root.set("interproscan-version", version)
+
+    for seq_id, data in seq_matches.items():
+        protein_elem = ET.SubElement(root, "protein")
+        sequence_elem = ET.SubElement(protein_elem, "sequence")
+        sequence_elem.text = data['sequences'][1]
+        sequence_elem.set("md5", data['sequences'][2])
+        xref_elem = ET.SubElement(protein_elem, "xref")
+        xref_elem.set("id", seq_id)
+        xref_elem.set("name", data['sequences'][0])
+
+        matches_elem = ET.SubElement(protein_elem, "matches")
+        if 'matches' in data and data['matches']:
+            for match_key, match_data in data['matches'].items():
+                match_elem = ET.SubElement(matches_elem, "hmmer3-match")
+                match_elem.set("evalue", str(match_data['evalue']))
+                match_elem.set("score", str(match_data["score"]))
+
+                signature_elem = ET.SubElement(match_elem, "signature")
+                signature_elem.set("ac", match_data['accession'])
+                signature_elem.set("desc", match_data['name'])
+                try:
+                    signature_elem.set("name", match_data['entry']['name'])
+                except TypeError:
+                    signature_elem.set("name", "-")
+                model_ac_elem = ET.SubElement(match_elem, "model-ac")
+                model_ac_elem.text = match_key
+
+                locations_elem = ET.SubElement(match_elem, "locations")
+                for location in match_data['locations']:
+                    location_elem = ET.SubElement(locations_elem, "hmmer3-location")
+                    location_elem.set("env-start", str(location["envelopeStart"]))
+                    location_elem.set("env-end", str(location["envelopeEnd"]))
+                    location_elem.set("score", str(location["score"]))
+                    location_elem.set("evalue", str(location["evalue"]))
+                    location_elem.set("hmm-start", str(location["hmmStart"]))
+                    location_elem.set("hmm-end", str(location["hmmEnd"]))
+                    location_elem.set("hmm-length", str(location["hmmLength"]))
+                    location_elem.set("start", str(location["start"]))
+                    location_elem.set("end", str(location["end"]))
+                    if 'sites' in location:
+                        location_elem.set("sites", str(location["sites"]))
+
+    tree = ET.ElementTree(root)
+    tree.write(xml_output, encoding="utf-8", xml_declaration=True)
+
+
+def write_results(sequences_path: str, matches_path: str, output_format: str, output_path: str, version: str):
     output_format = output_format.upper()
     seq_matches = {}
 
@@ -137,14 +176,14 @@ def write_results(sequences_path: str, matches_path: str, output_format: str, ou
                 'matches': {}
             }
 
-    print(json.dumps(seq_matches, indent=4))
-
     if "TSV" in output_format:
         tsv_output(seq_matches, output_path, False)
     if "TSV-PRO" in output_format:
         tsv_output(seq_matches, output_path, True)
     if "JSON" in output_format:
-        json_output(seq_matches, output_path)
+        json_output(seq_matches, output_path, version)
+    if "XML" in output_format:
+        xml_output(seq_matches, output_path, version)
 
 
 def main():
@@ -154,8 +193,9 @@ def main():
     matches = args[1]
     formats = args[2]
     output_path = args[3]
+    version = args[4]
 
-    write_results(sequences, matches, formats, output_path)
+    write_results(sequences, matches, formats, output_path, version)
 
 
 if __name__ == "__main__":

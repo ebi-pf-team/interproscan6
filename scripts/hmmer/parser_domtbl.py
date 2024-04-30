@@ -120,11 +120,11 @@ def get_domain(info: list[str]) -> dict[str, str]:
         "score": float(info[13]),  # bit score
         "envelopeStart": int(info[19]),  # env coord from
         "envelopeEnd": int(info[20]),  # env coord to
-        "bias": float(info[14]),
-        "postProcessed": "",
-        "cEvalue": float(info[11]),  # Conditional e-value
-        "signature_accession": info[21],
-        "description_of_target": info[22]
+        # "bias": float(info[14]),
+        "postProcessed": ""
+        # "cEvalue": float(info[11]),  # Conditional e-value
+        # "signature_accession": info[21],
+        # "description_of_target": info[22]
     }
     return domain_info
 
