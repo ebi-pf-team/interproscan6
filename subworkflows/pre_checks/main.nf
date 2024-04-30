@@ -20,24 +20,58 @@ def printHelp() {
 }
 
 
+process CHECK_NUCLEIC {
+    input:
+    path fasta_file
+
+    script:
+    """
+    python3 $projectDir/scripts/pre_checks/check_nucleic_seq.py ${fasta_file}
+    """
+}
+
+
 workflow PRE_CHECKS {
     take:
     params
 
     main:
+    if ( !nextflow.version.matches('23.10+') ) {
+        println "InterProScan requires Nextflow version 23.10 or greater -- You are running version $nextflow.version"
+        exit 1
+    }
+
     if (params.help) {
         log.info printHelp()
         exit 1
     }
 
     if (!params.input) {
-        log.info """
+        log.error """
                 Please provide an input file.
                 The typical command for running the pipeline is:
                     nextflow run interproscan.nf --input <path to fasta file>
                 For more information, please use the --help flag.
                 """
                 exit 1
+    }
+
+    // is user specifies the input is nucleic acid seqs
+    // check the input only contains nucleic acid seqs
+    def fasta = file(params.input)
+    if (params.nucleic) {
+        try {
+            CHECK_NUCLEIC(fasta)
+        } catch (all) {
+            println """Error in input sequences"""
+            log.error """
+            The '--nucleic' flag was used, but the input FASTA file
+            appears to contain at least one sequence that contains a
+            non-nucleic acid residue ('A','G','C','T','*','-', case insensitive).
+            Please check your input is correct.
+            """
+            exit 1
+        }
     }
 
     // Check if the input parameters are valid
