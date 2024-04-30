@@ -1,6 +1,6 @@
 process AGGREGATE_RESULTS {
     input:
-    val result_files
+    val result_files  //  paths to the json files created in SEQUENCE_ANALYSIS concatenated with parsed_matches (lookup)
 
     output:
     path "results_aggregated.json"
