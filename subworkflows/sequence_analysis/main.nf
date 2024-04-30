@@ -3,21 +3,21 @@ include {
     CDD_POSTPROCESS;
     CDD_PARSER
 } from "$projectDir/modules/cdd/main"
-include { 
+include {
     HMMER_RUNNER as GENERIC_HMMER_RUNNER;
     HMMER_RUNNER as SFLD_HMMER_RUNNER;
-    HMMER_RUNNER as PANTHER_HMMER_RUNNER; 
+    HMMER_RUNNER as PANTHER_HMMER_RUNNER;
 } from "$projectDir/modules/hmmer/runner/main"
-include { 
+include {
     HMMER_PARSER as GENERIC_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
 } from "$projectDir/modules/hmmer/parser/main"
-include { 
+include {
     PANTHER_POST_PROCESSER;
     SFLD_POST_PROCESSER
 } from "$projectDir/modules/hmmer/post_processing/main"
-include { 
+include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER
  } from "$projectDir/modules/signalp/main"
@@ -32,8 +32,11 @@ workflow SEQUENCE_ANALYSIS {
     // Divide members up into their respective analysis pipelines/methods
     Channel.from(applications.split(','))
     .branch { member ->
+        release = params.members."${member}".release
+        log.info "Running $member version $release"
         runner = ''
         if (member == 'antifam' || member == "ncbifam") {
+//         if (params.members."${member}".runner == "hmmer") {
             runner = 'hmmer'
         } else {
             runner = member
@@ -77,7 +80,7 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."${member}".postprocess.hierarchy
                 ]
             ]
-        
+
         /*
         Member databases that do NOT use HMMER
         */
@@ -107,8 +110,6 @@ workflow SEQUENCE_ANALYSIS {
 
         other: true
             log.info "Application ${member} (still) not supported"
-
-        log.info "Running $runner for $member"
     }.set { member_params }
 
     /*

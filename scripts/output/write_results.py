@@ -157,14 +157,9 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                 signature_elem = ET.SubElement(match_elem, "signature")
                 signature_elem.set("ac", match_data['accession'])
                 signature_elem.set("desc", match_data['name'])
-                try:
-                    signature_elem.set("name", match_data['entry']['name'])
-                except TypeError:
-                    signature_elem.set("name", "-")
-
                 if match_data['entry']:
                     entry_elem = ET.SubElement(signature_elem, "entry")
-                    entry_elem.set("ac", match_data['entry']['accession'])
+                    entry_elem.set("ac", match_data['entry']['accession'] if match_data['entry']['accession'] else "-")
                     entry_elem.set("desc", match_data['entry']['description'])
                     entry_elem.set("name", match_data['entry']['name'])
                     entry_elem.set("type", match_data['entry']['type'])
