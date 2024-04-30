@@ -64,17 +64,13 @@ workflow {
 
     all_results = parsed_matches.concat(parsed_analysis)
 
-    XREFS(all_results)
-        .collect()
-        .set { results2entry }
+    AGGREGATE_RESULTS(all_results.collect())
 
-    AGGREGATE_RESULTS(results2entry.collect())
-    .collect()
-    .set { results_aggregated }
+    XREFS(AGGREGATE_RESULTS.out)
 
     formats = params.formats.toLowerCase()
     Channel.from(formats.split(','))
     .set { ch_format }
 
-    WRITE_RESULTS(PARSE_SEQUENCE.out.collect(), results_aggregated, ch_format, params.output)
+    WRITE_RESULTS(PARSE_SEQUENCE.out.collect(), XREFS.out.collect(), ch_format, params.output)
 }
