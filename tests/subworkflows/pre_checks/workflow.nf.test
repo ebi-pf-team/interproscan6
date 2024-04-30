@@ -1,0 +1,209 @@
+nextflow_workflow {
+
+    name "Test Workflow PRE_CHECKS"
+    script "subworkflows/pre_checks/main.nf"
+    workflow "PRE_CHECKS"
+
+
+    stage {
+        symlink "scripts/pre_checks/check_nucleic_seq.py"
+    }
+
+
+    test("Run successfully") {
+
+        when {
+            params {
+                input="$projectDir/tests/test_inputs/protein_seqs.fasta"
+                applications="antifam,CDD"
+            }
+            workflow {
+                """
+                input[1] = file("${params.input}")
+                input[3] = ['input', 'applications', 'disable_precalc', ]
+                input[4] = "${params.applications}"
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert workflow.exitStatus == 0
+            assert workflow.stdout.isEmpty()
+        }
+
+    }
+
+
+    test("Print help message") {
+
+        when {
+            params {
+                input="test_inputs/protein_seqs.fasta"
+                applications="antifam,CDD"
+            }
+            workflow {
+                """
+                input[0] = "true"
+                input[1] = file("${params.input}")
+                input[3] = ['input', 'applications', 'disable_precalc', ]
+                input[4] = "${params.applications}"
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert workflow.exitStatus == 0
+        }
+
+    }
+
+
+    test("No input provided") {
+
+        when {
+            params {
+                nucleic=false
+                applications="antifam,CDD"
+            }
+            workflow {
+                """
+                input[3] = ['input', 'applications', 'disable_precalc', 'help']
+                input[4] = "${params.applications}"
+                """
+            }
+        }
+
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 5
+        }
+
+    }
+
+
+    test("Provided protein seqs not nucleic") {
+
+
+        when {
+            params {
+                input="$projectDir/tests/test_inputs/protein_seqs.fasta"
+                applications="antifam,CDD"
+            }
+            workflow {
+                """
+                input[1] = file("${params.input}")
+                input[2] = "true"
+                input[3] = ['input', 'applications', 'disable_precalc', 'help']
+                input[4] = "${params.applications}"
+                """
+            }
+        }
+
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 1
+        }
+
+    }
+
+
+    test("Provided nucleic seqs") {
+
+
+        when {
+            params {
+                input="$projectDir/tests/test_inputs/nt_seqs.fasta"
+                applications="antifam,CDD"
+            }
+            workflow {
+                """
+                input[1] = file("${params.input}")
+                input[2] = "true"
+                input[3] = ['input', 'applications', 'disable_precalc', 'help']
+                input[4] = "${params.applications}"
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert workflow.exitStatus == 0
+        }
+
+    }
+
+
+    test("Invalid parameter") {
+
+        when {
+            params {
+                input="test_inputs/protein_seqs.fasta"
+                applications="antifam,CDD"
+            }
+            workflow {
+                """
+                input[1] = file("${params.input}")
+                input[3] = ['input', 'Bilbo']
+                input[4] = "${params.applications}"
+                """
+            }
+        }
+
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 22
+        }
+
+    }
+
+
+    test("Invalid application") {
+
+        when {
+            params {
+                input="test_inputs/protein_seqs.fasta"
+                applications="antifam,CDD,Frodo"
+            }
+            workflow {
+                """
+                input[1] = file("${params.input}")
+                input[3] = ['input', 'help']
+                input[4] = "${params.applications}"
+                """
+            }
+        }
+
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 22
+        }
+
+    }
+
+
+    test("Empty input file") {
+
+        when {
+            params {
+                input="$projectDir/tests/test_inputs/empty.fasta"
+                applications="antifam,CDD"
+            }
+            workflow {
+                """
+                input[1] = file("${params.input}")
+                input[3] = ['input', 'help']
+                input[4] = "${params.applications}"
+                """
+            }
+        }
+
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 5
+        }
+
+    }
+
+}
