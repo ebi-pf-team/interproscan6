@@ -151,6 +151,9 @@ def _querymsf(match_data, pthr_align_length):
 
 
 def _run_epang(pthr, query_fasta, datadir, tempdir, binary=None, threads=1):
+    """
+    Run the software package EPA-ng: https://github.com/pierrebarbera/epa-ng
+    """
     msfdir = os.path.join(datadir, "Tree_MSF")
     referece_fasta = os.path.join(msfdir, "{}.AN.fasta".format(pthr))
     bifurnewick_in = os.path.join(msfdir, "{}.bifurcate.newick".format(pthr))
