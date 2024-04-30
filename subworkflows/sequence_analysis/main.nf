@@ -14,7 +14,10 @@ workflow SEQUENCE_ANALYSIS {
     // Divide members up into their respective analysis pipelines/methods
     Channel.from(applications.split(','))
     .branch { member ->
+        release = params.members."${member}".release
+        log.info "Running $member version $release"
         runner = ''
+
         if (params.members."${member}".runner == "hmmer") {
             runner = 'hmmer'
         }
@@ -67,8 +70,6 @@ workflow SEQUENCE_ANALYSIS {
 
         other: true
             log.info "Application ${member} (still) not supported"
-
-        log.info "Running $runner for $member"
     }.set { member_params }
 
     runner_hmmer_params = fasta.combine(member_params.hmmer)

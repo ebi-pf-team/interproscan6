@@ -11,6 +11,7 @@ def add_pathways(matches_path: str, pathway_path: str):
         pa_info = json.load(pa)
 
     db_pattern = {"t": "MetaCyc", "w": "UniPathway", "k": "KEGG", "r": "Reactome"}
+
     for seq_id, match_info in matches_info.items():
         for match_key, data in match_info.items():
             if data["entry"]:

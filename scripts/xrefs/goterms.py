@@ -10,6 +10,7 @@ def add_goterms(matches_path: str, goterm_path: str):
     with open(goterm_path + ".json", "r") as go:
         go_info = json.load(go)
 
+    db_pattern = {"P": "BIOLOGICAL_PROCESS", "C": "CELLULAR_COMPONENT", "F": "MOLECULAR_FUNCTION"}
     for seq_id, match_info in matches_info.items():
         for match_key, data in match_info.items():
             if data["entry"]:
@@ -20,7 +21,7 @@ def add_goterms(matches_path: str, goterm_path: str):
                         go_dict = {
                             "name": go_info[go_id][0],
                             "databaseName": "GO",
-                            "category": go_info[go_id][1],
+                            "category": db_pattern[go_info[go_id][1]],
                             "id": go_id
                         }
                         match_info[match_key]["entry"]["goXRefs"].append(go_dict)
