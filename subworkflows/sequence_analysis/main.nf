@@ -56,8 +56,8 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".release,
                 false,
                 [
+                    params.members."${member}".postprocess.data_dir,
                     params.members."${member}".postprocess.evalue,
-                    params.members."${member}".postprocess.control_factor,
                 ]
             ]
 
