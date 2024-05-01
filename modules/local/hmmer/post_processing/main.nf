@@ -44,6 +44,8 @@ process PANTHER_TREEGRAFTER {
     output:
         path out_file
         path "${out_dtbl}.post_processed.dtbl"
+        path alignment
+        val post_processing
 
     /*
     Input args for TreeGrafter:
