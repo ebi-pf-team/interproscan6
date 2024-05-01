@@ -95,6 +95,7 @@ def get_signature(
     signature_info = {
         "accession": info[4].split(":")[0].split(".")[0],
         "name": info[3],
+        "description": "",
         "evalue": float(info[6]),
         "score": float(info[7]),
         "qlen": int(info[5]),
