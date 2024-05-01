@@ -9,7 +9,7 @@ include {
     HMMER_PARSER as PANTHER_HMMER_PARSER;
 } from "$projectDir/modules/local/hmmer/parser/main"
 include { 
-    PANTHER_TREEGRAFTER;
+    PANTHER_POST_PROCESSER;
     SFLD_POST_PROCESSER
 } from "$projectDir/modules/local/hmmer/post_processing/main"
 include { SIGNALP_RUNNER } from "$projectDir/modules/local/signalp/runner/main"
@@ -98,8 +98,8 @@ workflow SEQUENCE_ANALYSIS {
     // Panther (+ treegrafter + epa-ng)
     runner_hmmer_panther_params = fasta.combine(member_params.panther)
     PANTHER_HMMER_RUNNER(runner_hmmer_panther_params)
-    PANTHER_TREEGRAFTER(PANTHER_HMMER_RUNNER.out, fasta)
-    PANTHER_HMMER_PARSER(PANTHER_TREEGRAFTER.out, params.tsv_pro, false)
+    PANTHER_POST_PROCESSER(PANTHER_HMMER_RUNNER.out, fasta)
+    PANTHER_HMMER_PARSER(PANTHER_POST_PROCESSER.out, params.tsv_pro, false)
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_hmmer_sfld_params = fasta.combine(member_params.sfld)
@@ -112,7 +112,11 @@ workflow SEQUENCE_ANALYSIS {
     SIGNALP_RUNNER(runner_signalp_params)
     SIGNALP_PARSER(SIGNALP_RUNNER.out, params.tsv_pro)
 
-    GENERIC_HMMER_PARSER.out.concat(SIGNALP_PARSER.out, SFLD_HMMER_PARSER.out)
+    GENERIC_HMMER_PARSER.out.concat(
+        PANTHER_HMMER_PARSER.out,
+        SFLD_HMMER_PARSER.out,
+        SIGNALP_PARSER.out
+    )
     .set { parsed_results }  // gathers the paths of the output file from each process
 
     emit:
