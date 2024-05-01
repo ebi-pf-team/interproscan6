@@ -54,10 +54,12 @@ Users who have novel nucleotide or protein sequences that they wish to functiona
     docker build -t interproscan6 .
     
 4. Download the additional images we use:
-    
+
+_Required for AnitFam, NCBIFam, Panther, SFLD, ...._:    
     docker pull biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1
-    docker pull quay.io/biocontainers/biopython:1.66--np112py36_0
-    docker pull docker pull evolbioinfo/epa-ng:v0.3.8
+
+_Required for Panther_:
+    docker build -t treegrafter docker_files/treegrafter
 
 5. [Optional] Build a docker image for [`easel`](https://github.com/EddyRivasLab/easel) for the prediction of Open Reading Frames:
 
