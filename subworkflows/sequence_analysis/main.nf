@@ -99,6 +99,7 @@ workflow SEQUENCE_ANALYSIS {
     runner_hmmer_panther_params = fasta.combine(member_params.panther)
     PANTHER_HMMER_RUNNER(runner_hmmer_panther_params)
     PANTHER_TREEGRAFTER(PANTHER_HMMER_RUNNER.out, fasta)
+    PANTHER_HMMER_PARSER(PANTHER_TREEGRAFTER.out, params.tsv_pro)
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_hmmer_sfld_params = fasta.combine(member_params.sfld)
