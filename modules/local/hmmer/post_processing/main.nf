@@ -32,8 +32,7 @@ process SFLD_POST_PROCESSER {
 
 
 process PANTHER_TREEGRAFTER {
-    container 'docker.io/evolbioinfo/epa-ng'
-    container 'quay.io/biocontainers/biopython:1.66--np112py36_0'
+    container 'docker.io/library/treegrafter'
 
     input:
         path out_file
@@ -43,14 +42,15 @@ process PANTHER_TREEGRAFTER {
         path fasta
 
     output:
-    path "processed_panther_hits"
+        path out_file
+        path "${out_dtbl}.post_processed.dtbl"
 
     /*
     Input args for TreeGrafter:
     1. input FASTA file
     2. Out file from HMMSearch
-    3. TreeGrafter data dir?
-    4. -e is the evalue threshold (in the members.config0
+    3. TreeGrafter data dir (from members config)
+    4. -e is the evalue threshold (from members.config)
     5. -o output file to be created
     6. --keep temp directory
     */
@@ -61,9 +61,14 @@ process PANTHER_TREEGRAFTER {
         run \
         ${fasta} \
         ${out_file} \
-        data \
-        -e ${postprocessing_params[0]} \
+        ${postprocessing_params[0]} \
+        -e ${postprocessing_params[1]} \
         -o processed_panther_hits \
+        --epa-ng /epa-ng/bin/epa-ng \
         --keep
+
+    python3 $projectDir/scripts/members/panther/process_treegrafter_hits.py \
+        processed_panther_hits \
+        ${out_dtbl}
     """
 }
