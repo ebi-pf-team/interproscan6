@@ -20,8 +20,7 @@ def main():
     parser = build_parser()
     args = parser.parse_args()
 
-    hits = parse_treegrafter(args)
-
+    hits = parse_treegrafter(args.treegrafter)
     update_dtbl(args.hmmer, hits)
 
 
@@ -51,6 +50,9 @@ def build_parser() -> argparse.ArgumentParser:
 def parse_treegrafter(treegrafter: Path) -> dict[str, list[str]]:
     """Parse TreeGrafter output into a dict.
 
+    Example:
+    {'OUTROSEMLOOKUP': ['PTHR43780:SF2'], 'sp_A2SLW2_1A1D_METPP': ['PTHR43780:SF2']}
+
     :param treegrafter: Path to treeGrafter output file
 
     Retrun dict, keyed by protein IDs and valued by list of Panther signature accessions
@@ -78,6 +80,17 @@ def update_dtbl(dtbl: Path, hits: dict[str, list[str]]) -> None:
     :param hits: dict of hits from panther post-processed output
         (i.e. TreeGrafter output)
     """
+    def reorder_hit_data(line: str, sig_acc: str) -> str:
+        """
+        Remove the ".orig.30.pir" suffix from the sig_acc,
+        and switch around the query_name and accession cols
+        """
+        line = line.replace(sig_acc, sig_acc.split(".")[0])
+        line_data = line.split()
+        line_data[3], line_data[4] = line_data[4], line_data[3]
+        line_data.append("\n")
+        return " ".join(line_data)
+
     processed_file = Path(dtbl.parent) / dtbl.name.replace(".dtbl", ".dtbl.post_processed.dtbl")
     closing_lines = ["#\n"]
     with open(processed_file, "w") as out_fh:
@@ -94,8 +107,8 @@ def update_dtbl(dtbl: Path, hits: dict[str, list[str]]) -> None:
                     sig_acc = line.split()[3]
                     try:
                         sig_accessions = [_.split(":")[0] for _ in hits[prot_id]]
-                        if sig_acc.split(".") in sig_accessions:
-                            out_fh.write(line)
+                        if sig_acc.split(".")[0] in sig_accessions:
+                            out_fh.write(reorder_hit_data(line, sig_acc))
                     except KeyError:
                         # protein was not in the TreeGrafter output
                         continue
