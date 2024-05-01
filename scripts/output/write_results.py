@@ -90,7 +90,7 @@ def json_output(seq_matches: dict, output_path: str, version:str):
                         },
                       "entry": match_data['entry']
                     }
-                
+
                     match = {
                         "signature": signature,
                         "locations": match_data['locations'],
@@ -138,7 +138,8 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
 
                 signature_elem = ET.SubElement(match_elem, "signature")
                 signature_elem.set("ac", match_data['accession'])
-                signature_elem.set("desc", match_data['name'])
+                signature_elem.set("desc", match_data['description'])
+                signature_elem.set("name", match_data['name'])
                 if match_data['entry']:
                     entry_elem = ET.SubElement(signature_elem, "entry")
                     entry_elem.set("ac", match_data['entry']['accession'] if match_data['entry']['accession'] else "-")
@@ -160,7 +161,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                             pathway_xref_elem.set("name", pathway_xref['name'])
 
                 signature_library_elem = ET.SubElement(signature_elem, "signature-library-release")
-                signature_elem.set("library", match_data['member_db'].upper())
+                signature_library_elem.set("library", match_data['member_db'].upper())
                 signature_library_elem.set("version", match_data['version'])
                 model_ac_elem = ET.SubElement(match_elem, "model-ac")
                 model_ac_elem.text = match_key
@@ -170,15 +171,22 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     location_elem = ET.SubElement(locations_elem, "hmmer3-location")
                     location_elem.set("env-start", str(location["envelopeStart"]))
                     location_elem.set("env-end", str(location["envelopeEnd"]))
+                    location_elem.set("post-processed", str(location["postProcessed"]))
                     location_elem.set("score", str(location["score"]))
                     location_elem.set("evalue", str(location["evalue"]))
                     location_elem.set("hmm-start", str(location["hmmStart"]))
                     location_elem.set("hmm-end", str(location["hmmEnd"]))
                     location_elem.set("hmm-length", str(location["hmmLength"]))
+                    location_elem.set("hmm-bounds", str(location["hmmBounds"]))
                     location_elem.set("start", str(location["start"]))
                     location_elem.set("end", str(location["end"]))
+                    location_elem.set("representative", str(location["representative"]))
+                    location_frags_elem = ET.SubElement(location_elem, "location-fragments")
                     if 'sites' in location:
-                        location_elem.set("sites", str(location["sites"]))
+                        location_frag_elem = ET.SubElement(location_frags_elem, "hmmer3-location-fragment")
+                        location_frag_elem.set("start", str(location["sites"]["start"]))
+                        location_frag_elem.set("end", str(location["sites"]["end"]))
+                        location_frag_elem.set("dc-status", "")
 
     tree = ET.ElementTree(root)
     tree.write(xml_output, encoding="utf-8", xml_declaration=True)
