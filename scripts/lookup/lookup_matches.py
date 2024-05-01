@@ -31,6 +31,7 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                 signature = {
                     "accession": accession,
                     "name": "",
+                    "description": "",
                     "evalue": float(hit_data[16]),
                     "score": float(hit_data[7]),
                     "bias": float(hit_data[8]),
@@ -46,15 +47,15 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     "hmmEnd": int(hit_data[11]),
                     "hmmLength": int(hit_data[12]),  # qlen?
                     "hmmBounds": "",
+                    "evalue": float(hit_data[16]),
+                    "score": hit_data[15],
                     "envelopeStart": int(hit_data[13]),
                     "envelopeEnd": int(hit_data[14]),
-                    "score": hit_data[15],
-                    "postProcessed": "",
+                    "postProcessed": ""
 
-                    "evalue": float(hit_data[16]),
-                    "aliwS": hit_data[6],
-                    "..": hit_data[9],
-                    "cigar_alignment": hit_data[17],
+                    # "aliwS": hit_data[6],
+                    # "..": hit_data[9],
+                    # "cigar_alignment": hit_data[17],
                 }
 
                 if target_key not in matches:
