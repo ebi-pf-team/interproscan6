@@ -201,10 +201,12 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     location_elem.set("representative", str(location["representative"]))
                     location_frags_elem = ET.SubElement(location_elem, "location-fragments")
                     if 'sites' in location:
-                        location_frag_elem = ET.SubElement(location_frags_elem, "hmmer3-location-fragment")
-                        location_frag_elem.set("start", str(location["sites"]["start"]))
-                        location_frag_elem.set("end", str(location["sites"]["end"]))
-                        location_frag_elem.set("dc-status", "")
+                        for site in location['sites']:
+                            for sitelocation in site['siteLocations']:
+                                location_frag_elem = ET.SubElement(location_frags_elem, "hmmer3-location-fragment")
+                              location_frag_elem.set("start", str(sitelocation["start"]))
+                              location_frag_elem.set("end", str(sitelocation["end"]))
+                              location_frag_elem.set("dc-status", "")
 
     tree = ET.ElementTree(root)
     tree.write(xml_output, encoding="utf-8", xml_declaration=True)
