@@ -51,7 +51,7 @@ def parse_treegrafter(treegrafter: Path) -> dict[str, list[str]]:
     """Parse TreeGrafter output into a dict.
 
     Example:
-    {'OUTROSEMLOOKUP': ['PTHR43780:SF2'], 'sp_A2SLW2_1A1D_METPP': ['PTHR43780:SF2']}
+    {'OUTROSEMLOOKUP': [('PTHR43780:SF2', 'AN233')]}
 
     :param treegrafter: Path to treeGrafter output file
 
@@ -65,10 +65,11 @@ def parse_treegrafter(treegrafter: Path) -> dict[str, list[str]]:
                 continue
             protein_id = line.split()[0]
             sig_acc = line.split()[1]
+            node_id = line.split()[-1]
             try:
-                hits[protein_id].append(sig_acc)
+                hits[protein_id].append((sig_acc, node_id))
             except KeyError:
-                hits[protein_id] = [sig_acc]
+                hits[protein_id] = [(sig_acc, node_id)]
 
     return hits
 
@@ -80,7 +81,12 @@ def update_dtbl(dtbl: Path, hits: dict[str, list[str]]) -> None:
     :param hits: dict of hits from panther post-processed output
         (i.e. TreeGrafter output)
     """
-    def reorder_hit_data(line: str, hmm_sig_acc: str, full_sig_acc: str) -> str:
+    def reorder_hit_data(
+        line: str,
+        hmm_sig_acc: str,  # e.g. 'PTHR43780.orig.30.pir'
+        full_sig_acc: str,  # e.g. 'PTHR43780:SF2'
+        node_id: str  # e.g. 'AN223'
+    ) -> str:
         """
         Remove the ".orig.30.pir" suffix from the sig_acc,
         and switch around the query_name and accession cols
@@ -88,7 +94,7 @@ def update_dtbl(dtbl: Path, hits: dict[str, list[str]]) -> None:
         line = line.replace(hmm_sig_acc, full_sig_acc)
         line_data = line.split()
         line_data[3], line_data[4] = line_data[4], line_data[3]
-        line_data.append("\n")
+        line_data.extend([node_id, "\n"])
         return "\t".join(line_data)
 
     processed_file = Path(dtbl.parent) / dtbl.name.replace(".dtbl", ".dtbl.post_processed.dtbl")
@@ -106,9 +112,9 @@ def update_dtbl(dtbl: Path, hits: dict[str, list[str]]) -> None:
                     prot_id = line.split()[0]
                     hmm_sig_acc = line.split()[3]  # e.g. "PTHR48077.orig.30.pir"
                     try:
-                        for full_sig_acc in hits[prot_id]:   # e.g. ['PTHR43780:SF2']
+                        for full_sig_acc, node_id in hits[prot_id]:  # e.g. [('PTHR43780:SF2', 'AN233')]
                             if hmm_sig_acc.split(".")[0] == full_sig_acc.split(":")[0]:
-                                out_fh.write(reorder_hit_data(line, hmm_sig_acc, full_sig_acc))
+                                out_fh.write(reorder_hit_data(line, hmm_sig_acc, full_sig_acc, node_id))
                     except KeyError:
                         # protein was not in the TreeGrafter output
                         continue
