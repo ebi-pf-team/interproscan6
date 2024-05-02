@@ -1,0 +1,24 @@
+
+nextflow_function {
+
+    name "Test Functions"
+    script "subworkflows/pre_checks/main.nf"
+
+	
+
+    test("Test Function printHelp") {
+
+        function "printHelp"
+
+        when {
+            function {
+            }
+        }
+
+        then {
+            assert function.success
+            assert snapshot(function.result).match()
+        }
+
+    }
+}

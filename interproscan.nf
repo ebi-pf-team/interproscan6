@@ -18,7 +18,13 @@ include { XREFS } from "$projectDir/subworkflows/xrefs/main"
 
 workflow {
     // Perform preliminary validation checks before running the analysis
-    PRE_CHECKS(params)
+    PRE_CHECKS(
+        params.help,
+        file(params.input),
+        params.nucleic,
+        params.keySet(),
+        params.applications
+    )
 
     applications = params.applications.toLowerCase()
 
