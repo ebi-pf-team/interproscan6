@@ -81,13 +81,13 @@ def json_output(seq_matches: dict, output_path: str):
                     }
                 else:
                     signature = {
-                        "accession": match_data['accession'],
+                        "accession": match_data['accession'].split(":")[0],  # drop subfamily
                         "description": match_data['name'],
                         "signatureLibraryRelease": {
                             "library": match_data['member_db'].upper(),
                             "version": match_data['version']
                         },
-                      "entry": match_data['entry']
+                        "entry": match_data['entry']
                     }
 
                     match = {

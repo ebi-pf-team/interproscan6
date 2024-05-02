@@ -86,7 +86,7 @@ def get_signature(info: list[str], member_db: str, version: str) -> dict[str, st
         against the query protein sequence
     """
     signature_info = {
-        "accession": info[4].split(".")[0],
+        "accession": info[4].split(":")[0].split(".")[0],
         "name": info[3],
         "evalue": float(info[6]),
         "score": float(info[7]),
