@@ -37,6 +37,10 @@ jobs:
         conda install anaconda::pytest
         conda install bioconda::nf-test
 
+    - name: Add Nextflow to PATH
+      run: |
+        echo "$CONDA/bin" >> $GITHUB_PATH
+
     - name: NF-Test pre-analysis checks
       run: |
         conda run --name test nf-test test tests/subworkflows/pre_checks/
