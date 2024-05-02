@@ -39,8 +39,10 @@ jobs:
 
     - name: NF-Test pre-analysis checks 
       run: |
+        source activate test
         nf-test test tests/subworkflows/pre_checks/
 
     - name: PY-Test pre-analsysi checks script
       run: |
+        source activate test
         python3 -m pytest tests/
