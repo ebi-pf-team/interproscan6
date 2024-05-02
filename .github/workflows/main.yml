@@ -35,12 +35,7 @@ jobs:
     - name: Install pytest and nf-test
       run: |
         conda install anaconda::pytest
-        conda install -c bioconda nf-test
-
-    - name: Install nf-test
-      run: |
-        wget -qO- https://code.askimed.com/install/nf-test | bash
-        echo "$HOME/bin" >> $GITHUB_PATH
+        conda install bioconda::nf-test
 
     - name: Run nf-test
       run: |
