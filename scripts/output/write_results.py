@@ -97,6 +97,14 @@ def json_output(seq_matches: dict, output_path: str):
                         "score": match_data['score'],
                         "model-ac": match_data['model-ac']
                     }
+
+                    try:
+                        # get protein class and graftpoint for Panther
+                        match['proteinClass'] = match_data['proteinClass']
+                        match['graftPoint'] = match_data['graftPoint']
+                    except KeyError:
+                        pass
+
                 matches.append(match)
 
         result = {

@@ -2,7 +2,7 @@ import json
 import sys
 
 
-def parse(hmmer_domtbl: str, retrieve_sites: bool):
+def parse(hmmer_domtbl: str, retrieve_sites: bool, mem_db_dir: str):
     """Parse hmmer output into a JSON object.
 
     In the resulting dict, each query protein is represented by its
@@ -16,6 +16,7 @@ def parse(hmmer_domtbl: str, retrieve_sites: bool):
         [only true for SFLD and CDD.]
         [Site annotation is added to the hmmer output files by
         in house post-processing scripts.]
+    :param mem_db_dt: str repr of path to the member db data dir
     """
     with open(hmmer_domtbl, "r") as dtbl_f:
         matches = {}
@@ -63,7 +64,7 @@ def parse(hmmer_domtbl: str, retrieve_sites: bool):
                 # Retrieve signature data
                 target_key = str(info[0])
                 acc_key = str(info[4].split(".")[0])
-                signature = get_signature(info, member_db, version)
+                signature = get_signature(info, member_db, version, mem_db_dir)
                 location = get_domain(info)
                 if target_key not in matches:
                     matches[target_key] = {}
@@ -76,14 +77,20 @@ def parse(hmmer_domtbl: str, retrieve_sites: bool):
     return matches
 
 
-def get_signature(info: list[str], member_db: str, version: str) -> dict[str, str]:
+def get_signature(
+    info: list[str],
+    member_db: str,
+    version: str,
+    mem_db_dir: str
+) -> dict[str, str]:
     """
     Retrieve data for the full sequence hit against the model:
         These are the data listed under --- full sequence ---
 
     :param info: list, line split by blankspace
-    :param locations: list of dicts, one dict per hit for the signature
-        against the query protein sequence
+    :param member_db: str, name of member database
+    :param version: str, release version of member db
+    :param mem_db_dir: str repr tp member db data dir
     """
     signature_info = {
         "accession": info[4].split(":")[0].split(".")[0],
@@ -96,6 +103,18 @@ def get_signature(info: list[str], member_db: str, version: str) -> dict[str, st
         "version": version,
         "model-ac": info[4]
     }
+    try:
+        # retrieve node id from Panther-TreeGrafter hits
+        # used to get protein class data later
+        node_id = info[23]
+        paint_anno_path = mem_db_dir + f'/{info[4].split(":")[0].split(".")[0]}.json'
+        with open(paint_anno_path, 'r') as fh:
+            paint_annotations = json.load(fh)
+            node_data = paint_annotations[node_id]
+        signature_info['proteinClass'] = node_data[2]
+        signature_info['graftPoint'] = node_data[3]
+    except IndexError:
+        pass
     return signature_info
 
 
@@ -160,7 +179,7 @@ def main():
         from file [true for SFLD and CDD]
     """
     args = sys.argv[1:]
-    parse_result = parse(args[0], True if args[1] == "true" else False)
+    parse_result = parse(args[0], True if args[1] == "true" else False, args[2])
     print(json.dumps(parse_result, indent=2))
 
 

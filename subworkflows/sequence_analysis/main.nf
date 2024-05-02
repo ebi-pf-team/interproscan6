@@ -58,6 +58,7 @@ workflow SEQUENCE_ANALYSIS {
                 [
                     params.members."${member}".postprocess.data_dir,
                     params.members."${member}".postprocess.evalue,
+                    params.members."${member}".postprocess.paint_annotations,
                 ]
             ]
 
