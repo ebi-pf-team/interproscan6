@@ -1,0 +1,46 @@
+name: Run Nextflow Unit Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Set up Miniconda
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: test
+        environment-file: environment.yml
+        python-version: 3.8
+        auto-activate-base: false
+
+    - name: Install pytest and nf-test
+      run: |
+        conda install anaconda::pytest
+        conda install -c bioconda nf-test
+
+    - name: Set up Nextflow
+      run: |
+        curl -s https://get.nextflow.io | bash
+        mv nextflow $HOME/bin/
+
+    - name: Install nf-test
+      run: |
+        wget -qO- https://code.askimed.com/install/nf-test | bash
+        echo "$HOME/bin" >> $GITHUB_PATH
+
+    - name: Run nf-test
+      run: |
+        nf-test test tests/subworkflows/pre_checks/
+
+    - name: Run pytest
+      run: |
+        python3 -m pytest tests/
