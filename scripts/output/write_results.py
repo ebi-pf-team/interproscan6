@@ -89,13 +89,13 @@ def json_output(seq_matches: dict, output_path: str):
                         },
                       "entry": match_data['entry']
                     }
-                
+
                     match = {
                         "signature": signature,
                         "locations": match_data['locations'],
                         "evalue": match_data['evalue'],
                         "score": match_data['score'],
-                        "model-ac": match_key
+                        "model-ac": match_data['model-ac']
                     }
                 matches.append(match)
 

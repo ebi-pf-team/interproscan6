@@ -93,7 +93,8 @@ def get_signature(info: list[str], member_db: str, version: str) -> dict[str, st
         "qlen": int(info[5]),
         "bias": float(info[8]),
         "member_db": member_db,
-        "version": version
+        "version": version,
+        "model-ac": info[4]
     }
     return signature_info
 

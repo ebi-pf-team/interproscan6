@@ -80,16 +80,16 @@ def update_dtbl(dtbl: Path, hits: dict[str, list[str]]) -> None:
     :param hits: dict of hits from panther post-processed output
         (i.e. TreeGrafter output)
     """
-    def reorder_hit_data(line: str, sig_acc: str) -> str:
+    def reorder_hit_data(line: str, hmm_sig_acc: str, full_sig_acc: str) -> str:
         """
         Remove the ".orig.30.pir" suffix from the sig_acc,
         and switch around the query_name and accession cols
         """
-        line = line.replace(sig_acc, sig_acc.split(".")[0])
+        line = line.replace(hmm_sig_acc, full_sig_acc)
         line_data = line.split()
         line_data[3], line_data[4] = line_data[4], line_data[3]
         line_data.append("\n")
-        return " ".join(line_data)
+        return "\t".join(line_data)
 
     processed_file = Path(dtbl.parent) / dtbl.name.replace(".dtbl", ".dtbl.post_processed.dtbl")
     closing_lines = ["#\n"]
@@ -104,11 +104,11 @@ def update_dtbl(dtbl: Path, hits: dict[str, list[str]]) -> None:
                 else:
                     # check if ther protein is in treegrafter output
                     prot_id = line.split()[0]
-                    sig_acc = line.split()[3]
+                    hmm_sig_acc = line.split()[3]  # e.g. "PTHR48077.orig.30.pir"
                     try:
-                        sig_accessions = [_.split(":")[0] for _ in hits[prot_id]]
-                        if sig_acc.split(".")[0] in sig_accessions:
-                            out_fh.write(reorder_hit_data(line, sig_acc))
+                        for full_sig_acc in hits[prot_id]:   # e.g. ['PTHR43780:SF2']
+                            if hmm_sig_acc.split(".")[0] == full_sig_acc.split(":")[0]:
+                                out_fh.write(reorder_hit_data(line, hmm_sig_acc, full_sig_acc))
                     except KeyError:
                         # protein was not in the TreeGrafter output
                         continue
