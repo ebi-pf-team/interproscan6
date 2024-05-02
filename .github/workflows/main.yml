@@ -37,12 +37,10 @@ jobs:
         conda install anaconda::pytest
         conda install bioconda::nf-test
 
-    - name: NF-Test pre-analysis checks 
+    - name: NF-Test pre-analysis checks
       run: |
-        source activate test
-        nf-test test tests/subworkflows/pre_checks/
-
-    - name: PY-Test pre-analsysi checks script
+        conda run --name test nf-test test tests/subworkflows/pre_checks/
+    
+    - name: PY-Test pre-analysis checks script
       run: |
-        source activate test
-        python3 -m pytest tests/
+        conda run --name test python3 -m pytest tests/
