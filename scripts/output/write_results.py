@@ -156,7 +156,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
 
                 signature_elem = ET.SubElement(match_elem, "signature")
                 signature_elem.set("ac", match_data['accession'])
-                signature_elem.set("desc", match_data['description'])
+                signature_elem.set("desc", match_data["entry"]['description'])
                 signature_elem.set("name", match_data['name'])
                 if match_data['entry']:
                     entry_elem = ET.SubElement(signature_elem, "entry")
@@ -204,9 +204,9 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         for site in location['sites']:
                             for sitelocation in site['siteLocations']:
                                 location_frag_elem = ET.SubElement(location_frags_elem, "hmmer3-location-fragment")
-                              location_frag_elem.set("start", str(sitelocation["start"]))
-                              location_frag_elem.set("end", str(sitelocation["end"]))
-                              location_frag_elem.set("dc-status", "")
+                                location_frag_elem.set("start", str(sitelocation["start"]))
+                                location_frag_elem.set("end", str(sitelocation["end"]))
+                                location_frag_elem.set("dc-status", "")
 
     tree = ET.ElementTree(root)
     tree.write(xml_output, encoding="utf-8", xml_declaration=True)
