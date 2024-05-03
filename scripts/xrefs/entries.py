@@ -15,10 +15,12 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
             try:
                 entry = entries[acc_id]
                 match_info[match_key]["entry"] = {
-                    "accession": entry[2],
-                    "name": entry[0],
-                    "description": entry[1],
-                    "type": "",
+                    "accession": entry[0],
+                    "name": entry[1],
+                    "description": entry[2],
+                    "db": entry[3],
+                    "type": entry[4],
+                    "evidence": entry[5],
                     "goXRefs": [],
                     "pathwayXRefs": []
                 }
