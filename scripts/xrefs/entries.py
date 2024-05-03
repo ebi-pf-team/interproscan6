@@ -15,8 +15,8 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
             try:
                 entry = entries[acc_id]
                 match_info[match_key]["entry"] = {
-                    "accession": entry[0],
-                    "name": entry[1],
+                    "accession": entry[0] if entry[0] is not None else "-",
+                    "name": entry[1] if entry[1] is not None else "-",
                     "description": entry[2],
                     "db": entry[3],
                     "type": entry[4],

@@ -10,6 +10,7 @@ def add_pathways(matches_path: str, pathway_path: str):
     with open(pathway_path + ".json", "r") as pa:
         pa_info = json.load(pa)
 
+    db_pattern = {"t": "MetaCyc", "w": "UniPathway", "k": "KEGG", "r": "Reactome"}
     for seq_id, match_info in matches_info.items():
         for match_key, data in match_info.items():
             if data["entry"]:
@@ -19,7 +20,7 @@ def add_pathways(matches_path: str, pathway_path: str):
                     for pa_id in pa_ids:
                         pa_dict = {
                             "name": pa_info[pa_id][1],
-                            "databaseName": pa_info[pa_id][0],
+                            "databaseName": db_pattern[pa_info[pa_id][0]],
                             "id": pa_id
                         }
                         match_info[match_key]["entry"]["pathwayXRefs"].append(pa_dict)

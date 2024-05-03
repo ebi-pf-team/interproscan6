@@ -7,17 +7,14 @@ from datetime import datetime
 def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
     def write_to_tsv(
             seq_id, md5, seq_len, member_db, sig_acc,
-            ali_from, ali_to, evalue, status, current_date,
-            sig_desc="", interpro_acc="-", interpro_desc="-"
+            sig_desc, ali_from, ali_to, evalue, status,
+            current_date, interpro_acc, interpro_name, xrefs
     ):
-        """
-        sig_desc is info from the DB or hmm.out, and added in a later step
-        interpro_acc and interpro_desc are added on entries PR
-        """
         tsv_file.write((
             f"{seq_id}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t"
             f"{sig_desc}\t{ali_from}\t{ali_to}\t{evalue}\t{status}\t"
-            f"{current_date}\t{interpro_acc}\t{interpro_desc}\n"
+            f"{current_date}\t{interpro_acc}\t{interpro_name}\t"
+            f"{xrefs}\n"
         ))
 
     tsv_output = os.path.join(output_path + '.tsv')
@@ -32,29 +29,37 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
             seq_id = seq_target
             md5 = sequence_data[2]
             seq_len = sequence_data[3]
+
             for match_acc, match in matches.items():
+                entry_acc = match["entry"]["accession"]
+                entry_name = match["entry"]["name"]
+                entry_desc = match["entry"]["description"]
+                entry_db = match["entry"]["db"]
+                goterms = []
+                pathways = []
+                for go_info in match["entry"]["goXRefs"]:
+                    goterms.append(go_info["id"])
+                for pwy_info in match["entry"]["pathwayXRefs"]:
+                    pathways.append(pwy_info["id"])
+                xrefs = f"{'|'.join(goterms)}\t{'|'.join(pathways)}"
+
                 if match_acc == "signal_peptide":
-                    member_db = match["member_db"]
                     sig_acc, status = "Signal Peptide", ""
                     ali_from = match["start"]
                     ali_to = match["end"]
                     evalue = match["pvalue"]
-                    write_to_tsv(
-                        seq_id, md5, seq_len, member_db,
-                        sig_acc, ali_from, ali_to, evalue,
-                        status, current_date)
                 else:
-                    member_db = match["member_db"]
                     sig_acc = match["accession"]
                     status = "T"
                     for location in match["locations"]:
                         evalue = location["evalue"]
                         ali_from = location["start"]
                         ali_to = location["end"]
-                        write_to_tsv(
-                            seq_id, md5, seq_len, member_db,
-                            sig_acc, ali_from, ali_to, evalue,
-                            status, current_date)
+                write_to_tsv(
+                    seq_id, md5, seq_len, entry_db,
+                    sig_acc, entry_desc, ali_from, ali_to,
+                    evalue, status, current_date, entry_acc,
+                    entry_name, xrefs)
 
 
 def json_output(seq_matches: dict, output_path: str):
@@ -89,7 +94,7 @@ def json_output(seq_matches: dict, output_path: str):
                         },
                       "entry": match_data['entry']
                     }
-                
+
                     match = {
                         "signature": signature,
                         "locations": match_data['locations'],
