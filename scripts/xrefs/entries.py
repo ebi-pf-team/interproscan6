@@ -20,7 +20,6 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
                     "description": entry[2],
                     "db": entry[3],
                     "type": entry[4],
-                    "evidence": entry[5],
                     "goXRefs": [],
                     "pathwayXRefs": []
                 }

@@ -87,12 +87,13 @@ def json_output(seq_matches: dict, output_path: str):
                 else:
                     signature = {
                         "accession": match_data['accession'],
-                        "description": match_data['name'],
+                        "name": match_data['name'],
+                        "description": match_data["entry"]["description"],
                         "signatureLibraryRelease": {
                             "library": match_data['member_db'].upper(),
                             "version": match_data['version']
                         },
-                      "entry": match_data['entry']
+                        "entry": match_data['entry'] if match_data['entry']['accession'] != "-" else None
                     }
 
                     match = {
