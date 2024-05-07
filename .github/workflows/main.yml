@@ -69,3 +69,8 @@ jobs:
     - name: PY-Test pre-analysis checks script
       run: |
         conda run --name test python3 -m pytest tests/
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4.0.1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
