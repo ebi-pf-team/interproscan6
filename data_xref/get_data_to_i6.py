@@ -87,30 +87,30 @@ def export_entries_info(ipr_uri: str, output_path: str):
 
     cur.execute(
         """
-        SELECT M.METHOD_AC, EM.ENTRY_AC, EM.NAME, M.DESCRIPTION, D.DBSHORT, ET.ABBREV
+        SELECT M.METHOD_AC, EM.ENTRY_AC, EM.SHORT_NAME, EM.NAME, ET.ABBREV
         FROM INTERPRO.METHOD M
         INNER JOIN INTERPRO.CV_DATABASE D
           ON M.DBCODE = D.DBCODE
         INNER JOIN INTERPRO.CV_ENTRY_TYPE ET
           ON M.SIG_TYPE = ET.CODE
         LEFT OUTER JOIN (
-            SELECT E.ENTRY_AC, EM.METHOD_AC, E.NAME
+            SELECT E.ENTRY_AC, EM.METHOD_AC, E.NAME, E.SHORT_NAME
             FROM INTERPRO.ENTRY E
             INNER JOIN INTERPRO.ENTRY2METHOD EM
               ON E.ENTRY_AC = EM.ENTRY_AC
             WHERE E.CHECKED = 'Y'
         ) EM ON M.METHOD_AC = EM.METHOD_AC
         UNION ALL
-        SELECT FM.METHOD_AC, NULL, FM.NAME, FM.DESCRIPTION, D.DBSHORT, 'Region'
+        SELECT FM.METHOD_AC, NULL, FM.NAME, FM.DESCRIPTION, 'Region'
         FROM INTERPRO.FEATURE_METHOD FM
         INNER JOIN INTERPRO.CV_DATABASE D
-          ON FM.DBCODE = D.DBCODE       
+          ON FM.DBCODE = D.DBCODE
         """
     )
 
     entries = {}
-    for method_ac, entry_ac, name, description, db, type in cur:
-        entries[method_ac] = [entry_ac, name, description, db, type]
+    for method_ac, entry_ac, short_name, name, type in cur:
+        entries[method_ac] = [entry_ac, short_name, name, type]
 
     with open(os.path.join(output_path, "entries.ipr.json"), "wt") as fh:
         json.dump(entries, fh)

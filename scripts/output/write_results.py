@@ -31,10 +31,10 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
             seq_len = sequence_data[3]
 
             for match_acc, match in matches.items():
+                match_db = match["member_db"]
                 entry_acc = match["entry"]["accession"]
                 entry_name = match["entry"]["name"]
                 entry_desc = match["entry"]["description"]
-                entry_db = match["entry"]["db"]
                 goterms = []
                 pathways = []
                 for go_info in match["entry"]["goXRefs"]:
@@ -56,7 +56,7 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                         ali_from = location["start"]
                         ali_to = location["end"]
                 write_to_tsv(
-                    seq_id, md5, seq_len, entry_db,
+                    seq_id, md5, seq_len, match_db,
                     sig_acc, entry_desc, ali_from, ali_to,
                     evalue, status, current_date, entry_acc,
                     entry_name, xrefs)
