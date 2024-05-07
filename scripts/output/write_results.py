@@ -161,8 +161,8 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                 if match_data['entry']:
                     entry_elem = ET.SubElement(signature_elem, "entry")
                     entry_elem.set("ac", match_data['entry']['accession'] if match_data['entry']['accession'] else "-")
-                    entry_elem.set("desc", match_data['entry']['description'])
-                    entry_elem.set("name", match_data['entry']['name'])
+                    entry_elem.set("desc", match_data['entry']['name'])
+                    entry_elem.set("name", match_data['entry']['short_name'])
                     entry_elem.set("type", match_data['entry']['type'])
                     if match_data['entry']['goXRefs']:
                         for go_xref in match_data['entry']['goXRefs']:
