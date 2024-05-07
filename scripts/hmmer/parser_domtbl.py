@@ -103,18 +103,16 @@ def get_signature(
         "version": version,
         "model-ac": info[4]
     }
-    try:
-        # retrieve node id from Panther-TreeGrafter hits
-        # used to get protein class data later
-        node_id = info[23]
+
+    if member_db.lower() == 'panther':
+        node_id = info[-1]  # retrieve node id from Panther-TreeGrafter hits
         paint_anno_path = mem_db_dir + f'/{info[4].split(":")[0].split(".")[0]}.json'
         with open(paint_anno_path, 'r') as fh:
             paint_annotations = json.load(fh)
             node_data = paint_annotations[node_id]
         signature_info['proteinClass'] = node_data[2]
         signature_info['graftPoint'] = node_data[3]
-    except IndexError:
-        pass
+
     return signature_info
 
 
@@ -179,7 +177,11 @@ def main():
         from file [true for SFLD and CDD]
     """
     args = sys.argv[1:]
-    parse_result = parse(args[0], True if args[1] == "true" else False, args[2])
+    parse_result = parse(
+        args[0],
+        True if args[1] == "true" else False,
+        args[2]
+    )
     print(json.dumps(parse_result, indent=2))
 
 
