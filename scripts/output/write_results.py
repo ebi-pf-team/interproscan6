@@ -34,8 +34,8 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
             for match_acc, match in matches.items():
                 match_db = match["member_db"]
                 entry_acc = match["entry"]["accession"]
-                entry_name = match["entry"]["name"]
-                entry_desc = match["entry"]["description"]
+                entry_name = match["entry"]["short_name"]
+                entry_desc = match["entry"]["name"]
                 goterms = []
                 pathways = []
                 for go_info in match["entry"]["goXRefs"]:
