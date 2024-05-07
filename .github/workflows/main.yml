@@ -32,6 +32,10 @@ jobs:
       run: |
         conda install bioconda::nextflow
 
+    - name: Install dependencies
+      run: |
+        pip install -r requirements-dev.txt
+
     - name: Install pytest and nf-test
       run: |
         conda install anaconda::pytest
@@ -68,7 +72,7 @@ jobs:
     
     - name: PY-Test pre-analysis checks script
       run: |
-        conda run --name test python3 -m pytest tests/
+        conda run --name test python3 -m pytest -v --cov=scripts --cov-report xml:.coverage.xml tests/
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.0.1
