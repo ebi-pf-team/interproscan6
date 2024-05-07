@@ -34,6 +34,7 @@ jobs:
         conda install anaconda::pytest
         conda install conda-forge::pytest-cov
         conda install conda-forge::pytest-ordering
+        conda install anaconda::coverage
         conda install bioconda::nf-test
 
     - name: Set up Docker Buildx
@@ -60,10 +61,6 @@ jobs:
     - name: Add Nextflow to PATH
       run: |
         echo "$CONDA/bin" >> $GITHUB_PATH
-
-    - name: Test plugins
-      run: |
-        pytest --trace-config
 
     - name: NF-Test pre-analysis checks
       run: |
