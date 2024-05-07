@@ -31,11 +31,7 @@ jobs:
     - name: Install dependencies
       run: |
         conda install bioconda::nextflow &&
-        conda install bioconda::nf-test &&
-        python -m pip install coverage &&
-        python -m pip install pytest &&
-        python -m pip install pytest-cov &&
-        python -m pip install pytest-ordering
+        conda install bioconda::nf-test
         
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
