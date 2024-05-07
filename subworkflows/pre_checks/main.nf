@@ -70,7 +70,7 @@ workflow PRE_CHECKS {
 
     // Check if the input parameters are valid
     def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro', 'translate', 'nucleic', 'formats', 'output', 'xrefs', 'goterms', 'pathways', 'ipsc_version']
-    def parameter_diff = params.keySet() - parameters_expected
+    def parameter_diff = all_params - parameters_expected
     if (parameter_diff.size() != 0){
         log.info printHelp()
         exit 22, "Input not valid: $parameter_diff"
