@@ -1,14 +1,15 @@
+name: Validate Citation
+
 on:
   push:
     paths:
       - CITATION.cff
   workflow_dispatch:
 
-name: CITATION.cff
+
 jobs:
   Validate-CITATION-cff:
     runs-on: ubuntu-latest
-    name: Validate CITATION.cff
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
