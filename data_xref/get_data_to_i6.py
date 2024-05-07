@@ -87,7 +87,7 @@ def export_entries_info(ipr_uri: str, output_path: str):
 
     cur.execute(
         """
-        SELECT M.METHOD_AC, EM.ENTRY_AC, EM.SHORT_NAME, EM.NAME, ET.ABBREV
+        SELECT M.METHOD_AC, EM.ENTRY_AC, EM.SHORT_NAME, EM.NAME, M.DESCRIPTION, ET.ABBREV
         FROM INTERPRO.METHOD M
         INNER JOIN INTERPRO.CV_DATABASE D
           ON M.DBCODE = D.DBCODE
@@ -101,7 +101,7 @@ def export_entries_info(ipr_uri: str, output_path: str):
             WHERE E.CHECKED = 'Y'
         ) EM ON M.METHOD_AC = EM.METHOD_AC
         UNION ALL
-        SELECT FM.METHOD_AC, NULL, FM.NAME, FM.DESCRIPTION, 'Region'
+        SELECT FM.METHOD_AC, NULL, FM.NAME, NULL, FM.DESCRIPTION, 'Region'
         FROM INTERPRO.FEATURE_METHOD FM
         INNER JOIN INTERPRO.CV_DATABASE D
           ON FM.DBCODE = D.DBCODE
@@ -109,8 +109,8 @@ def export_entries_info(ipr_uri: str, output_path: str):
     )
 
     entries = {}
-    for method_ac, entry_ac, short_name, name, type in cur:
-        entries[method_ac] = [entry_ac, short_name, name, type]
+    for method_ac, entry_ac, short_name, name, description, type in cur:
+        entries[method_ac] = [entry_ac, short_name, name, description, type]
 
     with open(os.path.join(output_path, "entries.ipr.json"), "wt") as fh:
         json.dump(entries, fh)

@@ -16,9 +16,10 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
                 entry = entries[acc_id]
                 match_info[match_key]["entry"] = {
                     "accession": entry[0] if entry[0] is not None else "-",
-                    "name": entry[1] if entry[1] is not None else "-",
-                    "description": entry[2] if entry[2] is not None else "-",
-                    "type": entry[3],
+                    "short_name": entry[1] if entry[1] is not None else "-",
+                    "name": entry[2] if entry[2] is not None else "-",
+                    "description": entry[3] if entry[3] is not None else "-",
+                    "type": entry[4],
                     "goXRefs": [],
                     "pathwayXRefs": []
                 }
