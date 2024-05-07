@@ -98,12 +98,10 @@ def json_output(seq_matches: dict, output_path: str):
                         "model-ac": match_data['model-ac']
                     }
 
-                    try:
+                    if match_data['member_db'].upper() == "PANTHER":
                         # get protein class and graftpoint for Panther
                         match['proteinClass'] = match_data['proteinClass']
                         match['graftPoint'] = match_data['graftPoint']
-                    except KeyError:
-                        pass
 
                 matches.append(match)
 
