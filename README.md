@@ -2,7 +2,7 @@
 
 [![nf-test](https://img.shields.io/badge/tested_with-nf--test-337ab7.svg)](https://github.com/askimed/nf-test)  
 
-[![CITATION.cff](https://github.com/HobnobMancer/cazy_webscraper/actions/workflows/main.yml/badge.svg)](https://github.com/HobnobMancer/cazy_webscraper/actions/workflows/main.yml)  
+[![CITATION.cff](https://github.com/ebi-pf-team/interproscan6/actions/workflows/citation.yml/badge.svg)](https://github.com/ebi-pf-team/interproscan6/actions/workflows/citation.yml)  
 
 **!! UNDER DEVELOPMENT !!**
 

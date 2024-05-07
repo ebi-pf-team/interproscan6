@@ -8,3 +8,6 @@ dependencies:
   - biopython>=1.76
   - nf-test
   - pytest
+  - coverage
+  - pytest-cov
+  - pytest-ordering

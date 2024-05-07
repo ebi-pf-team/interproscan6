@@ -28,15 +28,11 @@ jobs:
         python-version: 3.8
         auto-activate-base: false
 
-    - name: Install Nextflow
+    - name: Install dependencies
       run: |
-        conda install bioconda::nextflow
-
-    - name: Install pytest and nf-test
-      run: |
-        conda install anaconda::pytest
+        conda install bioconda::nextflow &&
         conda install bioconda::nf-test
-
+        
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
@@ -68,7 +64,7 @@ jobs:
     
     - name: PY-Test pre-analysis checks script
       run: |
-        conda run --name test python3 -m pytest tests/
+        conda run --name test python3 -m pytest tests -v --cov=scripts --cov-report xml:.coverage.xml
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.0.1
