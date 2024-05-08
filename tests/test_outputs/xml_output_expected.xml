@@ -1,0 +1,79 @@
+<protein-matches xmlns="https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/schemas" interproscan-version="6.0.0">
+<protein>
+<sequence md5="f1f6c0f82668b5315244caa65040cad9">MGIRYDNTVYGLSPLARGTRGNGNRPRGRGRFIPAGAGNTMSGTMPRLSGPVYPRWRGEHNERNNAQAFWSGLSPLARGTPNGSDVRRLRYRFIPAGAGNTATRCSNEPFDPVYPRWRGEHAQNDRRSEDSGGLSPLARGTRRPDQVMVLPLRFIPAGAGNTDIPPDPRPKSAVYPRWRGEHNGTDSTNQNFRGLSPLARGTLYDCRRYEKPRRFIPAGAGNTCYGVGALNIGAVYPRWRGEH</sequence>
+<xref id="UPI0010EB9177" name="UPI0010EB9177"/>
+<matches>
+<hmmer3-match evalue="1.7E-103" score="338.3">
+<signature ac="ANF00057" desc="Translation of E. coli type CRISPR repeat" name="Spurious_ORF_57">
+<signature-library-release library="ANTIFAM" version="7.0"/>
+</signature>
+<model-ac>ANF00057</model-ac>
+<locations>
+<hmmer3-location env-end="101" env-start="2" post-processed="false" score="93.0" evalue="2.7E-27" hmm-start="16" hmm-end="111" hmm-length="111" hmm-bounds="C_TERMINAL_COMPLETE" start="6" end="101" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="6" end="101" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+<hmmer3-location env-end="223" env-start="113" post-processed="false" score="115.5" evalue="2.6E-34" hmm-start="1" hmm-end="111" hmm-length="111" hmm-bounds="COMPLETE" start="113" end="223" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="113" end="223" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+<hmmer3-location env-end="243" env-start="174" post-processed="false" score="70.4" evalue="2.7E-20" hmm-start="1" hmm-end="70" hmm-length="111" hmm-bounds="COMPLETE" start="174" end="243" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="174" end="243" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+<hmmer3-location env-end="162" env-start="69" post-processed="false" score="95.9" evalue="3.4E-28" hmm-start="19" hmm-end="111" hmm-length="111" hmm-bounds="C_TERMINAL_COMPLETE" start="70" end="162" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="70" end="162" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+<hmmer3-match evalue="1.4E-48" score="160.8">
+<signature ac="ANF00006" desc="Translation of CRISPR region" name="Spurious_ORF_06">
+<signature-library-release library="ANTIFAM" version="7.0"/>
+</signature>
+<model-ac>ANF00006</model-ac>
+<locations>
+<hmmer3-location env-end="162" env-start="113" post-processed="false" score="44.1" evalue="4.1E-12" hmm-start="1" hmm-end="50" hmm-length="50" hmm-bounds="COMPLETE" start="113" end="162" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="113" end="162" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+<hmmer3-location env-end="223" env-start="174" post-processed="false" score="44.5" evalue="3.0E-12" hmm-start="1" hmm-end="50" hmm-length="50" hmm-bounds="COMPLETE" start="174" end="223" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="174" end="223" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+<hmmer3-location env-end="40" env-start="4" post-processed="false" score="28.0" evalue="4.3E-7" hmm-start="19" hmm-end="50" hmm-length="50" hmm-bounds="C_TERMINAL_COMPLETE" start="9" end="40" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="9" end="40" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+<hmmer3-location env-end="101" env-start="52" post-processed="false" score="50.4" evalue="4.2E-14" hmm-start="1" hmm-end="50" hmm-length="50" hmm-bounds="COMPLETE" start="52" end="101" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="52" end="101" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="6060f0d4cccb4dc4e224ee28348af028">MEEDIDTRKINNSFLRDHSYATEADIISTVEFNHTGELLATGDKGGRVVIFQREQESKNQVHRRGEYNVYSTFQSHEPEFDYLKSLEIEEKINKIRWLPQQNAAYFLLSTNDKTVKLWKVSERDKRPEGYNLKDEEGRLRDPATITTLRVPVLRPMDLMVEATPRRVFANAHTYHINSISVNSDYETYMSADDLRINLWNFEITNQSFNIVDIKPANMEELTEVITAAEFHPHHCNTFVYSSSKGTIRLCDMRASALCDRHTKFFEEPEDPSNRSFFSEIISSISDVKFSHSGRYIMTRDYLTVKVWDLNMENRPIETYQVHDYLRSKLCSLYENDCIFDKFECVWNGSDSVIMTGSYNNFFRMFDRNTKRDVTLEASRENSKPRAILKPRKVCVGGKRRKDEISVDSLDFSKKILHTAWHPSENIIAVAATNNLYIFQDKVN</sequence>
+<xref id="sp|Q5E9Q7|2ABB_BOVIN" name="sp|Q5E9Q7|2ABB_BOVIN Serine/threonine-protein phosphatase 2A 55 kDa regulatory subunit B beta isoform OS=Bos taurus OX=9913 GN=PPP2R2B PE=2 SV=1"/>
+<matches/>
+</protein>
+<protein>
+<sequence md5="5a40425be664fc947906456e8fc0e722">MLARGGIQSNQSRLSAHLGGKVDLYAKREDCNSGLAFGGNKLRKLEYIVPDAIASGADTLVSIGGVQSNHTRMVAAVAAKIGMKCRLVQEAWVPHEDAVYDRVGNIMLSRIMGADVGKE</sequence>
+<xref id="TESTESEMLOOKUP" name="TESTESEMLOOKUP"/>
+<matches/>
+</protein>
+<protein>
+<sequence md5="cf8b3730bba16fc9f9823ad3a120d975">MNLNRFERYPLTFGPSPITPLKRLSQHLGGKVELYAKREDCNSGLAFGGNKTRKLEYLIPEAIEQGCDTLVSIGGIQSNQTRQVAAVAAHLGMKCVLVQENWVNYSDAVYDRVGNIEMSRIMGADVRLDAAGFDIGIRPSWEKAMSDVVEQGGKPFPIPAGCSEHPYGGLGFVGFAEEVRQQEKELGFKFDYIVVCSVTGSTQAGMVVGFAADGRSKNVIGIDASAKPEQTKAQILRIARHTAELVELGREITEEDVVLDTRFAYPEYGLPNEGTLEAIRLCGSLEGVLTDPVYEGKSMHGMIEMVRRGEFPEGS</sequence>
+<xref id="OUTROSEMLOOKUP" name="OUTROSEMLOOKUP"/>
+<matches/>
+</protein>
+</protein-matches>

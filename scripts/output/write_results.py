@@ -33,7 +33,7 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
 
             for match_acc, match in matches.items():
                 match_db = match["member_db"]
-                entry_acc = match["entry"]["accession"]
+                entry_acc = match["entry"]["accession"] if match["entry"]["accession"] else "-"
                 entry_name = match["entry"]["short_name"]
                 entry_desc = match["entry"]["name"]
                 goterms = []
@@ -89,7 +89,7 @@ def json_output(seq_matches: dict, output_path: str, version:str):
                     signature = {
                         "accession": match_data['accession'].split(":")[0],  # drop subfamily
                         "name": match_data['name'],
-                        "description": match_data["entry"]["description"],
+                        "description": match_data["entry"]["description"] if match_data['entry']['description'] else "-",
                         "signatureLibraryRelease": {
                             "library": match_data['member_db'].upper(),
                             "version": match_data['version']
@@ -135,7 +135,7 @@ def json_output(seq_matches: dict, output_path: str, version:str):
 
 def xml_output(seq_matches: dict, output_path: str, version: str):
     xml_output = os.path.join(output_path + '.xml')
-    root = ET.Element("protein-matches", xmlns="https://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/schemas")
+    root = ET.Element("protein-matches", xmlns="https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/schemas")
     root.set("interproscan-version", version)
 
     for seq_id, data in seq_matches.items():
@@ -156,11 +156,11 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
 
                 signature_elem = ET.SubElement(match_elem, "signature")
                 signature_elem.set("ac", match_data['accession'])
-                signature_elem.set("desc", match_data["entry"]['description'])
+                signature_elem.set("desc", match_data["entry"]['description'] if match_data['entry']['description'] else "-")
                 signature_elem.set("name", match_data['name'])
                 if match_data['entry']:
                     entry_elem = ET.SubElement(signature_elem, "entry")
-                    entry_elem.set("ac", match_data['entry']['accession'] if match_data['entry']['accession'] else "-")
+                    entry_elem.set("ac", match_data['entry']['accession'])
                     entry_elem.set("desc", match_data['entry']['name'])
                     entry_elem.set("name", match_data['entry']['short_name'])
                     entry_elem.set("type", match_data['entry']['type'])
@@ -209,7 +209,8 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                                 location_frag_elem.set("dc-status", "")
 
     tree = ET.ElementTree(root)
-    tree.write(xml_output, encoding="utf-8", xml_declaration=True)
+    ET.indent(tree, space="\t", level=0)
+    tree.write(xml_output, encoding='utf-8')
 
 
 def write_results(sequences_path: str, matches_path: str, output_format: str, output_path: str, version: str):
