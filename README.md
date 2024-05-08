@@ -1,8 +1,9 @@
 # InterProScan6
 
-[![nf-test](https://img.shields.io/badge/tested_with-nf--test-337ab7.svg)](https://github.com/askimed/nf-test)  
-
-[![CITATION.cff](https://github.com/ebi-pf-team/interproscan6/actions/workflows/citation.yml/badge.svg)](https://github.com/ebi-pf-team/interproscan6/actions/workflows/citation.yml)  
+[![nf-test](https://img.shields.io/badge/tested_with-nf--test-337ab7.svg)](https://github.com/askimed/nf-test) 
+![Unit tests](https://github.com/ebi-pf-team/interproscan6/actions/workflows/main.yml/badge.svg)  
+[![codecov](https://codecov.io/gh/ebi-pf-team/interproscan6/graph/badge.svg?token=7MP9WCJHAQ)](https://codecov.io/gh/ebi-pf-team/interproscan6)
+[![Citation](https://github.com/ebi-pf-team/interproscan6/actions/workflows/citation.yml/badge.svg)](#citation)
 
 **!! UNDER DEVELOPMENT !!**
 
@@ -45,11 +46,30 @@ Users who have novel nucleotide or protein sequences that they wish to functiona
     rm interproscan-5.67-99.0 -rf
     rm interproscan-data-5.67-99.0.tar.gz
 
+These commands download and store all member database data in the `data/` directory.
+
+If you do not store these data in another directory you will need to update the members config file: 
+`subworkflows/sequence_analysis/members.config`. Specifically, you will need to 
+update the paths for:
+* `hmm`
+* Under `postprocess`: [_where applicable_]
+  * `data`
+  * `models`
+  * `modesl_dir`
+  * `rules`
+
+Please provide absolute paths. You can use the `$projectDir` short cut to represent the path to the root directory of `InterProScan6`.
 
 2. Download InterPro data files (xref (entries, goterms and pathways)):
 
     mkdir i6data
-    python interproscan6/data_xref/get_data_to_i6.py  # for devs
+    python interproscan6/data_xrefs/get_data_to_i6.py  # for devs
+
+This stores the InterPro data in the `data_xrefs/` directory.
+
+If you store these data in an alternative directory, please update the paths under the `xrefs` heading in the Nextflow configuration file (`./nextflow.config`).
+
+Please provide absolute paths. You can use the `$projectDir` short cut to represent the path to the root directory of `InterProScan6`.
 
 3. Build a docker `InterProScan6` base image:
 
