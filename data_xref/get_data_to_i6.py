@@ -4,7 +4,10 @@ import os
 import oracledb
 
 
-def _export_pathways(cur: oracledb.Cursor, output_path: str):
+def export_pathways(ipr_uri: str, output_path: str):
+    con = oracledb.connect(ipr_uri)
+    cur = con.cursor()
+
     cur.execute(
         """
         SELECT ENTRY_AC, DBCODE, AC, NAME
@@ -30,7 +33,10 @@ def _export_pathways(cur: oracledb.Cursor, output_path: str):
         json.dump(interpro2pathways, fh)
 
 
-def _export_go_terms(cur: oracledb.Cursor, goa_uri: str, output_path: str):
+def export_goterms(ipr_uri: str, goa_uri: str, output_path: str):
+    con = oracledb.connect(ipr_uri)
+    cur = con.cursor()
+
     goa_con = oracledb.connect(goa_uri)
     goa_cur = goa_con.cursor()
     goa_cur.execute(
@@ -75,39 +81,38 @@ def _export_go_terms(cur: oracledb.Cursor, goa_uri: str, output_path: str):
         json.dump(interpro2go, fh)
 
 
-def export_for_interproscan(ipr_uri: str, goa_uri: str, outdir: str):
-    con = oracledb.connect(ipr_uri)
-    cur = con.cursor()
-
-    _export_pathways(cur, outdir)
-    _export_go_terms(cur, goa_uri, outdir)
-
-    cur.close()
-    con.close()
-
-
-def export_interpro_info(ipr_uri: str, output_path: str):
+def export_entries_info(ipr_uri: str, output_path: str):
     con = oracledb.connect(ipr_uri)
     cur = con.cursor()
 
     cur.execute(
-        """SELECT DISTINCT M.METHOD_AC, NAME, DESCRIPTION, ENTRY_AC
-            FROM INTERPRO.METHOD M
-            LEFT OUTER JOIN (
-                SELECT E.ENTRY_AC, EM.METHOD_AC
-                FROM INTERPRO.ENTRY E
-                INNER JOIN INTERPRO.ENTRY2METHOD EM
-                  ON E.ENTRY_AC = EM.ENTRY_AC
-                WHERE E.CHECKED = 'Y'
-            ) EM ON M.METHOD_AC = EM.METHOD_AC
+        """
+        SELECT M.METHOD_AC, EM.ENTRY_AC, EM.SHORT_NAME, EM.NAME, M.DESCRIPTION, ET.ABBREV
+        FROM INTERPRO.METHOD M
+        INNER JOIN INTERPRO.CV_DATABASE D
+          ON M.DBCODE = D.DBCODE
+        INNER JOIN INTERPRO.CV_ENTRY_TYPE ET
+          ON M.SIG_TYPE = ET.CODE
+        LEFT OUTER JOIN (
+            SELECT E.ENTRY_AC, EM.METHOD_AC, E.NAME, E.SHORT_NAME
+            FROM INTERPRO.ENTRY E
+            INNER JOIN INTERPRO.ENTRY2METHOD EM
+              ON E.ENTRY_AC = EM.ENTRY_AC
+            WHERE E.CHECKED = 'Y'
+        ) EM ON M.METHOD_AC = EM.METHOD_AC
+        UNION ALL
+        SELECT FM.METHOD_AC, NULL, FM.NAME, NULL, FM.DESCRIPTION, 'Region'
+        FROM INTERPRO.FEATURE_METHOD FM
+        INNER JOIN INTERPRO.CV_DATABASE D
+          ON FM.DBCODE = D.DBCODE
         """
     )
 
     entries = {}
-    for method_ac, name, description, entry_ac in cur:
-        entries[method_ac] = [name, description, entry_ac]
+    for method_ac, entry_ac, short_name, name, description, type in cur:
+        entries[method_ac] = [entry_ac, short_name, name, description, type]
 
-    with open(os.path.join(output_path, "ipr_entries.json"), "wt") as fh:
+    with open(os.path.join(output_path, "entries.ipr.json"), "wt") as fh:
         json.dump(entries, fh)
 
     cur.close()
@@ -117,6 +122,8 @@ def export_interpro_info(ipr_uri: str, output_path: str):
 if __name__ == '__main__':
     goa_uri = ""
     ippro = ""
-    output_path = "./i6data"
-    export_for_interproscan(ippro, goa_uri, output_path)
-    export_interpro_info(ippro, output_path)
+    output_path = "./data_xref"
+
+    export_entries_info(ippro, output_path)
+    export_pathways(ippro, output_path)
+    export_goterms(ippro, goa_uri, output_path)

@@ -49,7 +49,7 @@ Users who have novel nucleotide or protein sequences that they wish to functiona
 2. Download InterPro data files (xref (entries, goterms and pathways)):
 
     mkdir i6data
-    python interproscan6/files_test/get_data_to_i6.py  # for devs
+    python interproscan6/data_xref/get_data_to_i6.py  # for devs
 
 3. Build a docker `InterProScan6` base image:
 
