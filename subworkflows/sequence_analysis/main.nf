@@ -1,7 +1,7 @@
 include {
     CDD_RUNNER,
     CDD_POSTPROCESS,
-    CDD_POSTPROCESS
+    CDD_PARSER
 } from "$projectDir/modules/local/cdd/main"
 include { 
     HMMER_RUNNER as GENERIC_HMMER_RUNNER;
