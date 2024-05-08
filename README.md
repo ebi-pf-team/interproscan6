@@ -83,6 +83,9 @@ _Required for AnitFam, NCBIFam, Panther, SFLD, ...._:
 _Required for Panther_:
     docker build -t treegrafter docker_files/treegrafter
 
+_Requires for CDD_:
+    docker pull ncbi/blast
+
 5. [Optional] Build a docker image for [`easel`](https://github.com/EddyRivasLab/easel) for the prediction of Open Reading Frames:
 
     docker build -t easel docker_files/easel
