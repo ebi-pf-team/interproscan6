@@ -1,0 +1,13 @@
+name: ips6-test-env
+channels:
+  - defaults
+  - conda-forge
+  - bioconda
+dependencies:
+  - python>=3.8
+  - biopython>=1.76
+  - nf-test
+  - pytest
+  - coverage
+  - pytest-cov
+  - pytest-ordering

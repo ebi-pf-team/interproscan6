@@ -2,7 +2,7 @@
 
 [![nf-test](https://img.shields.io/badge/tested_with-nf--test-337ab7.svg)](https://github.com/askimed/nf-test)  
 
-[![CITATION.cff](https://github.com/HobnobMancer/cazy_webscraper/actions/workflows/main.yml/badge.svg)](https://github.com/HobnobMancer/cazy_webscraper/actions/workflows/main.yml)  
+[![CITATION.cff](https://github.com/ebi-pf-team/interproscan6/actions/workflows/citation.yml/badge.svg)](https://github.com/ebi-pf-team/interproscan6/actions/workflows/citation.yml)  
 
 **!! UNDER DEVELOPMENT !!**
 
@@ -56,8 +56,12 @@ Users who have novel nucleotide or protein sequences that they wish to functiona
     docker build -t interproscan6 .
     
 4. Download the additional images we use:
-    
+
+_Required for AnitFam, NCBIFam, Panther, SFLD, ...._:    
     docker pull biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1
+
+_Required for Panther_:
+    docker build -t treegrafter docker_files/treegrafter
 
 5. [Optional] Build a docker image for [`easel`](https://github.com/EddyRivasLab/easel) for the prediction of Open Reading Frames:
 

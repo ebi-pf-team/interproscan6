@@ -14,8 +14,9 @@ process HMMER_PARSER {
     """
     rm -f ${alignment}
     python3 $projectDir/scripts/hmmer/${tsv_pro ? "parser_out" : "parser_domtbl"}.py \\
-    ${tsv_pro ? "${out}" : "${domtbl}"} \\
-    ${sites ? "true" : "false"} \\
-    > hmmer_parsed_${out}.json
+        ${tsv_pro ? "${out}" : "${domtbl}"} \\
+        ${sites ? "true" : "false"} \\
+        ${postprocessing_params[2]} \\
+        > hmmer_parsed_${out}.json
     """
 }

@@ -86,9 +86,9 @@ def json_output(seq_matches: dict, output_path: str):
                     }
                 else:
                     signature = {
-                        "accession": match_data['accession'],
+                        "accession": match_data['accession'].split(":")[0],  # drop subfamily
                         "name": match_data['name'],
-                        "description": match_data["entry"]["description"],
+                        "description": match_data["entry"]["description"]
                         "signatureLibraryRelease": {
                             "library": match_data['member_db'].upper(),
                             "version": match_data['version']
@@ -101,8 +101,14 @@ def json_output(seq_matches: dict, output_path: str):
                         "locations": match_data['locations'],
                         "evalue": match_data['evalue'],
                         "score": match_data['score'],
-                        "model-ac": match_key
+                        "model-ac": match_data['model-ac']
                     }
+
+                    if match_data['member_db'].upper() == "PANTHER":
+                        # get protein class and graftpoint for Panther
+                        match['proteinClass'] = match_data['proteinClass']
+                        match['graftPoint'] = match_data['graftPoint']
+
                 matches.append(match)
 
         result = {
