@@ -32,16 +32,19 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
             seq_len = sequence_data[3]
 
             for match_acc, match in matches.items():
+                entry_acc, entry_name, entry_desc = "-", "-", "-"
+                goterms, pathways = [], []
+                if match["entry"]:
+                    entry_acc = match["entry"]["accession"]
+                    entry_name = match["entry"]["short_name"]
+                    entry_desc = match["entry"]["name"]
+                    for go_info in match["entry"]["goXRefs"]:
+                        goterms.append(go_info["id"])
+                    for pwy_info in match["entry"]["pathwayXRefs"]:
+                        pathways.append(pwy_info["id"])
                 match_db = match["member_db"]
-                entry_acc = match["entry"]["accession"] if match["entry"]["accession"] else "-"
-                entry_name = match["entry"]["short_name"]
-                entry_desc = match["entry"]["name"]
                 goterms = []
                 pathways = []
-                for go_info in match["entry"]["goXRefs"]:
-                    goterms.append(go_info["id"])
-                for pwy_info in match["entry"]["pathwayXRefs"]:
-                    pathways.append(pwy_info["id"])
                 xrefs = f"{'|'.join(goterms)}\t{'|'.join(pathways)}"
 
                 if match_acc == "signal_peptide":
@@ -86,15 +89,20 @@ def json_output(seq_matches: dict, output_path: str, version:str):
                         "pvalue": match_data["pvalue"],
                     }
                 else:
+                    description = "-"
+                    entry = None
+                    if match_data['entry']:
+                        description = match_data['entry']['description']
+                        entry = match_data['entry']
                     signature = {
                         "accession": match_data['accession'].split(":")[0],  # drop subfamily
                         "name": match_data['name'],
-                        "description": match_data["entry"]["description"] if match_data['entry']['description'] else "-",
+                        "description": description,
                         "signatureLibraryRelease": {
                             "library": match_data['member_db'].upper(),
                             "version": match_data['version']
                         },
-                        "entry": match_data['entry'] if match_data['entry']['accession'] != "-" else None
+                        "entry": entry
                     }
                     match = {
                         "signature": signature,
@@ -156,9 +164,10 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
 
                 signature_elem = ET.SubElement(match_elem, "signature")
                 signature_elem.set("ac", match_data['accession'])
-                signature_elem.set("desc", match_data["entry"]['description'] if match_data['entry']['description'] else "-")
+                signature_elem.set("desc", match_data['name'])
                 signature_elem.set("name", match_data['name'])
                 if match_data['entry']:
+                    signature_elem.set("desc", match_data["entry"]['description'])
                     entry_elem = ET.SubElement(signature_elem, "entry")
                     entry_elem.set("ac", match_data['entry']['accession'])
                     entry_elem.set("desc", match_data['entry']['name'])
