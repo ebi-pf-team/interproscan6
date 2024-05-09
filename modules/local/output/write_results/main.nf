@@ -8,6 +8,9 @@ process WRITE_RESULTS {
     val format
     val output_path
 
+    output:
+    val ""
+
     script:
     """
     cat ${sequences.join(" ")} > $projectDir/results/temp/sequences_hash.tmp
