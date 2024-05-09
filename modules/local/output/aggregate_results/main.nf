@@ -1,4 +1,6 @@
 process AGGREGATE_RESULTS {
+    label 'io'
+    
     input:
     val result_files  //  paths to the json files created in SEQUENCE_ANALYSIS concatenated with parsed_matches (lookup)
 

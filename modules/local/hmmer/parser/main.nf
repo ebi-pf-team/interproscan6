@@ -1,4 +1,6 @@
 process HMMER_PARSER {
+    label 'analysis_parser'
+
     input:
     path out
     path domtbl

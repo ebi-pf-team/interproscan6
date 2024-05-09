@@ -1,4 +1,6 @@
 process ENTRIES {
+    label 'io'
+
     input:
     path matches
     val entries

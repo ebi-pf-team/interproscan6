@@ -1,4 +1,6 @@
 process PARSE_SEQUENCE {
+    label 'io'
+
     input:
     val fasta_file
 

@@ -1,4 +1,6 @@
 process LOOKUP_CHECK {
+    label 'io'
+    
     input:
     val hash_seq
 

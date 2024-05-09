@@ -1,3 +1,5 @@
+include { CHECK_NUCLEIC } from "$projectDir/modules/local/pre_checks/main"
+
 def printHelp() {
     """
     Usage example:
@@ -16,17 +18,6 @@ def printHelp() {
         --output <OUTPUT-FILE-PATH>        Optional. Path to the output file.
                                             If this option is not set, the output will be write on results/ folder.
         --pathways Optional. Include pathway information in the output.
-    """
-}
-
-
-process CHECK_NUCLEIC {
-    input:
-    path fasta_file
-
-    script:
-    """
-    python3 $projectDir/scripts/pre_checks/check_nucleic_seq.py ${fasta_file}
     """
 }
 

@@ -1,4 +1,6 @@
 process LOOKUP_MATCHES {
+    label 'io'
+    
     input:
     val checked_lookup
     val appl
