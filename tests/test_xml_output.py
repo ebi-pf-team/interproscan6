@@ -11,12 +11,13 @@ def run_interproscan(input_file, output_file):
 
 @pytest.fixture
 def output_data():
+    project_dir = os.path.dirname(os.path.abspath(__file__))
     output_file = "tests/test_outputs/xml_output"
     input_file = "tests/test_outputs/xml_test.fasta"
     if os.path.exists(output_file + ".xml"):
         os.remove(output_file + ".xml")
     run_interproscan(input_file, output_file)
-    return parse_xml("tests/test_outputs/xml_output.xml")
+    return parse_xml(project_dir + "/test_outputs/xml_output" + ".xml")
 
 
 @pytest.fixture
