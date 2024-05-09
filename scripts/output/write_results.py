@@ -43,8 +43,6 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                     for pwy_info in match["entry"]["pathwayXRefs"]:
                         pathways.append(pwy_info["id"])
                 match_db = match["member_db"]
-                goterms = []
-                pathways = []
                 xrefs = f"{'|'.join(goterms)}\t{'|'.join(pathways)}"
 
                 if match_acc == "signal_peptide":
