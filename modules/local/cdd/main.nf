@@ -78,6 +78,7 @@ process CDD_PARSER {
     input:
     path "rpsblast_processed"
     val release
+    val something
 
     script:
     """
