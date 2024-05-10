@@ -67,10 +67,12 @@ jobs:
       run: |
         cd ..
         docker run -v $PWD:/data -e ruleset=general linter-rules-for-nextflow > docker.output.txt
+        ls -l
     
     - name: Check linter output
       run: |
-        grep -q "CodeNarc completed: (p1=0; p2=0;)" docker.output.txt || exit 1
-        cat docker.output.txt
+        pwd
+        ls -l
+        grep -q "CodeNarc completed: (p1=0; p2=0;)" docker.output.txt || (cat docker.output.txt; exit 1)
 
         
