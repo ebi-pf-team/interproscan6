@@ -1,6 +1,6 @@
-include { ENTRIES } from "$projectDir/modules/local/xrefs/entries/main"
-include { GOTERMS } from "$projectDir/modules/local/xrefs/goterms/main"
-include { PATHWAYS } from "$projectDir/modules/local/xrefs/pathways/main"
+include { ENTRIES } from "$projectDir/modules/xrefs/entries/main"
+include { GOTERMS } from "$projectDir/modules/xrefs/goterms/main"
+include { PATHWAYS } from "$projectDir/modules/xrefs/pathways/main"
 
 workflow XREFS {
     take:
