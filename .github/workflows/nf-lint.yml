@@ -63,7 +63,14 @@ jobs:
       run: |
         echo "$CONDA/bin" >> $GITHUB_PATH
 
-    - name: Lint nextflow
+    - name: Run Docker linter
       run: |
         cd ..
-        docker run -v $PWD:/data -e ruleset=general linter-rules-for-nextflow | tee /dev/stderr | cat | grep -q "CodeNarc completed: (p1=0; p2=0;)" || exit 1
+        docker run -v $PWD:/data -e ruleset=general linter-rules-for-nextflow > docker.output.txt
+    
+    - name: Check linter output
+      run: |
+        grep -q "CodeNarc completed: (p1=0; p2=0;)" docker.output.txt || exit 1
+        cat docker.output.txt
+
+        
