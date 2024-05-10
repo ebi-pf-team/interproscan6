@@ -1,4 +1,5 @@
 process WRITE_RESULTS {
+    label 'io'
     publishDir "$projectDir/results/", mode: 'copy'
 
     input:
@@ -6,6 +7,9 @@ process WRITE_RESULTS {
     path matches
     val format
     val output_path
+
+    output:
+    val ""
 
     script:
     """

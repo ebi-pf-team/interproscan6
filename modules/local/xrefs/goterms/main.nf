@@ -1,4 +1,6 @@
 process GOTERMS {
+    label 'io'
+    
     input:
     path matches
     val goterms

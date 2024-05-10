@@ -1,5 +1,6 @@
 process SIGNALP_RUNNER {
     container 'docker.io/library/signalp6'
+    label 'signalp_runner'
 
     input:
     tuple path(fasta), val(mode), path(model_dir), val(organism), val(switches), val(pvalue), val(signal_version)

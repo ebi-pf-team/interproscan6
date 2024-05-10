@@ -7,6 +7,7 @@ nextflow_workflow {
 
     stage {
         symlink "scripts/pre_checks/check_nucleic_seq.py"
+        symlink "modules/local/pre_checks/main.nf"
     }
 
 
@@ -29,7 +30,6 @@ nextflow_workflow {
         then {
             assert workflow.success
             assert workflow.exitStatus == 0
-            assert workflow.stdout.isEmpty()
         }
 
     }

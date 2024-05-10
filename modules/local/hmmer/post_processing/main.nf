@@ -1,6 +1,7 @@
 
 process PANTHER_POST_PROCESSER {
     container 'docker.io/library/treegrafter'
+    label 'analysis_parser'
 
     input:
         path out_file
@@ -45,6 +46,8 @@ process PANTHER_POST_PROCESSER {
 
 
 process SFLD_POST_PROCESSER {
+    label 'analysis_parser'
+
     input:
         path out_file
         path out_dtbl

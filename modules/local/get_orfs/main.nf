@@ -1,5 +1,6 @@
 process GET_ORFS {
     container 'docker.io/library/easel'
+    label 'get_orfs'
 
     input:
     val fasta_file

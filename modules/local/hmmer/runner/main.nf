@@ -1,5 +1,6 @@
 process HMMER_RUNNER {
     container 'docker.io/biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1'
+    label 'hmmer_runner'
 
     input:
     tuple path(fasta), path(hmm), val(switches), val(release), val(alignment), val(postprocessing_params)

@@ -1,4 +1,6 @@
 process PATHWAYS {
+    label 'io'
+    
     input:
     path matches
     val pathways

@@ -1,4 +1,6 @@
 process SIGNALP_PARSER {
+    label 'analysis_parser'
+
     input:
     path out
     val pvalue
