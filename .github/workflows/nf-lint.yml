@@ -69,4 +69,4 @@ jobs:
     
     - name: Review lint
       run: |
-        lint.output.text tail -n 1 lint.output.text | grep -q "CodeNarc completed: (p1=0; p2=0;" || exit 1
+        tail -n 1 lint.output.text | grep -q "CodeNarc completed: (p1=0; p2=0;" || exit 1
