@@ -31,7 +31,7 @@ jobs:
     - name: Install dependencies
       run: |
         conda install bioconda::nextflow
-        
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
@@ -45,32 +45,31 @@ jobs:
 
     - name: Set up linter-rules-for-nextflow
       run: |
-        git clone https://github.com/awslabs/linter-rules-for-nextflow.git \
-        && bash linter/drop_rules.sh linter-rules-for-nextflow \
-        && cd linter-rules-for-nextflow
+        git clone https://github.com/awslabs/linter-rules-for-nextflow.git
+        bash linter/drop_rules.sh linter-rules-for-nextflow
 
-    - name: Build and load Docker image
-      uses: docker/build-push-action@v3
-      with:
-        context: .
-        file: ./Dockerfile
-        load: true
-        tags: linter-rules-for-nextflow:latest
-        cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+    - name: Build Docker image for linter-rules-for-nextflow
+      run: |
+        cd linter-rules-for-nextflow
+        docker build -t linter-rules-for-nextflow:latest .
+        cd ..
 
     - name: Add Nextflow to PATH
       run: |
         echo "$CONDA/bin" >> $GITHUB_PATH
 
     - name: Run Docker linter
+      id: linter
       run: |
-        cd ..
-        docker run -v $PWD:/data -e ruleset=general linter-rules-for-nextflow > /home/runner/work/interproscan6/interproscan6/docker.output.txt
-        ls -l /home/runner/work/interproscan6/interproscan6
-    
+        docker run -v $PWD:/data -e ruleset=general linter-rules-for-nextflow > docker.output.txt
+        cat docker.output.txt
+
     - name: Check linter output
       run: |
-        pwd
-        ls -l
-        grep -q "CodeNarc completed: (p1=0; p2=0;)" /home/runner/work/interproscan6/interproscan6/docker.output.txt || (cat /home/runner/work/interproscan6/interproscan6/docker.output.txt; exit 1)
+        if grep -q "CodeNarc completed: (p1=0; p2=0;)" docker.output.txt; then
+          echo "Linting passed"
+        else
+          echo "Linting failed"
+          cat docker.output.txt
+          exit 1
+        fi
