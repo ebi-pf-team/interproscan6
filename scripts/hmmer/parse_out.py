@@ -2,15 +2,10 @@ import re
 import json
 from cigar_alignment import cigar_alignment_parser, encode
 
-END_OF_OUTPUT_FILE = "[ok]"
-END_OF_RECORD = "//"
-DOMAIN_SECTION_START = ">> "
-START_OF_DOMAIN_ALIGNMENT_SECTION = "Alignments for each domain"
-DOMAIN_ALIGNMENT_SECTION_START = "=="
 
 DOMAIN_SECTION_START_PATTERN = re.compile(r"^>>\s+(\S+).*$")
-DOMAIN_ALIGNMENT_LINE_PATTERN = re.compile("^\s+==\s+domain\s+(\d+)\s+.*$")
-ALIGNMENT_SEQUENCE_PATTERN = re.compile("^\s+(\w+)\s+(\S+)\s+([-a-zA-Z]+)\s+(\S+)\s*$")
+DOMAIN_ALIGNMENT_LINE_PATTERN = re.compile(r"^\s+==\s+domain\s+(\d+)\s+.*$")
+ALIGNMENT_SEQUENCE_PATTERN = re.compile(r"^\s+(\w+)\s+(\S+)\s+([-a-zA-Z]+)\s+(\S+)\s*$")
 DOMAIN_LINE_PATTERN = re.compile(
                                 "^\\s+(\\d+)\\s+[!?]\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\S+).*$")
 # MODEL_ACCESSION_LINE_PATTERN = re.compile("^[^:]*:\\s+(\\w+)\\s+\\[M=(\\d+)\\].*$")
@@ -18,15 +13,14 @@ DOMAIN_LINE_PATTERN = re.compile(
 
 def get_accession_regex(appl):
     if appl == "antifam":
-        return re.compile("^Accession:\s+(ANF\d{5})\s*$")
+        return re.compile(r"^Accession:\s+(ANF\d{5})\s*$")
     if appl == "ncbifam":
-        return re.compile("^Accession:\s+((TIGR|NF)\d+)\.\d+$")
+        return re.compile(r"^Accession:\s+((TIGR|NF)\d+)\.\d+$")
     if appl == "sfld":
-        return re.compile("^Accession:\\s+(SFLD[^\\s]+)\\s*$")
+        return re.compile(r"^Accession:\s+(SFLD[^\s]+)\s*$")
 
 
 def parse(out_file):
-    search_record = []
     current_sequence = None
     domain_number = None
     domains = []
@@ -38,21 +32,23 @@ def parse(out_file):
 
     with open(out_file, "r") as f:
         for line in f.readlines():
-            if line.startswith(END_OF_OUTPUT_FILE):
+            if line.startswith("[ok]"):
                 break
+            if line.startswith("#"):
+                pass
             else:
-                if stage == 'LOOKING_FOR_DOMAIN_DATA_LINE' and line.startswith(DOMAIN_SECTION_START):
+                if stage == 'LOOKING_FOR_DOMAIN_DATA_LINE' and line.startswith(">> "):
                     stage = 'LOOKING_FOR_DOMAIN_SECTION'
-                if line.startswith(END_OF_RECORD):
-                    if domain_match:
-                        cigar_alignment = cigar_alignment_parser(domain_match["alignment"])
-                        domain_match["alignment_encoded"] = encode(cigar_alignment)
-                        domains.append(domain_match)
-                    sequence_match["accession"] = model_id
-                    sequence_match["domains"] = domains
-                    search_record.append(sequence_match)
-                    hmmer_parser_support[current_sequence] = search_record
-                    search_record = []
+                if line.startswith("//"):
+                    if domains:
+                        for domain_match in domains:
+                            cigar_alignment = cigar_alignment_parser(domain_match["alignment"])
+                            domain_match["alignment_encoded"] = encode(cigar_alignment)
+                        sequence_match["sequence"] = current_sequence
+                        sequence_match["domains"] = domains
+                        domains = []
+                        hmmer_parser_support[model_id] = sequence_match
+                    sequence_match = {}
                     stage = "LOOKING_FOR_METHOD_ACCESSION"
                 else:
                     if stage == 'LOOKING_FOR_METHOD_ACCESSION':
@@ -69,14 +65,12 @@ def parse(out_file):
                             if sequence_match:
                                 current_sequence = sequence_match["sequence_identifier"]
                     elif stage == 'LOOKING_FOR_DOMAIN_SECTION':
-                        if line.startswith(DOMAIN_SECTION_START):
+                        if line.startswith(">> "):
                             domain_section_header_matcher = DOMAIN_SECTION_START_PATTERN.match(line)
                             if domain_section_header_matcher:
-                                domains = []
                                 current_sequence = domain_section_header_matcher.group(1)
-                                domain_match = {}
                             stage = 'LOOKING_FOR_DOMAIN_DATA_LINE'
-                        if line.strip().startswith(DOMAIN_ALIGNMENT_SECTION_START):
+                        if line.strip().startswith("=="):
                             domain_alignment_matcher = DOMAIN_ALIGNMENT_LINE_PATTERN.match(line)
                             if domain_alignment_matcher:
                                 align_seq = []
@@ -88,16 +82,19 @@ def parse(out_file):
                                 domain_match["alignment"] = "".join(align_seq)
 
                     elif stage == 'LOOKING_FOR_DOMAIN_DATA_LINE':
-                        if START_OF_DOMAIN_ALIGNMENT_SECTION in line:
+                        if "Alignments for each domain" in line:
                             stage = 'LOOKING_FOR_DOMAIN_SECTION'
                         else:
                             match = DOMAIN_LINE_PATTERN.match(line)
                             if match:
-                                domain_match = get_domain_match(match, domain_match)
+                                domain_match = get_domain_match(match)
+                                domains.append(domain_match)
     return hmmer_parser_support
 
 
-def get_domain_match(match, domain_match):
+def get_domain_match(match):
+    domain_match = {}
+    hmm_bound_pattern = {"[]": "Complete", "[.": "N-terminal complete", ".]": "C-terminal complete", "..": "Incomplete"}
     domain_match["score"] = match.group(2)
     domain_match["bias"] = match.group(3)
     domain_match["cEvalue"] = match.group(4)
@@ -105,6 +102,7 @@ def get_domain_match(match, domain_match):
     domain_match["hmm_from"] = match.group(6)
     domain_match["hmm_to"] = match.group(7)
     domain_match["hmm_bounds"] = match.group(8)
+    domain_match["hmm_bounds_parsed"] = hmm_bound_pattern[match.group(8)]
     domain_match["ali_from"] = match.group(9)
     domain_match["ali_to"] = match.group(10)
     domain_match["env_from"] = match.group(11)

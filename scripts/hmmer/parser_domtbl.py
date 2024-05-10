@@ -65,7 +65,7 @@ def parse(hmmer_domtbl: str, retrieve_sites: bool, mem_db_dir: str):
                 target_key = str(info[0])
                 acc_key = str(info[4].split(".")[0])
                 signature = get_signature(info, member_db, version, mem_db_dir)
-                location = get_domain(info)
+                location = get_domain(info, member_db)
                 if target_key not in matches:
                     matches[target_key] = {}
                 if acc_key not in matches[target_key]:
@@ -117,7 +117,7 @@ def get_signature(
     return signature_info
 
 
-def get_domain(info: list[str]) -> dict[str, str]:
+def get_domain(info: list[str], member_db: str) -> dict[str, str]:
     """
     Retrieve the data for the specific domain hit:
         These are the data listed under --- this domain ---
@@ -126,7 +126,12 @@ def get_domain(info: list[str]) -> dict[str, str]:
     the input query sequence
 
     :param info: list, line split by blankspace
+    :param mem_db_dir: str repr tp member db data dir
     """
+    post_processed = False
+    if member_db == "gene3d" or member_db == "pfam":
+        post_processed = True
+
     domain_info = {
         "start": int(info[17]),  # ali coord from
         "end": int(info[18]),   # ali coord to
@@ -139,7 +144,7 @@ def get_domain(info: list[str]) -> dict[str, str]:
         "score": float(info[13]),  # bit score
         "envelopeStart": int(info[19]),  # env coord from
         "envelopeEnd": int(info[20]),  # env coord to
-        "postProcessed": ""
+        "postProcessed": post_processed
     }
     return domain_info
 
