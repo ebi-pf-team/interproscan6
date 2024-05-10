@@ -43,45 +43,23 @@ process CDD_POSTPROCESS {
     output:
     path "rpsblast_processed"
     val release
-    val postprocessing_params
-
     script:
     """
     ${postprocessing_params[0]} --infile rpsblast_out --outfile rpsblast_processed ${postprocessing_params[1]} --data-path ${postprocessing_params[2]}
     """
 }
-
-
-process CDD_ADD_SIGNATURES {
-    /*
-    Match hits to the signature library
-    */
-
-    input:
-    path "rpsblast_processed"
-    val release
-    val postprocessing_params // [3] = signature list
-
-    output:
-    path "rpsblast_parsed_processed"
-    val release
-
-    script:
-    """
-    ${postprocessing_params[0]} --infile rpsblast_out --outfile rpsblast_processed ${postprocessing_params[1]} --data-path ${postprocessing_params[2]}
-    """
-}
-
 
 
 process CDD_PARSER {
+
     input:
     path "rpsblast_processed"
     val release
-    val something
+
+    output:
+    path "cdd_parsed"
 
     script:
     """
-    asdfghjkl
     """
 }
