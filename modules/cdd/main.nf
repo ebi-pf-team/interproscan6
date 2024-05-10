@@ -53,7 +53,7 @@ process CDD_POSTPROCESS {
 process CDD_PARSER {
 
     input:
-    path "rpsblast_processed"
+    path rpsblast_processed
     val release
 
     output:
@@ -61,5 +61,6 @@ process CDD_PARSER {
 
     script:
     """
+    python3 $projectDir/scripts/members/cdd/cdd_parser.py ${rpsblast_processed} ${release}
     """
 }
