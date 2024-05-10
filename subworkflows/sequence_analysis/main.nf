@@ -1,3 +1,8 @@
+include {
+    CDD_RUNNER,
+    CDD_POSTPROCESS,
+    CDD_POSTPROCESS
+} from "$projectDir/modules/local/cdd/main"
 include { 
     HMMER_RUNNER as GENERIC_HMMER_RUNNER;
     HMMER_RUNNER as SFLD_HMMER_RUNNER;
@@ -12,8 +17,10 @@ include {
     PANTHER_POST_PROCESSER;
     SFLD_POST_PROCESSER
 } from "$projectDir/modules/local/hmmer/post_processing/main"
-include { SIGNALP_RUNNER } from "$projectDir/modules/local/signalp/runner/main"
-include { SIGNALP_PARSER } from "$projectDir/modules/local/signalp/parser/main"
+include { 
+    SIGNALP_RUNNER,
+    SIGNALP_PARSER
+ } from "$projectDir/modules/local/signalp/main"
 
 
 workflow SEQUENCE_ANALYSIS {
