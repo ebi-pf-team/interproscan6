@@ -47,6 +47,7 @@ jobs:
       run: |
         git clone https://github.com/awslabs/linter-rules-for-nextflow.git
         bash linter/drop_rules.sh linter-rules-for-nextflow
+        rm -rf linter-rules-for-nextflow/examples
 
     - name: Build Docker image for linter-rules-for-nextflow
       run: |
@@ -57,6 +58,10 @@ jobs:
     - name: Add Nextflow to PATH
       run: |
         echo "$CONDA/bin" >> $GITHUB_PATH
+
+    - name: Remove tests directory
+      run: |
+        rm -rf tests
 
     - name: Run Docker linter
       id: linter
