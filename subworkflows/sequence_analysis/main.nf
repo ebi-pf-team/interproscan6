@@ -2,25 +2,25 @@ include {
     CDD_RUNNER;
     CDD_POSTPROCESS;
     CDD_PARSER
-} from "$projectDir/modules/local/cdd/main"
+} from "$projectDir/modules/cdd/main"
 include { 
     HMMER_RUNNER as GENERIC_HMMER_RUNNER;
     HMMER_RUNNER as SFLD_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER; 
-} from "$projectDir/modules/local/hmmer/runner/main"
+} from "$projectDir/modules/hmmer/runner/main"
 include { 
     HMMER_PARSER as GENERIC_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
-} from "$projectDir/modules/local/hmmer/parser/main"
+} from "$projectDir/modules/hmmer/parser/main"
 include { 
     PANTHER_POST_PROCESSER;
     SFLD_POST_PROCESSER
-} from "$projectDir/modules/local/hmmer/post_processing/main"
+} from "$projectDir/modules/hmmer/post_processing/main"
 include { 
     SIGNALP_RUNNER;
     SIGNALP_PARSER
- } from "$projectDir/modules/local/signalp/main"
+ } from "$projectDir/modules/signalp/main"
 
 
 workflow SEQUENCE_ANALYSIS {
