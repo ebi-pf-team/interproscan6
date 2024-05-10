@@ -4,7 +4,10 @@ nextflow_function {
     name "Test Functions"
     script "subworkflows/pre_checks/main.nf"
 
-	
+    stage {
+        symlink "scripts/pre_checks/check_nucleic_seq.py"
+        symlink "modules/local/pre_checks/main.nf"
+    }
 
     test("Test Function printHelp") {
 
