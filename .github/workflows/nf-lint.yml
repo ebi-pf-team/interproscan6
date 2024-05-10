@@ -66,13 +66,11 @@ jobs:
     - name: Run Docker linter
       run: |
         cd ..
-        docker run -v $PWD:/data -e ruleset=general linter-rules-for-nextflow > docker.output.txt
-        ls -l
+        docker run -v $PWD:/data -e ruleset=general linter-rules-for-nextflow > /home/runner/work/interproscan6/interproscan6/docker.output.txt
+        ls -l /home/runner/work/interproscan6/interproscan6
     
     - name: Check linter output
       run: |
         pwd
         ls -l
-        grep -q "CodeNarc completed: (p1=0; p2=0;)" docker.output.txt || (cat docker.output.txt; exit 1)
-
-        
+        grep -q "CodeNarc completed: (p1=0; p2=0;)" /home/runner/work/interproscan6/interproscan6/docker.output.txt || (cat /home/runner/work/interproscan6/interproscan6/docker.output.txt; exit 1)
