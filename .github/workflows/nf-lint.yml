@@ -46,6 +46,7 @@ jobs:
     - name: Set up linter-rules-for-nextflow
       run: |
         git clone https://github.com/awslabs/linter-rules-for-nextflow.git \
+        && bash linter/drop_rules.sh linter-rules-for-nextflow \
         && cd linter-rules-for-nextflow
 
     - name: Build and load Docker image
