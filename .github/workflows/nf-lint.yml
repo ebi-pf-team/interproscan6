@@ -65,8 +65,5 @@ jobs:
 
     - name: Lint nextflow
       run: |
-        cd .. && docker run -v $PWD:/data -e ruleset=general linter-rules-for-nextflow | tee lint.output.text
-    
-    - name: Review lint
-      run: |
-        tail -n 1 lint.output.text | grep -q "CodeNarc completed: (p1=0; p2=0;" || exit 1
+        cd ..
+        docker run -v $PWD:/data -e ruleset=general linter-rules-for-nextflow | tee /dev/stderr | grep -q "CodeNarc completed: (p1=0; p2=0;)" || exit 1
