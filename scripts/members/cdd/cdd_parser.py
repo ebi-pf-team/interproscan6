@@ -44,6 +44,7 @@ def parse_cdd(rpsblast_processed: Path, release: str):
     :param release: release version of CDD
     """
     matches = {}  # prot seq id: [{domain data, 'sites': {[sites]}}]
+    protein_identifier = ""
 
     with open(rpsblast_processed, "r") as fh:
         for line in fh.readlines():
@@ -69,7 +70,7 @@ def parse_cdd(rpsblast_processed: Path, release: str):
                 if _line:
                     # #<session-ordinal>	<query-id[readingframe]>	<hit-type>	<PSSM-ID>	<from>	<to>	<E-Value>	<bitscore>	<accession>	<short-name>	<incomplete>	<superfamily PSSM-ID>
                     # e.g. 1	Query_1	Non-specific	238121	235	438	1.87425e-09	56.9596	cd00200	WD40	N	453027
-                    signature_accession = line.group(9)
+                    signature_accession = _line.group(9)
 
                     domain_info = {
                         "start": int(_line.group(5)),
@@ -86,7 +87,7 @@ def parse_cdd(rpsblast_processed: Path, release: str):
                         "name": _line.group(10),
                         "member_db": "CDD",
                         "version": release,
-                        "model-ac": line.group(9),
+                        "model-ac": signature_accession,
                         "locations": [domain_info],
                     }
 

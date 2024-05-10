@@ -57,10 +57,12 @@ process CDD_PARSER {
     val release
 
     output:
-    path "cdd_parsed"
+    path "cdd_parsed.json"
 
     script:
     """
-    python3 $projectDir/scripts/members/cdd/cdd_parser.py ${rpsblast_processed} ${release}
+    python3 $projectDir/scripts/members/cdd/cdd_parser.py \\
+        ${rpsblast_processed} \\
+        ${release} > cdd_parsed.json
     """
 }
