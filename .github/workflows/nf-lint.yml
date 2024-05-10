@@ -1,4 +1,4 @@
-name: Run Nextflow Unit Tests
+name: Nextflow linting
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,8 +30,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        conda install bioconda::nextflow &&
-        conda install bioconda::nf-test
+        conda install bioconda::nextflow
         
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -44,13 +43,18 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-buildx-
 
+    - name: Set up linter-rules-for-nextflow
+      run: |
+        git clone https://github.com/awslabs/linter-rules-for-nextflow.git \
+        && cd linter-rules-for-nextflow
+
     - name: Build and load Docker image
       uses: docker/build-push-action@v3
       with:
         context: .
         file: ./Dockerfile
         load: true
-        tags: interproscan6:latest
+        tags: linter-rules-for-nextflow:latest
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
 
@@ -58,15 +62,7 @@ jobs:
       run: |
         echo "$CONDA/bin" >> $GITHUB_PATH
 
-    - name: NF-Test pre-analysis checks
+    - name: Lint nextflow
       run: |
-        conda run --name test nf-test test tests/subworkflows/pre_checks/
-    
-    - name: PY-Test pre-analysis checks script
-      run: |
-        conda run --name test python3 -m pytest tests -v --cov=scripts --cov-report xml:.coverage.xml
-
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v4.0.1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        cd .. && docker run -v $PWD:/data -e ruleset=general linter-rules-for-nextflow | tee lint.output.text \
+        && tail -n 1 lint.output.text | grep -q "CodeNarc completed: (p1=0; p2=0;" || exit 1

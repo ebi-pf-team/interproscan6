@@ -1,0 +1,72 @@
+name: Unit Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Set up Java
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '11'
+
+    - name: Set up Miniconda
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: test
+        environment-file: environment.yml
+        python-version: 3.8
+        auto-activate-base: false
+
+    - name: Install dependencies
+      run: |
+        conda install bioconda::nextflow &&
+        conda install bioconda::nf-test
+        
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Cache Docker layers
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+
+    - name: Build and load Docker image
+      uses: docker/build-push-action@v3
+      with:
+        context: .
+        file: ./Dockerfile
+        load: true
+        tags: interproscan6:latest
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+
+    - name: Add Nextflow to PATH
+      run: |
+        echo "$CONDA/bin" >> $GITHUB_PATH
+
+    - name: NF-Test pre-analysis checks
+      run: |
+        conda run --name test nf-test test tests/subworkflows/pre_checks/
+    
+    - name: PY-Test pre-analysis checks script
+      run: |
+        conda run --name test python3 -m pytest tests -v --cov=scripts --cov-report xml:.coverage.xml
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4.0.1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
