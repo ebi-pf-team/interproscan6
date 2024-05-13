@@ -7,7 +7,7 @@ nextflow_workflow {
 
     stage {
         symlink "scripts/pre_checks/check_nucleic_seq.py"
-        symlink "modules/local/pre_checks/main.nf"
+        symlink "modules/pre_checks/main.nf"
     }
 
 
