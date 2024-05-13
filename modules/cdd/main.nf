@@ -1,4 +1,6 @@
 process CDD_RUNNER {
+    label 'cdd_runner'
+
     container 'docker.io/ncbi/blast'
 
     input:
@@ -28,6 +30,7 @@ process CDD_POSTPROCESS {
     processes dumped datafiles to obtain required information. All data files
     are downloadable from NCBI ftp site. Read README file for details
     */
+    label 'analysis_parser'
 
     input:
     path "rpsblast_out"
@@ -51,6 +54,7 @@ process CDD_POSTPROCESS {
 
 
 process CDD_PARSER {
+    label 'analysis_parser'
 
     input:
     path rpsblast_processed

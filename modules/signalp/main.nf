@@ -18,6 +18,8 @@ process SIGNALP_RUNNER {
 
 
 process SIGNALP_PARSER {
+    lable 'analysis_parser'
+    
     input:
     path out
     val pvalue
