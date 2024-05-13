@@ -154,6 +154,7 @@ workflow SEQUENCE_ANALYSIS {
     GENERIC_HMMER_PARSER.out.concat(
         PANTHER_HMMER_PARSER.out,
         SFLD_HMMER_PARSER.out,
+        CDD_PARSER.out,
         SIGNALP_PARSER.out
     )
     .set { parsed_results }  // gathers the paths of the output file from each process

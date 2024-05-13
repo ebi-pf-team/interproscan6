@@ -59,11 +59,12 @@ def parse_cdd(rpsblast_processed: Path, release: str):
                 # e.g. QUERY BLOCK: QUERY      Query_32        Peptide 576     A0A095XSD9_9FIRM 1-576
                 query_line = QUERY_LINE_PATTERN.match(line)
                 if query_line:
-                    definition_line = query_line.group(4)
-                    prot_seq_id = definition_line.strip()  # protein seq id from input file
+                    definition_line = query_line.group(4).strip()
+                    target_key = definition_line.split("|")[1] if definition_line.startswith("sp|") else definition_line.split()[0]
+                    # target_key = protein seq id from input file
 
-                    if prot_seq_id not in matches:
-                        matches[prot_seq_id] = []
+                    if target_key not in matches:
+                        matches[target_key] = {}
 
             elif line.startswith(protein_identifier):
                 _line = DOMAIN_LINE_PATTERN.match(line)
@@ -88,27 +89,31 @@ def parse_cdd(rpsblast_processed: Path, release: str):
                         "member_db": "CDD",
                         "version": release,
                         "model-ac": signature_accession,
-                        "locations": [domain_info],
                     }
 
-                    matches[prot_seq_id] = signature_info
+                    if signature_accession not in matches[target_key]:
+                        matches[target_key][signature_accession] = signature_info
+                        matches[target_key][signature_accession]['locations'] = [domain_info]
+                    else:
+                        matches[target_key][signature_accession]["locations"].append(domain_info)
 
                     continue
 
                 _line = SITE_LINE_PATTERN.match(line)
                 if _line:
+                    sites = line.split()[-4].split(",")
                     site_info = {
-                        "description": _line.group(3),
-                        "numLocations": len(_line.group(4).split(",")),
+                        "description": " ".join(line.split()[3:-4]),
+                        "numLocations": len(sites),
                         "siteLocations": [],
                     }
-                    for site in _line.group(4).split(","):
+                    for site in sites:
                         site_info["siteLocations"] = {
                             "start": site[1:],
                             "end": site[1:],
                             "residue": site[0]
                         }
-                    matches[prot_seq_id]['locations'][0]['sites'].append(site_info)
+                    matches[target_key][signature_accession]['locations'][-1]['sites'].append(site_info)
                     continue
 
     return matches
