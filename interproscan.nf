@@ -5,10 +5,10 @@ nextflow.enable.dsl=2
     IMPORT MODULES AND SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { PARSE_SEQUENCE } from "$projectDir/modules/local/parse_sequence/main"
-include { GET_ORFS } from "$projectDir/modules/local/get_orfs/main"
-include { AGGREGATE_RESULTS } from "$projectDir/modules/local/output/aggregate_results/main"
-include { WRITE_RESULTS } from "$projectDir/modules/local/output/write_results/main"
+include { PARSE_SEQUENCE } from "$projectDir/modules/parse_sequence/main"
+include { GET_ORFS } from "$projectDir/modules/get_orfs/main"
+include { AGGREGATE_RESULTS } from "$projectDir/modules/output/aggregate_results/main"
+include { WRITE_RESULTS } from "$projectDir/modules/output/write_results/main"
 
 include { PRE_CHECKS } from "$projectDir/subworkflows/pre_checks/main"
 include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"

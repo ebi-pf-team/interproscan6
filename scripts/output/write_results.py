@@ -99,10 +99,17 @@ def json_output(seq_matches: dict, output_path: str):
                     match = {
                         "signature": signature,
                         "locations": match_data['locations'],
-                        "evalue": match_data['evalue'],
-                        "score": match_data['score'],
-                        "model-ac": match_data['model-ac']
                     }
+
+                    if match_data['member_db'].upper() == "CDD":
+                        match["evalue"] = match_data['locations'][0]["evalue"]
+                        match["score"] = match_data['locations'][0]["score"]
+
+                    else:
+                        match["evalue"] = match_data['evalue']
+                        match["score"] = match_data['score']
+
+                    match["model-ac"] = match_data['model-ac']
 
                     if match_data['member_db'].upper() == "PANTHER":
                         # get protein class and graftpoint for Panther
