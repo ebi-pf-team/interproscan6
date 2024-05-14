@@ -29,6 +29,7 @@ workflow PRE_CHECKS {
     using_nucleic
     all_params
     user_applications
+    output_formats
 
     main:
     if ( !nextflow.version.matches('23.10+') ) {
@@ -86,7 +87,7 @@ workflow PRE_CHECKS {
 
     // Check if the formats are valid
     def formats_expected = ['json', 'tsv', 'tsv-pro', 'xml', 'gff3']
-    def formats_diff = params.formats.toLowerCase().split(',') - formats_expected
+    def formats_diff = output_formats.toLowerCase().split(',') - formats_expected
     if (formats_diff.size() != 0){
         log.info printHelp()
         exit 1, "Format not valid: $formats_diff. Valid formats are: $formats_expected"
@@ -96,10 +97,6 @@ workflow PRE_CHECKS {
     if (seq_input.countFasta() == 0) {
         log.error "No sequence found in the input file"
         exit 5
-    }
-    if (!params.input.toLowerCase().find(/.fasta$|.faa$|.fna$/)) {
-        log.error "The input file is not a FASTA file (it does not end in .fasta, .faa or .fna)"
-        exit 1
     }
 
     log.info "Number of sequences to analyse: ${seq_input.countFasta()}"
