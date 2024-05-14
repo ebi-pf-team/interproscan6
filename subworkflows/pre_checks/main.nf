@@ -90,7 +90,7 @@ workflow PRE_CHECKS {
     def formats_diff = output_formats.toLowerCase().split(',') - formats_expected
     if (formats_diff.size() != 0){
         log.info printHelp()
-        exit 1, "Format not valid: $formats_diff. Valid formats are: $formats_expected"
+        exit 22, "Format not valid: $formats_diff. Valid formats are: $formats_expected"
     }
 
     // Check if the input file is a fasta file and if it contains sequences
