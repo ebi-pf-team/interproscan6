@@ -5,6 +5,7 @@ include {
 } from "$projectDir/modules/cdd/main"
 include { 
     HMMER_RUNNER as GENERIC_HMMER_RUNNER;
+    HMMER_RUNNER as GENE3D_HMMER_RUNNER;
     HMMER_RUNNER as SFLD_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER; 
 } from "$projectDir/modules/hmmer/runner/main"
@@ -14,6 +15,7 @@ include {
     HMMER_PARSER as PANTHER_HMMER_PARSER;
 } from "$projectDir/modules/hmmer/parser/main"
 include { 
+    GENE3D_POST_PROCESSER;
     PANTHER_POST_PROCESSER;
     SFLD_POST_PROCESSER
 } from "$projectDir/modules/hmmer/post_processing/main"
@@ -50,6 +52,20 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".switches,
                 params.members."${member}".release,
                 false, []
+            ]
+
+        gene3d: runner == 'gene3d'
+            return [
+                params.members."${member}".hmm,
+                params.members."${member}".switches,
+                params.members."${member}".release,
+                false,
+                [
+                    params.members."${member}".postprocess.cath_resolve_hits_switches,
+                    params.members."${member}".postprocess.assign_cath_superfamilies_switches,
+                    params.members."${member}".postprocess.model2sf_map,
+                    params.members."${member}".postprocess.discontinuous_regs,
+                ]
             ]
 
         panther: runner == 'panther'
@@ -119,6 +135,12 @@ workflow SEQUENCE_ANALYSIS {
     runner_hmmer_params = fasta.combine(member_params.hmmer)
     GENERIC_HMMER_RUNNER(runner_hmmer_params)
     GENERIC_HMMER_PARSER(GENERIC_HMMER_RUNNER.out, params.tsv_pro, false)  // set sites to false
+
+    // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
+    runner_hmmer_gene3d_params = fasta.combine(member_params.gene3d)
+    GENE3D_HMMER_RUNNER(runner_hmmer_gene3d_params)
+    GENE3D_POST_PROCESSER(GENE3D_HMMER_RUNNER.out, fasta)
+    // PANTHER_HMMER_PARSER(PANTHER_POST_PROCESSER.out, params.tsv_pro, false)
 
     // Panther (+ treegrafter + epa-ng)
     runner_hmmer_panther_params = fasta.combine(member_params.panther)
