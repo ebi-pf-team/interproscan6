@@ -138,7 +138,7 @@ def json_output(seq_matches: dict, output_path: str):
     return final_data
 
 
-def write_results(sequences_path: str, matches_path: str, output_format: str, output_path: str, version: str):
+def write_results(sequences_path: str, matches_path: str, output_format: str, output_path: str):
     output_format = output_format.upper()
     seq_matches = {}
 

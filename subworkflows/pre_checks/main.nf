@@ -69,7 +69,7 @@ workflow PRE_CHECKS {
     }
 
     // Check if the input parameters are valid
-    def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro', 'translate', 'nucleic', 'formats', 'output', 'xrefs', 'goterms', 'pathways', 'ipsc_version']
+    def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro', 'translate', 'nucleic', 'formats', 'output', 'xrefs', 'goterms', 'pathways']
     def parameter_diff = all_params - parameters_expected
     if (parameter_diff.size() != 0){
         log.info printHelp()
@@ -84,22 +84,10 @@ workflow PRE_CHECKS {
         exit 22, "Applications not valid: $applications_diff. Valid applications are: $applications_expected"
     }
 
-    // Check if the formats are valid
-    def formats_expected = ['json', 'tsv', 'tsv-pro', 'xml', 'gff3']
-    def formats_diff = params.formats.toLowerCase().split(',') - formats_expected
-    if (formats_diff.size() != 0){
-        log.info printHelp()
-        exit 1, "Format not valid: $formats_diff. Valid formats are: $formats_expected"
-    }
-
     // Check if the input file is a fasta file and if it contains sequences
     if (seq_input.countFasta() == 0) {
         log.error "No sequence found in the input file"
         exit 5
-    }
-    if (!params.input.toLowerCase().find(/.fasta$|.faa$|.fna$/)) {
-        log.error "The input file is not a FASTA file (it does not end in .fasta, .faa or .fna)"
-        exit 1
     }
 
     log.info "Number of sequences to analyse: ${seq_input.countFasta()}"
