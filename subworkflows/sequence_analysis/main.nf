@@ -1,165 +1,94 @@
-include {
-    CDD_RUNNER;
-    CDD_POSTPROCESS;
-    CDD_PARSER
-} from "$projectDir/modules/cdd/main"
-include {
-    HMMER_RUNNER as GENERIC_HMMER_RUNNER;
-    HMMER_RUNNER as SFLD_HMMER_RUNNER;
-    HMMER_RUNNER as PANTHER_HMMER_RUNNER;
-} from "$projectDir/modules/hmmer/runner/main"
-include {
-    HMMER_PARSER as GENERIC_HMMER_PARSER;
-    HMMER_PARSER as SFLD_HMMER_PARSER;
-    HMMER_PARSER as PANTHER_HMMER_PARSER;
-} from "$projectDir/modules/hmmer/parser/main"
-include {
-    PANTHER_POST_PROCESSER;
-    SFLD_POST_PROCESSER
-} from "$projectDir/modules/hmmer/post_processing/main"
-include {
-    SIGNALP_RUNNER;
-    SIGNALP_PARSER
- } from "$projectDir/modules/signalp/main"
+include { CHECK_NUCLEIC } from "$projectDir/modules/pre_checks/main"
+
+def printHelp() {
+    """
+    Usage example:
+        nextflow run interproscan.nf --input <path to fasta file>
+
+    Params options:
+        --applications <ANALYSES>          Optional, comma separated - without spaces - list of analysis methods (i.e. member databases/applications).
+                                            If this option is not set, ALL analyses will be run.
+        --disable-precalc                  Optional. Disables use of the precalculated match lookup service.
+                                            All match calculations will be run locally.
+        --formats <FORMATS> Optional, comma separated - without spaces - list of output formats.
+        --goterms Optional. Include GO terms in the output.
+        --help                             Optional, display help information
+        --input <INPUT-FILE-PATH>          [REQUIRED] Path to fasta file that should be loaded on Master startup.
+        --nucleic                          Optional. Input comprises nucleic acid sequences.
+        --output <OUTPUT-FILE-PATH>        Optional. Path to the output file.
+                                            If this option is not set, the output will be write on results/ folder.
+        --pathways Optional. Include pathway information in the output.
+    """
+}
 
 
-workflow SEQUENCE_ANALYSIS {
+workflow PRE_CHECKS {
     take:
-    fasta
-    applications
+    help_msg
+    seq_input
+    using_nucleic
+    all_params
+    user_applications
 
     main:
-    // Divide members up into their respective analysis pipelines/methods
-    Channel.from(applications.split(','))
-    .branch { member ->
-        release = params.members."${member}".release
-        log.info "Running $member version $release"
-        runner = ''
-        if (member == 'antifam' || member == "ncbifam") {
-//         if (params.members."${member}".runner == "hmmer") {
-            runner = 'hmmer'
-        } else {
-            runner = member
+    if ( !nextflow.version.matches('23.10+') ) {
+        println "InterProScan requires Nextflow version 23.10 or greater -- You are running version $nextflow.version"
+        exit 1
+    }
+
+    if (help_msg) {
+        log.info printHelp()
+        exit 0
+    }
+
+    if (!seq_input) {
+        log.error """
+                Please provide an input file.
+                The typical command for running the pipeline is:
+                    nextflow run interproscan.nf --input <path to fasta file>
+                For more information, please use the --help flag.
+                """
+                exit 5
+    }
+
+    // is user specifies the input is nucleic acid seqs
+    // check the input only contains nucleic acid seqs
+    if (using_nucleic) {
+        try {
+            CHECK_NUCLEIC(seq_input)
+        } catch (all) {
+            println """Error in input sequences"""
+            log.error """
+            The '--nucleic' flag was used, but the input FASTA file
+            appears to contain at least one sequence that contains a
+            non-nucleic acid residue ('A','G','C','T','*','-', case insensitive).
+            Please check your input is correct.
+            """
+            exit 1
         }
+    }
 
-        /*
-        Member databases that use HMMER:
-        The post processing of some applications (e.g. SFLD) hits requires additional files
-        and parameters relative to the generic hmmer runner and parser
-        */
-        hmmer: runner == 'hmmer'
-            return [
-                params.members."${member}".hmm,
-                params.members."${member}".switches,
-                params.members."${member}".release,
-                false, []
-            ]
+    // Check if the input parameters are valid
+    def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro', 'translate', 'nucleic', 'formats', 'output', 'xrefs', 'goterms', 'pathways']
+    def parameter_diff = all_params - parameters_expected
+    if (parameter_diff.size() != 0){
+        log.info printHelp()
+        exit 22, "Input not valid: $parameter_diff"
+    }
 
-        panther: runner == 'panther'
-            return [
-                params.members."${member}".hmm,
-                params.members."${member}".switches,
-                params.members."${member}".release,
-                false,
-                [
-                    params.members."${member}".postprocess.data_dir,
-                    params.members."${member}".postprocess.evalue,
-                    params.members."${member}".postprocess.paint_annotations,
-                ]
-            ]
+    // Check if the applications are valid
+    def applications_expected = ['antifam', 'cdd', 'ncbifam', 'panther', 'sfld', 'signalp']
+    def applications_diff = user_applications.toLowerCase().split(',') - applications_expected
+    if (applications_diff.size() != 0){
+        log.info printHelp()
+        exit 22, "Applications not valid: $applications_diff. Valid applications are: $applications_expected"
+    }
 
-        sfld: runner == 'sfld'
-            return [
-                params.members."${member}".hmm,
-                params.members."${member}".switches,
-                params.members."${member}".release,
-                true,
-                [
-                    params.members."${member}".postprocess.bin,
-                    params.members."${member}".postprocess.sites_annotation,
-                    params.members."${member}".postprocess.hierarchy
-                ]
-            ]
+    // Check if the input file is a fasta file and if it contains sequences
+    if (seq_input.countFasta() == 0) {
+        log.error "No sequence found in the input file"
+        exit 5
+    }
 
-        /*
-        Member databases that do NOT use HMMER
-        */
-
-        cdd: runner == "cdd"
-            return [
-                params.members."${member}".library,
-                params.members."${member}".release,
-                params.members."${member}".switches,
-                [
-                    params.members."${member}".postprocess.bin,
-                    params.members."${member}".postprocess.switches,
-                    params.members."${member}".postprocess.data,
-                    params.members."${member}".postprocess.signature_list
-                ]
-            ]
-
-        signalp: runner == 'signalp'
-            return [
-                params.members.signalp.data.mode,
-                params.members.signalp.data.model_dir,
-                params.members.signalp.data.organism,
-                params.members.signalp.switches,
-                params.members.signalp.data.pvalue,
-                params.members.signalp.release
-            ]
-
-        other: true
-            log.info "Application ${member} (still) not supported"
-    }.set { member_params }
-
-    /*
-    Member databases that use HMMER
-    */
-
-    // AntiFam and NCBIfam
-    runner_hmmer_params = fasta.combine(member_params.hmmer)
-    GENERIC_HMMER_RUNNER(runner_hmmer_params)
-    GENERIC_HMMER_PARSER(GENERIC_HMMER_RUNNER.out, params.tsv_pro, false)  // set sites to false
-
-    // Panther (+ treegrafter + epa-ng)
-    runner_hmmer_panther_params = fasta.combine(member_params.panther)
-    PANTHER_HMMER_RUNNER(runner_hmmer_panther_params)
-    PANTHER_POST_PROCESSER(PANTHER_HMMER_RUNNER.out, fasta)
-    PANTHER_HMMER_PARSER(PANTHER_POST_PROCESSER.out, params.tsv_pro, false)
-
-    // SFLD (+ post-processing binary to add sites and filter hits)
-    runner_hmmer_sfld_params = fasta.combine(member_params.sfld)
-    SFLD_HMMER_RUNNER(runner_hmmer_sfld_params)
-    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out, params.tsv_pro)
-    SFLD_HMMER_PARSER(SFLD_POST_PROCESSER.out, params.tsv_pro, true)  // set sites to true for SFLD
-
-    /*
-    Member databases that do NOT use HMMER
-    */
-
-    // CDD
-    runner_cdd_params = fasta.combine(member_params.cdd)
-    CDD_RUNNER(runner_cdd_params)
-    CDD_POSTPROCESS(CDD_RUNNER.out)
-    CDD_PARSER(CDD_POSTPROCESS.out)
-
-    // SignalP
-    runner_signalp_params = fasta.combine(member_params.signalp)
-    SIGNALP_RUNNER(runner_signalp_params)
-    SIGNALP_PARSER(SIGNALP_RUNNER.out, params.tsv_pro)
-
-    /*
-    Gather the results
-    */
-
-    GENERIC_HMMER_PARSER.out.concat(
-        PANTHER_HMMER_PARSER.out,
-        SFLD_HMMER_PARSER.out,
-        CDD_PARSER.out,
-        SIGNALP_PARSER.out
-    )
-    .set { parsed_results }  // gathers the paths of the output file from each process
-
-    emit:
-    parsed_results
+    log.info "Number of sequences to analyse: ${seq_input.countFasta()}"
 }
