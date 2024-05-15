@@ -31,6 +31,10 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                 post_processed = False
                 if hit_appl == "gene3d" or hit_appl == "pfam":
                     post_processed = True
+                try:
+                    hmm_bounds = hmm_bound_pattern[hit_data[9]]
+                except KeyError:
+                    hmm_bounds = ""
 
                 signature = {
                     "accession": accession,
@@ -52,7 +56,7 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     "hmmEnd": int(hit_data[11]),
                     "hmmLength": int(hit_data[12]),
                     "hmmBoundsRaw": hit_data[9],
-                    "hmmBounds": hmm_bound_pattern[hit_data[9]],
+                    "hmmBounds": hmm_bounds,
                     "evalue": float(hit_data[16]),
                     "score": hit_data[15],
                     "envelopeStart": int(hit_data[13]),
