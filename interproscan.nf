@@ -26,6 +26,13 @@ workflow {
         params.applications
     )
 
+    formats = params.formats.toLowerCase()
+
+    tsv_pro = false
+    if (formats.contains("tsv-pro")) {
+        tsv_pro = true
+    }
+
     applications = params.applications.toLowerCase()
 
     Channel.fromPath( params.input , checkIfExists: true)
@@ -65,7 +72,7 @@ workflow {
         else {
             fasta_to_runner = ch_fasta
         }
-        parsed_analysis = SEQUENCE_ANALYSIS(fasta_to_runner, applications)
+        parsed_analysis = SEQUENCE_ANALYSIS(fasta_to_runner, applications, tsv_pro)
     }
 
     all_results = parsed_matches.concat(parsed_analysis)
@@ -74,7 +81,6 @@ workflow {
 
     XREFS(AGGREGATE_RESULTS.out)
 
-    formats = params.formats.toLowerCase()
     Channel.from(formats.split(','))
     .set { ch_format }
 

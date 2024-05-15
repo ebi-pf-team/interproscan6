@@ -8,19 +8,20 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
     def write_to_tsv(
             seq_id, md5, seq_len, member_db, sig_acc,
             sig_desc, ali_from, ali_to, evalue, status,
-            current_date, interpro_acc, interpro_name, xrefs
-    ):
+            current_date, interpro_acc, interpro_name,
+            cigar_alignment, xrefs):
         tsv_file.write((
             f"{seq_id}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t"
             f"{sig_desc}\t{ali_from}\t{ali_to}\t{evalue}\t{status}\t"
             f"{current_date}\t{interpro_acc}\t{interpro_name}\t"
-            f"{xrefs}\n"
+            f"{cigar_alignment}\t{xrefs}\n"
         ))
 
     tsv_output = os.path.join(output_path + '.tsv')
     if is_pro:
         tsv_output = tsv_output + "-pro"
 
+    cigar_alignment = None
     with open(tsv_output, 'w') as tsv_file:
         current_date = datetime.now().strftime('%d-%m-%Y')
         for seq_target, info in seq_matches.items():
@@ -42,6 +43,8 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                     for pwy_info in match["entry"]["pathwayXRefs"]:
                         pathways.append(pwy_info["id"])
                 match_db = match["member_db"]
+                if is_pro:
+                    cigar_alignment = match["cigar_alignment"]
                 xrefs = f"{'|'.join(goterms)}\t{'|'.join(pathways)}"
 
                 if match_acc == "signal_peptide":
@@ -60,7 +63,7 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                     seq_id, md5, seq_len, match_db,
                     sig_acc, entry_desc, ali_from, ali_to,
                     evalue, status, current_date, entry_acc,
-                    entry_name, xrefs)
+                    entry_name, cigar_alignment, xrefs)
 
 
 def json_output(seq_matches: dict, output_path: str):

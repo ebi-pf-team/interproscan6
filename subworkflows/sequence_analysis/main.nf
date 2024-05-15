@@ -27,6 +27,7 @@ workflow SEQUENCE_ANALYSIS {
     take:
     fasta
     applications
+    tsv_pro
 
     main:
     // Divide members up into their respective analysis pipelines/methods
@@ -118,19 +119,19 @@ workflow SEQUENCE_ANALYSIS {
     // AntiFam and NCBIfam
     runner_hmmer_params = fasta.combine(member_params.hmmer)
     GENERIC_HMMER_RUNNER(runner_hmmer_params)
-    GENERIC_HMMER_PARSER(GENERIC_HMMER_RUNNER.out, params.tsv_pro, false)  // set sites to false
+    GENERIC_HMMER_PARSER(GENERIC_HMMER_RUNNER.out, tsv_pro, false)  // set sites to false
 
     // Panther (+ treegrafter + epa-ng)
     runner_hmmer_panther_params = fasta.combine(member_params.panther)
     PANTHER_HMMER_RUNNER(runner_hmmer_panther_params)
     PANTHER_POST_PROCESSER(PANTHER_HMMER_RUNNER.out, fasta)
-    PANTHER_HMMER_PARSER(PANTHER_POST_PROCESSER.out, params.tsv_pro, false)
+    PANTHER_HMMER_PARSER(PANTHER_POST_PROCESSER.out, tsv_pro, false)
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_hmmer_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_hmmer_sfld_params)
-    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out, params.tsv_pro)
-    SFLD_HMMER_PARSER(SFLD_POST_PROCESSER.out, params.tsv_pro, true)  // set sites to true for SFLD
+    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out, tsv_pro)
+    SFLD_HMMER_PARSER(SFLD_POST_PROCESSER.out, tsv_pro, true)  // set sites to true for SFLD
 
     /*
     Member databases that do NOT use HMMER
@@ -145,7 +146,7 @@ workflow SEQUENCE_ANALYSIS {
     // SignalP
     runner_signalp_params = fasta.combine(member_params.signalp)
     SIGNALP_RUNNER(runner_signalp_params)
-    SIGNALP_PARSER(SIGNALP_RUNNER.out, params.tsv_pro)
+    SIGNALP_PARSER(SIGNALP_RUNNER.out, tsv_pro)
 
     /*
     Gather the results
