@@ -11,6 +11,7 @@ include {
 } from "$projectDir/modules/hmmer/runner/main"
 include { 
     HMMER_PARSER as GENERIC_HMMER_PARSER;
+    HMMER_PARSER as GENE3D_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
 } from "$projectDir/modules/hmmer/parser/main"
@@ -61,10 +62,10 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".release,
                 false,
                 [
-                    params.members."${member}".postprocess.cath_resolve_hits_switches,
-                    params.members."${member}".postprocess.assign_cath_superfamilies_switches,
-                    params.members."${member}".postprocess.model2sf_map,
-                    params.members."${member}".postprocess.discontinuous_regs,
+                   params.members."${member}".postprocess.cath_resolve_hits_switches,
+                   params.members."${member}".postprocess.assign_cath_superfamilies_switches,
+                   params.members."${member}".postprocess.model2sf_map,
+                   params.members."${member}".postprocess.discontinuous_regs,
                 ]
             ]
 
