@@ -88,10 +88,8 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".release,
                 params.members."${member}".switches,
                 [
-                    params.members."${member}".postprocess.bin,
                     params.members."${member}".postprocess.switches,
                     params.members."${member}".postprocess.data,
-                    params.members."${member}".postprocess.signature_list
                 ]
             ]
 

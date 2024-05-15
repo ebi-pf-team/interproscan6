@@ -30,6 +30,7 @@ process CDD_POSTPROCESS {
     processes dumped datafiles to obtain required information. All data files
     are downloadable from NCBI ftp site. Read README file for details
     */
+    container 'docker.io/library/cdd'
     label 'analysis_parser'
 
     input:
@@ -37,10 +38,8 @@ process CDD_POSTPROCESS {
     val release
     val postprocessing_params
     /*
-    [0] = bin file
-    [1] = switches
-    [2] = data
-    [3] = signature list
+    [0] = switches
+    [1] = data
     */
 
     output:
@@ -48,7 +47,7 @@ process CDD_POSTPROCESS {
     val release
     script:
     """
-    ${postprocessing_params[0]} --infile rpsblast_out --outfile rpsblast_processed ${postprocessing_params[1]} --data-path ${postprocessing_params[2]}
+    /opt/cdd/RpsbProc-x64-linux/rpsbproc --infile rpsblast_out --outfile rpsblast_processed ${postprocessing_params[0]} --data-path ${postprocessing_params[1]}
     """
 }
 
