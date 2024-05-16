@@ -157,7 +157,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
         if 'matches' in data and data['matches']:
             for match_key, match_data in data['matches'].items():
                 match_elem = ET.SubElement(matches_elem, "hmmer3-match")
-                match_elem.set("evalue", str(match_data['evalue']))
+                match_elem.set("evalue", str(match_data['evalue']).upper())
                 match_elem.set("score", str(match_data["score"]))
 
                 signature_elem = ET.SubElement(match_elem, "signature")
@@ -166,6 +166,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                 signature_elem.set("name", match_data['name'])
                 if match_data['entry']:
                     signature_elem.set("desc", match_data["entry"]['description'])
+                    signature_elem.set("name", match_data['entry']['short_name'])
                     entry_elem = ET.SubElement(signature_elem, "entry")
                     entry_elem.set("ac", match_data['entry']['accession'])
                     entry_elem.set("desc", match_data['entry']['name'])
@@ -198,7 +199,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     location_elem.set("env-end", str(location["envelopeEnd"]))
                     location_elem.set("post-processed", str(location["postProcessed"]))
                     location_elem.set("score", str(location["score"]))
-                    location_elem.set("evalue", str(location["evalue"]))
+                    location_elem.set("evalue", str(location["evalue"]).upper())
                     location_elem.set("hmm-start", str(location["hmmStart"]))
                     location_elem.set("hmm-end", str(location["hmmEnd"]))
                     location_elem.set("hmm-length", str(location["hmmLength"]))

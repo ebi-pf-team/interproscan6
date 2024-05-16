@@ -41,19 +41,21 @@ def xml2dict(element):
     return result
 
 
-def compare_dicts(expected, current):
+def compare_dicts(expected, current, ignore_elements):
     for key in expected:
+        if key in ignore_elements:
+            continue
         if key not in current:
             print(f"Key '{key}' missing in current dict")
             continue
         if isinstance(expected[key], dict):
-            compare_dicts(expected[key], current[key])
+            compare_dicts(expected[key], current[key], ignore_elements)
         elif isinstance(expected[key], list):
             if len(expected[key]) != len(current[key]):
                 print(f"List length mismatch for key '{key}'")
             else:
                 for i in range(len(expected[key])):
-                    compare_dicts(expected[key][i], current[key][i])
+                    compare_dicts(expected[key][i], current[key][i], ignore_elements)
         else:
             if expected[key] != current[key]:
                 print(f"Value mismatch for key '{key}'")
@@ -74,5 +76,6 @@ def test_xml_output(get_expected_output, get_current_output):
     expected = xml2dict(get_expected_output)
     current = xml2dict(get_current_output)
 
-    compare_dicts(expected, current)
+    ignore_elements = ['representative', 'hmmer3-location-fragment']
+    compare_dicts(expected, current, ignore_elements)
     assert expected == current

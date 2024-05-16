@@ -128,9 +128,9 @@ def get_domain(info: list[str], member_db: str) -> dict[str, str]:
     :param info: list, line split by blankspace
     :param mem_db_dir: str repr tp member db data dir
     """
-    post_processed = False
+    post_processed = "false"
     if member_db == "gene3d" or member_db == "pfam":
-        post_processed = True
+        post_processed = "true"
 
     domain_info = {
         "start": int(info[17]),  # ali coord from
