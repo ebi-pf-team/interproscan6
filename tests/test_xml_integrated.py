@@ -7,12 +7,12 @@ import os
 @pytest.fixture
 def get_current_output() -> ET.Element:
     def run_interproscan(input_file, output_file):
-        command = f"nextflow run interproscan.nf --input {input_file} --applications antifam --formats xml --disable_precalc --output {output_file}"
+        command = f"nextflow run interproscan.nf --input {input_file} --applications antifam --formats xml --output {output_file}"
         subprocess.run(command, shell=True)
     project_dir = os.path.dirname(os.path.abspath(__file__))
     output_file = "tests/test_outputs/xml_current_output"
     input_file = "tests/test_outputs/xml_test.fasta"
-    # run_interproscan(input_file, output_file)
+    run_interproscan(input_file, output_file)
     current_output = project_dir + "/test_outputs/xml_current_output" + ".xml"
     with open(current_output, 'r') as f:
         tree = ET.parse(f)
@@ -41,22 +41,22 @@ def xml2dict(element):
     return result
 
 
-def compare_dicts(expected, current, path=""):
+def compare_dicts(expected, current):
     for key in expected:
         if key not in current:
-            print(f"Key '{key}' missing in dict2")
+            print(f"Key '{key}' missing in current dict")
             continue
         if isinstance(expected[key], dict):
-            compare_dicts(expected[key], current[key], path + f"/{key}")
+            compare_dicts(expected[key], current[key])
         elif isinstance(expected[key], list):
             if len(expected[key]) != len(current[key]):
-                print(f"List length mismatch for key '{key}' at path '{path}'")
+                print(f"List length mismatch for key '{key}'")
             else:
                 for i in range(len(expected[key])):
-                    compare_dicts(expected[key][i], current[key][i], path + f"/{key}[{i}]")
+                    compare_dicts(expected[key][i], current[key][i])
         else:
             if expected[key] != current[key]:
-                print(f"Value mismatch for key '{key}' at path '{path}':")
+                print(f"Value mismatch for key '{key}'")
                 print(f"  expected: {expected[key]}")
                 print(f"  current: {current[key]}")
 
