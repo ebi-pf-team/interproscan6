@@ -27,31 +27,6 @@ def get_expected_output() -> ET.Element:
     return tree.getroot()
 
 
-def compare_xml_elements(elem1, elem2, path=""):
-    if elem1.tag.lower() != elem2.tag.lower():
-        raise AssertionError(f"Different tags at {path}: '{elem1.tag}' != '{elem2.tag}'")
-
-    if sorted(elem1.attrib.items()) != sorted(elem2.attrib.items()):
-        raise AssertionError(f"Different attributes at {path}: {elem1.attrib} != {elem2.attrib}")
-
-    if (elem1.text or '').strip().lower() != (elem2.text or '').strip().lower():
-        raise AssertionError(f"Different texts at {path}: '{elem1.text}' != '{elem2.text}'")
-
-    if len(elem1) != len(elem2):
-        raise AssertionError(f"Different number of children at {path}: {len(elem1)} != {len(elem2)}")
-
-    if not all(isinstance(child, ET.Element) for child in elem1):
-        return True
-
-    elem1_children = sorted(elem1, key=lambda x: x.tag.lower() + (x.get('md5') or '').lower() + (x.get('ac') or '').lower())
-    elem2_children = sorted(elem2, key=lambda x: x.tag.lower() + (x.get('md5') or '').lower() + (x.get('ac') or '').lower())
-
-    for child1, child2 in zip(elem1_children, elem2_children):
-        compare_xml_elements(child1, child2, path=f"{path}/{child1.tag}")
-
-    return True
-
-
 def xml2dict(element):
     result = {}
     if element.attrib:
@@ -66,6 +41,26 @@ def xml2dict(element):
     return result
 
 
+def compare_dicts(expected, current, path=""):
+    for key in expected:
+        if key not in current:
+            print(f"Key '{key}' missing in dict2")
+            continue
+        if isinstance(expected[key], dict):
+            compare_dicts(expected[key], current[key], path + f"/{key}")
+        elif isinstance(expected[key], list):
+            if len(expected[key]) != len(current[key]):
+                print(f"List length mismatch for key '{key}' at path '{path}'")
+            else:
+                for i in range(len(expected[key])):
+                    compare_dicts(expected[key][i], current[key][i], path + f"/{key}[{i}]")
+        else:
+            if expected[key] != current[key]:
+                print(f"Value mismatch for key '{key}' at path '{path}':")
+                print(f"  expected: {expected[key]}")
+                print(f"  current: {current[key]}")
+
+
 def test_xml_output(get_expected_output, get_current_output):
     def remove_namespace(element):
         for elem in element.iter():
@@ -76,7 +71,8 @@ def test_xml_output(get_expected_output, get_current_output):
     remove_namespace(get_expected_output)
     remove_namespace(get_current_output)
 
-    dict1 = xml2dict(get_expected_output)
-    dict2 = xml2dict(get_current_output)
-    assert dict1 == dict2
-    # assert compare_xml_elements(get_expected_output, get_current_output)
+    expected = xml2dict(get_expected_output)
+    current = xml2dict(get_current_output)
+
+    compare_dicts(expected, current)
+    assert expected == current
