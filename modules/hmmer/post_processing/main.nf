@@ -1,4 +1,35 @@
 
+process GENE3D_POST_PROCESSER {
+    container 'docker.io/library/cathtools'
+    label 'analysis_parser'
+
+    input:
+        path out_file
+        path out_dtbl
+        path alignment  // note used here. Needed for the SFLD pipeline
+        val postprocessing_params  // [0] evalue [1] control factor
+
+    output:
+        path "${out_file}.cat.resolved.out"
+        val postprocessing_params
+        path alignment
+
+    /*
+    Input args for TreeGrafter:
+    0. cath_resolve_hits_switches
+    1. model2sf_map
+    2. discontinuous_regs
+    */
+    script:
+    """
+    /cath-tools/cath-resolve-hits \\
+        ${out_file} \\
+        --input-for hmmsearch_out \\
+        ${postprocessing_params[0]} > "${out_file}.cat.resolved.out"
+    """
+}
+
+
 process PANTHER_POST_PROCESSER {
     container 'docker.io/library/treegrafter'
     label 'analysis_parser'

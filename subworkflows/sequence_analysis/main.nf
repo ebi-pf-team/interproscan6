@@ -20,6 +20,9 @@ include {
     PANTHER_POST_PROCESSER;
     SFLD_POST_PROCESSER
 } from "$projectDir/modules/hmmer/post_processing/main"
+include {
+    GENE3D_PARSER;
+} from "$projectDir/modules/cath_gene3d/main"
 include { 
     SIGNALP_RUNNER;
     SIGNALP_PARSER
@@ -63,7 +66,6 @@ workflow SEQUENCE_ANALYSIS {
                 false,
                 [
                    params.members."${member}".postprocess.cath_resolve_hits_switches,
-                   params.members."${member}".postprocess.assign_cath_superfamilies_switches,
                    params.members."${member}".postprocess.model2sf_map,
                    params.members."${member}".postprocess.discontinuous_regs,
                 ]
@@ -140,8 +142,8 @@ workflow SEQUENCE_ANALYSIS {
     // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
     runner_hmmer_gene3d_params = fasta.combine(member_params.gene3d)
     GENE3D_HMMER_RUNNER(runner_hmmer_gene3d_params)
-    GENE3D_POST_PROCESSER(GENE3D_HMMER_RUNNER.out, fasta)
-    // PANTHER_HMMER_PARSER(PANTHER_POST_PROCESSER.out, params.tsv_pro, false)
+    GENE3D_POST_PROCESSER(GENE3D_HMMER_RUNNER.out)
+    GENE3D_PARSER(GENE3D_POST_PROCESSER.out)
 
     // Panther (+ treegrafter + epa-ng)
     runner_hmmer_panther_params = fasta.combine(member_params.panther)
