@@ -167,24 +167,25 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                 if match_data['entry']:
                     signature_elem.set("desc", match_data["entry"]['description'])
                     signature_elem.set("name", match_data['entry']['short_name'])
-                    entry_elem = ET.SubElement(signature_elem, "entry")
-                    entry_elem.set("ac", match_data['entry']['accession'])
-                    entry_elem.set("desc", match_data['entry']['name'])
-                    entry_elem.set("name", match_data['entry']['short_name'])
-                    entry_elem.set("type", match_data['entry']['type'])
-                    if match_data['entry']['goXRefs']:
-                        for go_xref in match_data['entry']['goXRefs']:
-                            go_xref_elem = ET.SubElement(entry_elem, "go-xref")
-                            go_xref_elem.set("category", go_xref['category'])
-                            go_xref_elem.set("db", go_xref['databaseName'])
-                            go_xref_elem.set("id", go_xref['id'])
-                            go_xref_elem.set("name", go_xref['name'])
-                    if match_data['entry']['pathwayXRefs']:
-                        for pathway_xref in match_data['entry']['pathwayXRefs']:
-                            pathway_xref_elem = ET.SubElement(entry_elem, "pathway-xref")
-                            pathway_xref_elem.set("db", pathway_xref['databaseName'])
-                            pathway_xref_elem.set("id", pathway_xref['id'])
-                            pathway_xref_elem.set("name", pathway_xref['name'])
+                    if match_data['entry']['accession'] != "-":
+                        entry_elem = ET.SubElement(signature_elem, "entry")
+                        entry_elem.set("ac", match_data['entry']['accession'])
+                        entry_elem.set("desc", match_data['entry']['name'])
+                        entry_elem.set("name", match_data['entry']['short_name'])
+                        entry_elem.set("type", match_data['entry']['type'])
+                        if match_data['entry']['goXRefs']:
+                            for go_xref in match_data['entry']['goXRefs']:
+                                go_xref_elem = ET.SubElement(entry_elem, "go-xref")
+                                go_xref_elem.set("category", go_xref['category'])
+                                go_xref_elem.set("db", go_xref['databaseName'])
+                                go_xref_elem.set("id", go_xref['id'])
+                                go_xref_elem.set("name", go_xref['name'])
+                        if match_data['entry']['pathwayXRefs']:
+                            for pathway_xref in match_data['entry']['pathwayXRefs']:
+                                pathway_xref_elem = ET.SubElement(entry_elem, "pathway-xref")
+                                pathway_xref_elem.set("db", pathway_xref['databaseName'])
+                                pathway_xref_elem.set("id", pathway_xref['id'])
+                                pathway_xref_elem.set("name", pathway_xref['name'])
 
                 signature_library_elem = ET.SubElement(signature_elem, "signature-library-release")
                 signature_library_elem.set("library", match_data['member_db'].upper())
@@ -195,8 +196,8 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                 locations_elem = ET.SubElement(match_elem, "locations")
                 for location in match_data['locations']:
                     location_elem = ET.SubElement(locations_elem, "hmmer3-location")
-                    location_elem.set("env-start", str(location["envelopeStart"]))
                     location_elem.set("env-end", str(location["envelopeEnd"]))
+                    location_elem.set("env-start", str(location["envelopeStart"]))
                     location_elem.set("post-processed", str(location["postProcessed"]))
                     location_elem.set("score", str(location["score"]))
                     location_elem.set("evalue", str(location["evalue"]).upper())

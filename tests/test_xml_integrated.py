@@ -38,6 +38,8 @@ def xml2dict(element):
     for key, value in result.items():
         if isinstance(value, list) and all(isinstance(item, dict) for item in value):
             result[key] = sorted(value, key=lambda x: str(x))
+    if 'locations' in result:
+        result['locations'] = sorted(result['locations'], key=lambda x: int(x['hmmer3-location'][0]['attributes']['env-end']))
     return result
 
 
@@ -78,4 +80,5 @@ def test_xml_output(get_expected_output, get_current_output):
 
     ignore_elements = ['representative', 'hmmer3-location-fragment']
     compare_dicts(expected, current, ignore_elements)
+    print(current)
     assert expected == current
