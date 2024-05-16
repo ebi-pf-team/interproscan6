@@ -2,6 +2,7 @@ FROM ubuntu:latest
 LABEL authors="Laise Florentino (lcf@ebi.ac.uk), Matthias Blum (mblum@ebi.ac.uk)"
 ARG VERSION=6.0-95.0
 ENV TZ=Europe/London
+ENV NXF_ANSI_LOG=false
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
     apt-get update -y && \
@@ -9,3 +10,4 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
 
 WORKDIR /opt/interproscan6
 COPY . .
+RUN 
