@@ -14,7 +14,7 @@ def match_lookup(matches_checked: list, url: str) -> str:
 def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
     tree = ET.fromstring(match_data)
     matches = {}
-    hmm_bound_pattern = {"[]": "COMPLETE", "[.": "N-TERMINAL COMPLETE", ".]": "C-TERMINAL COMPLETE", "..": "INCOMPLETE"}
+    hmm_bound_pattern = {"[]": "COMPLETE", "[.": "N_TERMINAL_COMPLETE", ".]": "C_TERMINAL_COMPLETE", "..": "INCOMPLETE"}
 
     for match in tree.findall(".//match"):
         for hit in match.findall("hit"):
