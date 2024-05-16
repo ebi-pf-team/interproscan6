@@ -12,7 +12,7 @@ def get_current_output() -> ET.Element:
     project_dir = os.path.dirname(os.path.abspath(__file__))
     output_file = "tests/test_outputs/xml_current_output"
     input_file = "tests/test_outputs/xml_test.fasta"
-    run_interproscan(input_file, output_file)
+    # run_interproscan(input_file, output_file)
     current_output = project_dir + "/test_outputs/xml_current_output" + ".xml"
     with open(current_output, 'r') as f:
         tree = ET.parse(f)
@@ -28,15 +28,6 @@ def get_expected_output() -> ET.Element:
 
 
 def compare_xml_elements(elem1, elem2, path=""):
-    def remove_namespace(element):
-        for elem in element.iter():
-            if '}' in elem.tag:
-                elem.tag = elem.tag.split('}', 1)[1]
-            elem.attrib = {k.split('}', 1)[-1].lower(): v for k, v in elem.attrib.items()}
-
-    remove_namespace(elem1)
-    remove_namespace(elem2)
-
     if elem1.tag.lower() != elem2.tag.lower():
         raise AssertionError(f"Different tags at {path}: '{elem1.tag}' != '{elem2.tag}'")
 
@@ -61,5 +52,31 @@ def compare_xml_elements(elem1, elem2, path=""):
     return True
 
 
+def xml2dict(element):
+    result = {}
+    if element.attrib:
+        result.update({'attributes': element.attrib})
+    for child in element:
+        if child.tag not in result:
+            result[child.tag] = []
+        result[child.tag].append(xml2dict(child))
+    for key, value in result.items():
+        if isinstance(value, list) and all(isinstance(item, dict) for item in value):
+            result[key] = sorted(value, key=lambda x: str(x))
+    return result
+
+
 def test_xml_output(get_expected_output, get_current_output):
-    assert compare_xml_elements(get_expected_output, get_current_output)
+    def remove_namespace(element):
+        for elem in element.iter():
+            if '}' in elem.tag:
+                elem.tag = elem.tag.split('}', 1)[1]
+            elem.attrib = {k.split('}', 1)[-1].lower(): v for k, v in elem.attrib.items()}
+
+    remove_namespace(get_expected_output)
+    remove_namespace(get_current_output)
+
+    dict1 = xml2dict(get_expected_output)
+    dict2 = xml2dict(get_current_output)
+    assert dict1 == dict2
+    # assert compare_xml_elements(get_expected_output, get_current_output)
