@@ -12,7 +12,7 @@ def get_current_output() -> ET.Element:
     project_dir = os.path.dirname(os.path.abspath(__file__))
     output_file = "tests/test_outputs/xml_current_output"
     input_file = "tests/test_outputs/xml_test.fasta"
-    # run_interproscan(input_file, output_file)
+    run_interproscan(input_file, output_file)
     current_output = project_dir + "/test_outputs/xml_current_output" + ".xml"
     with open(current_output, 'r') as f:
         tree = ET.parse(f)
@@ -50,10 +50,8 @@ def compare_xml_elements(elem1, elem2, path=""):
         raise AssertionError(f"Different number of children at {path}: {len(elem1)} != {len(elem2)}")
 
     if not all(isinstance(child, ET.Element) for child in elem1):
-        # Base case: reached leaf nodes (sequences or fragments)
         return True
 
-    # For sequences, matches, and locations, sort them by some unique identifier to ensure order independence
     elem1_children = sorted(elem1, key=lambda x: x.tag.lower() + (x.get('md5') or '').lower() + (x.get('ac') or '').lower())
     elem2_children = sorted(elem2, key=lambda x: x.tag.lower() + (x.get('md5') or '').lower() + (x.get('ac') or '').lower())
 
