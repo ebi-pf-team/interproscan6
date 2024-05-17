@@ -108,11 +108,15 @@ def parse_cdd(rpsblast_processed: Path, release: str):
                         "siteLocations": [],
                     }
                     for site in sites:
-                        site_info["siteLocations"] = {
+                        site_data = {
                             "start": site[1:],
                             "end": site[1:],
                             "residue": site[0]
                         }
+                        try:
+                            site_info["siteLocations"].append(site_data)
+                        except KeyError:
+                            site_info["siteLocations"] = [site_data]
                     matches[target_key][signature_accession]['locations'][-1]['sites'].append(site_info)
                     continue
 
