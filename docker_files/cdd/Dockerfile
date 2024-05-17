@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM --platform=linux/amd64 ubuntu:latest
 ENV TZ=Europe/London
 WORKDIR /opt/cdd
 
