@@ -85,6 +85,7 @@ _Required for Panther_:
 
 _Requires for CDD_:
     docker pull ncbi/blast
+    docker build -t cdd docker_files/cdd
 
 5. [Optional] Build a docker image for [`easel`](https://github.com/EddyRivasLab/easel) for the prediction of Open Reading Frames:
 

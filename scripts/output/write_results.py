@@ -115,7 +115,10 @@ def json_output(seq_matches: dict, output_path: str, version:str):
                         match["evalue"] = match_data['evalue']
                         match["score"] = match_data['score']
 
-                    match["model-ac"] = match_data['model-ac']
+                    if 'model-ac' in match_data:
+                        match["model-ac"] = match_data['model-ac']
+                    else:
+                        match["model-ac"] = match_data['accession']
 
                     if match_data['member_db'].upper() == "PANTHER":
                         # get protein class and graftpoint for Panther
@@ -161,9 +164,21 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                 match_elem.set("score", str(match_data["score"]))
 
                 signature_elem = ET.SubElement(match_elem, "signature")
-                signature_elem.set("ac", match_data['accession'])
-                signature_elem.set("desc", match_data['name'])
-                signature_elem.set("name", match_data['name'])
+                # try/except
+                # some member dbs (e.g. signalp and tmhmm) do no have signatures
+                # and thus do no have sig accs, names or descs
+                try:
+                    signature_elem.set("ac", match_data['accession'])
+                except KeyError:
+                    pass
+                try:
+                    signature_elem.set("desc", match_data['name'])
+                except KeyError:
+                    pass
+                try:
+                    signature_elem.set("name", match_data['name'])
+                except KeyError:
+                    pass
                 if match_data['entry']:
                     signature_elem.set("desc", match_data["entry"]['description'])
                     signature_elem.set("name", match_data['entry']['short_name'])
@@ -192,30 +207,30 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                 signature_library_elem.set("version", match_data['version'])
                 model_ac_elem = ET.SubElement(match_elem, "model-ac")
                 model_ac_elem.text = match_key
-
-                locations_elem = ET.SubElement(match_elem, "locations")
-                for location in match_data['locations']:
-                    location_elem = ET.SubElement(locations_elem, "hmmer3-location")
-                    location_elem.set("env-end", str(location["envelopeEnd"]))
-                    location_elem.set("env-start", str(location["envelopeStart"]))
-                    location_elem.set("post-processed", str(location["postProcessed"]))
-                    location_elem.set("score", str(location["score"]))
-                    location_elem.set("evalue", str(location["evalue"]).upper())
-                    location_elem.set("hmm-start", str(location["hmmStart"]))
-                    location_elem.set("hmm-end", str(location["hmmEnd"]))
-                    location_elem.set("hmm-length", str(location["hmmLength"]))
-                    location_elem.set("hmm-bounds", str(location["hmmBounds"]))
-                    location_elem.set("start", str(location["start"]))
-                    location_elem.set("end", str(location["end"]))
-                    location_elem.set("representative", str(location["representative"]))
-                    location_frags_elem = ET.SubElement(location_elem, "location-fragments")
-                    if 'sites' in location:
-                        for site in location['sites']:
-                            for sitelocation in site['siteLocations']:
-                                location_frag_elem = ET.SubElement(location_frags_elem, "hmmer3-location-fragment")
-                                location_frag_elem.set("start", str(sitelocation["start"]))
-                                location_frag_elem.set("end", str(sitelocation["end"]))
-                                location_frag_elem.set("dc-status", "")
+                if 'locations' in match_data:
+                    locations_elem = ET.SubElement(match_elem, "locations")
+                    for location in match_data['locations']:
+                        location_elem = ET.SubElement(locations_elem, "hmmer3-location")
+                        location_elem.set("env-start", str(location["envelopeStart"]))
+                        location_elem.set("env-end", str(location["envelopeEnd"]))
+                        location_elem.set("post-processed", str(location["postProcessed"]))
+                        location_elem.set("score", str(location["score"]))
+                        location_elem.set("evalue", str(location["evalue"]))
+                        location_elem.set("hmm-start", str(location["hmmStart"]))
+                        location_elem.set("hmm-end", str(location["hmmEnd"]))
+                        location_elem.set("hmm-length", str(location["hmmLength"]))
+                        location_elem.set("hmm-bounds", str(location["hmmBounds"]))
+                        location_elem.set("start", str(location["start"]))
+                        location_elem.set("end", str(location["end"]))
+                        location_elem.set("representative", str(location["representative"]))
+                        location_frags_elem = ET.SubElement(location_elem, "location-fragments")
+                        if 'sites' in location:
+                            for site in location['sites']:
+                                for sitelocation in site['siteLocations']:
+                                    location_frag_elem = ET.SubElement(location_frags_elem, "hmmer3-location-fragment")
+                                    location_frag_elem.set("start", str(sitelocation["start"]))
+                                    location_frag_elem.set("end", str(sitelocation["end"]))
+                                    location_frag_elem.set("dc-status", "")
 
     tree = ET.ElementTree(root)
     ET.indent(tree, space="\t", level=0)

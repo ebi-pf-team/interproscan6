@@ -71,49 +71,66 @@ def parse_cdd(rpsblast_processed: Path, release: str):
                 if _line:
                     # #<session-ordinal>	<query-id[readingframe]>	<hit-type>	<PSSM-ID>	<from>	<to>	<E-Value>	<bitscore>	<accession>	<short-name>	<incomplete>	<superfamily PSSM-ID>
                     # e.g. 1	Query_1	Non-specific	238121	235	438	1.87425e-09	56.9596	cd00200	WD40	N	453027
-                    signature_accession = _line.group(9)
+                    if line.split()[2].upper() == "SPECIFIC":  # filter for only matches of hit-type SPECIFC
+                        signature_accession = _line.group(9)
 
-                    domain_info = {
-                        "start": int(_line.group(5)),
-                        "end": int(_line.group(6)),
-                        "representative": "",
-                        "evalue": float(_line.group(7)),
-                        "score": float(_line.group(8)),
-                        "postProcessed": "",
-                        "sites": [],
-                    }
+                        domain_info = {
+                            "start": int(_line.group(5)),
+                            "end": int(_line.group(6)),
+                            "representative": "",
+                            "evalue": float(_line.group(7)),
+                            "score": float(_line.group(8)),
+                            "postProcessed": "",
+                            "sites": [],
+                        }
 
-                    signature_info = {
-                        "accession": signature_accession,
-                        "name": _line.group(10),
-                        "member_db": "CDD",
-                        "version": release,
-                        "model-ac": signature_accession,
-                    }
+                        signature_info = {
+                            "accession": signature_accession,
+                            "name": _line.group(10),
+                            "member_db": "CDD",
+                            "version": release,
+                            "model-ac": signature_accession,
+                        }
 
-                    if signature_accession not in matches[target_key]:
-                        matches[target_key][signature_accession] = signature_info
-                        matches[target_key][signature_accession]['locations'] = [domain_info]
-                    else:
-                        matches[target_key][signature_accession]["locations"].append(domain_info)
+                        if signature_accession not in matches[target_key]:
+                            matches[target_key][signature_accession] = signature_info
+                            matches[target_key][signature_accession]['locations'] = [domain_info]
+                        else:
+                            matches[target_key][signature_accession]["locations"].append(domain_info)
 
                     continue
 
                 _line = SITE_LINE_PATTERN.match(line)
                 if _line:
-                    sites = line.split()[-4].split(",")
-                    site_info = {
-                        "description": " ".join(line.split()[3:-4]),
-                        "numLocations": len(sites),
-                        "siteLocations": [],
-                    }
-                    for site in sites:
-                        site_info["siteLocations"] = {
-                            "start": site[1:],
-                            "end": site[1:],
-                            "residue": site[0]
-                        }
-                    matches[target_key][signature_accession]['locations'][-1]['sites'].append(site_info)
+                    if signature_accession in matches[target_key]:
+                        sites = line.split()[-4].split(",")
+
+                        # find the domain that contains these sites
+                        positions = [int(_[1:].split("-")[0]) for _ in sites]
+                        earliest_start, latest_end = min(positions), max(positions)
+                        domain_index = None
+                        for i in range(len(matches[target_key][signature_accession]['locations'])):
+                            if (
+                                matches[target_key][signature_accession]['locations'][i]["start"] <= earliest_start
+                            ) and (
+                                matches[target_key][signature_accession]['locations'][i]["end"] >= latest_end
+                            ):
+                                domain_index = i
+                                break
+                        
+                        if domain_index is not None:  # domain index could by 0, so don't use `if domain_index:`
+                            site_info = {
+                                "description": " ".join(line.split()[3:-4]),
+                                "numLocations": len(sites),
+                                "siteLocations": [],
+                            }
+                            for site in sites:
+                                site_info["siteLocations"] = {
+                                    "start": site[1:],
+                                    "end": site[1:],
+                                    "residue": site[0]
+                                }
+                            matches[target_key][signature_accession]['locations'][-1]['sites'].append(site_info)
                     continue
 
     return matches
