@@ -4,14 +4,16 @@ include {
     CDD_PARSER
 } from "$projectDir/modules/cdd/main"
 include { 
+    FUNFAM_HMMER_RUNNER;
     HMMER_RUNNER as GENERIC_HMMER_RUNNER;
     HMMER_RUNNER as GENE3D_HMMER_RUNNER;
     HMMER_RUNNER as SFLD_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER; 
 } from "$projectDir/modules/hmmer/runner/main"
 include { 
+    GENE3D_PARSER;
+    GENE3D_HMMER_PARSER as FUNFAM_HMMER_PARSER;
     HMMER_PARSER as GENERIC_HMMER_PARSER;
-    HMMER_PARSER as GENE3D_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
 } from "$projectDir/modules/hmmer/parser/main"

@@ -12,7 +12,6 @@ process GENE3D_POST_PROCESSER {
     output:
         path "${out_file}.cat.resolved.out"
         val postprocessing_params
-        path alignment
 
     /*
     Input args for TreeGrafter:
@@ -22,6 +21,7 @@ process GENE3D_POST_PROCESSER {
     */
     script:
     """
+    rm -f ${alignment}
     /cath-tools/cath-resolve-hits \\
         ${out_file} \\
         --input-for hmmsearch_out \\
