@@ -15,6 +15,18 @@ def get_expected_output(expected_output_path: str) -> dict:
         return json.load(f)
 
 
+def json2dict(obj):
+    if isinstance(obj, dict):
+        result = {}
+        for key, value in obj.items():
+            result[key] = json2dict(value)
+        return dict(sorted(result.items()))
+    elif isinstance(obj, list):
+        return sorted([json2dict(item) for item in obj], key=lambda x: str(x))
+    else:
+        return obj
+
+
 def compare(expected, current, ignore_elements: list):
     for key in expected:
         if key in ignore_elements:
@@ -38,8 +50,11 @@ def compare(expected, current, ignore_elements: list):
 
 
 def test_json_output(input_path, expected_output_path, current_output_path, applications, disable_precalc):
-    expected = get_expected_output(expected_output_path)
-    current = get_current_output(current_output_path, input_path, applications, disable_precalc)
+    expected_output = get_expected_output(expected_output_path)
+    current_output = get_current_output(current_output_path, input_path, applications, disable_precalc)
+
+    expected = json2dict(expected_output)
+    current = json2dict(current_output)
 
     ignore_elements = ['representative', 'hmmer3-location-fragment']
     print("Missing elements in current output:")
