@@ -1,0 +1,204 @@
+{
+  "interproscan-version": "6.0.0",
+  "results": [
+    {
+      "sequence": "MGIRYDNTVYGLSPLARGTRGNGNRPRGRGRFIPAGAGNTMSGTMPRLSGPVYPRWRGEHNERNNAQAFWSGLSPLARGTPNGSDVRRLRYRFIPAGAGNTATRCSNEPFDPVYPRWRGEHAQNDRRSEDSGGLSPLARGTRRPDQVMVLPLRFIPAGAGNTDIPPDPRPKSAVYPRWRGEHNGTDSTNQNFRGLSPLARGTLYDCRRYEKPRRFIPAGAGNTCYGVGALNIGAVYPRWRGEH",
+      "md5": "f1f6c0f82668b5315244caa65040cad9",
+      "matches": [
+        {
+          "signature": {
+            "accession": "ANF00006",
+            "name": "Spurious_ORF_06",
+            "description": "Translation of CRISPR region",
+            "signatureLibraryRelease": {
+              "library": "ANTIFAM",
+              "version": "7.0"
+            },
+            "entry": {
+              "accession": "-",
+              "short_name": "Spurious_ORF_06",
+              "name": "-",
+              "description": "Translation of CRISPR region",
+              "type": "Region",
+              "goXRefs": [],
+              "pathwayXRefs": []
+            }
+          },
+          "locations": [
+            {
+              "start": 9,
+              "end": 40,
+              "representative": "",
+              "hmmStart": 19,
+              "hmmEnd": 50,
+              "hmmLength": 50,
+              "hmmBounds": "",
+              "evalue": 3.4e-10,
+              "score": 28.0,
+              "envelopeStart": 4,
+              "envelopeEnd": 40,
+              "postProcessed": "false"
+            },
+            {
+              "start": 52,
+              "end": 101,
+              "representative": "",
+              "hmmStart": 1,
+              "hmmEnd": 50,
+              "hmmLength": 50,
+              "hmmBounds": "",
+              "evalue": 3.4e-17,
+              "score": 50.4,
+              "envelopeStart": 52,
+              "envelopeEnd": 101,
+              "postProcessed": "false"
+            },
+            {
+              "start": 113,
+              "end": 162,
+              "representative": "",
+              "hmmStart": 1,
+              "hmmEnd": 50,
+              "hmmLength": 50,
+              "hmmBounds": "",
+              "evalue": 3.3e-15,
+              "score": 44.1,
+              "envelopeStart": 113,
+              "envelopeEnd": 162,
+              "postProcessed": "false"
+            },
+            {
+              "start": 174,
+              "end": 223,
+              "representative": "",
+              "hmmStart": 1,
+              "hmmEnd": 50,
+              "hmmLength": 50,
+              "hmmBounds": "",
+              "evalue": 2.4e-15,
+              "score": 44.5,
+              "envelopeStart": 174,
+              "envelopeEnd": 223,
+              "postProcessed": "false"
+            }
+          ],
+          "evalue": 1.1e-51,
+          "score": 160.8,
+          "model-ac": "ANF00006"
+        },
+        {
+          "signature": {
+            "accession": "ANF00057",
+            "name": "Spurious_ORF_57",
+            "description": "Translation of E. coli type CRISPR repeat",
+            "signatureLibraryRelease": {
+              "library": "ANTIFAM",
+              "version": "7.0"
+            },
+            "entry": {
+              "accession": "-",
+              "short_name": "Spurious_ORF_57",
+              "name": "-",
+              "description": "Translation of E. coli type CRISPR repeat",
+              "type": "Region",
+              "goXRefs": [],
+              "pathwayXRefs": []
+            }
+          },
+          "locations": [
+            {
+              "start": 6,
+              "end": 101,
+              "representative": "",
+              "hmmStart": 16,
+              "hmmEnd": 111,
+              "hmmLength": 111,
+              "hmmBounds": "",
+              "evalue": 2.2e-30,
+              "score": 93.0,
+              "envelopeStart": 2,
+              "envelopeEnd": 101,
+              "postProcessed": "false"
+            },
+            {
+              "start": 70,
+              "end": 162,
+              "representative": "",
+              "hmmStart": 19,
+              "hmmEnd": 111,
+              "hmmLength": 111,
+              "hmmBounds": "",
+              "evalue": 2.7e-31,
+              "score": 95.9,
+              "envelopeStart": 69,
+              "envelopeEnd": 162,
+              "postProcessed": "false"
+            },
+            {
+              "start": 113,
+              "end": 223,
+              "representative": "",
+              "hmmStart": 1,
+              "hmmEnd": 111,
+              "hmmLength": 111,
+              "hmmBounds": "",
+              "evalue": 2.1e-37,
+              "score": 115.5,
+              "envelopeStart": 113,
+              "envelopeEnd": 223,
+              "postProcessed": "false"
+            },
+            {
+              "start": 174,
+              "end": 243,
+              "representative": "",
+              "hmmStart": 1,
+              "hmmEnd": 70,
+              "hmmLength": 111,
+              "hmmBounds": "",
+              "evalue": 2.2e-23,
+              "score": 70.4,
+              "envelopeStart": 174,
+              "envelopeEnd": 243,
+              "postProcessed": "false"
+            }
+          ],
+          "evalue": 1.4e-106,
+          "score": 338.3,
+          "model-ac": "ANF00057"
+        }
+      ],
+      "xref": {
+        "name": "UPI0010EB9177",
+        "id": "UPI0010EB9177"
+      }
+    },
+    {
+      "sequence": "MEEDIDTRKINNSFLRDHSYATEADIISTVEFNHTGELLATGDKGGRVVIFQREQESKNQVHRRGEYNVYSTFQSHEPEFDYLKSLEIEEKINKIRWLPQQNAAYFLLSTNDKTVKLWKVSERDKRPEGYNLKDEEGRLRDPATITTLRVPVLRPMDLMVEATPRRVFANAHTYHINSISVNSDYETYMSADDLRINLWNFEITNQSFNIVDIKPANMEELTEVITAAEFHPHHCNTFVYSSSKGTIRLCDMRASALCDRHTKFFEEPEDPSNRSFFSEIISSISDVKFSHSGRYIMTRDYLTVKVWDLNMENRPIETYQVHDYLRSKLCSLYENDCIFDKFECVWNGSDSVIMTGSYNNFFRMFDRNTKRDVTLEASRENSKPRAILKPRKVCVGGKRRKDEISVDSLDFSKKILHTAWHPSENIIAVAATNNLYIFQDKVN",
+      "md5": "6060f0d4cccb4dc4e224ee28348af028",
+      "matches": [],
+      "xref": {
+        "name": "sp|Q5E9Q7|2ABB_BOVIN Serine/threonine-protein phosphatase 2A 55 kDa regulatory subunit B beta isoform OS=Bos taurus OX=9913 GN=PPP2R2B PE=2 SV=1",
+        "id": "sp|Q5E9Q7|2ABB_BOVIN"
+      }
+    },
+    {
+      "sequence": "MLARGGIQSNQSRLSAHLGGKVDLYAKREDCNSGLAFGGNKLRKLEYIVPDAIASGADTLVSIGGVQSNHTRMVAAVAAKIGMKCRLVQEAWVPHEDAVYDRVGNIMLSRIMGADVGKE",
+      "md5": "5a40425be664fc947906456e8fc0e722",
+      "matches": [],
+      "xref": {
+        "name": "TESTESEMLOOKUP",
+        "id": "TESTESEMLOOKUP"
+      }
+    },
+    {
+      "sequence": "MNLNRFERYPLTFGPSPITPLKRLSQHLGGKVELYAKREDCNSGLAFGGNKTRKLEYLIPEAIEQGCDTLVSIGGIQSNQTRQVAAVAAHLGMKCVLVQENWVNYSDAVYDRVGNIEMSRIMGADVRLDAAGFDIGIRPSWEKAMSDVVEQGGKPFPIPAGCSEHPYGGLGFVGFAEEVRQQEKELGFKFDYIVVCSVTGSTQAGMVVGFAADGRSKNVIGIDASAKPEQTKAQILRIARHTAELVELGREITEEDVVLDTRFAYPEYGLPNEGTLEAIRLCGSLEGVLTDPVYEGKSMHGMIEMVRRGEFPEGS",
+      "md5": "cf8b3730bba16fc9f9823ad3a120d975",
+      "matches": [],
+      "xref": {
+        "name": "OUTROSEMLOOKUP",
+        "id": "OUTROSEMLOOKUP"
+      }
+    }
+  ]
+}

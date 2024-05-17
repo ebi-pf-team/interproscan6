@@ -6,11 +6,13 @@ def get_current_output(current_output_path: str, input_path: str, applications: 
     disable_precalc = "--disable_precalc" if disable_precalc else ""
     command = f"nextflow run interproscan.nf --input {input_path} --applications {applications} {disable_precalc} --formats json --output {current_output_path}"
     subprocess.run(command, shell=True)
-    return json.loads(json.dumps(str(current_output_path) + ".json", indent=4))
+    with open(str(current_output_path) + ".json", 'r') as f:
+        return json.load(f)
 
 
 def get_expected_output(expected_output_path: str) -> dict:
-    return json.loads(json.dumps(str(expected_output_path) + ".json", indent=4))
+    with open(str(expected_output_path) + ".json", 'r') as f:
+        return json.load(f)
 
 
 def compare(expected, current, ignore_elements: list):
