@@ -93,14 +93,6 @@ workflow PRE_CHECKS {
         exit 22, "Format not valid: $formats_diff. Valid formats are: $formats_expected"
     }
 
-    // Check if the formats are valid
-    def formats_expected = ['json', 'tsv', 'tsv-pro', 'xml', 'gff3']
-    def formats_diff = params.formats.toLowerCase().split(',') - formats_expected
-    if (formats_diff.size() != 0){
-        log.info printHelp()
-        exit 1, "Format not valid: $formats_diff. Valid formats are: $formats_expected"
-    }
-
     // Check if the input file is a fasta file and if it contains sequences
     if (seq_input.countFasta() == 0) {
         log.error "No sequence found in the input file"
