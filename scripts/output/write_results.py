@@ -165,9 +165,21 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                 match_elem.set("score", str(match_data["score"]))
 
                 signature_elem = ET.SubElement(match_elem, "signature")
-                signature_elem.set("ac", match_data['accession'])
-                signature_elem.set("desc", match_data['name'])
-                signature_elem.set("name", match_data['name'])
+                # try/except
+                # some member dbs (e.g. signalp and tmhmm) do no have signatures
+                # and thus do no have sig accs, names or descs
+                try:
+                    signature_elem.set("ac", match_data['accession'])
+                except KeyError:
+                    pass
+                try:
+                    signature_elem.set("desc", match_data['name'])
+                except KeyError:
+                    pass
+                try:
+                    signature_elem.set("name", match_data['name'])
+                except KeyError:
+                    pass
                 if match_data['entry']:
                     signature_elem.set("desc", match_data["entry"]['description'])
                     entry_elem = ET.SubElement(signature_elem, "entry")
