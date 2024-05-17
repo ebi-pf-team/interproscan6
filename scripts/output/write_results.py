@@ -194,7 +194,8 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                 signature_library_elem.set("version", match_data['version'])
                 model_ac_elem = ET.SubElement(match_elem, "model-ac")
                 model_ac_elem.text = match_key
-
+if 'locations' in match_data:
+# you'll need to indent the subsequent lines, down to line 243
                 locations_elem = ET.SubElement(match_elem, "locations")
                 for location in match_data['locations']:
                     location_elem = ET.SubElement(locations_elem, "hmmer3-location")
