@@ -12,7 +12,30 @@ This doc describes the architecture and data contained within the output files o
 
 ## `InterProScan-5` `TSV` Output:
 
-:TO-DO:
+1. Sequence identifier
+2. Sequence MD5 checksum (lower casse)
+3. Sequence length
+4. Member database name
+5. Member database signature accession
+6. Member database signature description, name, or "-"
+7. Match location start
+8. Match location end
+9. Score
+    * e-value for AntiFam, CATH-Gene3D (+ FunFam), NCBIfam, PANTHER, Pfam, PIRSF, PRINTS, SFLD, SMART, SUPERFAMILY,
+    * score for HAMAP, PROSITE Profiles
+    * `-` for Coils, MobiDB-lite,  Phobius, PROSITE Patterns, SignalP, TMHMM
+10. Status (always `T`)
+11. Date (format: `DD-MM-YYYY`)
+12. InterPro entry or `-` (unintegrated)
+13. InterPro description or `-` (unintegrated)
+14. Pipe-separated list of GO terms, or `-` if none. Each GO term follows the format `GO:XXXXXXX(source)`, where `source` is the provider. It can be `InterPro`, `Panther`, or `InterPro,PANTHER`.
+15. Pipe-separated list of pathways, or `-` if none. Each pathway follows the format `Source:identifier`. Currently, the possible sources are `MetaCyc` and `Reactome`.
+
+Example:
+
+```
+UPI0004FABBC5	92e4b89dd86f8ab828f57121f6d7d460	257	PRINTS	PR01914 Neurotrophin-3 signature	81	95	2.0E-26	T	28-03-2024	IPR015578	Neurotrophin-3	GO:0005165(InterPro)	Reactome:R-BTA-9034013|Reactome:R-BTA-9034793|Reactome:R-BTA-9603381|Reactome:R-HSA-9025046|Reactome:R-HSA-9034013|Reactome:R-HSA-9034015|Reactome:R-HSA-9034793|Reactome:R-HSA-9034864|Reactome:R-HSA-9603381|Reactome:R-MMU-9034013|Reactome:R-MMU-9034793|Reactome:R-MMU-9603381|Reactome:R-RNO-9034013|Reactome:R-RNO-9034793|Reactome:R-RNO-9603381
+```
 
 ## `InterProScan-5` `JSON` Output:
 

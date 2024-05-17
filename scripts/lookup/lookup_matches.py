@@ -14,6 +14,7 @@ def match_lookup(matches_checked: list, url: str) -> str:
 def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
     tree = ET.fromstring(match_data)
     matches = {}
+    hmm_bound_pattern = {"[]": "Complete", "[.": "N-terminal complete", ".]": "C-terminal complete", "..": "Incomplete"}
 
     for match in tree.findall(".//match"):
         for hit in match.findall("hit"):
@@ -27,9 +28,17 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     target_key = protein_md5
 
                 accession = hit_data[2]
+                post_processed = False
+                if hit_appl == "gene3d" or hit_appl == "pfam":
+                    post_processed = True
+                try:
+                    hmm_bounds = hmm_bound_pattern[hit_data[9]]
+                except KeyError:
+                    hmm_bounds = ""
 
                 signature = {
                     "accession": accession,
+                    "model-ac": hit_data[3],
                     "name": "",
                     "description": "",
                     "evalue": float(hit_data[16]),
@@ -45,17 +54,17 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     "representative": "",
                     "hmmStart": int(hit_data[10]),
                     "hmmEnd": int(hit_data[11]),
-                    "hmmLength": int(hit_data[12]),  # qlen?
-                    "hmmBounds": "",
+                    "hmmLength": int(hit_data[12]),
+                    "hmmBoundsRaw": hit_data[9],
+                    "hmmBounds": hmm_bounds,
                     "evalue": float(hit_data[16]),
                     "score": hit_data[15],
                     "envelopeStart": int(hit_data[13]),
                     "envelopeEnd": int(hit_data[14]),
-                    "postProcessed": ""
-
-                    # "aliwS": hit_data[6],
-                    # "..": hit_data[9],
-                    # "cigar_alignment": hit_data[17],
+                    "postProcessed": post_processed,
+                    "aliwS": hit_data[6],
+                    "..": hit_data[9],
+                    "cigar_alignment": hit_data[17]
                 }
 
                 if target_key not in matches:

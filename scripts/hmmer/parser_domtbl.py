@@ -2,7 +2,7 @@ import json
 import sys
 
 
-def parse(hmmer_domtbl: str, retrieve_sites: bool):
+def parse(hmmer_domtbl: str, retrieve_sites: bool, mem_db_dir: str):
     """Parse hmmer output into a JSON object.
 
     In the resulting dict, each query protein is represented by its
@@ -16,6 +16,7 @@ def parse(hmmer_domtbl: str, retrieve_sites: bool):
         [only true for SFLD and CDD.]
         [Site annotation is added to the hmmer output files by
         in house post-processing scripts.]
+    :param mem_db_dt: str repr of path to the member db data dir
     """
     with open(hmmer_domtbl, "r") as dtbl_f:
         matches = {}
@@ -63,8 +64,8 @@ def parse(hmmer_domtbl: str, retrieve_sites: bool):
                 # Retrieve signature data
                 target_key = str(info[0])
                 acc_key = str(info[4].split(".")[0])
-                signature = get_signature(info, member_db, version)
-                location = get_domain(info)
+                signature = get_signature(info, member_db, version, mem_db_dir)
+                location = get_domain(info, member_db)
                 if target_key not in matches:
                     matches[target_key] = {}
                 if acc_key not in matches[target_key]:
@@ -76,17 +77,23 @@ def parse(hmmer_domtbl: str, retrieve_sites: bool):
     return matches
 
 
-def get_signature(info: list[str], member_db: str, version: str) -> dict[str, str]:
+def get_signature(
+    info: list[str],
+    member_db: str,
+    version: str,
+    mem_db_dir: str
+) -> dict[str, str]:
     """
     Retrieve data for the full sequence hit against the model:
         These are the data listed under --- full sequence ---
 
     :param info: list, line split by blankspace
-    :param locations: list of dicts, one dict per hit for the signature
-        against the query protein sequence
+    :param member_db: str, name of member database
+    :param version: str, release version of member db
+    :param mem_db_dir: str repr tp member db data dir
     """
     signature_info = {
-        "accession": info[4].split(".")[0],
+        "accession": info[4].split(":")[0].split(".")[0],
         "name": info[3],
         "description": "",
         "evalue": float(info[6]),
@@ -94,12 +101,23 @@ def get_signature(info: list[str], member_db: str, version: str) -> dict[str, st
         "qlen": int(info[5]),
         "bias": float(info[8]),
         "member_db": member_db,
-        "version": version
+        "version": version,
+        "model-ac": info[4]
     }
+
+    if member_db.lower() == 'panther':
+        node_id = info[-1]  # retrieve node id from Panther-TreeGrafter hits
+        paint_anno_path = mem_db_dir + f'/{info[4].split(":")[0].split(".")[0]}.json'
+        with open(paint_anno_path, 'r') as fh:
+            paint_annotations = json.load(fh)
+            node_data = paint_annotations[node_id]
+        signature_info['proteinClass'] = node_data[2]
+        signature_info['graftPoint'] = node_data[3]
+
     return signature_info
 
 
-def get_domain(info: list[str]) -> dict[str, str]:
+def get_domain(info: list[str], member_db: str) -> dict[str, str]:
     """
     Retrieve the data for the specific domain hit:
         These are the data listed under --- this domain ---
@@ -108,7 +126,12 @@ def get_domain(info: list[str]) -> dict[str, str]:
     the input query sequence
 
     :param info: list, line split by blankspace
+    :param mem_db_dir: str repr tp member db data dir
     """
+    post_processed = False
+    if member_db == "gene3d" or member_db == "pfam":
+        post_processed = True
+
     domain_info = {
         "start": int(info[17]),  # ali coord from
         "end": int(info[18]),   # ali coord to
@@ -116,12 +139,12 @@ def get_domain(info: list[str]) -> dict[str, str]:
         "hmmStart": int(info[15]),  # hmm coord from
         "hmmEnd": int(info[16]),  # hmm coord to
         "hmmLength": int(info[5]),  # qlen
-        "hmmBounds": "",
+        "hmmBounds": "",  # it will come from hmmer.out parser
         "evalue": float(info[12]),  # Independent e-value
         "score": float(info[13]),  # bit score
         "envelopeStart": int(info[19]),  # env coord from
         "envelopeEnd": int(info[20]),  # env coord to
-        "postProcessed": ""
+        "postProcessed": post_processed
     }
     return domain_info
 
@@ -160,7 +183,11 @@ def main():
         from file [true for SFLD and CDD]
     """
     args = sys.argv[1:]
-    parse_result = parse(args[0], True if args[1] == "true" else False)
+    parse_result = parse(
+        args[0],
+        True if args[1] == "true" else False,
+        args[2]
+    )
     print(json.dumps(parse_result, indent=2))
 
 

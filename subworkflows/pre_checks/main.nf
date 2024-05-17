@@ -1,3 +1,5 @@
+include { CHECK_NUCLEIC } from "$projectDir/modules/pre_checks/main"
+
 def printHelp() {
     """
     Usage example:
@@ -20,20 +22,14 @@ def printHelp() {
 }
 
 
-process CHECK_NUCLEIC {
-    input:
-    path fasta_file
-
-    script:
-    """
-    python3 $projectDir/scripts/pre_checks/check_nucleic_seq.py ${fasta_file}
-    """
-}
-
-
 workflow PRE_CHECKS {
     take:
-    params
+    help_msg
+    seq_input
+    using_nucleic
+    all_params
+    user_applications
+    output_formats
 
     main:
     if ( !nextflow.version.matches('23.10+') ) {
@@ -41,27 +37,26 @@ workflow PRE_CHECKS {
         exit 1
     }
 
-    if (params.help) {
+    if (help_msg) {
         log.info printHelp()
-        exit 1
+        exit 0
     }
 
-    if (!params.input) {
+    if (!seq_input) {
         log.error """
                 Please provide an input file.
                 The typical command for running the pipeline is:
                     nextflow run interproscan.nf --input <path to fasta file>
                 For more information, please use the --help flag.
                 """
-                exit 1
+                exit 5
     }
 
     // is user specifies the input is nucleic acid seqs
     // check the input only contains nucleic acid seqs
-    def fasta = file(params.input)
-    if (params.nucleic) {
+    if (using_nucleic) {
         try {
-            CHECK_NUCLEIC(fasta)
+            CHECK_NUCLEIC(seq_input)
         } catch (all) {
             println """Error in input sequences"""
             log.error """
@@ -76,18 +71,26 @@ workflow PRE_CHECKS {
 
     // Check if the input parameters are valid
     def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro', 'translate', 'nucleic', 'formats', 'output', 'xrefs', 'goterms', 'pathways', 'ipsc_version']
-    def parameter_diff = params.keySet() - parameters_expected
+    def parameter_diff = all_params - parameters_expected
     if (parameter_diff.size() != 0){
         log.info printHelp()
-        exit 1, "Input not valid: $parameter_diff"
+        exit 22, "Input not valid: $parameter_diff"
     }
 
     // Check if the applications are valid
-    def applications_expected = ['antifam', 'cdd', 'coils', 'funfam', 'gene3d', 'hamap', 'mobidblite', 'ncbifam', 'panther', 'pfam', 'phobius', 'pirsf', 'pirsr', 'prints', 'prositepatterns', 'prositeprofiles', 'sfld', 'signalp', 'smart', 'superfamily', 'tmhmm']
-    def applications_diff = params.applications.toLowerCase().split(',') - applications_expected
+    def applications_expected = ['antifam', 'cdd', 'ncbifam', 'panther', 'sfld', 'signalp']
+    def applications_diff = user_applications.toLowerCase().split(',') - applications_expected
     if (applications_diff.size() != 0){
         log.info printHelp()
-        exit 1, "Applications not valid: $applications_diff. Valid applications are: $applications_expected"
+        exit 22, "Applications not valid: $applications_diff. Valid applications are: $applications_expected"
+    }
+
+    // Check if the formats are valid
+    def formats_expected = ['json', 'tsv', 'tsv-pro', 'xml', 'gff3']
+    def formats_diff = output_formats.toLowerCase().split(',') - formats_expected
+    if (formats_diff.size() != 0){
+        log.info printHelp()
+        exit 22, "Format not valid: $formats_diff. Valid formats are: $formats_expected"
     }
 
     // Check if the formats are valid
@@ -99,6 +102,7 @@ workflow PRE_CHECKS {
     }
 
     // Check if the input file is a fasta file and if it contains sequences
+<<<<<<< HEAD
     if (!params.input.toLowerCase().find(/.fasta$|.faa$|.fna$/)) {
         log.error "The input file is not a FASTA file (it does not end in .fasta, .faa or .fna)"
         exit 1
@@ -109,6 +113,12 @@ workflow PRE_CHECKS {
             log.info "No sequence found in the input file"
             exit 1
         }
+=======
+    if (seq_input.countFasta() == 0) {
+        log.error "No sequence found in the input file"
+        exit 5
+    }
+>>>>>>> b21569f13c756feb034f770c3e1dc796a28f3c63
 
-    log.info "Number of sequences to analyse: ${seq_count}"
+    log.info "Number of sequences to analyse: ${seq_input.countFasta()}"
 }

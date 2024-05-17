@@ -1,8 +1,27 @@
-include { HMMER_RUNNER as GENERIC_HMMER_RUNNER; HMMER_RUNNER as SFLD_HMMER_RUNNER } from "$projectDir/modules/local/hmmer/runner/main"
-include { HMMER_PARSER as GENERIC_HMMER_PARSER; HMMER_PARSER as SFLD_PARSER } from "$projectDir/modules/local/hmmer/parser/main"
-include { SFLD_POST_PROCESSER } from "$projectDir/modules/local/hmmer/post_processing/main"
-include { SIGNALP_RUNNER } from "$projectDir/modules/local/signalp/runner/main"
-include { SIGNALP_PARSER } from "$projectDir/modules/local/signalp/parser/main"
+include {
+    CDD_RUNNER;
+    CDD_POSTPROCESS;
+    CDD_PARSER
+} from "$projectDir/modules/cdd/main"
+include {
+    HMMER_RUNNER as GENERIC_HMMER_RUNNER;
+    HMMER_RUNNER as SFLD_HMMER_RUNNER;
+    HMMER_RUNNER as PANTHER_HMMER_RUNNER;
+} from "$projectDir/modules/hmmer/runner/main"
+include {
+    HMMER_PARSER as GENERIC_HMMER_PARSER;
+    HMMER_PARSER as SFLD_HMMER_PARSER;
+    HMMER_PARSER as PANTHER_HMMER_PARSER;
+} from "$projectDir/modules/hmmer/parser/main"
+include {
+    PANTHER_POST_PROCESSER;
+    SFLD_POST_PROCESSER
+} from "$projectDir/modules/hmmer/post_processing/main"
+include {
+    SIGNALP_RUNNER;
+    SIGNALP_PARSER
+ } from "$projectDir/modules/signalp/main"
+
 
 workflow SEQUENCE_ANALYSIS {
     take:
@@ -17,34 +36,66 @@ workflow SEQUENCE_ANALYSIS {
         log.info "Running $member version $release"
         runner = ''
 
-        if (params.members."${member}".runner == "hmmer") {
+        if (member == 'antifam' || member == "ncbifam") {
+//         if (params.members."${member}".runner == "hmmer") {   # when all members were implemented
             runner = 'hmmer'
-        }
-        if (member == 'sfld') {
-            runner = 'sfld'
-        } else if (member == 'signalp') {
-            runner = 'signalp'
+        } else {
+            runner = member
         }
 
         /*
+        Member databases that use HMMER:
         The post processing of some applications (e.g. SFLD) hits requires additional files
         and parameters relative to the generic hmmer runner and parser
         */
         hmmer: runner == 'hmmer'
             return [
-                params.members."${member}".hmm, params.members."${member}".switches,
+                params.members."${member}".hmm,
+                params.members."${member}".switches,
                 params.members."${member}".release,
                 false, []
             ]
 
+        panther: runner == 'panther'
+            return [
+                params.members."${member}".hmm,
+                params.members."${member}".switches,
+                params.members."${member}".release,
+                false,
+                [
+                    params.members."${member}".postprocess.data_dir,
+                    params.members."${member}".postprocess.evalue,
+                    params.members."${member}".postprocess.paint_annotations,
+                ]
+            ]
+
         sfld: runner == 'sfld'
             return [
-                params.members."${member}".hmm, params.members."${member}".switches,
+                params.members."${member}".hmm,
+                params.members."${member}".switches,
                 params.members."${member}".release,
-                true, [
+                true,
+                [
                     params.members."${member}".postprocess.bin,
                     params.members."${member}".postprocess.sites_annotation,
                     params.members."${member}".postprocess.hierarchy
+                ]
+            ]
+
+        /*
+        Member databases that do NOT use HMMER
+        */
+
+        cdd: runner == "cdd"
+            return [
+                params.members."${member}".library,
+                params.members."${member}".release,
+                params.members."${member}".switches,
+                [
+                    params.members."${member}".postprocess.bin,
+                    params.members."${member}".postprocess.switches,
+                    params.members."${member}".postprocess.data,
+                    params.members."${member}".postprocess.signature_list
                 ]
             ]
 
@@ -62,20 +113,52 @@ workflow SEQUENCE_ANALYSIS {
             log.info "Application ${member} (still) not supported"
     }.set { member_params }
 
+    /*
+    Member databases that use HMMER
+    */
+
+    // AntiFam and NCBIfam
     runner_hmmer_params = fasta.combine(member_params.hmmer)
     GENERIC_HMMER_RUNNER(runner_hmmer_params)
     GENERIC_HMMER_PARSER(GENERIC_HMMER_RUNNER.out, params.tsv_pro, false)  // set sites to false
 
+    // Panther (+ treegrafter + epa-ng)
+    runner_hmmer_panther_params = fasta.combine(member_params.panther)
+    PANTHER_HMMER_RUNNER(runner_hmmer_panther_params)
+    PANTHER_POST_PROCESSER(PANTHER_HMMER_RUNNER.out, fasta)
+    PANTHER_HMMER_PARSER(PANTHER_POST_PROCESSER.out, params.tsv_pro, false)
+
+    // SFLD (+ post-processing binary to add sites and filter hits)
     runner_hmmer_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_hmmer_sfld_params)
     SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out, params.tsv_pro)
-    SFLD_PARSER(SFLD_POST_PROCESSER.out, params.tsv_pro, true)  // set sites to true for SFLD
+    SFLD_HMMER_PARSER(SFLD_POST_PROCESSER.out, params.tsv_pro, true)  // set sites to true for SFLD
 
+    /*
+    Member databases that do NOT use HMMER
+    */
+
+    // CDD
+    runner_cdd_params = fasta.combine(member_params.cdd)
+    CDD_RUNNER(runner_cdd_params)
+    CDD_POSTPROCESS(CDD_RUNNER.out)
+    CDD_PARSER(CDD_POSTPROCESS.out)
+
+    // SignalP
     runner_signalp_params = fasta.combine(member_params.signalp)
     SIGNALP_RUNNER(runner_signalp_params)
     SIGNALP_PARSER(SIGNALP_RUNNER.out, params.tsv_pro)
 
-    GENERIC_HMMER_PARSER.out.concat(SIGNALP_PARSER.out, SFLD_PARSER.out)
+    /*
+    Gather the results
+    */
+
+    GENERIC_HMMER_PARSER.out.concat(
+        PANTHER_HMMER_PARSER.out,
+        SFLD_HMMER_PARSER.out,
+        CDD_PARSER.out,
+        SIGNALP_PARSER.out
+    )
     .set { parsed_results }  // gathers the paths of the output file from each process
 
     emit:

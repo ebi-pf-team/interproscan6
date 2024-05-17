@@ -5,10 +5,10 @@ nextflow.enable.dsl=2
     IMPORT MODULES AND SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { PARSE_SEQUENCE } from "$projectDir/modules/local/parse_sequence/main"
-include { GET_ORFS } from "$projectDir/modules/local/get_orfs/main"
-include { AGGREGATE_RESULTS } from "$projectDir/modules/local/output/aggregate_results/main"
-include { WRITE_RESULTS } from "$projectDir/modules/local/output/write_results/main"
+include { PARSE_SEQUENCE } from "$projectDir/modules/parse_sequence/main"
+include { GET_ORFS } from "$projectDir/modules/get_orfs/main"
+include { AGGREGATE_RESULTS } from "$projectDir/modules/output/aggregate_results/main"
+include { WRITE_RESULTS } from "$projectDir/modules/output/write_results/main"
 
 include { PRE_CHECKS } from "$projectDir/subworkflows/pre_checks/main"
 include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
@@ -18,7 +18,14 @@ include { XREFS } from "$projectDir/subworkflows/xrefs/main"
 
 workflow {
     // Perform preliminary validation checks before running the analysis
-    PRE_CHECKS(params)
+    PRE_CHECKS(
+        params.help,
+        file(params.input),
+        params.nucleic,
+        params.keySet(),
+        params.applications,
+        params.formats
+    )
 
     applications = params.applications.toLowerCase()
 
@@ -79,18 +86,18 @@ log.info """
 If you use InterProScan in your work please cite:
 
 InterProScan:
-> Jones P, Binns D, Chang HY, Fraser M, Li W, McAnulla C, McWilliam H, 
-Maslen J, Mitchell A, Nuka G, Pesseat S, Quinn AF, Sangrador-Vegas A, 
-Scheremetjew M, Yong SY, Lopez R, Hunter S. 
-InterProScan 5: genome-scale protein function classification. 
-Bioinformatics. 2014 May 1;30(9):1236-40. doi: 10.1093/bioinformatics/btu031. 
+> Jones P, Binns D, Chang HY, Fraser M, Li W, McAnulla C, McWilliam H,
+Maslen J, Mitchell A, Nuka G, Pesseat S, Quinn AF, Sangrador-Vegas A,
+Scheremetjew M, Yong SY, Lopez R, Hunter S.
+InterProScan 5: genome-scale protein function classification.
+Bioinformatics. 2014 May 1;30(9):1236-40. doi: 10.1093/bioinformatics/btu031.
 Epub 2014 Jan 21. PMID: 24451626; PMCID: PMC3998142.
 
 InterPro:
-> Paysan-Lafosse T, Blum M, Chuguransky S, Grego T, Pinto BL, Salazar GA, Bileschi ML, 
-Bork P, Bridge A, Colwell L, Gough J, Haft DH, Letunić I, Marchler-Bauer A, Mi H, 
-Natale DA, Orengo CA, Pandurangan AP, Rivoire C, Sigrist CJA, Sillitoe I, Thanki N, 
-Thomas PD, Tosatto SCE, Wu CH, Bateman A. 
-InterPro in 2022. Nucleic Acids Res. 2023 Jan 6;51(D1):D418-D427. 
+> Paysan-Lafosse T, Blum M, Chuguransky S, Grego T, Pinto BL, Salazar GA, Bileschi ML,
+Bork P, Bridge A, Colwell L, Gough J, Haft DH, Letunić I, Marchler-Bauer A, Mi H,
+Natale DA, Orengo CA, Pandurangan AP, Rivoire C, Sigrist CJA, Sillitoe I, Thanki N,
+Thomas PD, Tosatto SCE, Wu CH, Bateman A.
+InterPro in 2022. Nucleic Acids Res. 2023 Jan 6;51(D1):D418-D427.
 doi: 10.1093/nar/gkac993. PMID: 36350672; PMCID: PMC9825450.
 """
