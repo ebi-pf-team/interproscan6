@@ -1,18 +1,16 @@
 import json
-import pytest
 import subprocess
 
 
-def get_current_output(input_path: str, applications: str, disable_precalc: bool) -> dict:
+def get_current_output(current_output_path: str, input_path: str, applications: str, disable_precalc: bool) -> dict:
     disable_precalc = "--disable_precalc" if disable_precalc else ""
-    command = f"nextflow run interproscan.nf --input {input_path} --applications {applications} {disable_precalc}" \
-              "--formats json --output current_output"
+    command = f"nextflow run interproscan.nf --input {input_path} --applications {applications} {disable_precalc} --formats json --output {current_output_path}"
     subprocess.run(command, shell=True)
-    return json.loads(json.dumps("current_output.json", indent=4))
+    return json.loads(json.dumps(str(current_output_path) + ".json", indent=4))
 
 
 def get_expected_output(expected_output_path: str) -> dict:
-    return json.loads(json.dumps(expected_output_path, indent=4))
+    return json.loads(json.dumps(str(expected_output_path) + ".json", indent=4))
 
 
 def compare(expected, current, ignore_elements: list):
@@ -37,10 +35,9 @@ def compare(expected, current, ignore_elements: list):
                 print(f"  current: {current[key]}")
 
 
-@pytest.mark.parametrize("input_path, output_expected_path, applications, disable_precalc", [])
-def test_json_output(input_path: str, output_expected_path: str, applications: str, disable_precalc: bool):
-    expected = get_expected_output(output_expected_path)
-    current = get_current_output(input_path, applications, disable_precalc)
+def test_json_output(input_path, expected_output_path, current_output_path, applications, disable_precalc):
+    expected = get_expected_output(expected_output_path)
+    current = get_current_output(current_output_path, input_path, applications, disable_precalc)
 
     ignore_elements = ['representative', 'hmmer3-location-fragment']
     print("Missing elements in current output:")

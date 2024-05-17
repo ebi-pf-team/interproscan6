@@ -6,13 +6,13 @@ def get_current_output(current_output_path: str, input_path: str, applications: 
     disable_precalc = "--disable_precalc" if disable_precalc else ""
     command = f"nextflow run interproscan.nf --input {input_path} --applications {applications} {disable_precalc} --formats xml --output {current_output_path}"
     subprocess.run(command, shell=True)
-    with open(current_output_path, 'r') as f:
+    with open(str(current_output_path) + ".xml", 'r') as f:
         tree = ET.parse(f)
     return tree.getroot()
 
 
 def get_expected_output(expected_output_path: str) -> ET.Element:
-    with open(expected_output_path, 'r') as f:
+    with open(str(expected_output_path) + ".xml", 'r') as f:
         tree = ET.parse(f)
     return tree.getroot()
 
