@@ -41,7 +41,7 @@ def parse(signalp_out: str, threshold: float, signalp_version: str):
                 sequence_matches[acc] = {
                     "signal_peptide": {
                         "member_db": "SignalP",
-                        "signalp_version": signalp_version,
+                        "version": signalp_version,
                         "start": start_location,
                         "end": end_location,
                         "pvalue": pvalue
