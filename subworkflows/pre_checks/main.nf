@@ -102,23 +102,10 @@ workflow PRE_CHECKS {
     }
 
     // Check if the input file is a fasta file and if it contains sequences
-<<<<<<< HEAD
-    if (!params.input.toLowerCase().find(/.fasta$|.faa$|.fna$/)) {
-        log.error "The input file is not a FASTA file (it does not end in .fasta, .faa or .fna)"
-        exit 1
-    }
-
-    def seq_count = file(params.input).countFasta()
-        if (seq_count == 0) {
-            log.info "No sequence found in the input file"
-            exit 1
-        }
-=======
     if (seq_input.countFasta() == 0) {
         log.error "No sequence found in the input file"
         exit 5
     }
->>>>>>> b21569f13c756feb034f770c3e1dc796a28f3c63
 
     log.info "Number of sequences to analyse: ${seq_input.countFasta()}"
 }
