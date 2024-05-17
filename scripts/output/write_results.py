@@ -102,10 +102,6 @@ def json_output(seq_matches: dict, output_path: str, version:str):
                         },
                         "entry": entry
                     }
-<<<<<<< HEAD
-
-=======
->>>>>>> b21569f13c756feb034f770c3e1dc796a28f3c63
                     match = {
                         "signature": signature,
                         "locations": match_data['locations'],
@@ -209,31 +205,30 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                 signature_library_elem.set("version", match_data['version'])
                 model_ac_elem = ET.SubElement(match_elem, "model-ac")
                 model_ac_elem.text = match_key
-if 'locations' in match_data:
-# you'll need to indent the subsequent lines, down to line 243
-                locations_elem = ET.SubElement(match_elem, "locations")
-                for location in match_data['locations']:
-                    location_elem = ET.SubElement(locations_elem, "hmmer3-location")
-                    location_elem.set("env-start", str(location["envelopeStart"]))
-                    location_elem.set("env-end", str(location["envelopeEnd"]))
-                    location_elem.set("post-processed", str(location["postProcessed"]))
-                    location_elem.set("score", str(location["score"]))
-                    location_elem.set("evalue", str(location["evalue"]))
-                    location_elem.set("hmm-start", str(location["hmmStart"]))
-                    location_elem.set("hmm-end", str(location["hmmEnd"]))
-                    location_elem.set("hmm-length", str(location["hmmLength"]))
-                    location_elem.set("hmm-bounds", str(location["hmmBounds"]))
-                    location_elem.set("start", str(location["start"]))
-                    location_elem.set("end", str(location["end"]))
-                    location_elem.set("representative", str(location["representative"]))
-                    location_frags_elem = ET.SubElement(location_elem, "location-fragments")
-                    if 'sites' in location:
-                        for site in location['sites']:
-                            for sitelocation in site['siteLocations']:
-                                location_frag_elem = ET.SubElement(location_frags_elem, "hmmer3-location-fragment")
-                                location_frag_elem.set("start", str(sitelocation["start"]))
-                                location_frag_elem.set("end", str(sitelocation["end"]))
-                                location_frag_elem.set("dc-status", "")
+                if 'locations' in match_data:
+                    locations_elem = ET.SubElement(match_elem, "locations")
+                    for location in match_data['locations']:
+                        location_elem = ET.SubElement(locations_elem, "hmmer3-location")
+                        location_elem.set("env-start", str(location["envelopeStart"]))
+                        location_elem.set("env-end", str(location["envelopeEnd"]))
+                        location_elem.set("post-processed", str(location["postProcessed"]))
+                        location_elem.set("score", str(location["score"]))
+                        location_elem.set("evalue", str(location["evalue"]))
+                        location_elem.set("hmm-start", str(location["hmmStart"]))
+                        location_elem.set("hmm-end", str(location["hmmEnd"]))
+                        location_elem.set("hmm-length", str(location["hmmLength"]))
+                        location_elem.set("hmm-bounds", str(location["hmmBounds"]))
+                        location_elem.set("start", str(location["start"]))
+                        location_elem.set("end", str(location["end"]))
+                        location_elem.set("representative", str(location["representative"]))
+                        location_frags_elem = ET.SubElement(location_elem, "location-fragments")
+                        if 'sites' in location:
+                            for site in location['sites']:
+                                for sitelocation in site['siteLocations']:
+                                    location_frag_elem = ET.SubElement(location_frags_elem, "hmmer3-location-fragment")
+                                    location_frag_elem.set("start", str(sitelocation["start"]))
+                                    location_frag_elem.set("end", str(sitelocation["end"]))
+                                    location_frag_elem.set("dc-status", "")
 
     tree = ET.ElementTree(root)
     ET.indent(tree, space="\t", level=0)
