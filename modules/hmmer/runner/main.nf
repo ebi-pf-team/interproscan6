@@ -25,7 +25,7 @@ process HMMER_RUNNER {
 }
 
 
-process FUNFAM_RUNNER {
+process FUNFAM_HMMER_RUNNER {
     /*
     FunFam requires its own runner in order to only use those FunFam families
     that are associated to Cath-Gene3D superfamilies where hits were found
@@ -50,15 +50,15 @@ process FUNFAM_RUNNER {
 
     script:
     """
-    awk 'NR>1' ${gened_out} | while read line
+    awk 'NR>1' ${gene3d_out} | while read line
     do
-        item=$(echo $line | cut -f2)
-        new_item=${item//./\/}
-        hmm_file_path="${hmm}/${new_item}.hmm"
-        if [ -f $hmm_file_path ]; then
-            hmmsearch ${switches} -o ${release}_${hmm_file_path}.out --domtblout ${release}_${hmm_file_path}.dtbl $hmm_file_path ${fasta}
+        item=\$(echo \$line | cut -f2 -d ' ')
+        new_item=\${item//./\\/}
+        hmm_file_path="\${hmm}/\${new_item}.hmm"
+        if [ -f \$hmm_file_path ]; then
+            hmmsearch ${switches} -o ${release}_\${hmm_file_path}.out --domtblout ${release}_\${hmm_file_path}.dtbl \$hmm_file_path ${fasta}
         fi
     done
-    touch ${hmm_file_path}_alignment
+    touch ${hmm}_alignment
     """
 }
