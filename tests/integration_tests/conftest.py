@@ -42,4 +42,4 @@ def applications():
 
 @pytest.fixture
 def disable_precalc():
-    return True
+    return False

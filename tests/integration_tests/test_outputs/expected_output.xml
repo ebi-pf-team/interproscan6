@@ -1,0 +1,810 @@
+<protein-matches xmlns="https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/schemas" interproscan-version="6.0.0">
+<protein>
+<sequence md5="88d47cc807fe8e977130b0cc93e0bd61">MSKIGKSIRLERIIDRKTRKTVIVPMDHGLTVGPIPGLIDLAAAVDKVAEGGANAVLGHMGLPLYGHRGYGKDVGLIIHLSASTSLGPDANHKVLVTRVEDAIRVGADGVSIHVNVGAEDEAEMLRDLGMVARRCDLWGMPLLAMMYPRGAKVRSEHSVEYVKHAARVGAELGVDIVKTNYTGSPETFREVVRGCPAPVVIAGGPKMDTEADLLQMVYDAMQAGAAGISIGRNIFQAENPTLLTRKLSKIVHEGYTPEEAARLKL</sequence>
+<xref id="A0B6J9" name="A0B6J9"/>
+<matches>
+<hmmer3-match evalue="1.8E-107" score="370.3">
+<signature ac="TIGR01949" desc="2-amino-3,7-dideoxy-D-threo-hept-6-ulosonate synthase" name="ADH_synth">
+<entry ac="IPR010210" desc="2-amino-3,7-dideoxy-D-threo-hept-6-ulosonate synthase" name="ADH_synthase" type="FAMILY">
+<go-xref category="BIOLOGICAL_PROCESS" db="GO" id="GO:0009073" name="aromatic amino acid family biosynthetic process"/>
+<go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0016836" name="hydro-lyase activity"/>
+<pathway-xref db="MetaCyc" id="PWY-6160" name="3-dehydroquinate biosynthesis II (archaea)"/>
+</entry>
+<signature-library-release library="NCBIFAM" version="14.0"/>
+</signature>
+<model-ac>TIGR01949</model-ac>
+<locations>
+<hmmer3-location env-end="262" env-start="4" post-processed="false" score="370.1" evalue="2.0E-107" hmm-start="1" hmm-end="253" hmm-length="255" hmm-bounds="N_TERMINAL_COMPLETE" start="4" end="260" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="4" end="260" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+<rpsblast-match>
+<signature ac="cd00958" desc="DhnA" name="DhnA">
+<entry ac="IPR041720" desc="Aldolase FbaB-like, archaeal-type" name="FbaB-like" type="FAMILY">
+<go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0004332" name="fructose-bisphosphate aldolase activity"/>
+<pathway-xref db="MetaCyc" id="PWY-6672" name="cis-geranyl-CoA degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-7695" name="aurofusarin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8151" name="cholesterol degradation to androstenedione III (anaerobic)"/>
+<pathway-xref db="MetaCyc" id="PWY-6142" name="gluconeogenesis II (Methanobacterium thermoautotrophicum)"/>
+<pathway-xref db="MetaCyc" id="PWY-7045" name="mithramycin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-5409" name="divinyl ether biosynthesis II"/>
+<pathway-xref db="MetaCyc" id="PWY-7354" name="aclacinomycin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-6946" name="cholesterol degradation to androstenedione II (cholesterol dehydrogenase)"/>
+<pathway-xref db="MetaCyc" id="PWY-7814" name="dTDP-L-daunosamine biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8029" name="limonene degradation IV (anaerobic)"/>
+<pathway-xref db="MetaCyc" id="PWY-7757" name="bisphenol A degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-7428" name="2-chloroacrylate degradation II"/>
+<pathway-xref db="MetaCyc" id="PWY-6627" name="salinosporamide A biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-5644" name="4-nitrotoluene degradation II"/>
+<pathway-xref db="MetaCyc" id="PWY-7189" name="pinocembrin C-glucosylation"/>
+<pathway-xref db="MetaCyc" id="PWY-7610" name="GDP-6-deoxy-D-altro-heptose biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-6944" name="androstenedione degradation I (aerobic)"/>
+<pathway-xref db="MetaCyc" id="PWY-721" name="3-methylquinoline degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-7275" name="L-homophenylalanine biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-1861" name="formaldehyde assimilation II (assimilatory RuMP Cycle)"/>
+<pathway-xref db="MetaCyc" id="PWY-5408" name="9-lipoxygenase and 9-hydroperoxide lyase pathway"/>
+<pathway-xref db="MetaCyc" id="PWY-6948" name="sitosterol degradation to androstenedione"/>
+<pathway-xref db="MetaCyc" id="PWY-6602" name="naringenin C-glucosylation"/>
+<pathway-xref db="MetaCyc" id="PWY-7153" name="grixazone biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-6945" name="cholesterol degradation to androstenedione I (cholesterol oxidase)"/>
+<pathway-xref db="MetaCyc" id="PWY-5410" name="traumatin and (Z)-3-hexen-1-yl acetate biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-2467" name="(+)-pisatin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-5780" name="hypericin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7821" name="tunicamycin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7130" name="L-glucose degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-7352" name="daunorubicin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8296" name="cremeomycin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-5367" name="petroselinate biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7811" name="6-methylpretetramide biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8134" name="bile acid 7beta-dehydroxylation"/>
+<pathway-xref db="MetaCyc" id="PWY-8044" name="cyclohexane-1-carboxyl-CoA biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-2229" name="superpathway of pterocarpan biosynthesis (via formononetin)"/>
+<pathway-xref db="MetaCyc" id="PWY-6160" name="3-dehydroquinate biosynthesis II (archaea)"/>
+<pathway-xref db="MetaCyc" id="PWY-7510" name="rhizocticin A and B biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-5484" name="glycolysis II (from fructose 6-phosphate)"/>
+<pathway-xref db="MetaCyc" id="PWY-8179" name="platensimycin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-6679" name="jadomycin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7385" name="1,3-propanediol biosynthesis (engineered)"/>
+<pathway-xref db="MetaCyc" id="PWY-8335" name="plasmalogen biosynthesis II (anaerobic)"/>
+<pathway-xref db="MetaCyc" id="PWY-6749" name="CMP-legionaminate biosynthesis I"/>
+<pathway-xref db="MetaCyc" id="PWY-8319" name="NiFe(CO)(CN)2 cofactor biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7769" name="phosalacine biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWYG-321" name="mycolate biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8178" name="pentose phosphate pathway (non-oxidative branch) II"/>
+<pathway-xref db="MetaCyc" id="PWY-1042" name="glycolysis IV"/>
+<pathway-xref db="MetaCyc" id="PWY-5061" name="6,7,4'-trihydroxyisoflavone biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7547" name="prodigiosin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7613" name="GDP-6-deoxy-D-manno-heptose biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8152" name="androstenedione degradation II (anaerobic)"/>
+<pathway-xref db="MetaCyc" id="PWY-8012" name="mupirocin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7897" name="flavonoid di-C-glucosylation"/>
+<pathway-xref db="MetaCyc" id="PWY-5979" name="3-amino-5-hydroxybenzoate biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7188" name="orientin and isoorientin biosynthesis I"/>
+<pathway-xref db="MetaCyc" id="PWY-735" name="jasmonic acid biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8404" name="glycolysis VI (from fructose)"/>
+<pathway-xref db="MetaCyc" id="PWY-6322" name="phosphinothricin tripeptide biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-6721" name="sangivamycin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-5793" name="maysin biosynthesis"/>
+</entry>
+<signature-library-release library="CDD" version="3.20"/>
+</signature>
+<model-ac>cd00958</model-ac>
+<locations>
+<rpsblast-location evalue="3.01931E-112" score="321.08" start="21" end="252" representative="true">
+<location-fragments>
+<rpsblast-location-fragment start="21" end="252" dc-status="CONTINUOUS"/>
+</location-fragments>
+<sites>
+<rpsblast-site description="putative active site" numLocations="8">
+<site-locations>
+<site-location residue="L" start="242" end="242"/>
+<site-location residue="M" start="221" end="221"/>
+<site-location residue="D" start="219" end="219"/>
+<site-location residue="G" start="194" end="194"/>
+<site-location residue="T" start="241" end="241"/>
+<site-location residue="L" start="243" end="243"/>
+<site-location residue="A" start="220" end="220"/>
+<site-location residue="A" start="197" end="197"/>
+</site-locations>
+</rpsblast-site>
+<rpsblast-site description="catalytic residue" numLocations="1">
+<site-locations>
+<site-location residue="G" start="194" end="194"/>
+</site-locations>
+</rpsblast-site>
+</sites>
+</rpsblast-location>
+</locations>
+</rpsblast-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="7bcb28d452c1f7ad86b5e0da7fa21fd3">MNLQRFPRHPLTFGPTPIQPLKRLSAHLGGQVELYAKREDCNSGLAFGGNKTRKLEYLIPEALAQGCDTLVSIGGIQSNQTRQVAAVAAHLGMKCVLVQENWVNYSDAVYDRVGNIEMSRILGADVRLDAAGFDIGIRPSWEQAMADVRAAGGKPFPIPAGCSEHRLGGLGFVGFAEEVRAQEAELGFKFDYIVVCSVTGSTQAGMVVGFAADGRAERVIGIDASAKPEQTHAQILRIAQNTAELVGLGREITAQDVVLDTRYGGPEYGLPSEGTLEAIRLCARQEGMLTDPVYEGKSMHGMIDKVKRGEFPAGSRVLYAHLGGVPALNAYSFLFRNG</sequence>
+<xref id="sp|A2SLW2|1A1D_METPP" name="sp|A2SLW2|1A1D_METPP 1-aminocyclopropane-1-carboxylate deaminase OS=Methylibium petroleiphilum (strain ATCC BAA-1232 / LMG 22953 / PM1) OX=420662 GN=acdS PE=3 SV=1"/>
+<matches>
+<hmmer3-match evalue="0.0" score="647.2">
+<signature ac="TIGR01274" desc="1-aminocyclopropane-1-carboxylate deaminase" name="ACC_deam">
+<entry ac="IPR005965" desc="1-aminocyclopropane-1-carboxylate deaminase" name="ACP_carboxylate_deaminase" type="FAMILY">
+<go-xref category="BIOLOGICAL_PROCESS" db="GO" id="GO:0009310" name="amine catabolic process"/>
+<go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0030170" name="pyridoxal phosphate binding"/>
+<go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0008660" name="1-aminocyclopropane-1-carboxylate deaminase activity"/>
+</entry>
+<signature-library-release library="NCBIFAM" version="14.0"/>
+</signature>
+<model-ac>TIGR01274</model-ac>
+<locations>
+<hmmer3-location env-end="338" env-start="2" post-processed="false" score="647.0" evalue="0.0" hmm-start="1" hmm-end="336" hmm-length="337" hmm-bounds="N_TERMINAL_COMPLETE" start="2" end="337" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="2" end="337" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+<rpsblast-match>
+<signature ac="cd06449" desc="ACCD" name="ACCD">
+<signature-library-release library="CDD" version="3.20"/>
+</signature>
+<model-ac>cd06449</model-ac>
+<locations>
+<rpsblast-location evalue="0.0" score="545.094" start="16" end="324" representative="true">
+<location-fragments>
+<rpsblast-location-fragment start="16" end="324" dc-status="CONTINUOUS"/>
+</location-fragments>
+<sites>
+<rpsblast-site description="catalytic residue" numLocations="1">
+<site-locations>
+<site-location residue="K" start="51" end="51"/>
+</site-locations>
+</rpsblast-site>
+<rpsblast-site description="pyridoxal 5'-phosphate binding site" numLocations="12">
+<site-locations>
+<site-location residue="V" start="198" end="198"/>
+<site-location residue="G" start="324" end="324"/>
+<site-location residue="N" start="50" end="50"/>
+<site-location residue="L" start="322" end="322"/>
+<site-location residue="S" start="201" end="201"/>
+<site-location residue="K" start="54" end="54"/>
+<site-location residue="G" start="200" end="200"/>
+<site-location residue="T" start="199" end="199"/>
+<site-location residue="K" start="51" end="51"/>
+<site-location residue="T" start="202" end="202"/>
+<site-location residue="N" start="79" end="79"/>
+<site-location residue="G" start="323" end="323"/>
+</site-locations>
+</rpsblast-site>
+</sites>
+</rpsblast-location>
+</locations>
+</rpsblast-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="268e4659f70d6eb10e6545eccaa347cf">MLIERMFPFISESVRVHQLPEGGVLEIDYMRDNVSISDFEYLDLNKTAYELCMLMDGQKTAEQILEYQCAAYNESPEDHKDWYYEMLDMLLNKQVIRLTDQPEYRRIATSGSSDFPMPLHATFELTHRCNLKCAHCYLESSPEALGTVSLEQFKKTADMLYEKGVLTCEITGGEIFVHPNANELLEYVLKKFKKVAVLTNGTLMRKESLEILRAYKQKIIVGISLDSVHSEVHDSFRGRKGSFAQTCKTIKLLSDHGIFVRVAMSVFEKNMWEIHDMAQKVRDLGAKAFSYNWVDDFGRGKDMIHPTKDAEQHRKFMEYEQNVIDEFKDLIPIIPYERKRAANCGAGWKSIVISPFGEVRPCALFPKEFSLGNIFHDSYESIFDSALVHKLWKAQAPRFSEHCKKDKCPFSGYCGGCYLKGLNSNKYHRKNICSWAKNEQLEDVVQLI</sequence>
+<xref id="A0A0H3E4R3_BACA1" name="A0A0H3E4R3_BACA1 1-448"/>
+<matches>
+<hmmer3-match evalue="1.6E-6" score="39.7">
+<signature ac="TIGR04085" desc="SPASM domain" name="rSAM_more_4Fe4S">
+<entry ac="IPR023885" desc="4Fe4S-binding SPASM domain" name="4Fe4S-binding_SPASM_dom" type="DOMAIN">
+<pathway-xref db="MetaCyc" id="PWY-7552" name="heme b biosynthesis III (from siroheme)"/>
+<pathway-xref db="MetaCyc" id="PWY-7022" name="paromamine biosynthesis II"/>
+<pathway-xref db="MetaCyc" id="PWY-6420" name="pyrroloquinoline quinone biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7510" name="rhizocticin A and B biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8122" name="mycofactocin biosynthesis"/>
+</entry>
+<signature-library-release library="NCBIFAM" version="14.0"/>
+</signature>
+<model-ac>TIGR04085</model-ac>
+<locations>
+<hmmer3-location env-end="433" env-start="344" post-processed="false" score="38.1" evalue="4.9E-6" hmm-start="1" hmm-end="86" hmm-length="93" hmm-bounds="N_TERMINAL_COMPLETE" start="344" end="429" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="344" end="429" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+<hmmer3-match evalue="0.0" score="1037.9">
+<signature ac="NF012164" desc="subtilosin maturase AlbA" name="AlbA">
+<signature-library-release library="NCBIFAM" version="14.0"/>
+</signature>
+<model-ac>NF012164</model-ac>
+<locations>
+<hmmer3-location env-end="448" env-start="7" post-processed="false" score="1037.8" evalue="0.0" hmm-start="1" hmm-end="442" hmm-length="442" hmm-bounds="COMPLETE" start="7" end="448" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="7" end="448" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+<hmmer3-match-with-sites evalue="0.0" score="609.7">
+<signature ac="SFLDG01386" desc="main SPASM domain-containing" name="main_SPASM_domain-containing">
+<signature-library-release library="SFLD" version="4"/>
+</signature>
+<model-ac>SFLDG01386</model-ac>
+<locations>
+<hmmer3-location-with-sites env-end="448" env-start="1" score="609.6" evalue="0.0" hmm-start="1" hmm-end="443" hmm-length="349" hmm-bounds="N_TERMINAL_COMPLETE" start="1" end="447" representative="false">
+<location-fragments>
+<hmmer3-location-fragment-with-sites start="1" end="447" dc-status="CONTINUOUS"/>
+</location-fragments>
+<sites>
+<hmmer3-site description="Binds [4Fe-4S]-AdoMet cluster" numLocations="3">
+<site-locations>
+<site-location residue="C" start="129" end="129"/>
+<site-location residue="C" start="136" end="136"/>
+<site-location residue="C" start="133" end="133"/>
+</site-locations>
+<group>0</group>
+<hmmEnd>0</hmmEnd>
+<hmmStart>0</hmmStart>
+</hmmer3-site>
+</sites>
+</hmmer3-location-with-sites>
+</locations>
+</hmmer3-match-with-sites>
+<hmmer3-match-with-sites evalue="0.0" score="609.7">
+<signature ac="SFLDF00315" desc="antilisterial bacteriocin subtilosin biosynthesis protein (AlbA-like)" name="antilisterial_bacteriocin_sub">
+<signature-library-release library="SFLD" version="4"/>
+</signature>
+<model-ac>SFLDF00315</model-ac>
+<locations>
+<hmmer3-location-with-sites env-end="448" env-start="1" score="609.6" evalue="0.0" hmm-start="1" hmm-end="443" hmm-length="448" hmm-bounds="N_TERMINAL_COMPLETE" start="1" end="447" representative="false">
+<location-fragments>
+<hmmer3-location-fragment-with-sites start="1" end="447" dc-status="CONTINUOUS"/>
+</location-fragments>
+<sites>
+<hmmer3-site description="Binds [4Fe-4S]-AdoMet cluster" numLocations="3">
+<site-locations>
+<site-location residue="C" start="129" end="129"/>
+<site-location residue="C" start="136" end="136"/>
+<site-location residue="C" start="133" end="133"/>
+</site-locations>
+<group>0</group>
+<hmmEnd>0</hmmEnd>
+<hmmStart>0</hmmStart>
+</hmmer3-site>
+</sites>
+</hmmer3-location-with-sites>
+</locations>
+</hmmer3-match-with-sites>
+<rpsblast-match>
+<signature ac="cd21125" desc="SPASM_AlbA-like" name="SPASM_AlbA-like">
+<signature-library-release library="CDD" version="3.20"/>
+</signature>
+<model-ac>cd21125</model-ac>
+<locations>
+<rpsblast-location evalue="2.57694E-37" score="129.918" start="342" end="437" representative="true">
+<location-fragments>
+<rpsblast-location-fragment start="342" end="437" dc-status="CONTINUOUS"/>
+</location-fragments>
+<sites/>
+</rpsblast-location>
+</locations>
+</rpsblast-match>
+<rpsblast-match>
+<signature ac="cd01335" desc="Radical_SAM" name="Radical_SAM">
+<signature-library-release library="CDD" version="3.20"/>
+</signature>
+<model-ac>cd01335</model-ac>
+<locations>
+<rpsblast-location evalue="2.64889E-18" score="81.2257" start="123" end="318" representative="true">
+<location-fragments>
+<rpsblast-location-fragment start="123" end="318" dc-status="CONTINUOUS"/>
+</location-fragments>
+<sites>
+<rpsblast-site description="FeS/SAM binding site" numLocations="16">
+<site-locations>
+<site-location residue="T" start="171" end="171"/>
+<site-location residue="S" start="265" end="265"/>
+<site-location residue="C" start="129" end="129"/>
+<site-location residue="L" start="131" end="131"/>
+<site-location residue="N" start="292" end="292"/>
+<site-location residue="Y" start="137" end="137"/>
+<site-location residue="C" start="133" end="133"/>
+<site-location residue="E" start="174" end="174"/>
+<site-location residue="N" start="200" end="200"/>
+<site-location residue="H" start="135" end="135"/>
+<site-location residue="W" start="293" end="293"/>
+<site-location residue="L" start="198" end="198"/>
+<site-location residue="T" start="199" end="199"/>
+<site-location residue="G" start="173" end="173"/>
+<site-location residue="C" start="136" end="136"/>
+<site-location residue="S" start="224" end="224"/>
+</site-locations>
+</rpsblast-site>
+</sites>
+</rpsblast-location>
+</locations>
+</rpsblast-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="3156952d6b1f52bf18e848ccc4e7e455">MDNVNKLTAISLAVAAALPMMASADVMITEYVEGSSNNKAIELYNSGDTAIDLAGYKLVRYKDGATVASDMVALDGQSIAPKTTKVILNSSAVITLDQGVDSYSGSLSFNGGDAVALVKDDAVVDIIGDVPTPTGWGFDVTLKRKLDALVANTVFNAAQWEQLPKDTFSGLGSLETPAEPEVPLFSCSGAKIVPIYQVQGAGESSPYVPEGAFESEAEVTVRGIVTARGESLFKGFYLQEVKGDNSPYTSDGVFVFLGEAVPEAIQPGVEVCVQGKVKEYFGLTQIDIKADKKFEVGAKGEVPVAAPFYVADGETLAQALERYEGMNVALDAGSDLKISRTFSYDYAGRRNNMLVSYKEPLMKSTQLYPALSAEATALVKSNLENQLFIESDYKPADGVIPYFPDFNVETGYIRVGDQLTNLQGVIGYSYGAYRLVATNTITAGDFIRGDDRTDAPSVATKGDLRVASFNVLNFFNDVDGGDTNPSGSNRGALTLEEMVLQRTKIVSAITAMNADIVGLMEIANNGFGEKSAIKNLVDALNEKQTPENAYSFVEITDADKYDGKYFGTDAITVGMLYRGGKVTLAGAAQAIDTPEQHASAGSVTRTKDGKTETNPGNDAYQRHSLAQTFKIHDESLTVVVNHLKSKGSGCLEDWANFEESVDPADQQGKCNAFRVSAAKVLGETLKDVKGDLLIIGDMNAYGMEDPIRVLTDFDASKSDRDIMTASWTTLDGKVFERQGSKIEKGYGLINLNTKAHGAGTYSYSYNGELGNLDHALANASLAKRLVDIEDWHINSVESNLFEYGKKFSGDLAKSENAFSASDHDPVIVALSYPAPVVPPKPEPTPKDDGGALGYLGLALMSLFGLQRRRR</sequence>
+<xref id="WP_338726824.1" name="WP_338726824.1 extracellular exonuclease ExeM [Shewanella baltica]"/>
+<matches>
+<hmmer3-match evalue="0.0" score="1609.3">
+<signature ac="NF033680" desc="extracellular exonuclease ExeM" name="exonuc_ExeM-GG">
+<signature-library-release library="NCBIFAM" version="14.0"/>
+</signature>
+<model-ac>NF033680</model-ac>
+<locations>
+<hmmer3-location env-end="869" env-start="1" post-processed="false" score="1609.1" evalue="0.0" hmm-start="1" hmm-end="884" hmm-length="884" hmm-bounds="COMPLETE" start="1" end="869" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="1" end="869" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+<hmmer3-match evalue="20.0" score="17.2">
+<signature ac="TIGR03501" desc="GlyGly-CTERM protein-sorting domain" name="GlyGly_CTERM">
+<entry ac="IPR020008" desc="GlyGly-CTERM domain" name="GlyGly_CTERM" type="DOMAIN"/>
+<signature-library-release library="NCBIFAM" version="14.0"/>
+</signature>
+<model-ac>TIGR03501</model-ac>
+<locations>
+<hmmer3-location env-end="869" env-start="848" post-processed="false" score="16.1" evalue="46.0" hmm-start="2" hmm-end="22" hmm-length="22" hmm-bounds="C_TERMINAL_COMPLETE" start="849" end="869" representative="true">
+<location-fragments>
+<hmmer3-location-fragment start="849" end="869" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+<hmmer3-match evalue="4.5E-180" score="611.7">
+<signature ac="NF033681" desc="ExeM/NucH family extracellular endonuclease" name="ExeM_NucH_DNase">
+<entry ac="IPR047971" desc="Extracellular endonuclease ExeM-like" name="ExeM-like" type="FAMILY"/>
+<signature-library-release library="NCBIFAM" version="14.0"/>
+</signature>
+<model-ac>NF033681</model-ac>
+<locations>
+<hmmer3-location env-end="832" env-start="221" post-processed="false" score="611.4" evalue="5.4E-180" hmm-start="1" hmm-end="545" hmm-length="546" hmm-bounds="N_TERMINAL_COMPLETE" start="221" end="831" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="221" end="831" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+<rpsblast-match>
+<signature ac="cd04486" desc="YhcR_OBF_like" name="YhcR_OBF_like">
+<signature-library-release library="CDD" version="3.20"/>
+</signature>
+<model-ac>cd04486</model-ac>
+<locations>
+<rpsblast-location evalue="2.23848E-22" score="90.0124" start="220" end="291" representative="true">
+<location-fragments>
+<rpsblast-location-fragment start="220" end="291" dc-status="CONTINUOUS"/>
+</location-fragments>
+<sites>
+<rpsblast-site description="generic binding surface I" numLocations="19">
+<site-locations>
+<site-location residue="V" start="225" end="225"/>
+<site-location residue="N" start="245" end="245"/>
+<site-location residue="L" start="238" end="238"/>
+<site-location residue="K" start="278" end="278"/>
+<site-location residue="V" start="277" end="277"/>
+<site-location residue="Q" start="285" end="285"/>
+<site-location residue="G" start="235" end="235"/>
+<site-location residue="E" start="240" end="240"/>
+<site-location residue="A" start="227" end="227"/>
+<site-location residue="S" start="246" end="246"/>
+<site-location residue="T" start="249" end="249"/>
+<site-location residue="F" start="236" end="236"/>
+<site-location residue="Y" start="237" end="237"/>
+<site-location residue="D" start="287" end="287"/>
+<site-location residue="T" start="226" end="226"/>
+<site-location residue="V" start="269" end="269"/>
+<site-location residue="P" start="247" end="247"/>
+<site-location residue="K" start="276" end="276"/>
+<site-location residue="I" start="286" end="286"/>
+</site-locations>
+</rpsblast-site>
+</sites>
+</rpsblast-location>
+</locations>
+</rpsblast-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="f91cb3cf61f2d7c7f5aaf6ea04e07868">MKKNFYLYVALFVAAIVAISAIASSFSAKANNENVTVNNENNNEQKEELPNVVILATGGTIAGTGSSSTQTTGYKSGDLGIETLIEAVPEMKELANITGEQIVKVDSTDITNEILLKLGKRVNELLASDDVDGIVITHGTDTLEETAYFLNLVVKSDKPVVLTAAMRPATAMSADGPFNLYNAVLLASHESSKGKGVLVTLNDRIASARNITKTNTTATDAFKSFENGYLGAIVAGKPYYYNNVERLHTTETPFDISKIKKLPQVDIIYGYQNSPTYMYKAAVQNGAKGIIVAAPGDGTLSAKSVEGVKYAMNKGVKVVLSSRVGTGTVSPKEGYITSDSLNPQKARILLMLALTVTNDPQEIQSFFDKY</sequence>
+<xref id="UPI0002E0D40B" name="UPI0002E0D40B status=active"/>
+<matches>
+<hmmer3-match evalue="0.0" score="471.9">
+<signature ac="TIGR00520" desc="type II asparaginase" name="asnASE_II">
+<entry ac="IPR004550" desc="L-asparaginase, type II" name="AsnASE_II" type="FAMILY">
+<go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0004067" name="asparaginase activity"/>
+<go-xref category="BIOLOGICAL_PROCESS" db="GO" id="GO:0006528" name="asparagine metabolic process"/>
+<pathway-xref db="MetaCyc" id="PWY-8402" name="N-(1-deoxy-D-fructos-1-yl)-L-asparagine degradation"/>
+</entry>
+<signature-library-release library="NCBIFAM" version="14.0"/>
+</signature>
+<model-ac>TIGR00520</model-ac>
+<locations>
+<hmmer3-location env-end="370" env-start="26" post-processed="false" score="471.6" evalue="0.0" hmm-start="9" hmm-end="352" hmm-length="352" hmm-bounds="C_TERMINAL_COMPLETE" start="34" end="370" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="34" end="370" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+<hmmer3-match-with-sites evalue="0.0" score="234.9">
+<signature ac="SFLDS00057" desc="Glutaminase/Asparaginase" name="Glutaminase/Asparaginase">
+<signature-library-release library="SFLD" version="4"/>
+</signature>
+<model-ac>SFLDS00057</model-ac>
+<locations>
+<hmmer3-location-with-sites env-end="370" env-start="44" score="234.7" evalue="0.0" hmm-start="3" hmm-end="332" hmm-length="343" hmm-bounds="INCOMPLETE" start="46" end="367" representative="false">
+<location-fragments>
+<hmmer3-location-fragment-with-sites start="46" end="367" dc-status="CONTINUOUS"/>
+</location-fragments>
+<sites>
+<hmmer3-site description="general acid/base" numLocations="1">
+<site-locations>
+<site-location residue="T" start="163" end="163"/>
+</site-locations>
+<group>0</group>
+<hmmEnd>0</hmmEnd>
+<hmmStart>0</hmmStart>
+</hmmer3-site>
+<hmmer3-site description="nucleophile" numLocations="1">
+<site-locations>
+<site-location residue="T" start="60" end="60"/>
+</site-locations>
+<group>0</group>
+<hmmEnd>0</hmmEnd>
+<hmmStart>0</hmmStart>
+</hmmer3-site>
+</sites>
+</hmmer3-location-with-sites>
+</locations>
+</hmmer3-match-with-sites>
+<rpsblast-match>
+<signature ac="cd08964" desc="L-asparaginase_II" name="L-asparaginase_II">
+<entry ac="IPR004550" desc="L-asparaginase, type II" name="AsnASE_II" type="FAMILY">
+<go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0004067" name="asparaginase activity"/>
+<go-xref category="BIOLOGICAL_PROCESS" db="GO" id="GO:0006528" name="asparagine metabolic process"/>
+<pathway-xref db="MetaCyc" id="PWY-8402" name="N-(1-deoxy-D-fructos-1-yl)-L-asparagine degradation"/>
+</entry>
+<signature-library-release library="CDD" version="3.20"/>
+</signature>
+<model-ac>cd08964</model-ac>
+<locations>
+<rpsblast-location evalue="0.0" score="433.09" start="50" end="364" representative="true">
+<location-fragments>
+<rpsblast-location-fragment start="50" end="364" dc-status="CONTINUOUS"/>
+</location-fragments>
+<sites>
+<rpsblast-site description="homotetramer interface" numLocations="51">
+<site-locations>
+<site-location residue="Y" start="271" end="271"/>
+<site-location residue="R" start="246" end="246"/>
+<site-location residue="Y" start="229" end="229"/>
+<site-location residue="I" start="267" end="267"/>
+<site-location residue="V" start="234" end="234"/>
+<site-location residue="A" start="287" end="287"/>
+<site-location residue="D" start="141" end="141"/>
+<site-location residue="R" start="323" end="323"/>
+<site-location residue="A" start="174" end="174"/>
+<site-location residue="P" start="177" end="177"/>
+<site-location residue="I" start="110" end="110"/>
+<site-location residue="E" start="145" end="145"/>
+<site-location residue="T" start="214" end="214"/>
+<site-location residue="R" start="209" end="209"/>
+<site-location residue="T" start="108" end="108"/>
+<site-location residue="L" start="115" end="115"/>
+<site-location residue="S" start="173" end="173"/>
+<site-location residue="S" start="301" end="301"/>
+<site-location residue="D" start="203" end="203"/>
+<site-location residue="A" start="232" end="232"/>
+<site-location residue="N" start="285" end="285"/>
+<site-location residue="Y" start="269" end="269"/>
+<site-location residue="N" start="243" end="243"/>
+<site-location residue="R" start="167" end="167"/>
+<site-location residue="T" start="216" end="216"/>
+<site-location residue="N" start="202" end="202"/>
+<site-location residue="Y" start="239" end="239"/>
+<site-location residue="T" start="60" end="60"/>
+<site-location residue="E" start="245" end="245"/>
+<site-location residue="T" start="111" end="111"/>
+<site-location residue="F" start="178" end="178"/>
+<site-location residue="D" start="109" end="109"/>
+<site-location residue="M" start="172" end="172"/>
+<site-location residue="P" start="275" end="275"/>
+<site-location residue="K" start="213" end="213"/>
+<site-location residue="L" start="230" end="230"/>
+<site-location residue="G" start="296" end="296"/>
+<site-location residue="S" start="330" end="330"/>
+<site-location residue="P" start="295" end="295"/>
+<site-location residue="Y" start="241" end="241"/>
+<site-location residue="N" start="215" end="215"/>
+<site-location residue="T" start="299" end="299"/>
+<site-location residue="P" start="331" end="331"/>
+<site-location residue="Y" start="277" end="277"/>
+<site-location residue="N" start="112" end="112"/>
+<site-location residue="D" start="297" end="297"/>
+<site-location residue="S" start="322" end="322"/>
+<site-location residue="A" start="218" end="218"/>
+<site-location residue="N" start="242" end="242"/>
+<site-location residue="G" start="228" end="228"/>
+<site-location residue="S" start="207" end="207"/>
+</site-locations>
+</rpsblast-site>
+<rpsblast-site description="active site" numLocations="11">
+<site-locations>
+<site-location residue="S" start="107" end="107"/>
+<site-location residue="T" start="299" end="299"/>
+<site-location residue="T" start="60" end="60"/>
+<site-location residue="T" start="140" end="140"/>
+<site-location residue="K" start="213" end="213"/>
+<site-location residue="T" start="108" end="108"/>
+<site-location residue="D" start="106" end="106"/>
+<site-location residue="A" start="165" end="165"/>
+<site-location residue="D" start="141" end="141"/>
+<site-location residue="G" start="139" end="139"/>
+<site-location residue="G" start="59" end="59"/>
+</site-locations>
+</rpsblast-site>
+<rpsblast-site description="homodimer interface" numLocations="42">
+<site-locations>
+<site-location residue="Q" start="344" end="344"/>
+<site-location residue="Y" start="271" end="271"/>
+<site-location residue="G" start="327" end="327"/>
+<site-location residue="M" start="278" end="278"/>
+<site-location residue="I" start="267" end="267"/>
+<site-location residue="T" start="111" end="111"/>
+<site-location residue="A" start="287" end="287"/>
+<site-location residue="D" start="141" end="141"/>
+<site-location residue="D" start="109" end="109"/>
+<site-location residue="R" start="323" end="323"/>
+<site-location residue="P" start="275" end="275"/>
+<site-location residue="V" start="324" end="324"/>
+<site-location residue="A" start="281" end="281"/>
+<site-location residue="K" start="213" end="213"/>
+<site-location residue="G" start="296" end="296"/>
+<site-location residue="T" start="146" end="146"/>
+<site-location residue="P" start="295" end="295"/>
+<site-location residue="T" start="328" end="328"/>
+<site-location residue="N" start="215" end="215"/>
+<site-location residue="I" start="110" end="110"/>
+<site-location residue="E" start="145" end="145"/>
+<site-location residue="T" start="299" end="299"/>
+<site-location residue="T" start="214" end="214"/>
+<site-location residue="R" start="347" end="347"/>
+<site-location residue="D" start="297" end="297"/>
+<site-location residue="Y" start="277" end="277"/>
+<site-location residue="N" start="112" end="112"/>
+<site-location residue="T" start="108" end="108"/>
+<site-location residue="S" start="322" end="322"/>
+<site-location residue="L" start="115" end="115"/>
+<site-location residue="S" start="301" end="301"/>
+<site-location residue="A" start="282" end="282"/>
+<site-location residue="E" start="144" end="144"/>
+<site-location residue="N" start="285" end="285"/>
+<site-location residue="T" start="142" end="142"/>
+<site-location residue="V" start="265" end="265"/>
+<site-location residue="T" start="217" end="217"/>
+<site-location residue="Y" start="269" end="269"/>
+<site-location residue="D" start="266" end="266"/>
+<site-location residue="L" start="300" end="300"/>
+<site-location residue="P" start="343" end="343"/>
+<site-location residue="T" start="216" end="216"/>
+</site-locations>
+</rpsblast-site>
+</sites>
+</rpsblast-location>
+</locations>
+</rpsblast-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="8394be2ab076e2920aff07d0c2fb0e06">MSPRPLRALLGAAAAALVSAAALAFPSQAAANDSPFYVNPNMSSAEWVRNNPNDPRTPVIRDRIASVPQGTWFAHHNPGQITGQVDALMSAAQAAGKIPILVVYNAPGRDCGNHSSGGAPSHSAYRSWIDEFAAGLKNRPAYIIVEPDLISLMSSCMQHVQQEVLETMAYAGKALKAGSSQARIYFDAGHSAWHSPAQMASWLQQADISNSAHGIATNTSNYRWTADEVAYAKAVLSAIGNPSLRAVIDTSRNGNGPAGNEWCDPSGRAIGTPSTTNTGDPMIDAFLWIKLPGEADGCIAGAGQFVPQAAYEMAIAAGGTNPNPNPNPTPTPTPTPTPPPGSSGACTATYTIANEWNDGFQATVTVTANQNITGWTVTWTFTDGQTITNAWNADVSTSGSSVTARNVGHNGTLSQGASTEFGFVGSKGNSNSVPTLTCAAS</sequence>
+<xref id="P26222" name="P26222"/>
+<matches/>
+</protein>
+<protein>
+<sequence md5="493932c1f43289805b4c4e651ceb9249">GRGLLPFVLLALGIXAPWAVEGAENALKGGACPPRKIVQCLRYEKPKCTSDWQCPDKKKCCRDTCAIKCLNPVAITNPVKVKPGKCPVVYGQCMMLNPPNHCKTDSQCLGDLKCCKSMCGKVCLTPVKA</sequence>
+<xref id="P22298" name="P22298"/>
+<matches>
+<rpsblast-match>
+<signature ac="cd00199" desc="WAP" name="WAP">
+<signature-library-release library="CDD" version="3.20"/>
+</signature>
+<model-ac>cd00199</model-ac>
+<locations>
+<rpsblast-location evalue="5.04643E-9" score="47.4447" start="77" end="127" representative="true">
+<location-fragments>
+<rpsblast-location-fragment start="77" end="127" dc-status="CONTINUOUS"/>
+</location-fragments>
+<sites>
+<rpsblast-site description="inhibitory loop" numLocations="7">
+<site-locations>
+<site-location residue="L" start="96" end="96"/>
+<site-location residue="Y" start="90" end="90"/>
+<site-location residue="Q" start="92" end="92"/>
+<site-location residue="M" start="94" end="94"/>
+<site-location residue="M" start="95" end="95"/>
+<site-location residue="G" start="91" end="91"/>
+<site-location residue="C" start="93" end="93"/>
+</site-locations>
+</rpsblast-site>
+</sites>
+</rpsblast-location>
+</locations>
+</rpsblast-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="4229019f6f6d6fbcd8988593755fe395">MDNVKKLSVLALSIAAALPVSAKADLLISEYVEGNSNNKAIELYNSGDAALDLTGYKLVRYKDGATNALDMVALDGLTIDAKKLKVIVHPSAEIALGSDVDSSTGNLYFNGGDAVALVKDGAVVDIIGAVPTPSGWGMNTTMQRNTDALSASNVFVESQWKVLPVDTFSGLGNLDGSSAPTEPEAPAFTCTGAKITPIYSVQGAGKSSPLIADGEYASKEEVTIRGVVTARGDSLFKGFYLQEVQGDGSPYTSDGIFVYLGEAAGEEIQPGVEVCVQGLVKEYYGLTQLDIKADKKMEVGENLGAPAATPFYVADGENLGDALERFEGMNVVLDAGSDMKVSRTFSYDYAARRNNMMLSHKAPLMKPTQLYPAMTDEAIALEKKNRANQLFVESDFKAKNGEVPYFPTFNAETGYIRVGDQLTNLEGVISYSYNEYRLVATNEIVAGDFIREDDRVDAPEVATKGDIRVASFNVLNLFTSDSDVGGALNASCKDQADADASRGCGRGAHTLEDYLLQRTKIVSALTEMNADIIGLMEIENNGFGEDSSIQYLVNDLNANLPAADAYKFIEVADADKYKGEYVGGDAITVGMLYRPSKVEPTGDAFVIETPEQHAMEGVVTRGEGDKLELSPAFDKYQRHSLGQAFSVNGEKLTVVVNHLKSKGSGCIEDWANFEDSSDPADLQGKCNEFRVSAAKVIGDALQDVEGDLLVIGDMNAYGLEDPIRVLTDYDAANSDRDIMTASWTTLGGKVYEREGSKIEKGYGMVNLNTQVHGTATYSYSYNGELGNLDHALANTSLAARVVDIQDWHINSVESNLFEYSSKYTGELEKSENAFSASDHDPVIVALSYPAPKPEPKPEPKEKDDGGSLGYLGLMLLGLAGLRRRN</sequence>
+<xref id="WP_249252303.1" name="WP_249252303.1 extracellular exonuclease ExeM [Shewanella aquimarina]"/>
+<matches>
+<hmmer3-match evalue="0.0" score="614.0">
+<signature ac="NF033681" desc="ExeM/NucH family extracellular endonuclease" name="ExeM_NucH_DNase">
+<entry ac="IPR047971" desc="Extracellular endonuclease ExeM-like" name="ExeM-like" type="FAMILY"/>
+<signature-library-release library="NCBIFAM" version="14.0"/>
+</signature>
+<model-ac>NF033681</model-ac>
+<locations>
+<hmmer3-location env-end="848" env-start="224" post-processed="false" score="613.7" evalue="0.0" hmm-start="1" hmm-end="545" hmm-length="546" hmm-bounds="N_TERMINAL_COMPLETE" start="224" end="847" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="224" end="847" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+<hmmer3-match evalue="0.68" score="21.8">
+<signature ac="TIGR03501" desc="GlyGly-CTERM protein-sorting domain" name="GlyGly_CTERM">
+<entry ac="IPR020008" desc="GlyGly-CTERM domain" name="GlyGly_CTERM" type="DOMAIN"/>
+<signature-library-release library="NCBIFAM" version="14.0"/>
+</signature>
+<model-ac>TIGR03501</model-ac>
+<locations>
+<hmmer3-location env-end="885" env-start="864" post-processed="false" score="20.8" evalue="1.5" hmm-start="2" hmm-end="22" hmm-length="22" hmm-bounds="C_TERMINAL_COMPLETE" start="865" end="885" representative="true">
+<location-fragments>
+<hmmer3-location-fragment start="865" end="885" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+<hmmer3-match evalue="0.0" score="1701.4">
+<signature ac="NF033680" desc="extracellular exonuclease ExeM" name="exonuc_ExeM-GG">
+<signature-library-release library="NCBIFAM" version="14.0"/>
+</signature>
+<model-ac>NF033680</model-ac>
+<locations>
+<hmmer3-location env-end="885" env-start="1" post-processed="false" score="1701.2" evalue="0.0" hmm-start="1" hmm-end="884" hmm-length="884" hmm-bounds="COMPLETE" start="1" end="885" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="1" end="885" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+<rpsblast-match>
+<signature ac="cd04486" desc="YhcR_OBF_like" name="YhcR_OBF_like">
+<signature-library-release library="CDD" version="3.20"/>
+</signature>
+<model-ac>cd04486</model-ac>
+<locations>
+<rpsblast-location evalue="2.20449E-23" score="92.7088" start="223" end="294" representative="true">
+<location-fragments>
+<rpsblast-location-fragment start="223" end="294" dc-status="CONTINUOUS"/>
+</location-fragments>
+<sites>
+<rpsblast-site description="generic binding surface I" numLocations="19">
+<site-locations>
+<site-location residue="S" start="249" end="249"/>
+<site-location residue="F" start="239" end="239"/>
+<site-location residue="A" start="230" end="230"/>
+<site-location residue="T" start="252" end="252"/>
+<site-location residue="D" start="290" end="290"/>
+<site-location residue="T" start="229" end="229"/>
+<site-location residue="V" start="272" end="272"/>
+<site-location residue="P" start="250" end="250"/>
+<site-location residue="Q" start="288" end="288"/>
+<site-location residue="L" start="279" end="279"/>
+<site-location residue="V" start="228" end="228"/>
+<site-location residue="Y" start="240" end="240"/>
+<site-location residue="G" start="248" end="248"/>
+<site-location residue="V" start="280" end="280"/>
+<site-location residue="G" start="238" end="238"/>
+<site-location residue="E" start="243" end="243"/>
+<site-location residue="L" start="241" end="241"/>
+<site-location residue="L" start="289" end="289"/>
+<site-location residue="K" start="281" end="281"/>
+</site-locations>
+</rpsblast-site>
+</sites>
+</rpsblast-location>
+</locations>
+</rpsblast-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="5a40425be664fc947906456e8fc0e722">MLARGGIQSNQSRLSAHLGGKVDLYAKREDCNSGLAFGGNKLRKLEYIVPDAIASGADTLVSIGGVQSNHTRMVAAVAAKIGMKCRLVQEAWVPHEDAVYDRVGNIMLSRIMGADVGKE</sequence>
+<xref id="TESTESEMLOOKUP" name="TESTESEMLOOKUP"/>
+<matches/>
+</protein>
+<protein>
+<sequence md5="b66e5ed56c0ea43a14a02b37b513ea8d">MNLNRFERYPLTFGPSPITPLKRLSQHLGGKVELYAKREDCNSGLAFGGNKTRKLEYLIPEAIEQGCDTLVSIGGIQSNQTRQVAAVAAHLGMKCVLVQENWVNYSDAVYDRVGNIEMSRIMGADVRLDAAGFDIGIRPSWEKAMSDVVEQGGKPFPIPAGCSEHPYGGLGFVGFAEEVRQQEKELGFKFDYIVVCSVTGSTQAGMVVGFAADGRSKNVIGIDASAKPEQTKAQILRIARHTAELVELGREITEEDVVLDTRFAYPEYGLPNEGTLEAIRLCGSLEGVLTDPVYEGKSMHGMIEMVRRGEFPEGSMIDLVRKGFFPAGAKVLYAHLGGAPALNGYAYAFRNG</sequence>
+<xref id="OUTROSEMLOOKUP" name="OUTROSEMLOOKUP"/>
+<matches>
+<hmmer3-match evalue="7.3E-197" score="664.8">
+<signature ac="TIGR01274" desc="1-aminocyclopropane-1-carboxylate deaminase" name="ACC_deam">
+<entry ac="IPR005965" desc="1-aminocyclopropane-1-carboxylate deaminase" name="ACP_carboxylate_deaminase" type="FAMILY">
+<go-xref category="BIOLOGICAL_PROCESS" db="GO" id="GO:0009310" name="amine catabolic process"/>
+<go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0030170" name="pyridoxal phosphate binding"/>
+<go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0008660" name="1-aminocyclopropane-1-carboxylate deaminase activity"/>
+</entry>
+<signature-library-release library="NCBIFAM" version="14.0"/>
+</signature>
+<model-ac>TIGR01274</model-ac>
+<locations>
+<hmmer3-location env-end="317" env-start="2" post-processed="false" score="627.4" evalue="1.8E-185" hmm-start="1" hmm-end="316" hmm-length="337" hmm-bounds="N_TERMINAL_COMPLETE" start="2" end="317" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="2" end="317" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+<rpsblast-match>
+<signature ac="cd06449" desc="ACCD" name="ACCD">
+<signature-library-release library="CDD" version="3.20"/>
+</signature>
+<model-ac>cd06449</model-ac>
+<locations>
+<rpsblast-location evalue="0.0" score="549.716" start="16" end="338" representative="true">
+<location-fragments>
+<rpsblast-location-fragment start="16" end="338" dc-status="CONTINUOUS"/>
+</location-fragments>
+<sites>
+<rpsblast-site description="catalytic residue" numLocations="1">
+<site-locations>
+<site-location residue="K" start="51" end="51"/>
+</site-locations>
+</rpsblast-site>
+<rpsblast-site description="pyridoxal 5'-phosphate binding site" numLocations="12">
+<site-locations>
+<site-location residue="V" start="198" end="198"/>
+<site-location residue="N" start="50" end="50"/>
+<site-location residue="G" start="337" end="337"/>
+<site-location residue="S" start="201" end="201"/>
+<site-location residue="G" start="338" end="338"/>
+<site-location residue="L" start="336" end="336"/>
+<site-location residue="K" start="54" end="54"/>
+<site-location residue="T" start="199" end="199"/>
+<site-location residue="G" start="200" end="200"/>
+<site-location residue="K" start="51" end="51"/>
+<site-location residue="T" start="202" end="202"/>
+<site-location residue="N" start="79" end="79"/>
+</site-locations>
+</rpsblast-site>
+</sites>
+</rpsblast-location>
+</locations>
+</rpsblast-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="c3e71fe6439f734a5b28ef1fdd640db9">MTTLFNKIKEVTELKAAAGFETPVRDYLRKTITPLVDEVQTDGLGGIFGIKHSQTENAPKVLVAAHMDEVGFMIKEIKADGTFRVVELGGWNPLVVSSQRFTLHTRDGRIYPVISGSVPPHFLRGSSGTSSLPGVSDIVFDAGFANQEEANTYGVFPGDVIIPESETILTANQKNVISKAWDNRYGVLMIRELLENVKDQELNNTLITGANVQEEVGLRGAHVSTTKFDPEVFFAVDCSPAGDIYGNQGKVGDGTLIRFFDPGHIMLPNMKDFLLTTAEEAGIKYQYYCAAGGTDAGAAHLQNSGVPSTTIGVCARYIHSHQTLYAMDDFLEAQAFLQAIVKKLDRSTVDLIKNY</sequence>
+<xref id="WP_134973503.1" name="WP_134973503.1 glutamyl aminopeptidase [Streptococcus thermophilus]"/>
+<matches>
+<hmmer3-match evalue="0.0" score="680.8">
+<signature ac="TIGR03107" desc="glutamyl aminopeptidase" name="glu_aminopep">
+<entry ac="IPR017538" desc="Peptidase M42, glutamyl aminopeptidase" name="Pept_M42_glutamyl_aminopept" type="FAMILY">
+<pathway-xref db="MetaCyc" id="PWY-7614" name="methiin metabolism"/>
+<pathway-xref db="MetaCyc" id="PWY-8454" name="aspartame degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-5707" name="propanethial S-oxide biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-5706" name="alliin metabolism"/>
+</entry>
+<signature-library-release library="NCBIFAM" version="14.0"/>
+</signature>
+<model-ac>TIGR03107</model-ac>
+<locations>
+<hmmer3-location env-end="353" env-start="5" post-processed="false" score="680.6" evalue="0.0" hmm-start="1" hmm-end="350" hmm-length="350" hmm-bounds="COMPLETE" start="5" end="353" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="5" end="353" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+</matches>
+</protein>
+</protein-matches>

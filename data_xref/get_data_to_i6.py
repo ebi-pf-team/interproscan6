@@ -120,8 +120,8 @@ def export_entries_info(ipr_uri: str, output_path: str):
 
 
 if __name__ == '__main__':
-    goa_uri = ""
-    ippro = ""
+    goa_uri = os.environ.get("GOA_URI")
+    ippro = os.environ.get("IPR_URI")
     output_path = "./data_xref"
 
     export_entries_info(ippro, output_path)
