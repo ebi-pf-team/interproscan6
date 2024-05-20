@@ -33,8 +33,12 @@ workflow SEQUENCE_ANALYSIS {
     // Divide members up into their respective analysis pipelines/methods
     Channel.from(applications.split(','))
     .branch { member ->
+        release = params.members."${member}".release
+        log.info "Running $member version $release"
         runner = ''
+
         if (member == 'antifam' || member == "ncbifam") {
+//         if (params.members."${member}".runner == "hmmer") {   # when all members were implemented
             runner = 'hmmer'
         } else {
             runner = member
@@ -108,8 +112,6 @@ workflow SEQUENCE_ANALYSIS {
 
         other: true
             log.info "Application ${member} (still) not supported"
-
-        log.info "Running $runner for $member"
     }.set { member_params }
 
     /*

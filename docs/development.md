@@ -40,6 +40,9 @@ Food for thoughts - direct actions are necessarily defined but these observation
 
 In the lookup we have to filter in the script because when we make the request we don't have the option of passing the applications we want first, the lookup match will return all the applications that have match, only then I can filter (using the `applications` variable).
 
+## Integration tests
+We have an "ignore list" in the integration tests for values that we haven't implemented yet or that have differences that we want to ignore (e.g. evalue)
+
 ## Optional inputs
 
 ....TO DO...

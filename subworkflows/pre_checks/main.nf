@@ -29,6 +29,7 @@ workflow PRE_CHECKS {
     using_nucleic
     all_params
     user_applications
+    output_formats
 
     main:
     if ( !nextflow.version.matches('23.10+') ) {
@@ -69,7 +70,7 @@ workflow PRE_CHECKS {
     }
 
     // Check if the input parameters are valid
-    def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro', 'translate', 'nucleic', 'formats', 'output', 'xrefs', 'goterms', 'pathways']
+    def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'tsv_pro', 'translate', 'nucleic', 'formats', 'output', 'xrefs', 'goterms', 'pathways', 'ipsc_version']
     def parameter_diff = all_params - parameters_expected
     if (parameter_diff.size() != 0){
         log.info printHelp()
@@ -82,6 +83,14 @@ workflow PRE_CHECKS {
     if (applications_diff.size() != 0){
         log.info printHelp()
         exit 22, "Applications not valid: $applications_diff. Valid applications are: $applications_expected"
+    }
+
+    // Check if the formats are valid
+    def formats_expected = ['json', 'tsv', 'tsv-pro', 'xml', 'gff3']
+    def formats_diff = output_formats.toLowerCase().split(',') - formats_expected
+    if (formats_diff.size() != 0){
+        log.info printHelp()
+        exit 22, "Format not valid: $formats_diff. Valid formats are: $formats_expected"
     }
 
     // Check if the input file is a fasta file and if it contains sequences
