@@ -34,15 +34,15 @@ process ADD_CATH_SUPERFAMILIES {
         val member_db
 
     output:
-        path "${out_file}.${member_db}.json"
-        val postprocessing_params
+        path "${out_file}.${member_db}"
+        val member_db
 
     script:
     """
     python3 $projectDir/members/gene3d_funfam/assign_cath_superfamilies.py \\
         ${postprocessing_params[1]} \\
         ${postprocessing_params[2]} \\
-        ${cath_resolve_out} "${out_file}.${member_db}.json"
+        ${cath_resolve_out} "${out_file}.${member_db}"
     """
 }
 

@@ -26,21 +26,22 @@ process HMMER_PARSER {
 
 process GENE3D_FUNFAM_PARSER {
     label 'analysis_parser'
+    when:
+        "${applications}".contains("${member_db}")
 
     input:
-    path cath_resolve_out
-    val postprocessing_params
-    path alignment
+        path post_processed_cath_resolve_out
+        val member_db
+        val applications
 
     output:
-    path "gene3d_out.json"
+        path "${member_db}_out.json"
 
     script:
     """
-    rm -f ${alignment}
     python3 $projectDir/scripts/members/gene3d/assign_cath_superfamilies.py \\
         ${postprocessing_params[1]} \\
         ${postprocessing_params[2]} \\
-        ${cath_resolve_out} "gene3d_out.json"
+        ${post_processed_cath_resolve_out} "${member_db}_out.json"
     """
 }

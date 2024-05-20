@@ -23,3 +23,42 @@ process HMMER_RUNNER {
     fi
     """
 }
+
+
+process FUNFAM_RUNNER {
+    /*
+    FunFam requires its own runner in order to only use those FunFam families
+    that are associated to Cath-Gene3D superfamilies where hits were found
+    (Gene3D must be run before FunFam). Otherwise running HMMER3 for all 
+    FunFam hmm profiles would take an extremely long time.
+
+    There will be one hmmer.out and one hmmer.dtbl file per FunFam hmm profile
+    used in the search. The results are concatenated into a single file following
+    post-processing by cath-resolve-hits in a downstream process.
+    */
+    container 'docker.io/biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1'
+    label 'hmmer_runner'
+
+    input:
+    tuple path(fasta), path(hmm), val(switches), val(release), val(postprocessing_params), path(gene3d_out), val(member_db)
+
+    output:
+    path "${release}_${hmm}*"
+    path "${release}_${hmm}*"
+    path "${hmm}_alignment"
+    val postprocessing_params
+
+    script:
+    """
+    awk 'NR>1' ${gened_out} | while read line
+    do
+        item=$(echo $line | cut -f2)
+        new_item=${item//./\/}
+        hmm_file_path="${hmm}/${new_item}.hmm"
+        if [ -f $hmm_file_path ]; then
+            hmmsearch ${switches} -o ${release}_${hmm_file_path}.out --domtblout ${release}_${hmm_file_path}.dtbl $hmm_file_path ${fasta}
+        fi
+    done
+    touch ${hmm_file_path}_alignment
+    """
+}
