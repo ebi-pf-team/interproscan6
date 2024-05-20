@@ -56,7 +56,7 @@ def test_json_output(input_path, expected_output_path, current_output_path, appl
     expected = json2dict(expected_output)
     current = json2dict(current_output)
 
-    ignore_elements = ['representative', 'location-fragments', 'hmmBounds', 'evalue']
+    ignore_elements = ['representative', 'location-fragments', 'hmmBounds']
     print("Missing elements in current output:")
     compare(expected, current, ignore_elements)
     print("Extra elements in current output:")

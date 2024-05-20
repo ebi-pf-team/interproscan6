@@ -89,7 +89,7 @@ def json_output(seq_matches: dict, output_path: str, version:str):
                 else:
                     description = "-"
                     entry = None
-                    if match_data['entry']:
+                    if match_data['entry']['accession'] != "-":
                         description = match_data['entry']['description']
                         entry = match_data['entry']
                     signature = {
@@ -102,6 +102,7 @@ def json_output(seq_matches: dict, output_path: str, version:str):
                         },
                         "entry": entry
                     }
+
                     match = {
                         "signature": signature,
                         "locations": match_data['locations'],
