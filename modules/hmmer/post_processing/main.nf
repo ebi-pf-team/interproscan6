@@ -5,7 +5,7 @@ parsed and applied to the internal IPS6 JSON structure in the
 filters module/
 */
 
-process GENE3D_POST_PROCESSER {
+process CATH_RESEOLVE_HITS {
     container 'docker.io/library/cathtools'
     label 'analysis_parser'
 
@@ -16,22 +16,39 @@ process GENE3D_POST_PROCESSER {
         val postprocessing_params  // [0] evalue [1] control factor
 
     output:
-        path "${out_file}.cat.resolved.out"
+        path "${out_file}.cath.resolved.out"
         val postprocessing_params
 
-    /*
-    Input args for TreeGrafter:
-    0. cath_resolve_hits_switches
-    1. model2sf_map
-    2. discontinuous_regs
-    */
+    // cath_resolve_hits is a third party tool used to minimise suprious hits
     script:
     """
     rm -f ${alignment}
     /cath-tools/cath-resolve-hits \\
         ${out_file} \\
         --input-for hmmsearch_out \\
-        ${postprocessing_params[0]} > "${out_file}.cat.resolved.out"
+        ${postprocessing_params[0]} > "${out_file}.cath.resolved.out"
+    """
+}
+
+
+process ADD_CATH_SUPERFAMILIES {
+    label 'analysis_parser'
+
+    input:
+        path cath_resolve_out
+        val postprocessing_params
+        val member_db
+
+    output:
+        path "${out_file}.${member_db}.json"
+        val postprocessing_params
+
+    script:
+    """
+    python3 $projectDir/members/gene3d_funfam/assign_cath_superfamilies.py \\
+        ${postprocessing_params[1]} \\
+        ${postprocessing_params[2]} \\
+        ${cath_resolve_out} "${out_file}.${member_db}.json"
     """
 }
 
