@@ -22,3 +22,25 @@ process HMMER_PARSER {
         > hmmer_parsed_${out}.json
     """
 }
+
+
+process GENE3D_FUNFAM_PARSER {
+    label 'analysis_parser'
+
+    input:
+    path cath_resolve_out
+    val postprocessing_params
+    path alignment
+
+    output:
+    path "gene3d_out.json"
+
+    script:
+    """
+    rm -f ${alignment}
+    python3 $projectDir/scripts/members/gene3d/assign_cath_superfamilies.py \\
+        ${postprocessing_params[1]} \\
+        ${postprocessing_params[2]} \\
+        ${cath_resolve_out} "gene3d_out.json"
+    """
+}
