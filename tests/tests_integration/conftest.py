@@ -37,7 +37,7 @@ def current_output_path(test_output_dir):
 
 @pytest.fixture
 def applications():
-    return "antifam"
+    return "antifam,ncbifam,sfld"
 
 
 @pytest.fixture
