@@ -22,8 +22,7 @@ def get_accession_regex(appl: str) -> re.Pattern:
 
 def parse(out_file: str) -> dict:
     current_sequence = None
-    domain_number = None
-    domains = []
+    current_domain = None
     domain_match = {}
     hmmer_parser_support = {}
     stage = 'LOOKING_FOR_METHOD_ACCESSION'
@@ -40,18 +39,19 @@ def parse(out_file: str) -> dict:
                 if stage == 'LOOKING_FOR_DOMAIN_DATA_LINE' and line.startswith(">> "):
                     stage = 'LOOKING_FOR_DOMAIN_SECTION'
                 if line.startswith("//"):
-                    if domains:
-                        for domain_match in domains:
-                            cigar_alignment = cigar_alignment_parser(domain_match["alignment"])
-                            domain_match["cigar_alignment"] = encode(cigar_alignment)
+                    if domain_match:
+                        for domain_key, domain_value in domain_match.items():
+                            cigar_alignment = cigar_alignment_parser(domain_match[domain_key]["alignment"])
+                            domain_match[domain_key]["cigar_alignment"] = encode(cigar_alignment)
                         sequence_match["sequence"] = current_sequence
-                        sequence_match["domains"] = domains
-                        domains = []
+                        sequence_match["domains"] = domain_match
+                        domain_match = {}
                         if current_sequence in hmmer_parser_support:
                             hmmer_parser_support[current_sequence].append(sequence_match)
                         else:
                             hmmer_parser_support[current_sequence] = [sequence_match]
                     sequence_match = {}
+
                     stage = "LOOKING_FOR_METHOD_ACCESSION"
                 else:
                     if stage == 'LOOKING_FOR_METHOD_ACCESSION':
@@ -63,6 +63,8 @@ def parse(out_file: str) -> dict:
                     elif stage == 'LOOKING_FOR_SEQUENCE_MATCHES':
                         if line.strip() == "":
                             stage = 'LOOKING_FOR_DOMAIN_SECTION'
+                            current_domain = None
+                            current_sequence = None
                         else:
                             sequence_match = get_sequence_match(line)
                             if sequence_match:
@@ -77,13 +79,12 @@ def parse(out_file: str) -> dict:
                             domain_alignment_matcher = DOMAIN_ALIGNMENT_LINE_PATTERN.match(line)
                             if domain_alignment_matcher:
                                 align_seq = []
-                                domain_number = domain_alignment_matcher.group(1)
-                        domain_match["alignment"] = ""
-                        if domain_number and current_sequence:
+                                current_domain = domain_alignment_matcher.group(1)
+                        if current_domain and current_sequence:
                             alignment_sequence_pattern = ALIGNMENT_SEQUENCE_PATTERN.match(line)
                             if alignment_sequence_pattern:
                                 align_seq.append(alignment_sequence_pattern.group(3))
-                                domain_match["alignment"] = "".join(align_seq)
+                                domain_match[current_domain]["alignment"] = "".join(align_seq)
 
                     elif stage == 'LOOKING_FOR_DOMAIN_DATA_LINE':
                         if "Alignments for each domain" in line:
@@ -91,8 +92,8 @@ def parse(out_file: str) -> dict:
                         else:
                             match = DOMAIN_LINE_PATTERN.match(line)
                             if match:
-                                domain_match = get_domain_match(match)
-                                domains.append(domain_match)
+                                domain_number = match.group(1)
+                                domain_match[domain_number] = get_domain_match(match)
     return hmmer_parser_support
 
 
