@@ -45,17 +45,15 @@ def parse(out_file: str) -> dict:
                         for domain_key, domain_value in domain_match.items():
                             cigar_alignment = cigar_alignment_parser(domain_match[domain_key]["alignment"])
                             domain_match[domain_key]["cigar_alignment"] = encode(cigar_alignment)
-                        if "locations" not in sequence_match:
-                            sequence_match["locations"] = [domain_match]
-                        else:
-                            sequence_match["locations"].append[domain_match]
+                            if "locations" not in sequence_match:
+                                sequence_match["locations"] = []
+                            sequence_match["locations"].append(domain_match[domain_key])
                         domain_match = {}
                         if current_sequence in hmmer_parser_support:
-                            hmmer_parser_support[current_sequence].update(sequence_match)
+                            hmmer_parser_support[current_sequence].update({model_id: sequence_match})
                         else:
                             hmmer_parser_support[current_sequence] = {model_id: sequence_match}
                     sequence_match = {}
-
                     stage = "LOOKING_FOR_METHOD_ACCESSION"
                 else:
                     if stage == 'LOOKING_FOR_METHOD_ACCESSION':
@@ -75,7 +73,7 @@ def parse(out_file: str) -> dict:
                             current_domain = None
                             current_sequence = None
                         else:
-                            sequence_match = get_sequence_match(line, model_id, query_name, description, version, member_db)
+                            sequence_match = get_sequence_match(line, model_id, query_name, description, version, member_db, qlen)
                     elif stage == 'LOOKING_FOR_DOMAIN_SECTION':
                         if line.startswith(">> "):
                             domain_section_header_matcher = DOMAIN_SECTION_START_PATTERN.match(line)
@@ -101,6 +99,7 @@ def parse(out_file: str) -> dict:
                             if match:
                                 domain_number = match.group(1)
                                 domain_match[domain_number] = get_domain_match(match, member_db, qlen)
+
     return hmmer_parser_support
 
 
@@ -127,7 +126,7 @@ def get_domain_match(match: re.Match, member_db: str, qlen: str) -> dict:
     return domain_match
 
 
-def get_sequence_match(sequence_line: str, model_id: str, query_name: str, description: str, version: str, member_db: str) -> dict:
+def get_sequence_match(sequence_line: str, model_id: str, query_name: str, description: str, version: str, member_db: str, qlen: str) -> dict:
     sequence_match = {}
     SEQUENCE_LINE_PATTERN = re.compile("^\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\d+\\s+(\\S+).*$")
     match = SEQUENCE_LINE_PATTERN.match(sequence_line)
@@ -137,7 +136,7 @@ def get_sequence_match(sequence_line: str, model_id: str, query_name: str, descr
         sequence_match["description"] = description.strip()
         sequence_match["evalue"] = match.group(1)
         sequence_match["score"] = match.group(2)
-        sequence_match["qlen"] = ""
+        sequence_match["qlen"] = qlen
         sequence_match["bias"] = match.group(3)
         sequence_match["member_db"] = member_db
         sequence_match["version"] = version
@@ -154,14 +153,15 @@ def get_sequence_match(sequence_line: str, model_id: str, query_name: str, descr
 
     return sequence_match
 
+
 def main():
     """
     :args 0: str repr of path to hmmer file to be parsed
     """
-    args = sys.argv[1:]
-    parse_result = parse(args[0])
+    # args = sys.argv[1:]
+    # parse_result = parse(args[0])
 
-    # parse_result = parse("/Users/lcf/PycharmProjects/interproscan6/work/a0/d9249cabb3013839a52feb8aad8b8a/7.0_AntiFam.hmm.out")
+    parse_result = parse("/Users/lcf/PycharmProjects/interproscan6/work/a0/d9249cabb3013839a52feb8aad8b8a/7.0_AntiFam.hmm.out")
 
     print(json.dumps(parse_result, indent=2))
 
