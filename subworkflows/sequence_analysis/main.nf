@@ -38,7 +38,6 @@ workflow SEQUENCE_ANALYSIS {
         runner = ''
 
         if (member == 'antifam' || member == "ncbifam") {
-//         if (params.members."${member}".runner == "hmmer") {   # when all members were implemented
             runner = 'hmmer'
         } else {
             runner = member
@@ -121,20 +120,20 @@ workflow SEQUENCE_ANALYSIS {
     // AntiFam and NCBIfam
     runner_hmmer_params = fasta.combine(member_params.hmmer)
     GENERIC_HMMER_RUNNER(runner_hmmer_params)
-    GENERIC_HMMER_PARSER(GENERIC_HMMER_RUNNER.out, tsv_pro, false)  // set sites to false
+    GENERIC_HMMER_PARSER(GENERIC_HMMER_RUNNER.out, tsv_pro, "antifam")
 
     // Panther (+ treegrafter + epa-ng)
     runner_hmmer_panther_params = fasta.combine(member_params.panther)
     PANTHER_HMMER_RUNNER(runner_hmmer_panther_params)
-    PANTHER_POST_PROCESSER(PANTHER_HMMER_RUNNER.out, fasta)
-    PANTHER_HMMER_PARSER(PANTHER_POST_PROCESSER.out, tsv_pro, false)
+    PANTHER_HMMER_PARSER(PANTHER_HMMER_RUNNER.out, tsv_pro, "panther")
+    PANTHER_POST_PROCESSER(PANTHER_HMMER_PARSER.out, fasta)
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_hmmer_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_hmmer_sfld_params)
-    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out, tsv_pro)
-    SFLD_HMMER_PARSER(SFLD_POST_PROCESSER.out, tsv_pro, true)  // set sites to true for SFLD
-
+    SFLD_HMMER_PARSER(SFLD_HMMER_RUNNER.out, tsv_pro, "sfld")
+    SFLD_POST_PROCESSER(SFLD_HMMER_PARSER.out, tsv_pro)
+    
     /*
     Member databases that do NOT use HMMER
     */
