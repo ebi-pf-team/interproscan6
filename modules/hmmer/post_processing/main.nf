@@ -4,17 +4,15 @@ process PANTHER_POST_PROCESSER {
     label 'analysis_parser'
 
     input:
+        path ips6_json
         path out_file
         path out_dtbl
-        path alignment  // note used here. Needed for the SFLD pipeline
-        val postprocessing_params  // [0] evalue [1] control factor
+        val postprocessing_params // [0] evalue [1] control factor
+        val tsv_pro
         path fasta
 
     output:
-        path out_file
-        path "${out_dtbl}.post_processed.dtbl"
-        path alignment
-        val postprocessing_params
+        path "${out_dtbl}.post.processed.json"
 
     /*
     Input args for TreeGrafter:
@@ -40,7 +38,7 @@ process PANTHER_POST_PROCESSER {
 
     python3 $projectDir/scripts/members/panther/process_treegrafter_hits.py \
         processed_panther_hits \
-        ${out_dtbl}
+        "${out_dtbl}.post.processed.json"
     """
 }
 
@@ -49,17 +47,15 @@ process SFLD_POST_PROCESSER {
     label 'analysis_parser'
 
     input:
+        path ips6_json
         path out_file
         path out_dtbl
-        path alignment
         val postprocessing_params // contains [0] bin and [1] site_annotations file path
+        path alignment
         val tsv_pro
 
     output:
-        path "${out_file}.post_processed.out"
-        path "${out_dtbl}.post_processed.dtbl"
-        path alignment
-        val postprocessing_params // need to make up input var nums in hmmer_parser module
+        path "${tsv_pro ? "${out_file}.post.processed.json" : "${out_dtbl}.post.processed.json"}"
 
     script:
         """
@@ -71,10 +67,7 @@ process SFLD_POST_PROCESSER {
             --output '${tsv_pro ? "${out_file}.processed.out" : "${out_dtbl}.processed.dtbl"}'
 
         python3 $projectDir/scripts/members/sfld/sfld_process_post_processed.py \
-            '${tsv_pro ? "${out_file}.processed.out" : "${out_dtbl}.processed.dtbl"}' \
+            '${tsv_pro ? "${out_file}.processed.json" : "${out_dtbl}.processed.json"}' \
             ${tsv_pro ? "-O '${out_file}'" : "-d '${out_dtbl}'"}
-
-        touch ${out_file}.post_processed.out
-        touch ${out_dtbl}.post_processed.dtbl
         """
 }

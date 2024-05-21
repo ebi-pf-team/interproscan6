@@ -11,6 +11,8 @@ process HMMER_PARSER {
 
     output:
     path "hmmer_parsed_*"
+    path out
+    path domtbl
     val postprocessing_params
     path(alignment), optional: true
 
@@ -21,7 +23,7 @@ process HMMER_PARSER {
         ${sites ? "true" : "false"} \\
         ${postprocessing_params[2]} \\
         > hmmer_parsed_${out}.json
-    if [${member_db} == "antifam" || ${member_db} == "ncbifam"]; then
+    if [${member_db} != "sfld"]; then
         rm ${alignment}
     fi
     """
