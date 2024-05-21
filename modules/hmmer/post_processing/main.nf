@@ -40,15 +40,15 @@ process ADD_CATH_SUPERFAMILIES {
         val member_db
 
     output:
-        path "${out_file}.${member_db}"
+        path "${cath_resolve_out}.${member_db}"
         val member_db
 
     script:
     """
-    python3 $projectDir/members/gene3d_funfam/assign_cath_superfamilies.py \\
+    python3 $projectDir/scripts/members/gene3d_funfam/assign_cath_superfamilies.py \\
         ${postprocessing_params[1]} \\
         ${postprocessing_params[2]} \\
-        ${cath_resolve_out} "${out_file}.${member_db}"
+        ${cath_resolve_out} "${cath_resolve_out}.cath_superfamilies.${member_db}"
     """
 }
 
