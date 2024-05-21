@@ -158,10 +158,8 @@ def main():
     """
     :args 0: str repr of path to hmmer file to be parsed
     """
-    # args = sys.argv[1:]
-    # parse_result = parse(args[0])
-
-    parse_result = parse("/Users/lcf/PycharmProjects/interproscan6/work/a0/d9249cabb3013839a52feb8aad8b8a/7.0_AntiFam.hmm.out")
+    args = sys.argv[1:]
+    parse_result = parse(args[0])
 
     print(json.dumps(parse_result, indent=2))
 
