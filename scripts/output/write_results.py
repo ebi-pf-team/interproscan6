@@ -44,28 +44,29 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                     for pwy_info in match["entry"]["pathwayXRefs"]:
                         pathways.append(pwy_info["id"])
                 match_db = match["member_db"]
-                if is_pro:
-                    for location in match["locations"]:
-                        cigar_alignment = location["cigar_alignment"]
                 xrefs = f"{'|'.join(goterms)}\t{'|'.join(pathways)}"
 
-                if match_acc == "signal_peptide":
-                    sig_acc, status = "Signal Peptide", ""
-                    ali_from = match["start"]
-                    ali_to = match["end"]
-                    evalue = match["pvalue"]
-                else:
-                    sig_acc = match["accession"]
-                    status = "T"
-                    for location in match["locations"]:
+                for location in match["locations"]:
+                    if match_acc == "signal_peptide":
+                        sig_acc, status = "Signal Peptide", ""
+                        ali_from = match["start"]
+                        ali_to = match["end"]
+                        evalue = match["pvalue"]
+                    else:
+                        sig_acc = match["accession"]
+                        status = "T"
                         evalue = location["evalue"]
                         ali_from = location["start"]
                         ali_to = location["end"]
-                write_to_tsv(
-                    seq_id, md5, seq_len, match_db,
-                    sig_acc, entry_desc, ali_from, ali_to,
-                    evalue, status, current_date, entry_acc,
-                    entry_name, cigar_alignment, xrefs)
+                    cigar_alignment = ""
+                    if is_pro:
+                        cigar_alignment = location["cigar_alignment"]
+
+                    write_to_tsv(
+                        seq_id, md5, seq_len, match_db,
+                        sig_acc, entry_desc, ali_from, ali_to,
+                        evalue, status, current_date, entry_acc,
+                        entry_name, cigar_alignment, xrefs)
 
 
 def json_output(seq_matches: dict, output_path: str, version:str):
