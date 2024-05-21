@@ -45,10 +45,8 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                         pathways.append(pwy_info["id"])
                 match_db = match["member_db"]
                 if is_pro:
-                    try:
-                        cigar_alignment = match["cigar_alignment"]
-                    except KeyError:
-                        cigar_alignment = ""
+                    for location in match["locations"]:
+                        cigar_alignment = location["cigar_alignment"]
                 xrefs = f"{'|'.join(goterms)}\t{'|'.join(pathways)}"
 
                 if match_acc == "signal_peptide":
