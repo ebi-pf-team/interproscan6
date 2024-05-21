@@ -64,6 +64,7 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     "postProcessed": post_processed,
                     "aliwS": hit_data[6],
                     "..": hit_data[9],
+                    "alignment": "",
                     "cigar_alignment": hit_data[17]
                 }
 
