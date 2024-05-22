@@ -69,7 +69,7 @@ def parse(out_file: str) -> dict:
                             stage = 'LOOKING_FOR_SEQUENCE_MATCHES'
                             model_ident_pattern = member_accession.match(line)
                             if model_ident_pattern:
-                                model_id = model_ident_pattern.group(1)
+                                model_id = model_ident_pattern.group(2).replace(".orig.30.pir", "")
                         if line.startswith("Query:"):
                             query_name = line.split()[1]
                             qlen = line.split("[")[1].split("]")[0].replace("M=", "")
