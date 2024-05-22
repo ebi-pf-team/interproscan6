@@ -4,8 +4,8 @@ import xml.etree.ElementTree as ET
 
 def get_current_output(current_output_path: str, input_path: str, applications: str, disable_precalc: bool) -> ET.Element:
     disable_precalc = "--disable_precalc" if disable_precalc else ""
-    command = f"nextflow run interproscan.nf --input {input_path} --applications {applications} {disable_precalc} --formats xml --output {current_output_path}"
-    subprocess.run(command, shell=True)
+    command = f"nextflow run interproscan.nf --input {input_path} --applications {applications} {disable_precalc} --formats xml --output {current_output_path} --goterms --pathways"
+    # subprocess.run(command, shell=True)
     with open(str(current_output_path) + ".xml", 'r') as f:
         tree = ET.parse(f)
     return tree.getroot()
@@ -70,7 +70,7 @@ def test_xml_output(input_path, expected_output_path, current_output_path, appli
     expected = xml2dict(expected_output)
     current = xml2dict(current_output)
 
-    ignore_elements = ['representative', 'hmmer3-location-fragment', 'hmm-bounds', 'evalue', 'go-xref']
+    ignore_elements = ['representative', 'hmmer3-location-fragment', 'hmm-bounds', 'evalue']
     print("Missing elements in current output:")
     compare(expected, current, ignore_elements)
     print("Extra elements in current output:")
