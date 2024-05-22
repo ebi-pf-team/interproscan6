@@ -6,7 +6,8 @@ from cigar_alignment import cigar_alignment_parser, encode
 
 DOMAIN_SECTION_START_PATTERN = re.compile(r"^>>\s+(\S+).*$")
 DOMAIN_ALIGNMENT_LINE_PATTERN = re.compile(r"^\s+==\s+domain\s+(\d+)\s+.*$")
-ALIGNMENT_SEQUENCE_PATTERN = re.compile(r"^\s+(\w+)\s+(\S+)\s+([-a-zA-Z]+)\s+(\S+)\s*$")
+# ALIGNMENT_SEQUENCE_PATTERN = re.compile(r"^\s+(\w+)\s+(\S+)\s+([-a-zA-Z]+)\s+(\S+)\s*$")
+ALIGNMENT_SEQUENCE_PATTERN = re.compile(r"^\s+(\S+)\s+(\d+)\s+([-a-zA-Z]+)\s+(\d+)\s*$")
 DOMAIN_LINE_PATTERN = re.compile(
                                 "^\\s+(\\d+)\\s+[!?]\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\S+).*$")
 
@@ -33,6 +34,7 @@ def parse(out_file: str) -> dict:
     appl = out_file.split("_")[1].split(".")[0]
     member_accession = get_accession_regex(appl)
     description = ""
+    model_id = ""
 
     with open(out_file, "r") as f:
         for line in f.readlines():
@@ -45,17 +47,14 @@ def parse(out_file: str) -> dict:
                     stage = 'LOOKING_FOR_DOMAIN_SECTION'
                 if line.startswith("//"):
                     if domain_match:
-                        for domain_key, domain_value in domain_match.items():
-                            
-                            try:
-                                cigar_alignment = cigar_alignment_parser(domain_match[domain_key]["alignment"])
-                                domain_match[domain_key]["cigar_alignment"] = encode(cigar_alignment)
-                            except KeyError:
-                                pass # temp until fixed
-                            
+                        for domains_key, domains_value in domain_match.items():
+                            for domain_key, domain_value in domains_value.items():
+                                    cigar_alignment = cigar_alignment_parser(domain_match[domains_key][domain_key]["alignment"])
+                                    domain_match[domains_key][domain_key]["cigar_alignment"] = encode(cigar_alignment)
+
                             if "locations" not in sequence_match:
                                 sequence_match["locations"] = []
-                            sequence_match["locations"].append(domain_match[domain_key])
+                            sequence_match["locations"].append(domain_match[domains_key])
                         domain_match = {}
                         if current_sequence in hmmer_parser_support:
                             hmmer_parser_support[current_sequence].update({model_id: sequence_match})
@@ -66,13 +65,13 @@ def parse(out_file: str) -> dict:
                     stage = "LOOKING_FOR_METHOD_ACCESSION"
                 else:
                     if stage == 'LOOKING_FOR_METHOD_ACCESSION':
-                        if line.startswith(("Accession:", "Query:", "Query sequence:")):
+                        if line.startswith("Accession:") or line.startswith("Query sequence:") or (line.startswith("Query:") and member_db == "panther"):
                             stage = 'LOOKING_FOR_SEQUENCE_MATCHES'
                             model_ident_pattern = member_accession.match(line)
                             if model_ident_pattern:
                                 model_id = model_ident_pattern.group(2).replace(".orig.30.pir", "")
-                        if line.startswith(("Accession:", "Query:", "Query sequence:")):
-                            query_name = line.split()[1].replace(".orig.30.pir", "")
+                        if line.startswith("Query:"):
+                            query_name = line.split()[1]
                             qlen = line.split("[")[1].split("]")[0].replace("M=", "")
                     elif stage == 'LOOKING_FOR_SEQUENCE_MATCHES':
                         if line.startswith("Description:"):
@@ -106,7 +105,7 @@ def parse(out_file: str) -> dict:
                             alignment_sequence_pattern = ALIGNMENT_SEQUENCE_PATTERN.match(line)
                             if alignment_sequence_pattern:
                                 align_seq.append(alignment_sequence_pattern.group(3))
-                                domain_match[current_domain]["alignment"] = "".join(align_seq)
+                                domain_match[current_sequence][current_domain]["alignment"] = "".join(align_seq)
 
                     elif stage == 'LOOKING_FOR_DOMAIN_DATA_LINE':
                         if "Alignments for each domain" in line:
@@ -115,7 +114,10 @@ def parse(out_file: str) -> dict:
                             match = DOMAIN_LINE_PATTERN.match(line)
                             if match:
                                 domain_number = match.group(1)
-                                domain_match[domain_number] = get_domain_match(match, member_db, qlen)
+                                try:
+                                    domain_match[current_sequence][domain_number] = get_domain_match(match, member_db, qlen)
+                                except KeyError:
+                                    domain_match[current_sequence] = {domain_number: get_domain_match(match, member_db, qlen)}
 
     return hmmer_parser_support
 
@@ -175,8 +177,10 @@ def main():
     """
     :args 0: str repr of path to hmmer file to be parsed
     """
-    args = sys.argv[1:]
-    parse_result = parse(args[0])
+    # args = sys.argv[1:]
+    # parse_result = parse(args[0])
+    parse_result = parse("/Users/lcf/PycharmProjects/interproscan6/work/6a/66ec6ff9e4f1f10c0d24243991fb2a/14.0_ncbifam.hmm.out")
+
 
     print(json.dumps(parse_result, indent=2))
 

@@ -213,8 +213,11 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     location_elem.set("start", str(location["start"]))
                     location_elem.set("end", str(location["end"]))
                     location_elem.set("representative", str(location["representative"]))
-                    location_elem.set("alignment", str(location["alignment"]))
-                    location_elem.set("cigar-alignment", str(location["cigar_alignment"]))
+                    try:
+                        location_elem.set("alignment", str(location["alignment"]))
+                        location_elem.set("cigar-alignment", str(location["cigar_alignment"]))
+                    except KeyError:
+                        pass
                     location_frags_elem = ET.SubElement(location_elem, "location-fragments")
                     if 'sites' in location:
                         for site in location['sites']:
