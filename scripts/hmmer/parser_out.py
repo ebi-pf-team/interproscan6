@@ -47,12 +47,7 @@ def parse(out_file: str) -> dict:
                     stage = 'LOOKING_FOR_DOMAIN_SECTION'
                 if line.startswith("//"):
                     if domain_match:
-                        for domain_key, domain_value in domain_match.items():
-                            cigar_alignment = cigar_alignment_parser(domain_match[domain_key]["alignment"])
-                            domain_match[domain_key]["cigar_alignment"] = encode(cigar_alignment)
-                            if "locations" not in sequence_match:
-                                sequence_match["locations"] = []
-                            sequence_match["locations"].append(domain_match[domain_key])
+                        sequence_match = add_domain_match(domain_match, sequence_match)
                         domain_match = {}
                         if current_sequence in hmmer_parser_support:
                             hmmer_parser_support[current_sequence].update({model_id: sequence_match})
@@ -74,7 +69,7 @@ def parse(out_file: str) -> dict:
                     elif stage == 'LOOKING_FOR_SEQUENCE_MATCHES':
                         if line.startswith("Description:"):
                             description = line.replace("Description:", "")
-                        if line.strip() == "":
+                        elif line.strip() == "":
                             stage = 'LOOKING_FOR_DOMAIN_SECTION'
                             current_domain = None
                             current_sequence = None
@@ -92,6 +87,15 @@ def parse(out_file: str) -> dict:
                         if line.startswith(">> "):
                             domain_section_header_matcher = DOMAIN_SECTION_START_PATTERN.match(line)
                             if domain_section_header_matcher:
+                                if domain_match:
+                                    sequence_match = add_domain_match(domain_match, sequence_match)
+                                    domain_match = {}
+                                    if current_sequence in hmmer_parser_support:
+                                        hmmer_parser_support[current_sequence].update({model_id: sequence_match})
+                                    else:
+                                        hmmer_parser_support[current_sequence] = {model_id: sequence_match}
+                                sequence_match = {}
+
                                 current_sequence = domain_section_header_matcher.group(1)
                             stage = 'LOOKING_FOR_DOMAIN_DATA_LINE'
                         if line.strip().startswith("=="):
@@ -118,6 +122,16 @@ def parse(out_file: str) -> dict:
                                     domain_match = {domain_number: get_domain_match(match, member_db, qlen)}
 
     return hmmer_parser_support
+
+
+def add_domain_match(domain_match: dict, sequence_match: dict) -> dict:
+    for domain_key, domain_value in domain_match.items():
+        cigar_alignment = cigar_alignment_parser(domain_match[domain_key]["alignment"])
+        domain_match[domain_key]["cigar_alignment"] = encode(cigar_alignment)
+        if "locations" not in sequence_match:
+            sequence_match["locations"] = []
+        sequence_match["locations"].append(domain_match[domain_key])
+    return sequence_match
 
 
 def get_domain_match(match: re.Match, member_db: str, qlen: str) -> dict:
@@ -178,7 +192,6 @@ def main():
     # args = sys.argv[1:]
     # parse_result = parse(args[0])
     parse_result = parse("/Users/lcf/PycharmProjects/interproscan6/work/6a/66ec6ff9e4f1f10c0d24243991fb2a/14.0_ncbifam.hmm.out")
-
 
     print(json.dumps(parse_result, indent=2))
 
