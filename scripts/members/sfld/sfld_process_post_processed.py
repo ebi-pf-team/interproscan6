@@ -118,11 +118,13 @@ def filter_matches_and_add_site(ips6, hits):
     with open(ips6, "r") as fh:
         ips6_data = json.load(fh)
 
+    processed_ips6_data = {}
+
     for protein_id in ips6_data:
         if protein_id not in hits:
             # IPS6 will only contain SFLD hits at this stage
             # so don't need to check if need to retain hits from other tools
-            del ips6_data[protein_id]
+            continue
 
         else:
             for signature_acc in ips6_data[protein_id]:
@@ -130,12 +132,18 @@ def filter_matches_and_add_site(ips6, hits):
                     # domain match did not parse the filtering of the post-processing
                     del ips6_data[protein_id][signature_acc]
                 else:
+                    if protein_id not in processed_ips6_data:
+                        processed_ips6_data[protein_id] = {}
+                    if signature_acc not in processed_ips6_data[protein_id]:
+                        processed_ips6_data[protein_id][signature_acc] = ips6_data[protein_id][signature_acc]
+                        # restart locations as not all locations may have parsed the post-processing
+                    
                     # add site data
                     # check each SfldSite instance as there can be multiple site hits
                     # for each signature accession in a protein sequence
                     for site in hits[protein_id].sites:
                         if site.model_ac == signature_acc:
-                            if "sites" not in ips6_data[protein_id][signature_acc]["locations"]:
+                            if "sites" not in processed_ips6_data[protein_id][signature_acc]["locations"]:
 
                                 site_positions = set()
                                 for position in site.site_residues.split(","):
@@ -144,25 +152,27 @@ def filter_matches_and_add_site(ips6, hits):
                                 earliest_site, latest_site = int(min(site_positions)), int(max(site_positions))
 
                                 # find the relevant (domain) location
-                                for i, location in enumerate(ips6_data[protein_id][signature_acc]["locations"]):
-                                    if int(location["start"]) <= earliest_site and int(location["end"]) >= latest_site:
-                                        if "sites" not in ips6_data[protein_id][signature_acc]["locations"][i]:
-                                            ips6_data[protein_id][signature_acc]["locations"][i]["sites"] = []
+                                for i, location in enumerate(processed_ips6_data[protein_id][signature_acc]["locations"]):
+                                    for location_key in location:
+                                        if int(location[location_key]["start"]) <= earliest_site and int(location[location_key]["end"]) >= latest_site:
+                                            if "sites" not in processed_ips6_data[protein_id][signature_acc]["locations"][i]:
+                                                processed_ips6_data[protein_id][signature_acc]["locations"][i][location_key]["sites"] = []
 
-                                        site_info = {
-                                            "description": site.site_desc,
-                                            "numLocations": len(site.site_residues.split(",")),
-                                            "siteLocations": []
-                                        }
-                                        for site_location in site.site_residues.split(","):
-                                            site_info['siteLocations'].append({
-                                                "start": site_location[0],
-                                                "end": site_location.split("-")[0][1:],
-                                                "residue": site_location[0],
-                                            })
-                                        ips6_data[protein_id][signature_acc]["locations"][i]["sites"].append(site_info)
+                                            site_info = {
+                                                "description": site.site_desc,
+                                                "numLocations": len(site.site_residues.split(",")),
+                                                "siteLocations": []
+                                            }
+                                            for site_location in site.site_residues.split(","):
+                                                site_info['siteLocations'].append({
+                                                    "start": site_location[0],
+                                                    "end": site_location.split("-")[0][1:],
+                                                    "residue": site_location[0],
+                                                })
 
-                                        break
+                                            processed_ips6_data[protein_id][signature_acc]["locations"][i][location_key]["sites"].append(site_info)
+
+                                            break
 
     return ips6_data
 
