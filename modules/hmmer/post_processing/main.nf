@@ -7,12 +7,12 @@ process PANTHER_POST_PROCESSER {
         path ips6_json
         path out_file
         path out_dtbl
-        val postprocessing_params // [0] evalue [1] control factor
+        val postprocessing_params // contains [0] bin and [1] site_annotations file path
         val tsv_pro
         path fasta
 
     output:
-        path "${out_dtbl}.post.processed.json"
+        path "${ips6_json}.post.processed.json"
 
     /*
     Input args for TreeGrafter:
@@ -38,7 +38,9 @@ process PANTHER_POST_PROCESSER {
 
     python3 $projectDir/scripts/members/panther/process_treegrafter_hits.py \
         processed_panther_hits \
-        "${out_dtbl}.post.processed.json"
+        ${ips6_json} \
+        ${postprocessing_params[2]} > ${ips6_json}.post.processed.json
+
     """
 }
 

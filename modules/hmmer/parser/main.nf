@@ -16,6 +16,11 @@ process HMMER_PARSER {
     val postprocessing_params
     path(alignment), optional: true
 
+    /*
+    member_db --> true/false is to tell the domtbl parser if to retrieve site data
+    postprocessing_params[2] is used for panther when parsing the domtbl 
+    These won't be needed in the python script call when using only HMMER.out
+    */
     script:
     """
     python3 $projectDir/scripts/hmmer/${tsv_pro ? "parser_out" : "parser_domtbl"}.py \\
