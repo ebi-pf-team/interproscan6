@@ -33,6 +33,7 @@ def parse(out_file: str) -> dict:
     appl = out_file.split("_")[1].split(".")[0]
     member_accession = get_accession_regex(appl)
     description = ""
+    model_id = ""
 
     with open(out_file, "r") as f:
         for line in f.readlines():
@@ -46,13 +47,13 @@ def parse(out_file: str) -> dict:
                 if line.startswith("//"):
                     if domain_match:
                         for domain_key, domain_value in domain_match.items():
-                            
+
                             try:
                                 cigar_alignment = cigar_alignment_parser(domain_match[domain_key]["alignment"])
                                 domain_match[domain_key]["cigar_alignment"] = encode(cigar_alignment)
                             except KeyError:
                                 pass # temp until fixed
-                            
+
                             if "locations" not in sequence_match:
                                 sequence_match["locations"] = []
                             sequence_match["locations"].append(domain_match[domain_key])
@@ -175,8 +176,9 @@ def main():
     """
     :args 0: str repr of path to hmmer file to be parsed
     """
-    args = sys.argv[1:]
-    parse_result = parse(args[0])
+    # args = sys.argv[1:]
+    # parse_result = parse(args[0])
+    parse_result = parse("/Users/lcf/PycharmProjects/interproscan6/work/6a/66ec6ff9e4f1f10c0d24243991fb2a/14.0_ncbifam.hmm.out")
 
     print(json.dumps(parse_result, indent=2))
 
