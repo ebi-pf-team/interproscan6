@@ -49,11 +49,8 @@ def parse(out_file: str) -> dict:
                     if domain_match:
                         for domains_key, domains_value in domain_match.items():
                             for domain_key, domain_value in domains_value.items():
-                                try:
                                     cigar_alignment = cigar_alignment_parser(domain_match[domains_key][domain_key]["alignment"])
                                     domain_match[domains_key][domain_key]["cigar_alignment"] = encode(cigar_alignment)
-                                except KeyError:
-                                    pass # temp until fixed
 
                             if "locations" not in sequence_match:
                                 sequence_match["locations"] = []
@@ -68,13 +65,13 @@ def parse(out_file: str) -> dict:
                     stage = "LOOKING_FOR_METHOD_ACCESSION"
                 else:
                     if stage == 'LOOKING_FOR_METHOD_ACCESSION':
-                        if line.startswith(("Accession:", "Query:", "Query sequence:")):
+                        if line.startswith("Accession:") or line.startswith("Query sequence:"):
                             stage = 'LOOKING_FOR_SEQUENCE_MATCHES'
                             model_ident_pattern = member_accession.match(line)
                             if model_ident_pattern:
-                                model_id = model_ident_pattern.group(2).replace(".orig.30.pir", "")
-                        if line.startswith(("Accession:", "Query:", "Query sequence:")):
-                            query_name = line.split()[1].replace(".orig.30.pir", "")
+                                model_id = model_ident_pattern.group(1)
+                        if line.startswith("Query:"):
+                            query_name = line.split()[1]
                             qlen = line.split("[")[1].split("]")[0].replace("M=", "")
                     elif stage == 'LOOKING_FOR_SEQUENCE_MATCHES':
                         if line.startswith("Description:"):
@@ -180,8 +177,10 @@ def main():
     """
     :args 0: str repr of path to hmmer file to be parsed
     """
-    args = sys.argv[1:]
-    parse_result = parse(args[0])
+    # args = sys.argv[1:]
+    # parse_result = parse(args[0])
+    parse_result = parse("/Users/lcf/PycharmProjects/interproscan6/work/6a/66ec6ff9e4f1f10c0d24243991fb2a/14.0_ncbifam.hmm.out")
+
 
     print(json.dumps(parse_result, indent=2))
 
