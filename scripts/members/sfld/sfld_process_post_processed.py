@@ -1,5 +1,6 @@
 import argparse
 import json
+import sys
 
 from pathlib import Path
 
@@ -132,7 +133,7 @@ def filter_matches_and_add_site(ips6, hits):
 
         else:
             for signature_acc in ips6_data[protein_id]:
-                if signature_acc.startswith('sfld'):
+                if signature_acc.upper().startswith('SFLD'):
                     if signature_acc not in hits[protein_id].domains:
                         # domain match did not parse the filtering of the post-processing
                         del ips6_data[protein_id][signature_acc]
@@ -141,20 +142,35 @@ def filter_matches_and_add_site(ips6, hits):
                         # check each SfldSite instance as there can be multiple site hits
                         # for each signature accession in a protein sequence
                         for site in hits[protein_id].sites:
-                            if site.model_acc == signature_acc:
+                            if site.model_ac == signature_acc:
                                 if "sites" not in ips6_data[protein_id][signature_acc]["locations"]:
-                                    ips6_data[protein_id][signature_acc]["locations"]["sites"] = []
-                                site_info = {
-                                    "description": site.site_desc,
-                                    "numLocations": len(site.site_residues.split(",")),
-                                    "siteLocations": []
-                                }
-                                for site_location in site.site_residues.split(","):
-                                    site_info['siteLocations'].append({
-                                        "start": site_location[0],
-                                        "end": site_location.split("-")[0][1:],
-                                        "residue": site_location.split("-")[1],
-                                    })
+                                    
+                                    site_positions = set()
+                                    for position in site.site_residues.split(","):
+                                        residues = position[1:].split("-")
+                                        site_positions.update(map(int, residues))
+                                    earliest_site, latest_site = int(min(site_positions)), int(max(site_positions))
+                                   
+                                    # find the relevant (domain) location
+                                    for i, location in enumerate(ips6_data[protein_id][signature_acc]["locations"]):
+                                        if int(location["start"]) <= earliest_site and int(location["end"]) >= latest_site:
+                                            if "sites" not in ips6_data[protein_id][signature_acc]["locations"][i]:
+                                                 ips6_data[protein_id][signature_acc]["locations"][i]["sites"] = []
+                                            
+                                            site_info = {
+                                                "description": site.site_desc,
+                                                "numLocations": len(site.site_residues.split(",")),
+                                                "siteLocations": []
+                                            }
+                                            for site_location in site.site_residues.split(","):
+                                                site_info['siteLocations'].append({
+                                                    "start": site_location[0],
+                                                    "end": site_location.split("-")[0][1:],
+                                                    "residue": site_location[0],
+                                                })
+                                            ips6_data[protein_id][signature_acc]["locations"][i]["sites"].append(site_info)
+
+                                            break
 
     return ips6_data
 
