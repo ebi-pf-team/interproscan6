@@ -20,7 +20,7 @@ process HMMER_PARSER {
     """
     python3 $projectDir/scripts/hmmer/${tsv_pro ? "parser_out" : "parser_domtbl"}.py \\
         ${tsv_pro ? "${out}" : "${domtbl}"} \\
-        ${sites ? "true" : "false"} \\
+        ${member_db == "sfld" ? "true" : "false"} \\
         ${postprocessing_params[2]} \\
         > hmmer_parsed_${out}.json
     if [${member_db} != "sfld"]; then

@@ -153,9 +153,9 @@ workflow SEQUENCE_ANALYSIS {
     Gather the results
     */
 
-    GENERIC_HMMER_PARSER.out.concat(
-        PANTHER_HMMER_PARSER.out,
-        SFLD_HMMER_PARSER.out,
+    GENERIC_HMMER_PARSER.out[0].concat(
+        PANTHER_POST_PROCESSER.out,
+        SFLD_POST_PROCESSER.out,
         CDD_PARSER.out,
         SIGNALP_PARSER.out
     )
