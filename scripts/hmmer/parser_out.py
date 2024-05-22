@@ -47,14 +47,12 @@ def parse(out_file: str) -> dict:
                     stage = 'LOOKING_FOR_DOMAIN_SECTION'
                 if line.startswith("//"):
                     if domain_match:
-                        for domains_key, domains_value in domain_match.items():
-                            for domain_key, domain_value in domains_value.items():
-                                    cigar_alignment = cigar_alignment_parser(domain_match[domains_key][domain_key]["alignment"])
-                                    domain_match[domains_key][domain_key]["cigar_alignment"] = encode(cigar_alignment)
-
+                        for domain_key, domain_value in domain_match.items():
+                            cigar_alignment = cigar_alignment_parser(domain_match[domain_key]["alignment"])
+                            domain_match[domain_key]["cigar_alignment"] = encode(cigar_alignment)
                             if "locations" not in sequence_match:
                                 sequence_match["locations"] = []
-                            sequence_match["locations"].append(domain_match[domains_key])
+                            sequence_match["locations"].append(domain_match[domain_key])
                         domain_match = {}
                         if current_sequence in hmmer_parser_support:
                             hmmer_parser_support[current_sequence].update({model_id: sequence_match})
@@ -105,7 +103,7 @@ def parse(out_file: str) -> dict:
                             alignment_sequence_pattern = ALIGNMENT_SEQUENCE_PATTERN.match(line)
                             if alignment_sequence_pattern:
                                 align_seq.append(alignment_sequence_pattern.group(3))
-                                domain_match[current_sequence][current_domain]["alignment"] = "".join(align_seq)
+                                domain_match[current_domain]["alignment"] = "".join(align_seq)
 
                     elif stage == 'LOOKING_FOR_DOMAIN_DATA_LINE':
                         if "Alignments for each domain" in line:
@@ -115,9 +113,9 @@ def parse(out_file: str) -> dict:
                             if match:
                                 domain_number = match.group(1)
                                 try:
-                                    domain_match[current_sequence][domain_number] = get_domain_match(match, member_db, qlen)
+                                    domain_match[domain_number] = get_domain_match(match, member_db, qlen)
                                 except KeyError:
-                                    domain_match[current_sequence] = {domain_number: get_domain_match(match, member_db, qlen)}
+                                    domain_match = {domain_number: get_domain_match(match, member_db, qlen)}
 
     return hmmer_parser_support
 
