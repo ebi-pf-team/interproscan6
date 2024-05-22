@@ -13,11 +13,13 @@ DOMAIN_LINE_PATTERN = re.compile(
 
 def get_accession_regex(appl: str) -> re.Pattern:
     if appl.upper() == "ANTIFAM":
-        return re.compile(r"^Accession:\s+(ANF\d{5})\s*$")
+        return re.compile(r"^(Accession:|Query:|Query sequence:)\s+(ANF\d{5})\s*$")
     if appl.upper() == "NCBIFAM":
-        return re.compile(r"^Accession:\s+((TIGR|NF)\d+)\.\d+$")
+        return re.compile(r"^(Accession:|Query:|Query sequence:)\s+((TIGR|NF)\d+)\.\d+$")
+    if appl.upper() == "PANTHER":
+        return re.compile(r"^(Accession:|Query:|Query sequence:)\s+(PTHR[^\s]+)\s*\[M=\d+\]$")
     if appl.upper() == "SFLD":
-        return re.compile(r"^Accession:\s+(SFLD[^\s]+)\s*$")
+        return re.compile(r"^(Accession:|Query:|Query sequence:)\s+(SFLD[^\s]+)\s*$")
 
 
 def parse(out_file: str) -> dict:
@@ -30,6 +32,7 @@ def parse(out_file: str) -> dict:
     stage = 'LOOKING_FOR_METHOD_ACCESSION'
     appl = out_file.split("_")[1].split(".")[0]
     member_accession = get_accession_regex(appl)
+    description = ""
 
     with open(out_file, "r") as f:
         for line in f.readlines():
@@ -43,8 +46,13 @@ def parse(out_file: str) -> dict:
                 if line.startswith("//"):
                     if domain_match:
                         for domain_key, domain_value in domain_match.items():
-                            cigar_alignment = cigar_alignment_parser(domain_match[domain_key]["alignment"])
-                            domain_match[domain_key]["cigar_alignment"] = encode(cigar_alignment)
+                            
+                            try:
+                                cigar_alignment = cigar_alignment_parser(domain_match[domain_key]["alignment"])
+                                domain_match[domain_key]["cigar_alignment"] = encode(cigar_alignment)
+                            except KeyError:
+                                pass # temp until fixed
+                            
                             if "locations" not in sequence_match:
                                 sequence_match["locations"] = []
                             sequence_match["locations"].append(domain_match[domain_key])
@@ -54,16 +62,17 @@ def parse(out_file: str) -> dict:
                         else:
                             hmmer_parser_support[current_sequence] = {model_id: sequence_match}
                     sequence_match = {}
+                    description = ""
                     stage = "LOOKING_FOR_METHOD_ACCESSION"
                 else:
                     if stage == 'LOOKING_FOR_METHOD_ACCESSION':
-                        if line.startswith("Accession:") or line.startswith("Query sequence:"):
+                        if line.startswith(("Accession:", "Query:", "Query sequence:")):
                             stage = 'LOOKING_FOR_SEQUENCE_MATCHES'
                             model_ident_pattern = member_accession.match(line)
                             if model_ident_pattern:
-                                model_id = model_ident_pattern.group(1)
-                        if line.startswith("Query:"):
-                            query_name = line.split()[1]
+                                model_id = model_ident_pattern.group(2).replace(".orig.30.pir", "")
+                        if line.startswith(("Accession:", "Query:", "Query sequence:")):
+                            query_name = line.split()[1].replace(".orig.30.pir", "")
                             qlen = line.split("[")[1].split("]")[0].replace("M=", "")
                     elif stage == 'LOOKING_FOR_SEQUENCE_MATCHES':
                         if line.startswith("Description:"):
@@ -73,7 +82,15 @@ def parse(out_file: str) -> dict:
                             current_domain = None
                             current_sequence = None
                         else:
-                            sequence_match = get_sequence_match(line, model_id, query_name, description, version, member_db, qlen)
+                            sequence_match = get_sequence_match(
+                                line,
+                                model_id,
+                                query_name,
+                                description,
+                                version,
+                                member_db,
+                                qlen
+                            )
                     elif stage == 'LOOKING_FOR_DOMAIN_SECTION':
                         if line.startswith(">> "):
                             domain_section_header_matcher = DOMAIN_SECTION_START_PATTERN.match(line)
