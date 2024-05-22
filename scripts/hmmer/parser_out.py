@@ -65,7 +65,7 @@ def parse(out_file: str) -> dict:
                     stage = "LOOKING_FOR_METHOD_ACCESSION"
                 else:
                     if stage == 'LOOKING_FOR_METHOD_ACCESSION':
-                        if line.startswith("Accession:") or line.startswith("Query sequence:"):
+                        if line.startswith("Accession:") or line.startswith("Query sequence:") or (line.startswith("Query:") and member_db == "panther"):
                             stage = 'LOOKING_FOR_SEQUENCE_MATCHES'
                             model_ident_pattern = member_accession.match(line)
                             if model_ident_pattern:
