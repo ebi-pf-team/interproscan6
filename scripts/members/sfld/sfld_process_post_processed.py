@@ -136,19 +136,19 @@ def filter_matches_and_add_site(ips6, hits):
                     for site in hits[protein_id].sites:
                         if site.model_ac == signature_acc:
                             if "sites" not in ips6_data[protein_id][signature_acc]["locations"]:
-                                
+
                                 site_positions = set()
                                 for position in site.site_residues.split(","):
                                     residues = position[1:].split("-")
                                     site_positions.update(map(int, residues))
                                 earliest_site, latest_site = int(min(site_positions)), int(max(site_positions))
-                                
+
                                 # find the relevant (domain) location
                                 for i, location in enumerate(ips6_data[protein_id][signature_acc]["locations"]):
                                     if int(location["start"]) <= earliest_site and int(location["end"]) >= latest_site:
                                         if "sites" not in ips6_data[protein_id][signature_acc]["locations"][i]:
-                                                ips6_data[protein_id][signature_acc]["locations"][i]["sites"] = []
-                                        
+                                            ips6_data[protein_id][signature_acc]["locations"][i]["sites"] = []
+
                                         site_info = {
                                             "description": site.site_desc,
                                             "numLocations": len(site.site_residues.split(",")),
