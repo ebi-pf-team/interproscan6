@@ -44,6 +44,12 @@ process PANTHER_POST_PROCESSER {
 
 
 process SFLD_POST_PROCESSER {
+    /*
+    Runs an in-house post-processing C script that filters the SFLD hits to
+    retain only those where all sites are conserved, and add site data to
+    the remaining hits. The out file is then parsed and the results in the IPS6
+    json file are filtered and site data is added to the remaining hits.
+    */
     label 'analysis_parser'
 
     input:
@@ -55,7 +61,7 @@ process SFLD_POST_PROCESSER {
         val tsv_pro
 
     output:
-        path "${tsv_pro ? "${out_file}.post.processed.json" : "${out_dtbl}.post.processed.json"}"
+        path "${tsv_pro ? "${out_file}.post.processed.out.json" : "${out_dtbl}.post.processed.dtbl.json"}"
 
     script:
         """
@@ -67,7 +73,8 @@ process SFLD_POST_PROCESSER {
             --output '${tsv_pro ? "${out_file}.processed.out" : "${out_dtbl}.processed.dtbl"}'
 
         python3 $projectDir/scripts/members/sfld/sfld_process_post_processed.py \
-            '${tsv_pro ? "${out_file}.processed.json" : "${out_dtbl}.processed.json"}' \
-            ${tsv_pro ? "-O '${out_file}'" : "-d '${out_dtbl}'"}
+            '${tsv_pro ? "${out_file}.processed.out" : "${out_dtbl}.processed.dtbl"}' \
+            ${ips6_json} \
+            > '${tsv_pro ? "${out_file}.post.processed.out.json" : "${out_dtbl}.post.processed.dtbl.json"}'
         """
 }

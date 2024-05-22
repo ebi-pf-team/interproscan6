@@ -118,20 +118,20 @@ def filter_matches_and_add_site(ips6, hits):
     with open(ips6, "r") as fh:
         ips6_data = json.load(fh)
 
-    for i, (protein_id, signature_matches) in ips6_data:
+    for protein_id in ips6_data:
         if protein_id not in hits:
             # if there are only SFLD hits (i.e. no hits from other tools): delete the protein
             # else only delete the SFLD keys
-            if all(signature_acc.startswith('sfld') for signature_acc in signature_matches):
+            if all(signature_acc.startswith('sfld') for signature_acc in ips6_data[protein_id]):
                 del ips6_data[protein_id]
                 continue
             else:
-                for signature_acc in signature_matches:
+                for signature_acc in ips6_data[protein_id]:
                     if signature_acc.startswith('sfld'):
                         del ips6_data[protein_id][signature_acc]
 
         else:
-            for signature_acc in signature_matches:
+            for signature_acc in ips6_data[protein_id]:
                 if signature_acc.startswith('sfld'):
                     if signature_acc not in hits[protein_id].domains:
                         # domain match did not parse the filtering of the post-processing
