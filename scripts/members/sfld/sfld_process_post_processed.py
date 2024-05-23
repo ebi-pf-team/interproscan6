@@ -153,10 +153,9 @@ def filter_matches_and_add_site(ips6, hits):
 
                                 # find the relevant (domain) location
                                 for i, location in enumerate(processed_ips6_data[protein_id][signature_acc]["locations"]):
-                                    for location_key in location:
-                                        if int(location[location_key]["start"]) <= earliest_site and int(location[location_key]["end"]) >= latest_site:
+                                        if int(location["start"]) <= earliest_site and int(location["end"]) >= latest_site:
                                             if "sites" not in processed_ips6_data[protein_id][signature_acc]["locations"][i]:
-                                                processed_ips6_data[protein_id][signature_acc]["locations"][i][location_key]["sites"] = []
+                                                processed_ips6_data[protein_id][signature_acc]["locations"][i]["sites"] = []
 
                                             site_info = {
                                                 "description": site.site_desc,
@@ -170,7 +169,7 @@ def filter_matches_and_add_site(ips6, hits):
                                                     "residue": site_location[0],
                                                 })
 
-                                            processed_ips6_data[protein_id][signature_acc]["locations"][i][location_key]["sites"].append(site_info)
+                                            processed_ips6_data[protein_id][signature_acc]["locations"][i]["sites"].append(site_info)
 
                                             break
 
