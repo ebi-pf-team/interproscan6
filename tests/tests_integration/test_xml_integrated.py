@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 def get_current_output(current_output_path: str, input_path: str, applications: str, disable_precalc: bool) -> ET.Element:
     disable_precalc = "--disable_precalc" if disable_precalc else ""
     command = f"nextflow run interproscan.nf --input {input_path} --applications {applications} {disable_precalc} --formats xml --output {current_output_path} --goterms --pathways"
-    # subprocess.run(command, shell=True)
+    subprocess.run(command, shell=True)
     with open(str(current_output_path) + ".xml", 'r') as f:
         tree = ET.parse(f)
     return tree.getroot()

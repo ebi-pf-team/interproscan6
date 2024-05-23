@@ -215,7 +215,10 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("score", str(location["score"]))
                         location_elem.set("postProcessed", str(location["postProcessed"]))
                     else:
-                        location_elem = ET.SubElement(locations_elem, "hmmer3-location")
+                        if match_data['member_db'].upper() == "SFLD":
+                            location_elem = ET.SubElement(locations_elem, "hmmer3-location-with-sites")
+                        else:
+                            location_elem = ET.SubElement(locations_elem, "hmmer3-location")
                         location_elem.set("env-end", str(location["envelopeEnd"]))
                         location_elem.set("env-start", str(location["envelopeStart"]))
                         location_elem.set("post-processed", str(location["postProcessed"]))
@@ -244,7 +247,10 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                                 location_frag_elem.set("residue", str(site['siteLocations']["residue"]))
                             else:
                                 for sitelocation in site['siteLocations']:
-                                    location_frag_elem = ET.SubElement(location_frags_elem, "hmmer3-location-fragment")
+                                    if match_data['member_db'].upper() == "SFLD":
+                                        location_frag_elem = ET.SubElement(location_frags_elem, "hmmer3-location-fragment-with-sites")
+                                    else:
+                                        location_frag_elem = ET.SubElement(location_frags_elem, "hmmer3-location-fragment")
                                     location_frag_elem.set("start", str(sitelocation["start"]))
                                     location_frag_elem.set("end", str(sitelocation["end"]))
                                     location_frag_elem.set("dc-status", "")
