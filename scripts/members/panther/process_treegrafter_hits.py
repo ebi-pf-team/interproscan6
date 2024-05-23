@@ -66,7 +66,6 @@ def build_parser() -> argparse.ArgumentParser:
         help="Path to PAINT annotations file from the Panther release"
     )
 
-
     return parser
 
 
@@ -120,35 +119,24 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]], paint_anno_path: Path) -
 
                 for panther_hit in hits[protein_id].domains:
                     if panther_hit["signature-acc:superfamily"].split(":")[0] == signature_acc:
-                        for location in ips6_data[protein_id][signature_acc]["locations"]:
-                            if location["start"] == panther_hit["ali_start"] and \
-                                location["end"] == panther_hit["ali_end"] and \
-                                location["hmmStart"] == panther_hit["hmm_start"] and \
-                                location["hmmEnd"] == panther_hit["hmm_end"] and \
-                                location["envelopeStart"] == panther_hit["env_start"] and \
-                                location["envelopeEnd"] == panther_hit["env_end"] and \
-                                location["evalue"] == panther_hit["evalue"] and \
-                                location["score"] == panther_hit["score"]:
+                        anno_path = paint_anno_path / f"{signature_acc}.json"
+                        with open(anno_path, 'r') as fh:
+                            paint_annotations = json.load(fh)
+                            node_data = paint_annotations[panther_hit["node_id"]]
 
-                                anno_path = paint_anno_path / f"{signature_acc}.json"
-                                with open(anno_path, 'r') as fh:
-                                    paint_annotations = json.load(fh)
-                                    node_data = paint_annotations[panther_hit["node_id"]]
+                        if protein_id not in processed_ips6_data:
+                            processed_ips6_data[protein_id] = {}
+                        if signature_acc not in processed_ips6_data[protein_id]:
+                            processed_ips6_data[protein_id][signature_acc] = ips6_data[protein_id][signature_acc]
+                            processed_ips6_data[protein_id][signature_acc]["locations"] = []
 
-                                if protein_id not in processed_ips6_data:
-                                    processed_ips6_data[protein_id] = {}
-                                if signature_acc not in processed_ips6_data[protein_id]:
-                                    processed_ips6_data[protein_id][signature_acc] = ips6_data[protein_id][signature_acc]
-                                    processed_ips6_data[protein_id][signature_acc]["locations"] = []
-                                    # start locations from scratch because not all locations
-                                    # may have passed the TreeGraft post-processing
-                                
-                                processed_ips6_data[protein_id][signature_acc]["locations"].append(location)
-                                processed_ips6_data[protein_id][signature_acc] = node_data[2]
-                                processed_ips6_data[protein_id][signature_acc] = node_data[3]
+                            # start locations from scratch because not all locations
+                            # may have passed the TreeGraft post-processing
 
-                                processed_ips6_data[protein_id][signature_acc]["accession"] = panther_hit["signature-acc:superfamily"]
-                                processed_ips6_data[protein_id][signature_acc]["model-ac"] = panther_hit["signature-acc:superfamily"]
+                        processed_ips6_data[protein_id][signature_acc]["proteinClass"] = node_data[2]
+                        processed_ips6_data[protein_id][signature_acc]["graftPoint"] = node_data[3]
+                        processed_ips6_data[protein_id][signature_acc]["accession"] = panther_hit["signature-acc:superfamily"]
+                        processed_ips6_data[protein_id][signature_acc]["model-ac"] = panther_hit["signature-acc:superfamily"]
 
     return ips6_data
 
