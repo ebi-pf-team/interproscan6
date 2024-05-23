@@ -6,8 +6,7 @@ from cigar_alignment import cigar_alignment_parser, encode
 
 DOMAIN_SECTION_START_PATTERN = re.compile(r"^>>\s+(\S+).*$")
 DOMAIN_ALIGNMENT_LINE_PATTERN = re.compile(r"^\s+==\s+domain\s+(\d+)\s+.*$")
-# ALIGNMENT_SEQUENCE_PATTERN = re.compile(r"^\s+(\w+)\s+(\S+)\s+([-a-zA-Z]+)\s+(\S+)\s*$")
-ALIGNMENT_SEQUENCE_PATTERN = re.compile(r"^\s+(\S+)\s+(\d+)\s+([-a-zA-Z]+)\s+(\d+)\s*$")
+ALIGNMENT_SEQUENCE_PATTERN = re.compile(r"^\s+(\S+)\s+(\d+)\s+([-a-zA-Z]+)\s+(\d+)\s*$") # replacing (\w+) with (\S+) and adding if to ignore current sequence
 DOMAIN_LINE_PATTERN = re.compile(
                                 "^\\s+(\\d+)\\s+[!?]\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\S+).*$")
 
@@ -94,7 +93,7 @@ def parse(out_file: str) -> dict:
                                         hmmer_parser_support[current_sequence].update({model_id: sequence_match})
                                     else:
                                         hmmer_parser_support[current_sequence] = {model_id: sequence_match}
-                                sequence_match = {}
+                                    sequence_match = {}
 
                                 current_sequence = domain_section_header_matcher.group(1)
                             stage = 'LOOKING_FOR_DOMAIN_DATA_LINE'
@@ -190,8 +189,9 @@ def main():
     """
     :args 0: str repr of path to hmmer file to be parsed
     """
-    args = sys.argv[1:]
-    parse_result = parse(args[0])
+    # args = sys.argv[1:]
+    # parse_result = parse(args[0])
+    parse_result = parse("/Users/lcf/PycharmProjects/interproscan6/work/6a/66ec6ff9e4f1f10c0d24243991fb2a/14.0_ncbifam.hmm.out")
 
     print(json.dumps(parse_result, indent=2))
 
