@@ -137,7 +137,7 @@ def filter_matches_and_add_site(ips6, hits):
                     if signature_acc not in processed_ips6_data[protein_id]:
                         processed_ips6_data[protein_id][signature_acc] = ips6_data[protein_id][signature_acc]
                         # restart locations as not all locations may have parsed the post-processing
-                    
+
                     # add site data
                     # check each SfldSite instance as there can be multiple site hits
                     # for each signature accession in a protein sequence
@@ -153,26 +153,25 @@ def filter_matches_and_add_site(ips6, hits):
 
                                 # find the relevant (domain) location
                                 for i, location in enumerate(processed_ips6_data[protein_id][signature_acc]["locations"]):
-                                    for location_key in location:
-                                        if int(location[location_key]["start"]) <= earliest_site and int(location[location_key]["end"]) >= latest_site:
-                                            if "sites" not in processed_ips6_data[protein_id][signature_acc]["locations"][i]:
-                                                processed_ips6_data[protein_id][signature_acc]["locations"][i][location_key]["sites"] = []
+                                    if int(location["start"]) <= earliest_site and int(location["end"]) >= latest_site:
+                                        if "sites" not in processed_ips6_data[protein_id][signature_acc]["locations"][i]:
+                                            processed_ips6_data[protein_id][signature_acc]["locations"][i]["sites"] = []
 
-                                            site_info = {
-                                                "description": site.site_desc,
-                                                "numLocations": len(site.site_residues.split(",")),
-                                                "siteLocations": []
-                                            }
-                                            for site_location in site.site_residues.split(","):
-                                                site_info['siteLocations'].append({
-                                                    "start": site_location[0],
-                                                    "end": site_location.split("-")[0][1:],
-                                                    "residue": site_location[0],
-                                                })
+                                        site_info = {
+                                            "description": site.site_desc,
+                                            "numLocations": len(site.site_residues.split(",")),
+                                            "siteLocations": []
+                                        }
+                                        for site_location in site.site_residues.split(","):
+                                            site_info['siteLocations'].append({
+                                                "start": site_location[0],
+                                                "end": site_location.split("-")[0][1:],
+                                                "residue": site_location[0],
+                                            })
 
-                                            processed_ips6_data[protein_id][signature_acc]["locations"][i][location_key]["sites"].append(site_info)
+                                        processed_ips6_data[protein_id][signature_acc]["locations"][i]["sites"].append(site_info)
 
-                                            break
+                                        break
 
     return ips6_data
 
