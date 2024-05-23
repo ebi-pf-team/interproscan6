@@ -60,7 +60,10 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                         ali_to = location["end"]
                     cigar_alignment = ""
                     if is_pro:
-                        cigar_alignment = location["cigar_alignment"]
+                        try:
+                            cigar_alignment = location["cigar_alignment"]
+                        except KeyError:
+                            pass  # some members may not have cigar alignment (e.g. cdd)
 
                     write_to_tsv(
                         seq_id, md5, seq_len, match_db,
