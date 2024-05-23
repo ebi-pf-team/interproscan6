@@ -52,6 +52,7 @@ def parse(out_file: str) -> dict:
                             hmmer_parser_support[current_sequence].update({model_id: sequence_match})
                         else:
                             hmmer_parser_support[current_sequence] = {model_id: sequence_match}
+
                     sequence_match = {}
                     description = ""
                     stage = "LOOKING_FOR_METHOD_ACCESSION"
@@ -93,8 +94,6 @@ def parse(out_file: str) -> dict:
                                         hmmer_parser_support[current_sequence].update({model_id: sequence_match})
                                     else:
                                         hmmer_parser_support[current_sequence] = {model_id: sequence_match}
-                                    sequence_match = {}
-
                                 current_sequence = domain_section_header_matcher.group(1)
                             stage = 'LOOKING_FOR_DOMAIN_DATA_LINE'
                         if line.strip().startswith("=="):
