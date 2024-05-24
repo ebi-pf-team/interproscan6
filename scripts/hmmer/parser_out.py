@@ -27,6 +27,7 @@ def parse(out_file: str) -> dict:
     member_db = out_file.split("/")[-1].split("_")[1].split(".")[0]
     current_sequence = None
     current_domain = None
+    sequence_match = {}
     domain_match = {}
     hmmer_parser_support = {}
     stage = 'LOOKING_FOR_METHOD_ACCESSION'
