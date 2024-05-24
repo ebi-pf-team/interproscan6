@@ -18,6 +18,9 @@ include {
     SFLD_POST_PROCESSER
 } from "$projectDir/modules/hmmer/post_processing/main"
 include {
+    PANTHER_FILTER_MATCHES;
+} from "$projectDir/modules/hmmer/filter/main"
+include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER
  } from "$projectDir/modules/signalp/main"
@@ -127,6 +130,7 @@ workflow SEQUENCE_ANALYSIS {
     PANTHER_HMMER_RUNNER(runner_hmmer_panther_params)
     PANTHER_HMMER_PARSER(PANTHER_HMMER_RUNNER.out, tsv_pro, "panther")
     PANTHER_POST_PROCESSER(PANTHER_HMMER_PARSER.out, fasta)
+    PANTHER_FILTER_MATCHES(PANTHER_POST_PROCESSER.out)
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_hmmer_sfld_params = fasta.combine(member_params.sfld)
@@ -154,7 +158,7 @@ workflow SEQUENCE_ANALYSIS {
     */
 
     GENERIC_HMMER_PARSER.out[0].concat(
-        PANTHER_POST_PROCESSER.out,
+        PANTHER_FILTER_MATCHES.out,
         SFLD_POST_PROCESSER.out,
         CDD_PARSER.out,
         SIGNALP_PARSER.out

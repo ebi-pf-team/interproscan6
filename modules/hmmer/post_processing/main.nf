@@ -1,3 +1,9 @@
+/*
+These scripts implement post-processing of the HMMER files.
+The output from these post-processing scripts and tools are 
+parsed and applied to the internal IPS6 JSON structure in the 
+filters module/
+*/
 
 process PANTHER_POST_PROCESSER {
     container 'docker.io/library/treegrafter'
@@ -12,7 +18,9 @@ process PANTHER_POST_PROCESSER {
         path fasta
 
     output:
-        path "${ips6_json}.post.processed.json"
+        path ips6_json
+        path "treegrafter_processed_panther_hits"
+        val postprocessing_params
 
     /*
     Input args for TreeGrafter:
@@ -32,15 +40,9 @@ process PANTHER_POST_PROCESSER {
         ${out_file} \
         ${postprocessing_params[0]} \
         -e ${postprocessing_params[1]} \
-        -o processed_panther_hits \
+        -o treegrafter_processed_panther_hits \
         --epa-ng /epa-ng/bin/epa-ng \
         --keep
-
-    python3 $projectDir/scripts/members/panther/process_treegrafter_hits.py \
-        processed_panther_hits \
-        ${ips6_json} \
-        ${postprocessing_params[2]} > ${ips6_json}.post.processed.json
-
     """
 }
 
