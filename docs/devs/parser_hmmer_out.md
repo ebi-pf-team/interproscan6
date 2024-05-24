@@ -1,6 +1,17 @@
-# Understanding HMMER.OUT parser:
+# Understanding HMMER.OUT parser
 
-## Initial info:
+<!-- TOC -->
+- [Initial info](#initial-info)
+  - [Query](#query)
+  - [Accession](#accession)
+  - [Description](#description)
+- [List of hits](#list-of-hits)
+- [Domain and Alignment Annotation](#domain-and-alignment-annotation)
+  - [How we get the alignments](#how-we-get-the-alignments)
+- [Two good examples](#two-good-examples)
+<!-- /TOC -->
+
+## [Initial info](initial-info)
 
 ### Query
 Name of the query sequence that input sequence matched, followed by qlen.
@@ -12,7 +23,7 @@ Sample:
 ```Query:       PTHR31901.orig.30.pir  [M=558]```
 
 
-### Accession:
+### Accession
 Each hmmer.out file is generated for a member hmm, in this case it's the member accession that was matched.
 
 Sample: 
@@ -21,7 +32,7 @@ Sample:
 
 ```Accession:   ANF00001```
 
-### Description:
+### Description
 description/detailed name of the matched sequence
 
 Sample:
@@ -37,7 +48,7 @@ List of the most significant sequence hits, ordered by E-value.
 ## Domain and Alignment Annotation
 Details the location of the domains identified in each sequence.
 
-#### How we get the alignments:
+#### How we get the alignments
 On the I5 we had this regex to get the alignments:
 
 ```^\\s+(\\w+)\\s+(\\S+)\\s+([-a-zA-Z]+)\\s+(\\S+)\\s*$```
@@ -54,9 +65,11 @@ But in the I6 parse, the way we deal with the current_sequence is slightly diffe
 
 
 
-### Two good examples of a match and what the result of the parse looks like:
+### Two good examples
 
-First one is a example with multiple domains:
+To understand the hmmer.out matches and what the result of the parse looks like, we get two good examples:
+
+- First one is a example with multiple domains:
 
 ```
 Query:       PTHR46751.orig.30.pir  [M=266]
@@ -142,7 +155,7 @@ Domain annotation for each sequence (and alignments):
 }
 ```
 
-On second one we have two queries (exonuc_ExeM-GG and ExeM_NucH_DNase) matching with two sequences (WP_249252303.1 and WP_338726824.1)
+- On second one we have two queries (exonuc_ExeM-GG and ExeM_NucH_DNase) matching with two sequences (WP_249252303.1 and WP_338726824.1)
 
 ```
 (...)
