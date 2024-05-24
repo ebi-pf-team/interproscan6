@@ -5,6 +5,18 @@ from datetime import datetime
 import xml.etree.ElementTree as ET
 
 
+MATCH_ELEMENT = {
+    'SIGNALP': 'signal-peptide',
+    'CDD': 'cdd-domain',
+    'ANTIFAM': 'hmmer3-match',
+    'GENE3D': 'hmmer3-match',
+    'FUNFAM': 'hmmer3-match',
+    'NCBIFAM': 'hmmer3-match',
+    'PANTHER': 'hmmer3-match',
+    'SFLD': 'hmmer3-match',
+}
+
+
 def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
     def write_to_tsv(
             seq_id, md5, seq_len, member_db, sig_acc,
@@ -49,9 +61,9 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                 for location in match["locations"]:
                     if match_acc == "signal_peptide":
                         sig_acc, status = "Signal Peptide", ""
-                        ali_from = match["start"]
-                        ali_to = match["end"]
-                        evalue = match["pvalue"]
+                        ali_from = match["locations"][0]["start"]
+                        ali_to = match["locations"][0]["end"]
+                        evalue = match["locations"][0]["pvalue"]
                     else:
                         sig_acc = match["accession"]
                         status = "T"
@@ -89,10 +101,10 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                 if match_key == "signal_peptide":
                     match = {
                         "signature": match_key,
-                        "SignalP_release": match_data["signalp_version"],
-                        "start": match_data["start"],
-                        "end": match_data["end"],
-                        "pvalue": match_data["pvalue"],
+                        "SignalP_release": match_data["version"],
+                        "start": match_data["locations"][0]["start"],
+                        "end": match_data["locations"][0]["end"],
+                        "pvalue": match_data["locations"][0]["pvalue"],
                     }
                 else:
                     description = "-"
@@ -164,7 +176,8 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
         matches_elem = ET.SubElement(protein_elem, "matches")
         if 'matches' in data and data['matches']:
             for match_key, match_data in data['matches'].items():
-                match_elem = ET.SubElement(matches_elem, "hmmer3-match")
+                match_elem = ET.SubElement(matches_elem, MATCH_ELEMENT[match_data['member_db'].upper()])
+
                 try:
                     match_elem.set("evalue", str(match_data['evalue']).upper())
                     match_elem.set("score", str(match_data["score"]))
@@ -172,9 +185,11 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     pass  # some members may not have evalue or score on this level (e.g. cdd)
 
                 signature_elem = ET.SubElement(match_elem, "signature")
-                signature_elem.set("ac", match_data['accession'])
-                signature_elem.set("desc", match_data['name'])
-                signature_elem.set("name", match_data['name'])
+                if match_data['member_db'].upper() not in ['SIGNALP']:  # member db that don't have sigs, so no accs etc.
+                    signature_elem.set("ac", match_data['accession'])
+                    signature_elem.set("desc", match_data['name'])
+                    signature_elem.set("name", match_data['name'])
+
                 if match_data['entry']:
                     signature_elem.set("desc", match_data["entry"]['description'])
                     signature_elem.set("name", match_data['entry']['short_name'])
@@ -205,6 +220,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                 model_ac_elem.text = match_key
 
                 locations_elem = ET.SubElement(match_elem, "locations")
+                
                 for location in match_data['locations']:
                     if match_data['member_db'].upper() == "CDD":
                         location_elem = ET.SubElement(locations_elem, "cdd-location")
@@ -214,6 +230,10 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("evalue", str(location["evalue"]))
                         location_elem.set("score", str(location["score"]))
                         location_elem.set("postProcessed", str(location["postProcessed"]))
+                    elif match_data['member_db'].upper() == "SIGNALP":
+                        location_elem.set("end", str(location["end"]))
+                        location_elem.set("start", str(location["start"]))
+                        location_elem.set("pvalue", str(location["pvalue"]))
                     else:
                         location_elem = ET.SubElement(locations_elem, "hmmer3-location")
                         location_elem.set("env-end", str(location["envelopeEnd"]))
