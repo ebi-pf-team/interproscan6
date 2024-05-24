@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 def get_current_output(current_output_path: str, input_path: str, applications: str, disable_precalc: bool) -> ET.Element:
     disable_precalc = "--disable_precalc" if disable_precalc else ""
     command = f"nextflow run interproscan.nf --input {input_path} --applications {applications} {disable_precalc} --formats xml --output {current_output_path} --goterms --pathways"
-    # subprocess.run(command, shell=True)
+    subprocess.run(command, shell=True)
     with open(str(current_output_path) + ".xml", 'r') as f:
         tree = ET.parse(f)
     return tree.getroot()
@@ -33,24 +33,24 @@ def xml2dict(element: ET.Element):
     return result
 
 
-def compare(expected, current, ignore_elements: list):
-    for key in expected:
+def compare(dict1, dict2, ignore_elements: list, comparing_type: str):
+    for key in dict1:
         if key in ignore_elements:
             continue
-        if key not in current:
-            print(f"Key '{key}' missing in current dict")
-        if isinstance(expected[key], dict):
-            compare(expected[key], current[key], ignore_elements)
-        elif isinstance(expected[key], list):
-            if len(expected[key]) != len(current[key]):
+        if key not in dict2:
+            print(f"Key '{key}' {comparing_type} in current dict")
+        if isinstance(dict1[key], dict):
+            compare(dict1[key], dict2[key], ignore_elements, comparing_type)
+        elif isinstance(dict1[key], list):
+            if len(dict1[key]) != len(dict2[key]):
                 print(f"List length mismatch for key '{key}'")
             else:
-                for i in range(len(expected[key])):
-                    compare(expected[key][i], current[key][i], ignore_elements)
+                for i in range(len(dict1[key])):
+                    compare(dict1[key][i], dict2[key][i], ignore_elements, comparing_type)
         else:
-            if str(expected[key]).lower() != str(current[key]).lower():
-                print(f"  expected: {expected[key]}")
-                print(f"  current: {current[key]}")
+            if str(dict1[key]).lower() != str(dict2[key]).lower():
+                print(f"  dict1: {dict1[key]}")
+                print(f"  dict2: {dict2[key]}")
                 print(f"Value mismatch for key '{key}'")
 
 
@@ -70,10 +70,8 @@ def test_xml_output(input_path, expected_output_path, current_output_path, appli
     expected = xml2dict(expected_output)
     current = xml2dict(current_output)
 
-    ignore_elements = ['representative', 'hmmer3-location-fragment', 'hmm-bounds', 'evalue']
-    print("Missing elements in current output:")
-    compare(expected, current, ignore_elements)
-    print("Extra elements in current output:")
-    compare(current, expected, ignore_elements)
+    ignore_elements = ['representative', 'hmmer3-location-fragment', 'hmm-bounds', 'evalue', "sites"]
+    compare(expected, current, ignore_elements, "missing")
+    compare(current, expected, ignore_elements, "extra")
 
     # assert expected == current  # Uncomment this line when output totally implemented

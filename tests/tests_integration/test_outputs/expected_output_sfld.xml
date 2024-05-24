@@ -13,15 +13,15 @@
 <sequence md5="268e4659f70d6eb10e6545eccaa347cf">MLIERMFPFISESVRVHQLPEGGVLEIDYMRDNVSISDFEYLDLNKTAYELCMLMDGQKTAEQILEYQCAAYNESPEDHKDWYYEMLDMLLNKQVIRLTDQPEYRRIATSGSSDFPMPLHATFELTHRCNLKCAHCYLESSPEALGTVSLEQFKKTADMLYEKGVLTCEITGGEIFVHPNANELLEYVLKKFKKVAVLTNGTLMRKESLEILRAYKQKIIVGISLDSVHSEVHDSFRGRKGSFAQTCKTIKLLSDHGIFVRVAMSVFEKNMWEIHDMAQKVRDLGAKAFSYNWVDDFGRGKDMIHPTKDAEQHRKFMEYEQNVIDEFKDLIPIIPYERKRAANCGAGWKSIVISPFGEVRPCALFPKEFSLGNIFHDSYESIFDSALVHKLWKAQAPRFSEHCKKDKCPFSGYCGGCYLKGLNSNKYHRKNICSWAKNEQLEDVVQLI</sequence>
 <xref id="A0A0H3E4R3_BACA1" name="A0A0H3E4R3_BACA1 1-448"/>
 <matches>
-<hmmer3-match-with-sites evalue="0.0" score="609.7">
+<hmmer3-match evalue="0.0" score="609.7">
 <signature ac="SFLDG01386" desc="main SPASM domain-containing" name="main_SPASM_domain-containing">
 <signature-library-release library="SFLD" version="4"/>
 </signature>
 <model-ac>SFLDG01386</model-ac>
 <locations>
-<hmmer3-location-with-sites env-end="448" env-start="1" score="609.6" evalue="0.0" hmm-start="1" hmm-end="443" hmm-length="349" hmm-bounds="N_TERMINAL_COMPLETE" start="1" end="447" representative="false">
+<hmmer3-location env-end="448" env-start="1" score="609.6" evalue="0.0" hmm-start="1" hmm-end="443" hmm-length="349" hmm-bounds="N_TERMINAL_COMPLETE" start="1" end="447" representative="false">
 <location-fragments>
-<hmmer3-location-fragment-with-sites start="1" end="447" dc-status="CONTINUOUS"/>
+<hmmer3-location-fragment start="1" end="447" dc-status="CONTINUOUS"/>
 </location-fragments>
 <sites>
 <hmmer3-site description="Binds [4Fe-4S]-AdoMet cluster" numLocations="3">
@@ -35,18 +35,18 @@
 <hmmStart>0</hmmStart>
 </hmmer3-site>
 </sites>
-</hmmer3-location-with-sites>
+</hmmer3-location>
 </locations>
-</hmmer3-match-with-sites>
-<hmmer3-match-with-sites evalue="0.0" score="609.7">
+</hmmer3-match>
+<hmmer3-match evalue="0.0" score="609.7">
 <signature ac="SFLDF00315" desc="antilisterial bacteriocin subtilosin biosynthesis protein (AlbA-like)" name="antilisterial_bacteriocin_sub">
 <signature-library-release library="SFLD" version="4"/>
 </signature>
 <model-ac>SFLDF00315</model-ac>
 <locations>
-<hmmer3-location-with-sites env-end="448" env-start="1" score="609.6" evalue="0.0" hmm-start="1" hmm-end="443" hmm-length="448" hmm-bounds="N_TERMINAL_COMPLETE" start="1" end="447" representative="false">
+<hmmer3-location env-end="448" env-start="1" score="609.6" evalue="0.0" hmm-start="1" hmm-end="443" hmm-length="448" hmm-bounds="N_TERMINAL_COMPLETE" start="1" end="447" representative="false">
 <location-fragments>
-<hmmer3-location-fragment-with-sites start="1" end="447" dc-status="CONTINUOUS"/>
+<hmmer3-location-fragment start="1" end="447" dc-status="CONTINUOUS"/>
 </location-fragments>
 <sites>
 <hmmer3-site description="Binds [4Fe-4S]-AdoMet cluster" numLocations="3">
@@ -60,9 +60,9 @@
 <hmmStart>0</hmmStart>
 </hmmer3-site>
 </sites>
-</hmmer3-location-with-sites>
+</hmmer3-location>
 </locations>
-</hmmer3-match-with-sites>
+</hmmer3-match>
 </matches>
 </protein>
 <protein>
@@ -79,15 +79,15 @@
 <sequence md5="f91cb3cf61f2d7c7f5aaf6ea04e07868">MKKNFYLYVALFVAAIVAISAIASSFSAKANNENVTVNNENNNEQKEELPNVVILATGGTIAGTGSSSTQTTGYKSGDLGIETLIEAVPEMKELANITGEQIVKVDSTDITNEILLKLGKRVNELLASDDVDGIVITHGTDTLEETAYFLNLVVKSDKPVVLTAAMRPATAMSADGPFNLYNAVLLASHESSKGKGVLVTLNDRIASARNITKTNTTATDAFKSFENGYLGAIVAGKPYYYNNVERLHTTETPFDISKIKKLPQVDIIYGYQNSPTYMYKAAVQNGAKGIIVAAPGDGTLSAKSVEGVKYAMNKGVKVVLSSRVGTGTVSPKEGYITSDSLNPQKARILLMLALTVTNDPQEIQSFFDKY</sequence>
 <xref id="UPI0002E0D40B" name="UPI0002E0D40B status=active"/>
 <matches>
-<hmmer3-match-with-sites evalue="0.0" score="234.9">
+<hmmer3-match evalue="0.0" score="234.9">
 <signature ac="SFLDS00057" desc="Glutaminase/Asparaginase" name="Glutaminase/Asparaginase">
 <signature-library-release library="SFLD" version="4"/>
 </signature>
 <model-ac>SFLDS00057</model-ac>
 <locations>
-<hmmer3-location-with-sites env-end="370" env-start="44" score="234.7" evalue="0.0" hmm-start="3" hmm-end="332" hmm-length="343" hmm-bounds="INCOMPLETE" start="46" end="367" representative="false">
+<hmmer3-location env-end="370" env-start="44" score="234.7" evalue="0.0" hmm-start="3" hmm-end="332" hmm-length="343" hmm-bounds="INCOMPLETE" start="46" end="367" representative="false">
 <location-fragments>
-<hmmer3-location-fragment-with-sites start="46" end="367" dc-status="CONTINUOUS"/>
+<hmmer3-location-fragment start="46" end="367" dc-status="CONTINUOUS"/>
 </location-fragments>
 <sites>
 <hmmer3-site description="general acid/base" numLocations="1">
@@ -107,9 +107,9 @@
 <hmmStart>0</hmmStart>
 </hmmer3-site>
 </sites>
-</hmmer3-location-with-sites>
+</hmmer3-location>
 </locations>
-</hmmer3-match-with-sites>
+</hmmer3-match>
 </matches>
 </protein>
 <protein>

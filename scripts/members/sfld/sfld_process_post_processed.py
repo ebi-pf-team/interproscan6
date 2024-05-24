@@ -156,21 +156,21 @@ def filter_matches_and_add_site(ips6, hits):
                                             if "sites" not in processed_ips6_data[protein_id][signature_acc]["locations"][i]:
                                                 processed_ips6_data[protein_id][signature_acc]["locations"][i]["sites"] = []
 
-                                            site_info = {
-                                                "description": site.site_desc,
-                                                "numLocations": len(site.site_residues.split(",")),
-                                                "siteLocations": []
-                                            }
-                                            for site_location in site.site_residues.split(","):
-                                                site_info['siteLocations'].append({
-                                                    "start": site_location[0],
-                                                    "end": site_location.split("-")[0][1:],
-                                                    "residue": site_location[0],
-                                                })
+                                        site_info = {
+                                            "description": site.site_desc,
+                                            "numLocations": len(site.site_residues.split(",")),
+                                            "siteLocations": []
+                                        }
+                                        for site_location in site.site_residues.split(","):
+                                            site_info['siteLocations'].append({
+                                                "start": site_location[0],
+                                                "end": site_location.split("-")[0][1:],
+                                                "residue": site_location[0],
+                                            })
 
                                             processed_ips6_data[protein_id][signature_acc]["locations"][i]["sites"].append(site_info)
 
-                                            break
+                                        break
 
     return processed_ips6_data
 

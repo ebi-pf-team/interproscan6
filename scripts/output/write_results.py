@@ -165,8 +165,11 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
         if 'matches' in data and data['matches']:
             for match_key, match_data in data['matches'].items():
                 match_elem = ET.SubElement(matches_elem, "hmmer3-match")
-                match_elem.set("evalue", str(match_data['evalue']).upper())
-                match_elem.set("score", str(match_data["score"]))
+                try:
+                    match_elem.set("evalue", str(match_data['evalue']).upper())
+                    match_elem.set("score", str(match_data["score"]))
+                except KeyError:
+                    pass  # some members may not have evalue or score on this level (e.g. cdd)
 
                 signature_elem = ET.SubElement(match_elem, "signature")
                 signature_elem.set("ac", match_data['accession'])
@@ -203,32 +206,49 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
 
                 locations_elem = ET.SubElement(match_elem, "locations")
                 for location in match_data['locations']:
-                    location_elem = ET.SubElement(locations_elem, "hmmer3-location")
-                    location_elem.set("env-end", str(location["envelopeEnd"]))
-                    location_elem.set("env-start", str(location["envelopeStart"]))
-                    location_elem.set("post-processed", str(location["postProcessed"]))
-                    location_elem.set("score", str(location["score"]))
-                    location_elem.set("evalue", str(location["evalue"]).upper())
-                    location_elem.set("hmm-start", str(location["hmmStart"]))
-                    location_elem.set("hmm-end", str(location["hmmEnd"]))
-                    location_elem.set("hmm-length", str(location["hmmLength"]))
-                    location_elem.set("hmm-bounds", str(location["hmmBounds"]))
-                    location_elem.set("start", str(location["start"]))
-                    location_elem.set("end", str(location["end"]))
-                    location_elem.set("representative", str(location["representative"]))
-                    try:
-                        location_elem.set("alignment", str(location["alignment"]))
-                        location_elem.set("cigar-alignment", str(location["cigar_alignment"]))
-                    except KeyError:
-                        pass
+                    if match_data['member_db'].upper() == "CDD":
+                        location_elem = ET.SubElement(locations_elem, "cdd-location")
+                        location_elem.set("end", str(location["end"]))
+                        location_elem.set("start", str(location["start"]))
+                        location_elem.set("representative", str(location["representative"]))
+                        location_elem.set("evalue", str(location["evalue"]))
+                        location_elem.set("score", str(location["score"]))
+                        location_elem.set("postProcessed", str(location["postProcessed"]))
+                    else:
+                        location_elem = ET.SubElement(locations_elem, "hmmer3-location")
+                        location_elem.set("env-end", str(location["envelopeEnd"]))
+                        location_elem.set("env-start", str(location["envelopeStart"]))
+                        location_elem.set("score", str(location["score"]))
+                        location_elem.set("evalue", str(location["evalue"]).upper())
+                        location_elem.set("hmm-start", str(location["hmmStart"]))
+                        location_elem.set("hmm-end", str(location["hmmEnd"]))
+                        location_elem.set("hmm-length", str(location["hmmLength"]))
+                        location_elem.set("hmm-bounds", str(location["hmmBounds"]))
+                        location_elem.set("start", str(location["start"]))
+                        location_elem.set("end", str(location["end"]))
+                        location_elem.set("representative", str(location["representative"]))
+                        if match_data['member_db'].upper() in ["NCBIFAM", "ANTIFAM"]:
+                            location_elem.set("post-processed", str(location["postProcessed"]))
+                        try:
+                            location_elem.set("alignment", str(location["alignment"]))
+                            location_elem.set("cigar-alignment", str(location["cigar_alignment"]))
+                        except KeyError:
+                            pass
+
                     location_frags_elem = ET.SubElement(location_elem, "location-fragments")
                     if 'sites' in location:
                         for site in location['sites']:
-                            for sitelocation in site['siteLocations']:
-                                location_frag_elem = ET.SubElement(location_frags_elem, "hmmer3-location-fragment")
-                                location_frag_elem.set("start", str(sitelocation["start"]))
-                                location_frag_elem.set("end", str(sitelocation["end"]))
-                                location_frag_elem.set("dc-status", "")
+                            if match_data['member_db'].upper() == "CDD":
+                                location_frag_elem = ET.SubElement(location_frags_elem, "cdd-location-fragment")
+                                location_frag_elem.set("start", str(site['siteLocations']["start"]))
+                                location_frag_elem.set("end", str(site['siteLocations']["end"]))
+                                location_frag_elem.set("residue", str(site['siteLocations']["residue"]))
+                            else:
+                                for sitelocation in site['siteLocations']:
+                                    location_frag_elem = ET.SubElement(location_frags_elem, "hmmer3-location-fragment")
+                                    location_frag_elem.set("start", str(sitelocation["start"]))
+                                    location_frag_elem.set("end", str(sitelocation["end"]))
+                                    location_frag_elem.set("dc-status", "")
 
     tree = ET.ElementTree(root)
     ET.indent(tree, space="\t", level=0)
