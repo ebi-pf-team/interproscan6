@@ -17,14 +17,12 @@ nextflow_workflow {
             params {
                 input="$projectDir/tests/test_inputs/protein_seqs.fasta"
                 applications="antifam,CDD"
-                formats="json,xml"
             }
             workflow {
                 """
                 input[1] = file("${params.input}")
                 input[3] = ['input', 'applications', 'disable_precalc', ]
                 input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
                 """
             }
         }
@@ -43,7 +41,6 @@ nextflow_workflow {
             params {
                 input="test_inputs/protein_seqs.fasta"
                 applications="antifam,CDD"
-                formats="tsv-pro"
             }
             workflow {
                 """
@@ -51,7 +48,6 @@ nextflow_workflow {
                 input[1] = file("${params.input}")
                 input[3] = ['input', 'applications', 'disable_precalc', ]
                 input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
                 """
             }
         }
@@ -70,13 +66,11 @@ nextflow_workflow {
             params {
                 nucleic=false
                 applications="antifam,CDD"
-                formats="json,xml,tsv"
             }
             workflow {
                 """
                 input[3] = ['input', 'applications', 'disable_precalc', 'help']
                 input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
                 """
             }
         }
@@ -96,7 +90,6 @@ nextflow_workflow {
             params {
                 input="$projectDir/tests/test_inputs/protein_seqs.fasta"
                 applications="antifam,CDD"
-                formats="json,tsv,tsv-pro"
             }
             workflow {
                 """
@@ -104,7 +97,6 @@ nextflow_workflow {
                 input[2] = "true"
                 input[3] = ['input', 'applications', 'disable_precalc', 'help']
                 input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
                 """
             }
         }
@@ -124,7 +116,6 @@ nextflow_workflow {
             params {
                 input="$projectDir/tests/test_inputs/nt_seqs.fasta"
                 applications="antifam,CDD"
-                formats="json"
             }
             workflow {
                 """
@@ -132,7 +123,6 @@ nextflow_workflow {
                 input[2] = "true"
                 input[3] = ['input', 'applications', 'disable_precalc', 'help']
                 input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
                 """
             }
         }
@@ -151,14 +141,12 @@ nextflow_workflow {
             params {
                 input="test_inputs/protein_seqs.fasta"
                 applications="antifam,CDD"
-                formats="json,xml"
             }
             workflow {
                 """
                 input[1] = file("${params.input}")
                 input[3] = ['input', 'Bilbo']
                 input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
                 """
             }
         }
@@ -177,39 +165,12 @@ nextflow_workflow {
             params {
                 input="test_inputs/protein_seqs.fasta"
                 applications="antifam,CDD,Frodo"
-                formats="json,xml"
             }
             workflow {
                 """
                 input[1] = file("${params.input}")
                 input[3] = ['input', 'help']
                 input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
-                """
-            }
-        }
-
-        then {
-            assert workflow.failed
-            assert workflow.exitStatus == 22
-        }
-
-    }
-
-    test("Invalid format") {
-
-        when {
-            params {
-                input="test_inputs/protein_seqs.fasta"
-                applications="antifam,CDD"
-                formats="json,xml,Gollum"
-            }
-            workflow {
-                """
-                input[1] = file("${params.input}")
-                input[3] = ['input', 'help']
-                input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
                 """
             }
         }
@@ -228,14 +189,12 @@ nextflow_workflow {
             params {
                 input="$projectDir/tests/test_inputs/empty.fasta"
                 applications="antifam,CDD"
-                formats="tsv-pro,tsv"
             }
             workflow {
                 """
                 input[1] = file("${params.input}")
                 input[3] = ['input', 'help']
                 input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
                 """
             }
         }
