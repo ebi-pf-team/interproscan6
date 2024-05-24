@@ -65,7 +65,9 @@ process SFLD_POST_PROCESSER {
         val tsv_pro
 
     output:
-        path "${tsv_pro ? "${out_file}.post.processed.out.json" : "${out_dtbl}.post.processed.dtbl.json"}"
+        path ips6_json
+        path "${tsv_pro ? "${out_file}.processed.out" : "${out_dtbl}.processed.dtbl"}"
+        val postprocessing_params
 
     script:
         """
@@ -75,10 +77,5 @@ process SFLD_POST_PROCESSER {
             --hmmer-out '${out_file}' \
             --site-info '${postprocessing_params[1]}' \
             --output '${tsv_pro ? "${out_file}.processed.out" : "${out_dtbl}.processed.dtbl"}'
-
-        python3 $projectDir/scripts/members/sfld/sfld_process_post_processed.py \
-            '${tsv_pro ? "${out_file}.processed.out" : "${out_dtbl}.processed.dtbl"}' \
-            ${ips6_json} \
-            > '${tsv_pro ? "${out_file}.post.processed.out.json" : "${out_dtbl}.post.processed.dtbl.json"}'
         """
 }

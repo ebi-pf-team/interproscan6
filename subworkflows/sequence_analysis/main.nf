@@ -19,6 +19,7 @@ include {
 } from "$projectDir/modules/hmmer/post_processing/main"
 include {
     PANTHER_FILTER_MATCHES;
+    SFLD_FILTER_MATCHES;
 } from "$projectDir/modules/hmmer/filter/main"
 include {
     SIGNALP_RUNNER;
@@ -137,6 +138,7 @@ workflow SEQUENCE_ANALYSIS {
     SFLD_HMMER_RUNNER(runner_hmmer_sfld_params)
     SFLD_HMMER_PARSER(SFLD_HMMER_RUNNER.out, tsv_pro, "sfld")
     SFLD_POST_PROCESSER(SFLD_HMMER_PARSER.out, tsv_pro)
+    SFLD_FILTER_MATCHES(SFLD_POST_PROCESSER.out)
     
     /*
     Member databases that do NOT use HMMER
@@ -159,7 +161,7 @@ workflow SEQUENCE_ANALYSIS {
 
     GENERIC_HMMER_PARSER.out[0].concat(
         PANTHER_FILTER_MATCHES.out,
-        SFLD_POST_PROCESSER.out,
+        SFLD_FILTER_MATCHES.out,
         CDD_PARSER.out,
         SIGNALP_PARSER.out
     )

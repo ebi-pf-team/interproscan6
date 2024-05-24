@@ -25,3 +25,23 @@ process PANTHER_FILTER_MATCHES {
         ${postprocessing_params[2]} > ${ips6_json}.post.processed.json
     """
 }
+
+process SFLD_FILTER_MATCHES {
+    label 'analysis_parser'
+
+    input:
+        path ips6_json
+        path slfd_post_processed_output
+        val postprocessing_params
+
+    output:
+        path "${ips6_json}.post.processed.json"
+
+    script:
+    """
+    python3 $projectDir/scripts/members/sfld/sfld_process_post_processed.py \
+        '${slfd_post_processed_output}' \
+        ${ips6_json} \
+        > '${ips6_json}.post.processed.json'
+    """
+}
