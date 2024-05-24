@@ -18,15 +18,15 @@
         "description" : "2-amino-3,7-dideoxy-D-threo-hept-6-ulosonate synthase",
         "type" : "FAMILY",
         "goXRefs" : [ {
-          "name" : "aromatic amino acid family biosynthetic process",
-          "databaseName" : "GO",
-          "category" : "BIOLOGICAL_PROCESS",
-          "id" : "GO:0009073"
-        }, {
           "name" : "hydro-lyase activity",
           "databaseName" : "GO",
           "category" : "MOLECULAR_FUNCTION",
           "id" : "GO:0016836"
+        }, {
+          "name" : "aromatic amino acid family biosynthetic process",
+          "databaseName" : "GO",
+          "category" : "BIOLOGICAL_PROCESS",
+          "id" : "GO:0009073"
         } ],
         "pathwayXRefs" : [ {
           "name" : "3-dehydroquinate biosynthesis II (archaea)",
@@ -80,15 +80,15 @@
         "description" : "1-aminocyclopropane-1-carboxylate deaminase",
         "type" : "FAMILY",
         "goXRefs" : [ {
-          "name" : "pyridoxal phosphate binding",
-          "databaseName" : "GO",
-          "category" : "MOLECULAR_FUNCTION",
-          "id" : "GO:0030170"
-        }, {
           "name" : "1-aminocyclopropane-1-carboxylate deaminase activity",
           "databaseName" : "GO",
           "category" : "MOLECULAR_FUNCTION",
           "id" : "GO:0008660"
+        }, {
+          "name" : "pyridoxal phosphate binding",
+          "databaseName" : "GO",
+          "category" : "MOLECULAR_FUNCTION",
+          "id" : "GO:0030170"
         }, {
           "name" : "amine catabolic process",
           "databaseName" : "GO",
@@ -547,15 +547,15 @@
         "description" : "L-asparaginase, type II",
         "type" : "FAMILY",
         "goXRefs" : [ {
-          "name" : "asparagine metabolic process",
-          "databaseName" : "GO",
-          "category" : "BIOLOGICAL_PROCESS",
-          "id" : "GO:0006528"
-        }, {
           "name" : "asparaginase activity",
           "databaseName" : "GO",
           "category" : "MOLECULAR_FUNCTION",
           "id" : "GO:0004067"
+        }, {
+          "name" : "asparagine metabolic process",
+          "databaseName" : "GO",
+          "category" : "BIOLOGICAL_PROCESS",
+          "id" : "GO:0006528"
         } ],
         "pathwayXRefs" : [ {
           "name" : "N-(1-deoxy-D-fructos-1-yl)-L-asparagine degradation",
@@ -754,15 +754,15 @@
         "description" : "1-aminocyclopropane-1-carboxylate deaminase",
         "type" : "FAMILY",
         "goXRefs" : [ {
-          "name" : "pyridoxal phosphate binding",
-          "databaseName" : "GO",
-          "category" : "MOLECULAR_FUNCTION",
-          "id" : "GO:0030170"
-        }, {
           "name" : "1-aminocyclopropane-1-carboxylate deaminase activity",
           "databaseName" : "GO",
           "category" : "MOLECULAR_FUNCTION",
           "id" : "GO:0008660"
+        }, {
+          "name" : "pyridoxal phosphate binding",
+          "databaseName" : "GO",
+          "category" : "MOLECULAR_FUNCTION",
+          "id" : "GO:0030170"
         }, {
           "name" : "amine catabolic process",
           "databaseName" : "GO",

@@ -6,7 +6,7 @@ from cigar_alignment import cigar_alignment_parser, encode
 
 DOMAIN_SECTION_START_PATTERN = re.compile(r"^>>\s+(\S+).*$")
 DOMAIN_ALIGNMENT_LINE_PATTERN = re.compile(r"^\s+==\s+domain\s+(\d+)\s+.*$")
-ALIGNMENT_SEQUENCE_PATTERN = re.compile(r"^\s+(\S+)\s+(\d+)\s+([-a-zA-Z]+)\s+(\d+)\s*$") # replacing (\w+) with (\S+) and adding if to ignore current sequence
+ALIGNMENT_SEQUENCE_PATTERN = re.compile(r"^\s+(\S+)\s+(\S+)\s+([-a-zA-Z]+)\s+(\S+)\s*$") # replacing (\w+) with (\S+) and adding if to ignore current sequence
 DOMAIN_LINE_PATTERN = re.compile(
                                 "^\\s+(\\d+)\\s+[!?]\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\S+).*$")
 

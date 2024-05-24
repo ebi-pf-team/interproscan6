@@ -4,7 +4,7 @@ import subprocess
 
 def get_current_output(current_output_path: str, input_path: str, applications: str, disable_precalc: bool) -> dict:
     disable_precalc = "--disable_precalc" if disable_precalc else ""
-    command = f"nextflow run interproscan.nf --input {input_path} --applications {applications} {disable_precalc} --formats json --output {current_output_path}"
+    command = f"nextflow run interproscan.nf --input {input_path} --applications {applications} {disable_precalc} --formats json,tsv-pro --output {current_output_path} --goterms --pathways"
     subprocess.run(command, shell=True)
     with open(str(current_output_path) + ".json", 'r') as f:
         return json.load(f)
@@ -56,7 +56,7 @@ def test_json_output(input_path, expected_output_path, current_output_path, appl
     expected = json2dict(expected_output)
     current = json2dict(current_output)
 
-    ignore_elements = ['representative', 'location-fragments', 'hmmBounds']
+    ignore_elements = ['representative', 'location-fragments']
     print("Missing elements in current output:")
     compare(expected, current, ignore_elements)
     print("Extra elements in current output:")
