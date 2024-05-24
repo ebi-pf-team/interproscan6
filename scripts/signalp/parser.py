@@ -42,9 +42,11 @@ def parse(signalp_out: str, threshold: float, signalp_version: str):
                     "signal_peptide": {
                         "member_db": "SignalP",
                         "version": signalp_version,
-                        "start": start_location,
-                        "end": end_location,
-                        "pvalue": pvalue
+                        "locations": [{
+                            "start": start_location,
+                            "end": end_location,
+                            "pvalue": pvalue
+                        }]
                     }
                 }
 

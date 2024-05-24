@@ -5,23 +5,36 @@ from datetime import datetime
 import xml.etree.ElementTree as ET
 
 
+MATCH_ELEMENT = {
+    'SIGNALP': 'signal-peptide',
+    'CDD': 'cdd-domain',
+    'ANTIFAM': 'hmmer3-match',
+    'GENE3D': 'hmmer3-match',
+    'FUNFAM': 'hmmer3-match',
+    'NCBIFAM': 'hmmer3-match',
+    'PANTHER': 'hmmer3-match',
+    'SFLD': 'hmmer3-match',
+}
+
+
 def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
     def write_to_tsv(
             seq_id, md5, seq_len, member_db, sig_acc,
             sig_desc, ali_from, ali_to, evalue, status,
-            current_date, interpro_acc, interpro_name, xrefs
-    ):
+            current_date, interpro_acc, interpro_name,
+            cigar_alignment, xrefs):
         tsv_file.write((
             f"{seq_id}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t"
             f"{sig_desc}\t{ali_from}\t{ali_to}\t{evalue}\t{status}\t"
             f"{current_date}\t{interpro_acc}\t{interpro_name}\t"
-            f"{xrefs}\n"
+            f"{cigar_alignment}\t{xrefs}\n"
         ))
 
     tsv_output = os.path.join(output_path + '.tsv')
     if is_pro:
         tsv_output = tsv_output + "-pro"
 
+    cigar_alignment = None
     with open(tsv_output, 'w') as tsv_file:
         current_date = datetime.now().strftime('%d-%m-%Y')
         for seq_target, info in seq_matches.items():
@@ -45,26 +58,33 @@ def tsv_output(seq_matches: dict, output_path: str, is_pro: bool):
                 match_db = match["member_db"]
                 xrefs = f"{'|'.join(goterms)}\t{'|'.join(pathways)}"
 
-                if match_acc == "signal_peptide":
-                    sig_acc, status = "Signal Peptide", ""
-                    ali_from = match["start"]
-                    ali_to = match["end"]
-                    evalue = match["pvalue"]
-                else:
-                    sig_acc = match["accession"]
-                    status = "T"
-                    for location in match["locations"]:
+                for location in match["locations"]:
+                    if match_acc == "signal_peptide":
+                        sig_acc, status = "Signal Peptide", ""
+                        ali_from = match["locations"][0]["start"]
+                        ali_to = match["locations"][0]["end"]
+                        evalue = match["locations"][0]["pvalue"]
+                    else:
+                        sig_acc = match["accession"]
+                        status = "T"
                         evalue = location["evalue"]
                         ali_from = location["start"]
                         ali_to = location["end"]
-                write_to_tsv(
-                    seq_id, md5, seq_len, match_db,
-                    sig_acc, entry_desc, ali_from, ali_to,
-                    evalue, status, current_date, entry_acc,
-                    entry_name, xrefs)
+                    cigar_alignment = ""
+                    if is_pro:
+                        try:
+                            cigar_alignment = location["cigar_alignment"]
+                        except KeyError:
+                            pass  # some members may not have cigar alignment (e.g. cdd)
+
+                    write_to_tsv(
+                        seq_id, md5, seq_len, match_db,
+                        sig_acc, entry_desc, ali_from, ali_to,
+                        evalue, status, current_date, entry_acc,
+                        entry_name, cigar_alignment, xrefs)
 
 
-def json_output(seq_matches: dict, output_path: str, version:str):
+def json_output(seq_matches: dict, output_path: str, version: str):
     json_output = os.path.join(output_path + '.json')
     results = []
 
@@ -81,15 +101,15 @@ def json_output(seq_matches: dict, output_path: str, version:str):
                 if match_key == "signal_peptide":
                     match = {
                         "signature": match_key,
-                        "SignalP_release": match_data["signalp_version"],
-                        "start": match_data["start"],
-                        "end": match_data["end"],
-                        "pvalue": match_data["pvalue"],
+                        "SignalP_release": match_data["version"],
+                        "start": match_data["locations"][0]["start"],
+                        "end": match_data["locations"][0]["end"],
+                        "pvalue": match_data["locations"][0]["pvalue"],
                     }
                 else:
                     description = "-"
                     entry = None
-                    if match_data['entry']:
+                    if match_data['entry']['accession'] != "-":
                         description = match_data['entry']['description']
                         entry = match_data['entry']
                     signature = {
@@ -122,8 +142,11 @@ def json_output(seq_matches: dict, output_path: str, version:str):
 
                     if match_data['member_db'].upper() == "PANTHER":
                         # get protein class and graftpoint for Panther
-                        match['proteinClass'] = match_data['proteinClass']
-                        match['graftPoint'] = match_data['graftPoint']
+                        try:
+                            match['proteinClass'] = match_data['proteinClass']
+                            match['graftPoint'] = match_data['graftPoint']
+                        except KeyError:
+                            pass
 
                 matches.append(match)
 
@@ -159,26 +182,20 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
         matches_elem = ET.SubElement(protein_elem, "matches")
         if 'matches' in data and data['matches']:
             for match_key, match_data in data['matches'].items():
-                match_elem = ET.SubElement(matches_elem, "hmmer3-match")
-                match_elem.set("evalue", str(match_data['evalue']).upper())
-                match_elem.set("score", str(match_data["score"]))
+                match_elem = ET.SubElement(matches_elem, MATCH_ELEMENT[match_data['member_db'].upper()])
+
+                try:
+                    match_elem.set("evalue", str(match_data['evalue']).upper())
+                    match_elem.set("score", str(match_data["score"]))
+                except KeyError:
+                    pass  # some members may not have evalue or score on this level (e.g. cdd)
 
                 signature_elem = ET.SubElement(match_elem, "signature")
-                # try/except
-                # some member dbs (e.g. signalp and tmhmm) do no have signatures
-                # and thus do no have sig accs, names or descs
-                try:
+                if match_data['member_db'].upper() not in ['SIGNALP']:  # member db that don't have sigs, so no accs etc.
                     signature_elem.set("ac", match_data['accession'])
-                except KeyError:
-                    pass
-                try:
                     signature_elem.set("desc", match_data['name'])
-                except KeyError:
-                    pass
-                try:
                     signature_elem.set("name", match_data['name'])
-                except KeyError:
-                    pass
+
                 if match_data['entry']:
                     signature_elem.set("desc", match_data["entry"]['description'])
                     signature_elem.set("name", match_data['entry']['short_name'])
@@ -207,15 +224,28 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                 signature_library_elem.set("version", match_data['version'])
                 model_ac_elem = ET.SubElement(match_elem, "model-ac")
                 model_ac_elem.text = match_key
-                if 'locations' in match_data:
-                    locations_elem = ET.SubElement(match_elem, "locations")
-                    for location in match_data['locations']:
-                        location_elem = ET.SubElement(locations_elem, "hmmer3-location")
-                        location_elem.set("env-start", str(location["envelopeStart"]))
-                        location_elem.set("env-end", str(location["envelopeEnd"]))
-                        location_elem.set("post-processed", str(location["postProcessed"]))
-                        location_elem.set("score", str(location["score"]))
+
+                locations_elem = ET.SubElement(match_elem, "locations")
+
+                for location in match_data['locations']:
+                    if match_data['member_db'].upper() == "CDD":
+                        location_elem = ET.SubElement(locations_elem, "cdd-location")
+                        location_elem.set("end", str(location["end"]))
+                        location_elem.set("start", str(location["start"]))
+                        location_elem.set("representative", str(location["representative"]))
                         location_elem.set("evalue", str(location["evalue"]))
+                        location_elem.set("score", str(location["score"]))
+                        location_elem.set("postProcessed", str(location["postProcessed"]))
+                    elif match_data['member_db'].upper() == "SIGNALP":
+                        location_elem.set("end", str(location["end"]))
+                        location_elem.set("start", str(location["start"]))
+                        location_elem.set("pvalue", str(location["pvalue"]))
+                    else:
+                        location_elem = ET.SubElement(locations_elem, "hmmer3-location")
+                        location_elem.set("env-end", str(location["envelopeEnd"]))
+                        location_elem.set("env-start", str(location["envelopeStart"]))
+                        location_elem.set("score", str(location["score"]))
+                        location_elem.set("evalue", str(location["evalue"]).upper())
                         location_elem.set("hmm-start", str(location["hmmStart"]))
                         location_elem.set("hmm-end", str(location["hmmEnd"]))
                         location_elem.set("hmm-length", str(location["hmmLength"]))
@@ -223,9 +253,23 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("end", str(location["end"]))
                         location_elem.set("representative", str(location["representative"]))
-                        location_frags_elem = ET.SubElement(location_elem, "location-fragments")
-                        if 'sites' in location:
-                            for site in location['sites']:
+                        if match_data['member_db'].upper() in ["NCBIFAM", "ANTIFAM"]:
+                            location_elem.set("post-processed", str(location["postProcessed"]))
+                        try:
+                            location_elem.set("alignment", str(location["alignment"]))
+                            location_elem.set("cigar-alignment", str(location["cigar_alignment"]))
+                        except KeyError:
+                            pass
+
+                    location_frags_elem = ET.SubElement(location_elem, "location-fragments")
+                    if 'sites' in location:
+                        for site in location['sites']:
+                            if match_data['member_db'].upper() == "CDD":
+                                location_frag_elem = ET.SubElement(location_frags_elem, "cdd-location-fragment")
+                                location_frag_elem.set("start", str(site['siteLocations']["start"]))
+                                location_frag_elem.set("end", str(site['siteLocations']["end"]))
+                                location_frag_elem.set("residue", str(site['siteLocations']["residue"]))
+                            else:
                                 for sitelocation in site['siteLocations']:
                                     location_frag_elem = ET.SubElement(location_frags_elem, "hmmer3-location-fragment")
                                     location_frag_elem.set("start", str(sitelocation["start"]))

@@ -1,25 +1,7 @@
 import argparse
-import sys
+import json
 
 from pathlib import Path
-
-
-NO_HIT_MSGS = [
-    "[No hits detected that satisfy reporting thresholds]",
-    "[No targets detected that satisfy reporting thresholds]"
-]
-
-METADATA_LINES = (
-    "# Program:",
-    "# Version:",
-    "# Pipeline mode:",
-    "# Query file:",
-    "# Target file:",
-    "# Option settings:",
-    "# Current dir:",
-    "# Date:",
-    "# [ok]"
-)
 
 
 class SfldHit:
@@ -50,20 +32,6 @@ class SiteMatch:
         self.site_desc = None
 
 
-class HmmerHit:
-    """Represent record in the hmmer.out file
-
-    :field include: to include in output [bool]
-    :field lines: list of lines from hmmer.out file"""
-    def __init__(self):
-        self.query_ac = None
-        self.model_ac = None
-        self.desc = None
-        self.include = True
-        self.lines = []
-        self.domains = {}  # prot_id: lines from hmmer.out file
-
-
 def build_parser() -> argparse.ArgumentParser:
     """Build cmd-line argument parser"""
     parser = argparse.ArgumentParser(
@@ -79,17 +47,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "-d", "--dom",
+        "ips6",
         type=Path,
         default=None,
-        help="HMMER domtblout file",
-    )
-
-    parser.add_argument(
-        "-O", "--hmmer_out",
-        type=Path,
-        default=None,
-        help="HMMER output file",
+        help="Path to internal IPS6 JSON structure (from HMMER_PARSER)",
     )
 
     return parser
@@ -98,17 +59,12 @@ def build_parser() -> argparse.ArgumentParser:
 def main():
     parser = build_parser()
     args = parser.parse_args()
-
     hits = parse_sfld(args.sfld)
-
-    if args.dom:
-        update_dtbl(args.dom, hits)
-
-    # if args.hmmer_out:
-    #     print()
+    updated_ips6 = filter_matches_and_add_site(args.ips6, hits)
+    print(json.dumps(updated_ips6, indent=2))
 
 
-def parse_sfld(sfld: Path) -> list[SfldHit]:
+def parse_sfld(sfld: Path) -> dict[str, SfldHit]:
     """Retrieve site and domain hits from post-processed SFLD output
 
     :param sfld: path to post-processed SFLD output
@@ -149,84 +105,74 @@ def parse_sfld(sfld: Path) -> list[SfldHit]:
     return hits
 
 
-def update_dtbl(dtbl: Path, hits: dict[str, SfldHit]):
-    """Parse hmmer.dtbl output, removing hits not in 
-    slfd-post-processed, and adding site annotation data
+def filter_matches_and_add_site(ips6, hits):
+    """Parse internal IPS6 JSON and remove matches not selected by SFLD post-processing
+    and add in site annotations
 
-    :param dtbl: Path to hmmer.dtbl file
-    :param hits: dict of hits from sfld post-processed
+    :param ips6: path to internal IPS6 JSON structure
+    :param hits: dict of SfldHit instances.
+        keyed by query protein accession, with
+        values of SiteMatch instances and InterPro families
+        (representing domain hits)
     """
-    processed_file = Path(dtbl.parent) / dtbl.name.replace(".dtbl", ".dtbl.post_processed.dtbl")
-    closing_lines = ["#\n"]
-    with open(processed_file, "w") as out_fh:
-        with open(dtbl, "r") as in_fh:
-            for line in in_fh:
-                if line.startswith("#"):
-                    if line.startswith(METADATA_LINES):
-                        closing_lines.append(line)
-                    else:
-                        out_fh.write(line)
+    with open(ips6, "r") as fh:
+        ips6_data = json.load(fh)
+
+    processed_ips6_data = {}
+
+    for protein_id in ips6_data:
+        if protein_id not in hits:
+            # IPS6 will only contain SFLD hits at this stage
+            # so don't need to check if need to retain hits from other tools
+            continue
+
+        else:
+            for signature_acc in ips6_data[protein_id]:
+                if signature_acc not in hits[protein_id].domains:
+                    # domain match did not parse the filtering of the post-processing
+                    del ips6_data[protein_id][signature_acc]
                 else:
-                    # check if domain hit in sfld processed
-                    prot_id = line.split()[0]
-                    try:
-                        model_ac = line.split()[4]
-                    except IndexError:
-                        print("INDEX ERROR when line.split()[4]", line)
-                        sys.exit(5)
+                    if protein_id not in processed_ips6_data:
+                        processed_ips6_data[protein_id] = {}
+                    if signature_acc not in processed_ips6_data[protein_id]:
+                        processed_ips6_data[protein_id][signature_acc] = ips6_data[protein_id][signature_acc]
+                    
+                    # add site data
+                    # check each SfldSite instance as there can be multiple site hits
+                    # for each signature accession in a protein sequence
+                    for site in hits[protein_id].sites:
+                        if site.model_ac == signature_acc:
+                            if "sites" not in processed_ips6_data[protein_id][signature_acc]["locations"]:
 
-                    try:
-                        if model_ac in hits[prot_id].domains:
-                            out_fh.write(line)
-                    except KeyError:
-                        continue  # not in sfld-processed file
+                                site_positions = set()
+                                for position in site.site_residues.split(","):
+                                    residues = position[1:].split("-")
+                                    site_positions.update(map(int, residues))
+                                earliest_site, latest_site = int(min(site_positions)), int(max(site_positions))
 
-        # add site annotations
-        out_fh.write((
-            "[I6-SITES]\n"
-            "[I6-SITES] target name\taccession\tsite residue\tsite description\n"
-            "[I6-SITES]------------------- ---------- ------------ ----------------\n"
-        ))
-        for prot_id in hits:
-            for _site in hits[prot_id].sites:
-                out_fh.write(
-                    f"[site] {prot_id}\t{_site.model_ac}\t{_site.site_residues}\t{_site.site_desc}\n"
-                )
+                                # find the relevant (domain) location
+                                for i, location in enumerate(processed_ips6_data[protein_id][signature_acc]["locations"]):
+                                        if int(location["start"]) <= earliest_site and int(location["end"]) >= latest_site:
+                                            if "sites" not in processed_ips6_data[protein_id][signature_acc]["locations"][i]:
+                                                processed_ips6_data[protein_id][signature_acc]["locations"][i]["sites"] = []
 
-        closing_lines.append("#")
+                                        site_info = {
+                                            "description": site.site_desc,
+                                            "numLocations": len(site.site_residues.split(",")),
+                                            "siteLocations": []
+                                        }
+                                        for site_location in site.site_residues.split(","):
+                                            site_info['siteLocations'].append({
+                                                "start": site_location[0],
+                                                "end": site_location.split("-")[0][1:],
+                                                "residue": site_location[0],
+                                            })
 
-        for line in closing_lines:
-            out_fh.write(line)
+                                            processed_ips6_data[protein_id][signature_acc]["locations"][i]["sites"].append(site_info)
 
+                                        break
 
-def parse_hmmer_out(hmmer: Path, hits: dict[str, SfldHit]):
-    """[WORK IN PROGRESS]
-    Parse hmmer.dtbl output, removing hits not in 
-    slfd-post-processed, and adding site data
-
-    :param hmmer: Path to hmmer.out file
-    :param hits: dict of hits from sfld post-processed
-    """
-    processed_file = Path(hmmer.parent) / hmmer.name.replace(".out", ".processed.out")
-
-    with open(processed_file, "w") as out_fh:
-        with open(hmmer, "r") as in_fh:
-            for line in in_fh:
-                record = HmmerHit()
-
-                if line.startswith("#"):
-                    if line.strip() == "":
-                        out_fh.write(line)
-
-                elif line.strip() == "//":
-                    record = HmmerHit()
-                elif line.strip() in NO_HIT_MSGS:
-                    record.include = False
-                elif line.strip().startswith("Accession:"):
-                    record.query_ac = line.split()[-1]
-                    record.lines.append(line.strip())
-                else:
-                    record.lines.append(line.strip())
+    return processed_ips6_data
 
 
 if __name__ == "__main__":

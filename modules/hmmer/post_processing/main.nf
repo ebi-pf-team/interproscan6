@@ -1,19 +1,25 @@
+/*
+These scripts implement post-processing of the HMMER files.
+The output from these post-processing scripts and tools are 
+parsed and applied to the internal IPS6 JSON structure in the 
+filters module/
+*/
 
 process PANTHER_POST_PROCESSER {
     container 'docker.io/library/treegrafter'
     label 'analysis_parser'
 
     input:
+        path ips6_json
         path out_file
         path out_dtbl
-        path alignment  // note used here. Needed for the SFLD pipeline
-        val postprocessing_params  // [0] evalue [1] control factor
+        val postprocessing_params // contains [0] bin and [1] site_annotations file path
+        val tsv_pro
         path fasta
 
     output:
-        path out_file
-        path "${out_dtbl}.post_processed.dtbl"
-        path alignment
+        path ips6_json
+        path "treegrafter_processed_panther_hits"
         val postprocessing_params
 
     /*
@@ -34,32 +40,34 @@ process PANTHER_POST_PROCESSER {
         ${out_file} \
         ${postprocessing_params[0]} \
         -e ${postprocessing_params[1]} \
-        -o processed_panther_hits \
+        -o treegrafter_processed_panther_hits \
         --epa-ng /epa-ng/bin/epa-ng \
         --keep
-
-    python3 $projectDir/scripts/members/panther/process_treegrafter_hits.py \
-        processed_panther_hits \
-        ${out_dtbl}
     """
 }
 
 
 process SFLD_POST_PROCESSER {
+    /*
+    Runs an in-house post-processing C script that filters the SFLD hits to
+    retain only those where all sites are conserved, and add site data to
+    the remaining hits. The out file is then parsed and the results in the IPS6
+    json file are filtered and site data is added to the remaining hits.
+    */
     label 'analysis_parser'
 
     input:
+        path ips6_json
         path out_file
         path out_dtbl
-        path alignment
         val postprocessing_params // contains [0] bin and [1] site_annotations file path
+        path alignment
         val tsv_pro
 
     output:
-        path "${out_file}.post_processed.out"
-        path "${out_dtbl}.post_processed.dtbl"
-        path alignment
-        val postprocessing_params // need to make up input var nums in hmmer_parser module
+        path ips6_json
+        path "${tsv_pro ? "${out_file}.processed.out" : "${out_dtbl}.processed.dtbl"}"
+        val postprocessing_params
 
     script:
         """
@@ -69,12 +77,5 @@ process SFLD_POST_PROCESSER {
             --hmmer-out '${out_file}' \
             --site-info '${postprocessing_params[1]}' \
             --output '${tsv_pro ? "${out_file}.processed.out" : "${out_dtbl}.processed.dtbl"}'
-
-        python3 $projectDir/scripts/members/sfld/sfld_process_post_processed.py \
-            '${tsv_pro ? "${out_file}.processed.out" : "${out_dtbl}.processed.dtbl"}' \
-            ${tsv_pro ? "-O '${out_file}'" : "-d '${out_dtbl}'"}
-
-        touch ${out_file}.post_processed.out
-        touch ${out_dtbl}.post_processed.dtbl
         """
 }

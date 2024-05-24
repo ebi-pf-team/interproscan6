@@ -23,7 +23,6 @@ def parse(hmmer_domtbl: str, retrieve_sites: bool, mem_db_dir: str):
         version = hmmer_domtbl.split("/")[-1].split("_")[0]
         member_db = hmmer_domtbl.split("/")[-1].split("_")[1].split(".")[0]
 
-
         for line in dtbl_f.readlines():
             if line.startswith("#"):
                 continue
