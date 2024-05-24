@@ -1,6 +1,8 @@
 import argparse
 import json
 
+from copy import copy
+
 from pathlib import Path
 
 
@@ -127,18 +129,42 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]], paint_anno_path: Path) -
                         if protein_id not in processed_ips6_data:
                             processed_ips6_data[protein_id] = {}
                         if signature_acc not in processed_ips6_data[protein_id]:
-                            processed_ips6_data[protein_id][signature_acc] = ips6_data[protein_id][signature_acc]
+                            processed_ips6_data[protein_id][signature_acc] = copy(ips6_data[protein_id][signature_acc])
                             processed_ips6_data[protein_id][signature_acc]["locations"] = []
-
-                            # start locations from scratch because not all locations
-                            # may have passed the TreeGraft post-processing
+                        
+                        # Panther/Treegrafter only has one (the best) match per protein
+                        for location in ips6_data[protein_id][signature_acc]["locations"]:
+                            if panther_hit["ali_start"] == location["start"] and \
+                                panther_hit["ali_end"] == location["end"] and \
+                                panther_hit["hmm_start"] == location["hmmStart"] and \
+                                panther_hit["hmm_end"] == location["hmmEnd"] and \
+                                panther_hit["env_start"] == location["envelopeStart"] and \
+                                panther_hit["env_end"] == location["envelopeEnd"]:
+                                
+                                processed_ips6_data[protein_id][signature_acc]["locations"] = [{
+                                    "start": panther_hit["ali_start"],
+                                    "end": panther_hit["ali_end"],
+                                    "representative": location["representative"],
+                                    "hmmStart": panther_hit["hmm_start"],
+                                    "hmmEnd": panther_hit["hmm_end"],
+                                    "hmmLength": location["hmmLength"],
+                                    "rawHmmBounds": location["rawHmmBounds"],
+                                    "hmmBounds": location["hmmBounds"],
+                                    "evalue": panther_hit["evalue"],
+                                    "score": panther_hit["score"],
+                                    "envelopeStart": panther_hit["env_start"],
+                                    "envelopeEnd": panther_hit["env_end"],
+                                    "postProcessed": location["postProcessed"],
+                                    "alignment": location["alignment"],
+                                    "cigar_alignment": location["cigar_alignment"]
+                                }]
 
                         processed_ips6_data[protein_id][signature_acc]["proteinClass"] = node_data[2]
                         processed_ips6_data[protein_id][signature_acc]["graftPoint"] = node_data[3]
                         processed_ips6_data[protein_id][signature_acc]["accession"] = panther_hit["signature-acc:superfamily"]
                         processed_ips6_data[protein_id][signature_acc]["model-ac"] = panther_hit["signature-acc:superfamily"]
 
-    return ips6_data
+    return processed_ips6_data
 
 
 if __name__ == '__main__':
