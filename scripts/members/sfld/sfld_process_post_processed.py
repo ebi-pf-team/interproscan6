@@ -136,7 +136,6 @@ def filter_matches_and_add_site(ips6, hits):
                         processed_ips6_data[protein_id] = {}
                     if signature_acc not in processed_ips6_data[protein_id]:
                         processed_ips6_data[protein_id][signature_acc] = ips6_data[protein_id][signature_acc]
-                        # restart locations as not all locations may have parsed the post-processing
                     
                     # add site data
                     # check each SfldSite instance as there can be multiple site hits
@@ -173,7 +172,7 @@ def filter_matches_and_add_site(ips6, hits):
 
                                             break
 
-    return ips6_data
+    return processed_ips6_data
 
 
 if __name__ == "__main__":
