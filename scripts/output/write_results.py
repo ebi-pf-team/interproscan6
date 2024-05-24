@@ -139,8 +139,11 @@ def json_output(seq_matches: dict, output_path: str, version: str):
 
                     if match_data['member_db'].upper() == "PANTHER":
                         # get protein class and graftpoint for Panther
-                        match['proteinClass'] = match_data['proteinClass']
-                        match['graftPoint'] = match_data['graftPoint']
+                        try:
+                            match['proteinClass'] = match_data['proteinClass']
+                            match['graftPoint'] = match_data['graftPoint']
+                        except KeyError:
+                            pass
 
                 matches.append(match)
 
@@ -220,7 +223,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                 model_ac_elem.text = match_key
 
                 locations_elem = ET.SubElement(match_elem, "locations")
-                
+
                 for location in match_data['locations']:
                     if match_data['member_db'].upper() == "CDD":
                         location_elem = ET.SubElement(locations_elem, "cdd-location")
