@@ -106,14 +106,15 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]], paint_anno_path: Path) -
 
     processed_ips6_data = {}
 
-    for protein_id in ips6_data:
+    for _protein_id in ips6_data:
+        protein_id = _protein_id.replace(".", "_")
         if protein_id not in hits:
             # IPS6 will only contain Panther hits at this stage
             # so don't need to check if need to retain hits from other tools
             continue
 
         else:
-            for signature_acc in ips6_data[protein_id]:
+            for signature_acc in ips6_data[_protein_id]:
 
                 if signature_acc not in hits[protein_id].signatures:
                     # signature hit did not parse TreeGrafter post-processing
@@ -127,13 +128,13 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]], paint_anno_path: Path) -
                             node_data = paint_annotations[panther_hit["node_id"]]
 
                         if protein_id not in processed_ips6_data:
-                            processed_ips6_data[protein_id] = {}
-                        if signature_acc not in processed_ips6_data[protein_id]:
-                            processed_ips6_data[protein_id][signature_acc] = copy(ips6_data[protein_id][signature_acc])
-                            processed_ips6_data[protein_id][signature_acc]["locations"] = []
+                            processed_ips6_data[_protein_id] = {}
+                        if signature_acc not in processed_ips6_data[_protein_id]:
+                            processed_ips6_data[_protein_id][signature_acc] = copy(ips6_data[_protein_id][signature_acc])
+                            processed_ips6_data[_protein_id][signature_acc]["locations"] = []
                         
                         # Panther/Treegrafter only has one (the best) match per protein
-                        for location in ips6_data[protein_id][signature_acc]["locations"]:
+                        for location in ips6_data[_protein_id][signature_acc]["locations"]:
                             if panther_hit["ali_start"] == location["start"] and \
                                 panther_hit["ali_end"] == location["end"] and \
                                 panther_hit["hmm_start"] == location["hmmStart"] and \
@@ -141,7 +142,7 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]], paint_anno_path: Path) -
                                 panther_hit["env_start"] == location["envelopeStart"] and \
                                 panther_hit["env_end"] == location["envelopeEnd"]:
                                 
-                                processed_ips6_data[protein_id][signature_acc]["locations"] = [{
+                                processed_ips6_data[_protein_id][signature_acc]["locations"] = [{
                                     "start": panther_hit["ali_start"],
                                     "end": panther_hit["ali_end"],
                                     "representative": location["representative"],
@@ -159,10 +160,10 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]], paint_anno_path: Path) -
                                     "cigar_alignment": location["cigar_alignment"]
                                 }]
 
-                        processed_ips6_data[protein_id][signature_acc]["proteinClass"] = node_data[2]
-                        processed_ips6_data[protein_id][signature_acc]["graftPoint"] = node_data[3]
-                        processed_ips6_data[protein_id][signature_acc]["accession"] = panther_hit["signature-acc:superfamily"]
-                        processed_ips6_data[protein_id][signature_acc]["model-ac"] = panther_hit["signature-acc:superfamily"]
+                        processed_ips6_data[_protein_id][signature_acc]["proteinClass"] = node_data[2]
+                        processed_ips6_data[_protein_id][signature_acc]["graftPoint"] = node_data[3]
+                        processed_ips6_data[_protein_id][signature_acc]["accession"] = panther_hit["signature-acc:superfamily"]
+                        processed_ips6_data[_protein_id][signature_acc]["model-ac"] = panther_hit["signature-acc:superfamily"]
 
     return processed_ips6_data
 
