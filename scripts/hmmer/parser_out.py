@@ -14,6 +14,8 @@ DOMAIN_LINE_PATTERN = re.compile(
 def get_accession_regex(appl: str) -> re.Pattern:
     if appl.upper() == "ANTIFAM":
         return re.compile(r"^(Accession:|Query:|Query sequence:)\s+(ANF\d{5})\s*$")
+    if appl.upper() == "GENE3D":
+        return re.compile(r"^(Accession:|Query:|Query sequence:)\s+([\w\d-]+)")
     if appl.upper() == "NCBIFAM":
         return re.compile(r"^(Accession:|Query:|Query sequence:)\s+((TIGR|NF)\d+)\.\d+$")
     if appl.upper() == "PANTHER":
@@ -59,11 +61,11 @@ def parse(out_file: str) -> dict:
                     stage = "LOOKING_FOR_METHOD_ACCESSION"
                 else:
                     if stage == 'LOOKING_FOR_METHOD_ACCESSION':
-                        if line.startswith("Accession:") or line.startswith("Query sequence:") or (line.startswith("Query:") and member_db == "panther"):
+                        if line.startswith("Accession:") or line.startswith("Query sequence:") or (line.startswith("Query:") and member_db in ["gene3d", "panther"]):
                             stage = 'LOOKING_FOR_SEQUENCE_MATCHES'
                             model_ident_pattern = member_accession.match(line)
                             if model_ident_pattern:
-                                model_id = model_ident_pattern.group(2).replace(".orig.30.pir", "")
+                                model_id = model_ident_pattern.group(2) if member_db != "panther" else model_ident_pattern.group(2).replace(".orig.30.pir", "")
                         if line.startswith("Query:"):
                             query_name = line.split()[1]
                             qlen = line.split("[")[1].split("]")[0].replace("M=", "")
@@ -171,7 +173,7 @@ def get_sequence_match(sequence_line: str, model_id: str, query_name: str, descr
         sequence_match["bias"] = match.group(3)
         sequence_match["member_db"] = member_db
         sequence_match["version"] = version
-        sequence_match["model-ac"] = model_id.split(":")[0].split(".")[0]
+        sequence_match["model-ac"] = model_id.split(":")[0].split(".")[0] if member_db != "gene3d" else model_id
 
     # if member_db.lower() == 'panther':
     #     node_id = info[-1]  # retrieve node id from Panther-TreeGrafter hits
