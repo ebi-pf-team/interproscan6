@@ -1,6 +1,5 @@
 import argparse
 import json
-import sys
 
 from pathlib import Path
 
@@ -118,8 +117,6 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> dict:
 
                 if not gene3d_location:
                     continue
-
-                # found a relevant location in the IPS6 data and cath-superfams data
 
                 if protein_id not in processed_ips6:
                     processed_ips6[protein_id] = {}
