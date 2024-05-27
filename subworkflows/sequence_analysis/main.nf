@@ -71,7 +71,6 @@ workflow SEQUENCE_ANALYSIS {
                 false,
                 [
                    params.members."${member}".postprocess.cath_resolve_hits_switches,
-                   params.members."${member}".postprocess.assign_cath_superfamilies_switches,
                    params.members."${member}".postprocess.model2sf_map,
                    params.members."${member}".postprocess.discontinuous_regs,
                 ]
@@ -144,8 +143,8 @@ workflow SEQUENCE_ANALYSIS {
     // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
     runner_hmmer_gene3d_params = fasta.combine(member_params.gene3d)
     GENE3D_HMMER_RUNNER(runner_hmmer_gene3d_params)
-    GENE3D_POST_PROCESSER(GENE3D_HMMER_RUNNER.out, fasta)
-    // PANTHER_HMMER_PARSER(PANTHER_POST_PROCESSER.out, params.tsv_pro, false)
+    GENE3D_POST_PROCESSER(GENE3D_HMMER_RUNNER.out)
+    GENE3D_PARSER(GENE3D_POST_PROCESSER.out)
 
     // Cath-Gene3D
     runner_hmmer_gene3d_params = fasta.combine(member_params.gene3d)
