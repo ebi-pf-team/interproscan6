@@ -11,9 +11,9 @@ include {
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
 } from "$projectDir/modules/hmmer/runner/main"
 include {
-    GENE3D_FUNFAM_PARSER as FUNFAM_PARSER;
-    GENE3D_FUNFAM_PARSER as GENE3D_PARSER;
     HMMER_PARSER as GENERIC_HMMER_PARSER;
+    HMMER_PARSER as GENE3D_HMMER_PARSER;
+    HMMER_PARSER as FUNFAM_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
 } from "$projectDir/modules/hmmer/parser/main"
@@ -26,6 +26,8 @@ include {
     SFLD_POST_PROCESSER
 } from "$projectDir/modules/hmmer/post_processing/main"
 include {
+    FUNFAM_GENE3D_FILTER_MATCHES as GENE3D_PARSER;
+    FUNFAM_GENE3D_FILTER_MATCHES as FUNFAM_PARSER;
     PANTHER_FILTER_MATCHES;
     SFLD_FILTER_MATCHES;
 } from "$projectDir/modules/hmmer/filter/main"
@@ -69,7 +71,20 @@ workflow SEQUENCE_ANALYSIS {
                 []  // no post-processing params
             ]
 
-        gene3d_funfam: (runner == 'funfam' || member == 'gene3d')
+        gene3d: (member == 'gene3d')
+            return [
+                params.members."${member}".hmm,
+                params.members."${member}".switches,
+                params.members."${member}".release,
+                false,  // retrieve site data
+                [
+                   params.members."${member}".postprocess.cath_resolve_hits_switches,
+                   params.members."${member}".postprocess.model2sf_map,
+                   params.members."${member}".postprocess.discontinuous_regs,
+                ]
+            ]
+
+        funfam: (member == 'funfam')
             return [
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
@@ -147,15 +162,12 @@ workflow SEQUENCE_ANALYSIS {
     GENERIC_HMMER_PARSER(GENERIC_HMMER_RUNNER.out, tsv_pro, "antifam")
 
     // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
-    // Gene3D also needs to run for FunFam
-    runner_hmmer_gene3d_params = fasta.combine(member_params.gene3d_funfam)
+    runner_hmmer_gene3d_params = fasta.combine(member_params.gene3d)
     GENE3D_HMMER_RUNNER(runner_hmmer_gene3d_params)
-    GENE3D_CATH_RESEOLVE_HITS(GENE3D_HMMER_RUNNER.out)
-    GENE3D_ADD_CATH_SUPERFAMILIES(GENE3D_CATH_RESEOLVE_HITS.out, "gene3d")
-    // GENE3D_ADD_CATH_SUPERFAMILIES.into {gene3d_out_for_parser, gene3d_out_for_funfam}
-    // Gene3D_parser will only run if the user selected gene3D (tested in the process)
-    // GENE3D_PARSER(gene3d_out_for_parser, applications)
-    GENE3D_PARSER(GENE3D_ADD_CATH_SUPERFAMILIES.out, applications)
+    GENE3D_HMMER_PARSER(GENE3D_HMMER_RUNNER.out, tsv_pro, "gene3d")
+    GENE3D_CATH_RESEOLVE_HITS(GENE3D_HMMER_PARSER.out)
+    GENE3D_ADD_CATH_SUPERFAMILIES(GENE3D_CATH_RESEOLVE_HITS.out)
+    GENE3D_PARSER(GENE3D_ADD_CATH_SUPERFAMILIES.out)
 
     // // FunFam (+ gene3D + cath-resolve-hits + assing-cath-superfamilies)
     // // These calls will only run if the user selected funfam
@@ -165,10 +177,6 @@ workflow SEQUENCE_ANALYSIS {
     // FUNFAM_CATH_RESEOLVE_HITS(FUNFAM_HMMER_RUNNER.out)
     // FUNFAM_ADD_CATH_SUPERFAMILIES(FUNFAM_CATH_RESEOLVE_HITS.out, "funfam")
     // FUNFAM_PARSER(FUNFAM_ADD_CATH_SUPERFAMILIES.out, applications)
-
-    // Cath-Gene3D
-    runner_hmmer_gene3d_params = fasta.combine(member_params.gene3d)
-    GENE3D_HMMER_RUNNER(runner_hmmer_gene3d_params)
 
     // Panther (+ treegrafter + epa-ng)
     runner_hmmer_panther_params = fasta.combine(member_params.panther)

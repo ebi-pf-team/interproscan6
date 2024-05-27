@@ -10,12 +10,14 @@ process CATH_RESEOLVE_HITS {
     label 'analysis_parser'
 
     input:
+        path ips6_json
         path out_file
         path out_dtbl
-        path alignment  // note used here. Needed for the SFLD pipeline
         val postprocessing_params  // [0] evalue [1] control factor
+        path alignment
 
     output:
+        path ips6_json
         path "${out_file}.cath.resolved.out"
         val postprocessing_params
 
@@ -35,20 +37,20 @@ process ADD_CATH_SUPERFAMILIES {
     label 'analysis_parser'
 
     input:
+        path ips6_json
         path cath_resolve_out
         val postprocessing_params
-        val member_db
 
     output:
-        path "${cath_resolve_out}.${member_db}"
-        val member_db
+        path ips6_json
+        path "${cath_resolve_out}.cath_superfamilies"
 
     script:
     """
     python3 $projectDir/scripts/members/gene3d_funfam/assign_cath_superfamilies.py \\
         ${postprocessing_params[1]} \\
         ${postprocessing_params[2]} \\
-        ${cath_resolve_out} "${cath_resolve_out}.cath_superfamilies.${member_db}"
+        ${cath_resolve_out} "${cath_resolve_out}.cath_superfamilies"
     """
 }
 

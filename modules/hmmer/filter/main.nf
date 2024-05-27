@@ -5,6 +5,24 @@ filtering the matches in the IPS6 JSON structure in order to
 only retain those that passed the post-processing.
 */
 
+process FUNFAM_GENE3D_FILTER_MATCHES {
+    label 'analysis_parser'
+
+    input:
+        path ips6_json
+        path cath_superfamilies
+    
+    output:
+        path "${ips6_json}.post.processed.json"
+
+    script:
+    """
+    python3 $projectDir/scripts/members/gene3d_funfam/filter_ips6_hits.py \\
+        ${ips6_json} \\
+        ${cath_superfamilies}
+    """
+}
+
 process PANTHER_FILTER_MATCHES {
     container 'docker.io/library/treegrafter'
     label 'analysis_parser'
