@@ -11,6 +11,7 @@ include {
 } from "$projectDir/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as GENERIC_HMMER_PARSER;
+    HMMER_PARSER as GENE3D_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
 } from "$projectDir/modules/hmmer/parser/main"
@@ -69,10 +70,10 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".release,
                 false,
                 [
-                    params.members."${member}".postprocess.cath_resolve_hits_switches,
-                    params.members."${member}".postprocess.assign_cath_superfamilies_switches,
-                    params.members."${member}".postprocess.model2sf_map,
-                    params.members."${member}".postprocess.discontinuous_regs,
+                   params.members."${member}".postprocess.cath_resolve_hits_switches,
+                   params.members."${member}".postprocess.assign_cath_superfamilies_switches,
+                   params.members."${member}".postprocess.model2sf_map,
+                   params.members."${member}".postprocess.discontinuous_regs,
                 ]
             ]
 
@@ -145,6 +146,10 @@ workflow SEQUENCE_ANALYSIS {
     GENE3D_HMMER_RUNNER(runner_hmmer_gene3d_params)
     GENE3D_POST_PROCESSER(GENE3D_HMMER_RUNNER.out, fasta)
     // PANTHER_HMMER_PARSER(PANTHER_POST_PROCESSER.out, params.tsv_pro, false)
+
+    // Cath-Gene3D
+    runner_hmmer_gene3d_params = fasta.combine(member_params.gene3d)
+    GENE3D_HMMER_RUNNER(runner_hmmer_gene3d_params)
 
     // Panther (+ treegrafter + epa-ng)
     runner_hmmer_panther_params = fasta.combine(member_params.panther)
