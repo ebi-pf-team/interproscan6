@@ -169,11 +169,9 @@ workflow SEQUENCE_ANALYSIS {
     GENE3D_ADD_CATH_SUPERFAMILIES(GENE3D_CATH_RESEOLVE_HITS.out)
     GENE3D_PARSER(GENE3D_ADD_CATH_SUPERFAMILIES.out)
 
-    // // FunFam (+ gene3D + cath-resolve-hits + assing-cath-superfamilies)
-    // // These calls will only run if the user selected funfam
-    // // This is tested within FUNFAM_HMMER_RUNNER
-    // runner_hmmer_funfam_params = fasta.combine(member_params.gene3d_funfam)
-    // FUNFAM_HMMER_RUNNER(runner_hmmer_funfam_params, gene3d_out_for_funfam)
+    // FunFam (+ gene3D + cath-resolve-hits + assing-cath-superfamilies)
+    runner_hmmer_funfam_params = fasta.combine(member_params.funfam)
+    FUNFAM_HMMER_RUNNER(runner_hmmer_funfam_params, gene3d_out_for_funfam)
     // FUNFAM_CATH_RESEOLVE_HITS(FUNFAM_HMMER_RUNNER.out)
     // FUNFAM_ADD_CATH_SUPERFAMILIES(FUNFAM_CATH_RESEOLVE_HITS.out, "funfam")
     // FUNFAM_PARSER(FUNFAM_ADD_CATH_SUPERFAMILIES.out, applications)
@@ -212,6 +210,7 @@ workflow SEQUENCE_ANALYSIS {
     */
 
     GENERIC_HMMER_PARSER.out[0].concat(
+        GENE3D_PARSER.out[0],
         PANTHER_FILTER_MATCHES.out,
         SFLD_FILTER_MATCHES.out,
         CDD_PARSER.out,

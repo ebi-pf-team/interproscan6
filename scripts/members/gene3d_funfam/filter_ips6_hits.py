@@ -59,6 +59,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="Path to cath_out file"
     )
 
+    parser.add_argument(
+        "out_json",
+        type=Path,
+        help="Path to write the output JSON file"
+    )
+
+    parser.add_argument(
+        "out_superfamilies",
+        type=Path,
+        help="Path to write out a plain text file listing the CATH superfamilies"
+    )
+
     return parser
 
 
@@ -83,15 +95,18 @@ def parse_cath(cath_out: Path) -> dict[str, Gene3dHit]:
     return matches
 
 
-def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> dict:
+def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> tuple[dict, set]:
     """Parse the IPS6 JSON file, filtering hits to only retains
     those that passed the Gene3D post-processing.
 
     :param ips6: path to internal IPS6 JSON file containing parsed hits from HMMER.out file
     :param gene3d_matches: dict of Gene3dHits, representing hits in the 
         add_cath_superfamilies.py output file
+    
+    Return processed IPS6 dict and a list of all cath superfamilies where hits were generated
     """
     processed_ips6 = {}
+    all_cath_superfamilies = set()
     with open(ips6, "r") as fh:
         ips6_data = json.load(fh)
 
@@ -122,6 +137,7 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> dict:
                     processed_ips6[protein_id] = {}
 
                 cath_superfam = gene3d_domain.cath_superfamily
+                all_cath_superfamilies.add(cath_superfam)
                 gene3d_sig_acc = f"G3DSA:{cath_superfam}"
                 if gene3d_sig_acc not in processed_ips6[protein_id]:
                     # signature_acc is the domain id
@@ -148,7 +164,7 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> dict:
 
                 processed_ips6[protein_id][gene3d_sig_acc]["locations"].append(gene3d_location)
 
-    return processed_ips6
+    return processed_ips6, cath_superfam
 
 
 def main():
@@ -156,8 +172,13 @@ def main():
     args = parser.parse_args()
 
     matches = parse_cath(args.cath_out)
-    processed_ips6 = filter_matches(args.ips6, matches)
-    print(json.dumps(processed_ips6, indent=2))
+    processed_ips6, superfamilies = filter_matches(args.ips6, matches)
+
+    with open(args.out_json, "w") as fh:
+        json.dump(processed_ips6, fh, indent=2)
+    with open(args.out_superfamilies, "w") as fh:
+        for superfam in superfamilies:
+            fh.write(f"{superfam}\n")
 
 
 if __name__ == "__main__":

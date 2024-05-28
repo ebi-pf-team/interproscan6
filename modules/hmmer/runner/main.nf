@@ -40,13 +40,17 @@ process FUNFAM_HMMER_RUNNER {
     label 'hmmer_runner'
 
     input:
-    tuple path(fasta), path(hmm), val(switches), val(release), val(postprocessing_params), path(gene3d_out), val(member_db)
+        tuple path(fasta), path(hmm), val(switches), val(release), val(postprocessing_params), path(gene3d_cath_superfamilies)
+    /*
+    gene3d_cath_superfamilies is a plain text file listing all Cath superfamilies
+    against which gene3D generated a hit.
+    */
 
     output:
-    path "${release}_${hmm}*"
-    path "${release}_${hmm}*"
-    path "${hmm}_alignment"
-    val postprocessing_params
+        path "${release}_${hmm}*"
+        path "${release}_${hmm}*"
+        path "${hmm}_alignment"
+        val postprocessing_params
 
     script:
     """

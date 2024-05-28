@@ -41,9 +41,10 @@ process GENE3D_FUNFAM_PARSER {
         "${applications}".contains("${member_db}")
 
     input:
-        path post_processed_cath_resolve_out
-        val member_db
-        val applications
+        path "${release}_${hmm}*"
+        path "${release}_${hmm}*"
+        path "${hmm}_alignment"
+        val postprocessing_params
 
     output:
         path "${member_db}_out.json"

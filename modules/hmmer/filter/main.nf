@@ -14,12 +14,15 @@ process FUNFAM_GENE3D_FILTER_MATCHES {
     
     output:
         path "${ips6_json}.post.processed.json"
+        path "cath.superfamilies"
 
     script:
     """
     python3 $projectDir/scripts/members/gene3d_funfam/filter_ips6_hits.py \\
         ${ips6_json} \\
-        ${cath_superfamilies}
+        ${cath_superfamilies} \\
+        ${ips6_json}.post.processed.json \\
+        cath.superfamilies
     """
 }
 
@@ -57,9 +60,8 @@ process SFLD_FILTER_MATCHES {
 
     script:
     """
-    python3 $projectDir/scripts/members/sfld/sfld_process_post_processed.py \
-        '${slfd_post_processed_output}' \
-        ${ips6_json} \
-        > '${ips6_json}.post.processed.json'
+    python3 $projectDir/scripts/members/sfld/sfld_process_post_processed.py \\
+        ${slfd_post_processed_output} \\
+        ${ips6_json} > ${ips6_json}.post.processed.json
     """
 }
