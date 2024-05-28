@@ -55,6 +55,54 @@ process ADD_CATH_SUPERFAMILIES {
 }
 
 
+process CATH_RESEOLVE_HITS {
+    container 'docker.io/library/cathtools'
+    label 'analysis_parser'
+
+    input:
+        path out_file
+        path out_dtbl
+        path alignment  // note used here. Needed for the SFLD pipeline
+        val postprocessing_params  // [0] evalue [1] control factor
+
+    output:
+        path "${out_file}.cath.resolved.out"
+        val postprocessing_params
+
+    // cath_resolve_hits is a third party tool used to minimise suprious hits
+    script:
+    """
+    rm -f ${alignment}
+    /cath-tools/cath-resolve-hits \\
+        ${out_file} \\
+        --input-for hmmsearch_out \\
+        ${postprocessing_params[0]} > "${out_file}.cath.resolved.out"
+    """
+}
+
+
+process ADD_CATH_SUPERFAMILIES {
+    label 'analysis_parser'
+
+    input:
+        path cath_resolve_out
+        val postprocessing_params
+        val member_db
+
+    output:
+        path "${out_file}.${member_db}"
+        val member_db
+
+    script:
+    """
+    python3 $projectDir/members/gene3d_funfam/assign_cath_superfamilies.py \\
+        ${postprocessing_params[1]} \\
+        ${postprocessing_params[2]} \\
+        ${cath_resolve_out} "${out_file}.${member_db}"
+    """
+}
+
+
 process PANTHER_POST_PROCESSER {
     container 'docker.io/library/treegrafter'
     label 'analysis_parser'

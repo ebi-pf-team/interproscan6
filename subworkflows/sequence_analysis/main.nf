@@ -176,6 +176,24 @@ workflow SEQUENCE_ANALYSIS {
     // FUNFAM_ADD_CATH_SUPERFAMILIES(FUNFAM_CATH_RESEOLVE_HITS.out, "funfam")
     // FUNFAM_PARSER(FUNFAM_ADD_CATH_SUPERFAMILIES.out, applications)
 
+    // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
+    // Gene3D also needs to run for FunFam
+    runner_hmmer_gene3d_params = fasta.combine(member_params.gene3d_funfam)
+    GENE3D_CATH_RESEOLVE_HITS(runner_hmmer_gene3d_params)
+    GENE3D_ADD_CATH_SUPERFAMILIES(GENE3D_CATH_RESEOLVE_HITS.out, "gene3d")
+    GENE3D_ADD_CATH_SUPERFAMILIES.into {gene3d_out_for_parser, gene3d_out_for_funfam}
+    // Gene3D_parser will only run if the user selected gene3D (tested in the process)
+    GENE3D_PARSER(gene3d_out_for_parser, applications)
+
+    // FunFam (+ gene3D + cath-resolve-hits + assing-cath-superfamilies)
+    // These calls will only run if the user selected funfam
+    // This is tested within FUNFAM_HMMER_RUNNER
+    runner_hmmer_funfam_params = fasta.combine(member_params.gene3d_funfam)
+    FUNFAM_HMMER_RUNNER(runner_hmmer_funfam_params, gene3d_out_for_funfam)
+    FUNFAM_CATH_RESEOLVE_HITS(FUNFAM_HMMER_RUNNER.out)
+    FUNFAM_ADD_CATH_SUPERFAMILIES(FUNFAM_CATH_RESEOLVE_HITS.out, "funfam")
+    FUNFAM_PARSER(FUNFAM_ADD_CATH_SUPERFAMILIES.out, applications)
+
     // Panther (+ treegrafter + epa-ng)
     runner_hmmer_panther_params = fasta.combine(member_params.panther)
     PANTHER_HMMER_RUNNER(runner_hmmer_panther_params)

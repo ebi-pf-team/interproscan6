@@ -57,3 +57,26 @@ process GENE3D_FUNFAM_PARSER {
         ${post_processed_cath_resolve_out} "${member_db}_out.json"
     """
 }
+
+
+process GENE3D_FUNFAM_PARSER {
+    label 'analysis_parser'
+    when:
+        "${applications}".contains("${member_db}")
+
+    input:
+        path post_processed_cath_resolve_out
+        val member_db
+        val applications
+
+    output:
+        path "${member_db}_out.json"
+
+    script:
+    """
+    python3 $projectDir/scripts/members/gene3d/assign_cath_superfamilies.py \\
+        ${postprocessing_params[1]} \\
+        ${postprocessing_params[2]} \\
+        ${post_processed_cath_resolve_out} "${member_db}_out.json"
+    """
+}
