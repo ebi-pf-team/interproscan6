@@ -129,6 +129,7 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         evalue = location["evalue"]
                         ali_from = location["start"]
                         ali_to = location["end"]
+                        location_evalue = location["evalue"]
                     cigar_alignment = ""
                     try:
                         cigar_alignment = location["cigar_alignment"]
