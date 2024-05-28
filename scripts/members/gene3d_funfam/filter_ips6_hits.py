@@ -10,10 +10,11 @@ class Gene3dHit:
         self.domains = {}
 
     def add_domain(self, value: str):
-        domain_id = value.split()[3]
+        match_id = value.split()[3]
         domain = DomainHit()
-        domain.domain_id = domain_id
+        domain.signature_acc = value.split()[0]
         domain.cath_superfamily = value.split()[1]
+        domain.match_id = match_id
         domain.score = value.split()[4]
         domain.evalue = value.split()[-1]
         domain.boundaries_start = value.split()[-5].split("-")[0]
@@ -21,16 +22,17 @@ class Gene3dHit:
         domain.resolved = value.split()[-4]
         domain.aligned_regions = value.split()[-3]
 
-        if domain_id not in self.domains:
-            self.domains[domain_id] = [domain]
+        if match_id not in self.domains:
+            self.domains[match_id] = [domain]
         else:
-            self.domains[domain_id].append(domain)
+            self.domains[match_id].append(domain)
 
 
 class DomainHit:
     def __init__(self):
-        self.domain_id = None
+        self.signature_acc = None
         self.cath_superfamily = None
+        self.match_id = None
         self.score = None  # bit score
         self.evalue = None  # indp-evalue
         self.boundaries_start = None  # envelope boundaries
@@ -102,7 +104,7 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> tuple[di
     :param ips6: path to internal IPS6 JSON file containing parsed hits from HMMER.out file
     :param gene3d_matches: dict of Gene3dHits, representing hits in the 
         add_cath_superfamilies.py output file
-    
+
     Return processed IPS6 dict and a list of all cath superfamilies where hits were generated
     """
     processed_ips6 = {}
@@ -146,7 +148,7 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> tuple[di
                     sig_info["accession"] = f"G3DSA:{cath_superfam}"
 
                     # model ac is the domain id (minus the -... suffix)
-                    sig_info["model-ac"] = signature_acc.split("-")[0]
+                    sig_info["model-ac"] = gene3d_domain.signature_acc.split("-")[0]
 
                     processed_ips6[protein_id][gene3d_sig_acc] = sig_info
                     processed_ips6[protein_id][gene3d_sig_acc]["locations"] = []
