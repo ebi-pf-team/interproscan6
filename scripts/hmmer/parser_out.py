@@ -14,6 +14,8 @@ DOMAIN_LINE_PATTERN = re.compile(
 def get_accession_regex(appl: str) -> re.Pattern:
     if appl.upper() == "ANTIFAM":
         return re.compile(r"^(Accession:|Query:|Query sequence:)\s+(ANF\d{5})\s*$")
+    if appl.upper() == "FUNFAM":
+        return re.compile(r"^(Accession:|Query:|Query sequence:)\s+([\w\d-]+)\s*\[M=\d+\]$")
     if appl.upper() == "GENE3D":
         return re.compile(r"^(Accession:|Query:|Query sequence:)\s+([\w\d-]+)")
     if appl.upper() == "NCBIFAM":
@@ -61,14 +63,24 @@ def parse(out_file: str) -> dict:
                     stage = "LOOKING_FOR_METHOD_ACCESSION"
                 else:
                     if stage == 'LOOKING_FOR_METHOD_ACCESSION':
-                        if line.startswith("Accession:") or line.startswith("Query sequence:") or (line.startswith("Query:") and member_db in ["gene3d", "panther"]):
+                        if line.startswith("Accession:") or line.startswith("Query sequence:") or (line.startswith("Query:") and member_db in ["funfam", "gene3d", "panther"]):
                             stage = 'LOOKING_FOR_SEQUENCE_MATCHES'
                             model_ident_pattern = member_accession.match(line)
                             if model_ident_pattern:
                                 model_id = model_ident_pattern.group(2) if member_db != "panther" else model_ident_pattern.group(2).replace(".orig.30.pir", "")
                         if line.startswith("Query:"):
-                            query_name = line.split()[1]
-                            qlen = line.split("[")[1].split("]")[0].replace("M=", "")
+                            try:
+                                query_name = line.split()[1]
+                            except IndexError:
+                                query_name = line.strip()
+                                # The lines for a new record in hmmer.out may be (real data)
+                                # //
+                                # Query:
+                                # Query:       4by6B00-i2  [M=191]
+                            try:
+                                qlen = line.split("[")[1].split("]")[0].replace("M=", "")
+                            except IndexError:  # e.g. line = "Query:       5xqwL01-i2]"
+                                qlen = ""
                     elif stage == 'LOOKING_FOR_SEQUENCE_MATCHES':
                         if line.startswith("Description:"):
                             description = line.replace("Description:", "")
@@ -173,16 +185,7 @@ def get_sequence_match(sequence_line: str, model_id: str, query_name: str, descr
         sequence_match["bias"] = match.group(3)
         sequence_match["member_db"] = member_db
         sequence_match["version"] = version
-        sequence_match["model-ac"] = model_id.split(":")[0].split(".")[0] if member_db != "gene3d" else model_id
-
-    # if member_db.lower() == 'panther':
-    #     node_id = info[-1]  # retrieve node id from Panther-TreeGrafter hits
-    #     paint_anno_path = mem_db_dir + f'/{info[4].split(":")[0].split(".")[0]}.json'
-    #     with open(paint_anno_path, 'r') as fh:
-    #         paint_annotations = json.load(fh)
-    #         node_data = paint_annotations[node_id]
-    #     signature_info['proteinClass'] = node_data[2]
-    #     signature_info['graftPoint'] = node_data[3]
+        sequence_match["model-ac"] = model_id.split(":")[0].split(".")[0] if member_db not in ["gene3d", "funfam"] else model_id
 
     return sequence_match
 

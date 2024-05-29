@@ -112,12 +112,15 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                     if match_data['entry']['accession'] != "-":
                         description = match_data['entry']['description']
                         entry = match_data['entry']
+                    # drop the Panther superfamily
+                    member_db = match_data['member_db'].upper()
+                    sig_acc = match_data['accession'] if member_db != 'PANTHER' else match_data['accession'].split(":")[0]
                     signature = {
-                        "accession": match_data['accession'].split(":")[0],  # drop subfamily
+                        "accession": sig_acc,
                         "name": match_data['name'],
                         "description": description,
                         "signatureLibraryRelease": {
-                            "library": match_data['member_db'].upper(),
+                            "library": member_db,
                             "version": match_data['version']
                         },
                         "entry": entry
