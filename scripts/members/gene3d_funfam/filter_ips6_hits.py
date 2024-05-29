@@ -166,7 +166,7 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> tuple[di
 
                 processed_ips6[protein_id][gene3d_sig_acc]["locations"].append(gene3d_location)
 
-    return processed_ips6, cath_superfam
+    return processed_ips6, all_cath_superfamilies
 
 
 def main():
