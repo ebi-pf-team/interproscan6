@@ -12,6 +12,7 @@ include {
 } from "$projectDir/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as GENERIC_HMMER_PARSER;
+    HMMER_PARSER as FUNFAM_HMMER_PARSER;
     HMMER_PARSER as GENE3D_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
@@ -25,6 +26,7 @@ include {
     SFLD_POST_PROCESSER
 } from "$projectDir/modules/hmmer/post_processing/main"
 include {
+    FUNFAM_GENE3D_FILTER_MATCHES as FUNFAM_FILTER_MATCHES;
     FUNFAM_GENE3D_FILTER_MATCHES as GENE3D_FILTER_MATCHES;
     PANTHER_FILTER_MATCHES;
     SFLD_FILTER_MATCHES;
@@ -165,16 +167,13 @@ workflow SEQUENCE_ANALYSIS {
     // FunFam (+ gene3D + cath-resolve-hits + assing-cath-superfamilies)
     // split into a channel so Nextflow can automatically manage the parallel execution of HmmSearch
     GENE3D_FILTER_MATCHES.out[1]
-        .splitText()
+        .splitText() { it.replace('\n', '') }
         .set { funfam_cath_superfamilies }
     FUNFAM_HMMER_RUNNER(runner_hmmer_gene3d_params, funfam_cath_superfamilies, applications)
-    // // FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out)
-    // // FUNFAM_CATH_RESEOLVE_HITS(AGGREGATE_FUNFAM_RESULTS.out)
-    // // FUNFAM_ADD_CATH_SUPERFAMILIES(FUNFAM_CATH_RESEOLVE_HITS.out)
-    // // FUNFAM_PARSER(FUNFAM_ADD_CATH_SUPERFAMILIES.out)
-    // // // HMMER ran for each Cath Superfamily hit from Gene3D
-    // // // concatenate the IPS6 JSON files into a single file for the post-processing
-    // // AGGREGATE_FUNFAM_RESULTS(FUNFAM_HMMER_PARSER.out)
+    FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out, tsv_pro, "funfam")
+    FUNFAM_CATH_RESEOLVE_HITS(FUNFAM_HMMER_PARSER.out)
+    FUNFAM_ADD_CATH_SUPERFAMILIES(FUNFAM_CATH_RESEOLVE_HITS.out)
+    FUNFAM_FILTER_MATCHES(FUNFAM_ADD_CATH_SUPERFAMILIES.out)
 
     // Panther (+ treegrafter + epa-ng)
     runner_hmmer_panther_params = fasta.combine(member_params.panther)
@@ -211,6 +210,7 @@ workflow SEQUENCE_ANALYSIS {
 
     if (applications.contains("gene3d")) {
             GENERIC_HMMER_PARSER.out[0].concat(
+            FUNFAM_FILTER_MATCHES.out[0],
             GENE3D_FILTER_MATCHES.out[0],
             PANTHER_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
@@ -221,6 +221,7 @@ workflow SEQUENCE_ANALYSIS {
     }
     else {
         GENERIC_HMMER_PARSER.out[0].concat(
+            FUNFAM_FILTER_MATCHES.out[0],
             PANTHER_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
             CDD_PARSER.out,

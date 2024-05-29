@@ -61,11 +61,14 @@ process FUNFAM_HMMER_RUNNER {
 
     script:
     """
-    new_item="${cath_superfamily.replace('.', '\\\\')}"
-    hmm_file_path="${postprocessing_params[3]}/${new_item}.hmm"
+    hmmsearch \\
+        ${postprocessing_params[4]} \\
+        -o ${postprocessing_params[5]}_funfam_${cath_superfamily}.out \\
+        --domtblout ${postprocessing_params[5]}_funfam_${cath_superfamily}.dtbl \\
+        "${postprocessing_params[3]}${cath_superfamily.replace('.', '/')}.hmm" \\
+        ${fasta}
     
-    hmmsearch ${postprocessing_params[4]} -o ${postprocessing_params[5]}_funfam_${new_item}.out --domtblout ${postprocessing_params[5]}_funfam_${new_item}.dtbl ${hmm_file_path} ${fasta}
-
     touch ${hmm}_alignment
     """
+
 }
