@@ -26,8 +26,8 @@ include {
     SFLD_POST_PROCESSER
 } from "$projectDir/modules/hmmer/post_processing/main"
 include {
-    FUNFAM_GENE3D_FILTER_MATCHES as FUNFAM_FILTER_MATCHES;
-    FUNFAM_GENE3D_FILTER_MATCHES as GENE3D_FILTER_MATCHES;
+    GENE3D_FILTER_MATCHES;
+    GENE3D_FILTER_MATCHES as FUNFAM_FILTER_MATCHES;
     PANTHER_FILTER_MATCHES;
     SFLD_FILTER_MATCHES;
 } from "$projectDir/modules/hmmer/filter/main"
@@ -157,8 +157,8 @@ workflow SEQUENCE_ANALYSIS {
 
     // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
     // These also run for FunFam as Gene3D must be run before FunFam  
-    runner_hmmer_gene3d_params = fasta.combine(member_params.gene3d_funfam)
-    GENE3D_HMMER_RUNNER(runner_hmmer_gene3d_params)
+    runner_gene3d_params = fasta.combine(member_params.gene3d_funfam)
+    GENE3D_HMMER_RUNNER(runner_gene3d_params)
     GENE3D_HMMER_PARSER(GENE3D_HMMER_RUNNER.out, tsv_pro, "gene3d")
     GENE3D_CATH_RESEOLVE_HITS(GENE3D_HMMER_PARSER.out)
     GENE3D_ADD_CATH_SUPERFAMILIES(GENE3D_CATH_RESEOLVE_HITS.out)
@@ -169,22 +169,22 @@ workflow SEQUENCE_ANALYSIS {
     GENE3D_FILTER_MATCHES.out[1]
         .splitText() { it.replace('\n', '') }
         .set { funfam_cath_superfamilies }
-    FUNFAM_HMMER_RUNNER(runner_hmmer_gene3d_params, funfam_cath_superfamilies, applications)
+    runner_funfam_params = fasta.combine(member_params.gene3d_funfam)
+    FUNFAM_HMMER_RUNNER(runner_funfam_params, funfam_cath_superfamilies, applications)
     FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out, tsv_pro, "funfam")
     FUNFAM_CATH_RESEOLVE_HITS(FUNFAM_HMMER_PARSER.out)
-    FUNFAM_ADD_CATH_SUPERFAMILIES(FUNFAM_CATH_RESEOLVE_HITS.out)
-    FUNFAM_FILTER_MATCHES(FUNFAM_ADD_CATH_SUPERFAMILIES.out)
+    // FUNFAM_FILTER_MATCHES(FUNFAM_CATH_RESEOLVE_HITS.out)
 
     // Panther (+ treegrafter + epa-ng)
-    runner_hmmer_panther_params = fasta.combine(member_params.panther)
-    PANTHER_HMMER_RUNNER(runner_hmmer_panther_params)
+    runner_panther_params = fasta.combine(member_params.panther)
+    PANTHER_HMMER_RUNNER(runner_panther_params)
     PANTHER_HMMER_PARSER(PANTHER_HMMER_RUNNER.out, tsv_pro, "panther")
     PANTHER_POST_PROCESSER(PANTHER_HMMER_PARSER.out, fasta)
     PANTHER_FILTER_MATCHES(PANTHER_POST_PROCESSER.out)
 
     // SFLD (+ post-processing binary to add sites and filter hits)
-    runner_hmmer_sfld_params = fasta.combine(member_params.sfld)
-    SFLD_HMMER_RUNNER(runner_hmmer_sfld_params)
+    runner_sfld_params = fasta.combine(member_params.sfld)
+    SFLD_HMMER_RUNNER(runner_sfld_params)
     SFLD_HMMER_PARSER(SFLD_HMMER_RUNNER.out, tsv_pro, "sfld")
     SFLD_POST_PROCESSER(SFLD_HMMER_PARSER.out, tsv_pro)
     SFLD_FILTER_MATCHES(SFLD_POST_PROCESSER.out)
@@ -210,7 +210,6 @@ workflow SEQUENCE_ANALYSIS {
 
     if (applications.contains("gene3d")) {
             GENERIC_HMMER_PARSER.out[0].concat(
-            FUNFAM_FILTER_MATCHES.out[0],
             GENE3D_FILTER_MATCHES.out[0],
             PANTHER_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
@@ -221,7 +220,6 @@ workflow SEQUENCE_ANALYSIS {
     }
     else {
         GENERIC_HMMER_PARSER.out[0].concat(
-            FUNFAM_FILTER_MATCHES.out[0],
             PANTHER_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
             CDD_PARSER.out,

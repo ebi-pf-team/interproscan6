@@ -5,7 +5,32 @@ filtering the matches in the IPS6 JSON structure in order to
 only retain those that passed the post-processing.
 */
 
-process FUNFAM_GENE3D_FILTER_MATCHES {
+process FUNFAM_FILTER_MATCHES {
+    label 'analysis_parser'
+
+    input:
+        path ips6_json
+        path cath_resolved_out
+        val postprocessing_params
+    /*
+    Post-processing params are needed when cath_resolved hits
+    process feeds into add_cath_superfamilies process
+    */
+    
+    output:
+        path "${ips6_json}.post.processed.json"
+
+    script:
+    """
+    python3 $projectDir/scripts/members/funfam/filter_ips6_hits.py \\
+        ${ips6_json} \\
+        ${cath_resolved_out} \\
+        ${ips6_json}.post.processed.json
+    """
+}
+
+
+process GENE3D_FILTER_MATCHES {
     label 'analysis_parser'
 
     input:
@@ -18,7 +43,7 @@ process FUNFAM_GENE3D_FILTER_MATCHES {
 
     script:
     """
-    python3 $projectDir/scripts/members/gene3d_funfam/filter_ips6_hits.py \\
+    python3 $projectDir/scripts/members/gene3d/filter_ips6_hits.py \\
         ${ips6_json} \\
         ${cath_superfamilies} \\
         ${ips6_json}.post.processed.json \\
