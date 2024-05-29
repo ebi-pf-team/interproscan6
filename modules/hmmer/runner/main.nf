@@ -3,17 +3,17 @@ process HMMER_RUNNER {
     label 'hmmer_runner'
 
     input:
-    tuple path(fasta), path(hmm), val(switches), val(release), val(alignment), val(postprocessing_params)
+        tuple path(fasta), path(hmm), val(switches), val(release), val(alignment), val(postprocessing_params)
     /*
     The post processing of SFLD, FunFam and Gene3D HMMER hits requires the alignment file
     But only generate alignmnets for these tool to reduce volume size
     */
 
     output:
-    path "${release}_${hmm}.out"
-    path "${release}_${hmm}.dtbl"
-    path "${hmm}_alignment"
-    val postprocessing_params
+        path "${release}_${hmm}.out"
+        path "${release}_${hmm}.dtbl"
+        path "${hmm}_alignment"
+        val postprocessing_params
 
     script:
     """
@@ -33,35 +33,39 @@ process FUNFAM_HMMER_RUNNER {
     FunFam hmm profiles would take an extremely long time.
 
     There will be one hmmer.out and one hmmer.dtbl file per FunFam hmm profile
-    used in the search. The results are concatenated into a single file following
-    post-processing by cath-resolve-hits in a downstream process.
+    used in the search.
     */
     container 'docker.io/biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1'
     label 'hmmer_runner'
 
+    when:
+        "${applications}".contains('funfam')
+
     input:
-        tuple path(fasta), path(hmm), val(switches), val(release), val(postprocessing_params), path(gene3d_cath_superfamilies)
+        tuple path(fasta), path(hmm), val(switches), val(release), val(alignment), val(postprocessing_params)
+        val cath_superfamily
+        val applications
+
     /*
-    gene3d_cath_superfamilies is a plain text file listing all Cath superfamilies
-    against which gene3D generated a hit.
+    post-processing params:
+    3. FunFam HMM dir
+    4. FunFam HMMsearch switches
+    5. FunFam release number
     */
 
     output:
-        path "${release}_${hmm}*"
-        path "${release}_${hmm}*"
+        path "${release}_funfam_${cath_superfamily}.out"
+        path "${release}_funfam_${cath_superfamily}.dtbl"
         path "${hmm}_alignment"
         val postprocessing_params
 
     script:
     """
-    awk 'NR>1' ${gene3d_out} | while read -r line
-    do
-        new_item=${line//./\\/}
-        hmm_file_path="${hmm}/${new_item}.hmm"
-        if [ -f $hmm_file_path ]; then
-            hmmsearch ${switches} -o ${release}_${hmm_file_path}.out --domtblout ${release}_${hmm_file_path}.dtbl $hmm_file_path ${fasta}
-        fi
-    done
+    new_item="${cath_superfamily.replace('.', '\\\\')}"
+    hmm_file_path="${postprocessing_params[3]}/${new_item}.hmm"
+    
+    hmmsearch ${postprocessing_params[4]} -o ${postprocessing_params[5]}_funfam_${new_item}.out --domtblout ${postprocessing_params[5]}_funfam_${new_item}.dtbl ${hmm_file_path} ${fasta}
+
     touch ${hmm}_alignment
     """
 }

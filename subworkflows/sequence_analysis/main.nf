@@ -69,16 +69,23 @@ workflow SEQUENCE_ANALYSIS {
                 []  // no post-processing params
             ]
 
+        /*
+        Place FunFam inside the Gene3D post-processing
+        because it must run after the Gene3D path
+        */
         gene3d_funfam: (member == 'gene3d' || member == 'funfam')
             return [
-                params.members."${member}".hmm,
-                params.members."${member}".switches,
-                params.members."${member}".release,
+                params.members."gene3d".hmm,
+                params.members."gene3d".switches,
+                params.members."gene3d".release,
                 false,  // retrieve site data
                 [
-                   params.members."${member}".postprocess.cath_resolve_hits_switches,
-                   params.members."${member}".postprocess.model2sf_map,
-                   params.members."${member}".postprocess.discontinuous_regs,
+                    params.members."gene3d".postprocess.cath_resolve_hits_switches,
+                    params.members."gene3d".postprocess.model2sf_map,
+                    params.members."gene3d".postprocess.discontinuous_regs,
+                    params.members."funfam".hmm,
+                    params.members."funfam".switches,
+                    params.members."funfam".release,
                 ]
             ]
 
@@ -155,11 +162,12 @@ workflow SEQUENCE_ANALYSIS {
     GENE3D_ADD_CATH_SUPERFAMILIES(GENE3D_CATH_RESEOLVE_HITS.out)
     GENE3D_FILTER_MATCHES(GENE3D_ADD_CATH_SUPERFAMILIES.out)
 
-    // // // FunFam (+ gene3D + cath-resolve-hits + assing-cath-superfamilies)
-    // // // These calls will only run if the user selected funfam
-    // // // This is tested within FUNFAM_HMMER_RUNNER
-    // // runner_hmmer_funfam_params = fasta.combine(member_params.gene3d_funfam)
-    // // FUNFAM_HMMER_RUNNER(runner_hmmer_funfam_params, GENE3D_FILTER_MATCHES.out[1])
+    // FunFam (+ gene3D + cath-resolve-hits + assing-cath-superfamilies)
+    // split into a channel so Nextflow can automatically manage the parallel execution of HmmSearch
+    GENE3D_FILTER_MATCHES.out[1]
+        .splitText()
+        .set { funfam_cath_superfamilies }
+    FUNFAM_HMMER_RUNNER(runner_hmmer_gene3d_params, funfam_cath_superfamilies, applications)
     // // FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out)
     // // FUNFAM_CATH_RESEOLVE_HITS(AGGREGATE_FUNFAM_RESULTS.out)
     // // FUNFAM_ADD_CATH_SUPERFAMILIES(FUNFAM_CATH_RESEOLVE_HITS.out)
