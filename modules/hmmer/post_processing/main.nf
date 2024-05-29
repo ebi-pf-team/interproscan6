@@ -40,6 +40,13 @@ process ADD_CATH_SUPERFAMILIES {
         path ips6_json
         path cath_resolve_out
         val postprocessing_params
+    /*
+    Post-processing params:
+    1. cath_resolve_hits_switches
+    2. model2sf_map - path to data file
+    3. discontinuous_regs - path to data file
+    4. assign_cath_superfamilies - path to py script
+    */
 
     output:
         path ips6_json
@@ -47,7 +54,7 @@ process ADD_CATH_SUPERFAMILIES {
 
     script:
     """
-    python3 $projectDir/scripts/members/gene3d_funfam/assign_cath_superfamilies.py \\
+    python3 ${postprocessing_params[3]} \\
         ${postprocessing_params[1]} \\
         ${postprocessing_params[2]} \\
         ${cath_resolve_out} "${cath_resolve_out}.cath_superfamilies"

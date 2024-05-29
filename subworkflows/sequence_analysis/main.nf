@@ -85,6 +85,7 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."gene3d".postprocess.cath_resolve_hits_switches,
                     params.members."gene3d".postprocess.model2sf_map,
                     params.members."gene3d".postprocess.discontinuous_regs,
+                    params.members."gene3d".postprocess.assign_cath_superfamilies,
                     params.members."funfam".hmm,
                     params.members."funfam".switches,
                     params.members."funfam".release,

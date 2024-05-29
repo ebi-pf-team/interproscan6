@@ -48,9 +48,9 @@ process FUNFAM_HMMER_RUNNER {
 
     /*
     post-processing params:
-    3. FunFam HMM dir
-    4. FunFam HMMsearch switches
-    5. FunFam release number
+    4. FunFam HMM dir
+    5. FunFam HMMsearch switches
+    6. FunFam release number
     */
 
     output:
@@ -62,10 +62,10 @@ process FUNFAM_HMMER_RUNNER {
     script:
     """
     hmmsearch \\
-        ${postprocessing_params[4]} \\
-        -o ${postprocessing_params[5]}_funfam_${cath_superfamily}.out \\
-        --domtblout ${postprocessing_params[5]}_funfam_${cath_superfamily}.dtbl \\
-        "${postprocessing_params[3]}${cath_superfamily.replace('.', '/')}.hmm" \\
+        ${postprocessing_params[5]} \\
+        -o ${postprocessing_params[6]}_funfam_${cath_superfamily}.out \\
+        --domtblout ${postprocessing_params[6]}_funfam_${cath_superfamily}.dtbl \\
+        "${postprocessing_params[4]}${cath_superfamily.replace('.', '/')}.hmm" \\
         ${fasta}
     
     touch ${hmm}_alignment
