@@ -157,11 +157,17 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> tuple[di
 
                 # add the location fragments (the 'aligned-regions') to the domain location data
                 gene3d_location["location-fragments"] = []
-                for fragment in gene3d_domain.aligned_regions.split(","):
+                if len(gene3d_domain.aligned_regions.split(",")) == 1:
+                    dc_status = "CONTINUOUS"
+                elif len(gene3d_domain.aligned_regions.split(",")) == 2:
+                    dc_status = False
+                else:
+                    dc_status = "DISCONTINUOUS"
+                for i, fragment in enumerate(gene3d_domain.aligned_regions.split(",")):
                     gene3d_location["location-fragments"].append({
                         "start": fragment.split("-")[0],
                         "end": fragment.split("-")[1],
-                        "dc-status": ""
+                        "dc-status": dc_status if dc_status else ("C_TERMINAL_DISC" if i == 0 else "N_TERMINAL_DISC")
                     })
 
                 processed_ips6[protein_id][gene3d_sig_acc]["locations"].append(gene3d_location)
