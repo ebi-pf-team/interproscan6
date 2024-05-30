@@ -27,7 +27,7 @@ include {
 } from "$projectDir/modules/hmmer/post_processing/main"
 include {
     GENE3D_FILTER_MATCHES;
-    GENE3D_FILTER_MATCHES as FUNFAM_FILTER_MATCHES;
+    FUNFAM_FILTER_MATCHES;
     PANTHER_FILTER_MATCHES;
     SFLD_FILTER_MATCHES;
 } from "$projectDir/modules/hmmer/filter/main"
@@ -44,6 +44,9 @@ workflow SEQUENCE_ANALYSIS {
     tsv_pro
 
     main:
+    boolean gene3d_funfam_processed = false 
+    // To prevent duplication if Gene3D and Funfam are called
+
     // Divide members up into their respective analysis pipelines/methods
     Channel.from(applications.split(','))
     .branch { member ->
@@ -75,7 +78,8 @@ workflow SEQUENCE_ANALYSIS {
         Place FunFam inside the Gene3D post-processing
         because it must run after the Gene3D path
         */
-        gene3d_funfam: (member == 'gene3d' || member == 'funfam')
+        gene3d_funfam: (member == 'gene3d' || member == 'funfam') && !gene3d_funfam_processed
+            gene3d_funfam_processed = true
             return [
                 params.members."gene3d".hmm,
                 params.members."gene3d".switches,
@@ -174,7 +178,7 @@ workflow SEQUENCE_ANALYSIS {
     FUNFAM_HMMER_RUNNER(runner_funfam_params, funfam_cath_superfamilies, applications)
     FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out, tsv_pro, "funfam")
     FUNFAM_CATH_RESEOLVE_HITS(FUNFAM_HMMER_PARSER.out)
-    // FUNFAM_FILTER_MATCHES(FUNFAM_CATH_RESEOLVE_HITS.out)
+    FUNFAM_FILTER_MATCHES(FUNFAM_CATH_RESEOLVE_HITS.out)
 
     // Panther (+ treegrafter + epa-ng)
     runner_panther_params = fasta.combine(member_params.panther)
@@ -210,7 +214,8 @@ workflow SEQUENCE_ANALYSIS {
     */
 
     if (applications.contains("gene3d")) {
-            GENERIC_HMMER_PARSER.out[0].concat(
+        GENERIC_HMMER_PARSER.out[0].concat(
+            FUNFAM_FILTER_MATCHES.out[0],
             GENE3D_FILTER_MATCHES.out[0],
             PANTHER_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
@@ -221,6 +226,7 @@ workflow SEQUENCE_ANALYSIS {
     }
     else {
         GENERIC_HMMER_PARSER.out[0].concat(
+            FUNFAM_FILTER_MATCHES.out[0],
             PANTHER_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
             CDD_PARSER.out,

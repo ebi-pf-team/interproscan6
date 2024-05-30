@@ -69,9 +69,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "out_superfamilies",
-        type=Path,
-        help="Path to write out a plain text file listing the CATH superfamilies"
+        "release",
+        type=str,
+        help="FunFam release version"
     )
 
     return parser
@@ -98,18 +98,18 @@ def parse_cath(cath_out: Path) -> dict[str, FunfamHit]:
     return matches
 
 
-def filter_matches(ips6: Path, gene3d_matches: dict[str, FunfamHit]) -> tuple[dict, set]:
+def filter_matches(ips6: Path, gene3d_matches: dict[str, FunfamHit], release: str) -> tuple[dict, set]:
     """Parse the IPS6 JSON file, filtering hits to only retains
     those that passed the Gene3D post-processing.
 
     :param ips6: path to internal IPS6 JSON file containing parsed hits from HMMER.out file
     :param gene3d_matches: dict of FunfamHits, representing hits in the 
         add_cath_superfamilies.py output file
+    :param release: FunFam release version
 
     Return processed IPS6 dict and a list of all cath superfamilies where hits were generated
     """
     processed_ips6 = {}
-    all_cath_superfamilies = set()
     with open(ips6, "r") as fh:
         ips6_data = json.load(fh)
 
@@ -144,6 +144,8 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, FunfamHit]) -> tuple[di
                     # signature_acc is the domain id
                     # replace the domain id with the Cath superfamily
                     sig_info = ips6_data[protein_id][signature_acc]
+                    sig_info["member_db"] = "funfam"
+                    sig_info["version"] = release
                     sig_info["accession"] = f"G3DSA:{funfam_domain.signature_acc}".replace("-", ":")
 
                     # model ac is the domain id (minus the -... suffix)
@@ -171,7 +173,7 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, FunfamHit]) -> tuple[di
 
                 processed_ips6[protein_id][funfam_sig_acc]["locations"].append(funfam_sig_acc)
 
-    return processed_ips6, all_cath_superfamilies
+    return processed_ips6
 
 
 def main():
@@ -179,13 +181,10 @@ def main():
     args = parser.parse_args()
 
     matches = parse_cath(args.cath_out)
-    processed_ips6, superfamilies = filter_matches(args.ips6, matches)
+    processed_ips6 = filter_matches(args.ips6, matches, args.release)
 
     with open(args.out_json, "w") as fh:
         json.dump(processed_ips6, fh, indent=2)
-    with open(args.out_superfamilies, "w") as fh:
-        for superfam in superfamilies:
-            fh.write(f"{superfam}\n")
 
 
 if __name__ == "__main__":

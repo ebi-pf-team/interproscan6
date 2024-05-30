@@ -25,7 +25,8 @@ process FUNFAM_FILTER_MATCHES {
     python3 $projectDir/scripts/members/funfam/filter_ips6_hits.py \\
         ${ips6_json} \\
         ${cath_resolved_out} \\
-        ${ips6_json}.post.processed.json
+        ${ips6_json}.post.processed.json \\
+        ${postprocessing_params[6]}
     """
 }
 
