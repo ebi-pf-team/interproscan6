@@ -113,12 +113,25 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                     model_ac = match['accession']
 
                 for location in match["locations"]:
-                    hmm_start = location["hmmStart"]
-                    hmm_end = location["hmmEnd"]
-                    hmm_length = location["hmmLength"]
-                    location_score = location["score"]
-                    env_end = location["envelopeEnd"]
-                    env_start = location["envelopeStart"]
+                    if member_db.upper() == "CDD":
+                        hmm_start = location["start"]
+                        hmm_end = location["end"]
+                        hmm_length = int(hmm_end) - int(hmm_start)
+                        location_score = location["score"]
+                        env_end, env_start = "-", "-"
+                    elif member_db.upper() == "SIGNALP":
+                        hmm_start = location["start"]
+                        hmm_end = location["end"]
+                        hmm_length = int(hmm_end) - int(hmm_start)
+                        location_score = location["pvalue"]
+                        env_end, env_start = "-", "-"
+                    else:
+                        hmm_start = location["hmmStart"]
+                        hmm_end = location["hmmEnd"]
+                        hmm_length = location["hmmLength"]
+                        location_score = location["score"]
+                        env_end = location["envelopeEnd"]
+                        env_start = location["envelopeStart"]
                     try:
                         fragment = location["fragment"]
                     except KeyError:
