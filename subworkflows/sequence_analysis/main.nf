@@ -3,7 +3,7 @@ include {
     CDD_POSTPROCESS;
     CDD_PARSER
 } from "$projectDir/modules/cdd/main"
-include { 
+include {
     FUNFAM_HMMER_RUNNER;
     HMMER_RUNNER as GENERIC_HMMER_RUNNER;
     HMMER_RUNNER as GENE3D_HMMER_RUNNER;
@@ -44,7 +44,7 @@ workflow SEQUENCE_ANALYSIS {
     tsv_pro
 
     main:
-    boolean gene3d_funfam_processed = false 
+    boolean gene3d_funfam_processed = false
     // To prevent duplication if Gene3D and Funfam are called
 
     // Divide members up into their respective analysis pipelines/methods
@@ -161,7 +161,7 @@ workflow SEQUENCE_ANALYSIS {
     GENERIC_HMMER_PARSER(GENERIC_HMMER_RUNNER.out, tsv_pro, "antifam")
 
     // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
-    // These also run for FunFam as Gene3D must be run before FunFam  
+    // These also run for FunFam as Gene3D must be run before FunFam
     runner_gene3d_params = fasta.combine(member_params.gene3d_funfam)
     GENE3D_HMMER_RUNNER(runner_gene3d_params)
     GENE3D_HMMER_PARSER(GENE3D_HMMER_RUNNER.out, tsv_pro, "gene3d")
@@ -175,7 +175,9 @@ workflow SEQUENCE_ANALYSIS {
         .splitText() { it.replace('\n', '') }
         .set { funfam_cath_superfamilies }
     runner_funfam_params = fasta.combine(member_params.gene3d_funfam)
-    FUNFAM_HMMER_RUNNER(runner_funfam_params, funfam_cath_superfamilies, applications)
+    runner_funfam_params_with_cath = runner_funfam_params.combine(funfam_cath_superfamilies)
+
+    FUNFAM_HMMER_RUNNER(runner_funfam_params_with_cath, applications)
     FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out, tsv_pro, "funfam")
     FUNFAM_CATH_RESEOLVE_HITS(FUNFAM_HMMER_PARSER.out)
     FUNFAM_FILTER_MATCHES(FUNFAM_CATH_RESEOLVE_HITS.out)
@@ -193,7 +195,7 @@ workflow SEQUENCE_ANALYSIS {
     SFLD_HMMER_PARSER(SFLD_HMMER_RUNNER.out, tsv_pro, "sfld")
     SFLD_POST_PROCESSER(SFLD_HMMER_PARSER.out, tsv_pro)
     SFLD_FILTER_MATCHES(SFLD_POST_PROCESSER.out)
-    
+
     /*
     Member databases that do NOT use HMMER
     */
@@ -222,7 +224,7 @@ workflow SEQUENCE_ANALYSIS {
             CDD_PARSER.out,
             SIGNALP_PARSER.out
         )
-        .set { parsed_results }           
+        .set { parsed_results }
     }
     else {
         GENERIC_HMMER_PARSER.out[0].concat(
@@ -232,7 +234,7 @@ workflow SEQUENCE_ANALYSIS {
             CDD_PARSER.out,
             SIGNALP_PARSER.out
         )
-        .set { parsed_results } 
+        .set { parsed_results }
     }
 
     emit:

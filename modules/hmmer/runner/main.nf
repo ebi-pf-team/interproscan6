@@ -29,7 +29,7 @@ process FUNFAM_HMMER_RUNNER {
     /*
     FunFam requires its own runner in order to only use those FunFam families
     that are associated to Cath-Gene3D superfamilies where hits were found
-    (Gene3D must be run before FunFam). Otherwise running HMMER3 for all 
+    (Gene3D must be run before FunFam). Otherwise running HMMER3 for all
     FunFam hmm profiles would take an extremely long time.
 
     There will be one hmmer.out and one hmmer.dtbl file per FunFam hmm profile
@@ -42,8 +42,7 @@ process FUNFAM_HMMER_RUNNER {
         "${applications}".contains('funfam')
 
     input:
-        tuple path(fasta), path(hmm), val(switches), val(release), val(alignment), val(postprocessing_params)
-        val cath_superfamily
+        tuple path(fasta), path(hmm), val(switches), val(release), val(alignment), val(postprocessing_params), val(cath_superfamily)
         val applications
 
     /*
@@ -67,7 +66,7 @@ process FUNFAM_HMMER_RUNNER {
         --domtblout ${postprocessing_params[6]}_funfam_${cath_superfamily}.dtbl \\
         "${postprocessing_params[4]}${cath_superfamily.replace('.', '/')}.hmm" \\
         ${fasta}
-    
+
     touch ${hmm}_alignment
     """
 
