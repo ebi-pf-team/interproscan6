@@ -107,6 +107,8 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
 
                 if 'model-ac' in match:
                     model_ac = match['model-ac']
+                elif member_db.upper() in ["SIGNALP"]:  # will probably apply to TMHMM and Phobius when added
+                    model_ac = "-"
                 else:
                     model_ac = match['accession']
 
