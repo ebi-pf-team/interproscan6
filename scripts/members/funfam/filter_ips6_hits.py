@@ -29,8 +29,6 @@ class FunfamHit:
 class DomainHit:
     def __init__(self):
         self.signature_acc = None
-        self.cath_superfamily = None
-        self.match_id = None
         self.score = None  # bit score
         self.evalue = None  # indp-evalue
         self.boundaries_start = None  # envelope boundaries
@@ -88,7 +86,7 @@ def parse_cath(cath_out: Path) -> dict[str, FunfamHit]:
         for line in fh.readlines():
             if line.startswith('#'):
                 continue  # header row
-            protein_id = line.split()[2]
+            protein_id = line.split()[0]
             if protein_id not in matches:
                 match = FunfamHit()
                 match.sequence_id = protein_id
@@ -117,39 +115,38 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, FunfamHit], release: st
         if protein_id not in gene3d_matches:
             continue
 
-        for signature_acc in ips6_data[protein_id]:
+        for signature_acc in ips6_data[protein_id]:  # e.g. 3.40.50.1170-FF-000001
             if signature_acc not in gene3d_matches[protein_id].domains:
                 continue
 
             # retrieve the relevant domain hit
-            funfam_sig_acc = None  # from the IPS6 data
+            ips6_location = None  # from the IPS6 data
             funfam_domain = None  # from the cath-superfamilies output
-            for location in ips6_data[protein_id][signature_acc]["locations"]:
+            for location in ips6_data[protein_id][signature_acc]["locations"]:  # list of locations
                 for domain in gene3d_matches[protein_id].domains[signature_acc]:
+                    # Iterate the list of DomainHit instances
                     if domain.evalue == location["evalue"] \
                         and domain.score == location["score"] \
                         and domain.boundaries_start == location["envelopeStart"] \
                         and domain.boundaries_end == location["envelopeEnd"]:
-                        funfam_sig_acc = location
-                        funfam_domain = domain
+                        ips6_location = location  # dict of hmmer match data
+                        funfam_domain = domain  # DomainHit instance
 
-                if not funfam_sig_acc:
+                if not ips6_location:
                     continue
 
                 if protein_id not in processed_ips6:
                     processed_ips6[protein_id] = {}
 
-                funfam_sig_acc = f"G3DSA:{funfam_domain.signature_acc}".replace("-", ":")
+                funfam_sig_acc = f"G3DSA:{signature_acc}".replace("-", ":")
                 if funfam_sig_acc not in processed_ips6[protein_id]:
-                    # signature_acc is the domain id
-                    # replace the domain id with the Cath superfamily
                     sig_info = ips6_data[protein_id][signature_acc]
                     sig_info["member_db"] = "funfam"
                     sig_info["version"] = release
-                    sig_info["accession"] = f"G3DSA:{funfam_domain.signature_acc}".replace("-", ":")
+                    sig_info["accession"] = funfam_sig_acc
 
                     # model ac is the domain id (minus the -... suffix)
-                    sig_info["model-ac"] = funfam_domain.signature_acc.replace("-", ":")
+                    sig_info["model-ac"] = funfam_sig_acc
 
                     processed_ips6[protein_id][funfam_sig_acc] = sig_info
                     processed_ips6[protein_id][funfam_sig_acc]["locations"] = []
@@ -157,7 +154,7 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, FunfamHit], release: st
                     # may have parsed the post-processing
 
                 # add the location fragments (the 'aligned-regions') to the domain location data
-                funfam_sig_acc["location-fragments"] = []
+                ips6_location["location-fragments"] = []
                 if len(funfam_domain.aligned_regions.split(",")) == 1:
                     dc_status = "CONTINUOUS"
                 elif len(funfam_domain.aligned_regions.split(",")) == 2:
@@ -165,13 +162,13 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, FunfamHit], release: st
                 else:
                     dc_status = "DISCONTINUOUS"
                 for i, fragment in enumerate(funfam_domain.aligned_regions.split(",")):
-                    funfam_sig_acc["location-fragments"].append({
+                    ips6_location["location-fragments"].append({
                         "start": fragment.split("-")[0],
                         "end": fragment.split("-")[1],
                         "dc-status": dc_status if dc_status else ("C_TERMINAL_DISC" if i == 0 else "N_TERMINAL_DISC")
                     })
 
-                processed_ips6[protein_id][funfam_sig_acc]["locations"].append(funfam_sig_acc)
+                processed_ips6[protein_id][funfam_sig_acc]["locations"].append(ips6_location)
 
     return processed_ips6
 
