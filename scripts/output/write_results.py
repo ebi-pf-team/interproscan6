@@ -97,7 +97,11 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
 
             for match_acc, match in matches.items():
                 member_db = match["member_db"]
-                version_major, version_minor = match['version'].split('.')
+                try:
+                    version_major, version_minor = match['version'].split('.')
+                except ValueError:
+                    version_major = match['version']
+                    version_minor = "0"
                 evalue = match["evalue"]
                 score = match["score"]
 
@@ -110,14 +114,17 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                     hmm_start = location["hmmStart"]
                     hmm_end = location["hmmEnd"]
                     hmm_length = location["hmmLength"]
-                    raw_hmm_bound = location["rawHmmBounds"]
                     location_score = location["score"]
                     env_end = location["envelopeEnd"]
                     env_start = location["envelopeStart"]
                     try:
                         fragment = location["fragment"]
                     except KeyError:
-                        fragment = f"{location['start']}-{location['end']}-C"
+                        fragment = f"{location['start']}-{location['end']}-S"
+                    try:
+                        raw_hmm_bound = location["rawHmmBounds"]
+                    except KeyError:
+                        raw_hmm_bound = ""  # lookup match does not have rawHmmBounds
 
                     if match_acc == "signal_peptide":
                         sig_acc, status = "Signal Peptide", ""
