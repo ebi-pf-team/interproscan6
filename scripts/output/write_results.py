@@ -102,8 +102,12 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                 except ValueError:
                     version_major = match['version']
                     version_minor = "0"
-                evalue = match["evalue"]
-                score = match["score"]
+                try:  # cdd does not have evalue and score on this level
+                    evalue = match["evalue"]
+                    score = match["score"]
+                except KeyError:
+                    evalue = "-"
+                    score = "-"
 
                 if 'model-ac' in match:
                     model_ac = match['model-ac']
