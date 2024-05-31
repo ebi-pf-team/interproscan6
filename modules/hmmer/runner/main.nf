@@ -1,5 +1,4 @@
 process HMMER_RUNNER {
-    container 'docker.io/biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1'
     label 'hmmer_runner'
 
     input:
@@ -17,7 +16,7 @@ process HMMER_RUNNER {
 
     script:
     """
-    hmmsearch ${switches} -o ${release}_${hmm}.out --domtblout ${release}_${hmm}.dtbl ${alignment ? "-A ${hmm}_alignment" : ""} ${hmm} ${fasta}
+    /hmmer/usr/bin/hmmsearch ${switches} -o ${release}_${hmm}.out --domtblout ${release}_${hmm}.dtbl ${alignment ? "-A ${hmm}_alignment" : ""} ${hmm} ${fasta}
     if [ ! -f ${hmm}_alignment ]; then
         touch ${hmm}_alignment
     fi

@@ -15,7 +15,6 @@ include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/mai
 include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
 include { XREFS } from "$projectDir/subworkflows/xrefs/main"
 
-
 workflow {
     // Perform preliminary validation checks before running the analysis
     PRE_CHECKS(
