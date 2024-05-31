@@ -221,9 +221,20 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             "score": float(location["score"]),
                             "envelopeStart": int(location["envelopeStart"]),
                             "envelopeEnd": int(location["envelopeEnd"]),
-                            "postProcessed": location["postProcessed"],
-                            # "location-fragments": location["location-fragments"]
+                            "postProcessed": location["postProcessed"]
                         }
+                        try:
+                            locations["location-fragments"] = location["location-fragments"]
+                        except KeyError:
+                            single_location = {
+                                "start": int(location["start"]),
+                                "end": int(location["end"]),
+                                "dc-status": "CONTINUOUS"
+                            }
+                            try:
+                                locations["location-fragments"].append(single_location)
+                            except KeyError:
+                                locations["location-fragments"] = [single_location]
                     match = {
                         "signature": signature,
                         "locations": locations
