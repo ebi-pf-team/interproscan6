@@ -173,7 +173,7 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
 def json_output(seq_matches: dict, output_path: str, version: str):
     json_output = os.path.join(output_path + '.json')
     results = []
-
+    boolean_map = {"true": True, "false": False}
     for seq_id, data in seq_matches.items():
         sequence = data['sequences'][1]
         md5 = data['sequences'][2]
@@ -225,7 +225,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         locations = {
                             "start": int(location["start"]),
                             "end": int(location["end"]),
-                            "representative": location["representative"],
+                            "representative": boolean_map.get(location["representative"].lower(), False),
                             "hmmStart": int(location["hmmStart"]),
                             "hmmEnd": int(location["hmmEnd"]),
                             "hmmLength": int(location["hmmLength"]),
@@ -234,7 +234,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             "score": float(location["score"]),
                             "envelopeStart": int(location["envelopeStart"]),
                             "envelopeEnd": int(location["envelopeEnd"]),
-                            "postProcessed": bool(location["postProcessed"])
+                            "postProcessed": boolean_map.get(location["postProcessed"].lower())
                         }
                         try:
                             locations["location-fragments"] = location["location-fragments"]
