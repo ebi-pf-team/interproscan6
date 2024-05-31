@@ -197,7 +197,20 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                     entry = None
                     if match_data['entry']['accession'] != "-":
                         description = match_data['entry']['description']
-                        entry = match_data['entry']
+                        entry = {
+                            "accession": match_data['entry']['accession'],
+                            "name": match_data['entry']['short_name'],
+                            "description": match_data['entry']['name'],
+                            "type": match_data['entry']['type']
+                        }
+                        try:
+                            entry["goXRefs"] = match_data['entry']['goXRefs']
+                        except KeyError:
+                            pass
+                        try:
+                            entry["pathwayXRefs"] = match_data['entry']['pathwayXRefs']
+                        except KeyError:
+                            pass
                     signature = {
                         "accession": match_data['accession'].split(":")[0],  # drop subfamily
                         "name": match_data['name'],
@@ -221,7 +234,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             "score": float(location["score"]),
                             "envelopeStart": int(location["envelopeStart"]),
                             "envelopeEnd": int(location["envelopeEnd"]),
-                            "postProcessed": location["postProcessed"]
+                            "postProcessed": bool(location["postProcessed"])
                         }
                         try:
                             locations["location-fragments"] = location["location-fragments"]

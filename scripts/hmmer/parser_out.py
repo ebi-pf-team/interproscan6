@@ -139,7 +139,7 @@ def get_domain_match(match: re.Match, member_db: str, qlen: str) -> dict:
     if member_db == "gene3d" or member_db == "pfam":
         post_processed = "true"
     domain_match = {}
-    hmm_bound_pattern = {"[]": "Complete", "[.": "N-terminal complete", ".]": "C-terminal complete", "..": "Incomplete"}
+    hmm_bound_pattern = {"[]": "COMPLETE", "[.": "N_TERMINAL_COMPLETE", ".]": "C_TERMINAL_COMPLETE", "..": "INCOMPLETE"}
     domain_match["start"] = match.group(9)  # ali coord from
     domain_match["end"] = match.group(10)  # ali coord to
     domain_match["representative"] = ""
