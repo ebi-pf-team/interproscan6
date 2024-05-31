@@ -208,17 +208,33 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         },
                         "entry": entry
                     }
+                    for location in match_data['locations']:
+                        locations = {
+                            "start": int(location["start"]),
+                            "end": int(location["end"]),
+                            "representative": location["representative"],
+                            "hmmStart": int(location["hmmStart"]),
+                            "hmmEnd": int(location["hmmEnd"]),
+                            "hmmLength": int(location["hmmLength"]),
+                            "hmmBounds": location["hmmBounds"],
+                            "evalue": float(location["evalue"]),
+                            "score": float(location["score"]),
+                            "envelopeStart": int(location["envelopeStart"]),
+                            "envelopeEnd": int(location["envelopeEnd"]),
+                            "postProcessed": location["postProcessed"],
+                            # "location-fragments": location["location-fragments"]
+                        }
                     match = {
                         "signature": signature,
-                        "locations": match_data['locations'],
+                        "locations": locations
                     }
 
                     if match_data['member_db'].upper() == "CDD":
-                        match["evalue"] = match_data['locations'][0]["evalue"]
-                        match["score"] = match_data['locations'][0]["score"]
+                        match["evalue"] = float(match_data['locations'][0]["evalue"])
+                        match["score"] = float(match_data['locations'][0]["score"])
                     else:
-                        match["evalue"] = match_data['evalue']
-                        match["score"] = match_data['score']
+                        match["evalue"] = float(match_data['evalue'])
+                        match["score"] = float(match_data['score'])
 
                     if 'model-ac' in match_data:
                         match["model-ac"] = match_data['model-ac']
@@ -326,7 +342,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("pvalue", str(location["pvalue"]))
                     else:
-                        location_elem = ET.SubElement(locations_elem, "hmmer3-location")
+                        location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("env-end", str(location["envelopeEnd"]))
                         location_elem.set("env-start", str(location["envelopeStart"]))
                         location_elem.set("score", str(location["score"]))
@@ -356,7 +372,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                                 location_frag_elem.set("residue", str(site['siteLocations']["residue"]))
                             else:
                                 for sitelocation in site['siteLocations']:
-                                    location_frag_elem = ET.SubElement(location_frags_elem, "hmmer3-location-fragment")
+                                    location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
                                     location_frag_elem.set("start", str(sitelocation["start"]))
                                     location_frag_elem.set("end", str(sitelocation["end"]))
                                     location_frag_elem.set("dc-status", "")
