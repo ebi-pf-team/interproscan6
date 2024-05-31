@@ -155,13 +155,13 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, FunfamHit], release: st
 
                 # add the location fragments (the 'aligned-regions') to the domain location data
                 ips6_location["location-fragments"] = []
-                if len(funfam_domain.aligned_regions.split(",")) == 1:
+                if len(funfam_domain.resolved.split(",")) == 1:
                     dc_status = "CONTINUOUS"
-                elif len(funfam_domain.aligned_regions.split(",")) == 2:
+                elif len(funfam_domain.resolved.split(",")) == 2:
                     dc_status = False
                 else:
                     dc_status = "DISCONTINUOUS"
-                for i, fragment in enumerate(funfam_domain.aligned_regions.split(",")):
+                for i, fragment in enumerate(funfam_domain.resolved.split(",")):
                     ips6_location["location-fragments"].append({
                         "start": fragment.split("-")[0],
                         "end": fragment.split("-")[1],
