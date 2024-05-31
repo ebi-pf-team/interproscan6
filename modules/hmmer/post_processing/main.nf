@@ -6,7 +6,6 @@ filters module/
 */
 
 process PANTHER_POST_PROCESSER {
-    container 'docker.io/library/treegrafter'
     label 'analysis_parser'
 
     input:
@@ -41,7 +40,7 @@ process PANTHER_POST_PROCESSER {
         ${postprocessing_params[0]} \
         -e ${postprocessing_params[1]} \
         -o treegrafter_processed_panther_hits \
-        --epa-ng /epa-ng/bin/epa-ng \
+        --epa-ng /opt/epa-ng/bin/epa-ng \
         --keep
     """
 }

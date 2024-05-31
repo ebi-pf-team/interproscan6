@@ -1,8 +1,6 @@
 process CDD_RUNNER {
     label 'cdd_runner'
 
-    container 'docker.io/ncbi/blast'
-
     input:
     tuple path(fasta), val(library), val(release), val(switches), val(postprocessing_params)
 
@@ -13,7 +11,8 @@ process CDD_RUNNER {
 
     script:
     """
-    rpsblast -query ${fasta} -db ${library} -out rpsblast_out ${switches}
+    export LD_LIBRARY_PATH="/blast/blast/lib"
+    /blast/blast/bin/rpsblast -query ${fasta} -db ${library} -out rpsblast_out ${switches}
     """
 }
 
@@ -30,7 +29,6 @@ process CDD_POSTPROCESS {
     processes dumped datafiles to obtain required information. All data files
     are downloadable from NCBI ftp site. Read README file for details
     */
-    container 'docker.io/library/cdd'
     label 'analysis_parser'
 
     input:
@@ -47,7 +45,7 @@ process CDD_POSTPROCESS {
     val release
     script:
     """
-    /opt/cdd/RpsbProc-x64-linux/rpsbproc --infile rpsblast_out --outfile rpsblast_processed ${postprocessing_params[0]} --data-path ${postprocessing_params[1]}
+    /opt/RpsbProc-x64-linux/rpsbproc --infile rpsblast_out --outfile rpsblast_processed ${postprocessing_params[0]} --data-path ${postprocessing_params[1]}
     """
 }
 
