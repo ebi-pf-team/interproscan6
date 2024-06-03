@@ -11,7 +11,7 @@ process LOOKUP_CHECK {
     script:
     if ( is_test )
         """
-        echo "\$(cat tests/unit_tests/test_outputs/precalc_match_lookup/lookup_check_out)" > checked_md5
+        cat $projectDir/tests/unit_tests/test_outputs/precalc_match_lookup/lookup_check_out > checked_md5
         """
     else
         """

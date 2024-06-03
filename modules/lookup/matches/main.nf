@@ -12,7 +12,7 @@ process LOOKUP_MATCHES {
     script:
     if ( is_test )
         """
-        echo '\$(cat tests/unit_tests/test_outputs/precalc_match_lookup/lookup_matches_out)' > parsed_match_lookup
+        cat $projectDir/tests/unit_tests/test_outputs/precalc_match_lookup/lookup_matches_out > parsed_match_lookup
         """
     else
         """

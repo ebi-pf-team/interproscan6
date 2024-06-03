@@ -9,9 +9,6 @@ process LOOKUP_NO_MATCHES {
 
     script:
     """
-    pwd
-    ls -l ../../../meta/scripts/lookup
-    cat "$projectDir/scripts/lookup/lookup_no_matches.py"
     output=\$(python3 $projectDir/scripts/lookup/lookup_no_matches.py "${checked_lookup}")
     
     if [ -n "\$output" ]; then
