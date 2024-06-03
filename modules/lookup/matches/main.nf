@@ -4,12 +4,18 @@ process LOOKUP_MATCHES {
     input:
     val checked_lookup
     val appl
+    val is_test
 
     output:
     path "parsed_match_lookup"
 
     script:
-    """
-    python3 $projectDir/scripts/lookup/lookup_matches.py ${checked_lookup} '${appl}' ${params.url_precalc}${params.matches} > parsed_match_lookup
-    """
+    if ( is_test )
+        """
+        echo '\$(cat tests/unit_tests/test_outputs/precalc_match_lookup/lookup_matches_out)' > parsed_match_lookup
+        """
+    else
+        """
+        python3 $projectDir/scripts/lookup/lookup_matches.py ${checked_lookup} '${appl}' ${params.url_precalc}${params.matches} > parsed_match_lookup
+        """
 }
