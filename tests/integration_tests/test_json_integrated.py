@@ -70,9 +70,9 @@ def test_json_output(input_path, expected_output_path, current_output_path, appl
     print("Extra elements in current output:")
     compare(current, expected, ignore_elements)
 
-    with open('tests/tests_integration/temp_expected.json', 'w') as file:
+    with open('/Users/lcf/PycharmProjects/interproscan6/tests/tests_integration/temp_expected.json', 'w') as file:
         json.dump(expected, file, indent=2)
-    with open('tests/tests_integration/temp_current.json', 'w') as file:
+    with open('/Users/lcf/PycharmProjects/interproscan6/tests/tests_integration/temp_current.json', 'w') as file:
         json.dump(current, file, indent=2)
 
     assert expected == current  # Uncomment this line when output totally implemented

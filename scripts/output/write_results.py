@@ -221,8 +221,9 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         },
                         "entry": entry
                     }
+                    locations = []
                     for location in match_data['locations']:
-                        locations = {
+                        info = {
                             "start": int(location["start"]),
                             "end": int(location["end"]),
                             "representative": boolean_map.get(location["representative"].lower(), False),
@@ -237,7 +238,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             "postProcessed": boolean_map.get(location["postProcessed"].lower())
                         }
                         try:
-                            locations["location-fragments"] = location["location-fragments"]
+                            info["location-fragments"] = location["location-fragments"]
                         except KeyError:
                             single_location = {
                                 "start": int(location["start"]),
@@ -245,9 +246,10 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 "dc-status": "CONTINUOUS"
                             }
                             try:
-                                locations["location-fragments"].append(single_location)
+                                info["location-fragments"].append(single_location)
                             except KeyError:
-                                locations["location-fragments"] = [single_location]
+                                info["location-fragments"] = [single_location]
+                        locations.append(info)
                     match = {
                         "signature": signature,
                         "locations": locations
@@ -327,7 +329,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     if match_data['entry']['accession'] != "-":
                         entry_elem = ET.SubElement(signature_elem, "entry")
                         entry_elem.set("ac", match_data['entry']['accession'])
-                        entry_elem.set("desc", match_data['entry']['name'])
+                        entry_elem.set("desc", match_data['entry']['description'])
                         entry_elem.set("name", match_data['entry']['short_name'])
                         entry_elem.set("type", match_data['entry']['type'])
                         if match_data['entry']['goXRefs']:
