@@ -193,7 +193,10 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         "pvalue": match_data["locations"][0]["pvalue"],
                     }
                 else:
-                    description = match_data['description']
+                    try:
+                        description = match_data['description']
+                    except KeyError:
+                        description = "-"
                     entry = None
                     if match_data['entry']['accession'] != "-":
                         description = match_data['entry']['description']
@@ -211,6 +214,8 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             entry["pathwayXRefs"] = match_data['entry']['pathwayXRefs']
                         except KeyError:
                             pass
+                    if match_data['member_db'].upper() == "CDD":
+                        description = match_data['name']
                     signature = {
                         "accession": match_data['accession'].split(":")[0],  # drop subfamily
                         "name": match_data['name'],
@@ -227,16 +232,19 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             "start": int(location["start"]),
                             "end": int(location["end"]),
                             "representative": boolean_map.get(location["representative"].lower(), False),
-                            "hmmStart": int(location["hmmStart"]),
-                            "hmmEnd": int(location["hmmEnd"]),
-                            "hmmLength": int(location["hmmLength"]),
-                            "hmmBounds": location["hmmBounds"],
                             "evalue": float(location["evalue"]),
                             "score": float(location["score"]),
-                            "envelopeStart": int(location["envelopeStart"]),
-                            "envelopeEnd": int(location["envelopeEnd"]),
-                            "postProcessed": boolean_map.get(location["postProcessed"].lower())
                         }
+                        if match_data['member_db'].upper() not in ["CDD"]:
+                            info["hmmStart"]: int(location["hmmStart"])
+                            info["hmmEnd"]: int(location["hmmEnd"])
+                            info["hmmLength"]: int(location["hmmLength"])
+                            info["hmmBounds"]: location["hmmBounds"]
+                            info["envelopeStart"]: int(location["envelopeStart"])
+                            info["envelopeEnd"]: int(location["envelopeEnd"])
+                            info["postProcessed"]: boolean_map.get(location["postProcessed"].lower())
+                        if match_data['member_db'].upper() in ["SFLD", "CDD"]:
+                            info["sites"] = location["sites"]
                         try:
                             info["location-fragments"] = location["location-fragments"]
                         except KeyError:
@@ -255,10 +263,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         "locations": locations
                     }
 
-                    if match_data['member_db'].upper() == "CDD":
-                        match["evalue"] = float(match_data['locations'][0]["evalue"])
-                        match["score"] = float(match_data['locations'][0]["score"])
-                    else:
+                    if match_data['member_db'].upper() != "CDD":
                         match["evalue"] = float(match_data['evalue'])
                         match["score"] = float(match_data['score'])
 
@@ -367,6 +372,8 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("end", str(location["end"]))
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("pvalue", str(location["pvalue"]))
+                    elif match_data['member_db'].upper() == "SFLD":
+                        location_elem.set("sites", location["sites"])
                     else:
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("env-end", str(location["envelopeEnd"]))

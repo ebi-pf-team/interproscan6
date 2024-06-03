@@ -23,7 +23,7 @@ def json2dict(obj):
         result = {}
         for key, value in obj.items():
             result[key] = json2dict(value)
-        return dict(result.items())
+        return dict(sorted(result.items()))
     elif isinstance(obj, list):
         sorted_list = sorted([json2dict(item) for item in obj], key=lambda x: json.dumps(x))
         if sorted_list and isinstance(sorted_list[0], dict) and 'md5' in sorted_list[0]:
@@ -68,10 +68,13 @@ def test_json_output(input_path, expected_output_path, current_output_path, appl
     expected = json2dict(expected_output)
     current = json2dict(current_output)
 
-    ignore_elements = ['representative', "evalue"]
-    print("Missing elements in current output:")
+    with open('/Users/lcf/PycharmProjects/interproscan6/tests/tests_integration/temp_expected.json', 'w') as file:
+        json.dump(expected, file, indent=2)
+    with open('/Users/lcf/PycharmProjects/interproscan6/tests/tests_integration/temp_current.json', 'w') as file:
+        json.dump(current, file, indent=2)
+
+    ignore_elements = ['representative']
     compare(expected, current, ignore_elements)
-    print("Extra elements in current output:")
     compare(current, expected, ignore_elements)
 
     assert expected == current

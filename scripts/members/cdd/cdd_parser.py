@@ -117,19 +117,22 @@ def parse_cdd(rpsblast_processed: Path, release: str):
                             ):
                                 domain_index = i
                                 break
-                        
+
                         if domain_index is not None:  # domain index could by 0, so don't use `if domain_index:`
                             site_info = {
                                 "description": " ".join(line.split()[3:-4]),
                                 "numLocations": len(sites),
                                 "siteLocations": [],
                             }
+                            site_info["siteLocations"] = []
                             for site in sites:
-                                site_info["siteLocations"] = {
-                                    "start": site[1:],
-                                    "end": site[1:],
-                                    "residue": site[0]
-                                }
+                                site_info["siteLocations"].append(
+                                    {
+                                        "start": site[1:],
+                                        "end": site[1:],
+                                        "residue": site[0]
+                                    }
+                                )
                             matches[target_key][signature_accession]['locations'][-1]['sites'].append(site_info)
                     continue
 
