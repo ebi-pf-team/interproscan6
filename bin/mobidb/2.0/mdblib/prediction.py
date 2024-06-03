@@ -5,9 +5,7 @@ from mdblib.states import States
 
 
 class Prediction(States):
-    def __init__(
-        self, _method, _scores, _threshold, _types=None, _include_in_mobidblite=False
-    ):
+    def __init__(self, _method, _scores, _threshold, _types=None, _include_in_mobidblite=False):
         self.method = _method
         self.scores = _scores
         self.threshold = _threshold
@@ -22,18 +20,12 @@ class Prediction(States):
             return True
         else:
             logging.debug(
-                "length difference | %s | len: %i pred: %s | %s",
-                self.method,
-                len(seq),
-                len(self.scores),
-                seq,
-            )
+                'length difference | %s | len: %i pred: %s | %s',
+                self.method, len(seq), len(self.scores), seq)
             return False
 
     def scores_to_states(self, tags=(1, 0)):
-        return [
-            tags[0] if score >= self.threshold else tags[1] for score in self.scores
-        ]
+        return [tags[0] if score >= self.threshold else tags[1] for score in self.scores]
 
     def regions_to_set(self):
         """Get list of ID amino-acids positions from region list
@@ -46,7 +38,7 @@ class Prediction(States):
             positions.update(range(start, end + 1))
         return positions
 
-    def regions_to_states(self, length, tags=("D", "S"), reg_startindex=1):
+    def regions_to_states(self, length, tags=('D', 'S'), reg_startindex=1):
         """Represent ID states as a string from a list ID regions
 
         :param length: Length of the protein sequence (num of amino-acids)

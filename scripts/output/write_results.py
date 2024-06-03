@@ -193,7 +193,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         "pvalue": match_data["locations"][0]["pvalue"],
                     }
                 else:
-                    description = "-"
+                    description = match_data['description']
                     entry = None
                     if match_data['entry']['accession'] != "-":
                         description = match_data['entry']['description']
@@ -201,7 +201,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             "accession": match_data['entry']['accession'],
                             "name": match_data['entry']['short_name'],
                             "description": match_data['entry']['name'],
-                            "type": match_data['entry']['type']
+                            "type": match_data['entry']['type'].upper()
                         }
                         try:
                             entry["goXRefs"] = match_data['entry']['goXRefs']
@@ -281,7 +281,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
             "sequence": sequence,
             "md5": md5,
             "matches": matches,
-            "xref": xrefs
+            "xref": [xrefs]
         }
         results.append(result)
 

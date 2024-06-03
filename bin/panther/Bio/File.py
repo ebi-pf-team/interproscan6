@@ -18,11 +18,11 @@ use.
 from __future__ import print_function
 
 import codecs
+import os
+import sys
 import contextlib
 import itertools
-import os
 import platform
-import sys
 
 from Bio._py3k import basestring
 
@@ -34,19 +34,18 @@ except ImportError:
 # Ordered dict is a language feature from Python 3.7 onwards.
 # CPython 3.6 also already has ordered dicts.
 # PyPy has always had ordered dicts.
-if (
-    sys.version_info >= (3, 7)
-    or platform.python_implementation() == "PyPy"
-    or (sys.version_info == (3, 6) and platform.python_implementation() == "CPython")
-):
+if (sys.version_info >= (3, 7)
+        or platform.python_implementation() == "PyPy"
+        or (sys.version_info == (3, 6)
+            and platform.python_implementation() == "CPython")):
     _dict = dict
 else:
     from collections import OrderedDict as _dict
 
 try:
+    from sqlite3 import dbapi2 as _sqlite
     from sqlite3 import IntegrityError as _IntegrityError
     from sqlite3 import OperationalError as _OperationalError
-    from sqlite3 import dbapi2 as _sqlite
 except ImportError:
     # Not present on Jython, but should be included in Python 2.5
     # or later (unless compiled from source without its dependencies)
@@ -139,7 +138,6 @@ def _open_for_random_access(filename):
     if magic == b"\x1f\x8b":
         # This is a gzipped file, but is it BGZF?
         from . import bgzf
-
         try:
             # If it is BGZF, we support that
             return bgzf.BgzfReader(mode="rb", fileobj=handle)
@@ -147,10 +145,8 @@ def _open_for_random_access(filename):
             assert "BGZF" in str(e)
             # Not a BGZF file after all,
             handle.close()
-            raise ValueError(
-                "Gzipped files are not suitable for indexing, "
-                "please use BGZF (blocked gzip format) instead."
-            )
+            raise ValueError("Gzipped files are not suitable for indexing, "
+                             "please use BGZF (blocked gzip format) instead.")
 
     return handle
 
@@ -188,7 +184,6 @@ class UndoHandle(object):
         return next
 
     if sys.version_info[0] < 3:
-
         def next(self):
             """Python 2 style alias for Python 3 style __next__ method."""
             return self.__next__()
@@ -266,7 +261,6 @@ class UndoHandle(object):
 # The rest of this file defines code used in Bio.SeqIO and Bio.SearchIO
 # for indexing
 
-
 class _IndexedSeqFileProxy(object):
     """Base class for file format specific random access (PRIVATE).
 
@@ -327,7 +321,8 @@ class _IndexedSeqFileDict(_dict_base):
     add or change values, pop values, nor clear the dictionary.
     """
 
-    def __init__(self, random_access_proxy, key_function, repr, obj_repr):
+    def __init__(self, random_access_proxy, key_function,
+                 repr, obj_repr):
         """Initialize the class."""
         # Use key_function=None for default value
         self._proxy = random_access_proxy
@@ -335,7 +330,8 @@ class _IndexedSeqFileDict(_dict_base):
         self._repr = repr
         self._obj_repr = obj_repr
         if key_function:
-            offset_iter = ((key_function(k), o, l) for (k, o, l) in random_access_proxy)
+            offset_iter = (
+                (key_function(k), o, l) for (k, o, l) in random_access_proxy)
         else:
             offset_iter = random_access_proxy
         offsets = _dict()
@@ -499,7 +495,8 @@ class _IndexedSeqFileDict(_dict_base):
         Python dictionaries provide this method for modifying data in the
         dictionary. This class mimics the dictionary interface but is read only.
         """
-        raise NotImplementedError("An indexed a sequence file doesn't " "support this.")
+        raise NotImplementedError("An indexed a sequence file doesn't "
+                                  "support this.")
 
     def copy(self):
         """Would copy a dictionary, but not implemented.
@@ -507,7 +504,8 @@ class _IndexedSeqFileDict(_dict_base):
         Python dictionaries provide this method for modifying data in the
         dictionary. This class mimics the dictionary interface but is read only.
         """
-        raise NotImplementedError("An indexed a sequence file doesn't " "support this.")
+        raise NotImplementedError("An indexed a sequence file doesn't "
+                                  "support this.")
 
     def close(self):
         """Close the file handle being used to read the data.
@@ -535,16 +533,9 @@ class _SQLiteManySeqFilesDict(_IndexedSeqFileDict):
     one of the open handles is closed first.
     """
 
-    def __init__(
-        self,
-        index_filename,
-        filenames,
-        proxy_factory,
-        format,
-        key_function,
-        repr,
-        max_open=10,
-    ):
+    def __init__(self, index_filename, filenames,
+                 proxy_factory, format,
+                 key_function, repr, max_open=10):
         """Initialize the class."""
         # TODO? - Don't keep filename list in memory (just in DB)?
         # Should save a chunk of memory if dealing with 1000s of files.
@@ -554,10 +545,8 @@ class _SQLiteManySeqFilesDict(_IndexedSeqFileDict):
         if not _sqlite:
             # Hack for Jython (of if Python is compiled without it)
             from Bio import MissingPythonDependencyError
-
-            raise MissingPythonDependencyError(
-                "Requires sqlite3, which is " "included Python 2.5+"
-            )
+            raise MissingPythonDependencyError("Requires sqlite3, which is "
+                                               "included Python 2.5+")
         if filenames is not None:
             filenames = list(filenames)  # In case it was a generator
 
@@ -588,13 +577,14 @@ class _SQLiteManySeqFilesDict(_IndexedSeqFileDict):
         format = self._format
         proxy_factory = self._proxy_factory
 
-        con = _sqlite.connect(index_filename, check_same_thread=False)
+        con = _sqlite.connect(index_filename,
+                              check_same_thread=False)
         self._con = con
         # Check the count...
         try:
-            (count,) = con.execute(
-                "SELECT value FROM meta_data WHERE key=?;", ("count",)
-            ).fetchone()
+            count, = con.execute(
+                "SELECT value FROM meta_data WHERE key=?;",
+                ("count",)).fetchone()
             self._length = int(count)
             if self._length == -1:
                 con.close()
@@ -603,37 +593,30 @@ class _SQLiteManySeqFilesDict(_IndexedSeqFileDict):
             # use MAX(_ROWID_) to obtain the number of sequences in the database
             # using COUNT(key) is quite slow in SQLITE
             # (https://stackoverflow.com/questions/8988915/sqlite-count-slow-on-big-tables)
-            (count,) = con.execute("SELECT MAX(_ROWID_) FROM offset_data;").fetchone()
+            count, = con.execute(
+                "SELECT MAX(_ROWID_) FROM offset_data;").fetchone()
             if self._length != int(count):
                 con.close()
-                raise ValueError(
-                    "Corrupt database? %i entries not %i" % (int(count), self._length)
-                )
-            (self._format,) = con.execute(
-                "SELECT value FROM meta_data WHERE key=?;", ("format",)
-            ).fetchone()
+                raise ValueError("Corrupt database? %i entries not %i"
+                                 % (int(count), self._length))
+            self._format, = con.execute(
+                "SELECT value FROM meta_data WHERE key=?;",
+                ("format",)).fetchone()
             if format and format != self._format:
                 con.close()
-                raise ValueError(
-                    "Index file says format %s, not %s" % (self._format, format)
-                )
+                raise ValueError("Index file says format %s, not %s"
+                                 % (self._format, format))
             try:
-                (filenames_relative_to_index,) = con.execute(
+                filenames_relative_to_index, = con.execute(
                     "SELECT value FROM meta_data WHERE key=?;",
-                    ("filenames_relative_to_index",),
-                ).fetchone()
-                filenames_relative_to_index = (
-                    filenames_relative_to_index.upper() == "TRUE"
-                )
+                    ("filenames_relative_to_index",)).fetchone()
+                filenames_relative_to_index = (filenames_relative_to_index.upper() == "TRUE")
             except TypeError:
                 # Original behaviour, assume if meta_data missing
                 filenames_relative_to_index = False
-            self._filenames = [
-                row[0]
-                for row in con.execute(
-                    "SELECT name FROM file_data " "ORDER BY file_number;"
-                ).fetchall()
-            ]
+            self._filenames = [row[0] for row in
+                               con.execute("SELECT name FROM file_data "
+                                           "ORDER BY file_number;").fetchall()]
             if filenames_relative_to_index:
                 # Not implicitly relative to $PWD, explicitly relative to index file
                 relative_path = os.path.abspath(os.path.dirname(index_filename))
@@ -644,35 +627,27 @@ class _SQLiteManySeqFilesDict(_IndexedSeqFileDict):
                     else:
                         # Would be stored with Unix / path separator, so convert
                         # it to the local OS path separator here:
-                        tmp.append(
-                            os.path.join(relative_path, f.replace("/", os.path.sep))
-                        )
+                        tmp.append(os.path.join(relative_path, f.replace("/", os.path.sep)))
                 self._filenames = tmp
                 del tmp
             if filenames and len(filenames) != len(self._filenames):
                 con.close()
-                raise ValueError(
-                    "Index file says %i files, not %i"
-                    % (len(self._filenames), len(filenames))
-                )
+                raise ValueError("Index file says %i files, not %i"
+                                 % (len(self._filenames), len(filenames)))
             if filenames and filenames != self._filenames:
                 for old, new in zip(self._filenames, filenames):
                     # Want exact match (after making relative to the index above)
                     if os.path.abspath(old) != os.path.abspath(new):
                         con.close()
                         if filenames_relative_to_index:
-                            raise ValueError(
-                                "Index file has different filenames, e.g. %r != %r"
-                                % (os.path.abspath(old), os.path.abspath(new))
-                            )
+                            raise ValueError("Index file has different filenames, e.g. %r != %r"
+                                             % (os.path.abspath(old), os.path.abspath(new)))
                         else:
-                            raise ValueError(
-                                "Index file has different filenames "
-                                "[This is an old index where any relative paths "
-                                "were relative to the original working directory]. "
-                                "e.g. %r != %r"
-                                % (os.path.abspath(old), os.path.abspath(new))
-                            )
+                            raise ValueError("Index file has different filenames "
+                                             "[This is an old index where any relative paths "
+                                             "were relative to the original working directory]. "
+                                             "e.g. %r != %r"
+                                             % (os.path.abspath(old), os.path.abspath(new)))
                 # Filenames are equal (after imposing abspath)
         except _OperationalError as err:
             con.close()
@@ -694,9 +669,7 @@ class _SQLiteManySeqFilesDict(_IndexedSeqFileDict):
         random_access_proxies = self._proxies
 
         if not format or not filenames:
-            raise ValueError(
-                "Filenames to index and format required to build %r" % index_filename
-            )
+            raise ValueError("Filenames to index and format required to build %r" % index_filename)
         if not proxy_factory(format):
             raise ValueError("Unsupported format '%s'" % format)
         # Create the index
@@ -710,21 +683,18 @@ class _SQLiteManySeqFilesDict(_IndexedSeqFileDict):
         # con.execute("CREATE TABLE offset_data (key TEXT PRIMARY KEY, "
         #             "offset INTEGER);")
         con.execute("CREATE TABLE meta_data (key TEXT, value TEXT);")
-        con.execute("INSERT INTO meta_data (key, value) VALUES (?,?);", ("count", -1))
-        con.execute(
-            "INSERT INTO meta_data (key, value) VALUES (?,?);", ("format", format)
-        )
-        con.execute(
-            "INSERT INTO meta_data (key, value) VALUES (?,?);",
-            ("filenames_relative_to_index", "True"),
-        )
+        con.execute("INSERT INTO meta_data (key, value) VALUES (?,?);",
+                    ("count", -1))
+        con.execute("INSERT INTO meta_data (key, value) VALUES (?,?);",
+                    ("format", format))
+        con.execute("INSERT INTO meta_data (key, value) VALUES (?,?);",
+                    ("filenames_relative_to_index", "True"))
         # TODO - Record the alphabet?
         # TODO - Record the file size and modified date?
-        con.execute("CREATE TABLE file_data (file_number INTEGER, name TEXT);")
         con.execute(
-            "CREATE TABLE offset_data (key TEXT, "
-            "file_number INTEGER, offset INTEGER, length INTEGER);"
-        )
+            "CREATE TABLE file_data (file_number INTEGER, name TEXT);")
+        con.execute("CREATE TABLE offset_data (key TEXT, "
+                    "file_number INTEGER, offset INTEGER, length INTEGER);")
         count = 0
         for i, filename in enumerate(filenames):
             # Default to storing as an absolute path,
@@ -736,24 +706,23 @@ class _SQLiteManySeqFilesDict(_IndexedSeqFileDict):
                 # Note for cross platform use (e.g. shared drive over SAMBA),
                 # convert any Windows slash into Unix style for rel paths.
                 f = os.path.relpath(filename, relative_path).replace(os.path.sep, "/")
-            elif (os.path.dirname(os.path.abspath(filename)) + os.path.sep).startswith(
-                relative_path + os.path.sep
-            ):
+            elif (os.path.dirname(os.path.abspath(filename)) +
+                  os.path.sep).startswith(relative_path + os.path.sep):
                 # Since sequence file is in same directory or sub directory,
                 # might as well make this into a relative path:
                 f = os.path.relpath(filename, relative_path).replace(os.path.sep, "/")
                 assert not f.startswith("../"), f
             # print("DEBUG - storing %r as [%r] %r" % (filename, relative_path, f))
             con.execute(
-                "INSERT INTO file_data (file_number, name) VALUES (?,?);", (i, f)
-            )
+                "INSERT INTO file_data (file_number, name) VALUES (?,?);",
+                (i, f))
             random_access_proxy = proxy_factory(format, filename)
             if key_function:
-                offset_iter = (
-                    (key_function(k), i, o, l) for (k, o, l) in random_access_proxy
-                )
+                offset_iter = ((key_function(k), i, o, l)
+                               for (k, o, l) in random_access_proxy)
             else:
-                offset_iter = ((k, i, o, l) for (k, o, l) in random_access_proxy)
+                offset_iter = ((k, i, o, l)
+                               for (k, o, l) in random_access_proxy)
             while True:
                 batch = list(itertools.islice(offset_iter, 100))
                 if not batch:
@@ -762,8 +731,7 @@ class _SQLiteManySeqFilesDict(_IndexedSeqFileDict):
                 #       % (len(batch), batch[0][0], batch[-1][0]))
                 con.executemany(
                     "INSERT INTO offset_data (key,file_number,offset,length) VALUES (?,?,?,?);",
-                    batch,
-                )
+                    batch)
                 con.commit()
                 count += len(batch)
             if len(random_access_proxies) < max_open:
@@ -773,16 +741,16 @@ class _SQLiteManySeqFilesDict(_IndexedSeqFileDict):
         self._length = count
         # print("About to index %i entries" % count)
         try:
-            con.execute(
-                "CREATE UNIQUE INDEX IF NOT EXISTS " "key_index ON offset_data(key);"
-            )
+            con.execute("CREATE UNIQUE INDEX IF NOT EXISTS "
+                        "key_index ON offset_data(key);")
         except _IntegrityError as err:
             self._proxies = random_access_proxies
             self.close()
             con.close()
             raise ValueError("Duplicate key? %s" % err)
         con.execute("PRAGMA locking_mode=NORMAL")
-        con.execute("UPDATE meta_data SET value = ? WHERE key = ?;", (count, "count"))
+        con.execute("UPDATE meta_data SET value = ? WHERE key = ?;",
+                    (count, "count"))
         con.commit()
         # print("Index created")
 
@@ -791,10 +759,8 @@ class _SQLiteManySeqFilesDict(_IndexedSeqFileDict):
 
     def __contains__(self, key):
         return bool(
-            self._con.execute(
-                "SELECT key FROM offset_data WHERE key=?;", (key,)
-            ).fetchone()
-        )
+            self._con.execute("SELECT key FROM offset_data WHERE key=?;",
+                              (key,)).fetchone())
 
     def __len__(self):
         """Return the number of records indexed."""
@@ -803,9 +769,7 @@ class _SQLiteManySeqFilesDict(_IndexedSeqFileDict):
 
     def __iter__(self):
         """Iterate over the keys."""
-        for row in self._con.execute(
-            "SELECT key FROM offset_data ORDER BY file_number, offset;"
-        ):
+        for row in self._con.execute("SELECT key FROM offset_data ORDER BY file_number, offset;"):
             yield str(row[0])
 
     if hasattr(dict, "iteritems"):
@@ -817,17 +781,15 @@ class _SQLiteManySeqFilesDict(_IndexedSeqFileDict):
             This tries to act like a Python 3 dictionary, and does not return
             a list of keys due to memory concerns.
             """
-            return [
-                str(row[0])
-                for row in self._con.execute("SELECT key FROM offset_data;").fetchall()
-            ]
+            return [str(row[0]) for row in
+                    self._con.execute("SELECT key FROM offset_data;").fetchall()]
 
     def __getitem__(self, key):
         """Return record for the specified key."""
         # Pass the offset to the proxy
         row = self._con.execute(
-            "SELECT file_number, offset FROM offset_data WHERE key=?;", (key,)
-        ).fetchone()
+            "SELECT file_number, offset FROM offset_data WHERE key=?;",
+            (key,)).fetchone()
         if not row:
             raise KeyError
         file_number, offset = row
@@ -868,8 +830,8 @@ class _SQLiteManySeqFilesDict(_IndexedSeqFileDict):
         """
         # Pass the offset to the proxy
         row = self._con.execute(
-            "SELECT file_number, offset, length FROM offset_data WHERE key=?;", (key,)
-        ).fetchone()
+            "SELECT file_number, offset, length FROM offset_data WHERE key=?;",
+            (key,)).fetchone()
         if not row:
             raise KeyError
         file_number, offset, length = row

@@ -10,12 +10,14 @@
 from Bio import Alphabet
 from Bio.Data import IUPACData
 
+
 # #################### Protein
 
 # From the IUPAC definition at:
 # http://www.chem.qmw.ac.uk/iupac/AminoAcid/A2021.html#AA21
 
-assert IUPACData.extended_protein_letters == IUPACData.extended_protein_letters.upper()
+assert (IUPACData.extended_protein_letters ==
+        IUPACData.extended_protein_letters.upper())
 
 
 class ExtendedIUPACProtein(Alphabet.ProteinAlphabet):

@@ -65,7 +65,7 @@ def _read_header(handle, length):
 def trim_str(string, max_len, concat_char):
     """Truncate the given string for display."""
     if len(string) > max_len:
-        return string[: max_len - len(concat_char)] + concat_char
+        return string[:max_len - len(concat_char)] + concat_char
     return string
 
 
@@ -99,9 +99,8 @@ def find_test_dir(start_dir=None):
 
     target = os.path.abspath(start_dir)
     while True:
-        if os.path.isdir(os.path.join(target, "Bio")) and os.path.isdir(
-            os.path.join(target, "Tests")
-        ):
+        if os.path.isdir(os.path.join(target, "Bio")) and \
+                os.path.isdir(os.path.join(target, "Tests")):
             # Good, we're in the Biopython root now
             return os.path.abspath(os.path.join(target, "Tests"))
         # Recurse up the tree
@@ -111,9 +110,8 @@ def find_test_dir(start_dir=None):
             # Reached root
             break
         target = new
-    raise ValueError(
-        "Not within Biopython source tree: %r" % os.path.abspath(start_dir)
-    )
+    raise ValueError("Not within Biopython source tree: %r" %
+                     os.path.abspath(start_dir))
 
 
 def run_doctest(target_dir=None, *args, **kwargs):
