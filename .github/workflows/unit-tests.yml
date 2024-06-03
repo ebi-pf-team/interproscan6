@@ -60,7 +60,7 @@ jobs:
 
     - name: NF-Test subworkflows tests
       run: |
-        conda run --name test nf-test test tests/unit_tests/subworkflows/pre_checks/
+        conda run --name test nf-test test tests/unit_tests/subworkflows/pre_checks/ &&
         conda run --name test nf-test test tests/unit_tests/subworkflows/sequence_precalc/
     
     - name: PY-Test scripts tests
