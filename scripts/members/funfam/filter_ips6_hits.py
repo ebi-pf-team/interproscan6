@@ -156,16 +156,36 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, FunfamHit], release: st
                 # add the location fragments (the 'aligned-regions') to the domain location data
                 ips6_location["location-fragments"] = []
                 if len(funfam_domain.resolved.split(",")) == 1:
-                    dc_status = "CONTINUOUS"
-                elif len(funfam_domain.resolved.split(",")) == 2:
-                    dc_status = False
-                else:
-                    dc_status = "DISCONTINUOUS"
-                for i, fragment in enumerate(funfam_domain.resolved.split(",")):
                     ips6_location["location-fragments"].append({
-                        "start": fragment.split("-")[0],
-                        "end": fragment.split("-")[1],
-                        "dc-status": dc_status if dc_status else ("C_TERMINAL_DISC" if i == 0 else "N_TERMINAL_DISC")
+                        "start": funfam_domain.resolved.split("-")[0],
+                        "end": funfam_domain.resolved.split("-")[1],
+                        "dc-status": "CONTINUOUS"
+                    })
+                else:
+                    # first fragment has dc-status C_TERMINAL_DISC
+                    # the last fragment, dc-status = N_TERMINAL_DISC
+                    # all fragments in between = NC_TERMIANL_DISC
+                    # Normally the fragments are listed in order (c-term to n-term), but best to check
+                    all_frags = [(int(_.split("-")[0]), int(_.split("-")[1])) for _ in funfam_domain.resolved.split(",")]
+                    all_frags = sorted(all_frags, key=lambda x: (x[0], x[1]))
+
+                    ips6_location["location-fragments"].append({
+                        "start": all_frags[0],
+                        "end": all_frags[1],
+                        "dc-status": "C_TERMINAL_DISC"
+                    })
+
+                    for fragment in all_frags[1:-1]:
+                        ips6_location["location-fragments"].append({
+                            "start": fragment[0],
+                            "end": fragment[1],
+                            "dc-status": "NC_TERMINAL_DISC"
+                        })
+
+                    ips6_location["location-fragments"].append({
+                        "start": all_frags[0],
+                        "end": all_frags[1],
+                        "dc-status": "N_TERMINAL_DISC"
                     })
 
                 processed_ips6[protein_id][funfam_sig_acc]["locations"].append(ips6_location)

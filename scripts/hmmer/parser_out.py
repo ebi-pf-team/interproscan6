@@ -15,9 +15,9 @@ def get_accession_regex(appl: str) -> re.Pattern:
     if appl.upper() == "ANTIFAM":
         return re.compile(r"^(Accession:|Query:|Query sequence:)\s+(ANF\d{5})\s*$")
     if appl.upper() == "FUNFAM":
-        return re.compile(r"^(Accession:|Query:|Query sequence:)\s+([\w\d\.-]+)\s*\[M=\d+\]$")
+        return re.compile(r"^(Accession:|Query:|Query sequence:)\s+([\w\d\.\-]+)\s*\[M=\d+\]$")
     if appl.upper() == "GENE3D":
-        return re.compile(r"^(Accession:|Query:|Query sequence:)\s+([\w\d-]+)")
+        return re.compile(r"^(Accession:|Query:|Query sequence:)\s+([\w\d\.\-_]+)\s*\[M=\d+\]$")
     if appl.upper() == "NCBIFAM":
         return re.compile(r"^(Accession:|Query:|Query sequence:)\s+((TIGR|NF)\d+)\.\d+$")
     if appl.upper() == "PANTHER":
@@ -64,10 +64,12 @@ def parse(out_file: str) -> dict:
                 else:
                     if stage == 'LOOKING_FOR_METHOD_ACCESSION':
                         if line.startswith("Accession:") or line.startswith("Query sequence:") or (line.startswith("Query:") and member_db.lower() in ["funfam", "gene3d", "panther"]):
+
                             stage = 'LOOKING_FOR_SEQUENCE_MATCHES'
                             model_ident_pattern = member_accession.match(line)
                             if model_ident_pattern:
                                 model_id = model_ident_pattern.group(2) if member_db != "panther" else model_ident_pattern.group(2).replace(".orig.30.pir", "")
+
                         if line.startswith("Query:"):
                             try:
                                 query_name = line.split()[1]

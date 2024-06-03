@@ -111,7 +111,6 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> tuple[di
     all_cath_superfamilies = set()
     with open(ips6, "r") as fh:
         ips6_data = json.load(fh)
-
     for protein_id in ips6_data:
         if protein_id not in gene3d_matches:
             continue
@@ -121,7 +120,7 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> tuple[di
                 continue
 
             # retrieve the relevant domain hit
-            gene3d_location = None  # from the IPS6 data
+            ips6_location = None  # from the IPS6 data
             gene3d_domain = None  # from the cath-superfamilies output
             for location in ips6_data[protein_id][signature_acc]["locations"]:
                 for domain in gene3d_matches[protein_id].domains[signature_acc]:
@@ -129,10 +128,10 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> tuple[di
                         and domain.score == location["score"] \
                         and domain.boundaries_start == location["envelopeStart"] \
                         and domain.boundaries_end == location["envelopeEnd"]:
-                        gene3d_location = location
+                        ips6_location = location
                         gene3d_domain = domain
 
-                if not gene3d_location:
+                if not ips6_location:
                     continue
 
                 if protein_id not in processed_ips6:
@@ -145,7 +144,7 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> tuple[di
                     # signature_acc is the domain id
                     # replace the domain id with the Cath superfamily
                     sig_info = ips6_data[protein_id][signature_acc]
-                    sig_info["accession"] = f"G3DSA:{cath_superfam}"
+                    sig_info["accession"] = gene3d_sig_acc
 
                     # model ac is the domain id (minus the -... suffix)
                     sig_info["model-ac"] = gene3d_domain.signature_acc.split("-")[0]
@@ -156,21 +155,41 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> tuple[di
                     # may have parsed the post-processing
 
                 # add the location fragments (the 'aligned-regions') to the domain location data
-                gene3d_location["location-fragments"] = []
-                if len(gene3d_domain.aligned_regions.split(",")) == 1:
-                    dc_status = "CONTINUOUS"
-                elif len(gene3d_domain.aligned_regions.split(",")) == 2:
-                    dc_status = False
+                ips6_location["location-fragments"] = []
+                if len(gene3d_domain.resolved.split(",")) == 1:
+                    ips6_location["location-fragments"].append({
+                        "start": gene3d_domain.resolved.split("-")[0],
+                        "end": gene3d_domain.resolved.split("-")[1],
+                        "dc-status": "CONTINUOUS"
+                    })
                 else:
-                    dc_status = "DISCONTINUOUS"
-                for i, fragment in enumerate(gene3d_domain.aligned_regions.split(",")):
-                    gene3d_location["location-fragments"].append({
-                        "start": fragment.split("-")[0],
-                        "end": fragment.split("-")[1],
-                        "dc-status": dc_status if dc_status else ("C_TERMINAL_DISC" if i == 0 else "N_TERMINAL_DISC")
+                    # first fragment has dc-status C_TERMINAL_DISC
+                    # the last fragment, dc-status = N_TERMINAL_DISC
+                    # all fragments in between = NC_TERMIANL_DISC
+                    # Normally the fragments are listed in order (c-term to n-term), but best to check
+                    all_frags = [(int(_.split("-")[0]), int(_.split("-")[1])) for _ in gene3d_domain.resolved.split(",")]
+                    all_frags = sorted(all_frags, key=lambda x: (x[0], x[1]))
+
+                    ips6_location["location-fragments"].append({
+                        "start": all_frags[0],
+                        "end": all_frags[1],
+                        "dc-status": "C_TERMINAL_DISC"
                     })
 
-                processed_ips6[protein_id][gene3d_sig_acc]["locations"].append(gene3d_location)
+                    for fragment in all_frags[1:-1]:
+                        ips6_location["location-fragments"].append({
+                            "start": fragment[0],
+                            "end": fragment[1],
+                            "dc-status": "NC_TERMINAL_DISC"
+                        })
+
+                    ips6_location["location-fragments"].append({
+                        "start": all_frags[0],
+                        "end": all_frags[1],
+                        "dc-status": "N_TERMINAL_DISC"
+                    })
+
+                processed_ips6[protein_id][gene3d_sig_acc]["locations"].append(ips6_location)
 
     return processed_ips6, all_cath_superfamilies
 
