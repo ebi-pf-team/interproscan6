@@ -1,0 +1,359 @@
+{
+  "Protein_with_panther_hits": {
+    "TIGR01274": {
+      "accession": "TIGR01274",
+      "model-ac": "TIGR01274",
+      "name": "",
+      "description": "",
+      "evalue": 0.0,
+      "score": 647.2,
+      "bias": 0.0,
+      "version": "14.0",
+      "member_db": "NCBIFAM",
+      "locations": [
+        {
+          "start": 2,
+          "end": 337,
+          "representative": "",
+          "hmmStart": 1,
+          "hmmEnd": 336,
+          "hmmLength": 337,
+          "hmmBoundsRaw": "[.",
+          "hmmBounds": "N_TERMINAL_COMPLETE",
+          "evalue": 0.0,
+          "score": "647.0",
+          "envelopeStart": 2,
+          "envelopeEnd": 338,
+          "postProcessed": "false",
+          "aliwS": "2-337-S",
+          "..": "[.",
+          "alignment": "",
+          "cigar_alignment": ""
+        },
+        {
+          "start": 2,
+          "end": 337,
+          "representative": "",
+          "hmmStart": 1,
+          "hmmEnd": 336,
+          "hmmLength": 337,
+          "hmmBoundsRaw": "[.",
+          "hmmBounds": "N_TERMINAL_COMPLETE",
+          "evalue": 0.0,
+          "score": "647.0",
+          "envelopeStart": 2,
+          "envelopeEnd": 338,
+          "postProcessed": "false",
+          "aliwS": "2-337-S",
+          "..": "[.",
+          "alignment": "",
+          "cigar_alignment": ""
+        }
+      ]
+    }
+  },
+  "UPI0002E0D40B": {
+    "TIGR00520": {
+      "accession": "TIGR00520",
+      "model-ac": "TIGR00520",
+      "name": "",
+      "description": "",
+      "evalue": 0.0,
+      "score": 471.9,
+      "bias": 0.0,
+      "version": "14.0",
+      "member_db": "NCBIFAM",
+      "locations": [
+        {
+          "start": 34,
+          "end": 370,
+          "representative": "",
+          "hmmStart": 9,
+          "hmmEnd": 352,
+          "hmmLength": 352,
+          "hmmBoundsRaw": ".]",
+          "hmmBounds": "C_TERMINAL_COMPLETE",
+          "evalue": 0.0,
+          "score": "471.6",
+          "envelopeStart": 26,
+          "envelopeEnd": 370,
+          "postProcessed": "false",
+          "aliwS": "34-370-S",
+          "..": ".]",
+          "alignment": "",
+          "cigar_alignment": ""
+        }
+      ]
+    }
+  },
+  "A0B6J9": {
+    "TIGR01949": {
+      "accession": "TIGR01949",
+      "model-ac": "TIGR01949",
+      "name": "",
+      "description": "",
+      "evalue": 1.8e-107,
+      "score": 370.3,
+      "bias": 2e-107,
+      "version": "14.0",
+      "member_db": "NCBIFAM",
+      "locations": [
+        {
+          "start": 4,
+          "end": 260,
+          "representative": "",
+          "hmmStart": 1,
+          "hmmEnd": 253,
+          "hmmLength": 255,
+          "hmmBoundsRaw": "[.",
+          "hmmBounds": "N_TERMINAL_COMPLETE",
+          "evalue": 2e-107,
+          "score": "370.1",
+          "envelopeStart": 4,
+          "envelopeEnd": 262,
+          "postProcessed": "false",
+          "aliwS": "4-260-S",
+          "..": "[.",
+          "alignment": "",
+          "cigar_alignment": ""
+        }
+      ]
+    }
+  },
+  "Panther_hits": {
+    "TIGR04085": {
+      "accession": "TIGR04085",
+      "model-ac": "TIGR04085",
+      "name": "",
+      "description": "",
+      "evalue": 1.6e-06,
+      "score": 39.7,
+      "bias": 4.9e-06,
+      "version": "14.0",
+      "member_db": "NCBIFAM",
+      "locations": [
+        {
+          "start": 344,
+          "end": 429,
+          "representative": "",
+          "hmmStart": 1,
+          "hmmEnd": 86,
+          "hmmLength": 93,
+          "hmmBoundsRaw": "[.",
+          "hmmBounds": "N_TERMINAL_COMPLETE",
+          "evalue": 4.9e-06,
+          "score": "38.1",
+          "envelopeStart": 344,
+          "envelopeEnd": 433,
+          "postProcessed": "false",
+          "aliwS": "344-429-S",
+          "..": "[.",
+          "alignment": "",
+          "cigar_alignment": ""
+        },
+        {
+          "start": 344,
+          "end": 429,
+          "representative": "",
+          "hmmStart": 1,
+          "hmmEnd": 86,
+          "hmmLength": 93,
+          "hmmBoundsRaw": "[.",
+          "hmmBounds": "N_TERMINAL_COMPLETE",
+          "evalue": 4.9e-06,
+          "score": "38.1",
+          "envelopeStart": 344,
+          "envelopeEnd": 433,
+          "postProcessed": "false",
+          "aliwS": "344-429-S",
+          "..": "[.",
+          "alignment": "",
+          "cigar_alignment": ""
+        }
+      ]
+    },
+    "NF012164": {
+      "accession": "NF012164",
+      "model-ac": "NF012164",
+      "name": "",
+      "description": "",
+      "evalue": 0.0,
+      "score": 1037.9,
+      "bias": 0.0,
+      "version": "14.0",
+      "member_db": "NCBIFAM",
+      "locations": [
+        {
+          "start": 7,
+          "end": 448,
+          "representative": "",
+          "hmmStart": 1,
+          "hmmEnd": 442,
+          "hmmLength": 442,
+          "hmmBoundsRaw": "[]",
+          "hmmBounds": "COMPLETE",
+          "evalue": 0.0,
+          "score": "1037.8",
+          "envelopeStart": 7,
+          "envelopeEnd": 448,
+          "postProcessed": "false",
+          "aliwS": "7-448-S",
+          "..": "[]",
+          "alignment": "",
+          "cigar_alignment": ""
+        },
+        {
+          "start": 7,
+          "end": 448,
+          "representative": "",
+          "hmmStart": 1,
+          "hmmEnd": 442,
+          "hmmLength": 442,
+          "hmmBoundsRaw": "[]",
+          "hmmBounds": "COMPLETE",
+          "evalue": 0.0,
+          "score": "1037.8",
+          "envelopeStart": 7,
+          "envelopeEnd": 448,
+          "postProcessed": "false",
+          "aliwS": "7-448-S",
+          "..": "[]",
+          "alignment": "",
+          "cigar_alignment": ""
+        }
+      ]
+    }
+  },
+  "WP_249252303.1": {
+    "TIGR03501": {
+      "accession": "TIGR03501",
+      "model-ac": "TIGR03501",
+      "name": "",
+      "description": "",
+      "evalue": 0.68,
+      "score": 21.8,
+      "bias": 1.5,
+      "version": "14.0",
+      "member_db": "NCBIFAM",
+      "locations": [
+        {
+          "start": 865,
+          "end": 885,
+          "representative": "",
+          "hmmStart": 2,
+          "hmmEnd": 22,
+          "hmmLength": 22,
+          "hmmBoundsRaw": ".]",
+          "hmmBounds": "C_TERMINAL_COMPLETE",
+          "evalue": 1.5,
+          "score": "20.8",
+          "envelopeStart": 864,
+          "envelopeEnd": 885,
+          "postProcessed": "false",
+          "aliwS": "865-885-S",
+          "..": ".]",
+          "alignment": "",
+          "cigar_alignment": ""
+        }
+      ]
+    },
+    "NF033681": {
+      "accession": "NF033681",
+      "model-ac": "NF033681",
+      "name": "",
+      "description": "",
+      "evalue": 0.0,
+      "score": 614.0,
+      "bias": 0.0,
+      "version": "14.0",
+      "member_db": "NCBIFAM",
+      "locations": [
+        {
+          "start": 224,
+          "end": 847,
+          "representative": "",
+          "hmmStart": 1,
+          "hmmEnd": 545,
+          "hmmLength": 546,
+          "hmmBoundsRaw": "[.",
+          "hmmBounds": "N_TERMINAL_COMPLETE",
+          "evalue": 0.0,
+          "score": "613.7",
+          "envelopeStart": 224,
+          "envelopeEnd": 848,
+          "postProcessed": "false",
+          "aliwS": "224-847-S",
+          "..": "[.",
+          "alignment": "",
+          "cigar_alignment": ""
+        }
+      ]
+    },
+    "NF033680": {
+      "accession": "NF033680",
+      "model-ac": "NF033680",
+      "name": "",
+      "description": "",
+      "evalue": 0.0,
+      "score": 1701.4,
+      "bias": 0.0,
+      "version": "14.0",
+      "member_db": "NCBIFAM",
+      "locations": [
+        {
+          "start": 1,
+          "end": 885,
+          "representative": "",
+          "hmmStart": 1,
+          "hmmEnd": 884,
+          "hmmLength": 884,
+          "hmmBoundsRaw": "[]",
+          "hmmBounds": "COMPLETE",
+          "evalue": 0.0,
+          "score": "1701.2",
+          "envelopeStart": 1,
+          "envelopeEnd": 885,
+          "postProcessed": "false",
+          "aliwS": "1-885-S",
+          "..": "[]",
+          "alignment": "",
+          "cigar_alignment": ""
+        }
+      ]
+    }
+  },
+  "WP_134973503.1": {
+    "TIGR03107": {
+      "accession": "TIGR03107",
+      "model-ac": "TIGR03107",
+      "name": "",
+      "description": "",
+      "evalue": 0.0,
+      "score": 680.8,
+      "bias": 0.0,
+      "version": "14.0",
+      "member_db": "NCBIFAM",
+      "locations": [
+        {
+          "start": 5,
+          "end": 353,
+          "representative": "",
+          "hmmStart": 1,
+          "hmmEnd": 350,
+          "hmmLength": 350,
+          "hmmBoundsRaw": "[]",
+          "hmmBounds": "COMPLETE",
+          "evalue": 0.0,
+          "score": "680.6",
+          "envelopeStart": 5,
+          "envelopeEnd": 353,
+          "postProcessed": "false",
+          "aliwS": "5-353-S",
+          "..": "[]",
+          "alignment": "",
+          "cigar_alignment": ""
+        }
+      ]
+    }
+  }
+}

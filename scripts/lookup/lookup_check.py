@@ -1,15 +1,17 @@
 import json
-import requests
 import sys
+import urllib.request
 
 """
 Checks for pre-calculated matches from any of the member dbs/applications.
 This differentiates between cases where the previous calculations found not matches and when a previous calculation has not been performed during LOOKUP_MATCH.
 """
+
+
 def check_precalc(md5: list, url: str) -> list:
-    sequences_md5 = ', '.join(md5)
-    checkout = requests.get(f"{url}?md5={sequences_md5}")
-    is_precalc = checkout.text
+    sequences_md5 = ','.join(md5)
+    checkout = urllib.request.urlopen(f"{url}?md5={sequences_md5}")
+    is_precalc = checkout.read().decode('utf-8')
     precalc = is_precalc.strip().split("\n")
     return precalc
 
