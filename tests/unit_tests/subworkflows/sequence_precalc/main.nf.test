@@ -10,7 +10,9 @@ nextflow_workflow {
         symlink "modules/lookup/no_matches/main.nf"
         symlink "scripts/lookup/lookup_check.py"
         symlink "scripts/lookup/lookup_matches.py"
-        symlink "scripts/lookup/lookup_no_matches.py"
+        copy "scripts/lookup/lookup_no_matches.py"
+        copy "tests/unit_tests/test_outputs/precalc_match_lookup/lookup_check_out"
+        copy "tests/unit_tests/test_outputs/precalc_match_lookup/lookup_matches_out"
     }
 
     test("Run precalc match lookup successfully") {
