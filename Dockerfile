@@ -37,6 +37,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN git clone https://github.com/pierrebarbera/epa-ng
 RUN cd epa-ng && make
 RUN pip install biopython
+RUN pip install requests
 
 # Install RpsbProc for CDD post-processing
 RUN curl -O https://ftp.ncbi.nih.gov/pub/mmdb/cdd/rpsbproc/RpsbProc-x64-linux.tar.gz && \
