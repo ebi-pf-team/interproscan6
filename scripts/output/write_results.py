@@ -199,17 +199,25 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         description = "-"
                     entry = None
                     if match_data['entry']['accession'] != "-":
-                        description = match_data['entry']['description']
-                        entry = {
-                            "accession": match_data['entry']['accession'],
-                            "name": match_data['entry']['short_name'],
-                            "description": match_data['entry']['name'],
-                            "type": match_data['entry']['type'].upper()
-                        }
+                        if match_data['member_db'].upper() == "PANTHER":
+                            entry = {
+                                "name": match_data['entry']['description']
+                            }
+                        else:
+                            description = match_data['entry']['description']
+                            entry = {
+                                "accession": match_data['entry']['accession'],
+                                "name": match_data['entry']['short_name'],
+                                "description": match_data['entry']['name'],
+                                "type": match_data['entry']['type'].upper()
+                            }
                         try:
                             entry["goXRefs"] = match_data['entry']['goXRefs']
                         except KeyError:
-                            pass
+                            if match_data['member_db'].upper() == "PANTHER":
+                                entry["goXRefs"] = []
+                            else:
+                                pass
                         try:
                             entry["pathwayXRefs"] = match_data['entry']['pathwayXRefs']
                         except KeyError:
@@ -235,14 +243,16 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             "evalue": float(location["evalue"]),
                             "score": float(location["score"]),
                         }
-                        if match_data['member_db'].upper() not in ["CDD"]:
-                            info["hmmStart"]: int(location["hmmStart"])
-                            info["hmmEnd"]: int(location["hmmEnd"])
-                            info["hmmLength"]: int(location["hmmLength"])
-                            info["hmmBounds"]: location["hmmBounds"]
-                            info["envelopeStart"]: int(location["envelopeStart"])
-                            info["envelopeEnd"]: int(location["envelopeEnd"])
-                            info["postProcessed"]: boolean_map.get(location["postProcessed"].lower())
+                        if match_data['member_db'].upper() == "CDD":
+                            pass
+                        else:
+                            info["hmmStart"] = int(location["hmmStart"])
+                            info["hmmEnd"] = int(location["hmmEnd"])
+                            info["hmmLength"] = int(location["hmmLength"])
+                            info["hmmBounds"] = location["hmmBounds"]
+                            info["envelopeStart"] = int(location["envelopeStart"])
+                            info["envelopeEnd"] = int(location["envelopeEnd"])
+                            info["postProcessed"] = boolean_map.get(location["postProcessed"].lower())
                         if match_data['member_db'].upper() in ["SFLD", "CDD"]:
                             info["sites"] = location["sites"]
                         try:
@@ -274,6 +284,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
 
                     if match_data['member_db'].upper() == "PANTHER":
                         # get protein class and graftpoint for Panther
+                        match['accession'] = match_data['accession']
                         try:
                             match['proteinClass'] = match_data['proteinClass']
                             match['graftPoint'] = match_data['graftPoint']
