@@ -39,8 +39,8 @@ def compare(expected, current, ignore_elements: list):
     for key in expected:
         if key == "md5":
             print(f"md5: {expected[key]}")
-        if key == "accession":
-            print(f"accession: {expected[key]}")
+        # if key == "accession":
+        #     print(f"accession: {expected[key]}")
         if key in ignore_elements:
             continue
         if key not in current:
@@ -75,6 +75,6 @@ def test_json_output(input_path, expected_output_path, current_output_path, appl
 
     ignore_elements = ['representative']
     compare(expected, current, ignore_elements)
-    compare(current, expected, ignore_elements)
+    # compare(current, expected, ignore_elements)
 
     assert expected == current

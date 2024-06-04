@@ -8,4 +8,9 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     apt-get install -y wget python3.10 python3-pip unzip python3-requests
 
 WORKDIR /opt/interproscan6
-COPY . .
+COPY subworkflows/ subworkflows/
+COPY scripts/ scripts/
+COPY modules/ modules/
+COPY interproscan.nf interproscan.nf
+COPY nextflow.config nextflow.config
+COPY README.md README.md

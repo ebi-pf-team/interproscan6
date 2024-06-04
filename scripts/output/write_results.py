@@ -426,8 +426,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
     tree.write(xml_output, encoding='utf-8')
 
 
-def write_results(sequences_path: str, matches_path: str, output_format: str, output_path: str, version: str):
-    output_format = output_format.upper()
+def write_results(sequences_path: str, matches_path: str, output_format: list, output_path: str, version: str):
     seq_matches = {}
 
     all_sequences = {}
@@ -465,10 +464,11 @@ def main():
 
     sequences = args[0]
     matches = args[1]
-    formats = args[2]
+    formats_str = args[2]
     output_path = args[3]
     version = args[4]
 
+    formats = formats_str.upper().split(',')
     write_results(sequences, matches, formats, output_path, version)
 
 

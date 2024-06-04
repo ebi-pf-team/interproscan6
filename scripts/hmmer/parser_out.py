@@ -29,7 +29,6 @@ def parse(out_file: str) -> dict:
     current_domain = None
     sequence_match = {}
     domain_match = {}
-    hmmer_parser_support = {}
     stage = 'LOOKING_FOR_METHOD_ACCESSION'
     appl = out_file.split("_")[1].split(".")[0]
     member_accession = get_accession_regex(appl)
@@ -47,14 +46,8 @@ def parse(out_file: str) -> dict:
                     stage = 'LOOKING_FOR_DOMAIN_SECTION'
                 if line.startswith("//"):
                     if domain_match:
-                        sequence_match = add_domain_match(domain_match, sequence_match)
+                        sequence_match[current_sequence][model_id] = add_domain_match(domain_match, sequence_match[current_sequence][model_id])
                         domain_match = {}
-                        if current_sequence in hmmer_parser_support:
-                            hmmer_parser_support[current_sequence].update({model_id: sequence_match})
-                        else:
-                            hmmer_parser_support[current_sequence] = {model_id: sequence_match}
-
-                    sequence_match = {}
                     description = ""
                     stage = "LOOKING_FOR_METHOD_ACCESSION"
                 else:
@@ -76,6 +69,7 @@ def parse(out_file: str) -> dict:
                             current_sequence = None
                         else:
                             sequence_match = get_sequence_match(
+                                sequence_match,
                                 line,
                                 model_id,
                                 query_name,
@@ -89,12 +83,8 @@ def parse(out_file: str) -> dict:
                             domain_section_header_matcher = DOMAIN_SECTION_START_PATTERN.match(line)
                             if domain_section_header_matcher:
                                 if domain_match:
-                                    sequence_match = add_domain_match(domain_match, sequence_match)
+                                    sequence_match[current_sequence][model_id] = add_domain_match(domain_match, sequence_match[current_sequence][model_id])
                                     domain_match = {}
-                                    if current_sequence in hmmer_parser_support:
-                                        hmmer_parser_support[current_sequence].update({model_id: sequence_match})
-                                    else:
-                                        hmmer_parser_support[current_sequence] = {model_id: sequence_match}
                                 current_sequence = domain_section_header_matcher.group(1)
                             stage = 'LOOKING_FOR_DOMAIN_DATA_LINE'
                         if line.strip().startswith("=="):
@@ -121,17 +111,17 @@ def parse(out_file: str) -> dict:
                                 except KeyError:
                                     domain_match = {domain_number: get_domain_match(match, member_db, qlen)}
 
-    return hmmer_parser_support
+    return sequence_match
 
 
-def add_domain_match(domain_match: dict, sequence_match: dict) -> dict:
+def add_domain_match(domain_match: dict, current_match: dict) -> dict:
     for domain_key, domain_value in domain_match.items():
         cigar_alignment = cigar_alignment_parser(domain_match[domain_key]["alignment"])
         domain_match[domain_key]["cigar_alignment"] = encode(cigar_alignment)
-        if "locations" not in sequence_match:
-            sequence_match["locations"] = []
-        sequence_match["locations"].append(domain_match[domain_key])
-    return sequence_match
+        if "locations" not in current_match:
+            current_match["locations"] = []
+        current_match["locations"].append(domain_match[domain_key])
+    return current_match
 
 
 def get_domain_match(match: re.Match, member_db: str, qlen: str) -> dict:
@@ -157,30 +147,30 @@ def get_domain_match(match: re.Match, member_db: str, qlen: str) -> dict:
     return domain_match
 
 
-def get_sequence_match(sequence_line: str, model_id: str, query_name: str, description: str, version: str, member_db: str, qlen: str) -> dict:
-    sequence_match = {}
+def get_sequence_match(sequence_match: dict, sequence_line: str, model_id: str, query_name: str, description: str, version: str, member_db: str, qlen: str) -> dict:
     SEQUENCE_LINE_PATTERN = re.compile("^\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\d+\\s+(\\S+).*$")
     match = SEQUENCE_LINE_PATTERN.match(sequence_line)
     if match:
-        sequence_match["accession"] = model_id
-        sequence_match["name"] = query_name
-        sequence_match["description"] = description.strip()
-        sequence_match["evalue"] = match.group(1)
-        sequence_match["score"] = match.group(2)
-        sequence_match["qlen"] = qlen
-        sequence_match["bias"] = match.group(3)
-        sequence_match["member_db"] = member_db
-        sequence_match["version"] = version
-        sequence_match["model-ac"] = model_id.split(":")[0].split(".")[0]
+        match_info = {
+            "accession": model_id,
+            "name": query_name,
+            "description": description.strip(),
+            "evalue": match.group(1),
+            "score": match.group(2),
+            "qlen": qlen,
+            "bias": match.group(3),
+            "member_db": member_db,
+            "version": version,
+            "model-ac": model_id.split(":")[0].split(".")[0]
+        }
+        sequence_id = match.group(4)
+        if sequence_id not in sequence_match:
+            sequence_match[sequence_id] = {}
 
-    # if member_db.lower() == 'panther':
-    #     node_id = info[-1]  # retrieve node id from Panther-TreeGrafter hits
-    #     paint_anno_path = mem_db_dir + f'/{info[4].split(":")[0].split(".")[0]}.json'
-    #     with open(paint_anno_path, 'r') as fh:
-    #         paint_annotations = json.load(fh)
-    #         node_data = paint_annotations[node_id]
-    #     signature_info['proteinClass'] = node_data[2]
-    #     signature_info['graftPoint'] = node_data[3]
+        if model_id not in sequence_match[sequence_id]:
+            sequence_match[sequence_id][model_id] = {}
+
+        sequence_match[sequence_id][model_id].update(match_info)
 
     return sequence_match
 
