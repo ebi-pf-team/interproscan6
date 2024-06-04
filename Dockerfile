@@ -45,4 +45,9 @@ RUN curl -O https://ftp.ncbi.nih.gov/pub/mmdb/cdd/rpsbproc/RpsbProc-x64-linux.ta
     rm RpsbProc-x64-linux.tar.gz
 
 WORKDIR /opt/interproscan6
-COPY . .
+COPY subworkflows/ subworkflows/
+COPY scripts/ scripts/
+COPY modules/ modules/
+COPY interproscan.nf interproscan.nf
+COPY nextflow.config nextflow.config
+COPY README.md README.md
