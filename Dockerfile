@@ -18,7 +18,7 @@ FROM biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1 as hmmer
 
 # Final image with InterProScan, BLAST, and HMMER
 FROM interproscan-base
-COPY --from=blast / /blast
+# COPY --from=blast / /blast
 COPY --from=hmmer / /hmmer
 
 # Install easel for predicting open reading frames (ORFs)
