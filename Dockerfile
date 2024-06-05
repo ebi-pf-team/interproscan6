@@ -11,7 +11,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     apt-get install -y autoconf automake autotools-dev bison build-essential cmake curl flex git libcurl3-gnutls libdivsufsort3 liblmdb0 libdw1 libgomp1 libnghttp2-dev libssl-dev libtool nghttp2 python3.10 python3-venv python3-pip python3-requests tar unzip wget zlib1g-dev
 
 # Pull NCBI BLAST (for CDD)
-FROM ncbi/blast as blast
+# FROM ncbi/blast as blast
 
 # Pull HMMER container
 FROM biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1 as hmmer
