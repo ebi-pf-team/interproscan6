@@ -136,7 +136,7 @@ def filter_matches_and_add_site(ips6, hits):
                         processed_ips6_data[protein_id] = {}
                     if signature_acc not in processed_ips6_data[protein_id]:
                         processed_ips6_data[protein_id][signature_acc] = ips6_data[protein_id][signature_acc]
-                    
+
                     # add site data
                     # check each SfldSite instance as there can be multiple site hits
                     # for each signature accession in a protein sequence
@@ -163,8 +163,8 @@ def filter_matches_and_add_site(ips6, hits):
                                         }
                                         for site_location in site.site_residues.split(","):
                                             site_info['siteLocations'].append({
-                                                "start": site_location[0],
-                                                "end": site_location.split("-")[0][1:],
+                                                "start": int(site_location.split("-")[0][1:]),
+                                                "end": int(site_location.split("-")[0][1:]),
                                                 "residue": site_location[0],
                                             })
 
