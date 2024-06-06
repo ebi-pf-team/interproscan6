@@ -802,7 +802,7 @@
   "matches" : [ {
     "signature" : {
       "accession" : "PTHR19441",
-      "name" : "WHEY ACDIC PROTEIN  WAP",
+      "name" : "WHEY ACDIC PROTEIN WAP",
       "description" : null,
       "signatureLibraryRelease" : {
         "library" : "PANTHER",
