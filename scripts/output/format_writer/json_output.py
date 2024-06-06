@@ -30,7 +30,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                     except KeyError:
                         description = "-"
                     entry = None
-                    if match_data['entry']['accession'] != "-":
+                    if match_data['entry']['accession']:
                         description = match_data['entry']['description']
                         entry = {
                             "accession": match_data['entry']['accession'],
@@ -38,17 +38,15 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             "description": match_data['entry']['name'],
                             "type": match_data['entry']['type'].upper()
                         }
-                        if match_data['member_db'].upper() == "PANTHER":
-                            entry["goXRefs"] = []
-                            matches["goXRefs"] = []
                         try:
                             entry["goXRefs"] = match_data['entry']['goXRefs']
                         except KeyError:
-                                pass
+                            pass
                         try:
                             entry["pathwayXRefs"] = match_data['entry']['pathwayXRefs']
                         except KeyError:
                             pass
+
                     if match_data['member_db'].upper() == "CDD":
                         description = match_data['name']
                     signature = {
@@ -61,6 +59,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         },
                         "entry": entry
                     }
+
                     locations = []
                     for location in match_data['locations']:
                         info = {
@@ -81,7 +80,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         elif match_data['member_db'].upper() == "PANTHER":
                             info["hmmStart"] = int(location["hmmStart"])
                             info["hmmEnd"] = int(location["hmmEnd"])
-                            info["hmmLength"] = int(location["hmmLength"])
+                            info["hmmLength"] = 0  # we have hmmLength but in i5 result its always 0
                             info["hmmBounds"] = location["hmmBounds"]
                             info["envelopeStart"] = int(location["envelopeStart"])
                             info["envelopeEnd"] = int(location["envelopeEnd"])
@@ -126,8 +125,13 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         match["model-ac"] = match_data['accession']
 
                     if match_data['member_db'].upper() == "PANTHER":
-                        # get protein class and graftpoint for Panther
+                        match["name"] = match_data['entry']['family_name']
                         match['accession'] = match_data['accession']
+                        match["goXRefs"] = entry["goXRefs"] if entry else []
+                        signature["description"] = None
+                        signature["name"] = match_data['entry']['description']
+
+                        # get protein class and graftpoint for Panther
                         try:
                             match['proteinClass'] = match_data['proteinClass']
                             match['graftPoint'] = match_data['graftPoint']
