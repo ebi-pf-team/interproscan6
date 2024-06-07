@@ -128,8 +128,8 @@ def parse_cdd(rpsblast_processed: Path, release: str):
                             for site in sites:
                                 site_info["siteLocations"].append(
                                     {
-                                        "start": site[1:],
-                                        "end": site[1:],
+                                        "start": int(site[1:]),
+                                        "end": int(site[1:]),
                                         "residue": site[0]
                                     }
                                 )

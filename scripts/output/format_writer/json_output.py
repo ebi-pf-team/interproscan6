@@ -68,7 +68,8 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             "representative": boolean_map.get(location["representative"].lower(), False)
                         }
                         if match_data['member_db'].upper() == "CDD":
-                            pass
+                            info["evalue"] = float(location["evalue"])
+                            info["score"] = float(location["score"])
                         elif match_data['member_db'].upper() == "SFLD":
                             info["evalue"] = float(location["evalue"])
                             info["score"] = float(location["score"])
@@ -123,6 +124,9 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         match["model-ac"] = match_data['model-ac']
                     else:
                         match["model-ac"] = match_data['accession']
+
+                    if match_data['member_db'].upper() == "SFLD":
+                        match["scope"] = None
 
                     if match_data['member_db'].upper() == "PANTHER":
                         match["name"] = match_data['entry']['family_name']
