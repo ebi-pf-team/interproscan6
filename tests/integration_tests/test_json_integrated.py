@@ -36,30 +36,36 @@ def json2dict(obj):
         return obj
 
 
-def compare(expected, current, ignore_elements: list):
+def compare(expected, current, ignore_elements: list, print_md5: bool, print_acc: bool):
     for key in expected:
-        if key == "md5":
+        if key == "md5" and print_md5:
             print(f"md5: {expected[key]}")
-        if key == "accession":
+            print_md5 = False
+        if key == "accession" and print_acc:
             print(f"accession: {expected[key]}")
+            print_acc = False
         if key in ignore_elements:
             continue
         if key not in current:
             print(f"MISMATCH: Key '{key}' missing in current dict")
+            print_md5 = True
+            print_acc = True
             continue
         if isinstance(expected[key], dict):
-            compare(expected[key], current[key], ignore_elements)
+            compare(expected[key], current[key], ignore_elements, print_md5, print_acc)
         elif isinstance(expected[key], list):
             if len(expected[key]) != len(current[key]):
                 print(f"MISMATCH: list length for key '{key}'")
             else:
                 for i in range(len(expected[key])):
-                    compare(expected[key][i], current[key][i], ignore_elements)
+                    compare(expected[key][i], current[key][i], ignore_elements, print_md5, print_acc)
         else:
             if str(expected[key]).lower() != str(current[key]).lower():
                 print(f"MISMATCH: for key '{key}'")
                 print(f"  expected: {expected[key]}")
                 print(f"  current: {current[key]}")
+                print_md5 = True
+                print_acc = True
 
 
 def test_json_output(input_path, expected_output_path, current_output_path, applications, disable_precalc):
@@ -69,13 +75,13 @@ def test_json_output(input_path, expected_output_path, current_output_path, appl
     expected = json2dict(expected_output)
     current = json2dict(current_output)
 
-    with open('/Users/lcf/PycharmProjects/interproscan6/tests/tests_integration/temp_expected.json', 'w') as file:
+    with open('/Users/lcf/PycharmProjects/interproscan6/tests/integration_tests/temp_expected.json', 'w') as file:
         json.dump(expected, file, indent=2)
-    with open('/Users/lcf/PycharmProjects/interproscan6/tests/tests_integration/temp_current.json', 'w') as file:
+    with open('/Users/lcf/PycharmProjects/interproscan6/tests/integration_tests/temp_current.json', 'w') as file:
         json.dump(current, file, indent=2)
 
     ignore_elements = ['representative', 'evalue']
-    compare(expected, current, ignore_elements)
-    compare(current, expected, ignore_elements)
+    compare(expected, current, ignore_elements, False, False)
+    compare(current, expected, ignore_elements, False, False)
 
     assert expected == current

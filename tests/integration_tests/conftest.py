@@ -5,7 +5,7 @@ import pytest
 
 @pytest.fixture
 def test_dir():
-    return Path("tests/tests_integration/")
+    return Path("tests/integration_tests/")
 
 
 @pytest.fixture
