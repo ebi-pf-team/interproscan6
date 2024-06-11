@@ -4,18 +4,22 @@ include {
     CDD_PARSER
 } from "$projectDir/modules/cdd/main"
 include {
-    HMMER_RUNNER as GENERIC_HMMER_RUNNER;
+    HMMER_RUNNER as ANTIFAM_HMMER_RUNNER;
+    HMMER_RUNNER as NCBIFAM_HMMER_RUNNER;
     HMMER_RUNNER as SFLD_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
+    HMMER_RUNNER as PFAM_HMMER_RUNNER;
 } from "$projectDir/modules/hmmer/runner/main"
 include {
-    HMMER_PARSER as GENERIC_HMMER_PARSER;
+    HMMER_PARSER as ANTIFAM_HMMER_PARSER;
+    HMMER_PARSER as NCBIFAM_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
+    HMMER_PARSER as PFAM_HMMER_PARSER;
 } from "$projectDir/modules/hmmer/parser/main"
 include {
     PANTHER_POST_PROCESSER;
-    SFLD_POST_PROCESSER
+    SFLD_POST_PROCESSER;
 } from "$projectDir/modules/hmmer/post_processing/main"
 include {
     PANTHER_FILTER_MATCHES;
@@ -23,7 +27,7 @@ include {
 } from "$projectDir/modules/hmmer/filter/main"
 include {
     SIGNALP_RUNNER;
-    SIGNALP_PARSER
+    SIGNALP_PARSER;
  } from "$projectDir/modules/signalp/main"
 
 
@@ -39,20 +43,13 @@ workflow SEQUENCE_ANALYSIS {
     .branch { member ->
         release = params.members."${member}".release
         log.info "Running $member version $release"
-        runner = ''
-
-        if (member == 'antifam' || member == "ncbifam") {
-            runner = 'hmmer'
-        } else {
-            runner = member
-        }
 
         /*
         Member databases that use HMMER:
         The post processing of some applications (e.g. SFLD) hits requires additional files
         and parameters relative to the generic hmmer runner and parser
         */
-        hmmer: runner == 'hmmer'
+        antifam: member == 'antifam'
             return [
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
@@ -60,7 +57,15 @@ workflow SEQUENCE_ANALYSIS {
                 false, []
             ]
 
-        panther: runner == 'panther'
+        ncbifam: member == 'ncbifam'
+            return [
+                params.members."${member}".hmm,
+                params.members."${member}".switches,
+                params.members."${member}".release,
+                false, []
+            ]
+
+        panther: member == 'panther'
             return [
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
@@ -73,7 +78,7 @@ workflow SEQUENCE_ANALYSIS {
                 ]
             ]
 
-        sfld: runner == 'sfld'
+        sfld: member == 'sfld'
             return [
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
@@ -82,7 +87,20 @@ workflow SEQUENCE_ANALYSIS {
                 [
                     params.members."${member}".postprocess.bin,
                     params.members."${member}".postprocess.sites_annotation,
-                    params.members."${member}".postprocess.hierarchy
+                    params.members."${member}".postprocess.hierarchy,
+                ]
+            ]
+
+        pfam: member == 'pfam'
+            return [
+                params.members."${member}".hmm,
+                params.members."${member}".switches,
+                params.members."${member}".release,
+                true,
+                [
+                    params.members."${member}".postprocess.seed,
+                    params.members."${member}".postprocess.clan,
+                    params.members."${member}".postprocess.data,
                 ]
             ]
 
@@ -90,7 +108,7 @@ workflow SEQUENCE_ANALYSIS {
         Member databases that do NOT use HMMER
         */
 
-        cdd: runner == "cdd"
+        cdd: member == "cdd"
             return [
                 params.members."${member}".library,
                 params.members."${member}".release,
@@ -101,7 +119,7 @@ workflow SEQUENCE_ANALYSIS {
                 ]
             ]
 
-        signalp: runner == 'signalp'
+        signalp: member == 'signalp'
             return [
                 params.members.signalp.data.mode,
                 params.members.signalp.data.model_dir,
@@ -119,10 +137,15 @@ workflow SEQUENCE_ANALYSIS {
     Member databases that use HMMER
     */
 
-    // AntiFam and NCBIfam
-    runner_hmmer_params = fasta.combine(member_params.hmmer)
-    GENERIC_HMMER_RUNNER(runner_hmmer_params)
-    GENERIC_HMMER_PARSER(GENERIC_HMMER_RUNNER.out, tsv_pro, "antifam")
+    // AntiFam
+    runner_hmmer_antifam_params = fasta.combine(member_params.antifam)
+    ANTIFAM_HMMER_RUNNER(runner_hmmer_antifam_params)
+    ANTIFAM_HMMER_PARSER(ANTIFAM_HMMER_RUNNER.out, tsv_pro, "antifam")
+
+    // NCBIfam
+    runner_hmmer_ncbifam_params = fasta.combine(member_params.ncbifam)
+    NCBIFAM_HMMER_RUNNER(runner_hmmer_ncbifam_params)
+    NCBIFAM_HMMER_PARSER(NCBIFAM_HMMER_RUNNER.out, tsv_pro, "ncbifam")
 
     // Panther (+ treegrafter + epa-ng)
     runner_hmmer_panther_params = fasta.combine(member_params.panther)
@@ -137,7 +160,13 @@ workflow SEQUENCE_ANALYSIS {
     SFLD_HMMER_PARSER(SFLD_HMMER_RUNNER.out, tsv_pro, "sfld")
     SFLD_POST_PROCESSER(SFLD_HMMER_PARSER.out, tsv_pro)
     SFLD_FILTER_MATCHES(SFLD_POST_PROCESSER.out)
-    
+
+    // Pfam
+    runner_hmmer_pfam_params = fasta.combine(member_params.pfam)
+    PFAM_HMMER_RUNNER(runner_hmmer_pfam_params)
+    PFAM_HMMER_PARSER(PFAM_HMMER_RUNNER.out, tsv_pro, "pfam")
+
+
     /*
     Member databases that do NOT use HMMER
     */
@@ -157,7 +186,8 @@ workflow SEQUENCE_ANALYSIS {
     Gather the results
     */
 
-    GENERIC_HMMER_PARSER.out[0].concat(
+    ANTIFAM_HMMER_PARSER.out[0].concat(
+        NCBIFAM_HMMER_PARSER.out[0],
         PANTHER_FILTER_MATCHES.out,
         SFLD_FILTER_MATCHES.out,
         CDD_PARSER.out,
