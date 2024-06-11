@@ -96,7 +96,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                true,
+                false,
                 [
                     params.members."${member}".postprocess.seed,
                     params.members."${member}".postprocess.clan,
