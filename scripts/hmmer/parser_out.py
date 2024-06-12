@@ -58,7 +58,6 @@ def parse(out_file: str) -> dict:
                             stage = 'LOOKING_FOR_SEQUENCE_MATCHES'
                             model_ident_pattern = member_accession.match(line)
                             if model_ident_pattern:
-                                print(model_ident_pattern)
                                 model_id = model_ident_pattern.group(2).replace(".orig.30.pir", "")
                         if line.startswith("Query:"):
                             query_name = line.split()[1]
@@ -182,10 +181,9 @@ def main():
     """
     :args 0: str repr of path to hmmer file to be parsed
     """
-    # args = sys.argv[1:]
-    # parse_result = parse(args[0])
+    args = sys.argv[1:]
+    parse_result = parse(args[0])
 
-    parse_result = parse("/Users/lcf/PycharmProjects/interproscan6/work/af/ce543fee306c0d7a012f3c1c66055a/37.0_pfam_a.hmm.out")
     print(json.dumps(parse_result, indent=2))
 
 
