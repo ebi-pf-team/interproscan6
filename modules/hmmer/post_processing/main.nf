@@ -1,7 +1,7 @@
 /*
 These scripts implement post-processing of the HMMER files.
-The output from these post-processing scripts and tools are 
-parsed and applied to the internal IPS6 JSON structure in the 
+The output from these post-processing scripts and tools are
+parsed and applied to the internal IPS6 JSON structure in the
 filters module/
 */
 
@@ -77,5 +77,29 @@ process SFLD_POST_PROCESSER {
             --hmmer-out '${out_file}' \
             --site-info '${postprocessing_params[1]}' \
             --output '${tsv_pro ? "${out_file}.processed.out" : "${out_dtbl}.processed.dtbl"}'
+        """
+}
+
+process PFAM_POST_PROCESSER {
+    label 'analysis_parser'
+
+    input:
+        path ips6_json
+        path out_file
+        val postprocessing_params // contains [0] bin and [1] site_annotations file path
+        path alignment
+
+    output:
+        path ips6_json
+        path "${"${out_file}.processed.out"}"
+        val postprocessing_params
+
+    script:
+        """
+        ${postprocessing_params[0]} \
+            --alignments '${alignment}' \
+            --hmmer-out '${out_file}' \
+            --site-info '${postprocessing_params[1]}' \
+            --output '${"${out_file}.processed.out"}'
         """
 }
