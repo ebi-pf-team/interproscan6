@@ -24,6 +24,7 @@ include {
 include {
     PANTHER_FILTER_MATCHES;
     SFLD_FILTER_MATCHES;
+    PFAM_FILTER_MATCHES;
 } from "$projectDir/modules/hmmer/filter/main"
 include {
     SIGNALP_RUNNER;
@@ -98,6 +99,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".release,
                 false,
                 [
+                    params.members."${member}".postprocess.min_length,
                     params.members."${member}".postprocess.seed,
                     params.members."${member}".postprocess.clan,
                     params.members."${member}".postprocess.data,
@@ -165,6 +167,7 @@ workflow SEQUENCE_ANALYSIS {
     runner_hmmer_pfam_params = fasta.combine(member_params.pfam)
     PFAM_HMMER_RUNNER(runner_hmmer_pfam_params)
     PFAM_HMMER_PARSER(PFAM_HMMER_RUNNER.out, tsv_pro, "pfam")
+    PFAM_FILTER_MATCHES(PFAM_HMMER_PARSER.out)
 
 
     /*
@@ -190,6 +193,7 @@ workflow SEQUENCE_ANALYSIS {
         NCBIFAM_HMMER_PARSER.out[0],
         PANTHER_FILTER_MATCHES.out,
         SFLD_FILTER_MATCHES.out,
+        PFAM_FILTER_MATCHES.out,
         CDD_PARSER.out,
         SIGNALP_PARSER.out
     )
