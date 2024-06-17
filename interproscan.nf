@@ -60,7 +60,7 @@ workflow {
     parsed_matches = Channel.empty()
     if (!params.disable_precalc) {
         log.info "Using precalculated match lookup service"
-        SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications)
+        SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications, false)  // final: bool to indicate not a unit test
         sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
         parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
     }

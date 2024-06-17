@@ -1,10 +1,10 @@
-import base64
-import codecs
-import contextlib
-import hashlib
-import logging
 import os
 import re
+import base64
+import codecs
+import hashlib
+import logging
+import contextlib
 from multiprocessing import Pool
 from tempfile import NamedTemporaryFile
 
@@ -12,8 +12,7 @@ from tempfile import NamedTemporaryFile
 from mdblib import predictor
 
 uniprot_acc_pattern = re.compile(
-    "[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}"
-)
+    "[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}")
 
 
 class Protein(object):
@@ -25,7 +24,6 @@ class Protein(object):
     :param _sequence: amino acid sequence of the protein object
     :type _sequence: str
     """
-
     def __init__(self, _accession, _sequence):
         # passed attributes
         self.accession = _accession
@@ -33,7 +31,7 @@ class Protein(object):
         # computed attributes
         search = uniprot_acc_pattern.search(self.accession)
         self.uniprot_acc = search.group(0) if search else None
-        self.secure_acc = self.accession.replace("|", "-").split()[0]
+        self.secure_acc = self.accession.replace('|', '-').split()[0]
         # handle attributes
         self.seguid = None
         self.reprs = None
@@ -79,27 +77,22 @@ class Protein(object):
         """
 
         f_disbin = NamedTemporaryFile(
-            delete=False, prefix="{}-disbin".format(self.secure_acc)
-        )
+            delete=False, prefix="{}-disbin".format(self.secure_acc))
         f_flat = NamedTemporaryFile(
-            delete=False, prefix="{}-flat".format(self.secure_acc)
-        )
+            delete=False, prefix="{}-flat".format(self.secure_acc))
         f_fasta = NamedTemporaryFile(
-            delete=False, prefix="{}-fasta".format(self.secure_acc)
-        )
+            delete=False, prefix="{}-fasta".format(self.secure_acc))
 
-        f_disbin.write(
-            "1\n{}\n{}".format(len(self.sequence), self.sequence).encode("utf-8")
-        )
-        f_flat.write(self.sequence.encode("utf-8"))
-        f_fasta.write(">{}\n{}\n".format(self.accession, self.sequence).encode("utf-8"))
+        f_disbin.write("1\n{}\n{}".format(len(self.sequence), self.sequence).encode('utf-8'))
+        f_flat.write(self.sequence.encode('utf-8'))
+        f_fasta.write(">{}\n{}\n".format(self.accession, self.sequence).encode('utf-8'))
 
         # set temporary files name
-        logging.debug("Tempfiles generated")
+        logging.debug('Tempfiles generated')
         self.reprs = {
-            "disbin": f_disbin.name,
-            "flat": f_flat.name,
-            "fasta": f_fasta.name,
+            'disbin': f_disbin.name,
+            'flat': f_flat.name,
+            'fasta': f_fasta.name
         }
 
     def delete_repr(self):
@@ -134,16 +127,12 @@ class Protein(object):
         for subcl in predictor.Predictor.__subclasses__():
             if outgroup in subcl.groups:
                 pred = subcl(
-                    self.reprs[subcl.intype],
-                    bin_dirs[subcl.shared_name],
-                    architecture,
-                    thresholds,
-                )
+                    self.reprs[subcl.intype], bin_dirs[subcl.shared_name], architecture, thresholds)
 
                 if pool is not None:
                     preds.append(pool.apply_async(pred.run))
                 else:
-                    logging.debug("Running predictor %s", pred.shared_name)
+                    logging.debug('Running predictor %s', pred.shared_name)
                     prediction = pred.run()
                     if prediction:
                         preds.extend(prediction)
@@ -174,6 +163,7 @@ class Protein(object):
         """
         unpacked_results = list()
         for applyresult_obj in pool_results:
+
             try:
                 if applyresult_obj.get():
                     for applyresult in applyresult_obj.get():

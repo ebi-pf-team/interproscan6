@@ -13,19 +13,24 @@ Maddison, Swofford, Maddison. 1997. Syst. Biol. 46(4):590-621
 """
 from __future__ import print_function
 
+from Bio._py3k import zip
+from Bio._py3k import range
+from Bio._py3k import basestring
+
+from functools import reduce
 import copy
 import math
 import random
 import sys
-from functools import reduce
 
 from Bio import File
-from Bio._py3k import basestring, range, zip
 from Bio.Alphabet import IUPAC
 from Bio.Data import IUPACData
+from Bio.Seq import Seq
+
 from Bio.Nexus.StandardData import StandardData
 from Bio.Nexus.Trees import Tree
-from Bio.Seq import Seq
+
 
 INTERLEAVE = 70
 SPECIAL_COMMANDS = [
@@ -667,8 +672,8 @@ class Nexus(object):
         self.set = {}  # dict of the set command to set various options
         self.options = {}  # dict of the options command in the data block
         self.codonposset = (
-            None  # name of the charpartition that defines codon positions
-        )
+            None
+        )  # name of the charpartition that defines codon positions
 
         # some defaults
         self.options["gapmode"] = "missing"
@@ -2027,7 +2032,6 @@ class Nexus(object):
         pos=0: first position
         pos=nchar: last position
         """
-
         # This comment stops black style adding a blank line here, which causes flake8 D202.
         def _adjust(set, x, d, leftgreedy=False):
             """Adjust character sets if gaps are inserted (PRIVATE).
@@ -2149,6 +2153,7 @@ except ImportError:
         lines = _kill_comments_and_break_lines(file_contents)
         commandlines = _adjust_lines(lines)
         return commandlines
+
 
 else:
 

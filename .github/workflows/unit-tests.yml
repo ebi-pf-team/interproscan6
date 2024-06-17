@@ -58,13 +58,14 @@ jobs:
       run: |
         echo "$CONDA/bin" >> $GITHUB_PATH
 
-    - name: NF-Test pre-analysis checks
+    - name: NF-Test subworkflows tests
       run: |
-        conda run --name test nf-test test tests/subworkflows/pre_checks/
+        conda run --name test nf-test test tests/unit_tests/subworkflows/pre_checks/ &&
+        conda run --name test nf-test test tests/unit_tests/subworkflows/sequence_precalc/
     
-    - name: PY-Test pre-analysis checks script
+    - name: PY-Test scripts tests
       run: |
-        conda run --name test python3 -m pytest tests -v --cov=scripts --cov-report xml:.coverage.xml
+        conda run --name test python3 -m pytest tests/unit_tests -v --cov=scripts --cov-report xml:.coverage.xml
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.0.1

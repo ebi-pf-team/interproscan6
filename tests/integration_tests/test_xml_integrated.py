@@ -29,7 +29,7 @@ def xml2dict(element: ET.Element):
         if isinstance(value, list) and all(isinstance(item, dict) for item in value):
             result[key] = sorted(value, key=lambda x: str(x))
     if 'locations' in result:
-        result['locations'] = sorted(result['locations'], key=lambda x: int(x['hmmer3-location'][0]['attributes']['env-end']))
+        result['locations'] = sorted(result['locations'], key=lambda x: int(x['analysis-location'][0]['attributes']['env-end']))
     return result
 
 
@@ -70,7 +70,7 @@ def test_xml_output(input_path, expected_output_path, current_output_path, appli
     expected = xml2dict(expected_output)
     current = xml2dict(current_output)
 
-    ignore_elements = ['representative', 'hmmer3-location-fragment', 'hmm-bounds', 'evalue', "sites"]
+    ignore_elements = ['representative', "sites"]
     compare(expected, current, ignore_elements, "missing")
     compare(current, expected, ignore_elements, "extra")
 

@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM --platform=linux/amd64 ubuntu:latest
 
 RUN apt-get update && \
 apt-get upgrade -y && \
@@ -12,7 +12,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Install epa-ng
 RUN git clone https://github.com/pierrebarbera/epa-ng
-RUN cd epa-ng && make 
+RUN cd epa-ng && make
 # the resulting epa-ng binary is located at bin/epa-ng
 
 # Install biopython

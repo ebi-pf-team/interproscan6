@@ -4,15 +4,15 @@
 # (http://www.opensource.org/licenses/gpl-license.php)
 # DisEMBL pipeline
 
-import os
-import sys
-import tempfile
-from os import popen3, system
 from string import *
 from sys import argv
-
+from Bio import File
+from Bio import Fasta
 import fpformat
-from Bio import Fasta, File
+import sys
+import tempfile
+import os
+from os import system,popen3
 
 # change these to the correct paths
 ROOTDIR = '/var/local/mobidb/bin/disembl_bin'

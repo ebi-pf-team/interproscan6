@@ -2,13 +2,13 @@ import json
 import sys
 import xml.etree.ElementTree as ET
 
-import requests
+import urllib.request
 
 
 def match_lookup(matches_checked: list, url: str) -> str:
     url_input = ','.join(matches_checked)
-    matches = requests.get(f"{url}?md5={url_input}")
-    return matches.text
+    matches = urllib.request.urlopen(f"{url}?md5={url_input}")
+    return matches.read().decode('utf-8')
 
 
 def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:

@@ -23,10 +23,11 @@ them to a file.
 
 import os
 
-from Bio import MissingPythonDependencyError
 from Bio._py3k import StringIO
-from Bio.Phylo import CDAO
 
+from Bio import MissingPythonDependencyError
+
+from Bio.Phylo import CDAO
 from ._cdao_owl import cdao_namespaces, resolve_uri
 
 # import of cdao_elements from ._cdao_owl removed in Biopython 1.74

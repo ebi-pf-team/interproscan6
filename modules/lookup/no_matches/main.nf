@@ -10,7 +10,7 @@ process LOOKUP_NO_MATCHES {
     script:
     """
     output=\$(python3 $projectDir/scripts/lookup/lookup_no_matches.py "${checked_lookup}")
-
+    
     if [ -n "\$output" ]; then
         echo "\$output" > no_match_lookup_fasta.fasta
     fi

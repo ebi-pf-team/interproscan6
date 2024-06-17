@@ -11,17 +11,19 @@ All object representations for phylogenetic trees should derive from these base
 classes in order to use the common methods defined on them.
 """
 
+from Bio._py3k import basestring, filter, unicode, zip
+
 import collections
 import copy
 import itertools
 import random
 import re
+
+from Bio import _utils
+
 # NB: On Python 2, repr() and str() are specified to return byte strings, not
 # unicode. On Python 3, it's the opposite. Horrible.
 import sys
-
-from Bio import _utils
-from Bio._py3k import basestring, filter, unicode, zip
 
 if sys.version_info[0] < 3:
 
@@ -30,6 +32,7 @@ if sys.version_info[0] < 3:
         if isinstance(s, unicode):
             return s.encode("utf-8")
         return str(s)
+
 
 else:
     as_string = str
@@ -49,7 +52,6 @@ def _level_traverse(root, get_children):
 
 def _preorder_traverse(root, get_children):
     """Traverse a tree in depth-first pre-order (parent before children) (PRIVATE)."""
-
     # This comment stops black style adding a blank line here, which causes flake8 D202.
     def dfs(elem):
         yield elem
@@ -63,7 +65,6 @@ def _preorder_traverse(root, get_children):
 
 def _postorder_traverse(root, get_children):
     """Traverse a tree in depth-first post-order (children before parent) (PRIVATE)."""
-
     # This comment stops black style adding a blank line here, which causes flake8 D202.
     def dfs(elem):
         for v in get_children(elem):
@@ -95,7 +96,6 @@ def _sorted_attrs(elem):
 
 def _identity_matcher(target):
     """Match a node to the target object by identity (PRIVATE)."""
-
     # This comment stops black style adding a blank line here, which causes flake8 D202.
     def match(node):
         return node is target
@@ -105,7 +105,6 @@ def _identity_matcher(target):
 
 def _class_matcher(target_cls):
     """Match a node if it's an instance of the given class (PRIVATE)."""
-
     # This comment stops black style adding a blank line here, which causes flake8 D202.
     def match(node):
         return isinstance(node, target_cls)
@@ -136,7 +135,6 @@ def _attribute_matcher(kwargs):
     match each of the corresponding values -- think 'and', not 'or', for
     multiple keys.
     """
-
     # This comment stops black style adding a blank line here, which causes flake8 D202.
     def match(node):
         if "terminal" in kwargs:
@@ -172,7 +170,6 @@ def _attribute_matcher(kwargs):
 
 def _function_matcher(matcher_func):
     """Safer attribute lookup -- returns False instead of raising an error (PRIVATE)."""
-
     # This comment stops black style adding a blank line here, which causes flake8 D202.
     def match(node):
         try:
@@ -270,7 +267,6 @@ class TreeElement(object):
 
     def __repr__(self):
         """Show this object's constructor with its primitive arguments."""
-
         # This comment stops black style adding a blank line here, which causes flake8 D202.
         def pair_as_kwarg_string(key, val):
             if isinstance(val, basestring):
@@ -394,7 +390,6 @@ class TreeMixin(object):
             depth-first (preorder) by default.
 
         """
-
         # This comment stops black style adding a blank line here, which causes flake8 D202.
         def match_attrs(elem):
             orig_clades = elem.__dict__.pop("clades")

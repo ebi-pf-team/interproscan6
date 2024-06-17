@@ -56,6 +56,7 @@ from __future__ import print_function
 from collections import OrderedDict
 
 from Bio._py3k import _is_int_or_long
+
 from Bio.Seq import MutableSeq, reverse_complement
 
 
