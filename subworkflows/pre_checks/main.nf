@@ -32,14 +32,8 @@ workflow PRE_CHECKS {
     output_formats
 
     main:
-<<<<<<< HEAD
-    
-    if (!nextflow.version =~ /^23\.10\.*/) {
-        println "InterProScan6 requires the Nextflow version 23.10.0 or greater -- You are running version ${nextflow.version}"
-=======
     if ( !nextflow.version.matches('>=23.10') ) {
         println "InterProScan requires Nextflow version 23.10 or greater -- You are running version $nextflow.version"
->>>>>>> main
         exit 1
     }
 
