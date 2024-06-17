@@ -8,7 +8,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     apt-get update -y && \
     apt-get upgrade -y && \
     DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC && \
-    apt-get install -y autoconf automake autotools-dev bison build-essential cmake curl flex git libcurl3-gnutls libdivsufsort3 liblmdb0 libdw1 libgomp1 libnghttp2-dev libssl-dev libtool nghttp2 python3.10 python3-venv python3-pip python3-requests tar unzip wget zlib1g-dev
+    apt-get install -y autoconf automake autotools-dev bison build-essential cmake curl flex git libcurl3-gnutls libdivsufsort3 liblmdb0 libdw1 libgomp1 libnghttp2-dev libssl-dev libtool nghttp2 procps python3.10 python3-venv python3-pip python3-requests tar unzip wget zlib1g-dev
 
 # Pull NCBI BLAST (for CDD)
 FROM ncbi/blast as blast
