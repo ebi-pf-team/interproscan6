@@ -21,11 +21,11 @@ See also the Seq_ wiki and the chapter in our tutorial:
 """
 from __future__ import print_function
 
-import array
-import collections
 import string  # for maketrans only
+import array
 import sys
 import warnings
+import collections
 
 try:
     # Python 3
@@ -34,14 +34,16 @@ except ImportError:
     # Python 2.7
     from collections import Iterable as _Iterable
 
-from Bio import Alphabet, BiopythonWarning
-from Bio._py3k import basestring, range
+from Bio._py3k import range
+from Bio._py3k import basestring
+
+from Bio import BiopythonWarning
+from Bio import Alphabet
 from Bio.Alphabet import IUPAC
-from Bio.Data import CodonTable
-from Bio.Data.IUPACData import ambiguous_dna_complement
+from Bio.Data.IUPACData import ambiguous_dna_complement, ambiguous_rna_complement
 from Bio.Data.IUPACData import ambiguous_dna_letters as _ambiguous_dna_letters
-from Bio.Data.IUPACData import ambiguous_rna_complement
 from Bio.Data.IUPACData import ambiguous_rna_letters as _ambiguous_rna_letters
+from Bio.Data import CodonTable
 
 
 def _maketrans(complement_mapping):

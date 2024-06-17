@@ -20,13 +20,16 @@ import re
 import sys
 import warnings
 
-from Bio import Alphabet, BiopythonWarning
 from Bio._py3k import basestring
+
+from Bio import Alphabet
 from Bio.Align import MultipleSeqAlignment
-from Bio.Phylo import BaseTree
 from Bio.Seq import Seq
-from Bio.SeqFeature import FeatureLocation, SeqFeature
+from Bio.SeqFeature import SeqFeature, FeatureLocation
 from Bio.SeqRecord import SeqRecord
+from Bio import BiopythonWarning
+
+from Bio.Phylo import BaseTree
 
 
 class PhyloXMLWarning(BiopythonWarning):
@@ -248,7 +251,6 @@ class Phylogeny(PhyloElement, BaseTree.Tree):
 
     def to_alignment(self):
         """Construct an alignment from the aligned sequences in this tree."""
-
         # This comment stops black style adding a blank line here, which causes flake8 D202.
         def is_aligned_seq(elem):
             if isinstance(elem, Sequence) and elem.mol_seq.is_aligned:
@@ -1347,7 +1349,6 @@ class Sequence(PhyloElement):
             }
 
         """
-
         # This comment stops black style adding a blank line here, which causes flake8 D202.
         def clean_dict(dct):
             """Remove None-valued items from a dictionary."""

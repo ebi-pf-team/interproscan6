@@ -1,7 +1,7 @@
-import json
-import logging
 import os
+import json
 import shlex
+import logging
 import subprocess
 
 from mdblib.prediction import Prediction
@@ -25,41 +25,36 @@ class Predictor(object):
 
     def run(self):
         try:
-            devnull = open(os.devnull, "w") if self.suppress_stderr is True else None
+            devnull = open(os.devnull, 'w') if self.suppress_stderr is True else None
             output = subprocess.check_output(
-                shlex.split(self.command), stderr=devnull, cwd=self.cwd
-            )
+                shlex.split(self.command), stderr=devnull, cwd=self.cwd)
 
             if output:
                 return self.parse(output)
             else:
-                logging.warning("%s | No output", self.shared_name)
+                logging.warning('%s | No output', self.shared_name)
 
         except subprocess.CalledProcessError as e:
-            acc = "|".join(self.input_file.split("-")[:-1]).split("/")[-1]
+            acc = '|'.join(self.input_file.split('-')[:-1]).split('/')[-1]
 
-            logging.error(
-                "%s | %s crashed with error <%s>",
-                acc,
-                self.shared_name,
-                "; ".join(e.output.decode("utf-8").split("\n")),
-            )
+            logging.error('%s | %s crashed with error <%s>',
+                         acc,
+                         self.shared_name,
+                         '; '.join(e.output.decode('utf-8').split('\n')))
 
         except OSError as e:
-            acc = "|".join(self.input_file.split("-")[:-1]).split("/")[-1]
+            acc = '|'.join(self.input_file.split('-')[:-1]).split('/')[-1]
 
-            logging.error(
-                "%s | %s crashed with error <%s>",
-                acc,
-                self.shared_name,
-                "; ".join(e.strerror.split("\n")),
-            )
+            logging.error('%s | %s crashed with error <%s>',
+                          acc,
+                          self.shared_name,
+                          '; '.join(e.strerror.split('\n')))
 
         except Exception as e:
             if isinstance(e, bytes):
-                e = e.decode("utf-8")
+                e = e.decode('utf-8')
 
-            logging.error("Unhandled exception encountered: <%s>", e)
+            logging.error('Unhandled exception encountered: <%s>', e)
 
         return None
 
@@ -68,20 +63,19 @@ class Predictor(object):
 
 
 class IUPredL(Predictor):
-    tag = "iupl"
-    types = ["disorder", "mobidblite"]
-    groups = ["main", "mobidb3", "allid"]
-    intype = "flat"
-    shared_name = "iupred"
+    tag = 'iupl'
+    types = ['disorder', 'mobidblite']
+    groups = ['main', 'mobidb3', 'allid']
+    intype = 'flat'
+    shared_name = 'iupred'
 
     def __init__(self, _input_file, _bin_directory, _architecture, _threshold):
         super(IUPredL, self).__init__(_input_file, _bin_directory, _architecture)
         self.threshold = _threshold[self.tag]
         self.input_seq = self.get_seq()
 
-        self.command = "{}/bin{}/iupred_string {} long".format(
-            self.bin_directory, self.architecture, self.input_seq
-        )
+        self.command = '{}/bin{}/iupred_string {} long'.format(
+            self.bin_directory, self.architecture, self.input_seq)
 
     def get_seq(self):
         seq = ""
@@ -93,7 +87,7 @@ class IUPredL(Predictor):
 
     def parse(self, output):
         probs = list()
-        for line in output.decode("utf-8").strip().split("\n"):
+        for line in output.decode('utf-8').strip().split("\n"):
             if line[0] != "#":
                 line = line.strip().split()
                 probs.append(round(float(line[2]), 4))
@@ -103,20 +97,19 @@ class IUPredL(Predictor):
 
 
 class IUPredS(Predictor):
-    tag = "iups"
-    types = ["disorder", "mobidblite"]
-    groups = ["main", "mobidb3", "allid"]
-    intype = "flat"
-    shared_name = "iupred"
+    tag = 'iups'
+    types = ['disorder', 'mobidblite']
+    groups = ['main', 'mobidb3', 'allid']
+    intype = 'flat'
+    shared_name = 'iupred'
 
     def __init__(self, _input_file, _bin_directory, _architecture, _threshold):
         super(IUPredS, self).__init__(_input_file, _bin_directory, _architecture)
         self.threshold = _threshold[self.tag]
         self.input_seq = self.get_seq()
 
-        self.command = "{}/bin{}/iupred_string {} short".format(
-            self.bin_directory, self.architecture, self.input_seq
-        )
+        self.command = '{}/bin{}/iupred_string {} short'.format(
+            self.bin_directory, self.architecture, self.input_seq)
 
     def get_seq(self):
         seq = ""
@@ -128,7 +121,7 @@ class IUPredS(Predictor):
 
     def parse(self, output):
         probs = list()
-        for r in output.decode("utf-8").strip().split("\n"):
+        for r in output.decode('utf-8').strip().split("\n"):
             if r[0] != "#":
                 r = r.strip().split()
                 probs.append(round(float(r[2]), 4))
@@ -138,24 +131,23 @@ class IUPredS(Predictor):
 
 
 class ESpritzN(Predictor):
-    tag = "espN"
-    types = ["disorder", "mobidblite"]
-    groups = ["main", "mobidb3", "allid"]
-    intype = "disbin"
-    shared_name = "espritz"
+    tag = 'espN'
+    types = ['disorder', 'mobidblite']
+    groups = ['main', 'mobidb3', 'allid']
+    intype = 'disbin'
+    shared_name = 'espritz'
 
     def __init__(self, _input_file, _bin_directory, _architecture, _threshold):
         super(ESpritzN, self).__init__(_input_file, _bin_directory, _architecture)
         self.threshold = _threshold[self.tag]
 
-        self.cwd = os.path.join(self.bin_directory, "bin")
-        self.command = "{0}/bin/bin{2}/disbinN {0}/bin/model_definition/ensembleN {1} /dev/null".format(
-            self.bin_directory, self.input_file, self.architecture
-        )
+        self.cwd = os.path.join(self.bin_directory, 'bin')
+        self.command = '{0}/bin/bin{2}/disbinN {0}/bin/model_definition/ensembleN {1} /dev/null'\
+            .format(self.bin_directory, self.input_file, self.architecture)
 
     def parse(self, output):
         probs = list()
-        for residue in output.decode("utf-8").split("\n"):
+        for residue in output.decode('utf-8').split("\n"):
             if not residue:
                 continue
             if residue[0] in ["O", "D"]:
@@ -166,24 +158,23 @@ class ESpritzN(Predictor):
 
 
 class ESpritzD(Predictor):
-    tag = "espD"
-    types = ["disorder", "mobidblite"]
-    groups = ["main", "mobidb3", "allid"]
-    intype = "disbin"
-    shared_name = "espritz"
+    tag = 'espD'
+    types = ['disorder', 'mobidblite']
+    groups = ['main', 'mobidb3', 'allid']
+    intype = 'disbin'
+    shared_name = 'espritz'
 
     def __init__(self, _input_file, _bin_directory, _architecture, _threshold):
         super(ESpritzD, self).__init__(_input_file, _bin_directory, _architecture)
         self.threshold = _threshold[self.tag]
 
-        self.cwd = os.path.join(self.bin_directory, "bin")
-        self.command = "{0}/bin/bin{2}/disbinD {0}/bin/model_definition/ensembleD {1} /dev/null".format(
-            self.bin_directory, self.input_file, self.architecture
-        )
+        self.cwd = os.path.join(self.bin_directory, 'bin')
+        self.command = '{0}/bin/bin{2}/disbinD {0}/bin/model_definition/ensembleD {1} /dev/null'\
+            .format(self.bin_directory, self.input_file, self.architecture)
 
     def parse(self, output):
         probs = list()
-        for residue in output.decode("utf-8").split("\n"):
+        for residue in output.decode('utf-8').split("\n"):
             if not residue:
                 continue
             if residue[0] in ["O", "D"]:
@@ -194,24 +185,23 @@ class ESpritzD(Predictor):
 
 
 class ESpritzX(Predictor):
-    tag = "espX"
-    types = ["disorder", "mobidblite"]
-    groups = ["main", "mobidb3", "allid"]
-    intype = "disbin"
-    shared_name = "espritz"
+    tag = 'espX'
+    types = ['disorder', 'mobidblite']
+    groups = ['main', 'mobidb3', 'allid']
+    intype = 'disbin'
+    shared_name = 'espritz'
 
     def __init__(self, _input_file, _bin_directory, _architecture, _threshold):
         super(ESpritzX, self).__init__(_input_file, _bin_directory, _architecture)
         self.threshold = _threshold[self.tag]
 
-        self.cwd = os.path.join(self.bin_directory, "bin")
-        self.command = "{0}/bin/bin{2}/disbinX {0}/bin/model_definition/ensembleX {1} /dev/null".format(
-            self.bin_directory, self.input_file, self.architecture
-        )
+        self.cwd = os.path.join(self.bin_directory, 'bin')
+        self.command = '{0}/bin/bin{2}/disbinX {0}/bin/model_definition/ensembleX {1} /dev/null'\
+            .format(self.bin_directory, self.input_file, self.architecture)
 
     def parse(self, output):
         probs = list()
-        for residue in output.decode("utf-8").split("\n"):
+        for residue in output.decode('utf-8').split("\n"):
             if len(residue) == 0:
                 continue
             if residue[0] in ["O", "D"]:
@@ -222,11 +212,11 @@ class ESpritzX(Predictor):
 
 
 class GlobPlot(Predictor):
-    tag = "glo"
-    types = ["disorder", "mobidblite"]
-    groups = ["main", "mobidb3", "allid"]
-    intype = "flat"
-    shared_name = "globplot"
+    tag = 'glo'
+    types = ['disorder', 'mobidblite']
+    groups = ['main', 'mobidb3', 'allid']
+    intype = 'flat'
+    shared_name = 'globplot'
     suppress_stderr = True
 
     def __init__(self, _input_file, _bin_directory, _architecture, _threshold):
@@ -238,53 +228,44 @@ class GlobPlot(Predictor):
         )
 
     def parse(self, output):
-        probs = json.loads(output.decode("utf-8").replace("'", '"'))[0]["p"]
+        probs = json.loads(output.decode('utf-8').replace("\'", "\""))[0]['p']
 
         if probs:
             return [Prediction(self.tag, probs, self.threshold, self.types)]
 
 
 class DisEMBL(Predictor):
-    tag = ["dis465", "disHL"]
-    types = ["disorder", "mobidblite"]
-    groups = ["main", "mobidb3", "allid"]
-    intype = "flat"
-    shared_name = "disembl"
+    tag = ['dis465', 'disHL']
+    types = ['disorder', 'mobidblite']
+    groups = ['main', 'mobidb3', 'allid']
+    intype = 'flat'
+    shared_name = 'disembl'
 
     def __init__(self, _input_file, _bin_directory, _architecture, _thresholds):
         super(DisEMBL, self).__init__(_input_file, _bin_directory, _architecture)
         self.thresholds = {subtag: _thresholds[subtag] for subtag in self.tag}
 
-        self.command = (
-            "python2 {0}/DisEMBL.mobidb.py 8 8 4 1.2 1.4 1.2 {0}/bin{2} {1}".format(
-                self.bin_directory, self.input_file, self.architecture
-            )
-        )
+        self.command = 'python2 {0}/DisEMBL.mobidb.py 8 8 4 1.2 1.4 1.2 {0}/bin{2} {1}'.format(
+            self.bin_directory, self.input_file, self.architecture)
 
     def parse(self, output):
-        probs = {
-            ele["pred"]: ele["p"]
-            for ele in json.loads(output.decode("utf-8").rstrip("\n").replace("'", '"'))
-        }
+        probs = {ele['pred']: ele['p'] for ele in json.loads(
+            output.decode('utf-8').rstrip("\n").replace("\'", "\""))}
 
         preds = list()
         for subtag in self.tag:
             if probs[subtag]:
-                preds.append(
-                    Prediction(
-                        subtag, probs[subtag], self.thresholds[subtag], self.types
-                    )
-                )
+                preds.append(Prediction(subtag, probs[subtag], self.thresholds[subtag], self.types))
 
         return preds
 
 
 class VSL2b(Predictor):
-    tag = "vsl"
-    types = ["disorder"]
-    groups = ["mobidb3", "allid"]
-    intype = "flat"
-    shared_name = "vsl2"
+    tag = 'vsl'
+    types = ['disorder']
+    groups = ['mobidb3', 'allid']
+    intype = 'flat'
+    shared_name = 'vsl2'
     suppress_stderr = True
 
     def __init__(self, _input_file, _bin_directory, _architecture, _threshold):
@@ -292,8 +273,7 @@ class VSL2b(Predictor):
         self.threshold = _threshold[self.tag]
 
         self.command = "java -XX:+UseSerialGC -jar {}/VSL2.jar -s:{}".format(
-            self.bin_directory, self.input_file
-        )
+            self.bin_directory, self.input_file)
 
     def parse(self, output):
         """Parse VSL2b output and extract probabilities
@@ -308,38 +288,35 @@ class VSL2b(Predictor):
         """
         processlines = False
         probs = list()
-        for row in output.decode("utf-8").split("\n"):
+        for row in output.decode('utf-8').split("\n"):
             if row == "----------------------------------------":
                 processlines = True
             elif row == "========================================":
                 processlines = False
             elif processlines and "-" not in row:
-                probs.append(round(float(row.split()[2].replace(",", ".")), 4))
+                probs.append(round(float(row.split()[2].replace(',', '.')), 4))
 
-        if (
-            probs
-        ):  # may not get results if sequence has non-standard residues (X,etc)outfile
+        if probs:  # may not get results if sequence has non-standard residues (X,etc)outfile
             return [Prediction(self.tag, probs, self.threshold, self.types)]
 
 
 class JRonn(Predictor):
-    tag = "jronn"
-    types = ["disorder"]
-    groups = ["mobidb3", "allid"]
-    intype = "fasta"
-    shared_name = "jronn"
+    tag = 'jronn'
+    types = ['disorder']
+    groups = ['mobidb3', 'allid']
+    intype = 'fasta'
+    shared_name = 'jronn'
 
     def __init__(self, _input_file, _bin_directory, _architecture, _threshold):
         super(JRonn, self).__init__(_input_file, _bin_directory, _architecture)
         self.threshold = _threshold[self.tag]
 
         self.command = "java -XX:+UseSerialGC -jar {}/jronn.jar -i={}".format(
-            self.bin_directory, self.input_file
-        )
+            self.bin_directory, self.input_file)
 
     def parse(self, output):
         probs = list()
-        for row in output.decode("utf-8").split("\n"):
+        for row in output.decode('utf-8').split("\n"):
             if len(row) > 0 and row[0] != ">":
                 probs.append(round(float(row.split()[1]), 4))
 
@@ -348,26 +325,25 @@ class JRonn(Predictor):
 
 
 class Seg(Predictor):
-    tag = "seg"
-    types = ["lowcomp"]
-    groups = ["mobidb3"]
-    intype = "fasta"
-    shared_name = "seg"
+    tag = 'seg'
+    types = ['lowcomp']
+    groups = ['mobidb3']
+    intype = 'fasta'
+    shared_name = 'seg'
 
     def __init__(self, _input_file, _bin_directory, _architecture, _threshold):
         super(Seg, self).__init__(_input_file, _bin_directory, _architecture)
         self.threshold = _threshold[self.tag]
 
-        self.command = "{}/bin{}/seg {} -x".format(
-            self.bin_directory, self.architecture, self.input_file
-        )
+        self.command = '{}/bin{}/seg {} -x'.format(
+            self.bin_directory, self.architecture, self.input_file)
 
     def parse(self, output):
         probs = list()
-        for line in output.decode("utf-8").split("\n"):
-            if len(line) > 0 and line[0] != ">":
+        for line in output.decode('utf-8').split("\n"):
+            if len(line) > 0 and line[0] != '>':
                 for pred in line:
-                    if pred == "x":
+                    if pred == 'x':
                         probs.append(1.0)
                     else:
                         probs.append(0.0)
@@ -377,26 +353,25 @@ class Seg(Predictor):
 
 
 class Pfilt(Predictor):
-    tag = "pfilt"
-    types = ["lowcomp"]
-    groups = ["mobidb3"]
-    intype = "fasta"
-    shared_name = "pfilt"
+    tag = 'pfilt'
+    types = ['lowcomp']
+    groups = ['mobidb3']
+    intype = 'fasta'
+    shared_name = 'pfilt'
 
     def __init__(self, _input_file, _bin_directory, _architecture, _threshold):
         super(Pfilt, self).__init__(_input_file, _bin_directory, _architecture)
         self.threshold = _threshold[self.tag]
 
-        self.command = "{}/bin{}/pfilt {}".format(
-            self.bin_directory, self.architecture, self.input_file
-        )
+        self.command = '{}/bin{}/pfilt {}'.format(
+            self.bin_directory, self.architecture, self.input_file)
 
     def parse(self, output):
         probs = list()
-        for line in output.decode("utf-8").split("\n"):
-            if len(line) > 0 and line[0] != ">":
+        for line in output.decode('utf-8').split("\n"):
+            if len(line) > 0 and line[0] != '>':
                 for pred in line:
-                    if pred == "X":
+                    if pred == 'X':
                         probs.append(1.0)
                     else:
                         probs.append(0.0)
@@ -405,25 +380,24 @@ class Pfilt(Predictor):
 
 
 class FESS(Predictor):
-    tag = ["fess_helix", "fess_sheet", "fess_coil"]
-    types = ["sspops"]
-    groups = ["mobidb3"]
-    intype = "fasta"
-    shared_name = "fess"
+    tag = ['fess_helix', 'fess_sheet', 'fess_coil']
+    types = ['sspops']
+    groups = ['mobidb3']
+    intype = 'fasta'
+    shared_name = 'fess'
 
     def __init__(self, _input_file, _bin_directory, _architecture, _thresholds):
         super(FESS, self).__init__(_input_file, _bin_directory, _architecture)
         self.thresholds = {subtag: _thresholds[subtag] for subtag in self.tag}
 
-        self.cwd = os.path.join(self.bin_directory, "bin{}".format(self.architecture))
-        self.command = "{}/bin{}/fess {}".format(
-            self.bin_directory, self.architecture, self.input_file
-        )
+        self.cwd = os.path.join(self.bin_directory, 'bin{}'.format(self.architecture))
+        self.command = '{}/bin{}/fess {}'.format(
+            self.bin_directory, self.architecture, self.input_file)
 
     def parse(self, output):
         probs = {t: list() for t in self.tag}
 
-        for output_line in output.decode("utf-8").split("\n"):
+        for output_line in output.decode('utf-8').split("\n"):
             if not output_line.startswith("#"):
                 output_line = output_line.split()
 
@@ -435,54 +409,44 @@ class FESS(Predictor):
         preds = list()
         for subtag in self.tag:
             if probs[subtag]:
-                preds.append(
-                    Prediction(
-                        subtag, probs[subtag], self.thresholds[subtag], self.types
-                    )
-                )
+                preds.append(Prediction(subtag, probs[subtag], self.thresholds[subtag], self.types))
 
         return preds
 
 
 class DynaMine(Predictor):
-    tag = "dynamine_coil"
-    types = ["sspops"]
-    groups = ["mobidb3"]
-    intype = "fasta"
-    shared_name = "dynamine"
+    tag = 'dynamine_coil'
+    types = ['sspops']
+    groups = ['mobidb3']
+    intype = 'fasta'
+    shared_name = 'dynamine'
 
     def __init__(self, _input_file, _bin_directory, _architecture, _threshold):
         super(DynaMine, self).__init__(_input_file, _bin_directory, _architecture)
         self.threshold = _threshold[self.tag]
 
-        self.command = "python2 {}/runFasta.py {}".format(
-            self.bin_directory, self.input_file
-        )
+        self.command = 'python2 {}/runFasta.py {}'.format(self.bin_directory, self.input_file)
 
     def parse(self, output):
-        probs = [
-            float(line.split()[-1])
-            for line in output.decode("utf-8").split("\n")[3:]
-            if line
-        ]
+        probs = [float(line.split()[-1]) for line in output.decode('utf-8').split("\n")[3:] if line]
 
         if probs:
             return [Prediction(self.tag, probs, self.threshold, self.types)]
 
 
 class Anchor(Predictor):
-    tag = "anchor"
-    types = ["bindsite"]
-    groups = ["mobidb3"]
-    intype = "fasta"
-    shared_name = "anchor"
+    tag = 'anchor'
+    types = ['bindsite']
+    groups = ['mobidb3']
+    intype = 'fasta'
+    shared_name = 'anchor'
 
     def __init__(self, _input_file, _bin_directory, _architecture, _threshold):
         super(Anchor, self).__init__(_input_file, _bin_directory, _architecture)
         self.threshold = _threshold[self.tag]
 
         self.cwd = self.bin_directory
-        self.command = "{}/anchor {}".format(self.bin_directory, self.input_file)
+        self.command = '{}/anchor {}'.format(self.bin_directory, self.input_file)
 
     def parse(self, output):
         """
@@ -501,7 +465,7 @@ class Anchor(Predictor):
 
         probs = list()
 
-        for line in output.decode("utf-8").split("\n"):
+        for line in output.decode('utf-8').split("\n"):
             # check if the first character is a residue position
             if not line.startswith("#"):
                 line = line.strip().split()

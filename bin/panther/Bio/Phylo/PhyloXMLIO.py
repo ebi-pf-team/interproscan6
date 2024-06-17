@@ -19,7 +19,9 @@ About capitalization:
 
 import sys
 
-from Bio._py3k import basestring, unicode
+from Bio._py3k import basestring
+from Bio._py3k import unicode
+
 from Bio.Phylo import PhyloXML as PX
 
 # For speed try to use cElementTree rather than ElementTree
@@ -110,7 +112,6 @@ def write(obj, file, encoding=DEFAULT_ENCODING, indent=True):
             either an open handle or a file name.
 
     """
-
     # This comment stops black style adding a blank line here, which causes flake8 D202.
     def fix_single(tree):
         if isinstance(tree, PX.Phylogeny):
@@ -528,7 +529,6 @@ class Parser(object):
 
     def binary_characters(self, elem):
         """Create binary characters object."""
-
         # This comment stops black style adding a blank line here, which causes flake8 D202.
         def bc_getter(elem):
             """Get binary characters from subnodes."""
@@ -699,7 +699,6 @@ def _clean_attrib(obj, attrs):
 
 def _handle_complex(tag, attribs, subnodes, has_text=False):
     """Handle to serialize nodes with subnodes (PRIVATE)."""
-
     # This comment stops black style adding a blank line here, which causes flake8 D202.
     def wrapped(self, obj):
         """Wrap nodes and subnodes as elements."""
@@ -724,7 +723,6 @@ def _handle_complex(tag, attribs, subnodes, has_text=False):
 
 def _handle_simple(tag):
     """Handle to serialize simple nodes (PRIVATE)."""
-
     # This comment stops black style adding a blank line here, which causes flake8 D202.
     def wrapped(self, obj):
         """Wrap node as element."""

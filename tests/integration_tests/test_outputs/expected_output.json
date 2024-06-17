@@ -1,0 +1,756 @@
+{
+  "interproscan-version": "6.0.0",
+  "results": [
+    {
+      "sequence": "MGIRYDNTVYGLSPLARGTRGNGNRPRGRGRFIPAGAGNTMSGTMPRLSGPVYPRWRGEHNERNNAQAFWSGLSPLARGTPNGSDVRRLRYRFIPAGAGNTATRCSNEPFDPVYPRWRGEHAQNDRRSEDSGGLSPLARGTRRPDQVMVLPLRFIPAGAGNTDIPPDPRPKSAVYPRWRGEHNGTDSTNQNFRGLSPLARGTLYDCRRYEKPRRFIPAGAGNTCYGVGALNIGAVYPRWRGEH",
+      "md5": "f1f6c0f82668b5315244caa65040cad9",
+      "matches": [
+        {
+          "signature": {
+            "accession": "ANF00057",
+            "name": "Spurious_ORF_57",
+            "description": "Translation of E. coli type CRISPR repeat",
+            "signatureLibraryRelease": {
+              "library": "ANTIFAM",
+              "version": "7.0"
+            },
+            "entry": null
+          },
+          "locations": [
+            {
+              "start": 6,
+              "end": 101,
+              "representative": false,
+              "hmmStart": 16,
+              "hmmEnd": 111,
+              "hmmLength": 111,
+              "hmmBounds": "C_TERMINAL_COMPLETE",
+              "evalue": 2.7e-27,
+              "score": 93,
+              "envelopeStart": 2,
+              "envelopeEnd": 101,
+              "postProcessed": false,
+              "location-fragments": [
+                {
+                  "start": 6,
+                  "end": 101,
+                  "dc-status": "CONTINUOUS"
+                }
+              ]
+            },
+            {
+              "start": 113,
+              "end": 223,
+              "representative": false,
+              "hmmStart": 1,
+              "hmmEnd": 111,
+              "hmmLength": 111,
+              "hmmBounds": "COMPLETE",
+              "evalue": 2.6e-34,
+              "score": 115.5,
+              "envelopeStart": 113,
+              "envelopeEnd": 223,
+              "postProcessed": false,
+              "location-fragments": [
+                {
+                  "start": 113,
+                  "end": 223,
+                  "dc-status": "CONTINUOUS"
+                }
+              ]
+            },
+            {
+              "start": 174,
+              "end": 243,
+              "representative": false,
+              "hmmStart": 1,
+              "hmmEnd": 70,
+              "hmmLength": 111,
+              "hmmBounds": "COMPLETE",
+              "evalue": 2.7e-20,
+              "score": 70.4,
+              "envelopeStart": 174,
+              "envelopeEnd": 243,
+              "postProcessed": false,
+              "location-fragments": [
+                {
+                  "start": 174,
+                  "end": 243,
+                  "dc-status": "CONTINUOUS"
+                }
+              ]
+            },
+            {
+              "start": 70,
+              "end": 162,
+              "representative": false,
+              "hmmStart": 19,
+              "hmmEnd": 111,
+              "hmmLength": 111,
+              "hmmBounds": "C_TERMINAL_COMPLETE",
+              "evalue": 3.4e-28,
+              "score": 95.9,
+              "envelopeStart": 69,
+              "envelopeEnd": 162,
+              "postProcessed": false,
+              "location-fragments": [
+                {
+                  "start": 70,
+                  "end": 162,
+                  "dc-status": "CONTINUOUS"
+                }
+              ]
+            }
+          ],
+          "evalue": 1.7e-103,
+          "score": 338.3,
+          "model-ac": "ANF00057"
+        },
+        {
+          "signature": {
+            "accession": "ANF00006",
+            "name": "Spurious_ORF_06",
+            "description": "Translation of CRISPR region",
+            "signatureLibraryRelease": {
+              "library": "ANTIFAM",
+              "version": "7.0"
+            },
+            "entry": null
+          },
+          "locations": [
+            {
+              "start": 113,
+              "end": 162,
+              "representative": false,
+              "hmmStart": 1,
+              "hmmEnd": 50,
+              "hmmLength": 50,
+              "hmmBounds": "COMPLETE",
+              "evalue": 4.1e-12,
+              "score": 44.1,
+              "envelopeStart": 113,
+              "envelopeEnd": 162,
+              "postProcessed": false,
+              "location-fragments": [
+                {
+                  "start": 113,
+                  "end": 162,
+                  "dc-status": "CONTINUOUS"
+                }
+              ]
+            },
+            {
+              "start": 174,
+              "end": 223,
+              "representative": false,
+              "hmmStart": 1,
+              "hmmEnd": 50,
+              "hmmLength": 50,
+              "hmmBounds": "COMPLETE",
+              "evalue": 3e-12,
+              "score": 44.5,
+              "envelopeStart": 174,
+              "envelopeEnd": 223,
+              "postProcessed": false,
+              "location-fragments": [
+                {
+                  "start": 174,
+                  "end": 223,
+                  "dc-status": "CONTINUOUS"
+                }
+              ]
+            },
+            {
+              "start": 9,
+              "end": 40,
+              "representative": false,
+              "hmmStart": 19,
+              "hmmEnd": 50,
+              "hmmLength": 50,
+              "hmmBounds": "C_TERMINAL_COMPLETE",
+              "evalue": 4.3e-7,
+              "score": 28,
+              "envelopeStart": 4,
+              "envelopeEnd": 40,
+              "postProcessed": false,
+              "location-fragments": [
+                {
+                  "start": 9,
+                  "end": 40,
+                  "dc-status": "CONTINUOUS"
+                }
+              ]
+            },
+            {
+              "start": 52,
+              "end": 101,
+              "representative": false,
+              "hmmStart": 1,
+              "hmmEnd": 50,
+              "hmmLength": 50,
+              "hmmBounds": "COMPLETE",
+              "evalue": 4.2e-14,
+              "score": 50.4,
+              "envelopeStart": 52,
+              "envelopeEnd": 101,
+              "postProcessed": false,
+              "location-fragments": [
+                {
+                  "start": 52,
+                  "end": 101,
+                  "dc-status": "CONTINUOUS"
+                }
+              ]
+            }
+          ],
+          "evalue": 1.4e-48,
+          "score": 160.8,
+          "model-ac": "ANF00006"
+        }
+      ],
+      "xref": [
+        {
+          "name": "UPI0010EB9177",
+          "id": "UPI0010EB9177"
+        }
+      ]
+    },
+    {
+      "sequence": "MEEDIDTRKINNSFLRDHSYATEADIISTVEFNHTGELLATGDKGGRVVIFQREQESKNQVHRRGEYNVYSTFQSHEPEFDYLKSLEIEEKINKIRWLPQQNAAYFLLSTNDKTVKLWKVSERDKRPEGYNLKDEEGRLRDPATITTLRVPVLRPMDLMVEATPRRVFANAHTYHINSISVNSDYETYMSADDLRINLWNFEITNQSFNIVDIKPANMEELTEVITAAEFHPHHCNTFVYSSSKGTIRLCDMRASALCDRHTKFFEEPEDPSNRSFFSEIISSISDVKFSHSGRYIMTRDYLTVKVWDLNMENRPIETYQVHDYLRSKLCSLYENDCIFDKFECVWNGSDSVIMTGSYNNFFRMFDRNTKRDVTLEASRENSKPRAILKPRKVCVGGKRRKDEISVDSLDFSKKILHTAWHPSENIIAVAATNNLYIFQDKVN",
+      "md5": "6060f0d4cccb4dc4e224ee28348af028",
+      "matches": [
+        {
+          "signature": {
+            "accession": "PTHR11871",
+            "name": "PROTEIN PHOSPHATASE PP2A REGULATORY SUBUNIT B",
+            "description": null,
+            "signatureLibraryRelease": {
+              "library": "PANTHER",
+              "version": "18.0"
+            },
+            "entry": {
+              "accession": "IPR000009",
+              "name": "PP2A_PR55",
+              "description": "Protein phosphatase 2A regulatory subunit PR55",
+              "type": "FAMILY",
+              "goXRefs": [
+                {
+                  "name": "protein phosphatase type 2A complex",
+                  "databaseName": "GO",
+                  "category": "CELLULAR_COMPONENT",
+                  "id": "GO:0000159"
+                },
+                {
+                  "name": "protein phosphatase regulator activity",
+                  "databaseName": "GO",
+                  "category": "MOLECULAR_FUNCTION",
+                  "id": "GO:0019888"
+                }
+              ],
+              "pathwayXRefs": [
+                {
+                  "name": "Cyclin D associated events in G1",
+                  "databaseName": "Reactome",
+                  "id": "R-MMU-69231"
+                },
+                {
+                  "name": "Nonsense Mediated Decay (NMD) enhanced by the Exon Junction Complex (EJC)",
+                  "databaseName": "Reactome",
+                  "id": "R-MMU-975957"
+                },
+                {
+                  "name": "Cyclin A/B1/B2 associated events during G2/M transition",
+                  "databaseName": "Reactome",
+                  "id": "R-RNO-69273"
+                },
+                {
+                  "name": "Initiation of Nuclear Envelope (NE) Reformation",
+                  "databaseName": "Reactome",
+                  "id": "R-CEL-2995383"
+                },
+                {
+                  "name": "Phosphorylation of ARM",
+                  "databaseName": "Reactome",
+                  "id": "R-DME-209396"
+                },
+                {
+                  "name": "Nonsense Mediated Decay (NMD) enhanced by the Exon Junction Complex (EJC)",
+                  "databaseName": "Reactome",
+                  "id": "R-HSA-975957"
+                },
+                {
+                  "name": "Cyclin D associated events in G1",
+                  "databaseName": "Reactome",
+                  "id": "R-CEL-69231"
+                },
+                {
+                  "name": "Assembly of the 'destruction complex'",
+                  "databaseName": "Reactome",
+                  "id": "R-DME-209413"
+                },
+                {
+                  "name": "Nonsense Mediated Decay (NMD) enhanced by the Exon Junction Complex (EJC)",
+                  "databaseName": "Reactome",
+                  "id": "R-CEL-975957"
+                },
+                {
+                  "name": "Initiation of Nuclear Envelope (NE) Reformation",
+                  "databaseName": "Reactome",
+                  "id": "R-DME-2995383"
+                },
+                {
+                  "name": "Cyclin A/B1/B2 associated events during G2/M transition",
+                  "databaseName": "Reactome",
+                  "id": "R-DME-69273"
+                },
+                {
+                  "name": "Cyclin D associated events in G1",
+                  "databaseName": "Reactome",
+                  "id": "R-DDI-69231"
+                },
+                {
+                  "name": "Cyclin A/B1/B2 associated events during G2/M transition",
+                  "databaseName": "Reactome",
+                  "id": "R-SCE-69273"
+                },
+                {
+                  "name": "Phosphorylation of CI",
+                  "databaseName": "Reactome",
+                  "id": "R-DME-209190"
+                },
+                {
+                  "name": "Cyclin A/B1/B2 associated events during G2/M transition",
+                  "databaseName": "Reactome",
+                  "id": "R-DDI-69273"
+                },
+                {
+                  "name": "Phosphorylation of AXN and APC",
+                  "databaseName": "Reactome",
+                  "id": "R-DME-209155"
+                },
+                {
+                  "name": "Phosphorylation of SMO",
+                  "databaseName": "Reactome",
+                  "id": "R-DME-209214"
+                },
+                {
+                  "name": "Phosphorylation of PER and TIM",
+                  "databaseName": "Reactome",
+                  "id": "R-DME-432553"
+                },
+                {
+                  "name": "MASTL Facilitates Mitotic Progression",
+                  "databaseName": "Reactome",
+                  "id": "R-HSA-2465910"
+                },
+                {
+                  "name": "Cyclin D associated events in G1",
+                  "databaseName": "Reactome",
+                  "id": "R-DME-69231"
+                },
+                {
+                  "name": "Cyclin A/B1/B2 associated events during G2/M transition",
+                  "databaseName": "Reactome",
+                  "id": "R-HSA-69273"
+                },
+                {
+                  "name": "Nonsense Mediated Decay (NMD) enhanced by the Exon Junction Complex (EJC)",
+                  "databaseName": "Reactome",
+                  "id": "R-SCE-975957"
+                },
+                {
+                  "name": "Cyclin D associated events in G1",
+                  "databaseName": "Reactome",
+                  "id": "R-RNO-69231"
+                },
+                {
+                  "name": "Cyclin A/B1/B2 associated events during G2/M transition",
+                  "databaseName": "Reactome",
+                  "id": "R-MMU-69273"
+                },
+                {
+                  "name": "Nonsense Mediated Decay (NMD) enhanced by the Exon Junction Complex (EJC)",
+                  "databaseName": "Reactome",
+                  "id": "R-SPO-975957"
+                },
+                {
+                  "name": "Cyclin A/B1/B2 associated events during G2/M transition",
+                  "databaseName": "Reactome",
+                  "id": "R-CEL-69273"
+                },
+                {
+                  "name": "Ubiquitination and degradation of phosphorylated ARM",
+                  "databaseName": "Reactome",
+                  "id": "R-DME-209461"
+                },
+                {
+                  "name": "Initiation of Nuclear Envelope (NE) Reformation",
+                  "databaseName": "Reactome",
+                  "id": "R-RNO-2995383"
+                },
+                {
+                  "name": "Recruitment of the 'destruction complex' to the receptor complex, the degradation of AXN and release of ARM",
+                  "databaseName": "Reactome",
+                  "id": "R-DME-209440"
+                },
+                {
+                  "name": "Initiation of Nuclear Envelope (NE) Reformation",
+                  "databaseName": "Reactome",
+                  "id": "R-HSA-2995383"
+                },
+                {
+                  "name": "Dephosphorylation of PER",
+                  "databaseName": "Reactome",
+                  "id": "R-DME-432620"
+                },
+                {
+                  "name": "Nonsense Mediated Decay (NMD) enhanced by the Exon Junction Complex (EJC)",
+                  "databaseName": "Reactome",
+                  "id": "R-DME-975957"
+                },
+                {
+                  "name": "Cyclin D associated events in G1",
+                  "databaseName": "Reactome",
+                  "id": "R-HSA-69231"
+                },
+                {
+                  "name": "Initiation of Nuclear Envelope (NE) Reformation",
+                  "databaseName": "Reactome",
+                  "id": "R-MMU-2995383"
+                },
+                {
+                  "name": "Ubiquitination and proteolysis of phosphorylated CI",
+                  "databaseName": "Reactome",
+                  "id": "R-DME-209360"
+                },
+                {
+                  "name": "Nonsense Mediated Decay (NMD) enhanced by the Exon Junction Complex (EJC)",
+                  "databaseName": "Reactome",
+                  "id": "R-RNO-975957"
+                },
+                {
+                  "name": "Cyclin A/B1/B2 associated events during G2/M transition",
+                  "databaseName": "Reactome",
+                  "id": "R-SPO-69273"
+                }
+              ]
+            }
+          },
+          "locations": [
+            {
+              "start": 19,
+              "end": 440,
+              "representative": false,
+              "hmmStart": 16,
+              "hmmEnd": 449,
+              "hmmLength": 0,
+              "hmmBounds": "C_TERMINAL_COMPLETE",
+              "envelopeStart": 5,
+              "envelopeEnd": 440,
+              "location-fragments": [
+                {
+                  "start": 19,
+                  "end": 440,
+                  "dc-status": "CONTINUOUS"
+                }
+              ]
+            }
+          ],
+          "accession": "PTHR11871:SF1",
+          "name": "SERINE_THREONINE-PROTEIN PHOSPHATASE 2A 55 KDA REGULATORY SUBUNIT B BETA ISOFORM",
+          "evalue": 0,
+          "score": 760.6,
+          "proteinClass": "PC00195",
+          "graftPoint": "PTN000221757",
+          "goXRefs": [
+            {
+              "name": "protein phosphatase type 2A complex",
+              "databaseName": "GO",
+              "category": "CELLULAR_COMPONENT",
+              "id": "GO:0000159"
+            },
+            {
+              "name": "cytosol",
+              "databaseName": "GO",
+              "category": "CELLULAR_COMPONENT",
+              "id": "GO:0005829"
+            },
+            {
+              "name": "protein phosphatase regulator activity",
+              "databaseName": "GO",
+              "category": "MOLECULAR_FUNCTION",
+              "id": "GO:0019888"
+            }
+          ],
+          "model-ac": "PTHR11871:SF1"
+        }
+      ],
+      "xref": [
+        {
+          "name": "sp|Q5E9Q7|2ABB_BOVIN Serine/threonine-protein phosphatase 2A 55 kDa regulatory subunit B beta isoform OS=Bos taurus OX=9913 GN=PPP2R2B PE=2 SV=1",
+          "id": "sp|Q5E9Q7|2ABB_BOVIN"
+        }
+      ]
+    },
+    {
+      "sequence": "MLARGGIQSNQSRLSAHLGGKVDLYAKREDCNSGLAFGGNKLRKLEYIVPDAIASGADTLVSIGGVQSNHTRMVAAVAAKIGMKCRLVQEAWVPHEDAVYDRVGNIMLSRIMGADVGKE",
+      "md5": "5a40425be664fc947906456e8fc0e722",
+      "matches": [
+        {
+          "signature": {
+            "accession": "PTHR43780",
+            "name": "1-AMINOCYCLOPROPANE-1-CARBOXYLATE DEAMINASE-RELATED",
+            "description": null,
+            "signatureLibraryRelease": {
+              "library": "PANTHER",
+              "version": "18.0"
+            },
+            "entry": {
+              "accession": "IPR027278",
+              "name": "ACCD_DCysDesulf",
+              "description": "1-aminocyclopropane-1-carboxylate deaminase/D-cysteine desulfhydrase",
+              "type": "FAMILY",
+              "goXRefs": [],
+              "pathwayXRefs": [
+                {
+                  "name": "sulfolactate degradation III",
+                  "databaseName": "MetaCyc",
+                  "id": "PWY-6638"
+                },
+                {
+                  "name": "nocardicin A biosynthesis",
+                  "databaseName": "MetaCyc",
+                  "id": "PWY-7797"
+                }
+              ]
+            }
+          },
+          "locations": [
+            {
+              "start": 20,
+              "end": 116,
+              "representative": false,
+              "hmmStart": 41,
+              "hmmEnd": 129,
+              "hmmLength": 0,
+              "hmmBounds": "INCOMPLETE",
+              "envelopeStart": 7,
+              "envelopeEnd": 118,
+              "location-fragments": [
+                {
+                  "start": 20,
+                  "end": 116,
+                  "dc-status": "CONTINUOUS"
+                }
+              ]
+            }
+          ],
+          "accession": "PTHR43780:SF2",
+          "name": "1-AMINOCYCLOPROPANE-1-CARBOXYLATE DEAMINASE-RELATED",
+          "evalue": 1.7e-24,
+          "score": 98.4,
+          "proteinClass": "PC00088",
+          "graftPoint": "BRADU|EnsemblGenome=BAC45506|UniProtKB=Q89XR6",
+          "goXRefs": [
+            {
+              "name": "D-cysteine desulfhydrase activity",
+              "databaseName": "GO",
+              "category": "MOLECULAR_FUNCTION",
+              "id": "GO:0019148"
+            }
+          ],
+          "model-ac": "PTHR43780:SF2"
+        }
+      ],
+      "xref": [
+        {
+          "name": "TESTESEMLOOKUP",
+          "id": "TESTESEMLOOKUP"
+        }
+      ]
+    },
+    {
+      "sequence": "MNLNRFERYPLTFGPSPITPLKRLSQHLGGKVELYAKREDCNSGLAFGGNKTRKLEYLIPEAIEQGCDTLVSIGGIQSNQTRQVAAVAAHLGMKCVLVQENWVNYSDAVYDRVGNIEMSRIMGADVRLDAAGFDIGIRPSWEKAMSDVVEQGGKPFPIPAGCSEHPYGGLGFVGFAEEVRQQEKELGFKFDYIVVCSVTGSTQAGMVVGFAADGRSKNVIGIDASAKPEQTKAQILRIARHTAELVELGREITEEDVVLDTRFAYPEYGLPNEGTLEAIRLCGSLEGVLTDPVYEGKSMHGMIEMVRRGEFPEGS",
+      "md5": "cf8b3730bba16fc9f9823ad3a120d975",
+      "matches": [
+        {
+          "signature": {
+            "accession": "PTHR43780",
+            "name": "1-AMINOCYCLOPROPANE-1-CARBOXYLATE DEAMINASE-RELATED",
+            "description": null,
+            "signatureLibraryRelease": {
+              "library": "PANTHER",
+              "version": "18.0"
+            },
+            "entry": {
+              "accession": "IPR027278",
+              "name": "ACCD_DCysDesulf",
+              "description": "1-aminocyclopropane-1-carboxylate deaminase/D-cysteine desulfhydrase",
+              "type": "FAMILY",
+              "goXRefs": [],
+              "pathwayXRefs": [
+                {
+                  "name": "sulfolactate degradation III",
+                  "databaseName": "MetaCyc",
+                  "id": "PWY-6638"
+                },
+                {
+                  "name": "nocardicin A biosynthesis",
+                  "databaseName": "MetaCyc",
+                  "id": "PWY-7797"
+                }
+              ]
+            }
+          },
+          "locations": [
+            {
+              "start": 8,
+              "end": 309,
+              "representative": false,
+              "hmmStart": 21,
+              "hmmEnd": 314,
+              "hmmLength": 0,
+              "hmmBounds": "INCOMPLETE",
+              "envelopeStart": 2,
+              "envelopeEnd": 315,
+              "location-fragments": [
+                {
+                  "start": 8,
+                  "end": 309,
+                  "dc-status": "CONTINUOUS"
+                }
+              ]
+            }
+          ],
+          "accession": "PTHR43780:SF2",
+          "name": "1-AMINOCYCLOPROPANE-1-CARBOXYLATE DEAMINASE-RELATED",
+          "evalue": 2.3e-59,
+          "score": 213,
+          "proteinClass": "PC00088",
+          "graftPoint": "PTN002465090",
+          "goXRefs": [
+            {
+              "name": "D-cysteine desulfhydrase activity",
+              "databaseName": "GO",
+              "category": "MOLECULAR_FUNCTION",
+              "id": "GO:0019148"
+            }
+          ],
+          "model-ac": "PTHR43780:SF2"
+        },
+        {
+          "signature": {
+            "accession": "TIGR01274",
+            "name": "ACC_deam",
+            "description": "1-aminocyclopropane-1-carboxylate deaminase",
+            "signatureLibraryRelease": {
+              "library": "NCBIFAM",
+              "version": "14.0"
+            },
+            "entry": {
+              "accession": "IPR005965",
+              "name": "ACP_carboxylate_deaminase",
+              "description": "1-aminocyclopropane-1-carboxylate deaminase",
+              "type": "FAMILY",
+              "goXRefs": [
+                {
+                  "name": "1-aminocyclopropane-1-carboxylate deaminase activity",
+                  "databaseName": "GO",
+                  "category": "MOLECULAR_FUNCTION",
+                  "id": "GO:0008660"
+                },
+                {
+                  "name": "pyridoxal phosphate binding",
+                  "databaseName": "GO",
+                  "category": "MOLECULAR_FUNCTION",
+                  "id": "GO:0030170"
+                },
+                {
+                  "name": "amine catabolic process",
+                  "databaseName": "GO",
+                  "category": "BIOLOGICAL_PROCESS",
+                  "id": "GO:0009310"
+                }
+              ],
+              "pathwayXRefs": []
+            }
+          },
+          "locations": [
+            {
+              "start": 2,
+              "end": 315,
+              "representative": false,
+              "hmmStart": 1,
+              "hmmEnd": 314,
+              "hmmLength": 337,
+              "hmmBounds": "N_TERMINAL_COMPLETE",
+              "evalue": 3.7e-185,
+              "score": 626.3,
+              "envelopeStart": 2,
+              "envelopeEnd": 315,
+              "postProcessed": false,
+              "location-fragments": [
+                {
+                  "start": 2,
+                  "end": 315,
+                  "dc-status": "CONTINUOUS"
+                }
+              ]
+            }
+          ],
+          "evalue": 3.3e-185,
+          "score": 626.5,
+          "model-ac": "TIGR01274"
+        },
+        {
+          "signature": {
+            "accession": "cd06449",
+            "name": "ACCD",
+            "description": "ACCD",
+            "signatureLibraryRelease": {
+              "library": "CDD",
+              "version": "3.20"
+            },
+            "entry": null
+          },
+          "locations": [
+            {
+              "start": 16,
+              "end": 315,
+              "representative": true,
+              "sites": [
+                {
+                  "description": "catalytic residue",
+                  "numLocations": 1,
+                  "siteLocations": [
+                    {
+                      "start": 51,
+                      "end": 51,
+                      "residue": "K"
+                    }
+                  ]
+                }
+              ],
+              "evalue": 0,
+              "score": 542.012,
+              "location-fragments": [
+                {
+                  "start": 16,
+                  "end": 315,
+                  "dc-status": "CONTINUOUS"
+                }
+              ]
+            }
+          ],
+          "model-ac": "cd06449"
+        }
+      ],
+      "xref": [
+        {
+          "name": "OUTROSEMLOOKUP",
+          "id": "OUTROSEMLOOKUP"
+        }
+      ]
+    }
+  ]
+}

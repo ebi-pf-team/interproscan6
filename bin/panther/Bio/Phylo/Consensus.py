@@ -13,10 +13,10 @@ adam consensus.
 """
 from __future__ import division
 
-import itertools
 import random
-from ast import literal_eval
+import itertools
 
+from ast import literal_eval
 from Bio.Phylo import BaseTree
 
 

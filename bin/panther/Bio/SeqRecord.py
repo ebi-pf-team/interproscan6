@@ -91,7 +91,7 @@ class _RestrictedDict(dict):
 
     def update(self, new_dict):
         # Force this to go via our strict __setitem__ method
-        for key, value in new_dict.items():
+        for (key, value) in new_dict.items():
             self[key] = value
 
 
@@ -755,7 +755,6 @@ class SeqRecord(object):
 
             if sys.version_info[0] < 3:
                 import warnings
-
                 from Bio import BiopythonDeprecationWarning
 
                 warnings.warn(

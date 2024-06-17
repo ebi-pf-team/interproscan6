@@ -29,9 +29,8 @@ def process_matches_epang(matches, datadir, tempdir, binary=None, threads=1):
     results = {}
 
     for pthr in matches:
-        query_fasta_file = generate_fasta_for_panthr(
-            pthr, matches[pthr], datadir, tempdir
-        )
+        query_fasta_file = generate_fasta_for_panthr(pthr, matches[pthr],
+                                                     datadir, tempdir)
         if not query_fasta_file:
             # No sequence to graft
             continue
@@ -41,22 +40,21 @@ def process_matches_epang(matches, datadir, tempdir, binary=None, threads=1):
             results[query_id] = [
                 query_id,
                 pthr,
-                matches[pthr][query_id]["score"][0],
-                matches[pthr][query_id]["evalue"][0],
-                matches[pthr][query_id]["domscore"][0],
-                matches[pthr][query_id]["domevalue"][0],
-                matches[pthr][query_id]["hmmstart"][0],
-                matches[pthr][query_id]["hmmend"][0],
-                matches[pthr][query_id]["alifrom"][0],
-                matches[pthr][query_id]["alito"][0],
-                matches[pthr][query_id]["envfrom"][0],
-                matches[pthr][query_id]["envto"][0],
-                "-",
+                matches[pthr][query_id]['score'][0],
+                matches[pthr][query_id]['evalue'][0],
+                matches[pthr][query_id]['domscore'][0],
+                matches[pthr][query_id]['domevalue'][0],
+                matches[pthr][query_id]['hmmstart'][0],
+                matches[pthr][query_id]['hmmend'][0],
+                matches[pthr][query_id]['alifrom'][0],
+                matches[pthr][query_id]['alito'][0],
+                matches[pthr][query_id]['envfrom'][0],
+                matches[pthr][query_id]['envto'][0],
+                "-"
             ]
 
-        result_tree = _run_epang(
-            pthr, query_fasta_file, datadir, tempdir, binary=binary, threads=threads
-        )
+        result_tree = _run_epang(pthr, query_fasta_file, datadir, tempdir,
+                                 binary=binary, threads=threads)
         if not result_tree:
             # EPA-ng error (e.g tree cannot be converted to unrooted)
             continue
@@ -69,26 +67,28 @@ def process_matches_epang(matches, datadir, tempdir, binary=None, threads=1):
 
 
 def generate_fasta_for_panthr(pthr, matches, datadir, tempdir):
+
     pthr_align_length = align_length(pthr, datadir)
 
-    query_fasta = ""
+    query_fasta = ''
 
     for query_id in matches:
         querymsf = _querymsf(matches[query_id], pthr_align_length)
 
         # print fasta header
-        query_fasta += ">" + query_id + "\n"
+        query_fasta += '>' + query_id + '\n'
 
         # and the body lines
         for i in range(0, len(querymsf), 80):
-            query_fasta += re.sub(r"[UO]", r"X", querymsf[i : i + 80], flags=re.I)
-            query_fasta += "\n"
+            query_fasta += re.sub(r"[UO]", r"X", querymsf[i:i + 80],
+                                  flags=re.I)
+            query_fasta += '\n'
 
     if not query_fasta:
         return None
 
-    fasta_out_file = os.path.join(tempdir, pthr + "_query.fasta")
-    with open(fasta_out_file, "wt") as outfile:
+    fasta_out_file = os.path.join(tempdir, pthr + '_query.fasta')
+    with open(fasta_out_file, 'wt') as outfile:
         outfile.write(query_fasta)
 
     return fasta_out_file
@@ -97,7 +97,7 @@ def generate_fasta_for_panthr(pthr, matches, datadir, tempdir):
 def stringify(query_id):
     # stringify query_id
 
-    query_id = re.sub(r"[^\w]", "_", query_id)
+    query_id = re.sub(r'[^\w]', '_', query_id)
 
     return query_id
 
@@ -109,43 +109,42 @@ def _querymsf(match_data, pthr_align_length):
     # N-terminaly padd the sequence
     # position 1 until start is filled with '-'
 
-    querymsf = (int(match_data["hmmstart"][0]) - 1) * "-"
+    querymsf = ((int(match_data['hmmstart'][0]) - 1) * '-')
 
     # loop the elements/domains
-    for i in range(0, len(match_data["matchalign"])):
+    for i in range(0, len(match_data['matchalign'])):
+
         # if this is not the first element, fill in the gap between the hits
         if i > 0:
-            start = int(match_data["hmmstart"][i])
-            end = int(match_data["hmmend"][i - 1])
+            start = int(match_data['hmmstart'][i])
+            end = int(match_data['hmmend'][i-1])
             # This bridges the query_id gap between the hits
-            querymsf += (start - end - 1) * "-"
+            querymsf += (start - end - 1) * '-'
 
         # extract the query string
-        matchalign = match_data["matchalign"][i]
-        hmmalign = match_data["hmmalign"][i]
+        matchalign = match_data['matchalign'][i]
+        hmmalign = match_data['hmmalign'][i]
 
         # loop the sequence
         for j in range(0, len(hmmalign)):
             # hmm insert state
-            if hmmalign[j : j + 1] == ".":
+            if hmmalign[j:j+1] == ".":
                 continue
 
-            querymsf += matchalign[j : j + 1]
+            querymsf += matchalign[j:j+1]
 
     # C-terminaly padd the sequence
     # get the end of the last element/domain
-    last_end = int(match_data["hmmend"][-1])
+    last_end = int(match_data['hmmend'][-1])
     # and padd out to fill the msf length
-    querymsf += (pthr_align_length - last_end) * "-"
+    querymsf += (pthr_align_length - last_end) * '-'
 
     # error check (is this required?)
     if len(querymsf) != pthr_align_length:
         # then something is wrong
-        sys.stderr.write(
-            "Error: length of query MSF longer than expected "
-            "PANTHER alignment length: expected {}, "
-            "got {}.".format(pthr_align_length, len(querymsf))
-        )
+        sys.stderr.write("Error: length of query MSF longer than expected "
+                         "PANTHER alignment length: expected {}, "
+                         "got {}.".format(pthr_align_length, len(querymsf)))
         sys.exit(1)
 
     return querymsf.upper()
@@ -158,23 +157,14 @@ def _run_epang(pthr, query_fasta, datadir, tempdir, binary=None, threads=1):
     outdir = os.path.join(tempdir, "{}_epang".format(pthr))
     os.mkdir(outdir)
 
-    args = [
-        binary or "epa-ng",
-        "-G",
-        "0.05",
-        "-m",
-        "WAG",
-        "-T",
-        str(threads),
-        "-t",
-        bifurnewick_in,
-        "-s",
-        referece_fasta,
-        "-q",
-        query_fasta,
-        "-w",
-        outdir,
-    ]
+    args = [binary or "epa-ng",
+            "-G", "0.05",
+            "-m", "WAG",
+            "-T", str(threads),
+            "-t", bifurnewick_in,
+            "-s", referece_fasta,
+            "-q", query_fasta,
+            "-w", outdir]
 
     exit_code = sp.call(args, stderr=sp.DEVNULL, stdout=sp.DEVNULL)
     jplace_file = os.path.join(outdir, "epa_result.jplace")
@@ -189,28 +179,29 @@ def process_tree(pthr, result_tree, pthr_matches, datadir):
     with open(result_tree, "rt") as classification:
         classification_json = json.load(classification)
 
-    tree_string = classification_json["tree"]
-    matches = re.findall(r"AN(\d+):\d+\.\d+\{(\d+)\}", tree_string)
+    tree_string = classification_json['tree']
+    matches = re.findall(r'AN(\d+):\d+\.\d+\{(\d+)\}', tree_string)
 
     an_label = {}
     for [an, r] in matches:
-        an_label["AN" + an] = "R" + r
-        an_label["R" + r] = "AN" + an
+        an_label['AN' + an] = 'R' + r
+        an_label['R' + r] = 'AN' + an
 
-    newick_string = re.sub(r"(AN\d+)?\:\d+\.\d+{(\d+)}", r"R\g<2>", tree_string)
+    newick_string = re.sub(r'(AN\d+)?\:\d+\.\d+{(\d+)}', r'R\g<2>',
+                           tree_string)
 
-    newick_string = re.sub(r"AN\d+", r"", newick_string)
-    newick_string = re.sub(r"BI\d+", r"", newick_string)
-    mytree = Phylo.read(NewickIO.StringIO(newick_string), "newick")
+    newick_string = re.sub(r'AN\d+', r'', newick_string)
+    newick_string = re.sub(r'BI\d+', r'', newick_string)
+    mytree = Phylo.read(NewickIO.StringIO(newick_string), 'newick')
     results_pthr = []
 
-    for placement in classification_json["placements"]:
-        query_id = placement["n"][0]
+    for placement in classification_json['placements']:
+        query_id = placement['n'][0]
         child_ids = []
         ter = []
 
-        for maploc in placement["p"]:
-            rloc = "R" + str(maploc[0])
+        for maploc in placement['p']:
+            rloc = 'R' + str(maploc[0])
             clade_obj = mytree.find_clades(rloc)
 
             node = next(clade_obj)
@@ -222,27 +213,25 @@ def process_tree(pthr, result_tree, pthr_matches, datadir):
 
         common_an = _commonancestor(pthr, child_ids, datadir)
 
-        annot_file = os.path.join(datadir, "PAINT_Annotations", pthr + ".json")
-        with open(annot_file, "rt") as fh:
+        annot_file = os.path.join(datadir, 'PAINT_Annotations', pthr + '.json')
+        with open(annot_file, 'rt') as fh:
             pthrsf, _, _, _ = json.load(fh)[common_an]
 
-        results_pthr.append(
-            [
-                query_id,
-                pthrsf or pthr,
-                pthr_matches[query_id]["score"][0],
-                pthr_matches[query_id]["evalue"][0],
-                pthr_matches[query_id]["domscore"][0],
-                pthr_matches[query_id]["domevalue"][0],
-                pthr_matches[query_id]["hmmstart"][0],
-                pthr_matches[query_id]["hmmend"][0],
-                pthr_matches[query_id]["alifrom"][0],
-                pthr_matches[query_id]["alito"][0],
-                pthr_matches[query_id]["envfrom"][0],
-                pthr_matches[query_id]["envto"][0],
-                common_an,
-            ]
-        )
+        results_pthr.append([
+            query_id,
+            pthrsf or pthr,
+            pthr_matches[query_id]['score'][0],
+            pthr_matches[query_id]['evalue'][0],
+            pthr_matches[query_id]['domscore'][0],
+            pthr_matches[query_id]['domevalue'][0],
+            pthr_matches[query_id]['hmmstart'][0],
+            pthr_matches[query_id]['hmmend'][0],
+            pthr_matches[query_id]['alifrom'][0],
+            pthr_matches[query_id]['alito'][0],
+            pthr_matches[query_id]['envfrom'][0],
+            pthr_matches[query_id]['envto'][0],
+            common_an
+        ])
 
     return results_pthr
 
@@ -270,10 +259,10 @@ def parsehmmsearch(hmmer_out):
         while line:
             m = ReMatcher(line)
 
-            if line.startswith("#") or not line.strip():
+            if line.startswith('#') or not line.strip():
                 line = fp.readline()
                 continue
-            elif m.match(r"\AQuery:\s+(PTHR[0-9]+)"):
+            elif m.match(r'\AQuery:\s+(PTHR[0-9]+)'):
                 matchpthr = m.group(1)
 
                 fp.readline()
@@ -285,7 +274,7 @@ def parsehmmsearch(hmmer_out):
                 inclusion = True
                 while line.strip():
                     m = ReMatcher(line)
-                    if m.match(r"\s+------\sinclusion\sthreshold"):
+                    if m.match(r'\s+------\sinclusion\sthreshold'):
                         inclusion = False
                         line = fp.readline()
                         continue
@@ -297,7 +286,7 @@ def parsehmmsearch(hmmer_out):
 
                     line = fp.readline()
 
-            elif m.match(r"\A>>\s+(\S+)"):
+            elif m.match(r'\A>>\s+(\S+)'):
                 query_id = m.group(1)
                 query_id = stringify(query_id)
                 store_domain = []
@@ -309,7 +298,7 @@ def parsehmmsearch(hmmer_out):
 
                 stored_score = 0
                 if query_id in match_store:
-                    stored_score = match_store[query_id]["score"]
+                    stored_score = match_store[query_id]['score']
 
                 if float(score_store[query_id]) > float(stored_score):
                     store_align = True
@@ -317,31 +306,29 @@ def parsehmmsearch(hmmer_out):
                     line = fp.readline()
 
                     m = ReMatcher(line)
-                    if m.match(
-                        r"\s+\[No individual domains that satisfy reporting thresholds"
-                    ):
+                    if m.match(r'\s+\[No individual domains that satisfy reporting thresholds'):
                         store_align = False
                         line = fp.readline()
                         continue
 
                     current_match = {
-                        "panther_id": matchpthr,
-                        "score": score_store[query_id],
-                        "align": {
-                            "hmmalign": [],
-                            "matchalign": [],
-                            "hmmstart": [],
-                            "hmmend": [],
-                            "score": [],
-                            "evalue": [],
-                            "domscore": [],
-                            "domevalue": [],
-                            "alifrom": [],
-                            "alito": [],
-                            "envfrom": [],
-                            "envto": [],
-                            "acc": [],
-                        },
+                        'panther_id': matchpthr,
+                        'score': score_store[query_id],
+                        'align': {
+                            'hmmalign': [],
+                            'matchalign': [],
+                            'hmmstart': [],
+                            'hmmend': [],
+                            'score': [],
+                            'evalue': [],
+                            'domscore': [],
+                            'domevalue': [],
+                            'alifrom': [],
+                            'alito': [],
+                            'envfrom': [],
+                            'envto': [],
+                            'acc': []
+                        }
                     }
 
                     fp.readline()
@@ -353,37 +340,32 @@ def parsehmmsearch(hmmer_out):
                             sys.stderr.write(
                                 "domain info length is {}, "
                                 "expected 16 "
-                                "for {}.\n".format(len(domain_info), query_id)
-                            )
+                                "for {}.\n".format(len(domain_info), query_id))
                             sys.exit(1)
 
                         dom_num = domain_info[0]
                         dom_state = domain_info[1]
 
-                        if dom_state == "!":
-                            current_match["align"]["score"].append(
-                                str(score_store[query_id])
-                            )
-                            current_match["align"]["evalue"].append(
-                                str(evalue_store[query_id])
-                            )
-                            current_match["align"]["domscore"].append(domain_info[2])
-                            current_match["align"]["domevalue"].append(domain_info[5])
-                            current_match["align"]["hmmstart"].append(domain_info[6])
-                            current_match["align"]["hmmend"].append(domain_info[7])
-                            current_match["align"]["alifrom"].append(domain_info[9])
-                            current_match["align"]["alito"].append(domain_info[10])
-                            current_match["align"]["envfrom"].append(domain_info[12])
-                            current_match["align"]["envto"].append(domain_info[13])
-                            current_match["align"]["acc"].append(domain_info[15])
+                        if dom_state == '!':
+                            current_match['align']['score'].append(str(score_store[query_id]))
+                            current_match['align']['evalue'].append(str(evalue_store[query_id]))
+                            current_match['align']['domscore'].append(domain_info[2])
+                            current_match['align']['domevalue'].append(domain_info[5])
+                            current_match['align']['hmmstart'].append(domain_info[6])
+                            current_match['align']['hmmend'].append(domain_info[7])
+                            current_match['align']['alifrom'].append(domain_info[9])
+                            current_match['align']['alito'].append(domain_info[10])
+                            current_match['align']['envfrom'].append(domain_info[12])
+                            current_match['align']['envto'].append(domain_info[13])
+                            current_match['align']['acc'].append(domain_info[15])
                             store_domain.append(dom_num)
 
                         line = fp.readline()
 
-                    if len(current_match["align"]["hmmend"]) == 0:
+                    if len(current_match['align']['hmmend']) == 0:
                         store_align = False
 
-            elif m.match(r"\s+==\sdomain\s(\d+)") and store_align:
+            elif m.match(r'\s+==\sdomain\s(\d+)') and store_align:
                 domain_num = m.group(1)
 
                 if domain_num in store_domain:
@@ -391,7 +373,7 @@ def parsehmmsearch(hmmer_out):
                     hmmalign_array = line.split()
 
                     hmmalign_model = hmmalign_array[0]
-                    hmmalign_model = re.sub(r"\..+", "", hmmalign_model)
+                    hmmalign_model = re.sub(r'\..+', '', hmmalign_model)
                     hmmalign_seq = hmmalign_array[2]
 
                     line = fp.readline()
@@ -405,23 +387,19 @@ def parsehmmsearch(hmmer_out):
                     matchlign_seq = matchalign_array[2]
 
                     if matchpthr == hmmalign_model and query_id == matchalign_query:
-                        if len(current_match["align"]["hmmalign"]) >= len(
-                            current_match["align"]["hmmstart"]
-                        ):
-                            sys.stderr.write(
-                                "Trying to add alignment sequence"
-                                " without additional data.\n"
-                            )
+                        if len(current_match['align']['hmmalign']) >= len(current_match['align']['hmmstart']):
+                            sys.stderr.write("Trying to add alignment sequence"
+                                             " without additional data.\n")
                             sys.exit(1)
 
-                        current_match["align"]["hmmalign"].append(hmmalign_seq)
-                        current_match["align"]["matchalign"].append(matchlign_seq)
+                        current_match['align']['hmmalign'].append(hmmalign_seq)
+                        current_match['align']['matchalign'].append(matchlign_seq)
 
                     match_store[query_id] = current_match
 
                 line = fp.readline()
 
-            elif m.match(r"\A\/\/"):
+            elif m.match(r'\A\/\/'):
                 score_store = {}
                 evalue_store = {}
                 store_domain = []
@@ -430,15 +408,15 @@ def parsehmmsearch(hmmer_out):
             line = fp.readline()
 
     for query_id in match_store:
-        panther_id = match_store[query_id]["panther_id"]
+        panther_id = match_store[query_id]['panther_id']
 
         if panther_id not in matches:
             matches[panther_id] = {}
 
-        if not match_store[query_id]["align"]["hmmstart"]:
+        if not match_store[query_id]['align']['hmmstart']:
             sys.exit(1)
 
-        matches[panther_id][query_id] = match_store[query_id]["align"]
+        matches[panther_id][query_id] = match_store[query_id]['align']
 
     return matches
 
@@ -446,11 +424,9 @@ def parsehmmsearch(hmmer_out):
 def filter_best_domain(matches):
     for panther in matches:
         for query in matches[panther]:
-            while len(matches[panther][query]["domscore"]) > 1:
-                if (
-                    matches[panther][query]["domscore"][0]
-                    > matches[panther][query]["domscore"][1]
-                ):
+
+            while len(matches[panther][query]['domscore']) > 1:
+                if matches[panther][query]['domscore'][0] > matches[panther][query]['domscore'][1]:
                     for key in matches[panther][query]:
                         del matches[panther][query][key][1]
                 else:
@@ -464,20 +440,22 @@ def filter_evalue_cutoff(matches, cutoff):
     for panther in matches:
         for query in dict(matches[panther]):
             # remove queries with e-value greater than the cutoff
-            if float(matches[panther][query]["evalue"][0]) > cutoff:
+            if float(matches[panther][query]['evalue'][0]) > cutoff:
                 del matches[panther][query]
 
     return matches
 
 
 def align_length(pthr, datadir):
-    pthr_fasta_file = os.path.join(datadir, "Tree_MSF", "{}.AN.fasta".format(pthr))
+    pthr_fasta_file = os.path.join(datadir,
+                                   "Tree_MSF",
+                                   "{}.AN.fasta".format(pthr))
 
     with open(pthr_fasta_file, "rt") as f:
-        file = f.read().split(">")
+        file = f.read().split('>')
         first_seq = file[1]
-        first_seq = re.sub(r"\A[^\n]+", "", first_seq)
-        first_seq = re.sub(r"\n", "", first_seq)
+        first_seq = re.sub(r'\A[^\n]+', '', first_seq)
+        first_seq = re.sub(r'\n', '', first_seq)
         seq_length = len(first_seq)
 
     return seq_length
@@ -494,7 +472,7 @@ def prepare(args):
     with open(paintfile, "rt") as fh:
         for i, line in enumerate(fh):
             fam_an_id, annotations, graft_point = line.rstrip().split("\t")
-            fam_id, node_id = fam_an_id.split(":")
+            fam_id, node_id = fam_an_id.split(':')
 
             try:
                 fam = families[fam_id]
@@ -515,11 +493,11 @@ def prepare(args):
                 subfam_id,
                 ",".join(go_terms) if go_terms else None,
                 protein_class,
-                graft_point,
+                graft_point
             ]
 
             if (i + 1) % 100000 == 0:
-                sys.stderr.write("\t{:,} lines processed\n".format(i + 1))
+                sys.stderr.write("\t{:,} lines processed\n".format(i+1))
 
     for fam_id, obj in families.items():
         with open(os.path.join(paintdir, fam_id + ".json"), "wt") as fh:
@@ -546,13 +524,16 @@ def prepare(args):
 
 def run(args):
     if not os.path.isfile(args.fasta):
-        sys.stderr.write("Error: {}: " "no such file.\n".format(args.fasta))
+        sys.stderr.write("Error: {}: "
+                         "no such file.\n".format(args.fasta))
         sys.exit(1)
     elif not os.path.isfile(args.hmmsearch):
-        sys.stderr.write("Error: {}: " "no such file.\n".format(args.hmmsearch))
+        sys.stderr.write("Error: {}: "
+                         "no such file.\n".format(args.hmmsearch))
         sys.exit(1)
     elif not os.path.isdir(args.datadir):
-        sys.stderr.write("Error: {}: " "no such directory.\n".format(args.datadir))
+        sys.stderr.write("Error: {}: "
+                         "no such directory.\n".format(args.datadir))
         sys.exit(1)
 
     matches = parsehmmsearch(args.hmmsearch)
@@ -569,16 +550,14 @@ def run(args):
     else:
         fh = open(args.output, "wt")
 
-    fh.write(
-        "query_id\tpanther_id\tscore\tevalue\tdom_score\tdom_evalue\t"
-        "hmm_start\thmm_end\tali_start\tali_end\tenv_start\tenv_end\t"
-        "node_id\n"
-    )
+    fh.write("query_id\tpanther_id\tscore\tevalue\tdom_score\tdom_evalue\t"
+             "hmm_start\thmm_end\tali_start\tali_end\tenv_start\tenv_end\t"
+             "node_id\n")
 
     try:
-        results = process_matches_epang(
-            matches, args.datadir, tempdir, binary=args.epang, threads=args.threads
-        )
+        results = process_matches_epang(matches, args.datadir, tempdir,
+                                        binary=args.epang,
+                                        threads=args.threads)
 
         for hit in results:
             fh.write("\t".join(map(str, hit)) + "\n")
@@ -591,12 +570,10 @@ def run(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="""\
+    parser = argparse.ArgumentParser(description="""\
 TreeGrafter is a tool for annotating uncharacterized
 protein sequences, using annotated phylogenetic trees.
-    """
-    )
+    """)
 
     subparsers = parser.add_subparsers()
 
@@ -608,32 +585,20 @@ protein sequences, using annotated phylogenetic trees.
     parser_run.add_argument("fasta", help="fasta file")
     parser_run.add_argument("hmmsearch", help="hmmsearch output file")
     parser_run.add_argument("datadir", help="TreeGrafter data directory")
-    parser_run.add_argument(
-        "-e", dest="evalue", type=float, metavar="FLOAT", help="e-value cutoff"
-    )
-    parser_run.add_argument(
-        "-o", dest="output", metavar="FILE", help="write output to FILE", default="-"
-    )
-    parser_run.add_argument(
-        "--epa-ng", dest="epang", help="location of the EPA-ng binary"
-    )
-    parser_run.add_argument(
-        "-t",
-        dest="threads",
-        type=int,
-        default=1,
-        help="number of threads to run EPA-ng with",
-    )
-    parser_run.add_argument(
-        "-T",
-        dest="tempdir",
-        metavar="DIR",
-        help="create temporary files in DIR",
-        default=tempfile.gettempdir(),
-    )
-    parser_run.add_argument(
-        "--keep", action="store_true", help="keep temporary directory"
-    )
+    parser_run.add_argument("-e", dest="evalue", type=float,
+                            metavar="FLOAT", help="e-value cutoff")
+    parser_run.add_argument("-o", dest="output", metavar="FILE",
+                            help="write output to FILE",
+                            default="-")
+    parser_run.add_argument("--epa-ng", dest="epang",
+                            help="location of the EPA-ng binary")
+    parser_run.add_argument("-t", dest="threads", type=int, default=1,
+                            help="number of threads to run EPA-ng with")
+    parser_run.add_argument("-T", dest="tempdir", metavar="DIR",
+                            help="create temporary files in DIR",
+                            default=tempfile.gettempdir())
+    parser_run.add_argument("--keep", action="store_true",
+                            help="keep temporary directory")
     parser_run.set_defaults(func=run)
 
     args = parser.parse_args()
@@ -645,5 +610,5 @@ protein sequences, using annotated phylogenetic trees.
         func(args)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -148,7 +148,6 @@ def draw_graphviz(
     """
     # Deprecated in Biopython 1.70 (#1247)
     import warnings
-
     from Bio import BiopythonDeprecationWarning
 
     warnings.warn(
