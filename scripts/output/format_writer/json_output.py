@@ -142,7 +142,8 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         except KeyError:
                             pass
 
-                matches.append(match)
+                if len(match_data['locations']) > 0:  # skip matches with no locations (we need to make sure it's valid to all members)
+                    matches.append(match)
 
         result = {
             "sequence": sequence,
@@ -150,6 +151,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
             "matches": matches,
             "xref": [xrefs]
         }
+
         results.append(result)
 
     final_data = {"interproscan-version": version, 'results': results}

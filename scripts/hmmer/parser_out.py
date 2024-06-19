@@ -120,8 +120,6 @@ def add_domain_match(domain_match: dict, current_match: dict) -> dict:
     for domain_key, domain_value in domain_match.items():
         cigar_alignment = cigar_alignment_parser(domain_match[domain_key]["alignment"])
         domain_match[domain_key]["cigar_alignment"] = encode(cigar_alignment)
-        if "locations" not in current_match:
-            current_match["locations"] = []
         current_match["locations"].append(domain_match[domain_key])
     return current_match
 
@@ -163,7 +161,8 @@ def get_sequence_match(sequence_match: dict, sequence_line: str, model_id: str, 
             "bias": match.group(3),
             "member_db": member_db,
             "version": version,
-            "model-ac": model_id.split(":")[0].split(".")[0]
+            "model-ac": model_id.split(":")[0].split(".")[0],
+            "locations": []
         }
         sequence_id = match.group(4)
         if sequence_id not in sequence_match:

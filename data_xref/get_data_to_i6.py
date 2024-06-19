@@ -105,6 +105,7 @@ def export_entries_info(ipr_uri: str, output_path: str):
         FROM INTERPRO.FEATURE_METHOD FM
         INNER JOIN INTERPRO.CV_DATABASE D
           ON FM.DBCODE = D.DBCODE
+        WHERE D.DBCODE IN ('a', 'f', 'g', 'j', 'n', 'q', 's', 'v', 'x')
         """
     )
 
