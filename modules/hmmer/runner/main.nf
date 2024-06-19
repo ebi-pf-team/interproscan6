@@ -6,18 +6,20 @@ process HMMER_RUNNER {
         tuple path(fasta), path(hmm), val(switches), val(release), val(alignment), val(postprocessing_params)
     /*
     The post processing of SFLD, FunFam and Gene3D HMMER hits requires the alignment file
-    But only generate alignmnets for these tool to reduce volume size
+    But only generate alignmnets for these tool to reduce volume size.
+    Likewise, for the HMMER table file ).tbl)
     */
 
     output:
         path "${release}_${hmm}.out"
         path "${release}_${hmm}.dtbl"
-        path "${hmm}_alignment"
         val postprocessing_params
+        path "${hmm}_alignment"
+        path "${release}_${hmm}.tbl"
 
     script:
     """
-    hmmsearch ${switches} -o ${release}_${hmm}.out --domtblout ${release}_${hmm}.dtbl ${alignment ? "-A ${hmm}_alignment" : ""} ${hmm} ${fasta}
+    hmmsearch ${switches} -o ${release}_${hmm}.out --tblout "${release}_${hmm}.tbl" --domtblout ${release}_${hmm}.dtbl ${alignment ? "-A ${hmm}_alignment" : ""} ${hmm} ${fasta}
     if [ ! -f ${hmm}_alignment ]; then
         touch ${hmm}_alignment
     fi
@@ -55,7 +57,6 @@ process FUNFAM_HMMER_RUNNER {
     output:
         path "${release}_funfam_${cath_superfamily}.out"
         path "${release}_funfam_${cath_superfamily}.dtbl"
-        path "${hmm}_alignment"
         val postprocessing_params
 
     script:
@@ -66,8 +67,6 @@ process FUNFAM_HMMER_RUNNER {
         --domtblout ${postprocessing_params[6]}_funfam_${cath_superfamily}.dtbl \\
         "${postprocessing_params[4]}${cath_superfamily.replace('.', '/')}.hmm" \\
         ${fasta}
-
-    touch ${hmm}_alignment
     """
 
 }

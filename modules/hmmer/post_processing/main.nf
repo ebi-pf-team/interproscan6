@@ -10,21 +10,16 @@ process CATH_RESEOLVE_HITS {
     label 'analysis_parser'
 
     input:
-        path ips6_json
         path out_file
-        path out_dtbl
         val postprocessing_params  // [0] evalue [1] control factor
-        path alignment
 
     output:
-        path ips6_json
         path "${out_file}.cath.resolved.out"
         val postprocessing_params
 
     // cath_resolve_hits is a third party tool used to minimise suprious hits
     script:
     """
-    rm -f ${alignment}
     /cath-tools/cath-resolve-hits \\
         ${out_file} \\
         --input-for hmmsearch_out \\
@@ -37,7 +32,6 @@ process ADD_CATH_SUPERFAMILIES {
     label 'analysis_parser'
 
     input:
-        path ips6_json
         path cath_resolve_out
         val postprocessing_params
     /*
@@ -49,7 +43,6 @@ process ADD_CATH_SUPERFAMILIES {
     */
 
     output:
-        path ips6_json
         path "${cath_resolve_out}.cath_superfamilies"
 
     script:
@@ -58,6 +51,31 @@ process ADD_CATH_SUPERFAMILIES {
         ${postprocessing_params[1]} \\
         ${postprocessing_params[2]} \\
         ${cath_resolve_out} "${cath_resolve_out}.cath_superfamilies"
+    """
+}
+
+
+process HAMAP_POST_PROCESSER {
+    label 'analysis_parser'
+
+    input:
+        path fasta
+        path dtbl
+        val postprocessing_params
+    
+    output:
+        "hamap_pfsearch_output"
+
+    /*
+    profiles_list_filename -- hmmer dtbl file
+    fasta_file -- input fasta
+    fasta_filtered_file -- output fasta file
+    output_file -- another output file
+    model_dir -- path to dir containing hamap profiles for pfsearch
+    */
+    script:
+    """
+    python3 ${postprocessing_params[0]} ${dtbl} ${fasta} "seqs_with_hits.faa" "hamap_pfsearch_output" ${postprocessing_params[1]} ${postprocessing_params[2]}
     """
 }
 

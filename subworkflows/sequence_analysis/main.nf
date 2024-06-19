@@ -24,6 +24,7 @@ include {
     ADD_CATH_SUPERFAMILIES as FUNFAM_ADD_CATH_SUPERFAMILIES;  // used for gene3D and Funfam
     CATH_RESEOLVE_HITS as GENE3D_CATH_RESEOLVE_HITS;
     ADD_CATH_SUPERFAMILIES as GENE3D_ADD_CATH_SUPERFAMILIES;
+    HAMAP_POST_PROCESSER;
     PANTHER_POST_PROCESSER;
     SFLD_POST_PROCESSER
 } from "$projectDir/modules/hmmer/post_processing/main"
@@ -104,7 +105,11 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".switches,
                 params.members."${member}".release,
                 false,  // retrieving site data
-                []  // post-processing params
+                [
+                    params.members."${member}".postprocess.bin,
+                    params.members."${member}".postprocess.models,
+                    params.members."${member}".postprocess.pfsearchv3_switches,
+                ]
             ]
 
         panther: runner == 'panther'
@@ -169,7 +174,31 @@ workflow SEQUENCE_ANALYSIS {
     // AntiFam and NCBIfam
     runner_hmmer_params = fasta.combine(member_params.hmmer)
     GENERIC_HMMER_RUNNER(runner_hmmer_params)
-    GENERIC_HMMER_PARSER(GENERIC_HMMER_RUNNER.out, tsv_pro, "antifam")
+    GENERIC_HMMER_PARSER(
+        GENERIC_HMMER_RUNNER.out[0],  // .out
+        GENERIC_HMMER_RUNNER.out[1],  // .dtbl
+        GENERIC_HMMER_RUNNER.out[2],  // post-processing-params
+        tsv_pro,
+        "false"
+    )
+
+    // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
+    // These also run for FunFam as Gene3D must be run before FunFam
+    runner_gene3d_params = fasta.combine(member_params.gene3d_funfam)
+    GENE3D_HMMER_RUNNER(runner_gene3d_params)
+    GENE3D_HMMER_PARSER(
+        GENE3D_HMMER_RUNNER.out[0],  // .out
+        GENE3D_HMMER_RUNNER.out[1],  // .dtbl
+        GENE3D_HMMER_RUNNER.out[2],  // post-processing-params
+        tsv_pro,
+        "false"
+    )
+    GENE3D_CATH_RESEOLVE_HITS(
+        GENE3D_HMMER_RUNNER.out[0],  // .out
+        GENE3D_HMMER_RUNNER.out[2],  // post-processing-params
+    )
+    GENE3D_ADD_CATH_SUPERFAMILIES(GENE3D_CATH_RESEOLVE_HITS.out)
+    GENE3D_FILTER_MATCHES(GENE3D_ADD_CATH_SUPERFAMILIES.out, GENE3D_HMMER_PARSER.out)
 
     // FunFam (+ gene3D + cath-resolve-hits + assing-cath-superfamilies)
     // split into a channel so Nextflow can automatically manage the parallel execution of HmmSearch
@@ -180,35 +209,27 @@ workflow SEQUENCE_ANALYSIS {
     runner_funfam_params_with_cath = runner_funfam_params.combine(funfam_cath_superfamilies)
 
     FUNFAM_HMMER_RUNNER(runner_funfam_params_with_cath, applications)
-    FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out, tsv_pro, "funfam")
+    FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out, tsv_pro, "false")
     FUNFAM_CATH_RESEOLVE_HITS(FUNFAM_HMMER_PARSER.out)
     FUNFAM_FILTER_MATCHES(FUNFAM_CATH_RESEOLVE_HITS.out)
-
-    // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
-    // These also run for FunFam as Gene3D must be run before FunFam
-    runner_gene3d_params = fasta.combine(member_params.gene3d_funfam)
-    GENE3D_HMMER_RUNNER(runner_gene3d_params)
-    GENE3D_HMMER_PARSER(GENE3D_HMMER_RUNNER.out, tsv_pro, "gene3d")
-    GENE3D_CATH_RESEOLVE_HITS(GENE3D_HMMER_PARSER.out)
-    GENE3D_ADD_CATH_SUPERFAMILIES(GENE3D_CATH_RESEOLVE_HITS.out)
-    GENE3D_FILTER_MATCHES(GENE3D_ADD_CATH_SUPERFAMILIES.out)
 
     // HAMAP (+ pfsearch_wrapper.py)
     runner_hamap_params = fasta.combine(member_params.hamap)
     HAMAP_HMMER_RUNNER(runner_hamap_params)
-    HAMAP_HMMER_PARSER(HAMAP_HMMER_RUNNER.out, tsv_pro, "hamap")
+    HAMAP_HMMER_PARSER(HAMAP_HMMER_RUNNER.out, tsv_pro, "false")
+    HAMAP_POST_PROCESSER(fasta, HAMAP_HMMER_RUNNER.out[1], HAMAP_HMMER_RUNNER.out[3])
 
     // Panther (+ treegrafter + epa-ng)
     runner_panther_params = fasta.combine(member_params.panther)
     PANTHER_HMMER_RUNNER(runner_panther_params)
-    PANTHER_HMMER_PARSER(PANTHER_HMMER_RUNNER.out, tsv_pro, "panther")
+    PANTHER_HMMER_PARSER(PANTHER_HMMER_RUNNER.out, tsv_pro, "false")
     PANTHER_POST_PROCESSER(PANTHER_HMMER_PARSER.out, fasta)
     PANTHER_FILTER_MATCHES(PANTHER_POST_PROCESSER.out)
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_sfld_params)
-    SFLD_HMMER_PARSER(SFLD_HMMER_RUNNER.out, tsv_pro, "sfld")
+    SFLD_HMMER_PARSER(SFLD_HMMER_RUNNER.out, tsv_pro, "true")
     SFLD_POST_PROCESSER(SFLD_HMMER_PARSER.out, tsv_pro)
     SFLD_FILTER_MATCHES(SFLD_POST_PROCESSER.out)
 
