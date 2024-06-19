@@ -3,7 +3,7 @@ import json
 import stockholm_parser
 
 
-def postprocess(hmm_matches, model2clans):
+def post_process(hmm_matches, model2clans):
     with open(hmm_matches, "r") as matches:
         matches_info = json.load(matches)
 
@@ -67,68 +67,61 @@ def build_fragments(filtered_matches, dat_parsed, min_length):
             location_fragments = []
             for info_raw in filtered_matches:
                 protein_id, domain_id, raw_match = info_raw
-                if (raw_match['accession'] in nested_models) and _matches_overlap(raw_match["locations"][0],
-                                                                                  pfam_match["locations"][0]):
-                    location_fragments.append({
-                        'start': raw_match["locations"][0]['start'],
-                        'end': raw_match["locations"][0]['end']
-                    })
+                for location in raw_match["locations"]:
+                    if (raw_match['accession'] in nested_models) and _matches_overlap(location, pfam_match["locations"][0]):
+                        location_fragments.append({
+                            'start': location['start'],
+                            'end': location['end']
+                        })
 
             location_fragments.sort(key=lambda x: (x['start'], x['end']))
             fragment_dc_status = "CONTINUOUS"
             raw_discontinuous_matches = [pfam_match]
-
             for fragment in location_fragments:
-                new_matches_from_fragment = []
-                for raw_discontinuous_match in raw_discontinuous_matches:
-                    new_location_start = raw_discontinuous_match["locations"][0]['start']
-                    new_location_end = raw_discontinuous_match["locations"][0]['end']
-                    final_location_end = raw_discontinuous_match["locations"][0]['end']
+                new_location_start = int(raw_discontinuous_matches[0]["locations"][0]['start'])
+                new_location_end = int(raw_discontinuous_matches[0]["locations"][0]['end'])
+                final_location_end = int(raw_discontinuous_matches[0]["locations"][0]['end'])
 
-                    if not _regions_overlap(new_location_start, new_location_end, fragment['start'], fragment['end']):
-                        new_matches_from_fragment.append(raw_discontinuous_match)
-                        continue
+                if not _regions_overlap(new_location_start, new_location_end, int(fragment['start']), int(fragment['end'])):
+                    continue
+                elif int(fragment['start']) <= new_location_start and int(fragment['end']) >= new_location_end:
+                    fragment_dc_status = "NC_TERMINAL_DISC"
+                elif fragment_dc_status == "CONTINUOUS":
+                    fragment_dc_status = None
 
-                    if fragment['start'] <= new_location_start and fragment['end'] >= new_location_end:
-                        fragment_dc_status = "NC_TERMINAL_DISC"
-                        raw_discontinuous_match['loc_fragment_dc_status'] = fragment_dc_status
-                        new_matches_from_fragment.append(raw_discontinuous_match)
-                        continue
+                two_actual_regions = False
+                if int(fragment['start']) <= new_location_start:
+                    new_location_start = int(int(fragment['end'])) + 1
+                    fragment_dc_status = "N_TERMINAL_DISC"
+                elif int(fragment['end']) >= new_location_end:
+                    new_location_end = int(int(fragment['start'])) - 1
+                    fragment_dc_status = "C_TERMINAL_DISC"
+                elif int(fragment['start']) > new_location_start and int(fragment['end']) < new_location_end:
+                    new_location_end = int(int(fragment['start'])) - 1
+                    two_actual_regions = True
+                    fragment_dc_status = "C_TERMINAL_DISC"
 
-                    if fragment_dc_status == "CONTINUOUS":
-                        fragment_dc_status = None
+                if 'location-fragments' not in raw_discontinuous_matches[0]:
+                    raw_discontinuous_matches[0]['location-fragments'] = []
 
-                    two_actual_regions = False
-                    if fragment['start'] <= new_location_start:
-                        new_location_start = int(fragment['end']) + 1
-                        fragment_dc_status = "N_TERMINAL_DISC"
-                    elif fragment['end'] >= new_location_end:
-                        new_location_end = int(fragment['start']) - 1
-                        fragment_dc_status = "C_TERMINAL_DISC"
-                    elif fragment['start'] > new_location_start and fragment['end'] < new_location_end:
-                        new_location_end = int(fragment['start']) - 1
-                        two_actual_regions = True
-                        fragment_dc_status = "C_TERMINAL_DISC"
+                new_match_region_one = {
+                    'start': new_location_start,
+                    'end': new_location_end,
+                    'dc-status': fragment_dc_status
+                }
+                raw_discontinuous_matches[0]['location-fragments'].append(new_match_region_one)
 
-                    new_match_region_one = raw_discontinuous_match.copy()
-                    new_match_region_one['start'] = new_location_start
-                    new_match_region_one['end'] = new_location_end
-                    new_match_region_one['dc_status'] = fragment_dc_status
-                    new_matches_from_fragment.append(new_match_region_one)
-
-                    if two_actual_regions:
-                        new_location_start = int(fragment['end']) + 1
-                        new_match_region_two = raw_discontinuous_match.copy()
-                        new_match_region_two['start'] = new_location_start
-                        new_match_region_two['end'] = final_location_end
-                        new_match_region_two['dc_status'] = "N_TERMINAL_DISC"
-                        new_matches_from_fragment.append(new_match_region_two)
-
-                raw_discontinuous_matches = new_matches_from_fragment
+                if two_actual_regions:
+                    new_location_start = int(int(fragment['end'])) + 1
+                    new_match_region_two = {
+                        'start': new_location_start,
+                        'end': final_location_end,
+                        'dc-status': "N_TERMINAL_DISC"
+                    }
+                    raw_discontinuous_matches[0]['location-fragments'].append(new_match_region_two)
 
             for raw_discontinuous_match in raw_discontinuous_matches:
-                match_length = int(raw_discontinuous_match["locations"][0]['end']) - int(
-                    raw_discontinuous_match["locations"][0]['start']) + 1
+                match_length = int(raw_discontinuous_match["locations"][0]['end']) - int(raw_discontinuous_match["locations"][0]['start']) + 1
                 if match_length >= min_length:
                     processed_matches.append(raw_discontinuous_match)
         else:
@@ -140,7 +133,6 @@ def build_fragments(filtered_matches, dat_parsed, min_length):
 
 
 def _matches_overlap(one, two) -> bool:
-    print(one, two)
     return max(one['start'], two['start']) <= min(one['end'], two['end'])
 
 
@@ -161,7 +153,6 @@ def build_result(filtered_matches):
             result[protein_id] = {}
         result[protein_id][domain_id] = domain_details
     return result
-
 
 
 def main():
@@ -188,7 +179,7 @@ def main():
     clans = stockholm_parser.get_clans(seed, clans)
     dat_parsed = stockholm_parser.get_pfam_a_dat(dat)
 
-    filtered_matches = postprocess(hmm_parsed, clans)
+    filtered_matches = post_process(hmm_parsed, clans)
     filtered_fragments = build_fragments(filtered_matches, dat_parsed, min_length)
     print(json.dumps(filtered_fragments, indent=4))
     # result = build_result(filtered_fragments)
