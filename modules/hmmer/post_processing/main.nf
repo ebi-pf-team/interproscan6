@@ -64,7 +64,7 @@ process HAMAP_POST_PROCESSER {
         val postprocessing_params
     
     output:
-        "hamap_pfsearch_output"
+        path "hamap_pfsearch_output"
 
     /*
     profiles_list_filename -- hmmer dtbl file
