@@ -110,7 +110,6 @@ workflow SEQUENCE_ANALYSIS {
                 false,  // don't build an alignment file
                 true,    // build a hmmer.tbl file
                 [
-                    params.members."${member}".postprocess.bin,
                     params.members."${member}".postprocess.models,
                     params.members."${member}".postprocess.pfsearchv3_switches,
                 ]
@@ -232,11 +231,7 @@ workflow SEQUENCE_ANALYSIS {
         tsv_pro,
         "false"
     )
-    hamap_post_process_params = fasta.combine([
-        HAMAP_HMMER_RUNNER.out[4],  // .tbl
-        HAMAP_HMMER_RUNNER.out[2]   // post-processing-params
-    ])
-    HAMAP_POST_PROCESSER(hamap_post_process_params)
+    HAMAP_POST_PROCESSER(fasta, HAMAP_HMMER_RUNNER.out[4], HAMAP_HMMER_RUNNER.out[2])
     // HAMAP_FILTER_MATCHES(
     //     HAMAP_HMMER_PARSER.out,    // internal IPS6 JSON
     //     HAMAP_POST_PROCESSER.out   // output from pfsearch_wrapper.py

@@ -59,13 +59,15 @@ process HAMAP_POST_PROCESSER {
     label 'analysis_parser'
 
     input:
-        tuple path(fasta), path(dtbl), val(postprocessing_params)
+        path fasta
+        path tlb
+        val postprocessing_params
     
     output:
         path "hamap_pfsearch_output"
 
     /*
-    profiles_list_filename -- hmmer dtbl file
+    profiles_list_filename -- hmmer tlb file
     fasta_file -- input fasta
     fasta_filtered_file -- output fasta file
     output_file -- another output file
@@ -73,7 +75,7 @@ process HAMAP_POST_PROCESSER {
     */
     script:
     """
-    python3 ${postprocessing_params[0]} ${dtbl} ${fasta} "seqs_with_hits.faa" "hamap_pfsearch_output" ${postprocessing_params[1]} ${postprocessing_params[2]}
+    python3 $projectDir/scripts/members/hamap/pfsearch_wrapper.py ${tlb} ${fasta} "seqs_with_hits.faa" "hamap_pfsearch_output" ${postprocessing_params[0]} ${postprocessing_params[1]}
     """
 }
 

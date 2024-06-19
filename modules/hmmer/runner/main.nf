@@ -14,12 +14,18 @@ process HMMER_RUNNER {
         path "${release}_${hmm}.out"
         path "${release}_${hmm}.dtbl"
         val postprocessing_params
-        path "${hmm}_alignment", optional: true
-        path "${release}_${hmm}.tbl", optional: true
+        path "${hmm}_alignment"
+        path "${release}_${hmm}_table.tbl"
 
     script:
     """
     hmmsearch ${switches} -o ${release}_${hmm}.out --domtblout ${release}_${hmm}.dtbl ${build_alignment ? "-A ${hmm}_alignment" : ""} ${build_table ? "--tblout ${release}_${hmm}_table.tbl" : ""} ${hmm} ${fasta}
+    if [ ! -f ${hmm}_alignment ]; then
+        touch ${hmm}_alignment
+    fi
+    if [ ! -f ${release}_${hmm}_table.tbl ]; then
+        touch ${release}_${hmm}_table.tbl
+    fi
     """
 }
 
