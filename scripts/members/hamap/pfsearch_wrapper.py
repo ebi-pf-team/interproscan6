@@ -15,32 +15,32 @@ from tempfile import NamedTemporaryFile
 
 #reformat pfsearch alignment output to appear on one line
 def clean_output(lines):
-  line_list = iter(lines.splitlines())
-  formatted_lines  = ''
+    line_list = iter(lines.splitlines())
+    formatted_lines  = ''
 
-  for line in line_list:
-    if not line.strip():
-      continue
-    if 'match_nb' in line:
-      line = re.sub('match_nb=\S+\s+match_type=\S+\s+', '', line)
-      if 'match_nb' in line:
-        #print 'regex failed ... ', line
-        line = re.sub('match_nb=\S+\s+', '', line)
-        line = re.sub('match_type=\S+\s+', '', line)
-        #print 'regex may hav failed, print line again: ', line
-	#else print 'regex worked ... ', line
-    if formatted_lines and len(line) > 0 and line[0] == '>':
-      formatted_lines += '\n'
-      formatted_lines += line
+    for line in line_list:
+        if not line.strip():
+            continue
+        if 'match_nb' in line:
+            line = re.sub('match_nb=\S+\s+match_type=\S+\s+', '', line)
+        if 'match_nb' in line:
+            #print 'regex failed ... ', line
+            line = re.sub('match_nb=\S+\s+', '', line)
+            line = re.sub('match_type=\S+\s+', '', line)
+            #print 'regex may hav failed, print line again: ', line
+        #else print 'regex worked ... ', line
+        if formatted_lines and len(line) > 0 and line[0] == '>':
+            formatted_lines += '\n'
+            formatted_lines += line
+        else:
+            formatted_lines += line
+    #print formatted_lines
+    if not formatted_lines.strip():
+        formatted_lines = ''
     else:
-      formatted_lines += line
-  #print formatted_lines
-  if not formatted_lines.strip():
-    formatted_lines = ''
-  else:
-    formatted_lines += '\n'
-  #print formatted_lines
-  return formatted_lines
+        formatted_lines += '\n'
+    #print formatted_lines
+    return formatted_lines
 
 ##get the hamap profiles from the
 def get_hamap_profile(profiles_list_filename):
@@ -59,7 +59,7 @@ def get_hamap_profile(profiles_list_filename):
                 hit_line = ''
                 if m:
                     seq_id = m.group(1)
-                    profile = m.group(3)
+                    profile = m.group(4)  # change to 3 to parse .tbl file not .dtbl
                     profile_path = model_dir + '/' + profile + ".prf"
                     #print line
                     hit_line = 'ok - ' + line
