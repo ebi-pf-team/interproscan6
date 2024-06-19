@@ -29,8 +29,9 @@ include {
     SFLD_POST_PROCESSER
 } from "$projectDir/modules/hmmer/post_processing/main"
 include {
-    GENE3D_FILTER_MATCHES;
     FUNFAM_FILTER_MATCHES;
+    GENE3D_FILTER_MATCHES;
+    HAMAP_FILTER_MATCHES;
     PANTHER_FILTER_MATCHES;
     SFLD_FILTER_MATCHES;
 } from "$projectDir/modules/hmmer/filter/main"
@@ -73,7 +74,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                false,  // not retrieving site data
                 []  // no post-processing params
             ]
 
@@ -87,7 +87,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."gene3d".hmm,
                 params.members."gene3d".switches,
                 params.members."gene3d".release,
-                false,  // retrieve site data
                 [
                     params.members."gene3d".postprocess.cath_resolve_hits_switches,
                     params.members."gene3d".postprocess.model2sf_map,
@@ -104,7 +103,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                false,  // retrieving site data
                 [
                     params.members."${member}".postprocess.bin,
                     params.members."${member}".postprocess.models,
@@ -117,7 +115,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                false,  // retrieving site data
                 [
                     params.members."${member}".postprocess.data_dir,
                     params.members."${member}".postprocess.evalue,
@@ -130,7 +127,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                true,  // retrieving site data
                 [
                     params.members."${member}".postprocess.bin,
                     params.members."${member}".postprocess.sites_annotation,
@@ -210,14 +206,31 @@ workflow SEQUENCE_ANALYSIS {
 
     FUNFAM_HMMER_RUNNER(runner_funfam_params_with_cath, applications)
     FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out, tsv_pro, "false")
-    FUNFAM_CATH_RESEOLVE_HITS(FUNFAM_HMMER_RUNNER.out[0], FUNFAM_HMMER_RUNNER.out[2])
+    FUNFAM_CATH_RESEOLVE_HITS(
+        FUNFAM_HMMER_RUNNER.out[0],  // .out
+        FUNFAM_HMMER_RUNNER.out[2]   // post-processing-params
+    )
     FUNFAM_FILTER_MATCHES(FUNFAM_HMMER_PARSER.out, FUNFAM_CATH_RESEOLVE_HITS.out)
 
     // HAMAP (+ pfsearch_wrapper.py)
     runner_hamap_params = fasta.combine(member_params.hamap)
     HAMAP_HMMER_RUNNER(runner_hamap_params)
-    HAMAP_HMMER_PARSER(HAMAP_HMMER_RUNNER.out, tsv_pro, "false")
-    HAMAP_POST_PROCESSER(fasta, HAMAP_HMMER_RUNNER.out[1], HAMAP_HMMER_RUNNER.out[3])
+    HAMAP_HMMER_PARSER(
+        HAMAP_HMMER_RUNNER.out[0],  // .out
+        HAMAP_HMMER_RUNNER.out[1],  // .dtbl
+        HAMAP_HMMER_RUNNER.out[2],  // post-processing-params
+        tsv_pro,
+        "false"
+    )
+    HAMAP_POST_PROCESSER(
+        fasta,
+        HAMAP_HMMER_RUNNER.out[4],  // .tbl
+        HAMAP_HMMER_RUNNER.out[2]   // post-processing-params
+    )
+    HAMAP_FILTER_MATCHES(
+        HAMAP_HMMER_PARSER.out,    // internal IPS6 JSON
+        HAMAP_POST_PROCESSER.out   // output from pfsearch_wrapper.py
+    )
 
     // Panther (+ treegrafter + epa-ng)
     runner_panther_params = fasta.combine(member_params.panther)
@@ -225,17 +238,17 @@ workflow SEQUENCE_ANALYSIS {
     PANTHER_HMMER_PARSER(
         PANTHER_HMMER_RUNNER.out[0],  // .out
         PANTHER_HMMER_RUNNER.out[1],  // .dtbl
-        PANTHER_HMMER_RUNNER.out[2],  // .post-processing-params
+        PANTHER_HMMER_RUNNER.out[2],  // post-processing-params
         tsv_pro,
         "false"
     )
     PANTHER_POST_PROCESSER(
-        PANTHER_HMMER_PARSER.out,  // .out
-        PANTHER_HMMER_RUNNER.out[2],  // .post-processing-params
+        PANTHER_HMMER_PARSER.out,     // .out
+        PANTHER_HMMER_RUNNER.out[2],  // post-processing-params
         fasta
     )
     PANTHER_FILTER_MATCHES(
-        PANTHER_HMMER_PARSER.out,  // internal ips6 json
+        PANTHER_HMMER_PARSER.out,   // internal ips6 json
         PANTHER_POST_PROCESSER.out  // treegrafter output + post-processing params
     )
 
