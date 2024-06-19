@@ -85,15 +85,11 @@ process PANTHER_POST_PROCESSER {
     label 'analysis_parser'
 
     input:
-        path ips6_json
         path out_file
-        path out_dtbl
         val postprocessing_params // contains [0] bin and [1] site_annotations file path
-        val tsv_pro
         path fasta
 
     output:
-        path ips6_json
         path "treegrafter_processed_panther_hits"
         val postprocessing_params
 
@@ -132,7 +128,6 @@ process SFLD_POST_PROCESSER {
     label 'analysis_parser'
 
     input:
-        path ips6_json
         path out_file
         path out_dtbl
         val postprocessing_params // contains [0] bin and [1] site_annotations file path
@@ -140,7 +135,6 @@ process SFLD_POST_PROCESSER {
         val tsv_pro
 
     output:
-        path ips6_json
         path "${tsv_pro ? "${out_file}.processed.out" : "${out_dtbl}.processed.dtbl"}"
         val postprocessing_params
 

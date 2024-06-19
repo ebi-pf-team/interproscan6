@@ -210,8 +210,8 @@ workflow SEQUENCE_ANALYSIS {
 
     FUNFAM_HMMER_RUNNER(runner_funfam_params_with_cath, applications)
     FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out, tsv_pro, "false")
-    FUNFAM_CATH_RESEOLVE_HITS(FUNFAM_HMMER_PARSER.out)
-    FUNFAM_FILTER_MATCHES(FUNFAM_CATH_RESEOLVE_HITS.out)
+    FUNFAM_CATH_RESEOLVE_HITS(FUNFAM_HMMER_RUNNER.out[0], FUNFAM_HMMER_RUNNER.out[2])
+    FUNFAM_FILTER_MATCHES(FUNFAM_HMMER_PARSER.out, FUNFAM_CATH_RESEOLVE_HITS.out)
 
     // HAMAP (+ pfsearch_wrapper.py)
     runner_hamap_params = fasta.combine(member_params.hamap)
@@ -222,16 +222,41 @@ workflow SEQUENCE_ANALYSIS {
     // Panther (+ treegrafter + epa-ng)
     runner_panther_params = fasta.combine(member_params.panther)
     PANTHER_HMMER_RUNNER(runner_panther_params)
-    PANTHER_HMMER_PARSER(PANTHER_HMMER_RUNNER.out, tsv_pro, "false")
-    PANTHER_POST_PROCESSER(PANTHER_HMMER_PARSER.out, fasta)
-    PANTHER_FILTER_MATCHES(PANTHER_POST_PROCESSER.out)
+    PANTHER_HMMER_PARSER(
+        PANTHER_HMMER_RUNNER.out[0],  // .out
+        PANTHER_HMMER_RUNNER.out[1],  // .dtbl
+        PANTHER_HMMER_RUNNER.out[2],  // .post-processing-params
+        tsv_pro,
+        "false"
+    )
+    PANTHER_POST_PROCESSER(
+        PANTHER_HMMER_PARSER.out,  // .out
+        PANTHER_HMMER_RUNNER.out[2],  // .post-processing-params
+        fasta
+    )
+    PANTHER_FILTER_MATCHES(
+        PANTHER_HMMER_PARSER.out,  // internal ips6 json
+        PANTHER_POST_PROCESSER.out  // treegrafter output + post-processing params
+    )
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_sfld_params)
-    SFLD_HMMER_PARSER(SFLD_HMMER_RUNNER.out, tsv_pro, "true")
-    SFLD_POST_PROCESSER(SFLD_HMMER_PARSER.out, tsv_pro)
-    SFLD_FILTER_MATCHES(SFLD_POST_PROCESSER.out)
+    SFLD_HMMER_PARSER(
+        SFLD_HMMER_RUNNER.out[0],  // .out
+        SFLD_HMMER_RUNNER.out[1],  // .dtbl
+        SFLD_HMMER_RUNNER.out[2],  // post-processing-params
+        tsv_pro,
+        "true"
+    )
+    SFLD_POST_PROCESSER(
+        SFLD_HMMER_RUNNER.out[0],  // .out
+        SFLD_HMMER_RUNNER.out[1],  // .dtbl
+        SFLD_HMMER_RUNNER.out[2],  // post-processing-params
+        SFLD_HMMER_RUNNER.out[3],  // alignment file
+        tsv_pro,
+    )
+    SFLD_FILTER_MATCHES(SFLD_HMMER_PARSER.out, SFLD_POST_PROCESSER.out)
 
     /*
     Member databases that do NOT use HMMER
