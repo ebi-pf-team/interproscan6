@@ -3,7 +3,7 @@ process HMMER_RUNNER {
     label 'hmmer_runner'
 
     input:
-        tuple path(fasta), path(hmm), val(switches), val(release), val(postprocessing_params), val(build_alignment), val(build_table)
+        tuple path(fasta), path(hmm), val(switches), val(release), val(build_alignment), val(build_table), val(postprocessing_params)
     /*
     The post processing of SFLD, FunFam and Gene3D HMMER hits requires the alignment file
     But only generate alignmnets for these tool to reduce volume size.
@@ -41,7 +41,7 @@ process FUNFAM_HMMER_RUNNER {
         "${applications}".contains('funfam')
 
     input:
-        tuple path(fasta), path(hmm), val(switches), val(release), val(alignment), val(postprocessing_params), val(cath_superfamily)
+        tuple path(fasta), path(hmm), val(switches), val(release), val(build_alignment), val(build_table), val(postprocessing_params), val(cath_superfamily)
         val applications
 
     /*

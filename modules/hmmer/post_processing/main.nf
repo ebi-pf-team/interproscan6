@@ -59,9 +59,7 @@ process HAMAP_POST_PROCESSER {
     label 'analysis_parser'
 
     input:
-        path fasta
-        path dtbl
-        val postprocessing_params
+        tuple path(fasta), path(dtbl), val(postprocessing_params)
     
     output:
         path "hamap_pfsearch_output"

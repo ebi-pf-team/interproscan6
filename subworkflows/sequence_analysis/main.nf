@@ -74,6 +74,8 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
+                false,  // don't build an alignment file
+                false,   // don't build a hmmer.tbl file 
                 []  // no post-processing params
             ]
 
@@ -87,6 +89,8 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."gene3d".hmm,
                 params.members."gene3d".switches,
                 params.members."gene3d".release,
+                true,   // build an alignment file
+                false,   // don't build a hmmer.tbl file
                 [
                     params.members."gene3d".postprocess.cath_resolve_hits_switches,
                     params.members."gene3d".postprocess.model2sf_map,
@@ -103,6 +107,8 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
+                false,  // don't build an alignment file
+                true,    // build a hmmer.tbl file
                 [
                     params.members."${member}".postprocess.bin,
                     params.members."${member}".postprocess.models,
@@ -115,6 +121,8 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
+                false,  // don't build an alignment file
+                false,   // don't build a hmmer.tbl file
                 [
                     params.members."${member}".postprocess.data_dir,
                     params.members."${member}".postprocess.evalue,
@@ -127,6 +135,8 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
+                true,  // build an alignment file
+                false,  // don't build a hmmer.tbl file
                 [
                     params.members."${member}".postprocess.bin,
                     params.members."${member}".postprocess.sites_annotation,
@@ -169,11 +179,7 @@ workflow SEQUENCE_ANALYSIS {
 
     // AntiFam and NCBIfam
     runner_hmmer_params = fasta.combine(member_params.hmmer)
-    GENERIC_HMMER_RUNNER(
-        runner_hmmer_params,
-        false,  // don't build an alignment file
-        false   // don't build a hmmer.tbl file 
-    )
+    GENERIC_HMMER_RUNNER(runner_hmmer_params)
     GENERIC_HMMER_PARSER(
         GENERIC_HMMER_RUNNER.out[0],  // .out
         GENERIC_HMMER_RUNNER.out[1],  // .dtbl
@@ -185,11 +191,7 @@ workflow SEQUENCE_ANALYSIS {
     // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
     // These also run for FunFam as Gene3D must be run before FunFam
     runner_gene3d_params = fasta.combine(member_params.gene3d_funfam)
-    GENE3D_HMMER_RUNNER(
-        runner_gene3d_params,
-        true,   // build an alignment file
-        false   // don't build a hmmer.tbl file
-    )
+    GENE3D_HMMER_RUNNER(runner_gene3d_params)
     GENE3D_HMMER_PARSER(
         GENE3D_HMMER_RUNNER.out[0],  // .out
         GENE3D_HMMER_RUNNER.out[1],  // .dtbl
@@ -222,11 +224,7 @@ workflow SEQUENCE_ANALYSIS {
 
     // HAMAP (+ pfsearch_wrapper.py)
     runner_hamap_params = fasta.combine(member_params.hamap)
-    HAMAP_HMMER_RUNNER(
-        runner_hamap_params,
-        false,  // don't build an alignment file
-        true    // build a hmmer.tbl file
-    )
+    HAMAP_HMMER_RUNNER(runner_hamap_params)
     HAMAP_HMMER_PARSER(
         HAMAP_HMMER_RUNNER.out[0],  // .out
         HAMAP_HMMER_RUNNER.out[1],  // .dtbl
@@ -234,22 +232,19 @@ workflow SEQUENCE_ANALYSIS {
         tsv_pro,
         "false"
     )
-    HAMAP_POST_PROCESSER(
-        fasta,
+    hamap_post_process_params = fasta.combine([
         HAMAP_HMMER_RUNNER.out[4],  // .tbl
         HAMAP_HMMER_RUNNER.out[2]   // post-processing-params
-    )
-    HAMAP_FILTER_MATCHES(
-        HAMAP_HMMER_PARSER.out,    // internal IPS6 JSON
-        HAMAP_POST_PROCESSER.out   // output from pfsearch_wrapper.py
-    )
+    ])
+    HAMAP_POST_PROCESSER(hamap_post_process_params)
+    // HAMAP_FILTER_MATCHES(
+    //     HAMAP_HMMER_PARSER.out,    // internal IPS6 JSON
+    //     HAMAP_POST_PROCESSER.out   // output from pfsearch_wrapper.py
+    // )
 
     // Panther (+ treegrafter + epa-ng)
     runner_panther_params = fasta.combine(member_params.panther)
-    PANTHER_HMMER_RUNNER(runner_panther_params,
-        false,  // don't build an alignment file
-        false   // don't build a hmmer.tbl file
-    )
+    PANTHER_HMMER_RUNNER(runner_panther_params)
     PANTHER_HMMER_PARSER(
         PANTHER_HMMER_RUNNER.out[0],  // .out
         PANTHER_HMMER_RUNNER.out[1],  // .dtbl
@@ -269,11 +264,7 @@ workflow SEQUENCE_ANALYSIS {
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
-    SFLD_HMMER_RUNNER(
-        runner_sfld_params,
-        true,  // build an alignment file
-        false  // don't build a hmmer.tbl file
-    )
+    SFLD_HMMER_RUNNER(runner_sfld_params)
     SFLD_HMMER_PARSER(
         SFLD_HMMER_RUNNER.out[0],  // .out
         SFLD_HMMER_RUNNER.out[1],  // .dtbl
