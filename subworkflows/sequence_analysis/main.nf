@@ -7,6 +7,7 @@ include {
     FUNFAM_HMMER_RUNNER;
     HMMER_RUNNER as GENERIC_HMMER_RUNNER;
     HMMER_RUNNER as GENE3D_HMMER_RUNNER;
+    HMMER_RUNNER as HAMAP_HMMER_RUNNER;
     HMMER_RUNNER as SFLD_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
 } from "$projectDir/modules/hmmer/runner/main"
@@ -14,6 +15,7 @@ include {
     HMMER_PARSER as GENERIC_HMMER_PARSER;
     HMMER_PARSER as FUNFAM_HMMER_PARSER;
     HMMER_PARSER as GENE3D_HMMER_PARSER;
+    HMMER_PARSER as HAMAP_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
 } from "$projectDir/modules/hmmer/parser/main"
@@ -95,6 +97,15 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."funfam".release,
                 ]
             ]
+        
+        hamap: runner == 'hamap'
+            return [
+                params.members."${member}".hmm,
+                params.members."${member}".switches,
+                params.members."${member}".release,
+                false,  // retrieving site data
+                []  // post-processing params
+            ]
 
         panther: runner == 'panther'
             return [
@@ -160,15 +171,6 @@ workflow SEQUENCE_ANALYSIS {
     GENERIC_HMMER_RUNNER(runner_hmmer_params)
     GENERIC_HMMER_PARSER(GENERIC_HMMER_RUNNER.out, tsv_pro, "antifam")
 
-    // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
-    // These also run for FunFam as Gene3D must be run before FunFam
-    runner_gene3d_params = fasta.combine(member_params.gene3d_funfam)
-    GENE3D_HMMER_RUNNER(runner_gene3d_params)
-    GENE3D_HMMER_PARSER(GENE3D_HMMER_RUNNER.out, tsv_pro, "gene3d")
-    GENE3D_CATH_RESEOLVE_HITS(GENE3D_HMMER_PARSER.out)
-    GENE3D_ADD_CATH_SUPERFAMILIES(GENE3D_CATH_RESEOLVE_HITS.out)
-    GENE3D_FILTER_MATCHES(GENE3D_ADD_CATH_SUPERFAMILIES.out)
-
     // FunFam (+ gene3D + cath-resolve-hits + assing-cath-superfamilies)
     // split into a channel so Nextflow can automatically manage the parallel execution of HmmSearch
     GENE3D_FILTER_MATCHES.out[1]
@@ -181,6 +183,20 @@ workflow SEQUENCE_ANALYSIS {
     FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out, tsv_pro, "funfam")
     FUNFAM_CATH_RESEOLVE_HITS(FUNFAM_HMMER_PARSER.out)
     FUNFAM_FILTER_MATCHES(FUNFAM_CATH_RESEOLVE_HITS.out)
+
+    // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
+    // These also run for FunFam as Gene3D must be run before FunFam
+    runner_gene3d_params = fasta.combine(member_params.gene3d_funfam)
+    GENE3D_HMMER_RUNNER(runner_gene3d_params)
+    GENE3D_HMMER_PARSER(GENE3D_HMMER_RUNNER.out, tsv_pro, "gene3d")
+    GENE3D_CATH_RESEOLVE_HITS(GENE3D_HMMER_PARSER.out)
+    GENE3D_ADD_CATH_SUPERFAMILIES(GENE3D_CATH_RESEOLVE_HITS.out)
+    GENE3D_FILTER_MATCHES(GENE3D_ADD_CATH_SUPERFAMILIES.out)
+
+    // HAMAP (+ pfsearch_wrapper.py)
+    runner_hamap_params = fasta.combine(member_params.hamap)
+    HAMAP_HMMER_RUNNER(runner_hamap_params)
+    HAMAP_HMMER_PARSER(HAMAP_HMMER_RUNNER.out, tsv_pro, "hamap")
 
     // Panther (+ treegrafter + epa-ng)
     runner_panther_params = fasta.combine(member_params.panther)
