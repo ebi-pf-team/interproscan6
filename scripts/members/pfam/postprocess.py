@@ -11,7 +11,6 @@ def post_process(hmm_matches, model2clans):
     for protein_id, domains in matches_info.items():
         for domain_id, domain_details in domains.items():
             matches_list.append((protein_id, domain_id, domain_details))
-
     # evalue ASC e score DESC to keep the best matches in the optimistic algorithm below
     matches_sorted = sorted(matches_list, key=lambda match: (float(match[2]['evalue']), -float(match[2]['score'])))
 
@@ -19,7 +18,6 @@ def post_process(hmm_matches, model2clans):
     for candidate_match in matches_sorted:
         protein_id, domain_id, domain_details = candidate_match
         keep = True
-
         try:
             candidate_match_info = model2clans[domain_id]
             for filtered_match in filtered_matches:
@@ -46,7 +44,6 @@ def post_process(hmm_matches, model2clans):
                         break
                     else:
                         domain_details["locations"] = not_overlapping_locations
-
         except KeyError:
             pass
 
@@ -58,78 +55,81 @@ def post_process(hmm_matches, model2clans):
 
 def build_fragments(filtered_matches, dat_parsed, min_length):
     processed_matches = []
-
     for info_pfam in filtered_matches:
         protein_id, domain_id, pfam_match = info_pfam
         model_id = pfam_match['accession']
         nested_models = dat_parsed.get(model_id, [])
+
         if nested_models:
             location_fragments = []
             for info_raw in filtered_matches:
-                protein_id, domain_id, raw_match = info_raw
+                raw_protein_id, raw_domain_id, raw_match = info_raw
                 for location in raw_match["locations"]:
                     if (raw_match['accession'] in nested_models) and _matches_overlap(location, pfam_match["locations"][0]):
                         location_fragments.append({
                             'start': location['start'],
                             'end': location['end']
                         })
-
             location_fragments.sort(key=lambda x: (x['start'], x['end']))
+
             fragment_dc_status = "CONTINUOUS"
             raw_discontinuous_matches = [pfam_match]
             for fragment in location_fragments:
-                new_location_start = int(raw_discontinuous_matches[0]["locations"][0]['start'])
-                new_location_end = int(raw_discontinuous_matches[0]["locations"][0]['end'])
-                final_location_end = int(raw_discontinuous_matches[0]["locations"][0]['end'])
-
-                if not _regions_overlap(new_location_start, new_location_end, int(fragment['start']), int(fragment['end'])):
-                    continue
-                elif int(fragment['start']) <= new_location_start and int(fragment['end']) >= new_location_end:
-                    fragment_dc_status = "NC_TERMINAL_DISC"
-                elif fragment_dc_status == "CONTINUOUS":
-                    fragment_dc_status = None
-
                 two_actual_regions = False
-                if int(fragment['start']) <= new_location_start:
-                    new_location_start = int(int(fragment['end'])) + 1
-                    fragment_dc_status = "N_TERMINAL_DISC"
-                elif int(fragment['end']) >= new_location_end:
-                    new_location_end = int(int(fragment['start'])) - 1
-                    fragment_dc_status = "C_TERMINAL_DISC"
-                elif int(fragment['start']) > new_location_start and int(fragment['end']) < new_location_end:
-                    new_location_end = int(int(fragment['start'])) - 1
-                    two_actual_regions = True
-                    fragment_dc_status = "C_TERMINAL_DISC"
+                new_location_start, new_location_end, final_location_end, fragment_dc_status, two_actual_regions = _create_fragment(
+                    raw_discontinuous_matches[0], fragment, fragment_dc_status, two_actual_regions)
 
-                if 'location-fragments' not in raw_discontinuous_matches[0]:
-                    raw_discontinuous_matches[0]['location-fragments'] = []
+                for loc in raw_discontinuous_matches[0]["locations"]:  # it's always only one location here?
+                    if 'location-fragments' not in loc:
+                        loc['location-fragments'] = []
 
-                new_match_region_one = {
-                    'start': new_location_start,
-                    'end': new_location_end,
-                    'dc-status': fragment_dc_status
-                }
-                raw_discontinuous_matches[0]['location-fragments'].append(new_match_region_one)
-
-                if two_actual_regions:
-                    new_location_start = int(int(fragment['end'])) + 1
-                    new_match_region_two = {
+                    loc['location-fragments'].append({
                         'start': new_location_start,
-                        'end': final_location_end,
-                        'dc-status': "N_TERMINAL_DISC"
-                    }
-                    raw_discontinuous_matches[0]['location-fragments'].append(new_match_region_two)
+                        'end': new_location_end,
+                        'dc-status': fragment_dc_status
+                    })
+
+                    if two_actual_regions:
+                        loc['location-fragments'].append({
+                            'start': int(fragment['end']) + 1,
+                            'end': final_location_end,
+                            'dc-status': "N_TERMINAL_DISC"
+                        })
 
             for raw_discontinuous_match in raw_discontinuous_matches:
                 match_length = int(raw_discontinuous_match["locations"][0]['end']) - int(raw_discontinuous_match["locations"][0]['start']) + 1
                 if match_length >= min_length:
-                    processed_matches.append(raw_discontinuous_match)
+                    processed_matches.append((protein_id, domain_id, raw_discontinuous_match))
         else:
             match_length = int(pfam_match["locations"][0]['end']) - int(pfam_match["locations"][0]['start']) + 1
             if match_length >= min_length:
-                processed_matches.append(pfam_match)
+                processed_matches.append((protein_id, domain_id, pfam_match))
 
     return processed_matches
+
+
+def _create_fragment(raw_match, fragment, fragment_dc_status, two_actual_regions):
+    new_location_start = int(raw_match["locations"][0]['start'])
+    new_location_end = int(raw_match["locations"][0]['end'])
+    final_location_end = int(raw_match["locations"][0]['end'])
+
+    if int(fragment['start']) <= new_location_start and int(fragment['end']) >= new_location_end:
+        fragment_dc_status = "NC_TERMINAL_DISC"
+    elif fragment_dc_status == "CONTINUOUS":
+        fragment_dc_status = None
+
+    if int(fragment['start']) <= new_location_start:
+        new_location_start = int(fragment['end']) + 1
+        fragment_dc_status = "N_TERMINAL_DISC"
+    elif int(fragment['end']) >= new_location_end:
+        new_location_end = int(fragment['start']) - 1
+        fragment_dc_status = "C_TERMINAL_DISC"
+    elif int(fragment['start']) > new_location_start and int(fragment['end']) < new_location_end:
+        new_location_end = int(fragment['start']) - 1
+        two_actual_regions = True
+        fragment_dc_status = "C_TERMINAL_DISC"
+
+    return new_location_start, new_location_end, final_location_end, fragment_dc_status, two_actual_regions
 
 
 def _matches_overlap(one, two) -> bool:
@@ -156,34 +156,27 @@ def build_result(filtered_matches):
 
 
 def main():
-    # parser = argparse.ArgumentParser(description='Postprocess pfam matches')
-    # parser.add_argument('--hmm_parsed', required=True, help='hmm parsed file')
-    # parser.add_argument('--min_length', required=True, help='minimum length')
-    # parser.add_argument('--seed', required=True, help='seed file')
-    # parser.add_argument('--clans', required=True, help='clans file')
-    # parser.add_argument('--dat', required=True, help='dat file')
-    # args = parser.parse_args()
-    #
-    # hmm_parsed = args.hmm_parsed
-    # seed = args.seed.split("=")[1]
-    # clans = args.clans.split("=")[1]
-    # dat = args.dat.split("=")[1]
-    # min_length = int(args.min_length)
+    parser = argparse.ArgumentParser(description='Postprocess pfam matches')
+    parser.add_argument('--hmm_parsed', required=True, help='hmm parsed file')
+    parser.add_argument('--min_length', required=True, help='minimum length')
+    parser.add_argument('--seed', required=True, help='seed file')
+    parser.add_argument('--clans', required=True, help='clans file')
+    parser.add_argument('--dat', required=True, help='dat file')
+    args = parser.parse_args()
 
-    hmm_parsed = "/Users/lcf/PycharmProjects/interproscan6/work/7a/2c3aee668468f60c31dc7802c18efd/hmmer_parsed_37.0_pfam_a.hmm.out.json"
-    seed = '/Users/lcf/PycharmProjects/interproscan6/data/pfam/37.0/pfam_a.seed'
-    clans = '/Users/lcf/PycharmProjects/interproscan6/data/pfam/37.0/pfam_clans'
-    dat = '/Users/lcf/PycharmProjects/interproscan6/data/pfam/37.0/pfam_a.dat'
-    min_length = 8
+    hmm_parsed = args.hmm_parsed
+    seed = args.seed.split("=")[1]
+    clans = args.clans.split("=")[1]
+    dat = args.dat.split("=")[1]
+    min_length = int(args.min_length)
 
     clans = stockholm_parser.get_clans(seed, clans)
     dat_parsed = stockholm_parser.get_pfam_a_dat(dat)
 
     filtered_matches = post_process(hmm_parsed, clans)
     filtered_fragments = build_fragments(filtered_matches, dat_parsed, min_length)
-    print(json.dumps(filtered_fragments, indent=4))
-    # result = build_result(filtered_fragments)
-    # print(json.dumps(result, indent=4))
+    result = build_result(filtered_fragments)
+    print(json.dumps(result, indent=4))
 
 
 if __name__ == '__main__':

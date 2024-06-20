@@ -15,7 +15,6 @@ include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/mai
 include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
 include { XREFS } from "$projectDir/subworkflows/xrefs/main"
 
-
 workflow {
     // Perform preliminary validation checks before running the analysis
     PRE_CHECKS(
@@ -86,6 +85,11 @@ workflow {
     .set { ch_format }
 
     WRITE_RESULTS(PARSE_SEQUENCE.out.collect(), XREFS.out.collect(), ch_format, params.output, params.ipsc_version)
+}
+
+workflow.onComplete = {
+    println "Workflow completed $workflow.success. Results on ${params.output}.*"
+    println "Duration: $workflow.duration"
 }
 
 log.info """
