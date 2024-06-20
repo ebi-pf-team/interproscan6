@@ -3,7 +3,7 @@ import json
 import stockholm_parser
 
 
-def post_process(hmm_matches, model2clans):
+def post_process(hmm_matches: str, model2clans: dict) -> list:
     with open(hmm_matches, "r") as matches:
         matches_info = json.load(matches)
 
@@ -53,7 +53,7 @@ def post_process(hmm_matches, model2clans):
     return filtered_matches
 
 
-def build_fragments(filtered_matches, dat_parsed, min_length):
+def build_fragments(filtered_matches: list, dat_parsed: dict, min_length: int) -> list:
     processed_matches = []
     for info_pfam in filtered_matches:
         protein_id, domain_id, pfam_match = info_pfam
@@ -108,7 +108,7 @@ def build_fragments(filtered_matches, dat_parsed, min_length):
     return processed_matches
 
 
-def _create_fragment(raw_match, fragment, fragment_dc_status, two_actual_regions):
+def _create_fragment(raw_match: dict, fragment: dict, fragment_dc_status: str, two_actual_regions: bool):
     new_location_start = int(raw_match["locations"][0]['start'])
     new_location_end = int(raw_match["locations"][0]['end'])
     final_location_end = int(raw_match["locations"][0]['end'])
@@ -132,17 +132,17 @@ def _create_fragment(raw_match, fragment, fragment_dc_status, two_actual_regions
     return new_location_start, new_location_end, final_location_end, fragment_dc_status, two_actual_regions
 
 
-def _matches_overlap(one, two) -> bool:
-    return max(one['start'], two['start']) <= min(one['end'], two['end'])
+def _matches_overlap(one: dict, two: dict) -> bool:
+    return max(int(one['start']), int(two['start'])) <= min(int(one['end']), int(two['end']))
 
 
-def _matches_are_nested(one, two):
+def _matches_are_nested(one: dict, two: dict):
     if one is None or two is None:
         return False
     return not set(one).isdisjoint(set(two))
 
 
-def _regions_overlap(start_region_one, end_region_one, start_region_two, end_region_two):
+def _regions_overlap(start_region_one: int, end_region_one: int, start_region_two: int, end_region_two: int):
     return max(start_region_one, start_region_two) <= min(end_region_one, end_region_two)
 
 
