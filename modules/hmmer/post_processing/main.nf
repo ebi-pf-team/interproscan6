@@ -139,7 +139,6 @@ process SFLD_POST_PROCESSER {
 
     input:
         path out_file
-        path out_dtbl
         val postprocessing_params // contains [0] bin and [1] site_annotations file path
         path alignment
 
@@ -151,7 +150,6 @@ process SFLD_POST_PROCESSER {
         """
         ${postprocessing_params[0]} \
             --alignments '${alignment}' \
-            --dom '${out_dtbl}' \
             --hmmer-out '${out_file}' \
             --site-info '${postprocessing_params[1]}' \
             --output '${out_file}.processed.out"}'

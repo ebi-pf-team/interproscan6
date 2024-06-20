@@ -29,6 +29,11 @@ include {
     CATH_RESEOLVE_HITS as GENE3D_CATH_RESEOLVE_HITS;
     ADD_CATH_SUPERFAMILIES as GENE3D_ADD_CATH_SUPERFAMILIES;
     HAMAP_POST_PROCESSER;
+} from "$projectDir/modules/hmmer/sfld/main"
+include {
+    HMMER_PARSER_DTBL;
+} from "$projectDir/modules/hmmer/sfld/main"
+include {
     PANTHER_POST_PROCESSER;
     SFLD_POST_PROCESSER;
 } from "$projectDir/modules/hmmer/post_processing/main"
@@ -238,7 +243,6 @@ workflow SEQUENCE_ANALYSIS {
         ANTIFAM_HMMER_RUNNER.out[0], // hmmer.out path
         ANTIFAM_HMMER_RUNNER.out[1], // hmmer.dtbl path
         ANTIFAM_HMMER_RUNNER.out[2], // post-processing-params
-        tsv_pro,
         "false"
     )
 
@@ -249,7 +253,6 @@ workflow SEQUENCE_ANALYSIS {
         NCBIFAM_HMMER_RUNNER.out[0], // hmmer.out path
         NCBIFAM_HMMER_RUNNER.out[1], // hmmer.dtbl path
         NCBIFAM_HMMER_RUNNER.out[2], // post-processing-params
-        tsv_pro,
         "false"
     )
 
@@ -261,7 +264,6 @@ workflow SEQUENCE_ANALYSIS {
         GENE3D_HMMER_RUNNER.out[0],  // hmmer.out path
         GENE3D_HMMER_RUNNER.out[1],  // hmmer.dtbl path
         GENE3D_HMMER_RUNNER.out[2],  // post-processing-params
-        tsv_pro,
         "false"
     )
     GENE3D_CATH_RESEOLVE_HITS(
@@ -280,7 +282,7 @@ workflow SEQUENCE_ANALYSIS {
     runner_funfam_params_with_cath = runner_funfam_params.combine(funfam_cath_superfamilies)
 
     FUNFAM_HMMER_RUNNER(runner_funfam_params_with_cath, applications)
-    FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out, tsv_pro, "false")
+    FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out, "false")
     FUNFAM_CATH_RESEOLVE_HITS(
         FUNFAM_HMMER_RUNNER.out[0],  // hmmer.out path
         FUNFAM_HMMER_RUNNER.out[2]   // post-processing-params
@@ -294,7 +296,6 @@ workflow SEQUENCE_ANALYSIS {
         HAMAP_HMMER_RUNNER.out[0],  // hmmer.out path
         HAMAP_HMMER_RUNNER.out[1],  // hmmer.dtbl path
         HAMAP_HMMER_RUNNER.out[2],  // post-processing-params
-        tsv_pro,
         "false"
     )
     HAMAP_POST_PROCESSER(
@@ -314,7 +315,6 @@ workflow SEQUENCE_ANALYSIS {
         PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
         PANTHER_HMMER_RUNNER.out[1],  // hmmer.dtbl path
         PANTHER_HMMER_RUNNER.out[2],  // post-processing-params
-        tsv_pro,
         "false"
     )
     PANTHER_POST_PROCESSER(
@@ -327,6 +327,9 @@ workflow SEQUENCE_ANALYSIS {
         PANTHER_POST_PROCESSER.out  // treegrafter output + post-processing params
     )
 
+    /*
+    Member databases that use HMMER dtbl
+    */
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_sfld_params)
@@ -334,7 +337,6 @@ workflow SEQUENCE_ANALYSIS {
         SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
         SFLD_HMMER_RUNNER.out[1],  // hmmer.dtbl path
         SFLD_HMMER_RUNNER.out[2],  // post-processing-params
-        tsv_pro,
         "true"
     )
     SFLD_POST_PROCESSER(
@@ -342,7 +344,6 @@ workflow SEQUENCE_ANALYSIS {
         SFLD_HMMER_RUNNER.out[1],  // hmmer.dtbl path
         SFLD_HMMER_RUNNER.out[2],  // post-processing-params
         SFLD_HMMER_RUNNER.out[3],  // alignment file
-        tsv_pro,
     )
     SFLD_FILTER_MATCHES(SFLD_HMMER_PARSER.out, SFLD_POST_PROCESSER.out)
 
@@ -353,7 +354,6 @@ workflow SEQUENCE_ANALYSIS {
         PFAM_HMMER_RUNNER.out[0],  // hmmer.out path
         PFAM_HMMER_RUNNER.out[1],  // hmmer.dtbl path
         PFAM_HMMER_RUNNER.out[2],  // post-processing-params
-        tsv_pro,
         "pfam"
     )
     PFAM_FILTER_MATCHES(
