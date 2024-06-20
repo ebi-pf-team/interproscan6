@@ -142,10 +142,9 @@ process SFLD_POST_PROCESSER {
         path out_dtbl
         val postprocessing_params // contains [0] bin and [1] site_annotations file path
         path alignment
-        val tsv_pro
 
     output:
-        path "${tsv_pro ? "${out_file}.processed.out" : "${out_dtbl}.processed.dtbl"}"
+        path "${out_file.processed.out"}"
         val postprocessing_params
 
     script:
@@ -155,6 +154,6 @@ process SFLD_POST_PROCESSER {
             --dom '${out_dtbl}' \
             --hmmer-out '${out_file}' \
             --site-info '${postprocessing_params[1]}' \
-            --output '${tsv_pro ? "${out_file}.processed.out" : "${out_dtbl}.processed.dtbl"}'
+            --output '${out_file}.processed.out"}'
         """
 }

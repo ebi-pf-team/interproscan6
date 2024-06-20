@@ -7,9 +7,7 @@ workflow XREFS {
     matches
 
     main:
-
     ENTRIES(matches, params.xrefs.entries)
-
     if (params.goterms) {
         GOTERMS(ENTRIES.out, params.xrefs.goterms)
         if (params.pathways) {

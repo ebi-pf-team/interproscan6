@@ -29,11 +29,6 @@ workflow {
 
     formats = params.formats.toLowerCase()
 
-    tsv_pro = false
-    if (formats.contains("tsv-pro")) {
-        tsv_pro = true
-    }
-
     applications = params.applications.toLowerCase()
 
     Channel.fromPath( params.input , checkIfExists: true)
@@ -78,7 +73,7 @@ workflow {
                 fasta_to_runner = ch_fasta
             }
         }
-        parsed_analysis = SEQUENCE_ANALYSIS(fasta_to_runner, applications, tsv_pro)
+        parsed_analysis = SEQUENCE_ANALYSIS(fasta_to_runner, applications)
     }
 
     all_results = parsed_matches.concat(parsed_analysis)

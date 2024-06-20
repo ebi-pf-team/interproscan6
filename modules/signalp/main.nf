@@ -24,7 +24,6 @@ process SIGNALP_PARSER {
     path out
     val pvalue
     val signalp_version
-    val tsv_pro
 
     output:
     path "signalp_parsed.json"

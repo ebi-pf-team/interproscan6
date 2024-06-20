@@ -62,7 +62,6 @@ workflow SEQUENCE_ANALYSIS {
     take:
     fasta
     applications
-    tsv_pro
 
     main:
     boolean gene3d_funfam_processed = false
@@ -86,7 +85,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".switches,
                 params.members."${member}".release,
                 false,  // don't build an alignment file
-                false,  // don't build a hmmer.tbl file path 
+                false,  // don't build a hmmer.tbl file path
                 []  // no post-processing params
             ]
 
@@ -113,7 +112,7 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."funfam".release,
                 ]
             ]
-        
+
         hamap: member == 'hamap'
             return [
                 "${member}",
@@ -135,7 +134,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".switches,
                 params.members."${member}".release,
                 false,  // don't build an alignment file
-                false,  // don't build a hmmer.tbl file path 
+                false,  // don't build a hmmer.tbl file path
                 []
             ]
 
@@ -239,7 +238,7 @@ workflow SEQUENCE_ANALYSIS {
         ANTIFAM_HMMER_RUNNER.out[0], // hmmer.out path
         ANTIFAM_HMMER_RUNNER.out[1], // hmmer.dtbl path
         ANTIFAM_HMMER_RUNNER.out[2], // post-processing-params
-        tsv_pro, 
+        tsv_pro,
         "false"
     )
 
@@ -385,7 +384,7 @@ workflow SEQUENCE_ANALYSIS {
     // SignalP
     runner_signalp_params = fasta.combine(member_params.signalp)
     SIGNALP_RUNNER(runner_signalp_params)
-    SIGNALP_PARSER(SIGNALP_RUNNER.out, tsv_pro)
+    SIGNALP_PARSER(SIGNALP_RUNNER.out)
 
     /*
     Gather the results
