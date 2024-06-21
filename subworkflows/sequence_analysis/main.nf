@@ -9,9 +9,10 @@ include {
     FUNFAM_HMMER_RUNNER;
     HMMER_RUNNER as GENE3D_HMMER_RUNNER;
     HMMER_RUNNER as HAMAP_HMMER_RUNNER;
-    HMMER_RUNNER as SFLD_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
+    HMMER_RUNNER_WITH_ALIGNMENTS as SFLD_HMMER_RUNNER;
+
 } from "$projectDir/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
@@ -19,7 +20,6 @@ include {
     HMMER_PARSER as FUNFAM_HMMER_PARSER;
     HMMER_PARSER as GENE3D_HMMER_PARSER;
     HMMER_PARSER as HAMAP_HMMER_PARSER;
-    HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
     HMMER_PARSER as PFAM_HMMER_PARSER;
 } from "$projectDir/modules/hmmer/parser/main"
@@ -33,6 +33,9 @@ include {
 include {
     HMMER_PARSER_DTBL;
 } from "$projectDir/modules/hmmer/sfld/main"
+include {
+    HMMER_PARSER_WITH_ALIGNMENT as SFLD_HMMER_PARSER;
+} from "$projectDir/modules/hmmer/parser/main"
 include {
     PANTHER_POST_PROCESSER;
     SFLD_POST_PROCESSER;
@@ -57,6 +60,10 @@ include {
 include {
     PFSCAN_PARSER as PROSITE_PATTERNS_PARSER
 } from "$projectDir/modules/prosite/pfscan/parser/main"
+    CDD_RUNNER;
+    CDD_PARSER;
+    CDD_POSTPROCESS;
+} from "$projectDir/modules/cdd/main"
 include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER
@@ -234,7 +241,7 @@ workflow SEQUENCE_ANALYSIS {
     }.set { member_params }
 
     /*
-    Member databases that use HMMER
+    Member databases that use HMMER (out)
     */
     // AntiFam
     runner_hmmer_antifam_params = fasta.combine(member_params.antifam)
@@ -328,7 +335,7 @@ workflow SEQUENCE_ANALYSIS {
     )
 
     /*
-    Member databases that use HMMER dtbl
+    Member databases that use HMMER (dtbl)
     */
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)

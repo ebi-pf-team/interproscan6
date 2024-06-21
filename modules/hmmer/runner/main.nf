@@ -2,32 +2,58 @@ process HMMER_RUNNER {
     label 'hmmer_runner'
 
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(build_alignment), val(build_table), val(postprocessing_params)
+        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
+
+    output:
+        path "${release}._.${member}._.out"
+        val postprocessing_params
+        path "${fasta}"
+
+    script:
+    """
+    /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${member}._.out ${hmm} ${fasta}
+    """
+}
+
+process HMMER_RUNNER_WITH_ALIGNMENTS {
+    label 'hmmer_runner'
     /*
     The post processing of SFLD, FunFam and Gene3D HMMER hits requires the alignment file
-    But only generate alignmnets for these tool to reduce volume size.
-    Likewise, for the HMMER table file ).tbl)
     */
+    input:
+        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
 
     output:
         path "${release}._.${member}._.out"
         path "${release}._.${member}._.dtbl"
         val postprocessing_params
         path "${member}_alignment"
+        path "${fasta}"
+
+    script:
+    """
+    /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl -A ${member}_alignment" ${hmm} ${fasta}
+    """
+}
+
+
+process HMMER_RUNNER_TBL_OUTPUT {
+    label 'hmmer_runner'
+    /*
+    The post processing of HAMAP requires the tbl file
+    */
+    input:
+        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
+
+    output:
+        path "${release}._.${member}._.out"
+        val postprocessing_params
         path "${release}._.${member}._.table.tbl"
         path "${fasta}"
 
     script:
     """
-    /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl ${build_alignment ? "-A ${member}_alignment" : ""} ${build_table ? "--tblout ${release}._.${member}._.table.tbl" : ""} ${hmm} ${fasta}
-
-
-    if [ ! -f ${member}_alignment ]; then
-        touch ${member}_alignment
-    fi
-    if [ ! -f ${release}._.${member}._.table.tbl ]; then
-        touch ${release}._.${member}._.table.tbl
-    fi
+    /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --tblout ${release}._.${member}._.table.tbl ${hmm} ${fasta}
     """
 }
 
