@@ -6,7 +6,7 @@ process HMMER_PARSER {
     val postprocessing_params // used to post processing
 
     output:
-    path "hmmer_parsed_*"
+    path "hmmer_parsed_${out}.json"
     val postprocessing_params
 
     script:
@@ -28,6 +28,7 @@ process HMMER_PARSER_WITH_ALIGNMENT {
         output:
         path "hmmer_parsed_*"
         path domtbl
+        path out
         val postprocessing_params
         path(alignment)
         val is_sfld  // just SFLD needs to retrieve site data and parse dtbl

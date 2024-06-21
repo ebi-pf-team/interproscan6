@@ -127,7 +127,6 @@ process PANTHER_POST_PROCESSER {
     """
 }
 
-
 process SFLD_POST_PROCESSER {
     /*
     Runs an in-house post-processing C script that filters the SFLD hits to
@@ -143,7 +142,7 @@ process SFLD_POST_PROCESSER {
         path alignment
 
     output:
-        path "${out_file.processed.out"}"
+        path "${out_file}.processed.out"
         val postprocessing_params
 
     script:
@@ -152,6 +151,6 @@ process SFLD_POST_PROCESSER {
             --alignments '${alignment}' \
             --hmmer-out '${out_file}' \
             --site-info '${postprocessing_params[1]}' \
-            --output '${out_file}.processed.out"}'
+            --output '${out_file}.processed.out}'
         """
 }

@@ -90,14 +90,13 @@ workflow SEQUENCE_ANALYSIS {
         The post processing of some applications (e.g. SFLD) hits requires additional files
         and parameters relative to the generic hmmer runner and parser
         */
+
         antifam: member == 'antifam'
             return [
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                false,  // don't build an alignment file
-                false,  // don't build a hmmer.tbl file path
                 []  // no post-processing params
             ]
 
@@ -108,12 +107,10 @@ workflow SEQUENCE_ANALYSIS {
         gene3d_funfam: (member == 'gene3d' || member == 'funfam') && !gene3d_funfam_processed
             gene3d_funfam_processed = true
             return [
-                "gene3d",
+                "${member}",
                 params.members."gene3d".hmm,
                 params.members."gene3d".switches,
                 params.members."gene3d".release,
-                true,   // build an alignment file
-                false,   // don't build a hmmer.tbl file path
                 [
                     params.members."gene3d".postprocess.cath_resolve_hits_switches,
                     params.members."gene3d".postprocess.model2sf_map,
@@ -131,8 +128,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                false,   // don't build an alignment file
-                true,    // build a hmmer.tbl file path
                 [
                     params.members."${member}".postprocess.models_dir,
                     params.members."${member}".postprocess.pfsearchv3_switches,
@@ -145,9 +140,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                false,  // don't build an alignment file
-                false,  // don't build a hmmer.tbl file path
-                []
+                []  // no post-processing params
             ]
 
         panther: member == 'panther'
@@ -156,8 +149,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                false,  // don't build an alignment file
-                false,   // don't build a hmmer.tbl file path
                 [
                     params.members."${member}".postprocess.data_dir,
                     params.members."${member}".postprocess.evalue,
@@ -171,8 +162,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                true,  // build an alignment file
-                false,  // don't build a hmmer.tbl file path
                 [
                     params.members."${member}".postprocess.bin,
                     params.members."${member}".postprocess.sites_annotation,
@@ -186,8 +175,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                false,  // don't build an alignment file
-                false,   // don't build a hmmer.tbl file path
                 [
                     params.members."${member}".postprocess.min_length,
                     params.members."${member}".postprocess.seed,
@@ -217,7 +204,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".evaluator,
                 params.members."${member}".release,
                 params.members."${member}".switches
-                []  // post-processing params,
             ]
 
         prosite_profiles: member == "prosite_profiles"
@@ -250,7 +236,6 @@ workflow SEQUENCE_ANALYSIS {
         ANTIFAM_HMMER_RUNNER.out[0], // hmmer.out path
         ANTIFAM_HMMER_RUNNER.out[1], // hmmer.dtbl path
         ANTIFAM_HMMER_RUNNER.out[2], // post-processing-params
-        "false"
     )
 
     // NCBIfam
@@ -260,7 +245,6 @@ workflow SEQUENCE_ANALYSIS {
         NCBIFAM_HMMER_RUNNER.out[0], // hmmer.out path
         NCBIFAM_HMMER_RUNNER.out[1], // hmmer.dtbl path
         NCBIFAM_HMMER_RUNNER.out[2], // post-processing-params
-        "false"
     )
 
     // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
@@ -303,7 +287,6 @@ workflow SEQUENCE_ANALYSIS {
         HAMAP_HMMER_RUNNER.out[0],  // hmmer.out path
         HAMAP_HMMER_RUNNER.out[1],  // hmmer.dtbl path
         HAMAP_HMMER_RUNNER.out[2],  // post-processing-params
-        "false"
     )
     HAMAP_POST_PROCESSER(
         HAMAP_HMMER_RUNNER.out[5], // path to fasta file parsed by HMMER
@@ -322,7 +305,6 @@ workflow SEQUENCE_ANALYSIS {
         PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
         PANTHER_HMMER_RUNNER.out[1],  // hmmer.dtbl path
         PANTHER_HMMER_RUNNER.out[2],  // post-processing-params
-        "false"
     )
     PANTHER_POST_PROCESSER(
         PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
@@ -361,7 +343,6 @@ workflow SEQUENCE_ANALYSIS {
         PFAM_HMMER_RUNNER.out[0],  // hmmer.out path
         PFAM_HMMER_RUNNER.out[1],  // hmmer.dtbl path
         PFAM_HMMER_RUNNER.out[2],  // post-processing-params
-        "pfam"
     )
     PFAM_FILTER_MATCHES(
         PFAM_HMMER_PARSER.out, // ips6 json
