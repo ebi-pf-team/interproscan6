@@ -7,8 +7,6 @@ process HMMER_RUNNER {
     output:
         path "${release}._.${member}._.out"
         val postprocessing_params
-        path "${fasta}"
-
     script:
     """
     /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${member}._.out ${hmm} ${fasta}
@@ -24,15 +22,16 @@ process HMMER_RUNNER_WITH_ALIGNMENTS {
         tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
 
     output:
-        path "${release}._.${member}._.out"
-        path "${release}._.${member}._.dtbl"
+        path "${release}._.${member}._.*"
         val postprocessing_params
         path "${member}_alignment"
-        path "${fasta}"
 
     script:
     """
-    /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl -A ${member}_alignment" ${hmm} ${fasta}
+    /opt/hmmer/bin/hmmsearch ${switches} \
+    -o ${release}._.${member}._.out \
+    --domtblout ${release}._.${member}._.dtbl \
+    -A ${member}_alignment" ${hmm} ${fasta}
     """
 }
 
@@ -49,7 +48,6 @@ process HMMER_RUNNER_TBL_OUTPUT {
         path "${release}._.${member}._.out"
         val postprocessing_params
         path "${release}._.${member}._.table.tbl"
-        path "${fasta}"
 
     script:
     """

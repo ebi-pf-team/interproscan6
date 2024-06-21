@@ -227,7 +227,7 @@ workflow SEQUENCE_ANALYSIS {
     }.set { member_params }
 
     /*
-    Member databases that use HMMER (out)
+    Member databases that use HMMER
     */
     // AntiFam
     runner_hmmer_antifam_params = fasta.combine(member_params.antifam)
@@ -317,9 +317,10 @@ workflow SEQUENCE_ANALYSIS {
     )
 
     /*
-    Member databases that use HMMER (dtbl)
+    Member databases that use HMMER with alignments
     */
     // SFLD (+ post-processing binary to add sites and filter hits)
+<<<<<<< HEAD
     runner_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_sfld_params)
     SFLD_HMMER_PARSER(

@@ -23,6 +23,7 @@ process HMMER_PARSER_WITH_ALIGNMENT {
         path domtbl  // domtbl is needed for SFLD .c script
         path alignment
         val postprocessing_params
+        val use_dtbl
 
 
         output:
@@ -45,7 +46,6 @@ process HMMER_PARSER_WITH_ALIGNMENT {
             > hmmer_parsed_${out}.json
         """
 }
-
 
 process HMMER_PARSER_TBL {
     label 'analysis_parser'

@@ -140,17 +140,19 @@ process SFLD_POST_PROCESSER {
         path out_file
         val postprocessing_params // contains [0] bin and [1] site_annotations file path
         path alignment
+        val use_dtbl
 
     output:
         path "${out_file}.processed.out"
         val postprocessing_params
 
     script:
+        def out_file_str = "${out_file}"
+        def (out1, out2) = out_file_str.split(' ', 2)
         """
         ${postprocessing_params[0]} \
-            --alignments '${alignment}' \
-            --hmmer-out '${out_file}' \
+            --alignments '${alignment}' --dom '${out1}' --hmmer-out '${out2}' \
             --site-info '${postprocessing_params[1]}' \
-            --output '${out_file}.processed.out}'
+            --output 'sfld.processed.out'
         """
 }
