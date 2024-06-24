@@ -36,6 +36,13 @@ include {
     SFLD_FILTER_MATCHES;
 } from "$projectDir/modules/hmmer/filter/main"
 include {
+    PS_SCAN_RUNNER as PATTERNS_PS_SCAN_RUNNER;
+    PS_SCAN_RUNNER as PROFILES_PS_SCAN_RUNNER
+} from "$projectDir/modules/prosite/ps_scan/runner/main"
+include {
+    PS_SCAN_PARSER
+} from "$projectDir/modules/prosite/ps_scan/parser/main"
+include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER
 } from "$projectDir/modules/signalp/main"
@@ -156,6 +163,27 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."${member}".postprocess.switches,
                     params.members."${member}".postprocess.data,
                 ]
+            ]
+
+        prosite_patterns: runner == "prosite_patterns"
+            return [
+                params.members."${member}".data
+                params.members."${member}".evaluator
+                params.members."${member}".release
+                params.members."${member}".switches
+                []  // post-processing params
+            ]
+
+        prosite_profiles: runner == "prosite_profiles"
+            return [
+                params.members."${member}".data
+                params.members."${member}".evaluator
+                params.members."${member}".release
+                params.members."${member}".switches
+                [
+                    params.members."${member}".models_dir
+                    params.members."${member}".skip_flagged_profiles
+                ]  // post-processing params
             ]
 
         signalp: runner == 'signalp'
@@ -289,6 +317,15 @@ workflow SEQUENCE_ANALYSIS {
     CDD_RUNNER(runner_cdd_params)
     CDD_POSTPROCESS(CDD_RUNNER.out)
     CDD_PARSER(CDD_POSTPROCESS.out)
+
+    // PROSITE Patterns
+    runner_patterns = fasta.combine(member_params.prosite_patterns)
+    PATTERNS_PS_SCAN_RUNNER(runner_patterns)
+    PS_SCAN_PARSER(PATTERNS_PS_SCAN_RUNNER.out)
+
+    // PROSITE Profiles
+    runner_profiles = fasta.combine(member_params.prosite_profiles)
+    PROFILES_PS_SCAN_RUNNER(runner_profiles)
 
     // SignalP
     runner_signalp_params = fasta.combine(member_params.signalp)
