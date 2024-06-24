@@ -22,12 +22,12 @@ def test_output_dir(test_dir):
 
 @pytest.fixture
 def input_path(test_input_dir):
-    return test_input_dir / "integration_input.fasta"
+    return test_input_dir / "pfam_mini.fasta"
 
 
 @pytest.fixture
 def expected_output_path(test_output_dir):
-    return test_output_dir / "expected_output_ncbifam_antifam"
+    return test_output_dir / "expected_output_pfam"
 
 
 @pytest.fixture
@@ -37,7 +37,7 @@ def current_output_path(test_output_dir):
 
 @pytest.fixture
 def applications():
-    return "ncbifam,antifam"
+    return "pfam"
 
 
 @pytest.fixture
