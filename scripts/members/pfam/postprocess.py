@@ -98,7 +98,8 @@ def build_fragments(filtered_matches: list, dat_parsed: dict, min_length: int) -
                         })
 
             for raw_discontinuous_match in raw_discontinuous_matches:
-                match_length = int(raw_discontinuous_match["locations"][0]['end']) - int(raw_discontinuous_match["locations"][0]['start']) + 1
+                match_length = int(raw_discontinuous_match["locations"][0]['end']) - \
+                    int(raw_discontinuous_match["locations"][0]['start']) + 1
                 if match_length >= min_length:
                     processed_matches.append((protein_id, domain_id, raw_discontinuous_match))
         else:
