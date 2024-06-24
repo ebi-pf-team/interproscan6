@@ -83,6 +83,9 @@ _Required for AnitFam, NCBIFam, Panther, SFLD, ...._:
 _Required for Gene3D and FunFam_:
     docker build -t cathtools docker_files/cath-tools
 
+_Required for HAMAP and PROSITE:
+    docker pull sibswiss/pftools
+
 _Required for Panther_:
     docker build -t treegrafter docker_files/treegrafter
 
