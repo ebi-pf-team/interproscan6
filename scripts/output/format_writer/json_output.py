@@ -70,6 +70,19 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         if match_data['member_db'].upper() == "CDD":
                             info["evalue"] = float(location["evalue"])
                             info["score"] = float(location["score"])
+
+                        elif match_data['member_db'].upper() == "HAMAP":
+                            info["score"] = float(location["score"])
+                            info["alignment"] = location["alignment"]
+
+                        elif match_data['member_db'].upper() == "PANTHER":
+                            info["hmmStart"] = int(location["hmmStart"])
+                            info["hmmEnd"] = int(location["hmmEnd"])
+                            info["hmmLength"] = 0  # we have hmmLength but in i5 result its always 0
+                            info["hmmBounds"] = location["hmmBounds"]
+                            info["envelopeStart"] = int(location["envelopeStart"])
+                            info["envelopeEnd"] = int(location["envelopeEnd"])
+
                         elif match_data['member_db'].upper() == "SFLD":
                             info["evalue"] = float(location["evalue"])
                             info["score"] = float(location["score"])
@@ -78,13 +91,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             info["hmmLength"] = int(location["hmmLength"])
                             info["envelopeStart"] = int(location["envelopeStart"])
                             info["envelopeEnd"] = int(location["envelopeEnd"])
-                        elif match_data['member_db'].upper() == "PANTHER":
-                            info["hmmStart"] = int(location["hmmStart"])
-                            info["hmmEnd"] = int(location["hmmEnd"])
-                            info["hmmLength"] = 0  # we have hmmLength but in i5 result its always 0
-                            info["hmmBounds"] = location["hmmBounds"]
-                            info["envelopeStart"] = int(location["envelopeStart"])
-                            info["envelopeEnd"] = int(location["envelopeEnd"])
+
                         else:
                             info["evalue"] = float(location["evalue"])
                             info["score"] = float(location["score"])
@@ -116,7 +123,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         "locations": locations
                     }
 
-                    if match_data['member_db'].upper() != "CDD":
+                    if match_data['member_db'].upper() not in ["CDD", "HAMAP"]:
                         match["evalue"] = float(match_data['evalue'])
                         match["score"] = float(match_data['score'])
 
