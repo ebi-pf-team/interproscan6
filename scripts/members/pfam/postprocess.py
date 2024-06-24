@@ -63,7 +63,7 @@ def build_fragments(filtered_matches: list, dat_parsed: dict, min_length: int) -
         if nested_models:
             location_fragments = []
             for info_raw in filtered_matches:
-                raw_protein_id, raw_domain_id, raw_match = info_raw
+                _, _, raw_match = info_raw
                 for location in raw_match["locations"]:
                     if (raw_match['accession'] in nested_models) and _matches_overlap(location, pfam_match["locations"][0]):
                         location_fragments.append({
