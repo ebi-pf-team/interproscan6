@@ -1,5 +1,3 @@
-import json
-import os
 import re
 
 ACCESSION_LINE = "#=GF AC"
