@@ -65,10 +65,10 @@ process HAMAP_FILTER_MATCHES {
 
     script:
     """
-    // python3 $projectDir/scripts/members/hamap/filter_ips6_hits.py \\
-    //     ${ips6_json} \\
-    //     ${pfsearch_wrapper_output} \\
-    //     ${ips6_json}.post.processed.json
+    python3 $projectDir/scripts/members/hamap/filter_ips6_hits.py \\
+        ${ips6_json} \\
+        ${pfsearch_wrapper_output} \\
+        ${ips6_json}.post.processed.json
     """
 }
 
