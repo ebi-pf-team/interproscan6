@@ -77,8 +77,18 @@ def build_fragments(filtered_matches: list, dat_parsed: dict, min_length: int) -
             raw_discontinuous_matches = [pfam_match]
             for fragment in location_fragments:
                 two_actual_regions = False
-                new_location_start, new_location_end, final_location_end, fragment_dc_status, two_actual_regions = _create_fragment(
-                    raw_discontinuous_matches[0], fragment, fragment_dc_status, two_actual_regions)
+                (
+                    new_location_start,
+                    new_location_end,
+                    final_location_end,
+                    fragment_dc_status,
+                    two_actual_regions
+                ) = _create_fragment(
+                    raw_discontinuous_matches[0],
+                    fragment,
+                    fragment_dc_status,
+                    two_actual_regions
+                )
 
                 for loc in raw_discontinuous_matches[0]["locations"]:  # it's always only one location here?
                     if 'location-fragments' not in loc:
