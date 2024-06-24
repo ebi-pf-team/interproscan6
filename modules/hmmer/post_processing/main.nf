@@ -62,20 +62,37 @@ process HAMAP_POST_PROCESSER {
         path fasta
         path tlb
         val postprocessing_params
-    
+    /*
+    post-processing params:
+    0. models dir
+    1. flags for pfserach
+    */
+
     output:
         path "hamap_pfsearch_output"
 
     /*
-    profiles_list_filename -- hmmer tlb file
+    hmmer_tbl_path -- hmmer tlb file
     fasta_file -- input fasta
     fasta_filtered_file -- output fasta file
     output_file -- another output file
     model_dir -- path to dir containing hamap profiles for pfsearch
     */
+
+    /*
+    Delete "$projectDir/bin/prosite/pfsearchV3" and remove its use in
+    pfsearch_wrapper.py when we move over to the single docker image
+    */
     script:
     """
-    python3 $projectDir/scripts/members/hamap/pfsearch_wrapper.py ${tlb} ${fasta} "seqs_with_hits.faa" "hamap_pfsearch_output" ${postprocessing_params[0]} ${postprocessing_params[1]}
+    python3 $projectDir/scripts/members/hamap/pfsearch_wrapper.py \
+        ${tlb} \
+        ${fasta} \
+        "seqs_with_hits.faa" \
+        "hamap_pfsearch_output" \
+        ${postprocessing_params[0]} \
+        $projectDir/bin/prosite/pfsearchV3 \
+        ${postprocessing_params[1]} > "print.statements.out"
     """
 }
 

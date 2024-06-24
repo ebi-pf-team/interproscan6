@@ -11,20 +11,21 @@ process HMMER_RUNNER {
     */
 
     output:
-        path "${release}_${hmm}.out"
-        path "${release}_${hmm}.dtbl"
+        path "${release}._.${hmm}.out"
+        path "${release}._.${hmm}.dtbl"
         val postprocessing_params
         path "${hmm}_alignment"
-        path "${release}_${hmm}_table.tbl"
+        path "${release}._.${hmm}_table.tbl"
+        path "${fasta}"
 
     script:
     """
-    hmmsearch ${switches} -o ${release}_${hmm}.out --domtblout ${release}_${hmm}.dtbl ${build_alignment ? "-A ${hmm}_alignment" : ""} ${build_table ? "--tblout ${release}_${hmm}_table.tbl" : ""} ${hmm} ${fasta}
+    hmmsearch ${switches} -o ${release}._.${hmm}.out --domtblout ${release}._.${hmm}.dtbl ${build_alignment ? "-A ${hmm}_alignment" : ""} ${build_table ? "--tblout ${release}._.${hmm}_table.tbl" : ""} ${hmm} ${fasta}
     if [ ! -f ${hmm}_alignment ]; then
         touch ${hmm}_alignment
     fi
-    if [ ! -f ${release}_${hmm}_table.tbl ]; then
-        touch ${release}_${hmm}_table.tbl
+    if [ ! -f ${release}._.${hmm}_table.tbl ]; then
+        touch ${release}._.${hmm}_table.tbl
     fi
     """
 }
@@ -58,8 +59,8 @@ process FUNFAM_HMMER_RUNNER {
     */
 
     output:
-        path "${release}_funfam_${cath_superfamily}.out"
-        path "${release}_funfam_${cath_superfamily}.dtbl"
+        path "${release}._.funfam_${cath_superfamily}.out"
+        path "${release}._.funfam_${cath_superfamily}.dtbl"
         val postprocessing_params
 
     script:
