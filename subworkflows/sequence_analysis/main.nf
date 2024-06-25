@@ -36,12 +36,11 @@ include {
     SFLD_FILTER_MATCHES;
 } from "$projectDir/modules/hmmer/filter/main"
 include {
-    PS_SCAN_RUNNER as PATTERNS_PS_SCAN_RUNNER;
-    PS_SCAN_RUNNER as PROFILES_PS_SCAN_RUNNER
-} from "$projectDir/modules/prosite/ps_scan/runner/main"
+    PFSCAN_RUNNER
+} from "$projectDir/modules/prosite/pfscan/runner/main"
 include {
-    PS_SCAN_PARSER
-} from "$projectDir/modules/prosite/ps_scan/parser/main"
+    PFSCAN_PARSER
+} from "$projectDir/modules/prosite/pfscan/parser/main"
 include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER
@@ -320,12 +319,12 @@ workflow SEQUENCE_ANALYSIS {
 
     // PROSITE Patterns
     runner_patterns = fasta.combine(member_params.prosite_patterns)
-    PATTERNS_PS_SCAN_RUNNER(runner_patterns)
-    PS_SCAN_PARSER(PATTERNS_PS_SCAN_RUNNER.out)
+    PATTERNS_PFSCAN_RUNNER(runner_patterns)
+    PFSCAN_PARSER(PATTERNS_PFSCAN_RUNNER.out)
 
     // PROSITE Profiles
     runner_profiles = fasta.combine(member_params.prosite_profiles)
-    PROFILES_PS_SCAN_RUNNER(runner_profiles)
+    PROFILES_PFSCAN_RUNNER(runner_profiles)
 
     // SignalP
     runner_signalp_params = fasta.combine(member_params.signalp)
