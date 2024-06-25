@@ -1,6 +1,6 @@
 # Base image with dependencies
 FROM --platform=linux/amd64 ubuntu:latest as interproscan-base
-LABEL authors="Laise Florentino (lcf@ebi.ac.uk), Matthias Blum (mblum@ebi.ac.uk)"
+LABEL authors="Laise Florentino (lcf@ebi.ac.uk), Emma Hobbs (ehobbs@ebi.ac.uk), Matthias Blum (mblum@ebi.ac.uk)"
 ARG VERSION=6.0-95.0
 ENV TZ=Europe/London
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
@@ -8,7 +8,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     apt-get update -y && \
     apt-get upgrade -y && \
     DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC && \
-    apt-get install -y autoconf automake autotools-dev bison build-essential cmake curl flex git libcurl3-gnutls libdivsufsort3 liblmdb0 libdw1 libgomp1 libnghttp2-dev libssl-dev libtool nghttp2 procps python3.10 python3-venv python3-pip python3-requests tar unzip wget zlib1g-dev
+    apt-get install -y autoconf automake autotools-dev bison build-essential cmake curl flex git libcurl3-gnutls libdivsufsort3 liblmdb0 libdw1 libgomp1 libnghttp2-dev libssl-dev libtool nghttp2 procps python3.10 python3-venv python3-pip python3-requests tar unzip zlib1g-dev
 
 # Pull NCBI BLAST (for CDD)
 FROM ncbi/blast as blast
@@ -18,8 +18,8 @@ FROM biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1 as hmmer
 
 # Final image with InterProScan, BLAST, and HMMER
 FROM interproscan-base
-COPY --from=blast / /blast
-COPY --from=hmmer / /hmmer
+COPY --from=blast / /opt/blast
+COPY --from=hmmer / /opt/hmmer
 
 # Install easel for predicting open reading frames (ORFs)
 WORKDIR /opt/easel
@@ -36,8 +36,7 @@ RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN git clone https://github.com/pierrebarbera/epa-ng
 RUN cd epa-ng && make
-RUN pip install biopython
-RUN pip install requests
+RUN pip install biopython==1.76
 
 # Install RpsbProc for CDD post-processing
 RUN curl -O https://ftp.ncbi.nih.gov/pub/mmdb/cdd/rpsbproc/RpsbProc-x64-linux.tar.gz && \
