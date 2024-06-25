@@ -13,7 +13,6 @@ process PFSCAN_RUNNER {
         path evaluator
         val release
         val switches
-        val post_processing  // PROSITE profiles only
     /*
     ps_scan_params params:
     0. patterns data file dir
