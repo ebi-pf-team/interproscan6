@@ -1,4 +1,9 @@
 process PS_SCAN_RUNNER {
+    /*
+    The ps_scan.pl script is a wrapper for the pfscan tool that is provided by the 
+    pftools developers. It automates running pfscan for all provided patterns and 
+    includes post-processing of the hits.
+    */
     container 'docker.io/sibswiss/pftools'
     label 'prosite_ps_scan_runner'
 
