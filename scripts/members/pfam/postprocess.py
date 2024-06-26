@@ -17,7 +17,7 @@ def post_process(hmm_matches: str, model2clans: dict) -> list:
     )
 
     filtered_matches = []
-    for candidate_match in matches_sorted:
+    for candidate_match in sorted_matches:
         protein_id, domain_id, domain_details = candidate_match
         keep = True
         try:
@@ -157,10 +157,6 @@ def _matches_are_nested(one: dict, two: dict):
     return not set(one).isdisjoint(set(two))
 
 
-def _regions_overlap(start_region_one: int, end_region_one: int, start_region_two: int, end_region_two: int):
-    return max(start_region_one, start_region_two) <= min(end_region_one, end_region_two)
-
-
 def build_result(filtered_matches):
     result = {}
     for protein_id, domain_id, domain_details in filtered_matches:
@@ -185,12 +181,13 @@ def main():
     dat = args.dat.split("=")[1]
     min_length = int(args.min_length)
 
-   # Need to return Pfam clans AND nesting relationships between models
-   seed_nesting = stockholm_parser.parser_seed_nesting(seed)
-   clans_parsed = stockholm_parser.parser_clans(clans, seed_nesting)
+    # Need to return Pfam clans AND nesting relationships between models
+    seed_nesting = stockholm_parser.parser_seed_nesting(seed)
+    clans_parsed = stockholm_parser.parser_clans(clans, seed_nesting)
+
     dat_parsed = stockholm_parser.get_pfam_a_dat(dat)
 
-    filtered_matches = post_process(hmm_parsed, clans)
+    filtered_matches = post_process(hmm_parsed, clans_parsed)
     filtered_fragments = build_fragments(filtered_matches, dat_parsed, min_length)
     result = build_result(filtered_fragments)
     print(json.dumps(result, indent=4))

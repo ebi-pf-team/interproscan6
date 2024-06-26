@@ -6,17 +6,10 @@ NESTING_LINE = "#=GF NE"
 ACCESSION_EXTRACTOR_PATTERN = re.compile("^\\#=GF\\s+[A-Z]{2}\\s+([A-Z0-9]+).*$")
 
 
-# it needs to return Pfam clans AND nesting relationships between models.
-def get_clans(pfam_a_seed_file: str, pfam_clans_file: str):
-    seed_nesting = parser_seed_nesting(pfam_a_seed_file)
-    clans_parsed = parser_clans(pfam_clans_file, seed_nesting)
-    return clans_parsed
-
-
-def parser_seed_nesting(pfam_a_seed_file: str) -> dict[str, str]:
+def parser_seed_nesting(pfam_a_seed_file: str) -> dict:
     nesting_info = {}
-    with open(pfam_a_seed_file, 'r') as file:
-        for line in file:
+    with open(pfam_a_seed_file, 'rb') as file:
+        for line in map(_decode, file):
             if line.startswith(ACCESSION_LINE):
                 model_accession = re.match(ACCESSION_EXTRACTOR_PATTERN, line)
                 if model_accession:
@@ -34,8 +27,8 @@ def parser_seed_nesting(pfam_a_seed_file: str) -> dict[str, str]:
 
 
 def parser_clans(pfam_clans_file: str, parsed_seed: dict[str, str]) -> dict[str, str]:
-    with open(pfam_clans_file, 'r', errors="replace") as file:
-        for line in file:
+    with open(pfam_clans_file, 'rb') as file:
+        for line in map(_decode, file):
             if line.startswith(ACCESSION_LINE):
                 clan_accession = re.match(ACCESSION_EXTRACTOR_PATTERN, line)
                 if clan_accession:
@@ -56,8 +49,8 @@ def get_pfam_a_dat(pfam_a_dat_file):
     name2acc = {}
     acc2nested = {}
 
-    with open(pfam_a_dat_file, 'r') as reader:
-        for line in reader:
+    with open(pfam_a_dat_file, 'rb') as reader:
+        for line in map(_decode, reader):
             line = line.strip()
             if line.startswith("#=GF ID"):
                 name = line.split()[2]
@@ -80,3 +73,19 @@ def get_pfam_a_dat(pfam_a_dat_file):
             except KeyError:
                 parsed_dat[accession] = [name2acc[name]]
     return parsed_dat
+
+
+def _decode(b: bytes) -> str:
+    """Decode bytes to a string using UTF-8 or Latin-1
+
+    :param b: bytes to decode
+    :return: a string, with any trailing whitespace trimmed
+    """
+    try:
+        s = b.decode("utf-8")
+    except UnicodeDecodeError:
+        pass
+    else:
+        return s.rstrip()
+
+    return b.decode("latin-1").rstrip()
