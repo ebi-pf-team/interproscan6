@@ -8,11 +8,8 @@ process PFSCAN_RUNNER {
     label 'prosite_pfscan_runner'
 
     input:
-        path fasta
-        path data
-        path evaluator
-        val release
-        val switches
+    tuple
+        path(fasta), path(data), path(evaluator), val(release), val(switches)
     /*
     ps_scan_params params:
     0. patterns data file dir
