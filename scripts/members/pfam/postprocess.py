@@ -183,7 +183,9 @@ def main():
     dat = args.dat.split("=")[1]
     min_length = int(args.min_length)
 
-    clans = stockholm_parser.get_clans(seed, clans)
+   # Need to return Pfam clans AND nesting relationships between models
+   seed_nesting = stockholm_parser.parser_seed_nesting(seed)
+   clans_parsed = stockholm_parser.parser_clans(clans, seed_nesting)
     dat_parsed = stockholm_parser.get_pfam_a_dat(dat)
 
     filtered_matches = post_process(hmm_parsed, clans)
