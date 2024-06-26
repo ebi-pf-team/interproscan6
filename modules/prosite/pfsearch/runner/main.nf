@@ -16,7 +16,7 @@ process PFSEARCH_RUNNER {
     // when we move over to the single docker file
     script:
     """
-    python3 $projectDir/scripts/members/prosite/run_prosite.py \
+    python3 $projectDir/scripts/members/prosite/run_pfsearchv3.py \
         ${models_dir} \
         ${fasta} \
         ${release}_prosite_profiles.out \
