@@ -21,6 +21,6 @@ process PFSEARCH_RUNNER {
         ${fasta} \
         ${release}_prosite_profiles.out \
         $projectDir/bin/prosite/pfsearchV3 \
-        ${switches} > print.statments.out
+        ${switches}
     """
 }
