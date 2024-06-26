@@ -7,12 +7,14 @@ def post_process(hmm_matches: str, model2clans: dict) -> list:
     with open(hmm_matches, "r") as matches:
         matches_info = json.load(matches)
 
-    matches_list = []
-    for protein_id, domains in matches_info.items():
-        for domain_id, domain_details in domains.items():
-            matches_list.append((protein_id, domain_id, domain_details))
-    # evalue ASC e score DESC to keep the best matches in the optimistic algorithm below
-    matches_sorted = sorted(matches_list, key=lambda match: (float(match[2]['evalue']), -float(match[2]['score'])))
+    sorted_matches = sorted(
+        (
+            (protein_id, domain_id, domain_details)
+            for protein_id, domains in matches_info.items()
+            for domain_id, domain_details in domains.items()
+        ),
+        key=lambda match: (float(match[2]['evalue']), -float(match[2]['score']))
+    )
 
     filtered_matches = []
     for candidate_match in matches_sorted:
