@@ -11,7 +11,10 @@ MATCH_ELEMENT = {
     'NCBIFAM': 'hmmer3-match',
     'PANTHER': 'hmmer3-match',
     'SFLD': 'hmmer3-match',
+    'PROSITE_PATTERNS': 'profilescan-match',
+    'PROSITE_PROFILES': 'profilesearch-match',  # changed from i5 which is also profilescan-match
 }
+
 
 def xml_output(seq_matches: dict, output_path: str, version: str):
     xml_output = os.path.join(output_path + '.xml')
@@ -91,6 +94,11 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     elif match_data['member_db'].upper() == "SFLD":
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("sites", location["sites"])
+                    elif match_data['member_db'].upper() == "PROSITE_PROFILES":
+                        location_elem = ET.SubElement(locations_elem, "analysis-location")
+                        location_elem.set("start", str(location["start"]))
+                        location_elem.set("end", str(location["end"]))
+                        location_elem.set("alignment", str(location["alignment"]))
                     else:
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("env-end", str(location["envelopeEnd"]))

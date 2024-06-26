@@ -76,7 +76,7 @@ def parse_and_filter(pfsearch_out: str, blacklist: list[str], release: str) -> d
                         "accession": hit.profile,
                         "name": hit.profile_name,
                         "description": "",
-                        "member_db": "PROSITE Profiles",
+                        "member_db": "PROSITE_PROFILES",
                         "version": release,
                         "model-ac": hit.profile,
                         "locations": []
