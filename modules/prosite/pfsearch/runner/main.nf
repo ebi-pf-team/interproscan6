@@ -7,10 +7,11 @@ process PFSEARCH_RUNNER {
     label 'prosite_pfsearch_runner'
 
     input:
-        tuple path(fasta), path(models_dir), val(release), val(switches), val(postprocessing_params)
+        tuple path(fasta), path(models_dir), val(release), val(switches), path(blacklist_file)
 
     output:
-        path "${release}_prosite_profiles.out"
+        path "${release}._.prosite_profiles.out"
+        path blacklist_file
 
     // change to use just pfsearchV3 not the full project dir path
     // when we move over to the single docker file
@@ -19,7 +20,7 @@ process PFSEARCH_RUNNER {
     python3 $projectDir/scripts/members/prosite/run_pfsearchv3.py \
         ${models_dir} \
         ${fasta} \
-        ${release}_prosite_profiles.out \
+        ${release}._.prosite_profiles.out \
         $projectDir/bin/prosite/pfsearchV3 \
         ${switches}
     """

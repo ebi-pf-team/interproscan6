@@ -1,27 +1,18 @@
 process PFSEARCH_PARSER {
-    /*
-    We us an inhouse python script to coordinate running pfsearch for 
-    all provided PROSTITE Profiles
-    */
-    container 'docker.io/sibswiss/pftools'
-    label 'prosite_pfsearch_runner'
+    label 'analysis_parser'
 
     input:
-        path fasta
-        path models_dir
-        val release
-        val switches
+        path pfsearch_out
+        path blacklist_file
 
     output:
-        path "${release}_prosite_profiles.out"
+        path "${pfsearch_out}-filtered.json"
 
     script:
     """
-    $projectDir/scripts/prosite/run_prosite.py \
-        ${models_dir} \
-        ${fasta} \
-        ${release}_prosite_profiles.out \
-        pfsearchV3 \
-        ${swithces} 
+    python3 $projectDir/scripts/members/prosite/pfsearch_parser.py \
+        ${pfsearch_out} \
+        ${pfsearch_out}-filtered.json \
+        ${blacklist_file}
     """
 }

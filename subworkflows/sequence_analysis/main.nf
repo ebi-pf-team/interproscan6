@@ -36,16 +36,16 @@ include {
     SFLD_FILTER_MATCHES;
 } from "$projectDir/modules/hmmer/filter/main"
 include {
-    PFSEARCH_RUNNER
+    PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER
 } from "$projectDir/modules/prosite/pfsearch/runner/main"
 include {
-    PFSEARCH_PARSER
+    PFSEARCH_PARSER as PROSITE_PROFILES_PARSER
 } from "$projectDir/modules/prosite/pfsearch/parser/main"
 include {
-    PFSCAN_RUNNER
+    PFSCAN_RUNNER as PROSITE_PATTERNS_RUNNER
 } from "$projectDir/modules/prosite/pfscan/runner/main"
 include {
-    PFSCAN_PARSER
+    PFSCAN_PARSER as PROSITE_PATTERNS_PARSER
 } from "$projectDir/modules/prosite/pfscan/parser/main"
 include {
     SIGNALP_RUNNER;
@@ -184,10 +184,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".data,
                 params.members."${member}".release,
                 params.members."${member}".switches,
-                [
-                    params.members."${member}".models_dir,
-                    params.members."${member}".skip_flagged_profiles,
-                ]  // post-processing params
+                params.members."${member}".skip_flagged_profiles
             ]
 
         signalp: runner == 'signalp'
@@ -322,14 +319,15 @@ workflow SEQUENCE_ANALYSIS {
     CDD_POSTPROCESS(CDD_RUNNER.out)
     CDD_PARSER(CDD_POSTPROCESS.out)
 
-    // PROSITE Patterns
+    // PROSITE Patterns (uses pfscanV3)
     runner_patterns = fasta.combine(member_params.prosite_patterns)
-    PFSCAN_RUNNER(runner_patterns)
-    PFSCAN_PARSER(PFSCAN_RUNNER.out)
+    PROSITE_PATTERNS_RUNNER(runner_patterns)
+    PROSITE_PATTERNS_PARSER(PROSITE_PATTERNS_RUNNER.out)
 
-    // PROSITE Profiles
+    // PROSITE Profiles (uses pfsearchV3)
     runner_profiles = fasta.combine(member_params.prosite_profiles)
-    PFSEARCH_RUNNER(runner_profiles)
+    PROSITE_PROFILES_RUNNER(runner_profiles)
+    PROSITE_PROFILES_PARSER(PROSITE_PROFILES_RUNNER.out)
 
     // SignalP
     runner_signalp_params = fasta.combine(member_params.signalp)
@@ -348,6 +346,8 @@ workflow SEQUENCE_ANALYSIS {
             PANTHER_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
             CDD_PARSER.out,
+            PROSITE_PATTERNS_PARSER.out,
+            PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out
         )
         .set { parsed_results }
@@ -359,6 +359,8 @@ workflow SEQUENCE_ANALYSIS {
             PANTHER_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
             CDD_PARSER.out,
+            PROSITE_PATTERNS_PARSER.out,
+            PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out
         )
         .set { parsed_results }
