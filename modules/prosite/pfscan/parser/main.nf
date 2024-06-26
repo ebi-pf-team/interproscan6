@@ -1,4 +1,4 @@
-process PFSCAN_RUNNER_PARSER {
+process PFSCAN_PARSER {
     /*
     Parse the output from the ps_scan.pl script (wrapper for pfscan)
     into the internal IPS6 JSON structure

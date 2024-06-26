@@ -36,6 +36,12 @@ include {
     SFLD_FILTER_MATCHES;
 } from "$projectDir/modules/hmmer/filter/main"
 include {
+    PFSEARCH_RUNNER
+} from "$projectDir/modules/prosite/pfsearch/runner/main"
+include {
+    PFSEARCH_PARSER
+} from "$projectDir/modules/prosite/pfsearch/parser/main"
+include {
     PFSCAN_RUNNER
 } from "$projectDir/modules/prosite/pfscan/runner/main"
 include {
@@ -166,22 +172,22 @@ workflow SEQUENCE_ANALYSIS {
 
         prosite_patterns: runner == "prosite_patterns"
             return [
-                params.members."${member}".data
-                params.members."${member}".evaluator
-                params.members."${member}".release
+                params.members."${member}".data,
+                params.members."${member}".evaluator,
+                params.members."${member}".release,
                 params.members."${member}".switches
-                []  // post-processing params
+                []  // post-processing params,
             ]
 
         prosite_profiles: runner == "prosite_profiles"
             return [
-                params.members."${member}".data
-                params.members."${member}".evaluator
-                params.members."${member}".release
-                params.members."${member}".switches
+                params.members."${member}".data,
+                params.members."${member}".evaluator,
+                params.members."${member}".release,
+                params.members."${member}".switches,
                 [
-                    params.members."${member}".models_dir
-                    params.members."${member}".skip_flagged_profiles
+                    params.members."${member}".models_dir,
+                    params.members."${member}".skip_flagged_profiles,
                 ]  // post-processing params
             ]
 
@@ -319,12 +325,12 @@ workflow SEQUENCE_ANALYSIS {
 
     // PROSITE Patterns
     runner_patterns = fasta.combine(member_params.prosite_patterns)
-    PATTERNS_PFSCAN_RUNNER(runner_patterns)
-    PFSCAN_PARSER(PATTERNS_PFSCAN_RUNNER.out)
+    PFSCAN_RUNNER(runner_patterns)
+    PFSCAN_PARSER(PFSCAN_RUNNER.out)
 
     // PROSITE Profiles
     runner_profiles = fasta.combine(member_params.prosite_profiles)
-    PROFILES_PFSCAN_RUNNER(runner_profiles)
+    PFSEARCH_RUNNER(runner_profiles)
 
     // SignalP
     runner_signalp_params = fasta.combine(member_params.signalp)
