@@ -96,6 +96,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("sites", location["sites"])
                     elif match_data['member_db'].upper() == "PROSITE_PROFILES":
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
+                        location_elem.set("score", str(location["score"]))
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("end", str(location["end"]))
                         location_elem.set("alignment", str(location["alignment"]))
