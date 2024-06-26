@@ -182,7 +182,6 @@ workflow SEQUENCE_ANALYSIS {
         prosite_profiles: runner == "prosite_profiles"
             return [
                 params.members."${member}".data,
-                params.members."${member}".evaluator,
                 params.members."${member}".release,
                 params.members."${member}".switches,
                 [

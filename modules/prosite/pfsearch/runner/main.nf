@@ -7,7 +7,7 @@ process PFSEARCH_RUNNER {
     label 'prosite_pfsearch_runner'
 
     input:
-        tuple path(fasta), path(models_dir), val(release), val(switches)
+        tuple path(fasta), path(models_dir), val(release), val(switches), val(postprocessing_params)
 
     output:
         path "${release}_prosite_profiles.out"
@@ -19,6 +19,6 @@ process PFSEARCH_RUNNER {
         ${fasta} \
         ${release}_prosite_profiles.out \
         pfsearchV3 \
-        ${swithces} 
+        ${switches} 
     """
 }
