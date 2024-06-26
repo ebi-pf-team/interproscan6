@@ -23,14 +23,15 @@ def main():
 
     profiles = _get_profile_paths(models_dir)
     for profile in profiles:
-        run_cmd = [bin_cmd, binary_switches, profile, fasta_file]
+        run_cmd = [bin_cmd, profile, fasta_file, binary_switches]
         try:
+            print(" ".join(run_cmd))
             output = subprocess.check_output(run_cmd, universal_newlines=True)
             if output.strip():
                 with open(output_file, 'a') as out_file:
                     out_file.write(output + '\n')
         except Exception:
-            sys.exit("Error running pfsearchV3 using cmd:" + run_cmd) 
+            sys.exit("Error running pfsearchV3 using cmd:" + run_cmd)
 
 
 if __name__ == "__main__":

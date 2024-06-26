@@ -3,7 +3,7 @@ process PFSEARCH_RUNNER {
     We us an inhouse python script to coordinate running pfsearch for 
     all provided PROSTITE Profiles
     */
-    container 'docker.io/sibswiss/pftools'
+    // container 'docker.io/sibswiss/pftools'
     label 'prosite_pfsearch_runner'
 
     input:
@@ -12,13 +12,15 @@ process PFSEARCH_RUNNER {
     output:
         path "${release}_prosite_profiles.out"
 
+    // change to use just pfsearchV3 not the full project dir path
+    // when we move over to the single docker file
     script:
     """
-    $projectDir/scripts/prosite/run_prosite.py \
+    python3 $projectDir/scripts/members/prosite/run_prosite.py \
         ${models_dir} \
         ${fasta} \
         ${release}_prosite_profiles.out \
-        pfsearchV3 \
-        ${switches} 
+        $projectDir/bin/prosite/pfsearchV3 \
+        ${switches} > print.statments.out
     """
 }
