@@ -49,10 +49,12 @@ def json_output(seq_matches: dict, output_path: str, version: str):
 
                     if match_data['member_db'].upper() == "CDD":
                         description = match_data['name']
+
                     if match_data['member_db'].upper() in ["GENE3D", "FUNFAM"]:
                         accession = match_data['accession']  # GENE3D needs the info after ":" (e.g G3DSA:3.20.20.70)
                     else:
-                        accession = match_data['accession'].split(":")[0],  # drop subfamily
+                        accession = match_data['accession'].split(":")[0]  # drop subfamily
+
                     signature = {
                         "accession": accession,
                         "name": match_data['name'],

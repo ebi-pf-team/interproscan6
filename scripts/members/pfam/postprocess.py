@@ -24,10 +24,10 @@ def post_process(hmm_matches: str, model2clans: dict) -> dict:
             candidate_match_info = model2clans.get(domain_id, {})
             for filtered_domain_id, filtered_domain_details in filtered_matches[protein_id].items():
                 filtered_match_info = model2clans.get(filtered_domain_id, {})
-                candidate_clan = candidate_match_info.get("clan", "")
-                filtered_clan = filtered_match_info.get("clan", "")
+                candidate_clan = candidate_match_info.get("clan", None)
+                filtered_clan = filtered_match_info.get("clan", None)
                 # same clan?
-                if candidate_clan == filtered_clan:
+                if candidate_clan and (candidate_clan == filtered_clan):
                     not_overlapping_locations = []
                     # overlap?
                     for candidate_location in domain_details["locations"]:
