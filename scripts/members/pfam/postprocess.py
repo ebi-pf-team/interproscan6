@@ -3,38 +3,40 @@ import json
 import stockholm_parser
 
 
-def post_process(hmm_matches: str, model2clans: dict) -> list:
+def post_process(hmm_matches: str, model2clans: dict) -> dict:
     with open(hmm_matches, "r") as matches:
         matches_info = json.load(matches)
 
-    sorted_matches = sorted(
-        (
-            (protein_id, domain_id, domain_details)
-            for protein_id, domains in matches_info.items()
-            for domain_id, domain_details in domains.items()
-        ),
-        key=lambda match: (float(match[2]['evalue']), -float(match[2]['score']))
-    )
+    sorted_matches_info = {}
+    for protein_id, domains in matches_info.items():
+        sorted_domains = sorted(
+            domains.items(),
+            key=lambda item: (float(item[1]['evalue']), -float(item[1]['score']))
+        )
+        sorted_matches_info[protein_id] = {domain_id: domain_details for domain_id, domain_details in sorted_domains}
 
-    filtered_matches = []
-    for candidate_match in sorted_matches:
-        protein_id, domain_id, domain_details = candidate_match
-        keep = True
-        try:
-            candidate_match_info = model2clans[domain_id]
-            for filtered_match in filtered_matches:
-                filtred_match_info = model2clans.get(filtered_match[1], {})
+    filtered_matches = {}
+
+    for protein_id, domains in sorted_matches_info.items():
+        filtered_matches[protein_id] = {}
+        for domain_id, domain_details in domains.items():
+            keep = True
+            candidate_match_info = model2clans.get(domain_id, {})
+            for filtered_domain_id, filtered_domain_details in filtered_matches[protein_id].items():
+                filtered_match_info = model2clans.get(filtered_domain_id, {})
+                candidate_clan = candidate_match_info.get("clan", "")
+                filtered_clan = filtered_match_info.get("clan", "")
                 # same clan?
-                if candidate_match_info["clan"] == filtred_match_info["clan"]:
-                    # overlap?
+                if candidate_clan == filtered_clan:
                     not_overlapping_locations = []
+                    # overlap?
                     for candidate_location in domain_details["locations"]:
                         overlapping = False
-                        for filtered_location in filtered_match[2]["locations"]:
+                        for filtered_location in filtered_domain_details["locations"]:
                             if _matches_overlap(candidate_location, filtered_location):
                                 # if overlapping, check if they are NOT nested
                                 candidate_nested = candidate_match_info.get('nested', [])
-                                filtered_nested = filtred_match_info.get('nested', [])
+                                filtered_nested = filtered_match_info.get('nested', [])
                                 if not _matches_are_nested(candidate_nested, filtered_nested):
                                     overlapping = True
                                     break
@@ -48,79 +50,77 @@ def post_process(hmm_matches: str, model2clans: dict) -> list:
                         break
                     else:
                         domain_details["locations"] = not_overlapping_locations
-        except KeyError:
-            pass
 
-        if keep:
-            filtered_matches.append(candidate_match)
+            if keep:
+                filtered_matches[protein_id][domain_id] = domain_details
 
     return filtered_matches
 
 
-def build_fragments(filtered_matches: list, dat_parsed: dict, min_length: int) -> list:
+def build_fragments(filtered_matches: dict, dat_parsed: dict, min_length: int) -> list:
     processed_matches = []
-    for info_pfam in filtered_matches:
-        protein_id, domain_id, pfam_match = info_pfam
-        model_id = pfam_match['accession']
-        nested_models = dat_parsed.get(model_id, [])
 
-        if nested_models:
-            location_fragments = []
-            for info_raw in filtered_matches:
-                _, _, raw_match = info_raw
-                for location in raw_match["locations"]:
-                    if (raw_match['accession'] in nested_models) \
-                        and _matches_overlap(location, pfam_match["locations"][0]):
-                        location_fragments.append({
-                            'start': location['start'],
-                            'end': location['end']
-                        })
-            location_fragments.sort(key=lambda x: (x['start'], x['end']))
+    for protein_id, domains in filtered_matches.items():
+        for domain_id, pfam_match in domains.items():
+            model_id = pfam_match['accession']
+            nested_models = dat_parsed.get(model_id, [])
 
-            fragment_dc_status = "CONTINUOUS"
-            raw_discontinuous_matches = [pfam_match]
-            for fragment in location_fragments:
-                two_actual_regions = False
-                (
-                    new_location_start,
-                    new_location_end,
-                    final_location_end,
-                    fragment_dc_status,
-                    two_actual_regions
-                ) = _create_fragment(
-                    raw_discontinuous_matches[0],
-                    fragment,
-                    fragment_dc_status,
-                    two_actual_regions
-                )
+            if nested_models:
+                location_fragments = []
+                for other_domain_id, other_match in domains.items():
+                    for location in other_match["locations"]:
+                        if (other_match['accession'] in nested_models) \
+                                and _matches_overlap(location, pfam_match["locations"][0]):
+                            location_fragments.append({
+                                'start': location['start'],
+                                'end': location['end']
+                            })
+                location_fragments.sort(key=lambda x: (x['start'], x['end']))
 
-                for loc in raw_discontinuous_matches[0]["locations"]:  # it's always only one location here?
-                    if 'location-fragments' not in loc:
-                        loc['location-fragments'] = []
+                fragment_dc_status = "CONTINUOUS"
+                raw_discontinuous_matches = [pfam_match]
+                for fragment in location_fragments:
+                    two_actual_regions = False
+                    (
+                        new_location_start,
+                        new_location_end,
+                        final_location_end,
+                        fragment_dc_status,
+                        two_actual_regions
+                    ) = _create_fragment(
+                        raw_discontinuous_matches[0],
+                        fragment,
+                        fragment_dc_status,
+                        two_actual_regions
+                    )
 
-                    loc['location-fragments'].append({
-                        'start': new_location_start,
-                        'end': new_location_end,
-                        'dc-status': fragment_dc_status
-                    })
+                    for loc in raw_discontinuous_matches[0]["locations"]:  # it's always only one location here?
+                        if 'location-fragments' not in loc:
+                            loc['location-fragments'] = []
 
-                    if two_actual_regions:
                         loc['location-fragments'].append({
-                            'start': int(fragment['end']) + 1,
-                            'end': final_location_end,
-                            'dc-status': "N_TERMINAL_DISC"
+                            'start': new_location_start,
+                            'end': new_location_end,
+                            'dc-status': fragment_dc_status
                         })
 
-            for raw_discontinuous_match in raw_discontinuous_matches:
-                match_length = int(raw_discontinuous_match["locations"][0]['end']) - \
-                    int(raw_discontinuous_match["locations"][0]['start']) + 1
-                if match_length >= min_length:
-                    processed_matches.append((protein_id, domain_id, raw_discontinuous_match))
-        else:
-            if len(pfam_match["locations"]) > 0:
-                match_length = int(pfam_match["locations"][0]['end']) - int(pfam_match["locations"][0]['start']) + 1
-                if match_length >= min_length:
-                    processed_matches.append((protein_id, domain_id, pfam_match))
+                        if two_actual_regions:
+                            loc['location-fragments'].append({
+                                'start': int(fragment['end']) + 1,
+                                'end': final_location_end,
+                                'dc-status': "N_TERMINAL_DISC"
+                            })
+
+                for raw_discontinuous_match in raw_discontinuous_matches:
+                    match_length = int(raw_discontinuous_match["locations"][0]['end']) - \
+                                   int(raw_discontinuous_match["locations"][0]['start']) + 1
+                    if match_length >= min_length:
+                        processed_matches.append((protein_id, domain_id, raw_discontinuous_match))
+            else:
+                if len(pfam_match["locations"]) > 0:
+                    match_length = int(pfam_match["locations"][0]['end']) - int(pfam_match["locations"][0]['start']) + 1
+                    if match_length >= min_length:
+                        processed_matches.append((protein_id, domain_id, pfam_match))
 
     return processed_matches
 

@@ -250,6 +250,7 @@ workflow SEQUENCE_ANALYSIS {
             FUNFAM_FILTER_MATCHES.out[0],
             GENE3D_FILTER_MATCHES.out[0],
             PANTHER_FILTER_MATCHES.out,
+            PFAM_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
             CDD_PARSER.out,
             SIGNALP_PARSER.out
@@ -261,6 +262,7 @@ workflow SEQUENCE_ANALYSIS {
             NCBIFAM_HMMER_PARSER.out[0],
             FUNFAM_FILTER_MATCHES.out[0],
             PANTHER_FILTER_MATCHES.out,
+            PFAM_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
             CDD_PARSER.out,
             SIGNALP_PARSER.out
