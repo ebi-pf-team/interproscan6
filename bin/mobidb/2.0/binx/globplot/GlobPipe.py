@@ -4,11 +4,10 @@
 # GlobPlot is licensed under the Academic Free license
 
 
+import fpformat
 import sys
 from os import popen3
 from string import *
-
-import fpformat
 
 try:
     smoothFrame = int(sys.argv[1])

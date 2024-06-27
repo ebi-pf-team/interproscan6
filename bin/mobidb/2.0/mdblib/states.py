@@ -3,11 +3,11 @@ Contain States class which abstracts series of statuses. It is used to operate o
 applying mathematical morphology and translation to other representations (regions).
 """
 
-import copy
-import logging
-import math
 import re
 import sys
+import copy
+import math
+import logging
 from itertools import groupby
 from operator import itemgetter
 
@@ -16,7 +16,6 @@ class States(object):
     """
     States class
     """
-
     def __init__(self, _states):
         self.states = _states
 
@@ -28,7 +27,7 @@ class States(object):
         """
         self.states = [translation[status] for status in self.states]
 
-    def math_morphology(self, rmax=3, tags=("D", "S")):
+    def math_morphology(self, rmax=3, tags=('D', 'S')):
         """Erosion/Dilation implementation of Order/Disorder states
 
         Mathematical Morphology (MM) Erosion & Dilation implementation of
@@ -69,18 +68,15 @@ class States(object):
         dis_tag, str_tag = tags
 
         if not isinstance(rmax, int):
-            logging.error(
-                "Mathematical Morphology length parameter must be an integer, "
-                "instead its: %s",
-                rmax,
-            )
+            logging.error("Mathematical Morphology length parameter must be an integer, "
+                            "instead its: %s", rmax)
             raise ValueError
 
         else:
-            logging.debug("startseq: %s", "".join(self.states))
+            logging.debug('startseq: %s', ''.join(self.states))
 
             if isinstance(self.states, list):
-                states = "".join(map(str, self.states))
+                states = ''.join(map(str, self.states))
             else:
                 states = self.states
 
@@ -95,7 +91,7 @@ class States(object):
                     states = states.replace(pattern, new_pattern)
 
             # Disorder contraction
-            states = rmax * str_tag + states[rmax:-rmax] + rmax * str_tag
+            states = rmax * str_tag + states[rmax: -rmax] + rmax * str_tag
 
             for rlevel in range(1, rmax + 1):
                 pattern = str_tag * rlevel + dis_tag * rlevel + str_tag * rlevel
@@ -104,10 +100,10 @@ class States(object):
                 for _ in range(0, rlevel + 1):
                     states = states.replace(pattern, new_pattern)
 
-            self.states = states[rmax:-rmax]
-            logging.debug("matmorph: %s", self.states)
+            self.states = states[rmax: -rmax]
+            logging.debug('matmorph: %s', self.states)
 
-    def merge_close_longidrs(self, tags=("D", "S")):
+    def merge_close_longidrs(self, tags=('D', 'S')):
         """Merge two long IDRs separated by a short structured region
 
         Convert stretches of structured residues flanked by long IDRs into ID
@@ -129,27 +125,19 @@ class States(object):
             if match_obj:
                 match_length = match_obj.end(0) - match_obj.start(0)
 
-                merged_states = (
-                    merged_states[: match_obj.start(0)]
-                    + dis_tag * match_length
-                    + merged_states[match_obj.end(0) :]
-                )
+                merged_states = merged_states[:match_obj.start(0)] \
+                    + dis_tag * match_length + \
+                    merged_states[match_obj.end(0):]
             else:
                 there_are_matches = False
 
         if merged_states is not None:
             self.states = merged_states
 
-        logging.debug("mergeidr: %s", self.states)
+        logging.debug('mergeidr: %s', self.states)
 
-    def to_regions(
-        self,
-        keep_none=False,
-        translate_states=None,
-        start_index=0,
-        positivetag=None,
-        len_thr=1,
-    ):
+    def to_regions(self, keep_none=False, translate_states=None,
+                   start_index=0, positivetag=None, len_thr=1):
         """Transform multiclass list or string into a list of disorder regions (start/end)
 
         :param keep_none: modifier, if true return regions of missing annotation
@@ -179,13 +167,8 @@ class States(object):
                 if end - start + 1 >= len_thr:
                     status = translate_states[status] if translate_states else status
 
-                    if (
-                        not positivetag
-                        or status == positivetag
-                        or (
-                            translate_states and status == translate_states[positivetag]
-                        )
-                    ):
+                    if not positivetag or  status == positivetag or \
+                            (translate_states and status == translate_states[positivetag]):
                         regions.append([start, end, status])
 
         return regions
@@ -219,12 +202,12 @@ class States(object):
         :return: identifier of the ID class
         :rtype: str
         """
-        id_class = ""
+        id_class = ''
         seqlen = float(len(seq))
 
         # make translation table for amino acids
-        intab = "RKDEACFGHILMNPQSTVWY"
-        outab = "PPNN____P___________"
+        intab = 'RKDEACFGHILMNPQSTVWY'
+        outab = 'PPNN____P___________'
         trantab = str.maketrans(intab, outab)
 
         # translate sequence
@@ -241,21 +224,21 @@ class States(object):
         if fcr > 0.35:
             # polyampholytes
             if ncpr <= 0.35 or (f_minus > 0.35 and f_plus > 0.35):
-                id_class = "PA"
+                id_class = 'PA'
             # polyelectrolytes
             else:
                 # positive charge
                 if f_plus > 0.35:
-                    id_class = "PPE"
+                    id_class = 'PPE'
                 # negative charge
                 if f_minus > 0.35:
-                    id_class = "NPE"
+                    id_class = 'NPE'
         # weak charge
         else:
-            id_class = "WC"
+            id_class = 'WC'
 
         if not id_class:
-            logging.warning("Couldn't define ID flavor for seq: %s", seq)
+            logging.warning('Couldn\'t define ID flavor for seq: %s', seq)
 
         return id_class
 
@@ -293,15 +276,15 @@ class States(object):
         :rtype: iterator
         """
 
-        new_seq = copy.copy(self.states[1 : n + 1][::-1])  # Reversed start
+        new_seq = copy.copy(self.states[1:n + 1][::-1])  # Reversed start
         new_seq += copy.copy(self.states)
-        new_seq += copy.copy(self.states[-n - 1 : -1][::-1])  # Reversed end
+        new_seq += copy.copy(self.states[-n - 1:-1][::-1])  # Reversed end
         seq = new_seq
 
         for pos in range(n, len(seq) - n):
-            yield seq[pos - n : pos + n + 1]
+            yield seq[pos - n:pos + n + 1]
 
-    def make_binary(self, active, inactive="0"):
+    def make_binary(self, active, inactive='0'):
         """
         Transform multi-class states in binary states (setter method).
 
@@ -314,4 +297,4 @@ class States(object):
         :type inactive: str
         """
 
-        self.states = "".join(x if x == active else inactive for x in self.states)
+        self.states = ''.join(x if x == active else inactive for x in self.states)

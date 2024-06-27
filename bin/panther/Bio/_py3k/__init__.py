@@ -46,10 +46,12 @@ go away.
 
 import sys
 
+
 if sys.version_info[0] >= 3:
     # Code for Python 3
+    from builtins import open, zip, map, filter, range, input
+
     import codecs
-    from builtins import filter, input, map, open, range, zip
 
     # Lots of our Python 2 code uses isinstance(x, basestring)
     # which after 2to3 becomes isinstance(x, str)
@@ -127,30 +129,28 @@ if sys.version_info[0] >= 3:
 
     # On Python 3, this will be a unicode StringIO
     from io import StringIO
-    from urllib.error import HTTPError, URLError
-    from urllib.parse import quote, urlencode
-    # On Python 3 urllib, urllib2, and urlparse were merged:
-    from urllib.request import (Request, urlcleanup, urlopen, urlparse,
-                                urlretrieve)
 
-    exec(
-        """\
+    # On Python 3 urllib, urllib2, and urlparse were merged:
+    from urllib.request import urlopen, Request, urlretrieve, urlparse, urlcleanup
+    from urllib.parse import urlencode, quote
+    from urllib.error import URLError, HTTPError
+
+    exec("""\
 def raise_from(value, from_value):
     try:
         raise value from from_value
     finally:
         value = None
-"""
-    )
+""")
 
 else:
     # Python 2 code
-    from __builtin__ import basestring, open
-    from __builtin__ import raw_input as input
-    from __builtin__ import unicode
-    from __builtin__ import xrange as range
+    from __builtin__ import open, basestring, unicode
+
     # Import Python3 like iterator functions:
-    from future_builtins import filter, map, zip
+    from future_builtins import zip, map, filter
+    from __builtin__ import xrange as range
+    from __builtin__ import raw_input as input
 
     _bytes_to_string = lambda b: b  # bytes to string, i.e. do nothing
     _string_to_bytes = lambda s: str(s)  # str (or unicode) to bytes string
@@ -194,12 +194,15 @@ else:
         from StringIO import StringIO
 
     # Under urllib.request on Python 3:
+    from urllib2 import urlopen, Request
+    from urllib import urlretrieve, urlcleanup
+    from urlparse import urlparse
+
     # Under urllib.parse on Python 3:
-    from urllib import quote, urlcleanup, urlencode, urlretrieve
+    from urllib import urlencode, quote
 
     # Under urllib.error on Python 3:
-    from urllib2 import HTTPError, Request, URLError, urlopen
-    from urlparse import urlparse
+    from urllib2 import URLError, HTTPError
 
     def raise_from(value, from_value):
         raise value
@@ -212,19 +215,15 @@ if sys.platform == "win32":
     # http://bugs.python.org/issue10197
     def getoutput(cmd):
         import subprocess
-
-        child = subprocess.Popen(
-            cmd,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            universal_newlines=True,
-            shell=False,
-        )
+        child = subprocess.Popen(cmd,
+                                 stdin=subprocess.PIPE,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT,
+                                 universal_newlines=True,
+                                 shell=False)
         stdout, stderr = child.communicate()
         # Remove trailing \n to match the Unix function,
         return stdout.rstrip("\n")
-
 elif sys.version_info[0] >= 3:
     # Use subprocess.getoutput on Python 3,
     from subprocess import getoutput

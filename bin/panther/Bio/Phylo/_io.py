@@ -14,7 +14,7 @@ This API follows the same semantics as Biopython's ``SeqIO`` and
 from __future__ import print_function
 
 from Bio import File
-from Bio.Phylo import BaseTree, NewickIO, NeXMLIO, NexusIO, PhyloXMLIO
+from Bio.Phylo import BaseTree, NewickIO, NexusIO, PhyloXMLIO, NeXMLIO
 
 supported_formats = {
     "newick": NewickIO,

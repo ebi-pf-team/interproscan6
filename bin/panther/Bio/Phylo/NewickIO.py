@@ -13,8 +13,8 @@ See: http://evolution.genetics.washington.edu/phylip/newick_doc.html
 """
 
 import re
-
 from Bio._py3k import StringIO
+
 from Bio.Phylo import Newick
 
 

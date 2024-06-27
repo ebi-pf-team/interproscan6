@@ -6,10 +6,11 @@ workflow SEQUENCE_PRECALC {
     take:
     hash_sequence
     applications
+    is_test  // boolean, true = unit test so don't make calls to remote servers
 
     main:
-    LOOKUP_CHECK(hash_sequence)
-    LOOKUP_MATCHES(LOOKUP_CHECK.out, applications)
+    LOOKUP_CHECK(hash_sequence, is_test)
+    LOOKUP_MATCHES(LOOKUP_CHECK.out, applications, is_test)
     LOOKUP_NO_MATCHES(LOOKUP_CHECK.out)
 
     emit:

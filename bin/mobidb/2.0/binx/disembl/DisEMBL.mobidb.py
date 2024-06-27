@@ -4,6 +4,7 @@
 # (http://www.opensource.org/licenses/gpl-license.php)
 # DisEMBL pipeline
 
+import fpformat
 import os
 import shlex
 import subprocess
@@ -11,8 +12,6 @@ import sys
 import tempfile
 from os import system
 from string import *
-
-import fpformat
 
 # change these to the correct paths
 ROOTDIR = sys.argv[7]

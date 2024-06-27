@@ -1,0 +1,25 @@
+{
+    "Run precalc match lookup successfully": {
+        "content": [
+            {
+                "0": [
+                    "no_match_lookup_fasta.fasta:md5,4e72b2094c713d10d64b89dbf482b483"
+                ],
+                "1": [
+                    "parsed_match_lookup:md5,673c9577f5675986860a4e84717383c6"
+                ],
+                "parsed_matches": [
+                    "parsed_match_lookup:md5,673c9577f5675986860a4e84717383c6"
+                ],
+                "sequences_to_analyse": [
+                    "no_match_lookup_fasta.fasta:md5,4e72b2094c713d10d64b89dbf482b483"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.04.2"
+        },
+        "timestamp": "2024-06-03T11:26:17.309574"
+    }
+}
