@@ -16,26 +16,25 @@ def post_process(hmm_matches: str, model2clans: dict) -> list:
         key=lambda match: (float(match[2]['evalue']), -float(match[2]['score']))
     )
 
-    filtered_matches = {}
+    filtered_matches = []
     for candidate_match in sorted_matches:
         protein_id, domain_id, domain_details = candidate_match
         keep = True
         try:
             candidate_match_info = model2clans[domain_id]
-            candidate_clan = candidate_match_info["clan"]
-            # same clan already on filtered_matches?
-            if candidate_clan in filtered_matches:
-                # overlap?
-                not_overlapping_locations = []
-                for candidate_location in domain_details["locations"]:
-                    overlapping = False
-                    for filtered_match in filtered_matches[candidate_clan]:
-                        filtered_location = filtered_match[2]["locations"]
-                        for loc in filtered_location:
-                            if _matches_overlap(candidate_location, loc):
+            for filtered_match in filtered_matches:
+                filtred_match_info = model2clans.get(filtered_match[1], {})
+                # same clan?
+                if candidate_match_info["clan"] == filtred_match_info["clan"]:
+                    # overlap?
+                    not_overlapping_locations = []
+                    for candidate_location in domain_details["locations"]:
+                        overlapping = False
+                        for filtered_location in filtered_match[2]["locations"]:
+                            if _matches_overlap(candidate_location, filtered_location):
                                 # if overlapping, check if they are NOT nested
                                 candidate_nested = candidate_match_info.get('nested', [])
-                                filtered_nested = model2clans[filtered_match[1]].get('nested', [])
+                                filtered_nested = filtred_match_info.get('nested', [])
                                 if not _matches_are_nested(candidate_nested, filtered_nested):
                                     overlapping = True
                                     break
@@ -44,23 +43,18 @@ def post_process(hmm_matches: str, model2clans: dict) -> list:
                     if not overlapping:
                         not_overlapping_locations.append(candidate_location)
 
-                if not not_overlapping_locations:
-                    keep = False
-                else:
-                    domain_details["locations"] = not_overlapping_locations
+                    if not not_overlapping_locations:
+                        keep = False
+                        break
+                    else:
+                        domain_details["locations"] = not_overlapping_locations
         except KeyError:
             pass
 
         if keep:
-            if candidate_clan not in filtered_matches:
-                filtered_matches[candidate_clan] = []
-            filtered_matches[candidate_clan].append(candidate_match)
+            filtered_matches.append(candidate_match)
 
-    final_matches = [
-        match for matches in filtered_matches.values() for match in matches
-    ]
-
-    return final_matches
+    return filtered_matches
 
 
 def build_fragments(filtered_matches: list, dat_parsed: dict, min_length: int) -> list:
