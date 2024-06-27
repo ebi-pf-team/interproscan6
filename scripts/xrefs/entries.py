@@ -24,7 +24,20 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
                     "pathwayXRefs": []
                 }
             except KeyError:
-                match_info[match_key]["entry"] = None
+                acc_id = match_key  # some accs need the '.'  , e.g. Gene3D
+                try:
+                    entry = entries[acc_id]
+                    match_info[match_key]["entry"] = {
+                        "accession": entry[0] if entry[0] is not None else "-",
+                        "short_name": entry[1] if entry[1] is not None else "-",
+                        "name": entry[2] if entry[2] is not None else "-",
+                        "description": entry[3] if entry[3] is not None else "-",
+                        "type": entry[4],
+                        "goXRefs": [],
+                        "pathwayXRefs": []
+                    }
+                except KeyError:
+                    match_info[match_key]["entry"] = None
 
             if data["member_db"].upper() == "PANTHER":
                 acc_id_family = data["accession"]
