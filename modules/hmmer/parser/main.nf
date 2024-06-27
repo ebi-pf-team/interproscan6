@@ -28,7 +28,7 @@ process HMMER_PARSER {
         ${member_db == "sfld" ? "true" : "false"} \\
         ${postprocessing_params[2]} \\
         > hmmer_parsed_${out}.json
-    if [${member_db} != "sfld"]; then
+    if [${member_db} != "sfld" || ${member_db} != "gene3d" || ${member_db} != "funfam"]; then
         rm ${alignment}
     fi
     """

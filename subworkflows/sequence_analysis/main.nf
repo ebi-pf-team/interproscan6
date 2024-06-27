@@ -6,6 +6,8 @@ include {
 include {
     HMMER_RUNNER as ANTIFAM_HMMER_RUNNER;
     HMMER_RUNNER as NCBIFAM_HMMER_RUNNER;
+    FUNFAM_HMMER_RUNNER;
+    HMMER_RUNNER as GENE3D_HMMER_RUNNER;
     HMMER_RUNNER as SFLD_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
@@ -13,23 +15,31 @@ include {
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
     HMMER_PARSER as NCBIFAM_HMMER_PARSER;
+    HMMER_PARSER as FUNFAM_HMMER_PARSER;
+    HMMER_PARSER as GENE3D_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
     HMMER_PARSER as PFAM_HMMER_PARSER;
 } from "$projectDir/modules/hmmer/parser/main"
 include {
+    CATH_RESEOLVE_HITS as FUNFAM_CATH_RESEOLVE_HITS;  // third party tool to minimise suprious hits
+    ADD_CATH_SUPERFAMILIES as FUNFAM_ADD_CATH_SUPERFAMILIES;  // used for gene3D and Funfam
+    CATH_RESEOLVE_HITS as GENE3D_CATH_RESEOLVE_HITS;
+    ADD_CATH_SUPERFAMILIES as GENE3D_ADD_CATH_SUPERFAMILIES;
     PANTHER_POST_PROCESSER;
     SFLD_POST_PROCESSER;
 } from "$projectDir/modules/hmmer/post_processing/main"
 include {
+    GENE3D_FILTER_MATCHES;
+    FUNFAM_FILTER_MATCHES;
     PANTHER_FILTER_MATCHES;
     SFLD_FILTER_MATCHES;
     PFAM_FILTER_MATCHES;
 } from "$projectDir/modules/hmmer/filter/main"
 include {
     SIGNALP_RUNNER;
-    SIGNALP_PARSER;
- } from "$projectDir/modules/signalp/main"
+    SIGNALP_PARSER
+} from "$projectDir/modules/signalp/main"
 
 
 workflow SEQUENCE_ANALYSIS {
@@ -39,6 +49,9 @@ workflow SEQUENCE_ANALYSIS {
     tsv_pro
 
     main:
+    boolean gene3d_funfam_processed = false
+    // To prevent duplication if Gene3D and Funfam are called
+
     // Divide members up into their respective analysis pipelines/methods
     Channel.from(applications.split(','))
     .branch { member ->
@@ -55,7 +68,30 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                false, []
+                false,  // not retrieving site data
+                []  // no post-processing params
+            ]
+
+        /*
+        Place FunFam inside the Gene3D post-processing
+        because it must run after the Gene3D path
+        */
+        gene3d_funfam: (member == 'gene3d' || member == 'funfam') && !gene3d_funfam_processed
+            gene3d_funfam_processed = true
+            return [
+                params.members."gene3d".hmm,
+                params.members."gene3d".switches,
+                params.members."gene3d".release,
+                false,  // retrieve site data
+                [
+                    params.members."gene3d".postprocess.cath_resolve_hits_switches,
+                    params.members."gene3d".postprocess.model2sf_map,
+                    params.members."gene3d".postprocess.discontinuous_regs,
+                    params.members."gene3d".postprocess.assign_cath_superfamilies,
+                    params.members."funfam".hmm,
+                    params.members."funfam".switches,
+                    params.members."funfam".release,
+                ]
             ]
 
         ncbifam: member == 'ncbifam'
@@ -71,7 +107,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                false,
+                false,  // retrieving site data
                 [
                     params.members."${member}".postprocess.data_dir,
                     params.members."${member}".postprocess.evalue,
@@ -84,7 +120,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                true,
+                true,  // retrieving site data
                 [
                     params.members."${member}".postprocess.bin,
                     params.members."${member}".postprocess.sites_annotation,
@@ -130,9 +166,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members.signalp.data.pvalue,
                 params.members.signalp.release
             ]
-
-        other: true
-            log.info "Application ${member} (still) not supported"
     }.set { member_params }
 
     /*
@@ -149,16 +182,38 @@ workflow SEQUENCE_ANALYSIS {
     NCBIFAM_HMMER_RUNNER(runner_hmmer_ncbifam_params)
     NCBIFAM_HMMER_PARSER(NCBIFAM_HMMER_RUNNER.out, tsv_pro, "ncbifam")
 
+    // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
+    // These also run for FunFam as Gene3D must be run before FunFam
+    runner_gene3d_params = fasta.combine(member_params.gene3d_funfam)
+    GENE3D_HMMER_RUNNER(runner_gene3d_params)
+    GENE3D_HMMER_PARSER(GENE3D_HMMER_RUNNER.out, tsv_pro, "gene3d")
+    GENE3D_CATH_RESEOLVE_HITS(GENE3D_HMMER_PARSER.out)
+    GENE3D_ADD_CATH_SUPERFAMILIES(GENE3D_CATH_RESEOLVE_HITS.out)
+    GENE3D_FILTER_MATCHES(GENE3D_ADD_CATH_SUPERFAMILIES.out)
+
+    // FunFam (+ gene3D + cath-resolve-hits + assing-cath-superfamilies)
+    // split into a channel so Nextflow can automatically manage the parallel execution of HmmSearch
+    GENE3D_FILTER_MATCHES.out[1]
+        .splitText() { it.replace('\n', '') }
+        .set { funfam_cath_superfamilies }
+    runner_funfam_params = fasta.combine(member_params.gene3d_funfam)
+    runner_funfam_params_with_cath = runner_funfam_params.combine(funfam_cath_superfamilies)
+
+    FUNFAM_HMMER_RUNNER(runner_funfam_params_with_cath, applications)
+    FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out, tsv_pro, "funfam")
+    FUNFAM_CATH_RESEOLVE_HITS(FUNFAM_HMMER_PARSER.out)
+    FUNFAM_FILTER_MATCHES(FUNFAM_CATH_RESEOLVE_HITS.out)
+
     // Panther (+ treegrafter + epa-ng)
-    runner_hmmer_panther_params = fasta.combine(member_params.panther)
-    PANTHER_HMMER_RUNNER(runner_hmmer_panther_params)
+    runner_panther_params = fasta.combine(member_params.panther)
+    PANTHER_HMMER_RUNNER(runner_panther_params)
     PANTHER_HMMER_PARSER(PANTHER_HMMER_RUNNER.out, tsv_pro, "panther")
     PANTHER_POST_PROCESSER(PANTHER_HMMER_PARSER.out, fasta)
     PANTHER_FILTER_MATCHES(PANTHER_POST_PROCESSER.out)
 
     // SFLD (+ post-processing binary to add sites and filter hits)
-    runner_hmmer_sfld_params = fasta.combine(member_params.sfld)
-    SFLD_HMMER_RUNNER(runner_hmmer_sfld_params)
+    runner_sfld_params = fasta.combine(member_params.sfld)
+    SFLD_HMMER_RUNNER(runner_sfld_params)
     SFLD_HMMER_PARSER(SFLD_HMMER_RUNNER.out, tsv_pro, "sfld")
     SFLD_POST_PROCESSER(SFLD_HMMER_PARSER.out, tsv_pro)
     SFLD_FILTER_MATCHES(SFLD_POST_PROCESSER.out)
@@ -168,7 +223,6 @@ workflow SEQUENCE_ANALYSIS {
     PFAM_HMMER_RUNNER(runner_hmmer_pfam_params)
     PFAM_HMMER_PARSER(PFAM_HMMER_RUNNER.out, tsv_pro, "pfam")
     PFAM_FILTER_MATCHES(PFAM_HMMER_PARSER.out)
-
 
     /*
     Member databases that do NOT use HMMER
@@ -189,15 +243,30 @@ workflow SEQUENCE_ANALYSIS {
     Gather the results
     */
 
-    ANTIFAM_HMMER_PARSER.out[0].concat(
-        NCBIFAM_HMMER_PARSER.out[0],
-        PANTHER_FILTER_MATCHES.out,
-        SFLD_FILTER_MATCHES.out,
-        PFAM_FILTER_MATCHES.out,
-        CDD_PARSER.out,
-        SIGNALP_PARSER.out
-    )
-    .set { parsed_results }  // gathers the paths of the output file from each process
+
+    if (applications.contains("gene3d")) {
+        ANTIFAM_HMMER_PARSER.out[0].concat(
+            NCBIFAM_HMMER_PARSER.out[0],
+            FUNFAM_FILTER_MATCHES.out[0],
+            GENE3D_FILTER_MATCHES.out[0],
+            PANTHER_FILTER_MATCHES.out,
+            SFLD_FILTER_MATCHES.out,
+            CDD_PARSER.out,
+            SIGNALP_PARSER.out
+        )
+        .set { parsed_results }
+    }
+    else {
+        ANTIFAM_HMMER_PARSER.out[0].concat(
+            NCBIFAM_HMMER_PARSER.out[0],
+            FUNFAM_FILTER_MATCHES.out[0],
+            PANTHER_FILTER_MATCHES.out,
+            SFLD_FILTER_MATCHES.out,
+            CDD_PARSER.out,
+            SIGNALP_PARSER.out
+        )
+        .set { parsed_results }
+    }
 
     emit:
     parsed_results

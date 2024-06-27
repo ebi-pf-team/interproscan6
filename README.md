@@ -80,6 +80,9 @@ Please provide absolute paths. You can use the `$projectDir` short cut to repres
 _Required for AnitFam, NCBIFam, Panther, SFLD, ...._:    
     docker pull biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1
 
+_Required for Gene3D and FunFam_:
+    docker build -t cathtools docker_files/cath-tools
+
 _Required for Panther_:
     docker build -t treegrafter docker_files/treegrafter
 
@@ -420,7 +423,7 @@ Also try providing root privileges to docker within Nextflow, by changing the th
 ```
  docker {
      enabled = true
--    mountFlags = 'Z'
+     mountFlags = 'Z'
 +    runOptions = '--user root'  <<-- ADD
  }
 ```

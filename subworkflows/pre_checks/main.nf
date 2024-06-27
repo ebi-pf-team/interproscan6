@@ -8,7 +8,7 @@ def printHelp() {
     Params options:
         --applications <ANALYSES>          Optional, comma separated - without spaces - list of analysis methods (i.e. member databases/applications).
                                             If this option is not set, ALL analyses will be run.
-        --disable-precalc                  Optional. Disables use of the precalculated match lookup service.
+        --disable_precalc                  Optional. Disables use of the precalculated match lookup service.
                                             All match calculations will be run locally.
         --formats <FORMATS> Optional, comma separated - without spaces - list of output formats.
         --goterms Optional. Include GO terms in the output.
@@ -78,7 +78,8 @@ workflow PRE_CHECKS {
     }
 
     // Check if the applications are valid
-    def applications_expected = ['antifam', 'cdd', 'ncbifam', 'panther', 'sfld', 'signalp', 'pfam']
+    def applications_expected = ['antifam', 'cdd', 'gene3d', 'funfam', 'ncbifam', 'panther', 'pfam', 'sfld', 'signalp']
+
     def applications_diff = user_applications.toLowerCase().split(',') - applications_expected
     if (applications_diff.size() != 0){
         log.info printHelp()
