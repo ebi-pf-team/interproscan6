@@ -16,7 +16,7 @@ process HMMER_RUNNER {
 
     script:
     """
-    /hmmer/usr/bin/hmmsearch ${switches} -o ${release}_${hmm}.out --domtblout ${release}_${hmm}.dtbl ${alignment ? "-A ${hmm}_alignment" : ""} ${hmm} ${fasta}
+    /opt/hmmer/bin/hmmsearch ${switches} -o ${release}_${hmm}.out --domtblout ${release}_${hmm}.dtbl ${alignment ? "-A ${hmm}_alignment" : ""} ${hmm} ${fasta}
     if [ ! -f ${hmm}_alignment ]; then
         touch ${hmm}_alignment
     fi

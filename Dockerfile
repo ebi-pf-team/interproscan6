@@ -12,7 +12,6 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     libssl-dev libtool nghttp2 procps python3.10 python3-venv python3-pip python3-requests \
     tar unzip zlib1g-dev
 
-
 WORKDIR /test/
 RUN python3 --version > py.v.txt
 
@@ -22,6 +21,7 @@ FROM sibswiss/pftools as pftools
 # Final image with InterProScan and pftoools
 FROM interproscan-base
 COPY --from=pftools / /opt/pftools
+ENV PATH="/opt/pftools/usr/local/bin:${PATH}"
 
 # Install NCBI BLAST, only rpsblast (for CDD)
 # Don't pull the NCBI BLAST image has its BIG - Just get the bits we need
@@ -32,14 +32,14 @@ RUN curl -O https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-bl
 
 # Install HMMER
 WORKDIR /opt/
-RUN curl -O http://eddylab.org/software/hmmer/hmmer-3.3.tar.gz && \
+RUN mkdir /opt/hmmer && \
+    curl -O http://eddylab.org/software/hmmer/hmmer-3.3.tar.gz && \
     tar -xzf hmmer-3.3.tar.gz && \
     rm hmmer-3.3.tar.gz && \
     cd hmmer-3.3 && \
     ./configure --prefix /opt/hmmer && \
-    make
-    # make check
-    # make install
+    make && \
+    make install
 
 # Install easel for predicting open reading frames (ORFs)
 RUN cd /opt/hmmer-3.3/easel && \

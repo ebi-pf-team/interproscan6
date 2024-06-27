@@ -11,8 +11,8 @@ process CDD_RUNNER {
 
     script:
     """
-    export LD_LIBRARY_PATH="/blast/blast/lib"
-    /blast/blast/bin/rpsblast -query ${fasta} -db ${library} -out rpsblast_out ${switches}
+    export LD_LIBRARY_PATH="/opt/blast/ncbi-blast-2.15.0+/lib"
+    /opt/blast/ncbi-blast-2.15.0+/bin/rpsblast -query ${fasta} -db ${library} -out rpsblast_out ${switches}
     """
 }
 
@@ -45,7 +45,7 @@ process CDD_POSTPROCESS {
     val release
     script:
     """
-    /opt/RpsbProc-x64-linux/rpsbproc --infile rpsblast_out --outfile rpsblast_processed ${postprocessing_params[0]} --data-path ${postprocessing_params[1]}
+    /opt/rpsbproc/RpsbProc-x64-linux --infile rpsblast_out --outfile rpsblast_processed ${postprocessing_params[0]} --data-path ${postprocessing_params[1]}
     """
 }
 
