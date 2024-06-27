@@ -30,6 +30,12 @@ RUN curl -O https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-bl
     tar -zxpf ncbi-blast-2.15.0+-x64-linux.tar.gz && \
     rm ncbi-blast-2.15.0+-x64-linux.tar.gz
 
+# Install RpsbProc for CDD post-processing
+WORKDIR /opt/rpsbproc
+RUN curl -O https://ftp.ncbi.nih.gov/pub/mmdb/cdd/rpsbproc/RpsbProc-x64-linux.tar.gz && \
+    tar -xzf RpsbProc-x64-linux.tar.gz && \
+    rm RpsbProc-x64-linux.tar.gz
+
 # Install HMMER
 WORKDIR /opt/
 RUN mkdir /opt/hmmer && \
@@ -55,12 +61,6 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN git clone https://github.com/pierrebarbera/epa-ng
 RUN cd epa-ng && make
 RUN pip install biopython==1.83
-
-# Install RpsbProc for CDD post-processing
-WORKDIR /opt/rpsbproc
-RUN curl -O https://ftp.ncbi.nih.gov/pub/mmdb/cdd/rpsbproc/RpsbProc-x64-linux.tar.gz && \
-    tar -xzf RpsbProc-x64-linux.tar.gz && \
-    rm RpsbProc-x64-linux.tar.gz
 
 WORKDIR /opt/interproscan6
 COPY subworkflows/ subworkflows/
