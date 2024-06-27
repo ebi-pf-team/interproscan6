@@ -5,6 +5,63 @@ parsed and applied to the internal IPS6 JSON structure in the
 filters module/
 */
 
+process CATH_RESEOLVE_HITS {
+    container 'docker.io/library/cathtools'
+    label 'analysis_parser'
+
+    input:
+        path ips6_json
+        path out_file
+        path out_dtbl
+        val postprocessing_params  // [0] evalue [1] control factor
+        path alignment
+
+    output:
+        path ips6_json
+        path "${out_file}.cath.resolved.out"
+        val postprocessing_params
+
+    // cath_resolve_hits is a third party tool used to minimise suprious hits
+    script:
+    """
+    rm -f ${alignment}
+    /cath-tools/cath-resolve-hits \\
+        ${out_file} \\
+        --input-for hmmsearch_out \\
+        ${postprocessing_params[0]} > "${out_file}.cath.resolved.out"
+    """
+}
+
+
+process ADD_CATH_SUPERFAMILIES {
+    label 'analysis_parser'
+
+    input:
+        path ips6_json
+        path cath_resolve_out
+        val postprocessing_params
+    /*
+    Post-processing params:
+    1. cath_resolve_hits_switches
+    2. model2sf_map - path to data file
+    3. discontinuous_regs - path to data file
+    4. assign_cath_superfamilies - path to py script
+    */
+
+    output:
+        path ips6_json
+        path "${cath_resolve_out}.cath_superfamilies"
+
+    script:
+    """
+    python3 ${postprocessing_params[3]} \\
+        ${postprocessing_params[1]} \\
+        ${postprocessing_params[2]} \\
+        ${cath_resolve_out} "${cath_resolve_out}.cath_superfamilies"
+    """
+}
+
+
 process PANTHER_POST_PROCESSER {
     label 'analysis_parser'
 

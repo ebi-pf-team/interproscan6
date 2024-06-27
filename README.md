@@ -75,7 +75,7 @@ Please provide absolute paths. You can use the `$projectDir` short cut to repres
 
     docker build -t interproscan6 .
 
-6. [Optional] install licensed software
+4. [Optional] install licensed software
 
 By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` because they contain licensed components. In order to activate these analyses please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
 
@@ -403,7 +403,7 @@ Also try providing root privileges to docker within Nextflow, by changing the th
 ```
  docker {
      enabled = true
--    mountFlags = 'Z'
+     mountFlags = 'Z'
 +    runOptions = '--user root'  <<-- ADD
  }
 ```

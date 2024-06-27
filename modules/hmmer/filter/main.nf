@@ -5,6 +5,53 @@ filtering the matches in the IPS6 JSON structure in order to
 only retain those that passed the post-processing.
 */
 
+process FUNFAM_FILTER_MATCHES {
+    label 'analysis_parser'
+
+    input:
+        path ips6_json
+        path cath_resolved_out
+        val postprocessing_params
+    /*
+    Post-processing params are needed when cath_resolved hits
+    process feeds into add_cath_superfamilies process
+    */
+    
+    output:
+        path "${ips6_json}.post.processed.json"
+
+    script:
+    """
+    python3 $projectDir/scripts/members/funfam/filter_ips6_hits.py \\
+        ${ips6_json} \\
+        ${cath_resolved_out} \\
+        ${ips6_json}.post.processed.json \\
+        ${postprocessing_params[6]}
+    """
+}
+
+
+process GENE3D_FILTER_MATCHES {
+    label 'analysis_parser'
+
+    input:
+        path ips6_json
+        path cath_superfamilies
+    
+    output:
+        path "${ips6_json}.post.processed.json"
+        path "cath.superfamilies"
+
+    script:
+    """
+    python3 $projectDir/scripts/members/gene3d/filter_ips6_hits.py \\
+        ${ips6_json} \\
+        ${cath_superfamilies} \\
+        ${ips6_json}.post.processed.json \\
+        cath.superfamilies
+    """
+}
+
 process PANTHER_FILTER_MATCHES {
     label 'analysis_parser'
 
@@ -38,9 +85,8 @@ process SFLD_FILTER_MATCHES {
 
     script:
     """
-    python3 $projectDir/scripts/members/sfld/sfld_process_post_processed.py \
-        '${slfd_post_processed_output}' \
-        ${ips6_json} \
-        > '${ips6_json}.post.processed.json'
+    python3 $projectDir/scripts/members/sfld/sfld_process_post_processed.py \\
+        ${slfd_post_processed_output} \\
+        ${ips6_json} > ${ips6_json}.post.processed.json
     """
 }
