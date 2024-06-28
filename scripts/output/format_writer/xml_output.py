@@ -15,6 +15,11 @@ MATCH_ELEMENT = {
 }
 
 def xml_output(seq_matches: dict, output_path: str, version: str):
+    def _check_null(value, acc=False):
+        if acc:
+            return str(value) if str(value).lower() not in ["none", "null", ""] else "-"
+        return str(value) if str(value).lower() not in ["none", "null", ""] else ""
+
     xml_output = os.path.join(output_path + '.xml')
     root = ET.Element("protein-matches", xmlns="https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/schemas")
     root.set("interproscan-version", version)
@@ -46,10 +51,10 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     signature_elem.set("name", match_data['name'])
 
                 if match_data['entry']:
-                    acc = match_data['entry']['accession'] if match_data['entry']['accession'] else "-"
-                    type = match_data['entry']['type'] if match_data['entry']['type'] else ""
-                    desc = match_data["entry"]['description'] if match_data["entry"]['description'] else ""
-                    short_name = match_data["entry"]['short_name'] if match_data["entry"]['short_name'] else ""
+                    acc = _check_null(match_data['entry']['accession'], acc=True)
+                    sig_type = _check_null(match_data['entry']['type'])
+                    desc = _check_null(match_data["entry"]['description'])
+                    short_name = _check_null(match_data["entry"]['short_name'])
                     signature_elem.set("desc", desc)
                     signature_elem.set("name", short_name)
                     if match_data['entry']['accession'] != "-":
@@ -57,7 +62,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         entry_elem.set("ac", acc)
                         entry_elem.set("desc", desc)
                         entry_elem.set("name", short_name)
-                        entry_elem.set("type", type)
+                        entry_elem.set("type", sig_type)
                         if match_data['entry']['goXRefs']:
                             for go_xref in match_data['entry']['goXRefs']:
                                 go_xref_elem = ET.SubElement(entry_elem, "go-xref")
