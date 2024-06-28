@@ -99,7 +99,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("postProcessed", str(location["postProcessed"]))
 
                     elif match_data['member_db'].upper() == "HAMAP":
-                        location_elem.set("score", float(location["score"]))
+                        location_elem.set("score", str(location["score"]))
                         location_elem.set("alignment", str(location["alignment"]))
 
                     elif match_data['member_db'].upper() == "SIGNALP":
