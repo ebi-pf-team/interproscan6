@@ -278,7 +278,7 @@ workflow SEQUENCE_ANALYSIS {
         "false"
     )
     PANTHER_POST_PROCESSER(
-        PANTHER_HMMER_PARSER.out,     // hmmer.out path
+        PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
         PANTHER_HMMER_RUNNER.out[2],  // post-processing-params
         fasta
     )
