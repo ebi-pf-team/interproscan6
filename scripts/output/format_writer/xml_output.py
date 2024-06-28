@@ -133,15 +133,14 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         for site in location['sites']:
                             if match_data['member_db'].upper() == "CDD":
                                 location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
-                                location_frag_elem.set("start", str(site['siteLocations']["start"]))
-                                location_frag_elem.set("end", str(site['siteLocations']["end"]))
-                                location_frag_elem.set("residue", str(site['siteLocations']["residue"]))
+                                location_frag_elem.set("description", str(site['description']))
+                                location_frag_elem.set("numLocations", int(site['numLocations']))
                             else:
                                 for sitelocation in site['siteLocations']:
                                     location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
                                     location_frag_elem.set("start", str(sitelocation["start"]))
                                     location_frag_elem.set("end", str(sitelocation["end"]))
-                                    location_frag_elem.set("dc-status", "")
+                                    location_frag_elem.set("residue", str(sitelocation["residue"]))
 
     tree = ET.ElementTree(root)
     ET.indent(tree, space="\t", level=0)
