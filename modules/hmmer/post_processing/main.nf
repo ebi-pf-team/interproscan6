@@ -91,7 +91,7 @@ process HAMAP_POST_PROCESSER {
         "seqs_with_hits.faa" \
         "hamap_pfsearch_output" \
         ${postprocessing_params[0]} \
-        $projectDir/bin/prosite/pfsearchV3 \
+        /opt/pftools/usr/local/bin/pfsearchV3 \
         ${postprocessing_params[1]} > "print.statements.out"
     """
 }
