@@ -45,6 +45,7 @@ def parse_cdd(rpsblast_processed: Path, release: str):
     """
     matches = {}  # prot seq id: [{domain data, 'sites': {[sites]}}]
     protein_identifier = ""
+    signature_accession = ""
 
     with open(rpsblast_processed, "r") as fh:
         for line in fh.readlines():
