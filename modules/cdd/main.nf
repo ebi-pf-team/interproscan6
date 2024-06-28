@@ -45,7 +45,7 @@ process CDD_POSTPROCESS {
     val release
     script:
     """
-    /opt/rpsbproc/RpsbProc-x64-linux --infile rpsblast_out --outfile rpsblast_processed ${postprocessing_params[0]} --data-path ${postprocessing_params[1]}
+    /opt/rpsbproc/RpsbProc-x64-linux/rpsbproc --infile rpsblast_out --outfile rpsblast_processed ${postprocessing_params[0]} --data-path ${postprocessing_params[1]}
     """
 }
 
