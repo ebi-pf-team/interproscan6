@@ -35,8 +35,8 @@ process GENE3D_FILTER_MATCHES {
     label 'analysis_parser'
 
     input:
+        path cath_resolve_out_with_superfams
         path ips6_json
-        path cath_superfamilies
     
     output:
         path "${ips6_json}.post.processed.json"
@@ -46,7 +46,7 @@ process GENE3D_FILTER_MATCHES {
     """
     python3 $projectDir/scripts/members/gene3d/filter_ips6_hits.py \\
         ${ips6_json} \\
-        ${cath_superfamilies} \\
+        ${cath_resolve_out_with_superfams} \\
         ${ips6_json}.post.processed.json \\
         cath.superfamilies
     """
