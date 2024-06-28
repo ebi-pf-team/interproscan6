@@ -41,9 +41,22 @@ def json_output(seq_matches: dict, output_path: str, version: str):
 
                 if match_data['member_db'].upper() == "CDD":
                     description = match_data['name']
+
+                if match_data['member_db'].upper() in ["GENE3D", "FUNFAM"]:
+                    accession = match_data['accession']  # GENE3D needs the info after ":" (e.g G3DSA:3.20.20.70)
+                elif match_key == "signal_peptide":
+                    name = accession
+                    if match_data['member_db'].upper() == "SIGNALP_EUK":
+                        accession = "SignalP-noTM"
+                    else:
+                        accession = "SignalP-TM"
+                else:
+                    accession = match_data['accession'].split(":")[0],  # drop subfamily
+                    name = match_data['name']
+
                 signature = {
-                    "accession": match_data['accession'].split(":")[0],  # drop subfamily
-                    "name": match_data['name'],
+                    "accession": accession,
+                    "name": name,
                     "description": description,
                     "signatureLibraryRelease": {
                         "library": match_data['member_db'].upper(),
@@ -59,9 +72,23 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         "end": int(location["end"]),
                         "representative": boolean_map.get(location["representative"].lower(), False)
                     }
+
                     if match_data['member_db'].upper() == "CDD":
                         info["evalue"] = float(location["evalue"])
                         info["score"] = float(location["score"])
+
+                    elif match_data['member_db'].upper() == "HAMAP":
+                        info["score"] = float(location["score"])
+                        info["alignment"] = location["alignment"]
+
+                    elif match_data['member_db'].upper() == "PANTHER":
+                        info["hmmStart"] = int(location["hmmStart"])
+                        info["hmmEnd"] = int(location["hmmEnd"])
+                        info["hmmLength"] = 0  # we have hmmLength but in i5 result its always 0
+                        info["hmmBounds"] = location["hmmBounds"]
+                        info["envelopeStart"] = int(location["envelopeStart"])
+                        info["envelopeEnd"] = int(location["envelopeEnd"])
+
                     elif match_data['member_db'].upper() == "SFLD":
                         info["evalue"] = float(location["evalue"])
                         info["score"] = float(location["score"])
@@ -70,13 +97,14 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         info["hmmLength"] = int(location["hmmLength"])
                         info["envelopeStart"] = int(location["envelopeStart"])
                         info["envelopeEnd"] = int(location["envelopeEnd"])
-                    elif match_data['member_db'].upper() == "PANTHER":
-                        info["hmmStart"] = int(location["hmmStart"])
-                        info["hmmEnd"] = int(location["hmmEnd"])
-                        info["hmmLength"] = 0  # we have hmmLength but in i5 result its always 0
-                        info["hmmBounds"] = location["hmmBounds"]
-                        info["envelopeStart"] = int(location["envelopeStart"])
-                        info["envelopeEnd"] = int(location["envelopeEnd"])
+
+                    elif match_data['member_db'].upper() == "PROSITE_PROFILES":
+                        info["score"] = float(location["score"])
+                        info["alignment"] = str(location["alignment"])
+
+                    elif match_key == "signal_peptide":
+                        info["score"] = float(location["pvalue"])
+
                     else:
                         info["evalue"] = float(location["evalue"])
                         info["score"] = float(location["score"])
@@ -102,18 +130,23 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             info["location-fragments"].append(single_location)
                         except KeyError:
                             info["location-fragments"] = [single_location]
+
                     locations.append(info)
+
                 match = {
                     "signature": signature,
                     "locations": locations
                 }
 
-                if match_data['member_db'].upper() != "CDD":
+                if match_data['member_db'].upper() not in ["CDD", "HAMAP", "PROSITE_PROFILES", "SIGNALP"]:
                     match["evalue"] = float(match_data['evalue'])
                     match["score"] = float(match_data['score'])
 
                 if 'model-ac' in match_data:
                     match["model-ac"] = match_data['model-ac']
+                elif match_key == "signal_peptide":
+                    match["model-ac"] = name
+                    match["orgType"] = match_data['member_db'].upper()
                 else:
                     match["model-ac"] = match_data['accession']
 
@@ -134,131 +167,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                     except KeyError:
                         pass
 
-                if match_key == "signal_peptide":
-                    match = {
-                        "signature": match_key,
-                        "SignalP_release": match_data["version"],
-                        "start": match_data["locations"][0]["start"],
-                        "end": match_data["locations"][0]["end"],
-                        "pvalue": match_data["locations"][0]["pvalue"],
-                    }
-
-                    if match_data['member_db'].upper() == "CDD":
-                        description = match_data['name']
-
-                    if match_data['member_db'].upper() in ["GENE3D", "FUNFAM"]:
-                        accession = match_data['accession']  # GENE3D needs the info after ":" (e.g G3DSA:3.20.20.70)
-                    else:
-                        accession = match_data['accession'].split(":")[0]  # drop subfamily
-
-                    signature = {
-                        "accession": accession,
-                        "name": match_data['name'],
-                        "description": description,
-                        "signatureLibraryRelease": {
-                            "library": match_data['member_db'].upper(),
-                            "version": match_data['version']
-                        },
-                        "entry": entry
-                    }
-
-                    locations = []
-                    for location in match_data['locations']:
-                        info = {
-                            "start": int(location["start"]),
-                            "end": int(location["end"]),
-                            "representative": boolean_map.get(location["representative"].lower(), False)
-                        }
-                        if match_data['member_db'].upper() == "CDD":
-                            info["evalue"] = float(location["evalue"])
-                            info["score"] = float(location["score"])
-
-                        elif match_data['member_db'].upper() == "HAMAP":
-                            info["score"] = float(location["score"])
-                            info["alignment"] = location["alignment"]
-
-                        elif match_data['member_db'].upper() == "PANTHER":
-                            info["hmmStart"] = int(location["hmmStart"])
-                            info["hmmEnd"] = int(location["hmmEnd"])
-                            info["hmmLength"] = 0  # we have hmmLength but in i5 result its always 0
-                            info["hmmBounds"] = location["hmmBounds"]
-                            info["envelopeStart"] = int(location["envelopeStart"])
-                            info["envelopeEnd"] = int(location["envelopeEnd"])
-
-                        elif match_data['member_db'].upper() == "SFLD":
-                            info["evalue"] = float(location["evalue"])
-                            info["score"] = float(location["score"])
-                            info["hmmStart"] = int(location["hmmStart"])
-                            info["hmmEnd"] = int(location["hmmEnd"])
-                            info["hmmLength"] = int(location["hmmLength"])
-                            info["envelopeStart"] = int(location["envelopeStart"])
-                            info["envelopeEnd"] = int(location["envelopeEnd"])
-
-                        elif match_data['member_db'].upper() == "PROSITE_PROFILES":
-                            info["score"] = float(location["score"])
-                            info["alignment"] = str(location["alignment"])
-
-                        else:
-                            info["evalue"] = float(location["evalue"])
-                            info["score"] = float(location["score"])
-                            info["hmmStart"] = int(location["hmmStart"])
-                            info["hmmEnd"] = int(location["hmmEnd"])
-                            info["hmmLength"] = int(location["hmmLength"])
-                            info["hmmBounds"] = location["hmmBounds"]
-                            info["envelopeStart"] = int(location["envelopeStart"])
-                            info["envelopeEnd"] = int(location["envelopeEnd"])
-                            info["postProcessed"] = boolean_map.get(location["postProcessed"].lower())
-
-                        if match_data['member_db'].upper() in ["SFLD", "CDD"]:
-                            try:
-                                info["sites"] = location["sites"]
-                            except KeyError:
-                                info["sites"] = []
-                        try:
-                            info["location-fragments"] = location["location-fragments"]
-                        except KeyError:
-                            single_location = {
-                                "start": int(location["start"]),
-                                "end": int(location["end"]),
-                                "dc-status": "CONTINUOUS"
-                            }
-                            try:
-                                info["location-fragments"].append(single_location)
-                            except KeyError:
-                                info["location-fragments"] = [single_location]
-                        locations.append(info)
-                    match = {
-                        "signature": signature,
-                        "locations": locations
-                    }
-
-                    if match_data['member_db'].upper() not in ["CDD", "HAMAP", "PROSITE_PROFILES"]:
-                        match["evalue"] = float(match_data['evalue'])
-                        match["score"] = float(match_data['score'])
-
-                    if 'model-ac' in match_data:
-                        match["model-ac"] = match_data['model-ac']
-                    else:
-                        match["model-ac"] = match_data['accession']
-
-                    if match_data['member_db'].upper() == "SFLD":
-                        match["scope"] = None
-
-                    if match_data['member_db'].upper() == "PANTHER":
-                        match["name"] = match_data['entry']['family_name']
-                        match['accession'] = match_data['accession']
-                        match["goXRefs"] = entry["goXRefs"] if entry else []
-                        signature["description"] = None
-                        signature["name"] = match_data['entry']['description']
-
-                        # get protein class and graftpoint for Panther
-                        try:
-                            match['proteinClass'] = match_data['proteinClass']
-                            match['graftPoint'] = match_data['graftPoint']
-                        except KeyError:
-                            pass
-
-                if len(match_data['locations']) > 0:  # skip matches with no locations (we need to make sure it's valid to all members)
+                if len(match_data['locations']) < 1:  # skip matches with no locations (we need to make sure it's valid to all members)
                     matches.append(match)
 
         result = {
