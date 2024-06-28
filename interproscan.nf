@@ -71,7 +71,12 @@ workflow {
             fasta_to_runner = sequences_to_analyse
         }
         else {
-            fasta_to_runner = ch_fasta
+            if (params.nucleic) {
+                fasta_to_runner = orfs_fasta
+            }
+            else {
+                fasta_to_runner = ch_fasta
+            }
         }
         parsed_analysis = SEQUENCE_ANALYSIS(fasta_to_runner, applications, tsv_pro)
     }

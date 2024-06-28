@@ -1,5 +1,4 @@
 import json
-import os
 import sys
 
 from format_writer.tsv_output import tsv_pro_output
@@ -8,7 +7,13 @@ from format_writer.json_output import json_output
 from format_writer.xml_output import xml_output
 
 
-def write_results(sequences_path: str, matches_path: str, output_format: list, output_path: str, version: str):
+def write_results(
+    sequences_path: str,
+    matches_path: str, 
+    output_format: list,
+    output_path: str,
+    version: str
+):
     seq_matches = {}
 
     all_sequences = {}
@@ -19,17 +24,11 @@ def write_results(sequences_path: str, matches_path: str, output_format: list, o
             sequence = json.loads(line)
             all_sequences.update(sequence)
 
-    for key in all_sequences:
-        if key in all_matches:
-            seq_matches[key] = {
-                'sequences': all_sequences[key],
-                'matches': all_matches[key]
-            }
-        else:
-            seq_matches[key] = {
-                'sequences': all_sequences[key],
-                'matches': {}
-            }
+    for key, value in all_sequences.items():
+        seq_matches[key] = {
+            'sequences': value,
+            'matches': all_matches.get(key, {})
+        }
 
     if "TSV" in output_format:
         tsv_output(seq_matches, output_path)
