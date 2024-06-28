@@ -102,7 +102,7 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                     model_ac = match['accession']
 
                 for location in match["locations"]:
-                    if member_db.upper() == "CDD":
+                    if member_db.upper() in ["CDD", "HAMAP"]:
                         hmm_start = location["start"]
                         hmm_end = location["end"]
                         hmm_length = int(hmm_end) - int(hmm_start)
@@ -135,6 +135,12 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         ali_from = match["locations"][0]["start"]
                         ali_to = match["locations"][0]["end"]
                         location_evalue = match["locations"][0]["pvalue"]
+                    elif member_db.upper() == "HAMAP":
+                        sig_acc = match["accession"]
+                        evalue = location["score"]
+                        ali_from = location["start"]
+                        ali_to = location["end"]
+                        location_evalue = location["score"]
                     else:
                         sig_acc = match["accession"]
                         evalue = location["evalue"]

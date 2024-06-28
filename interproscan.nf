@@ -1,4 +1,5 @@
 nextflow.enable.dsl=2
+NXF_ANSI_LOG = "false"
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -14,7 +15,6 @@ include { PRE_CHECKS } from "$projectDir/subworkflows/pre_checks/main"
 include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
 include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
 include { XREFS } from "$projectDir/subworkflows/xrefs/main"
-
 
 workflow {
     // Perform preliminary validation checks before running the analysis
@@ -71,7 +71,12 @@ workflow {
             fasta_to_runner = sequences_to_analyse
         }
         else {
-            fasta_to_runner = ch_fasta
+            if (params.nucleic) {
+                fasta_to_runner = orfs_fasta
+            }
+            else {
+                fasta_to_runner = ch_fasta
+            }
         }
         parsed_analysis = SEQUENCE_ANALYSIS(fasta_to_runner, applications, tsv_pro)
     }

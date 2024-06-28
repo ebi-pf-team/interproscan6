@@ -36,6 +36,11 @@ def current_output_path(test_output_dir):
 
 
 @pytest.fixture
+def expected_output_path(test_output_dir):
+    return test_output_dir / "expected_output_hamap"
+
+
+@pytest.fixture
 def applications():
     return "signalp"
 

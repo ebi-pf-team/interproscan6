@@ -5,20 +5,107 @@ parsed and applied to the internal IPS6 JSON structure in the
 filters module/
 */
 
-process PANTHER_POST_PROCESSER {
-    container 'docker.io/library/treegrafter'
+process CATH_RESEOLVE_HITS {
+    container 'docker.io/library/cathtools'
     label 'analysis_parser'
 
     input:
-        path ips6_json
         path out_file
-        path out_dtbl
+        val postprocessing_params  // [0] evalue [1] control factor
+
+    output:
+        path "${out_file}.cath.resolved.out"
+        val postprocessing_params
+
+    // cath_resolve_hits is a third party tool used to minimise suprious hits
+    script:
+    """
+    /cath-tools/cath-resolve-hits \\
+        ${out_file} \\
+        --input-for hmmsearch_out \\
+        ${postprocessing_params[0]} > "${out_file}.cath.resolved.out"
+    """
+}
+
+
+process ADD_CATH_SUPERFAMILIES {
+    label 'analysis_parser'
+
+    input:
+        path cath_resolve_out
+        val postprocessing_params
+    /*
+    Post-processing params:
+    1. cath_resolve_hits_switches
+    2. model2sf_map - path to data file
+    3. discontinuous_regs - path to data file
+    4. assign_cath_superfamilies - path to py script
+    */
+
+    output:
+        path "${cath_resolve_out}.cath_superfamilies"
+
+    script:
+    """
+    python3 ${postprocessing_params[3]} \\
+        ${postprocessing_params[1]} \\
+        ${postprocessing_params[2]} \\
+        ${cath_resolve_out} "${cath_resolve_out}.cath_superfamilies"
+    """
+}
+
+
+process HAMAP_POST_PROCESSER {
+    label 'analysis_parser'
+
+    input:
+        path fasta
+        path tlb
+        val postprocessing_params
+    /*
+    post-processing params:
+    0. models dir
+    1. flags for pfserach
+    */
+
+    output:
+        path "hamap_pfsearch_output"
+
+    /*
+    hmmer_tbl_path -- hmmer tlb file
+    fasta_file -- input fasta
+    fasta_filtered_file -- output fasta file
+    output_file -- another output file
+    model_dir -- path to dir containing hamap profiles for pfsearch
+    */
+
+    /*
+    Delete "$projectDir/bin/prosite/pfsearchV3" and remove its use in
+    pfsearch_wrapper.py when we move over to the single docker image
+    */
+    script:
+    """
+    python3 $projectDir/scripts/members/hamap/pfsearch_wrapper.py \
+        ${tlb} \
+        ${fasta} \
+        "seqs_with_hits.faa" \
+        "hamap_pfsearch_output" \
+        ${postprocessing_params[0]} \
+        $projectDir/bin/prosite/pfsearchV3 \
+        ${postprocessing_params[1]} > "print.statements.out"
+    """
+}
+
+
+process PANTHER_POST_PROCESSER {
+    label 'analysis_parser'
+
+    input:
+        path out_file
         val postprocessing_params // contains [0] bin and [1] site_annotations file path
-        val tsv_pro
         path fasta
 
     output:
-        path ips6_json
         path "treegrafter_processed_panther_hits"
         val postprocessing_params
 
@@ -41,7 +128,7 @@ process PANTHER_POST_PROCESSER {
         ${postprocessing_params[0]} \
         -e ${postprocessing_params[1]} \
         -o treegrafter_processed_panther_hits \
-        --epa-ng /epa-ng/bin/epa-ng \
+        --epa-ng /opt/epa-ng/bin/epa-ng \
         --keep
     """
 }
@@ -57,7 +144,6 @@ process SFLD_POST_PROCESSER {
     label 'analysis_parser'
 
     input:
-        path ips6_json
         path out_file
         path out_dtbl
         val postprocessing_params // contains [0] bin and [1] site_annotations file path
@@ -65,7 +151,6 @@ process SFLD_POST_PROCESSER {
         val tsv_pro
 
     output:
-        path ips6_json
         path "${tsv_pro ? "${out_file}.processed.out" : "${out_dtbl}.processed.dtbl"}"
         val postprocessing_params
 

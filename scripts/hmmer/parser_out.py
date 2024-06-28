@@ -3,17 +3,30 @@ import re
 import sys
 from cigar_alignment import cigar_alignment_parser, encode
 
-
+POST_PROCESSED_MEMBERS = [
+    "funfam",
+    "gene3d",
+    "hamap",
+    "panther",
+    "sfld",
+]
 DOMAIN_SECTION_START_PATTERN = re.compile(r"^>>\s+(\S+).*$")
 DOMAIN_ALIGNMENT_LINE_PATTERN = re.compile(r"^\s+==\s+domain\s+(\d+)\s+.*$")
 ALIGNMENT_SEQUENCE_PATTERN = re.compile(r"^\s+(\S+)\s+(\S+)\s+([-a-zA-Z]+)\s+(\S+)\s*$")  # replacing (\w+) with (\S+) and adding if to ignore current sequence
 DOMAIN_LINE_PATTERN = re.compile(
-                                "^\\s+(\\d+)\\s+[!?]\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\S+).*$")
+    "^\\s+(\\d+)\\s+[!?]\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\S+).*$"
+)
 
 
 def get_accession_regex(appl: str) -> re.Pattern:
     if appl.upper() == "ANTIFAM":
         return re.compile(r"^(Accession:|Query:|Query sequence:)\s+(ANF\d{5})\s*$")
+    if appl.upper() == "FUNFAM":
+        return re.compile(r"^(Accession:|Query:|Query sequence:)\s+([\w\d\.\-]+)\s*\[M=\d+\]$")
+    if appl.upper() == "GENE3D":
+        return re.compile(r"^(Accession:|Query:|Query sequence:)\s+([\w\d\.\-_]+)\s*\[M=\d+\]$")
+    if appl.upper() == "HAMAP":
+        return re.compile(r"^(Accession:|Query:|Query sequence:)\s+(MF_\d+)\s+(\[M=\d+\])$")
     if appl.upper() == "NCBIFAM":
         return re.compile(r"^(Accession:|Query:|Query sequence:)\s+((TIGR|NF)\d+)\.\d+$")
     if appl.upper() == "PANTHER":
@@ -23,15 +36,19 @@ def get_accession_regex(appl: str) -> re.Pattern:
 
 
 def parse(out_file: str) -> dict:
-    version = out_file.split("/")[-1].split("_")[0]
-    member_db = out_file.split("/")[-1].split("_")[1].split(".")[0]
+    """Main parser for the hmmer.out file.
+
+    :parama out_file: str representation of path to HMMER.out file
+    """
+    path_segments = out_file.split("/")[-1].split("._.")
+    version = path_segments[0]
+    member_db = path_segments[1].split(".")[0]
     current_sequence = None
     current_domain = None
     sequence_match = {}
     domain_match = {}
     stage = 'LOOKING_FOR_METHOD_ACCESSION'
-    appl = out_file.split("_")[1].split(".")[0]
-    member_accession = get_accession_regex(appl)
+    member_accession = get_accession_regex(member_db)
     description = ""
     model_id = ""
 
@@ -46,20 +63,41 @@ def parse(out_file: str) -> dict:
                     stage = 'LOOKING_FOR_DOMAIN_SECTION'
                 if line.startswith("//"):
                     if domain_match:
-                        sequence_match[current_sequence][model_id] = add_domain_match(domain_match, sequence_match[current_sequence][model_id])
+                        sequence_match[current_sequence][model_id] = add_domain_match(
+                            domain_match,
+                            sequence_match[current_sequence][model_id]
+                        )
                         domain_match = {}
                     description = ""
                     stage = "LOOKING_FOR_METHOD_ACCESSION"
                 else:
                     if stage == 'LOOKING_FOR_METHOD_ACCESSION':
-                        if line.startswith("Accession:") or line.startswith("Query sequence:") or (line.startswith("Query:") and member_db == "panther"):
+                        if line.startswith("Accession:") or \
+                            line.startswith("Query sequence:") or \
+                            (line.startswith("Query:") and member_db.lower() in \
+                                ["funfam", "gene3d", "hamap", "panther"]):
+
                             stage = 'LOOKING_FOR_SEQUENCE_MATCHES'
                             model_ident_pattern = member_accession.match(line)
+
                             if model_ident_pattern:
-                                model_id = model_ident_pattern.group(2).replace(".orig.30.pir", "")
+                                model_id = model_ident_pattern.group(2) if \
+                                    member_db != "panther" else \
+                                    model_ident_pattern.group(2).replace(".orig.30.pir", "")
+
                         if line.startswith("Query:"):
-                            query_name = line.split()[1]
-                            qlen = line.split("[")[1].split("]")[0].replace("M=", "")
+                            try:
+                                query_name = line.split()[1]
+                            except IndexError:
+                                query_name = line.strip()
+                                # The lines for a new record in hmmer.out may be (real data)
+                                # //
+                                # Query:
+                                # Query:       4by6B00-i2  [M=191]
+                            try:
+                                qlen = line.split("[")[1].split("]")[0].replace("M=", "")
+                            except IndexError:  # e.g. line = "Query:       5xqwL01-i2]"
+                                qlen = ""
                     elif stage == 'LOOKING_FOR_SEQUENCE_MATCHES':
                         if line.startswith("Description:"):
                             description = line.replace("Description:", "")
@@ -83,7 +121,10 @@ def parse(out_file: str) -> dict:
                             domain_section_header_matcher = DOMAIN_SECTION_START_PATTERN.match(line)
                             if domain_section_header_matcher:
                                 if domain_match:
-                                    sequence_match[current_sequence][model_id] = add_domain_match(domain_match, sequence_match[current_sequence][model_id])
+                                    sequence_match[current_sequence][model_id] = add_domain_match(
+                                        domain_match,
+                                        sequence_match[current_sequence][model_id]
+                                    )
                                     domain_match = {}
                                 current_sequence = domain_section_header_matcher.group(1)
                             stage = 'LOOKING_FOR_DOMAIN_DATA_LINE'
@@ -115,6 +156,12 @@ def parse(out_file: str) -> dict:
 
 
 def add_domain_match(domain_match: dict, current_match: dict) -> dict:
+    """
+    Add domain match as a match 'location'.
+
+    :param domain_match: dict representing a domain hit from HMMER
+    :param current_match: dict representing current signature match
+    """
     for domain_key, domain_value in domain_match.items():
         cigar_alignment = cigar_alignment_parser(domain_match[domain_key]["alignment"])
         domain_match[domain_key]["cigar_alignment"] = encode(cigar_alignment)
@@ -125,13 +172,23 @@ def add_domain_match(domain_match: dict, current_match: dict) -> dict:
 
 
 def get_domain_match(match: re.Match, member_db: str, qlen: str) -> dict:
-    post_processed = "false"
-    if member_db == "gene3d" or member_db == "pfam":
-        post_processed = "true"
+    """
+    Retrieve data about a domain match
+
+    :param match: re group object matching a line containing a domain hit
+    :param member_db: name of the member database
+    :param qlen: query length
+    """
+    post_processed = "true" if member_db in POST_PROCESSED_MEMBERS else "false"
     domain_match = {}
-    hmm_bound_pattern = {"[]": "COMPLETE", "[.": "N_TERMINAL_COMPLETE", ".]": "C_TERMINAL_COMPLETE", "..": "INCOMPLETE"}
-    domain_match["start"] = match.group(9)  # ali coord from
-    domain_match["end"] = match.group(10)  # ali coord to
+    hmm_bound_pattern = {
+        "[]": "COMPLETE",
+        "[.": "N_TERMINAL_COMPLETE",
+        ".]": "C_TERMINAL_COMPLETE",
+        "..": "INCOMPLETE"
+    }
+    domain_match["start"] = match.group(9) if member_db.upper() != "GENE3D" else match.group(11)  # ali coord from
+    domain_match["end"] = match.group(10) if member_db.upper() != "GENE3D" else match.group(12)  # ali coord to
     domain_match["representative"] = ""
     domain_match["hmmStart"] = match.group(6)  # hmm coord from
     domain_match["hmmEnd"] = match.group(7)   # hmm coord to
@@ -147,8 +204,20 @@ def get_domain_match(match: re.Match, member_db: str, qlen: str) -> dict:
     return domain_match
 
 
-def get_sequence_match(sequence_match: dict, sequence_line: str, model_id: str, query_name: str, description: str, version: str, member_db: str, qlen: str) -> dict:
-    SEQUENCE_LINE_PATTERN = re.compile("^\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\d+\\s+(\\S+).*$")
+def get_sequence_match(
+    sequence_match: dict,
+    sequence_line: str,
+    model_id: str,
+    query_name: str,
+    description: str,
+    version: str,
+    member_db: str,
+    qlen: str
+) -> dict:
+    """Retrieve data about the query sequence"""
+    SEQUENCE_LINE_PATTERN = re.compile(
+        "^\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\d+\\s+(\\S+).*$"
+    )
     match = SEQUENCE_LINE_PATTERN.match(sequence_line)
     if match:
         match_info = {
