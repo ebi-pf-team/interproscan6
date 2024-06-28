@@ -63,6 +63,10 @@ RUN git clone https://github.com/pierrebarbera/epa-ng
 RUN cd epa-ng && make
 RUN pip install biopython==1.83
 
+WORKDIR /opt/cath-tools
+RUN curl -O cath-resolve-hits https://github.com/UCLOrengoGroup/cath-tools/releases/download/v0.16.10/cath-resolve-hits.ubuntu-20.04
+RUN chmod +x cath-resolve-hits
+
 WORKDIR /opt/interproscan6
 COPY subworkflows/ subworkflows/
 COPY scripts/ scripts/
