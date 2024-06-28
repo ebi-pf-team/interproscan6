@@ -101,7 +101,10 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
 
                     elif match_data['member_db'].upper() == "SFLD":
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
-                        location_elem.set("sites", location["sites"])
+                        try:
+                            location_elem.set("sites", location["sites"])
+                        except KeyError:
+                            location_elem.set("sites", [])
                     else:
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("env-end", str(location["envelopeEnd"]))
