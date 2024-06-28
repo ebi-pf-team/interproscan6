@@ -6,7 +6,6 @@ filters module/
 */
 
 process CATH_RESEOLVE_HITS {
-    container 'docker.io/library/cathtools'
     label 'analysis_parser'
 
     input:
