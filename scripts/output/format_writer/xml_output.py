@@ -49,14 +49,18 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     signature_elem.set("name", match_data['name'])
 
                 if match_data['entry']:
-                    signature_elem.set("desc", match_data["entry"]['description'])
-                    signature_elem.set("name", match_data['entry']['short_name'])
+                    acc = match_data['entry']['accession'] if match_data['entry']['accession'] else "-"
+                    type = match_data['entry']['type'] if match_data['entry']['type'] else ""
+                    desc = match_data["entry"]['description'] if match_data["entry"]['description'] else ""
+                    short_name = match_data["entry"]['short_name'] if match_data["entry"]['short_name'] else ""
+                    signature_elem.set("desc", desc)
+                    signature_elem.set("name", short_name)
                     if match_data['entry']['accession'] != "-":
                         entry_elem = ET.SubElement(signature_elem, "entry")
-                        entry_elem.set("ac", match_data['entry']['accession'])
-                        entry_elem.set("desc", match_data['entry']['description'])
-                        entry_elem.set("name", match_data['entry']['short_name'])
-                        entry_elem.set("type", match_data['entry']['type'])
+                        entry_elem.set("ac", acc)
+                        entry_elem.set("desc", desc)
+                        entry_elem.set("name", short_name)
+                        entry_elem.set("type", type)
                         if match_data['entry']['goXRefs']:
                             for go_xref in match_data['entry']['goXRefs']:
                                 go_xref_elem = ET.SubElement(entry_elem, "go-xref")
@@ -134,7 +138,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                             if match_data['member_db'].upper() == "CDD":
                                 location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
                                 location_frag_elem.set("description", str(site['description']))
-                                location_frag_elem.set("numLocations", int(site['numLocations']))
+                                location_frag_elem.set("numLocations", str(site['numLocations']))
                             else:
                                 for sitelocation in site['siteLocations']:
                                     location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
