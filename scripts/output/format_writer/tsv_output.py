@@ -39,11 +39,16 @@ def tsv_output(seq_matches: dict, output_path: str):
                 xrefs = f"{'|'.join(goterms)}\t{'|'.join(pathways)}"
 
                 for location in match["locations"]:
-                    if match_acc == "signal_peptide":
+                    if match["member_db"].upper() == "SIGNALP":
                         sig_acc, status = "Signal Peptide", ""
                         ali_from = match["locations"][0]["start"]
                         ali_to = match["locations"][0]["end"]
                         evalue = match["locations"][0]["pvalue"]
+                    elif match["member_db"].upper() in ["CDD", "HAMAP"]:
+                        status = "T"
+                        ali_from = location["start"]
+                        ali_to = location["end"]
+                        evalue = location["score"]
                     else:
                         sig_acc = match["accession"]
                         status = "T"
