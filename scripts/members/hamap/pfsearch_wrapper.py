@@ -145,14 +145,13 @@ def run_pfsearch_binary(
         get_seq_time += time_to_get_seqences
         temp_file_list.append(temp_file)
 
-        comd_to_run = []
         comd_to_run = [pfsearch_bin, profiles[prf][0], temp_file] + pfsearch_flags
-
         count += 1
 
         if not os.path.isfile(profiles[prf][0]):
             # profile not available
             continue
+
         output = subprocess.check_output(comd_to_run, universal_newlines=True)
         if output.strip():
             with open(output_file, 'a') as out_file:
