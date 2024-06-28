@@ -183,11 +183,12 @@ def get_domain_match(match: re.Match, member_db: str, qlen: str) -> dict:
     domain_match = {}
     hmm_bound_pattern = {
         "[]": "COMPLETE",
-        "[.": "N_TERMINAL_COMPLETE", ".]": "C_TERMINAL_COMPLETE",
+        "[.": "N_TERMINAL_COMPLETE",
+        ".]": "C_TERMINAL_COMPLETE",
         "..": "INCOMPLETE"
     }
-    domain_match["start"] = match.group(9)  # ali coord from
-    domain_match["end"] = match.group(10)  # ali coord to
+    domain_match["start"] = match.group(9) if member_db.upper() != "GENE3D" else match.group(11)  # ali coord from
+    domain_match["end"] = match.group(10) if member_db.upper() != "GENE3D" else match.group(12)  # ali coord to
     domain_match["representative"] = ""
     domain_match["hmmStart"] = match.group(6)  # hmm coord from
     domain_match["hmmEnd"] = match.group(7)   # hmm coord to

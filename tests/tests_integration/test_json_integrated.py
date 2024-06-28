@@ -55,11 +55,7 @@ def compare(expected, current, ignore_elements: list, print_md5: bool, print_acc
             compare(expected[key], current[key], ignore_elements, print_md5, print_acc)
         elif isinstance(expected[key], list):
             if len(expected[key]) != len(current[key]):
-                print((
-                    f"MISMATCH: list length for key '{key}'\n"
-                    f"expected: {len(expected[key])}\n"
-                    f"current: {len(current[key])}"
-                ))
+                print(f"MISMATCH: list length for key '{key}'")
             else:
                 for i in range(len(expected[key])):
                     compare(expected[key][i], current[key][i], ignore_elements, print_md5, print_acc)
@@ -79,13 +75,13 @@ def test_json_output(input_path, expected_output_path, current_output_path, appl
     expected = json2dict(expected_output)
     current = json2dict(current_output)
 
-    with open('tests/integration_tests/temp_expected.json', 'w') as file:
+    with open('/Users/lcf/PycharmProjects/interproscan6/tests/integration_tests/temp_expected.json', 'w') as file:
         json.dump(expected, file, indent=2)
-    with open('tests/integration_tests/temp_current.json', 'w') as file:
+    with open('/Users/lcf/PycharmProjects/interproscan6/tests/integration_tests/temp_current.json', 'w') as file:
         json.dump(current, file, indent=2)
 
     ignore_elements = ['representative', 'evalue']
-    compare(expected, current, ignore_elements, False, False)
+    compare(expected, current, ignore_elements, True, True)
     compare(current, expected, ignore_elements, False, False)
 
     assert expected == current

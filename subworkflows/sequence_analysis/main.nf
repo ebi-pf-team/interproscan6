@@ -167,9 +167,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members.signalp.data.pvalue,
                 params.members.signalp.release
             ]
-
-        other: true
-            log.info "Application ${member} (still) not supported"
     }.set { member_params }
 
     /*

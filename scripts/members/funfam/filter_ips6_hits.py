@@ -146,7 +146,7 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, FunfamHit], release: st
                     sig_info["accession"] = funfam_sig_acc
 
                     # model ac is the domain id (minus the -... suffix)
-                    sig_info["model-ac"] = funfam_sig_acc
+                    sig_info["model-ac"] = funfam_sig_acc.replace(":", "-")
 
                     processed_ips6[protein_id][funfam_sig_acc] = sig_info
                     processed_ips6[protein_id][funfam_sig_acc]["locations"] = []
