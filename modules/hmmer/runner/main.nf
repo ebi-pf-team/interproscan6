@@ -41,7 +41,6 @@ process FUNFAM_HMMER_RUNNER {
     There will be one hmmer.out and one hmmer.dtbl file per FunFam hmm profile
     used in the search.
     */
-    container 'docker.io/biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1'
     label 'hmmer_runner'
 
     when:
@@ -65,7 +64,7 @@ process FUNFAM_HMMER_RUNNER {
 
     script:
     """
-    hmmsearch \\
+    /opt/hmmer/bin/hmmsearch \\
         ${postprocessing_params[5]} \\
         -o ${postprocessing_params[6]}_funfam_${cath_superfamily}.out \\
         --domtblout ${postprocessing_params[6]}_funfam_${cath_superfamily}.dtbl \\
