@@ -20,7 +20,7 @@ process CATH_RESEOLVE_HITS {
     // cath_resolve_hits is a third party tool used to minimise suprious hits
     script:
     """
-    /cath-tools/cath-resolve-hits \\
+    /opt/cath-tools/cath-resolve-hits \\
         ${out_file} \\
         --input-for hmmsearch_out \\
         ${postprocessing_params[0]} > "${out_file}.cath.resolved.out"
