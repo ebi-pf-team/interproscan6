@@ -52,6 +52,27 @@ process GENE3D_FILTER_MATCHES {
     """
 }
 
+
+process HAMAP_FILTER_MATCHES {
+    label 'analysis_parser'
+
+    input:
+        path ips6_json
+        path pfsearch_wrapper_output
+
+    output:
+        path "${ips6_json}.post.processed.json"
+
+    script:
+    """
+    python3 $projectDir/scripts/members/hamap/filter_ips6_hits.py \\
+        ${ips6_json} \\
+        ${pfsearch_wrapper_output} \\
+        ${ips6_json}.post.processed.json
+    """
+}
+
+
 process PANTHER_FILTER_MATCHES {
     label 'analysis_parser'
 

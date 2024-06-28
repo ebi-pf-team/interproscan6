@@ -77,7 +77,8 @@ Please provide absolute paths. You can use the `$projectDir` short cut to repres
 
 4. [Optional] install licensed software
 
-By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` because they contain licensed components. In order to activate these analyses please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
+By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
+because they contain licensed components. In order to activate these analyses please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
 
 # Using `InterProScan6`
 
