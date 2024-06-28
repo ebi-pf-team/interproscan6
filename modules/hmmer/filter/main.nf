@@ -74,7 +74,6 @@ process HAMAP_FILTER_MATCHES {
 
 
 process PANTHER_FILTER_MATCHES {
-    container 'docker.io/library/treegrafter'
     label 'analysis_parser'
 
     input:

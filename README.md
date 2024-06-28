@@ -71,33 +71,11 @@ If you store these data in an alternative directory, please update the paths und
 
 Please provide absolute paths. You can use the `$projectDir` short cut to represent the path to the root directory of `InterProScan6`.
 
-3. Build a docker `InterProScan6` base image:
+3. Build a docker `InterProScan6` base image (this includes all non-licensed dependencies including `HMMER`, `BLAST`, `BioPython`, `easel`, etc.)
 
     docker build -t interproscan6 .
-    
-4. Download the additional images we use:
 
-_Required for AnitFam, NCBIFam, Panther, SFLD, ...._:    
-    docker pull biocontainers/hmmer:v3.2.1dfsg-1-deb_cv1
-
-_Required for Gene3D and FunFam_:
-    docker build -t cathtools docker_files/cath-tools
-
-_Required for HAMAP and PROSITE:
-    docker pull sibswiss/pftools
-
-_Required for Panther_:
-    docker build -t treegrafter docker_files/treegrafter
-
-_Requires for CDD_:
-    docker pull ncbi/blast
-    docker build -t cdd docker_files/cdd
-
-5. [Optional] Build a docker image for [`easel`](https://github.com/EddyRivasLab/easel) for the prediction of Open Reading Frames:
-
-    docker build -t easel docker_files/easel
-
-6. [Optional] install licensed software
+4. [Optional] install licensed software
 
 By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
 because they contain licensed components. In order to activate these analyses please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
