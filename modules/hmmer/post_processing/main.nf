@@ -78,11 +78,6 @@ process HAMAP_POST_PROCESSER {
     output_file -- another output file
     model_dir -- path to dir containing hamap profiles for pfsearch
     */
-
-    /*
-    Delete "$projectDir/bin/prosite/pfsearchV3" and remove its use in
-    pfsearch_wrapper.py when we move over to the single docker image
-    */
     script:
     """
     python3 $projectDir/scripts/members/hamap/pfsearch_wrapper.py \
