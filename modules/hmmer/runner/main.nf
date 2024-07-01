@@ -32,7 +32,7 @@ process HMMER_RUNNER {
 }
 
 
-process FUNFAM_HMMER_RUNNER {
+process funfam._.HMMER_RUNNER {
     /*
     FunFam requires its own runner in order to only use those FunFam families
     that are associated to Cath-Gene3D superfamilies where hits were found
@@ -59,16 +59,16 @@ process FUNFAM_HMMER_RUNNER {
     */
 
     output:
-        path "${release}._.funfam_${cath_superfamily}.out"
-        path "${release}._.funfam_${cath_superfamily}.dtbl"
+        path "${postprocessing_params[6]}._.funfam._.${cath_superfamily}.out"
+        path "${postprocessing_params[6]}._.funfam._.${cath_superfamily}.dtbl"
         val postprocessing_params
 
     script:
     """
     /opt/hmmer/bin/hmmsearch \\
         ${postprocessing_params[5]} \\
-        -o ${postprocessing_params[6]}_funfam_${cath_superfamily}.out \\
-        --domtblout ${postprocessing_params[6]}_funfam_${cath_superfamily}.dtbl \\
+        -o ${postprocessing_params[6]}._.funfam._.${cath_superfamily}.out \\
+        --domtblout ${postprocessing_params[6]}._.funfam._.${cath_superfamily}.dtbl \\
         "${postprocessing_params[4]}${cath_superfamily.replace('.', '/')}.hmm" \\
         ${fasta}
     """
