@@ -93,6 +93,11 @@ workflow {
     WRITE_RESULTS(PARSE_SEQUENCE.out.collect(), XREFS.out.collect(), ch_format, params.output, params.ipsc_version)
 }
 
+workflow.onComplete = {
+    println "InterProScan workflow completed $workflow.success. Results in ${params.output}.*"
+    println "Duration: $workflow.duration"
+}
+
 log.info """
 If you use InterProScan in your work please cite:
 

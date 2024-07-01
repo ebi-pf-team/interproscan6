@@ -1,7 +1,7 @@
 /*
 These scripts implement post-processing of the HMMER files.
-The output from these post-processing scripts and tools are 
-parsed and applied to the internal IPS6 JSON structure in the 
+The output from these post-processing scripts and tools are
+parsed and applied to the internal IPS6 JSON structure in the
 filters module/
 */
 
