@@ -29,12 +29,13 @@ def parse(signalp_out: str, threshold: float, signalp_version: str):
             start_location = None
             end_location = None
             pvalue = None
+            representative = "false"
 
             cs_prediction = line.split("\t")[-1]
             if len(cs_prediction) > 1:
                 if float(cs_prediction.split("Pr:")[-1].strip()) >= threshold:
-                    start_location = int(cs_prediction.split(". ")[0].strip("CS pos: ").split("-")[0].strip())
-                    end_location = int(cs_prediction.split(". ")[0].strip("CS pos: ").split("-")[1].strip())
+                    start_location = 1
+                    end_location = int(cs_prediction.split(". ")[0].strip("CS pos: ").split("-")[0].strip())
                     pvalue = float(cs_prediction.split("Pr:")[-1].strip())
 
             if start_location:
@@ -45,7 +46,8 @@ def parse(signalp_out: str, threshold: float, signalp_version: str):
                         "locations": [{
                             "start": start_location,
                             "end": end_location,
-                            "pvalue": pvalue
+                            "pvalue": pvalue,
+                            "representative": representative
                         }]
                     }
                 }
