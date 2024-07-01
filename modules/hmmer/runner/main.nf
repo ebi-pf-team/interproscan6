@@ -32,7 +32,7 @@ process HMMER_RUNNER {
 }
 
 
-process funfam._.HMMER_RUNNER {
+process FUNFAM_HMMER_RUNNER {
     /*
     FunFam requires its own runner in order to only use those FunFam families
     that are associated to Cath-Gene3D superfamilies where hits were found
