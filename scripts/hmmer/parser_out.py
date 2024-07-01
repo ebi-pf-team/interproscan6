@@ -42,7 +42,7 @@ def parse(out_file: str) -> dict:
     """
     path_segments = out_file.split("/")[-1].split("._.")
     version = path_segments[0]
-    member_db = path_segments[1].split(".")[0]
+    member_db = path_segments[1]
     current_sequence = None
     current_domain = None
     sequence_match = {}
@@ -74,9 +74,7 @@ def parse(out_file: str) -> dict:
                     if stage == 'LOOKING_FOR_METHOD_ACCESSION':
                         if line.startswith("Accession:") or \
                             line.startswith("Query sequence:") or \
-                            (line.startswith("Query:") and member_db.lower() in \
-                                ["funfam", "gene3d", "hamap", "panther"]):
-
+                            (line.startswith("Query:") and member_db.lower() in ["funfam", "gene3d", "hamap", "panther"]):
                             stage = 'LOOKING_FOR_SEQUENCE_MATCHES'
                             model_ident_pattern = member_accession.match(line)
 
@@ -98,6 +96,7 @@ def parse(out_file: str) -> dict:
                                 qlen = line.split("[")[1].split("]")[0].replace("M=", "")
                             except IndexError:  # e.g. line = "Query:       5xqwL01-i2]"
                                 qlen = ""
+
                     elif stage == 'LOOKING_FOR_SEQUENCE_MATCHES':
                         if line.startswith("Description:"):
                             description = line.replace("Description:", "")
@@ -116,6 +115,7 @@ def parse(out_file: str) -> dict:
                                 member_db,
                                 qlen
                             )
+
                     elif stage == 'LOOKING_FOR_DOMAIN_SECTION':
                         if line.startswith(">> "):
                             domain_section_header_matcher = DOMAIN_SECTION_START_PATTERN.match(line)

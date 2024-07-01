@@ -2,7 +2,7 @@ process HMMER_RUNNER {
     label 'hmmer_runner'
 
     input:
-        tuple path(fasta), path(hmm), val(switches), val(release), val(build_alignment), val(build_table), val(postprocessing_params)
+        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(build_alignment), val(build_table), val(postprocessing_params)
     /*
     The post processing of SFLD, FunFam and Gene3D HMMER hits requires the alignment file
     But only generate alignmnets for these tool to reduce volume size.
@@ -10,22 +10,23 @@ process HMMER_RUNNER {
     */
 
     output:
-        path "${release}._.${hmm}.out"
-        path "${release}._.${hmm}.dtbl"
+        path "${release}._.${member}._.out"
+        path "${release}._.${member}._.dtbl"
         val postprocessing_params
-        path "${hmm}_alignment"
-        path "${release}._.${hmm}_table.tbl"
+        path "${member}_alignment"
+        path "${release}._.${member}._.table.tbl"
         path "${fasta}"
 
     script:
     """
-    /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${hmm}.out --domtblout ${release}._.${hmm}.dtbl ${build_alignment ? "-A ${hmm}_alignment" : ""} ${build_table ? "--tblout ${release}._.${hmm}_table.tbl" : ""} ${hmm} ${fasta}
+    /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl ${build_alignment ? "-A ${member}_alignment" : ""} ${build_table ? "--tblout ${release}._.${member}._.table.tbl" : ""} ${hmm} ${fasta}
 
-    if [ ! -f ${hmm}_alignment ]; then
-        touch ${hmm}_alignment
+
+    if [ ! -f ${member}_alignment ]; then
+        touch ${member}_alignment
     fi
-    if [ ! -f ${release}._.${hmm}_table.tbl ]; then
-        touch ${release}._.${hmm}_table.tbl
+    if [ ! -f ${release}._.${member}._.table.tbl ]; then
+        touch ${release}._.${member}._.table.tbl
     fi
     """
 }

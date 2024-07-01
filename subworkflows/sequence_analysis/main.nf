@@ -83,6 +83,7 @@ workflow SEQUENCE_ANALYSIS {
         */
         hmmer: runner == 'hmmer'
             return [
+                "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
@@ -98,6 +99,7 @@ workflow SEQUENCE_ANALYSIS {
         gene3d_funfam: (member == 'gene3d' || member == 'funfam') && !gene3d_funfam_processed
             gene3d_funfam_processed = true
             return [
+                "gene3d",
                 params.members."gene3d".hmm,
                 params.members."gene3d".switches,
                 params.members."gene3d".release,
@@ -116,6 +118,7 @@ workflow SEQUENCE_ANALYSIS {
         
         hamap: runner == 'hamap'
             return [
+                "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
@@ -129,6 +132,7 @@ workflow SEQUENCE_ANALYSIS {
 
         panther: runner == 'panther'
             return [
+                "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
@@ -143,6 +147,7 @@ workflow SEQUENCE_ANALYSIS {
 
         sfld: runner == 'sfld'
             return [
+                "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
@@ -201,6 +206,8 @@ workflow SEQUENCE_ANALYSIS {
     /*
     Member databases that use HMMER
     */
+
+    log.info "Applications: $applications"
 
     // AntiFam and NCBIfam
     runner_hmmer_params = fasta.combine(member_params.hmmer)
