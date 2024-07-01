@@ -1,6 +1,6 @@
 process PFSEARCH_RUNNER {
     /*
-    We us an inhouse python script to coordinate running pfsearch for 
+    We use an inhouse python script to coordinate running pfsearch for 
     all provided PROSTITE Profiles
     */
     // container 'docker.io/sibswiss/pftools'
