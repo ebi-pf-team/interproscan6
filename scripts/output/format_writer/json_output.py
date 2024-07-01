@@ -22,7 +22,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                 except KeyError:
                     description = "-"
                 entry = None
-                if match_data['entry']['accession']:
+                if match_key != "signal_peptide" and match_data['entry']['accession']:
                     description = match_data['entry']['description']
                     entry = {
                         "accession": match_data['entry']['accession'],
@@ -72,7 +72,6 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         "end": int(location["end"]),
                         "representative": boolean_map.get(location["representative"].lower(), False)
                     }
-
                     if match_data['member_db'].upper() == "CDD":
                         info["evalue"] = float(location["evalue"])
                         info["score"] = float(location["score"])
@@ -101,9 +100,6 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                     elif match_data['member_db'].upper() == "PROSITE_PROFILES":
                         info["score"] = float(location["score"])
                         info["alignment"] = str(location["alignment"])
-
-                    elif match_key == "signal_peptide":
-                        info["score"] = float(location["pvalue"])
 
                     else:
                         info["evalue"] = float(location["evalue"])
