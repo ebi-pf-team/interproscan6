@@ -49,10 +49,12 @@ def json_output(seq_matches: dict, output_path: str, version: str):
 
                     if match_data['member_db'].upper() == "CDD":
                         description = match_data['name']
+
                     if match_data['member_db'].upper() in ["GENE3D", "FUNFAM"]:
                         accession = match_data['accession']  # GENE3D needs the info after ":" (e.g G3DSA:3.20.20.70)
                     else:
-                        accession = match_data['accession'].split(":")[0],  # drop subfamily
+                        accession = match_data['accession'].split(":")[0]  # drop subfamily
+
                     signature = {
                         "accession": accession,
                         "name": match_data['name'],
@@ -157,7 +159,8 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         except KeyError:
                             pass
 
-                matches.append(match)
+                if len(match_data['locations']) > 0:  # skip matches with no locations (we need to make sure it's valid to all members)
+                    matches.append(match)
 
         result = {
             "sequence": sequence,
@@ -165,6 +168,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
             "matches": matches,
             "xref": [xrefs]
         }
+
         results.append(result)
 
     final_data = {"interproscan-version": version, 'results': results}
