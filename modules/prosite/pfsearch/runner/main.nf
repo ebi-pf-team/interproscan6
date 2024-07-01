@@ -21,7 +21,7 @@ process PFSEARCH_RUNNER {
         ${models_dir} \
         ${fasta} \
         ${release}._.prosite_profiles.out \
-        "/opt/pftools/var/lib/pftools/bin/pfsearchV" \
+        "/opt/pftools/var/lib/pftools/bin/pfsearchV3" \
         ${switches}
     """
 }
