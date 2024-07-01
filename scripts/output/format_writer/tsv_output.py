@@ -44,20 +44,12 @@ def tsv_output(seq_matches: dict, output_path: str):
                         ali_from = match["locations"][0]["start"]
                         ali_to = match["locations"][0]["end"]
                         evalue = match["locations"][0]["pvalue"]
-<<<<<<< HEAD
-                    elif match_db.upper() in ["HAMAP", "PROSITE_PROFILES"]:
+                    elif match_db.upper() in ["CDD", "HAMAP", "PROSITE_PROFILES"]:
                         sig_acc = match["accession"]
                         status = "T"
                         evalue = location["score"]
                         ali_from = location["start"]
                         ali_to = location["end"]
-=======
-                    elif match["member_db"].upper() in ["CDD", "HAMAP"]:
-                        status = "T"
-                        ali_from = location["start"]
-                        ali_to = location["end"]
-                        evalue = location["score"]
->>>>>>> e2574d3 (fix hamap tsv output)
                     else:
                         sig_acc = match["accession"]
                         status = "T"
