@@ -48,7 +48,7 @@ process FUNFAM_HMMER_RUNNER {
         "${applications}".contains('funfam')
 
     input:
-        tuple path(fasta), path(hmm), val(switches), val(release), val(build_alignment), val(build_table), val(postprocessing_params), val(cath_superfamily)
+        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(build_alignment), val(build_table), val(postprocessing_params), val(cath_superfamily)
         val applications
 
     /*
