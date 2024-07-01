@@ -1,10 +1,10 @@
 process PFSCAN_RUNNER {
     /*
-    The ps_scan.pl script is a wrapper for the pfscan tool that is provided by the 
-    pftools developers. It automates running pfscan for all provided patterns and 
+    The ps_scan.pl script is a wrapper for the pfscan tool that is provided by the
+    pftools developers. It automates running pfscan for all provided patterns and
     includes post-processing of the hits.
     */
-    container 'docker.io/sibswiss/pftools'
+    // container 'docker.io/sibswiss/pftools'
     label 'prosite_pfscan_runner'
 
     input:
@@ -21,10 +21,10 @@ process PFSCAN_RUNNER {
 
     script:
     """
-    ps_scan.pl \
+    python3 $projectDir/scripts/members/prosite/run_pfscanv3.py \
         ${fasta} \
         -d ${data} \
-        --pfscan pfscanV3 \
+        --pfscan $projectDir/pftools/var/lib/pftools/bin/pfscanV3 \
         -b ${evaluator} \
         ${switches} > ps_scan_${release}.out
     """

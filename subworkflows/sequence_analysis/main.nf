@@ -68,7 +68,6 @@ workflow SEQUENCE_ANALYSIS {
     .branch { member ->
         release = params.members."${member}".release
         log.info "Running $member version $release"
-        runner = ''
 
         if (member == 'antifam' || member == "ncbifam") {
             runner = 'hmmer'
@@ -87,7 +86,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".switches,
                 params.members."${member}".release,
                 false,  // don't build an alignment file
-                false,   // don't build a hmmer.tbl file path 
+                false,   // don't build a hmmer.tbl file path
                 []  // no post-processing params
             ]
 
@@ -101,7 +100,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."gene3d".hmm,
                 params.members."gene3d".switches,
                 params.members."gene3d".release,
-                true,   // build an alignment file
+                false,   // build an alignment file
                 false,   // don't build a hmmer.tbl file path
                 [
                     params.members."gene3d".postprocess.cath_resolve_hits_switches,
@@ -113,7 +112,7 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."funfam".release,
                 ]
             ]
-        
+
         hamap: runner == 'hamap'
             return [
                 params.members."${member}".hmm,
