@@ -36,6 +36,18 @@ include {
     SFLD_FILTER_MATCHES;
 } from "$projectDir/modules/hmmer/filter/main"
 include {
+    PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER
+} from "$projectDir/modules/prosite/pfsearch/runner/main"
+include {
+    PFSEARCH_PARSER as PROSITE_PROFILES_PARSER
+} from "$projectDir/modules/prosite/pfsearch/parser/main"
+include {
+    PFSCAN_RUNNER as PROSITE_PATTERNS_RUNNER
+} from "$projectDir/modules/prosite/pfscan/runner/main"
+include {
+    PFSCAN_PARSER as PROSITE_PATTERNS_PARSER
+} from "$projectDir/modules/prosite/pfscan/parser/main"
+include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER
 } from "$projectDir/modules/signalp/main"
@@ -156,6 +168,23 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."${member}".postprocess.switches,
                     params.members."${member}".postprocess.data,
                 ]
+            ]
+
+        prosite_patterns: runner == "prosite_patterns"
+            return [
+                params.members."${member}".data,
+                params.members."${member}".evaluator,
+                params.members."${member}".release,
+                params.members."${member}".switches
+                []  // post-processing params,
+            ]
+
+        prosite_profiles: runner == "prosite_profiles"
+            return [
+                params.members."${member}".data,
+                params.members."${member}".release,
+                params.members."${member}".switches,
+                params.members."${member}".skip_flagged_profiles
             ]
 
         signalp: runner == 'signalp'
@@ -287,6 +316,16 @@ workflow SEQUENCE_ANALYSIS {
     CDD_POSTPROCESS(CDD_RUNNER.out)
     CDD_PARSER(CDD_POSTPROCESS.out)
 
+    // PROSITE Patterns (uses pfscanV3)
+    runner_patterns = fasta.combine(member_params.prosite_patterns)
+    PROSITE_PATTERNS_RUNNER(runner_patterns)
+    PROSITE_PATTERNS_PARSER(PROSITE_PATTERNS_RUNNER.out)
+
+    // PROSITE Profiles (uses pfsearchV3)
+    runner_profiles = fasta.combine(member_params.prosite_profiles)
+    PROSITE_PROFILES_RUNNER(runner_profiles)
+    PROSITE_PROFILES_PARSER(PROSITE_PROFILES_RUNNER.out)
+
     // SignalP
     runner_signalp_params = fasta.combine(member_params.signalp)
     SIGNALP_RUNNER(runner_signalp_params)
@@ -304,6 +343,8 @@ workflow SEQUENCE_ANALYSIS {
             PANTHER_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
             CDD_PARSER.out,
+            PROSITE_PATTERNS_PARSER.out,
+            PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out
         )
         .set { parsed_results }
@@ -315,6 +356,8 @@ workflow SEQUENCE_ANALYSIS {
             PANTHER_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
             CDD_PARSER.out,
+            PROSITE_PATTERNS_PARSER.out,
+            PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out
         )
         .set { parsed_results }

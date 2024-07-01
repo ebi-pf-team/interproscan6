@@ -96,6 +96,10 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             info["envelopeStart"] = int(location["envelopeStart"])
                             info["envelopeEnd"] = int(location["envelopeEnd"])
 
+                        elif match_data['member_db'].upper() == "PROSITE_PROFILES":
+                            info["score"] = float(location["score"])
+                            info["alignment"] = str(location["alignment"])
+
                         else:
                             info["evalue"] = float(location["evalue"])
                             info["score"] = float(location["score"])
@@ -127,7 +131,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         "locations": locations
                     }
 
-                    if match_data['member_db'].upper() not in ["CDD", "HAMAP"]:
+                    if match_data['member_db'].upper() not in ["CDD", "HAMAP", "PROSITE_PROFILES"]:
                         match["evalue"] = float(match_data['evalue'])
                         match["score"] = float(match_data['score'])
 
