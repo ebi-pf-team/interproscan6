@@ -25,29 +25,36 @@ def parse(pfscan_out: str, version: str):
                     desc = name2desc[2]
                     if seq_id not in ips6_matches:
                         ips6_matches[seq_id] = {}
-                    ips6_matches[seq_id].update({
-                        match_id: {
-                            "accession": match_id,
-                            "name": name,
-                            "description": desc,
-                            "member_db": "PROSITE_PATTERNS",
-                            "version": version,
-                            "locations": []
-                        }
-                    })
                 else:
                     locations = line_strip.split()
                     alignment = locations[3]
-                    if len(alignment) > 9:
-                        cigar_alignment = cigar_alignment_parser(alignment)
-                        location = {
-                            "start": int(locations[0]),
-                            "end": int(locations[2]),
-                            "representative": "false",
-                            "cigarAlignment": encode(cigar_alignment),
-                            "alignment": alignment
-                        }
-                        ips6_matches[seq_id][match_id]["locations"].append(location)
+                    try:
+                        level = locations[4]
+                        if level == "L=(0)":
+                            cigar_alignment = cigar_alignment_parser(alignment)
+                            location = {
+                                "start": int(locations[0]),
+                                "end": int(locations[2]),
+                                "representative": "false",
+                                "level": "STRONG",
+                                "cigarAlignment": encode(cigar_alignment),
+                                "alignment": alignment
+                            }
+                            try:
+                                ips6_matches[seq_id][match_id]["locations"].append(location)
+                            except KeyError:
+                                ips6_matches[seq_id][match_id] = {
+                                    "accession": match_id,
+                                    "name": name,
+                                    "description": desc,
+                                    "member_db": "PROSITE_PATTERNS",
+                                    "version": version,
+                                    "locations": []
+                                }
+                                ips6_matches[seq_id][match_id]["locations"].append(location)
+
+                    except IndexError:
+                        pass
     return ips6_matches
 
 

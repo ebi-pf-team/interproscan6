@@ -31,7 +31,8 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         description = "-"
                     entry = None
                     if match_data['entry']['accession']:
-                        description = match_data['entry']['description']
+                        if match_data['member_db'].upper() not in ["PROSITE_PATTERNS"]:
+                            description = match_data['entry']['description']
                         entry = {
                             "accession": match_data['entry']['accession'],
                             "name": match_data['entry']['short_name'],
@@ -52,7 +53,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                     if match_data['member_db'].upper() in ["GENE3D", "FUNFAM"]:
                         accession = match_data['accession']  # GENE3D needs the info after ":" (e.g G3DSA:3.20.20.70)
                     else:
-                        accession = match_data['accession'].split(":")[0],  # drop subfamily
+                        accession = match_data['accession'].split(":")[0]  # drop subfamily
                     signature = {
                         "accession": accession,
                         "name": match_data['name'],
@@ -101,9 +102,9 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             info["alignment"] = str(location["alignment"])
 
                         elif match_data['member_db'].upper() == "PROSITE_PATTERNS":
-                            info["cigarAlignment"] =location["cigarAlignment"]
-                            info["alignment"] = str(location["alignment"])
-
+                            info["cigarAlignment"] = location["cigarAlignment"]
+                            info["alignment"] = location["alignment"]
+                            info["level"] = location["level"]
                         else:
                             info["evalue"] = float(location["evalue"])
                             info["score"] = float(location["score"])
