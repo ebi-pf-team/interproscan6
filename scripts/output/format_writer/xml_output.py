@@ -48,6 +48,10 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                 except KeyError:
                     pass  # some members may not have evalue or score on this level (e.g. cdd)
 
+                if match_data['member_db'].upper() == "PANTHER":
+                    match_elem.set("protein-class", match_data['proteinClass'])
+                    match_elem.set("graft-point", match_data['graftPoint'])
+
                 signature_elem = ET.SubElement(match_elem, "signature")
                 if match_data['member_db'].upper() not in ['SIGNALP']:  # member db that don't have sigs, so no accs etc.
                     signature_elem.set("ac", match_data['accession'])
