@@ -18,8 +18,8 @@ def parse(pfscan_out: str, version: str):
                     return None
                 if line_strip.startswith(">"):
                     seq2match = line_strip.split(":")
-                    seq_id = seq2match[0].strip()
-                    match_id = seq2match[1].split()[0].strip()[1:]
+                    seq_id = seq2match[0].strip().replace(">", "")
+                    match_id = seq2match[1].split()[0].strip()
                     name2desc = seq2match[1].strip().split(' ', 2)
                     name = name2desc[1]
                     desc = name2desc[2]
@@ -37,15 +37,17 @@ def parse(pfscan_out: str, version: str):
                     })
                 else:
                     locations = line_strip.split()
-                    cigar_alignment = cigar_alignment_parser(locations[3])
-                    location = {
-                        "start": int(locations[0]),
-                        "end": int(locations[2]),
-                        "cigarAlignment": encode(cigar_alignment),
-                        "alignment": locations[3]
-                    }
-
-                    ips6_matches[seq_id][match_id]["locations"].append(location)
+                    alignment = locations[3]
+                    if len(alignment) > 9:
+                        cigar_alignment = cigar_alignment_parser(alignment)
+                        location = {
+                            "start": int(locations[0]),
+                            "end": int(locations[2]),
+                            "representative": "false",
+                            "cigarAlignment": encode(cigar_alignment),
+                            "alignment": alignment
+                        }
+                        ips6_matches[seq_id][match_id]["locations"].append(location)
     return ips6_matches
 
 

@@ -26,23 +26,18 @@ def input_path(test_input_dir):
 
 
 @pytest.fixture
-def expected_output_path(test_output_dir):
-    return test_output_dir / "expected_output_hamap"
-
-
-@pytest.fixture
 def current_output_path(test_output_dir):
     return test_output_dir / "current_output"
 
 
 @pytest.fixture
 def expected_output_path(test_output_dir):
-    return test_output_dir / "expected_output_hamap"
+    return test_output_dir / "expected_output_prosite_patterns"
 
 
 @pytest.fixture
 def applications():
-    return "hamap"
+    return "prosite_patterns"
 
 
 @pytest.fixture
