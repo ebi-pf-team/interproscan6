@@ -49,8 +49,8 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     pass  # some members may not have evalue or score on this level (e.g. cdd)
 
                 if match_data['member_db'].upper() == "PANTHER":
-                    match_elem.set("protein-class", match_data['proteinClass'])
-                    match_elem.set("graft-point", match_data['graftPoint'])
+                    match_elem.set("protein-class", _check_null(match_data['proteinClass']))
+                    match_elem.set("graft-point", _check_null(match_data['graftPoint']))
 
                 signature_elem = ET.SubElement(match_elem, "signature")
                 if match_data['member_db'].upper() not in ['SIGNALP']:  # member db that don't have sigs, so no accs etc.
@@ -151,12 +151,18 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     if 'sites' in location:
                         for site in location['sites']:
                             if match_data['member_db'].upper() == "CDD":
-                                location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
+                                location_frag_elem = ET.SubElement(
+                                    location_frags_elem,
+                                    "analysis-location-fragment"
+                                )
                                 location_frag_elem.set("description", str(site['description']))
                                 location_frag_elem.set("numLocations", str(site['numLocations']))
                             else:
                                 for sitelocation in site['siteLocations']:
-                                    location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
+                                    location_frag_elem = ET.SubElement(
+                                        location_frags_elem,
+                                        "analysis-location-fragment"
+                                    )
                                     location_frag_elem.set("start", str(sitelocation["start"]))
                                     location_frag_elem.set("end", str(sitelocation["end"]))
                                     location_frag_elem.set("residue", str(sitelocation["residue"]))
