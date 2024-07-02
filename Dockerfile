@@ -37,16 +37,28 @@ RUN curl -L -O https://ftp.ncbi.nih.gov/pub/mmdb/cdd/rpsbproc/RpsbProc-x64-linux
     tar -xzf RpsbProc-x64-linux.tar.gz && \
     rm RpsbProc-x64-linux.tar.gz
 
-# Install HMMER
+# Install HMMER3
 WORKDIR /opt/
-RUN mkdir /opt/hmmer && \
+RUN mkdir /opt/hmmer3 && \
     curl -L -O http://eddylab.org/software/hmmer/hmmer-3.3.tar.gz && \
     tar -xzf hmmer-3.3.tar.gz && \
     rm hmmer-3.3.tar.gz && \
     cd hmmer-3.3 && \
-    ./configure --prefix /opt/hmmer && \
+    ./configure --prefix /opt/hmmer3 && \
     make && \
     make install
+
+# Install HMMER2 (for SMART)
+WORKDIR /opt/
+RUN mkdir /opt/hmmer2 && \
+    curl -L -O http://eddylab.org/software/hmmer/2.3.2/hmmer-2.3.2.tar.gz && \
+    tar -xzf hmmer-2.3.2.tar.gz && \
+    rm hmmer-2.3.2.tar.gz && \
+    cd hmmer-2.3.2 && \
+    ./configure --prefix /opt/hmmer2 && \
+    make && \
+    make install && \
+    rm -rf hmmer-2.3.2
 
 # Install easel for predicting open reading frames (ORFs)
 RUN cd /opt/hmmer-3.3/easel && \
