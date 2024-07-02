@@ -22,7 +22,7 @@ def test_output_dir(test_dir):
 
 @pytest.fixture
 def input_path(test_input_dir):
-    return test_input_dir / "integration_input.fasta"
+    return test_input_dir / "pfam_fragm.fasta"
 
 
 @pytest.fixture

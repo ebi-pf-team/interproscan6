@@ -85,8 +85,8 @@ def parse_cath(cath_out: Path) -> dict[str, Gene3dHit]:
 
     with open(cath_out, "r") as fh:
         for line in fh.readlines():
-            if line.startswith('#'):
-                continue  # header row
+            if line.startswith('#') or not line.strip():
+                continue  # header row or blank line
             protein_id = line.split()[2]
             if protein_id not in matches:
                 match = Gene3dHit()
