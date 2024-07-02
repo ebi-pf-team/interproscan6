@@ -85,7 +85,7 @@ workflow {
 
     AGGREGATE_RESULTS(all_results.collect())
 
-    XREFS(AGGREGATE_RESULTS.out)
+    XREFS(AGGREGATE_RESULTS.out, applications)
 
     Channel.from(formats.split(','))
     .set { ch_format }
@@ -94,7 +94,8 @@ workflow {
 }
 
 workflow.onComplete = {
-    println "InterProScan workflow completed successfully: $workflow.success.\nResults are located in ${params.output}.*"
+    println "InterProScan workflow completed successfully: $workflow.success."
+    println "Results are located at ${params.output}.*"
     println "Duration: $workflow.duration"
 }
 
