@@ -58,7 +58,7 @@ RUN mkdir /opt/hmmer2 && \
     ./configure --prefix /opt/hmmer2 && \
     make && \
     make install && \
-    rm -rf hmmer-2.3.2
+    rm -rf /opt/hmmer-2.3.2
 
 # Install easel for predicting open reading frames (ORFs)
 RUN cd /opt/hmmer-3.3/easel && \
