@@ -10,17 +10,20 @@ class Gene3dHit:
         self.domains = {}
 
     def add_domain(self, value: str):
-        match_id = value.split()[3]
+        """Where value is a result of line.split()"""
+        match_id = value[3]
         domain = DomainHit()
-        domain.signature_acc = value.split()[0]
-        domain.cath_superfamily = value.split()[1]
+        domain.signature_acc = value[0]
+        domain.cath_superfamily = value[1]
         domain.match_id = match_id
-        domain.score = value.split()[4]
-        domain.evalue = value.split()[-1]
-        domain.boundaries_start = value.split()[-5].split("-")[0]
-        domain.boundaries_end = value.split()[-5].split("-")[1]
-        domain.resolved = value.split()[-4]
-        domain.aligned_regions = value.split()[-3]
+        domain.score = value[4]
+        domain.evalue = value[-1]
+        domain.start = value[6].split("-")[0]
+        domain.end = value[6].split("-")[1]
+        domain.boundaries_start = value[-5].split("-")[0]
+        domain.boundaries_end = value[-5].split("-")[1]
+        domain.resolved = value[-4]
+        domain.aligned_regions = value[-3]
 
         if match_id not in self.domains:
             self.domains[match_id] = [domain]
@@ -35,6 +38,8 @@ class DomainHit:
         self.match_id = None
         self.score = None  # bit score
         self.evalue = None  # indp-evalue
+        self.start = None  # resolved.split("-")[0]
+        self.end = None  # resolved.split("-")[1]
         self.boundaries_start = None  # envelope boundaries
         self.boundaries_end = None
         self.resolved = None
@@ -92,7 +97,7 @@ def parse_cath(cath_out: Path) -> dict[str, Gene3dHit]:
                 match = Gene3dHit()
                 match.sequence_id = protein_id
                 matches[protein_id] = match
-            matches[protein_id].add_domain(line)
+            matches[protein_id].add_domain(line.split())
 
     return matches
 
@@ -109,8 +114,10 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> tuple[di
     """
     processed_ips6 = {}
     all_cath_superfamilies = set()
+
     with open(ips6, "r") as fh:
         ips6_data = json.load(fh)
+
     for protein_id in ips6_data:
         if protein_id not in gene3d_matches:
             continue
@@ -122,12 +129,15 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> tuple[di
             # retrieve the relevant domain hit
             ips6_location = None  # from the IPS6 data
             gene3d_domain = None  # from the cath-superfamilies output
+
+            # locations is a list of dicts, each representing a location where the signature
+            # matched a region of the query protein sequece
             for location in ips6_data[protein_id][signature_acc]["locations"]:
                 for domain in gene3d_matches[protein_id].domains[signature_acc]:
                     if domain.evalue == location["evalue"] \
                         and domain.score == location["score"] \
-                        and domain.boundaries_start == location["envelopeStart"] \
-                        and domain.boundaries_end == location["envelopeEnd"]:
+                        and domain.start == location["start"] \
+                        and domain.end == location["end"]:
                         ips6_location = location
                         gene3d_domain = domain
 
