@@ -86,7 +86,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".switches,
                 params.members."${member}".release,
                 false,  // don't build an alignment file
-                false,   // don't build a hmmer.tbl file path 
+                false,  // don't build a hmmer.tbl file path 
                 []  // no post-processing params
             ]
 
@@ -114,13 +114,13 @@ workflow SEQUENCE_ANALYSIS {
                 ]
             ]
         
-        hamap: runner == 'hamap'
+        hamap: member == 'hamap'
             return [
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                false,  // don't build an alignment file
+                false,   // don't build an alignment file
                 true,    // build a hmmer.tbl file path
                 [
                     params.members."${member}".postprocess.models_dir,
@@ -130,10 +130,13 @@ workflow SEQUENCE_ANALYSIS {
 
         ncbifam: member == 'ncbifam'
             return [
+                "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                false, []
+                false,  // don't build an alignment file
+                false,  // don't build a hmmer.tbl file path 
+                []
             ]
 
         panther: member == 'panther'
@@ -195,7 +198,7 @@ workflow SEQUENCE_ANALYSIS {
                 ]
             ]
 
-        prosite_patterns: runner == "prosite_patterns"
+        prosite_patterns: member == "prosite_patterns"
             return [
                 params.members."${member}".data,
                 params.members."${member}".evaluator,
@@ -204,7 +207,7 @@ workflow SEQUENCE_ANALYSIS {
                 []  // post-processing params,
             ]
 
-        prosite_profiles: runner == "prosite_profiles"
+        prosite_profiles: member == "prosite_profiles"
             return [
                 params.members."${member}".data,
                 params.members."${member}".release,
@@ -212,7 +215,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".skip_flagged_profiles
             ]
 
-        signalp: runner == 'signalp'
+        signalp: member == 'signalp'
 
             return [
                 params.members.signalp.data.mode,
@@ -345,8 +348,17 @@ workflow SEQUENCE_ANALYSIS {
     // Pfam
     runner_hmmer_pfam_params = fasta.combine(member_params.pfam)
     PFAM_HMMER_RUNNER(runner_hmmer_pfam_params)
-    PFAM_HMMER_PARSER(PFAM_HMMER_RUNNER.out, tsv_pro, "pfam")
-    PFAM_FILTER_MATCHES(PFAM_HMMER_PARSER.out)
+    PFAM_HMMER_PARSER(
+        PFAM_HMMER_RUNNER.out[0],  // hmmer.out path
+        PFAM_HMMER_RUNNER.out[1],  // hmmer.dtbl path
+        PFAM_HMMER_RUNNER.out[2],  // post-processing-params
+        tsv_pro,
+        "pfam"
+    )
+    PFAM_FILTER_MATCHES(
+        PFAM_HMMER_PARSER.out, // ips6 json
+        PFAM_HMMER_RUNNER.out[2]  // post-processing-params
+    )
 
     /*
     Member databases that do NOT use HMMER

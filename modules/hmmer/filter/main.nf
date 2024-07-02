@@ -93,6 +93,30 @@ process PANTHER_FILTER_MATCHES {
     """
 }
 
+
+process PFAM_FILTER_MATCHES {
+    label 'analysis_parser'
+
+    input:
+        path ips6_json
+        val postprocessing_params
+
+    output:
+        path "${ips6_json}.post.processed.json"
+
+    script:
+    """
+    python3 $projectDir/scripts/members/pfam/postprocess.py \
+        --hmm_parsed ${ips6_json} \
+        --min_length '${postprocessing_params[0]}' \
+        --seed '${postprocessing_params[1]}' \
+        --clans '${postprocessing_params[2]}' \
+        --dat '${postprocessing_params[3]}' \
+        > '${ips6_json}.post.processed.json'
+    """
+}
+
+
 process SFLD_FILTER_MATCHES {
     label 'analysis_parser'
 
@@ -109,30 +133,5 @@ process SFLD_FILTER_MATCHES {
     python3 $projectDir/scripts/members/sfld/sfld_process_post_processed.py \\
         ${slfd_post_processed_output} \\
         ${ips6_json} > ${ips6_json}.post.processed.json
-    """
-}
-
-process PFAM_FILTER_MATCHES {
-    label 'analysis_parser'
-
-    input:
-        path ips6_json
-        path out_file
-        path out_dtbl
-        val postprocessing_params
-        path alignment
-
-    output:
-        path "${ips6_json}.post.processed.json"
-
-    script:
-    """
-    python3 $projectDir/scripts/members/pfam/postprocess.py \
-        --hmm_parsed ${ips6_json} \
-        --min_length '${postprocessing_params[0]}' \
-        --seed '${postprocessing_params[1]}' \
-        --clans '${postprocessing_params[2]}' \
-        --dat '${postprocessing_params[3]}' \
-        > '${ips6_json}.post.processed.json'
     """
 }
