@@ -171,6 +171,7 @@ workflow SEQUENCE_ANALYSIS {
 
         pfam: member == 'pfam'
             return [
+                "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
