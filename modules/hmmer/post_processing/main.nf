@@ -6,7 +6,6 @@ filters module/
 */
 
 process CATH_RESEOLVE_HITS {
-    container 'docker.io/library/cathtools'
     label 'analysis_parser'
 
     input:
@@ -20,7 +19,7 @@ process CATH_RESEOLVE_HITS {
     // cath_resolve_hits is a third party tool used to minimise suprious hits
     script:
     """
-    /cath-tools/cath-resolve-hits \\
+    /opt/cath-tools/cath-resolve-hits \\
         ${out_file} \\
         --input-for hmmsearch_out \\
         ${postprocessing_params[0]} > "${out_file}.cath.resolved.out"
@@ -78,11 +77,6 @@ process HAMAP_POST_PROCESSER {
     output_file -- another output file
     model_dir -- path to dir containing hamap profiles for pfsearch
     */
-
-    /*
-    Delete "$projectDir/bin/prosite/pfsearchV3" and remove its use in
-    pfsearch_wrapper.py when we move over to the single docker image
-    */
     script:
     """
     python3 $projectDir/scripts/members/hamap/pfsearch_wrapper.py \
@@ -91,7 +85,7 @@ process HAMAP_POST_PROCESSER {
         "seqs_with_hits.faa" \
         "hamap_pfsearch_output" \
         ${postprocessing_params[0]} \
-        $projectDir/bin/prosite/pfsearchV3 \
+        "/opt/pftools/var/lib/pftools/bin/pfsearchV3" \
         ${postprocessing_params[1]} > "print.statements.out"
     """
 }

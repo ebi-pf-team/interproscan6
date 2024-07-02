@@ -114,7 +114,10 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             info["postProcessed"] = boolean_map.get(location["postProcessed"].lower())
 
                         if match_data['member_db'].upper() in ["SFLD", "CDD"]:
-                            info["sites"] = location["sites"]
+                            try:
+                                info["sites"] = location["sites"]
+                            except KeyError:
+                                info["sites"] = []
                         try:
                             info["location-fragments"] = location["location-fragments"]
                         except KeyError:

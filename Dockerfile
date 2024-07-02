@@ -27,20 +27,20 @@ ENV PATH="/opt/pftools/usr/local/bin:${PATH}"
 # Install NCBI BLAST, only rpsblast (for CDD)
 # Don't pull the NCBI BLAST image has its BIG - Just get the bits we need
 WORKDIR /opt/blast
-RUN curl -O https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.15.0+-x64-linux.tar.gz && \
+RUN curl -L -O https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.15.0+-x64-linux.tar.gz && \
     tar -zxpf ncbi-blast-2.15.0+-x64-linux.tar.gz && \
     rm ncbi-blast-2.15.0+-x64-linux.tar.gz
 
 # Install RpsbProc for CDD post-processing
 WORKDIR /opt/rpsbproc
-RUN curl -O https://ftp.ncbi.nih.gov/pub/mmdb/cdd/rpsbproc/RpsbProc-x64-linux.tar.gz && \
+RUN curl -L -O https://ftp.ncbi.nih.gov/pub/mmdb/cdd/rpsbproc/RpsbProc-x64-linux.tar.gz && \
     tar -xzf RpsbProc-x64-linux.tar.gz && \
     rm RpsbProc-x64-linux.tar.gz
 
 # Install HMMER
 WORKDIR /opt/
 RUN mkdir /opt/hmmer && \
-    curl -O http://eddylab.org/software/hmmer/hmmer-3.3.tar.gz && \
+    curl -L -O http://eddylab.org/software/hmmer/hmmer-3.3.tar.gz && \
     tar -xzf hmmer-3.3.tar.gz && \
     rm hmmer-3.3.tar.gz && \
     cd hmmer-3.3 && \
@@ -62,6 +62,11 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN git clone https://github.com/pierrebarbera/epa-ng
 RUN cd epa-ng && make
 RUN pip install biopython==1.83
+
+# Install Cath-tools for Gene3D and FunFam
+WORKDIR /opt/cath-tools
+RUN curl -L -o cath-resolve-hits https://github.com/UCLOrengoGroup/cath-tools/releases/download/v0.16.10/cath-resolve-hits.ubuntu-20.04
+RUN chmod +x cath-resolve-hits
 
 WORKDIR /opt/interproscan6
 COPY subworkflows/ subworkflows/

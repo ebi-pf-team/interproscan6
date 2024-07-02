@@ -6,8 +6,9 @@ MATCH_ELEMENT = {
     'SIGNALP': 'signal-peptide',
     'CDD': 'cdd-domain',
     'ANTIFAM': 'hmmer3-match',
-    'GENE3D': 'hmmer3-match',
     'FUNFAM': 'hmmer3-match',
+    'GENE3D': 'hmmer3-match',
+    'HAMAP': 'hmmer3-match',
     'NCBIFAM': 'hmmer3-match',
     'PANTHER': 'hmmer3-match',
     'SFLD': 'hmmer3-match',
@@ -17,6 +18,11 @@ MATCH_ELEMENT = {
 
 
 def xml_output(seq_matches: dict, output_path: str, version: str):
+    def _check_null(value, acc=False):
+        if acc:
+            return str(value) if str(value).lower() not in ["none", "null", ""] else "-"
+        return str(value) if str(value).lower() not in ["none", "null", ""] else ""
+
     xml_output = os.path.join(output_path + '.xml')
     root = ET.Element("protein-matches", xmlns="https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/schemas")
     root.set("interproscan-version", version)
@@ -48,14 +54,18 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     signature_elem.set("name", match_data['name'])
 
                 if match_data['entry']:
-                    signature_elem.set("desc", match_data["entry"]['description'])
-                    signature_elem.set("name", match_data['entry']['short_name'])
+                    acc = _check_null(match_data['entry']['accession'], acc=True)
+                    sig_type = _check_null(match_data['entry']['type'])
+                    desc = _check_null(match_data["entry"]['description'])
+                    short_name = _check_null(match_data["entry"]['short_name'])
+                    signature_elem.set("desc", desc)
+                    signature_elem.set("name", short_name)
                     if match_data['entry']['accession'] != "-":
                         entry_elem = ET.SubElement(signature_elem, "entry")
-                        entry_elem.set("ac", match_data['entry']['accession'])
-                        entry_elem.set("desc", match_data['entry']['description'])
-                        entry_elem.set("name", match_data['entry']['short_name'])
-                        entry_elem.set("type", match_data['entry']['type'])
+                        entry_elem.set("ac", acc)
+                        entry_elem.set("desc", desc)
+                        entry_elem.set("name", short_name)
+                        entry_elem.set("type", sig_type)
                         if match_data['entry']['goXRefs']:
                             for go_xref in match_data['entry']['goXRefs']:
                                 go_xref_elem = ET.SubElement(entry_elem, "go-xref")
@@ -87,19 +97,30 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("evalue", str(location["evalue"]))
                         location_elem.set("score", str(location["score"]))
                         location_elem.set("postProcessed", str(location["postProcessed"]))
+
+                    elif match_data['member_db'].upper() == "HAMAP":
+                        location_elem.set("score", str(location["score"]))
+                        location_elem.set("alignment", str(location["alignment"]))
+
                     elif match_data['member_db'].upper() == "SIGNALP":
                         location_elem.set("end", str(location["end"]))
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("pvalue", str(location["pvalue"]))
+
                     elif match_data['member_db'].upper() == "SFLD":
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
-                        location_elem.set("sites", location["sites"])
+                        try:
+                            location_elem.set("sites", location["sites"])
+                        except KeyError:
+                            location_elem.set("sites", [])
+
                     elif match_data['member_db'].upper() == "PROSITE_PROFILES":
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("score", str(location["score"]))
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("end", str(location["end"]))
                         location_elem.set("alignment", str(location["alignment"]))
+
                     else:
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("env-end", str(location["envelopeEnd"]))
@@ -126,15 +147,14 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         for site in location['sites']:
                             if match_data['member_db'].upper() == "CDD":
                                 location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
-                                location_frag_elem.set("start", str(site['siteLocations']["start"]))
-                                location_frag_elem.set("end", str(site['siteLocations']["end"]))
-                                location_frag_elem.set("residue", str(site['siteLocations']["residue"]))
+                                location_frag_elem.set("description", str(site['description']))
+                                location_frag_elem.set("numLocations", str(site['numLocations']))
                             else:
                                 for sitelocation in site['siteLocations']:
                                     location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
                                     location_frag_elem.set("start", str(sitelocation["start"]))
                                     location_frag_elem.set("end", str(sitelocation["end"]))
-                                    location_frag_elem.set("dc-status", "")
+                                    location_frag_elem.set("residue", str(sitelocation["residue"]))
 
     tree = ET.ElementTree(root)
     ET.indent(tree, space="\t", level=0)

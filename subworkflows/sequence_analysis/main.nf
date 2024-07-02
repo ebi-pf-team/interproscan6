@@ -81,6 +81,7 @@ workflow SEQUENCE_ANALYSIS {
         */
         antifam: member == 'antifam'
             return [
+                "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
@@ -96,6 +97,7 @@ workflow SEQUENCE_ANALYSIS {
         gene3d_funfam: (member == 'gene3d' || member == 'funfam') && !gene3d_funfam_processed
             gene3d_funfam_processed = true
             return [
+                "gene3d",
                 params.members."gene3d".hmm,
                 params.members."gene3d".switches,
                 params.members."gene3d".release,
@@ -114,6 +116,7 @@ workflow SEQUENCE_ANALYSIS {
         
         hamap: runner == 'hamap'
             return [
+                "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
@@ -135,6 +138,7 @@ workflow SEQUENCE_ANALYSIS {
 
         panther: member == 'panther'
             return [
+                "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
@@ -149,6 +153,7 @@ workflow SEQUENCE_ANALYSIS {
 
         sfld: member == 'sfld'
             return [
+                "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
@@ -222,7 +227,6 @@ workflow SEQUENCE_ANALYSIS {
     /*
     Member databases that use HMMER
     */
-
     // AntiFam
     runner_hmmer_antifam_params = fasta.combine(member_params.antifam)
     ANTIFAM_HMMER_RUNNER(runner_hmmer_antifam_params)
@@ -241,7 +245,7 @@ workflow SEQUENCE_ANALYSIS {
         NCBIFAM_HMMER_RUNNER.out[0], // hmmer.out path
         NCBIFAM_HMMER_RUNNER.out[1], // hmmer.dtbl path
         NCBIFAM_HMMER_RUNNER.out[2], // post-processing-params
-        tsv_pro, 
+        tsv_pro,
         "false"
     )
 
@@ -310,7 +314,7 @@ workflow SEQUENCE_ANALYSIS {
         "false"
     )
     PANTHER_POST_PROCESSER(
-        PANTHER_HMMER_PARSER.out,     // hmmer.out path
+        PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
         PANTHER_HMMER_RUNNER.out[2],  // post-processing-params
         fasta
     )
