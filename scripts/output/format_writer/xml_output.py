@@ -11,6 +11,7 @@ MATCH_ELEMENT = {
     'HAMAP': 'hmmer3-match',
     'NCBIFAM': 'hmmer3-match',
     'PANTHER': 'hmmer3-match',
+    'PFAM': 'hmmer3-match',
     'SFLD': 'hmmer3-match',
     'PROSITE_PATTERNS': 'profilescan-match',
     'PROSITE_PROFILES': 'profilesearch-match',  # changed from i5 which is also profilescan-match
