@@ -25,45 +25,33 @@ def parse(pfscan_out: str, version: str):
                     desc = name2desc[2]
                     if seq_id not in ips6_matches:
                         ips6_matches[seq_id] = {}
-                    ips6_matches[seq_id]["matches"] = {}
-                    signature = {
-                        "accession": match_id,
-                        "name": name,
-                        "description": desc,
-                        "signatureLibraryRelease": {
-                            "library": "PROSITE_PATTERNS",
-                            "version": version
+                    ips6_matches[seq_id].update({
+                        match_id: {
+                            "accession": match_id,
+                            "name": name,
+                            "description": desc,
+                            "member_db": "PROSITE_PATTERNS",
+                            "version": version,
+                            "locations": []
                         }
-                    }
-                    ips6_matches[seq_id].update(
-                        {
-                            match_id:
-                                {
-                                    "signature": signature,
-                                    "locations": []
-                                 }
-                        }
-                    )
+                    })
                 else:
                     locations = line_strip.split()
-                    if len(locations) == 3:
-                        cigar_alignment = cigar_alignment_parser(locations[3])
-                        location = {
-                            "start": int(locations[0]),
-                            "end": int(locations[2]),
-                            "cigarAlignment": encode(cigar_alignment),
-                            "alignment": locations[3]
-                        }
-                    else:
-                        raise AttributeError(f"ERRO NO LOCATION {locations}")
+                    cigar_alignment = cigar_alignment_parser(locations[3])
+                    location = {
+                        "start": int(locations[0]),
+                        "end": int(locations[2]),
+                        "cigarAlignment": encode(cigar_alignment),
+                        "alignment": locations[3]
+                    }
 
                     ips6_matches[seq_id][match_id]["locations"].append(location)
     return ips6_matches
 
 
 def main():
-    pfscan_out = sys.argv[0]  # output file from PFSCAN_RUNNER module
-    output_file = sys.argv[1]  # str rep of path for internal IPS6 JSON
+    pfscan_out = sys.argv[1]  # output file from PFSCAN_RUNNER module
+    output_file = sys.argv[2]  # str rep of path for internal IPS6 JSON
 
     version = pfscan_out.split("._.")[0]
 
