@@ -211,11 +211,11 @@ def main():
     matches = parse_cath(args.cath_out)
     processed_ips6, superfamilies = filter_matches(args.ips6, matches)
 
-    # with open(args.out_json, "w") as fh:
-    #     json.dump(processed_ips6, fh, indent=2)
-    # with open(args.out_superfamilies, "w") as fh:
-    #     for superfam in superfamilies:
-    #         fh.write(f"{superfam}\n")
+    with open(args.out_json, "w") as fh:
+        json.dump(processed_ips6, fh, indent=2)
+    with open(args.out_superfamilies, "w") as fh:
+        for superfam in superfamilies:
+            fh.write(f"{superfam}\n")
 
 
 if __name__ == "__main__":
