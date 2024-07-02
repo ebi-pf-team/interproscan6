@@ -94,7 +94,7 @@ workflow {
 }
 
 workflow.onComplete = {
-    println "InterProScan workflow completed $workflow.success. Results in ${params.output}.*"
+    println "InterProScan workflow completed successfully: $workflow.success.\nResults are located in ${params.output}.*"
     println "Duration: $workflow.duration"
 }
 
