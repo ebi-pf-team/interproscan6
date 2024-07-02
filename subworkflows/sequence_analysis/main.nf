@@ -175,7 +175,8 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                false,
+                false,  // don't build an alignment file
+                false,   // don't build a hmmer.tbl file path
                 [
                     params.members."${member}".postprocess.min_length,
                     params.members."${member}".postprocess.seed,
