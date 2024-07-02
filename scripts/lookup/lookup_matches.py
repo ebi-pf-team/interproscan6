@@ -48,6 +48,9 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     "member_db": hit_appl
                 }
 
+                if signature["member_db"].upper() == "PANTHER":
+                    signature["node_id"] = hit_data[17]
+
                 location = {
                     "start": int(hit_data[4]),
                     "end": int(hit_data[5]),
