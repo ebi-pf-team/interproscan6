@@ -34,8 +34,8 @@ def parse(signalp_out: str, threshold: float, signalp_version: str):
             cs_prediction = line.split("\t")[-1]
             if len(cs_prediction) > 1:
                 if float(cs_prediction.split("Pr:")[-1].strip()) >= threshold:
-                    start_location = 1
-                    end_location = int(cs_prediction.split(". ")[0].strip("CS pos: ").split("-")[0].strip())
+                    start_location = int(cs_prediction.split(". ")[0].strip("CS pos: ").split("-")[0].strip())
+                    end_location = int(cs_prediction.split(". ")[0].strip("CS pos: ").split("-")[1].strip())
                     pvalue = float(cs_prediction.split("Pr:")[-1].strip())
 
             if start_location:
