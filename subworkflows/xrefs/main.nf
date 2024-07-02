@@ -11,43 +11,21 @@ workflow XREFS {
     main:
 
     ENTRIES(matches, params.xrefs.entries)
+    final_result = ENTRIES.out
 
     if ("${applications}".contains('panther')) {
-        PAINT_ANNOTATIONS(ENTRIES.out, params.members.panther.postprocess.paint_annotations)
+        PAINT_ANNOTATIONS(final_result, params.members.panther.postprocess.paint_annotations)
+        final_result = PAINT_ANNOTATIONS.out
     }
 
     if (params.goterms) {
-        if ("${applications}".contains('panther')) {
-            GOTERMS(PAINT_ANNOTATIONS.out, params.xrefs.goterms)
-        }
-        else {
-            GOTERMS(ENTRIES.out, params.xrefs.goterms)
-        }
-        
-        if (params.pathways) {
-            final_result = PATHWAYS(GOTERMS.out, params.xrefs.pathways)
-        }
-        else {
-            final_result = GOTERMS.out
-        }
+        GOTERMS(final_result, params.xrefs.goterms)
+        final_result = GOTERMS.out
     }
-    else {
-        if (params.pathways) {
-            if ("${applications}".contains('panther')) {
-                final_result = PATHWAYS(PAINT_ANNOTATIONS.out, params.xrefs.pathways)
-            }
-            else {
-                final_result = PATHWAYS(ENTRIES.out, params.xrefs.pathways)
-            }
-        }
-        else {
-            if ("${applications}".contains('panther')) {
-                final_result = PAINT_ANNOTATIONS.out
-            }
-            else {
-                final_result = ENTRIES.out
-            }
-        }
+
+    if (params.pathways) {
+        PATHWAYS(final_result, params.xrefs.pathways)
+        final_result = PATHWAYS.out
     }
 
     emit:
