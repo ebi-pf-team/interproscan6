@@ -6,12 +6,13 @@ include {
 include {
     HMMER_RUNNER as ANTIFAM_HMMER_RUNNER;
     HMMER_RUNNER as NCBIFAM_HMMER_RUNNER;
-    FUNFAM_HMMER_RUNNER;
     HMMER_RUNNER as GENE3D_HMMER_RUNNER;
     HMMER_RUNNER as HAMAP_HMMER_RUNNER;
     HMMER_RUNNER as SFLD_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
+    FUNFAM_HMMER_RUNNER;
+    SMART_HMMER_RUNNER;
 } from "$projectDir/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
@@ -167,6 +168,15 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."${member}".postprocess.sites_annotation,
                     params.members."${member}".postprocess.hierarchy,
                 ]
+            ]
+
+        smart: member == 'smart'
+            return [
+                "${member}",
+                params.members."${member}".hmm,
+                params.members."${member}".switches,
+                params.members."${member}".release,
+                []
             ]
 
         pfam: member == 'pfam'
@@ -327,6 +337,10 @@ workflow SEQUENCE_ANALYSIS {
         PANTHER_HMMER_PARSER.out,   // internal ips6 json
         PANTHER_POST_PROCESSER.out  // treegrafter output + post-processing params
     )
+
+    // SMART (HMMER 2)
+    runner_smart_params = fasta.combine(member_params.smart)
+    SMART_HMMER_RUNNER(runner_smart_params)
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)

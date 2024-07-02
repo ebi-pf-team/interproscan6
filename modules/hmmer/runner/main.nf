@@ -84,12 +84,11 @@ process SMART_HMMER_RUNNER {
 
     output:
         path "${release}._.${member}._.out"
-        path "${release}._.${member}._.dtbl"
         val postprocessing_params
         path "${fasta}"
 
     script:
     """
-    /opt/hmmer2/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl ${hmm} ${fasta}
+    /opt/hmmer2/bin/hmmpfam ${switches} ${hmm} ${fasta} > ${release}._.${member}._.out
     """
 }
