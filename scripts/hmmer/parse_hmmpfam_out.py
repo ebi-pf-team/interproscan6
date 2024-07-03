@@ -248,26 +248,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-                        # print(protein_with_hit.signatures)
-                        # print(protein_with_hit.signatures[list(protein_with_hit.signatures.keys())[0]].model_id)
-                        # print(protein_with_hit.signatures[list(protein_with_hit.signatures.keys())[0]].description)
-                        # print(protein_with_hit.signatures[list(protein_with_hit.signatures.keys())[0]].score)
-                        # print(protein_with_hit.signatures[list(protein_with_hit.signatures.keys())[0]].evalue)
-                        # print(protein_with_hit.signatures[list(protein_with_hit.signatures.keys())[0]].num_domains)
-
-
-                        # print("sigs", protein_with_hit.signatures)
-                        # print("domains", protein_with_hit.signatures[list(protein_with_hit.signatures.keys())[0]].domains)
-                        # for d_num in protein_with_hit.signatures[list(protein_with_hit.signatures.keys())[0]].domains:
-                        #     print(protein_with_hit.signatures[list(protein_with_hit.signatures.keys())[0]].domains[d_num].model_id)
-                        #     print(protein_with_hit.signatures[list(protein_with_hit.signatures.keys())[0]].domains[d_num].domain_num)
-                        #     print(protein_with_hit.signatures[list(protein_with_hit.signatures.keys())[0]].domains[d_num].seq_from)
-                        #     print(protein_with_hit.signatures[list(protein_with_hit.signatures.keys())[0]].domains[d_num].seq_to)
-                        #     print(protein_with_hit.signatures[list(protein_with_hit.signatures.keys())[0]].domains[d_num].hmm_from)
-                        #     print(protein_with_hit.signatures[list(protein_with_hit.signatures.keys())[0]].domains[d_num].hmm_to)
-                        #     print(protein_with_hit.signatures[list(protein_with_hit.signatures.keys())[0]].domains[d_num].hmm_raw_bounds)
-                        #     print(protein_with_hit.signatures[list(protein_with_hit.signatures.keys())[0]].domains[d_num].hmm_bounds)
-                        #     print(protein_with_hit.signatures[list(protein_with_hit.signatures.keys())[0]].domains[d_num].score)
-                        #     print(protein_with_hit.signatures[list(protein_with_hit.signatures.keys())[0]].domains[d_num].evalue)
