@@ -5,7 +5,7 @@ parsed and applied to the internal IPS6 JSON structure in the
 filters module/
 */
 
-process CATH_RESEOLVE_HITS {
+process CATH_RESOLVE_HITS {
     label 'analysis_parser'
 
     input:

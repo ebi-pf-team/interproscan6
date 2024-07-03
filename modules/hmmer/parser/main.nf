@@ -3,7 +3,7 @@ process HMMER_PARSER {
 
     input:
     path out
-    val postprocessing_params // used to post processing
+    val postprocessing_params
 
     output:
     path "hmmer_parsed_${out}.json"
@@ -43,24 +43,5 @@ process HMMER_PARSER_WITH_ALIGNMENT {
             ${is_sfld} \\
             ${postprocessing_params[2]} \\
             > hmmer_parsed_${out}.json
-        """
-}
-
-process HMMER_PARSER_TBL {
-    label 'analysis_parser'
-
-    input:
-        path out
-        path tbl  // used to post processing
-        val postprocessing_params // used to post processing
-
-        output:
-        path "hmmer_parsed_*"
-        path tbl
-        val postprocessing_params
-
-        script:
-        """
-        python3 $projectDir/scripts/hmmer/parser_out.py ${out} > hmmer_parsed_${out}.json
         """
 }

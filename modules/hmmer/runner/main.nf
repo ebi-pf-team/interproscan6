@@ -7,6 +7,7 @@ process HMMER_RUNNER {
     output:
         path "${release}._.${member}._.out"
         val postprocessing_params
+
     script:
     """
     /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${member}._.out ${hmm} ${fasta}
@@ -19,11 +20,10 @@ process HMMER_RUNNER_WITH_ALIGNMENTS {
     The post processing of SFLD, FunFam and Gene3D HMMER hits requires the alignment file
     */
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
+        tuple path(fasta), val(member), path(hmm), val(switches), val(release)
 
     output:
         path "${release}._.${member}._.*"
-        val postprocessing_params
         path "${member}_alignment"
 
     script:
