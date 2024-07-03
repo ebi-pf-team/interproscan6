@@ -31,8 +31,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         description = "-"
                     entry = None
                     if match_data['entry']['accession']:
-                        if match_data['member_db'].upper() not in ["PROSITE_PATTERNS"]:
-                            description = match_data['entry']['description']
+                        description = match_data['entry']['description']
                         entry = {
                             "accession": match_data['entry']['accession'],
                             "name": match_data['entry']['short_name'],
@@ -55,7 +54,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         accession = match_data['accession']  # GENE3D needs the info after ":" (e.g G3DSA:3.20.20.70)
                     else:
                         accession = match_data['accession'].split(":")[0]  # drop subfamily
-                        
+
                     signature = {
                         "accession": accession,
                         "name": match_data['name'],

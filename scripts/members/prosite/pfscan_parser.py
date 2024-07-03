@@ -16,45 +16,34 @@ def parse(pfscan_out: str, version: str):
             if line_strip:
                 if line.startswith("pfscanV3 is not meant to be used with a single profile"):
                     return None
-                if line_strip.startswith(">"):
-                    seq2match = line_strip.split(":")
-                    seq_id = seq2match[0].strip().replace(">", "")
-                    match_id = seq2match[1].split()[0].strip()
-                    name2desc = seq2match[1].strip().split(' ', 2)
-                    name = name2desc[1]
-                    desc = name2desc[2]
+                parts = line.split()
+                if len(line.split()) > 9:
+                    seq_id = parts[0]
+                    match_id = parts[2]
+                    name = parts[9].strip().replace('SequenceDescription "', '').replace('"', '')
+                    alignment = parts[15].replace('"', '')
+                    cigar_alignment = cigar_alignment_parser(alignment)
+                    location = {
+                        "start": int(parts[3]),
+                        "end": int(parts[4]),
+                        "representative": "false",
+                        "level": "STRONG",
+                        "cigarAlignment": encode(cigar_alignment),
+                        "alignment": alignment
+                    }
                     if seq_id not in ips6_matches:
                         ips6_matches[seq_id] = {}
-                else:
-                    locations = line_strip.split()
-                    alignment = locations[3]
-                    try:
-                        level = locations[4]
-                        if level == "L=(0)":
-                            cigar_alignment = cigar_alignment_parser(alignment)
-                            location = {
-                                "start": int(locations[0]),
-                                "end": int(locations[2]),
-                                "representative": "false",
-                                "level": "STRONG",
-                                "cigarAlignment": encode(cigar_alignment),
-                                "alignment": alignment
-                            }
-                            try:
-                                ips6_matches[seq_id][match_id]["locations"].append(location)
-                            except KeyError:
-                                ips6_matches[seq_id][match_id] = {
-                                    "accession": match_id,
-                                    "name": name,
-                                    "description": desc,
-                                    "member_db": "PROSITE_PATTERNS",
-                                    "version": version,
-                                    "locations": []
-                                }
-                                ips6_matches[seq_id][match_id]["locations"].append(location)
+                    if match_id not in ips6_matches[seq_id]:
+                        ips6_matches[seq_id][match_id] = {
+                            "accession": match_id,
+                            "name": name,
+                            "description": "-",
+                            "member_db": "PROSITE_PATTERNS",
+                            "version": version,
+                            "locations": []
+                        }
+                    ips6_matches[seq_id][match_id]["locations"].append(location)
 
-                    except IndexError:
-                        pass
     return ips6_matches
 
 
