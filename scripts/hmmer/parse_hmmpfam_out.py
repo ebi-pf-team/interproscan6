@@ -123,7 +123,7 @@ def add_match(
     matches: dict,
     protein_with_hit: QueryProtein,
     member_db: str,
-    release: str,
+    version: str,
 ) -> dict:
     """Store data for protein with hits against SMART HMM profiles.
 
@@ -133,7 +133,7 @@ def add_match(
     if protein_with_hit.sequence_id not in matches:
         matches[protein_with_hit.sequence_id] = {}
 
-    for model_id, model_obj in protein_with_hit.signatures:  # dict {model id: ModelHit()}
+    for model_id, model_obj in protein_with_hit.signatures.items():  # dict {model id: ModelHit()}
         if model_id not in matches[protein_with_hit.sequence_id]:
             matches[protein_with_hit.sequence_id][model_id] = {
                 "accession": model_id,
@@ -141,41 +141,41 @@ def add_match(
                 "description": "",
                 "evalue": model_obj.evalue,
                 "score": model_obj.score,
-                "qlen": None,
-                "bias": "",
                 "member_db": member_db,
-                "version": release,
+                "version": version,
                 "model-ac": model_id,
                 "locations": []
             }
 
-        for domain_num, domain_obj in model_obj.domains:
+        for domain_num, domain_obj in model_obj.domains.items():
             matches[protein_with_hit.sequence_id][model_id]["locations"].append(
                 {
-                    "start": domain_obj.seq_from,
-                    "end": domain_obj.seq_to,
+                    "start": int(domain_obj.seq_from),
+                    "end": int(domain_obj.seq_to),
                     "representative": "",
-                    "hmmStart": domain_obj.hmm_from,
-                    "hmmEnd": domain_obj.hmm_to,
+                    "hmmStart": int(domain_obj.hmm_from),
+                    "hmmEnd": int(domain_obj.hmm_to),
+                    "hmmLength": int(domain_obj.hmm_to) + 1 - int(domain_obj.hmm_from),
                     "rawHmmBounds": domain_obj.hmm_raw_bounds,
                     "hmmBounds": domain_obj.hmm_bounds,
-                    "evalue": domain_obj.evalue,
-                    "score": domain_obj.score,
+                    "evalue": domain_obj.evalue,  # keep as str because can be Xe-Y
+                    "score": domain_obj.score,  # keep as str because can be Xe-Y
                     "postProcessed": "true",
                     "alignment": domain_obj.alignment,
                     "cigar_alignment": domain_obj.cigar_alignment,
                 }
             )
 
+    return matches
+
 
 def parse_hmmpfam_out(out_file: str) -> dict:
     """Coordinate parsing the HMMER2 Hmmpfam output file"""
-    # path_segments = out_file.split("/")[-1].split("._.")
-    # version = path_segments[0]
-    # member_db = path_segments[1]
+    path_segments = out_file.split("/")[-1].split("._.")
+    version = path_segments[0]
+    member_db = path_segments[1]
     matches = {}
     stage = 'LOOKING_FOR_METHOD_ACCESSION'
-    i = 1
     protein_with_hit = QueryProtein()
     alignment = Alignment()
 
@@ -188,7 +188,7 @@ def parse_hmmpfam_out(out_file: str) -> dict:
 
                 # add new domain to matches
                 if protein_with_hit.signatures:
-                    matches = add_match(matches)
+                    matches = add_match(matches, protein_with_hit, member_db, version)
 
                 # start a new protein instance
                 protein_with_hit = QueryProtein()
@@ -239,6 +239,8 @@ def parse_hmmpfam_out(out_file: str) -> dict:
 
                     elif line.endswith("<-*"):
                         alignment.finished = True
+
+    return matches
 
 
 def main():
