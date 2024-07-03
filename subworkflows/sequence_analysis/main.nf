@@ -12,7 +12,7 @@ include {
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
     FUNFAM_HMMER_RUNNER;
-    SMART_HMMER_RUNNER;
+    SMART_HMMER2_RUNNER;
 } from "$projectDir/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
@@ -23,6 +23,7 @@ include {
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
     HMMER_PARSER as PFAM_HMMER_PARSER;
+    HMMER2_PARSER;
 } from "$projectDir/modules/hmmer/parser/main"
 include {
     CATH_RESEOLVE_HITS as FUNFAM_CATH_RESEOLVE_HITS;  // third party tool to minimise suprious hits
@@ -340,7 +341,8 @@ workflow SEQUENCE_ANALYSIS {
 
     // SMART (HMMER 2)
     runner_smart_params = fasta.combine(member_params.smart)
-    SMART_HMMER_RUNNER(runner_smart_params)
+    SMART_HMMER2_RUNNER(runner_smart_params)
+    HMMER2_PARSER(SMART_HMMER2_RUNNER.out)
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)

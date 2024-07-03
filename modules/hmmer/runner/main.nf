@@ -76,7 +76,7 @@ process FUNFAM_HMMER_RUNNER {
 }
 
 
-process SMART_HMMER_RUNNER {
+process SMART_HMMER2_RUNNER {
     label 'hmmer_2_runner'
 
     input:
@@ -85,7 +85,6 @@ process SMART_HMMER_RUNNER {
     output:
         path "${release}._.${member}._.out"
         val postprocessing_params
-        path "${fasta}"
 
     script:
     """
