@@ -1,27 +1,22 @@
 include {
-    CDD_RUNNER;
-    CDD_POSTPROCESS;
-    CDD_PARSER
-} from "$projectDir/modules/cdd/main"
-include {
     HMMER_RUNNER as ANTIFAM_HMMER_RUNNER;
     HMMER_RUNNER as NCBIFAM_HMMER_RUNNER;
-    FUNFAM_HMMER_RUNNER;
-    HMMER_RUNNER as GENE3D_HMMER_RUNNER;
-    HMMER_RUNNER as HAMAP_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
+    HMMER_RUNNER_WITH_ALIGNMENTS as GENE3D_HMMER_RUNNER;
     HMMER_RUNNER_WITH_ALIGNMENTS as SFLD_HMMER_RUNNER;
-
+    FUNFAM_HMMER_RUNNER;
+    HAMAP_HMMER_RUNNER as HAMAP_HMMER_RUNNER;
 } from "$projectDir/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
     HMMER_PARSER as NCBIFAM_HMMER_PARSER;
     HMMER_PARSER as FUNFAM_HMMER_PARSER;
-    HMMER_PARSER as GENE3D_HMMER_PARSER;
     HMMER_PARSER as HAMAP_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
     HMMER_PARSER as PFAM_HMMER_PARSER;
+    HMMER_PARSER_WITH_ALIGNMENT as GENE3D_HMMER_PARSER;
+    HMMER_PARSER_WITH_ALIGNMENT as SFLD_HMMER_PARSER;
 } from "$projectDir/modules/hmmer/parser/main"
 include {
     CATH_RESEOLVE_HITS as FUNFAM_CATH_RESEOLVE_HITS;  // third party tool to minimise suprious hits
@@ -29,13 +24,7 @@ include {
     CATH_RESEOLVE_HITS as GENE3D_CATH_RESEOLVE_HITS;
     ADD_CATH_SUPERFAMILIES as GENE3D_ADD_CATH_SUPERFAMILIES;
     HAMAP_POST_PROCESSER;
-} from "$projectDir/modules/hmmer/sfld/main"
-include {
-    HMMER_PARSER_DTBL;
-} from "$projectDir/modules/hmmer/sfld/main"
-include {
-    HMMER_PARSER_WITH_ALIGNMENT as SFLD_HMMER_PARSER;
-} from "$projectDir/modules/hmmer/parser/main"
+} from "$projectDir/modules/hmmer/post_processing/main"
 include {
     PANTHER_POST_PROCESSER;
     SFLD_POST_PROCESSER;
@@ -60,13 +49,14 @@ include {
 include {
     PFSCAN_PARSER as PROSITE_PATTERNS_PARSER
 } from "$projectDir/modules/prosite/pfscan/parser/main"
+include {
     CDD_RUNNER;
     CDD_PARSER;
     CDD_POSTPROCESS;
 } from "$projectDir/modules/cdd/main"
 include {
     SIGNALP_RUNNER;
-    SIGNALP_PARSER
+    SIGNALP_PARSER;
 } from "$projectDir/modules/signalp/main"
 
 
@@ -234,8 +224,7 @@ workflow SEQUENCE_ANALYSIS {
     ANTIFAM_HMMER_RUNNER(runner_hmmer_antifam_params)
     ANTIFAM_HMMER_PARSER(
         ANTIFAM_HMMER_RUNNER.out[0], // hmmer.out path
-        ANTIFAM_HMMER_RUNNER.out[1], // hmmer.dtbl path
-        ANTIFAM_HMMER_RUNNER.out[2], // post-processing-params
+        ANTIFAM_HMMER_RUNNER.out[1], // post-processing-params
     )
 
     // NCBIfam
@@ -243,8 +232,7 @@ workflow SEQUENCE_ANALYSIS {
     NCBIFAM_HMMER_RUNNER(runner_hmmer_ncbifam_params)
     NCBIFAM_HMMER_PARSER(
         NCBIFAM_HMMER_RUNNER.out[0], // hmmer.out path
-        NCBIFAM_HMMER_RUNNER.out[1], // hmmer.dtbl path
-        NCBIFAM_HMMER_RUNNER.out[2], // post-processing-params
+        NCBIFAM_HMMER_RUNNER.out[1], // post-processing-params
     )
 
     // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
@@ -254,6 +242,7 @@ workflow SEQUENCE_ANALYSIS {
     GENE3D_HMMER_PARSER(
         GENE3D_HMMER_RUNNER.out[0],  // hmmer.out path
         GENE3D_HMMER_RUNNER.out[1],  // hmmer.dtbl path
+
         GENE3D_HMMER_RUNNER.out[2],  // post-processing-params
         "false"
     )
@@ -320,7 +309,6 @@ workflow SEQUENCE_ANALYSIS {
     Member databases that use HMMER with alignments
     */
     // SFLD (+ post-processing binary to add sites and filter hits)
-<<<<<<< HEAD
     runner_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_sfld_params)
     SFLD_HMMER_PARSER(

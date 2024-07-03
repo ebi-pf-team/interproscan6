@@ -35,27 +35,6 @@ process HMMER_RUNNER_WITH_ALIGNMENTS {
     """
 }
 
-
-process HMMER_RUNNER_TBL_OUTPUT {
-    label 'hmmer_runner'
-    /*
-    The post processing of HAMAP requires the tbl file
-    */
-    input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
-
-    output:
-        path "${release}._.${member}._.out"
-        val postprocessing_params
-        path "${release}._.${member}._.table.tbl"
-
-    script:
-    """
-    /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --tblout ${release}._.${member}._.table.tbl ${hmm} ${fasta}
-    """
-}
-
-
 process FUNFAM_HMMER_RUNNER {
     /*
     FunFam requires its own runner in order to only use those FunFam families
@@ -96,5 +75,23 @@ process FUNFAM_HMMER_RUNNER {
         "${postprocessing_params[4]}${cath_superfamily.replace('.', '/')}.hmm" \\
         ${fasta}
     """
+}
 
+process HAMAP_HMMER_RUNNER {
+    label 'hmmer_runner'
+    /*
+    The post processing of HAMAP requires the tbl file
+    */
+    input:
+        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
+
+    output:
+        path "${release}._.${member}._.out"
+        val postprocessing_params
+        path "${release}._.${member}._.table.tbl"
+
+    script:
+    """
+    /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --tblout ${release}._.${member}._.table.tbl ${hmm} ${fasta}
+    """
 }

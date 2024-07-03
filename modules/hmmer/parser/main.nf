@@ -21,7 +21,6 @@ process HMMER_PARSER_WITH_ALIGNMENT {
     input:
         path out
         path domtbl  // domtbl is needed for SFLD .c script
-        path alignment
         val postprocessing_params
         val use_dtbl
 
