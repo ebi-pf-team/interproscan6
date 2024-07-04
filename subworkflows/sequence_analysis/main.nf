@@ -8,7 +8,7 @@ include {
     HMMER_RUNNER as NCBIFAM_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
-    HMMER_RUNNER as GENE3D_HMMER_RUNNER;
+    HMMER_RUNNER_WITH_ALIGNMENTS as GENE3D_HMMER_RUNNER;
     HMMER_RUNNER_WITH_ALIGNMENTS as SFLD_HMMER_RUNNER;
     FUNFAM_HMMER_RUNNER;
     HAMAP_HMMER_RUNNER as HAMAP_HMMER_RUNNER;
@@ -78,7 +78,6 @@ workflow SEQUENCE_ANALYSIS {
         The post processing of some applications (e.g. SFLD) hits requires additional files
         and parameters relative to the generic hmmer runner and parser
         */
-
         antifam: member == 'antifam'
             return [
                 "${member}",
@@ -174,7 +173,6 @@ workflow SEQUENCE_ANALYSIS {
         /*
         Member databases that do NOT use HMMER
         */
-
         cdd: member == "cdd"
             return [
                 params.members."${member}".library,
@@ -217,7 +215,6 @@ workflow SEQUENCE_ANALYSIS {
     /*
     Member databases that use HMMER
     */
-
     /*
     Using generic HMMER
     */
@@ -251,7 +248,8 @@ workflow SEQUENCE_ANALYSIS {
     )
     PANTHER_FILTER_MATCHES(
         PANTHER_HMMER_PARSER.out,   // internal ips6 json
-        PANTHER_POST_PROCESSER.out  // treegrafter output
+        PANTHER_POST_PROCESSER.out,  // treegrafter output
+        PANTHER_HMMER_RUNNER.out[1],  // post-processing-params
     )
 
     // Pfam
@@ -263,6 +261,7 @@ workflow SEQUENCE_ANALYSIS {
     )
     PFAM_FILTER_MATCHES(
         PFAM_HMMER_PARSER.out, // ips6 json
+        PFAM_HMMER_RUNNER.out[1],  // post-processing-params
     )
 
     /*
@@ -298,45 +297,43 @@ workflow SEQUENCE_ANALYSIS {
 //     )
 //     FUNFAM_FILTER_MATCHES(FUNFAM_HMMER_PARSER.out, FUNFAM_CATH_RESOLVE_HITS.out)
 //
-//     // HAMAP (+ pfsearch_wrapper.py)
-//     runner_hamap_params = fasta.combine(member_params.hamap)
-//     HAMAP_HMMER_RUNNER(runner_hamap_params)
-//     HAMAP_HMMER_PARSER(
-//         HAMAP_HMMER_RUNNER.out[0],  // hmmer.out path
-//         HAMAP_HMMER_RUNNER.out[1],  // hmmer.dtbl path
-//         HAMAP_HMMER_RUNNER.out[2],  // post-processing-params
-//     )
-//     HAMAP_POST_PROCESSER(
-//         HAMAP_HMMER_RUNNER.out[5], // path to fasta file parsed by HMMER
-//         HAMAP_HMMER_RUNNER.out[4], // hmmer .tbl file path
-//         HAMAP_HMMER_RUNNER.out[2]  // post-processing-params
-//     )
-//     HAMAP_FILTER_MATCHES(
-//         HAMAP_HMMER_PARSER.out,    // internal IPS6 JSON
-//         HAMAP_POST_PROCESSER.out   // output from pfsearch_wrapper.py
-//     )
+    // HAMAP (+ pfsearch_wrapper.py)
+    runner_hamap_params = fasta.combine(member_params.hamap)
+    HAMAP_HMMER_RUNNER(runner_hamap_params)
+    HAMAP_HMMER_PARSER(
+        HAMAP_HMMER_RUNNER.out[0],  // hmmer.out path
+        HAMAP_HMMER_RUNNER.out[3],  // post-processing-params
+    )
+    HAMAP_POST_PROCESSER(
+        HAMAP_HMMER_RUNNER.out[2], // path to fasta file
+        HAMAP_HMMER_RUNNER.out[1], // hmmer .tbl file path
+        HAMAP_HMMER_RUNNER.out[3]  // post-processing-params
+    )
+    HAMAP_FILTER_MATCHES(
+        HAMAP_HMMER_PARSER.out,    // internal IPS6 JSON
+        HAMAP_POST_PROCESSER.out   // output from pfsearch_wrapper.py
+    )
 
-//     // SFLD (+ post-processing binary to add sites and filter hits)
-//     runner_sfld_params = fasta.combine(member_params.sfld)
-//     SFLD_HMMER_RUNNER(runner_sfld_params)
-//     SFLD_HMMER_PARSER(
-//         SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
-//         SFLD_HMMER_RUNNER.out[1],  // hmmer.dtbl path
-//         SFLD_HMMER_RUNNER.out[2],  // post-processing-params
-//         "true"
-//     )
-//     SFLD_POST_PROCESSER(
-//         SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
-//         SFLD_HMMER_RUNNER.out[1],  // hmmer.dtbl path
-//         SFLD_HMMER_RUNNER.out[2],  // post-processing-params
-//         SFLD_HMMER_RUNNER.out[3],  // alignment file
-//     )
-//     SFLD_FILTER_MATCHES(SFLD_HMMER_PARSER.out, SFLD_POST_PROCESSER.out)
+    // SFLD (+ post-processing binary to add sites and filter hits)
+    runner_sfld_params = fasta.combine(member_params.sfld)
+    SFLD_HMMER_RUNNER(runner_sfld_params)
+    SFLD_HMMER_PARSER(
+        SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
+        SFLD_HMMER_RUNNER.out[1],  // hmmer.dtbl path
+        SFLD_HMMER_RUNNER.out[2],  // post-processing-params
+        "true" // is_sfld
+    )
+    SFLD_POST_PROCESSER(
+        SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
+        SFLD_HMMER_RUNNER.out[1],  // hmmer.dtbl path
+        SFLD_HMMER_RUNNER.out[2],  // post-processing-params
+        SFLD_HMMER_RUNNER.out[3],  // alignment file
+    )
+    SFLD_FILTER_MATCHES(SFLD_HMMER_PARSER.out, SFLD_POST_PROCESSER.out)
 
     /*
     Member databases that do NOT use HMMER
     */
-
     // CDD
     runner_cdd_params = fasta.combine(member_params.cdd)
     CDD_RUNNER(runner_cdd_params)
@@ -361,17 +358,15 @@ workflow SEQUENCE_ANALYSIS {
     /*
     Gather the results
     */
-
-
     if (applications.contains("gene3d")) {
         ANTIFAM_HMMER_PARSER.out.concat(
             NCBIFAM_HMMER_PARSER.out,
 //             FUNFAM_FILTER_MATCHES.out[0],
 //             GENE3D_FILTER_MATCHES.out[0],
-//             HAMAP_FILTER_MATCHES.out,
+            HAMAP_FILTER_MATCHES.out,
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,
-//             SFLD_FILTER_MATCHES.out,
+            SFLD_FILTER_MATCHES.out,
             CDD_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
@@ -383,10 +378,10 @@ workflow SEQUENCE_ANALYSIS {
         ANTIFAM_HMMER_PARSER.out.concat(
             NCBIFAM_HMMER_PARSER.out,
 //             FUNFAM_FILTER_MATCHES.out[0],
-//             HAMAP_FILTER_MATCHES.out,
+            HAMAP_FILTER_MATCHES.out,
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,
-//             SFLD_FILTER_MATCHES.out,
+            SFLD_FILTER_MATCHES.out,
             CDD_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,

@@ -16,14 +16,12 @@ process HMMER_RUNNER {
 
 process HMMER_RUNNER_WITH_ALIGNMENTS {
     label 'hmmer_runner'
-    /*
-    The post processing of SFLD, FunFam and Gene3D HMMER hits requires the alignment file
-    */
     input:
         tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
 
     output:
-        path "${release}._.${member}._.*"
+        path "${release}._.${member}._.out"
+        path "${release}._.${member}._.dtbl"
         path "${member}_alignment"
         val postprocessing_params
 
@@ -32,7 +30,7 @@ process HMMER_RUNNER_WITH_ALIGNMENTS {
     /opt/hmmer/bin/hmmsearch ${switches} \
     -o ${release}._.${member}._.out \
     --domtblout ${release}._.${member}._.dtbl \
-    -A ${member}_alignment" ${hmm} ${fasta}
+    -A ${member}_alignment ${hmm} ${fasta}
     """
 }
 
@@ -64,7 +62,6 @@ process FUNFAM_HMMER_RUNNER {
 
     output:
         path "${postprocessing_params[6]}._.funfam._.${cath_superfamily}.out"
-        path "${postprocessing_params[6]}._.funfam._.${cath_superfamily}.dtbl"
         val postprocessing_params
 
     script:
@@ -72,7 +69,6 @@ process FUNFAM_HMMER_RUNNER {
     /opt/hmmer/bin/hmmsearch \\
         ${postprocessing_params[5]} \\
         -o ${postprocessing_params[6]}._.funfam._.${cath_superfamily}.out \\
-        --domtblout ${postprocessing_params[6]}._.funfam._.${cath_superfamily}.dtbl \\
         "${postprocessing_params[4]}${cath_superfamily.replace('.', '/')}.hmm" \\
         ${fasta}
     """
@@ -88,8 +84,9 @@ process HAMAP_HMMER_RUNNER {
 
     output:
         path "${release}._.${member}._.out"
-        val postprocessing_params
         path "${release}._.${member}._.table.tbl"
+        path fasta
+        val postprocessing_params
 
     script:
     """

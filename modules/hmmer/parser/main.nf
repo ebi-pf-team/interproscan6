@@ -21,16 +21,12 @@ process HMMER_PARSER_WITH_ALIGNMENT {
         path out
         path domtbl  // domtbl is needed for SFLD .c script
         val postprocessing_params
-        val use_dtbl
+        val is_sfld
 
         output:
         path "hmmer_parsed_*"
-        path domtbl
-        path out
-        path(alignment)
-        val is_sfld  // just SFLD needs to retrieve site data and parse dtbl
         /*
-        postprocessing_params[2] is used for panther when parsing the domtbl
+        postprocessing_params[2] is used for sfld when parsing the domtbl
         These won't be needed in the python script call when using only HMMER.out
         */
         script:

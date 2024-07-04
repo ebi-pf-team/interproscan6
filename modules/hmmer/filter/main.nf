@@ -16,7 +16,7 @@ process FUNFAM_FILTER_MATCHES {
     Post-processing params are needed when cath_resolved hits
     process feeds into add_cath_superfamilies process
     */
-    
+
     output:
         path "${ips6_json}.post.processed.json"
 
@@ -37,7 +37,7 @@ process GENE3D_FILTER_MATCHES {
     input:
         path cath_resolve_out_with_superfams
         path ips6_json
-    
+
     output:
         path "${ips6_json}.post.processed.json"
         path "cath.superfamilies"
