@@ -2,7 +2,7 @@
 ## RUNNER Module
 ### `HMMER_RUNNER`
 Generic process to execute HMMER
-**Members using:** antifam, ncbifam, panther, pfam
+**Members using:** AntiFam, NCBIfam, Panther, Pfam
 - **Input**:
   - Fasta file
   - Runner params 
@@ -13,7 +13,7 @@ Generic process to execute HMMER
 
 ### `HMMER_RUNNER_WITH_ALIGNMENTS`
 Process to execute HMMER that requires alignments
-**Members using:** sfld, gene3d (funfam requires alignment but has a different process)
+**Members using:** SFLD, Gene3D (FunFam requires alignment but has a different process)
 - **Input**:
   - Fasta file
   - Runner params 
@@ -51,7 +51,7 @@ HAMAP has a specific process because it uses HMMER tbl output
 ## PARSER Module
 ### `HMMER_PARSER`
 Generic process to parser HMMER `.out` file
-**Members using:** antifam, ncbifam, hamap, panther, pfam
+**Members using:** AntiFam, NCBIfam, HAMAP, Panther, Pfam
 - **Input**:
   - HMMER `.out` file
   - postprocessing_params
@@ -60,7 +60,7 @@ Generic process to parser HMMER `.out` file
 
 ### `HMMER_PARSER_WITH_ALIGNMENTS`
 Process to parser HMMER
-**Members using:** funfam, gene3d, sfld
+**Members using:** FunFam, Gene3D, SFLD
 - **Input**:
   - HMMER `.out` file
   - HMMER `.dtbl` file (used only by sfld. It will be removed after .c script translation to .py)
@@ -71,5 +71,7 @@ Process to parser HMMER
 
 
 ## POST PROCESSING Module
+All process specific to each member
 
 ## FILTER Module
+All process specific to each member

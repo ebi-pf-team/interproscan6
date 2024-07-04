@@ -273,12 +273,18 @@ workflow SEQUENCE_ANALYSIS {
     GENE3D_HMMER_RUNNER(runner_gene3d_params)
     GENE3D_HMMER_PARSER(
         GENE3D_HMMER_RUNNER.out[0],  // hmmer.out path
+        GENE3D_HMMER_RUNNER.out[1],  // hmmer.dtbl path
+        GENE3D_HMMER_RUNNER.out[2],  // post-processing-params
+        "false" // is_sfld
     )
     GENE3D_CATH_RESOLVE_HITS(
         GENE3D_HMMER_RUNNER.out[0],  // hmmer.out path
         GENE3D_HMMER_RUNNER.out[2],  // post-processing-params
     )
-    GENE3D_ADD_CATH_SUPERFAMILIES(GENE3D_CATH_RESOLVE_HITS.out)
+    GENE3D_ADD_CATH_SUPERFAMILIES(
+        GENE3D_CATH_RESOLVE_HITS.out,
+        GENE3D_HMMER_RUNNER.out[2],  // post-processing-params
+    )
     GENE3D_FILTER_MATCHES(GENE3D_ADD_CATH_SUPERFAMILIES.out, GENE3D_HMMER_PARSER.out)
 
     // FunFam (+ gene3D + cath-resolve-hits + assing-cath-superfamilies)
@@ -289,14 +295,23 @@ workflow SEQUENCE_ANALYSIS {
     runner_funfam_params = fasta.combine(member_params.gene3d_funfam)
     runner_funfam_params_with_cath = runner_funfam_params.combine(funfam_cath_superfamilies)
 
-//     FUNFAM_HMMER_RUNNER(runner_funfam_params_with_cath, applications)
-//     FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out, "false")
-//     FUNFAM_CATH_RESOLVE_HITS(
-//         FUNFAM_HMMER_RUNNER.out[0],  // hmmer.out path
-//         FUNFAM_HMMER_RUNNER.out[2]   // post-processing-params
-//     )
-//     FUNFAM_FILTER_MATCHES(FUNFAM_HMMER_PARSER.out, FUNFAM_CATH_RESOLVE_HITS.out)
-//
+    FUNFAM_HMMER_RUNNER(runner_funfam_params_with_cath, applications)
+    FUNFAM_HMMER_PARSER(
+        GENE3D_HMMER_RUNNER.out[0],  // hmmer.out path
+        GENE3D_HMMER_RUNNER.out[1],  // hmmer.dtbl path
+        GENE3D_HMMER_RUNNER.out[2],  // post-processing-params
+        "false" // is_sfld
+    )
+    FUNFAM_CATH_RESOLVE_HITS(
+        FUNFAM_HMMER_RUNNER.out[0],  // hmmer.out path
+        FUNFAM_HMMER_RUNNER.out[1]   // post-processing-params
+    )
+    FUNFAM_FILTER_MATCHES(
+        FUNFAM_HMMER_PARSER.out,
+        FUNFAM_CATH_RESOLVE_HITS.out,
+        FUNFAM_HMMER_RUNNER.out[1]   // post-processing-params
+    )
+
     // HAMAP (+ pfsearch_wrapper.py)
     runner_hamap_params = fasta.combine(member_params.hamap)
     HAMAP_HMMER_RUNNER(runner_hamap_params)

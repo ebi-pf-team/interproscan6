@@ -14,7 +14,6 @@ process CATH_RESOLVE_HITS {
 
     output:
         path "${out_file}.cath.resolved.out"
-        val postprocessing_params
 
     // cath_resolve_hits is a third party tool used to minimise suprious hits
     script:
