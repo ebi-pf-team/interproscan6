@@ -123,7 +123,6 @@ process SFLD_FILTER_MATCHES {
     input:
         path ips6_json
         path slfd_post_processed_output
-        val postprocessing_params
 
     output:
         path "${ips6_json}.post.processed.json"

@@ -25,8 +25,9 @@ process HMMER_PARSER_WITH_ALIGNMENT {
 
         output:
         path "hmmer_parsed_*"
+
         /*
-        postprocessing_params[2] is used for sfld when parsing the domtbl
+        postprocessing_params[2] is used for parsing the domtbl
         These won't be needed in the python script call when using only HMMER.out
         */
         script:

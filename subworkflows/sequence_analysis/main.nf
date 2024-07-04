@@ -16,11 +16,11 @@ include {
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
     HMMER_PARSER as NCBIFAM_HMMER_PARSER;
-    HMMER_PARSER as FUNFAM_HMMER_PARSER;
-    HMMER_PARSER as GENE3D_HMMER_PARSER;
     HMMER_PARSER as HAMAP_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
     HMMER_PARSER as PFAM_HMMER_PARSER;
+    HMMER_PARSER_WITH_ALIGNMENT as FUNFAM_HMMER_PARSER;
+    HMMER_PARSER_WITH_ALIGNMENT as GENE3D_HMMER_PARSER;
     HMMER_PARSER_WITH_ALIGNMENT as SFLD_HMMER_PARSER;
 } from "$projectDir/modules/hmmer/parser/main"
 include {
@@ -267,28 +267,28 @@ workflow SEQUENCE_ANALYSIS {
     /*
     Using specific HMMER runners
     */
-//     // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
-//     // These also run for FunFam as Gene3D must be run before FunFam
-//     runner_gene3d_params = fasta.combine(member_params.gene3d_funfam)
-//     GENE3D_HMMER_RUNNER(runner_gene3d_params)
-//     GENE3D_HMMER_PARSER(
-//         GENE3D_HMMER_RUNNER.out[0],  // hmmer.out path
-//     )
-//     GENE3D_CATH_RESOLVE_HITS(
-//         GENE3D_HMMER_RUNNER.out[0],  // hmmer.out path
-//         GENE3D_HMMER_RUNNER.out[2],  // post-processing-params
-//     )
-//     GENE3D_ADD_CATH_SUPERFAMILIES(GENE3D_CATH_RESOLVE_HITS.out)
-//     GENE3D_FILTER_MATCHES(GENE3D_ADD_CATH_SUPERFAMILIES.out, GENE3D_HMMER_PARSER.out)
-//
-//     // FunFam (+ gene3D + cath-resolve-hits + assing-cath-superfamilies)
-//     // split into a channel so Nextflow can automatically manage the parallel execution of HmmSearch
-//     GENE3D_FILTER_MATCHES.out[1]
-//         .splitText() { it.replace('\n', '') }
-//         .set { funfam_cath_superfamilies }
-//     runner_funfam_params = fasta.combine(member_params.gene3d_funfam)
-//     runner_funfam_params_with_cath = runner_funfam_params.combine(funfam_cath_superfamilies)
-//
+    // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
+    // These also run for FunFam as Gene3D must be run before FunFam
+    runner_gene3d_params = fasta.combine(member_params.gene3d_funfam)
+    GENE3D_HMMER_RUNNER(runner_gene3d_params)
+    GENE3D_HMMER_PARSER(
+        GENE3D_HMMER_RUNNER.out[0],  // hmmer.out path
+    )
+    GENE3D_CATH_RESOLVE_HITS(
+        GENE3D_HMMER_RUNNER.out[0],  // hmmer.out path
+        GENE3D_HMMER_RUNNER.out[2],  // post-processing-params
+    )
+    GENE3D_ADD_CATH_SUPERFAMILIES(GENE3D_CATH_RESOLVE_HITS.out)
+    GENE3D_FILTER_MATCHES(GENE3D_ADD_CATH_SUPERFAMILIES.out, GENE3D_HMMER_PARSER.out)
+
+    // FunFam (+ gene3D + cath-resolve-hits + assing-cath-superfamilies)
+    // split into a channel so Nextflow can automatically manage the parallel execution of HmmSearch
+    GENE3D_FILTER_MATCHES.out[1]
+        .splitText() { it.replace('\n', '') }
+        .set { funfam_cath_superfamilies }
+    runner_funfam_params = fasta.combine(member_params.gene3d_funfam)
+    runner_funfam_params_with_cath = runner_funfam_params.combine(funfam_cath_superfamilies)
+
 //     FUNFAM_HMMER_RUNNER(runner_funfam_params_with_cath, applications)
 //     FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out, "false")
 //     FUNFAM_CATH_RESOLVE_HITS(
@@ -320,16 +320,19 @@ workflow SEQUENCE_ANALYSIS {
     SFLD_HMMER_PARSER(
         SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
         SFLD_HMMER_RUNNER.out[1],  // hmmer.dtbl path
-        SFLD_HMMER_RUNNER.out[2],  // post-processing-params
+        SFLD_HMMER_RUNNER.out[3],  // post-processing-params
         "true" // is_sfld
     )
     SFLD_POST_PROCESSER(
         SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
         SFLD_HMMER_RUNNER.out[1],  // hmmer.dtbl path
-        SFLD_HMMER_RUNNER.out[2],  // post-processing-params
-        SFLD_HMMER_RUNNER.out[3],  // alignment file
+        SFLD_HMMER_RUNNER.out[2],  // alignment file
+        SFLD_HMMER_RUNNER.out[3],  // post-processing-params
     )
-    SFLD_FILTER_MATCHES(SFLD_HMMER_PARSER.out, SFLD_POST_PROCESSER.out)
+    SFLD_FILTER_MATCHES(
+        SFLD_HMMER_PARSER.out,
+        SFLD_POST_PROCESSER.out,
+    )
 
     /*
     Member databases that do NOT use HMMER
@@ -362,7 +365,7 @@ workflow SEQUENCE_ANALYSIS {
         ANTIFAM_HMMER_PARSER.out.concat(
             NCBIFAM_HMMER_PARSER.out,
 //             FUNFAM_FILTER_MATCHES.out[0],
-//             GENE3D_FILTER_MATCHES.out[0],
+            GENE3D_FILTER_MATCHES.out[0],
             HAMAP_FILTER_MATCHES.out,
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,

@@ -51,7 +51,7 @@ HAMAP has a specific process because it uses HMMER tbl output
 ## PARSER Module
 ### `HMMER_PARSER`
 Generic process to parser HMMER `.out` file
-**Members using:** antifam, ncbifam, _funfam_, _hamap_, panther, pfam
+**Members using:** antifam, ncbifam, hamap, panther, pfam
 - **Input**:
   - HMMER `.out` file
   - postprocessing_params
@@ -60,7 +60,7 @@ Generic process to parser HMMER `.out` file
 
 ### `HMMER_PARSER_WITH_ALIGNMENTS`
 Process to parser HMMER
-**Members using:** antifam, ncbifam, _funfam_, _hamap_, panther, pfam
+**Members using:** funfam, gene3d, sfld
 - **Input**:
   - HMMER `.out` file
   - HMMER `.dtbl` file (used only by sfld. It will be removed after .c script translation to .py)
@@ -70,3 +70,6 @@ Process to parser HMMER
   - Path to HMMER `.out` OR `.dtbl` file **parsed**
 
 
+## POST PROCESSING Module
+
+## FILTER Module
