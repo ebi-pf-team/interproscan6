@@ -4,14 +4,14 @@ include {
     CDD_POSTPROCESS;
 } from "$projectDir/modules/cdd/main"
 include {
-    FUNFAM_HMMER_RUNNER;
-    HAMAP_HMMER_RUNNER as HAMAP_HMMER_RUNNER;
     HMMER_RUNNER as ANTIFAM_HMMER_RUNNER;
     HMMER_RUNNER as NCBIFAM_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
     HMMER_RUNNER as GENE3D_HMMER_RUNNER;
     HMMER_RUNNER_WITH_ALIGNMENTS as SFLD_HMMER_RUNNER;
+    FUNFAM_HMMER_RUNNER;
+    HAMAP_HMMER_RUNNER as HAMAP_HMMER_RUNNER;
 } from "$projectDir/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
@@ -251,7 +251,7 @@ workflow SEQUENCE_ANALYSIS {
     )
     PANTHER_FILTER_MATCHES(
         PANTHER_HMMER_PARSER.out,   // internal ips6 json
-        PANTHER_POST_PROCESSER.out  // treegrafter output + post-processing params
+        PANTHER_POST_PROCESSER.out  // treegrafter output
     )
 
     // Pfam
@@ -263,7 +263,6 @@ workflow SEQUENCE_ANALYSIS {
     )
     PFAM_FILTER_MATCHES(
         PFAM_HMMER_PARSER.out, // ips6 json
-        PFAM_HMMER_RUNNER.out[2]  // post-processing-params
     )
 
     /*
@@ -365,8 +364,8 @@ workflow SEQUENCE_ANALYSIS {
 
 
     if (applications.contains("gene3d")) {
-        ANTIFAM_HMMER_PARSER.out[0].concat(
-            NCBIFAM_HMMER_PARSER.out[0],
+        ANTIFAM_HMMER_PARSER.out.concat(
+            NCBIFAM_HMMER_PARSER.out,
 //             FUNFAM_FILTER_MATCHES.out[0],
 //             GENE3D_FILTER_MATCHES.out[0],
 //             HAMAP_FILTER_MATCHES.out,
@@ -381,8 +380,8 @@ workflow SEQUENCE_ANALYSIS {
         .set { parsed_results }
     }
     else {
-        ANTIFAM_HMMER_PARSER.out[0].concat(
-            NCBIFAM_HMMER_PARSER.out[0],
+        ANTIFAM_HMMER_PARSER.out.concat(
+            NCBIFAM_HMMER_PARSER.out,
 //             FUNFAM_FILTER_MATCHES.out[0],
 //             HAMAP_FILTER_MATCHES.out,
             PANTHER_FILTER_MATCHES.out,

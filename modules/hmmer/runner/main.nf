@@ -20,11 +20,12 @@ process HMMER_RUNNER_WITH_ALIGNMENTS {
     The post processing of SFLD, FunFam and Gene3D HMMER hits requires the alignment file
     */
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(release)
+        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
 
     output:
         path "${release}._.${member}._.*"
         path "${member}_alignment"
+        val postprocessing_params
 
     script:
     """

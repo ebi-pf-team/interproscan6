@@ -101,7 +101,6 @@ process PANTHER_POST_PROCESSER {
 
     output:
         path "treegrafter_processed_panther_hits"
-        val postprocessing_params
 
     /*
     Input args for TreeGrafter:
