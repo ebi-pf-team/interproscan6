@@ -57,9 +57,9 @@ process HAMAP_POST_PROCESSER {
     label 'analysis_parser'
 
     input:
+        val postprocessing_params
         path fasta
         path tlb
-        val postprocessing_params
     /*
     post-processing params:
     0. models dir
@@ -136,9 +136,9 @@ process SFLD_POST_PROCESSER {
 
     input:
         path out_file
-        path out_dtbl
-        path alignment
         val postprocessing_params // contains [0] bin and [1] site_annotations file path
+        path alignment
+        path out_dtbl
 
     output:
         path "${out_file}.processed.out"

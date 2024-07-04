@@ -21,9 +21,9 @@ process HMMER_RUNNER_WITH_ALIGNMENTS {
 
     output:
         path "${release}._.${member}._.out"
-        path "${release}._.${member}._.dtbl"
-        path "${member}_alignment"
         val postprocessing_params
+        path "${member}_alignment"
+        path "${release}._.${member}._.dtbl"
 
     script:
     """
@@ -52,14 +52,12 @@ process FUNFAM_HMMER_RUNNER {
     input:
         tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(build_alignment), val(build_table), val(postprocessing_params), val(cath_superfamily)
         val applications
-
     /*
     post-processing params:
     4. FunFam HMM dir
     5. FunFam HMMsearch switches
     6. FunFam release number
     */
-
     output:
         path "${postprocessing_params[6]}._.funfam._.${cath_superfamily}.out"
         val postprocessing_params
@@ -84,9 +82,9 @@ process HAMAP_HMMER_RUNNER {
 
     output:
         path "${release}._.${member}._.out"
-        path "${release}._.${member}._.table.tbl"
-        path fasta
         val postprocessing_params
+        path fasta
+        path "${release}._.${member}._.table.tbl"
 
     script:
     """
