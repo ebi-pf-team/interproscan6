@@ -56,6 +56,10 @@ include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER
 } from "$projectDir/modules/signalp/main"
+include {
+    TMHMM_RUNNER;
+    TMHMM_PARSER
+} from "$projectDir/modules/tmhmm/main"
 
 
 workflow SEQUENCE_ANALYSIS {
@@ -227,6 +231,11 @@ workflow SEQUENCE_ANALYSIS {
                 params.members.signalp.data.pvalue,
                 params.members.signalp.release
             ]
+    // release may actually be in data
+        tmhmm: member == 'tmhmm'
+            return [
+                params.members.tmhmm.release
+            ]
     }.set { member_params }
 
     /*
@@ -387,6 +396,11 @@ workflow SEQUENCE_ANALYSIS {
     SIGNALP_RUNNER(runner_signalp_params)
     SIGNALP_PARSER(SIGNALP_RUNNER.out, tsv_pro)
 
+    // DeepTMHMM
+    runner_tmhmm_params = fasta.combine(member_params.tmhmm)
+    TMHMM_RUNNER(runner_tmhmm_params)
+    TMHMM_PARSER(TMHMM_RUNNER.out)
+
     /*
     Gather the results
     */
@@ -404,7 +418,8 @@ workflow SEQUENCE_ANALYSIS {
             CDD_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
-            SIGNALP_PARSER.out
+            SIGNALP_PARSER.out,
+            TMHMM_PARSER.out
         )
         .set { parsed_results }
     }
@@ -419,7 +434,8 @@ workflow SEQUENCE_ANALYSIS {
             CDD_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
-            SIGNALP_PARSER.out
+            SIGNALP_PARSER.out,
+            TMHMM_PARSER.out
         )
         .set { parsed_results }
     }
