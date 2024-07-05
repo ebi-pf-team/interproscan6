@@ -24,7 +24,7 @@ class QueryProtein:
     """Represents a input protein sequence and associated hits"""
     def __init__(self):
         self.sequence_id = None  # query seq id
-        self.signatures = {} # {sig acc/model id: ModelHit}
+        self.signatures = {}  # {sig acc/model id: ModelHit}
         self.has_hits = False
 
     def get_seq_id(self, value):
