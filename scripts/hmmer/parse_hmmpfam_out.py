@@ -1,7 +1,6 @@
 import json
 import re
 import sys
-from cigar_alignment import cigar_alignment_parser, encode
 """Parse the output from HMMER2 hmmpfam for SMART
 
 For a description of the Hmmpfam output file structure see the HMMER-2.3.2 UserGuide
@@ -59,16 +58,6 @@ class QueryProtein:
         domain.evalue = domain_pattern.group(10)
         self.signatures[domain.model_id].domains[domain.domain_num] = domain
 
-    def get_cigar_alignment(self, alignment_obj):
-        """Convert the protein seq from the alignment to a cigar alignment"""
-        cigar_alignment = cigar_alignment_parser(alignment_obj.protein_seq)
-        self.signatures[
-            alignment_obj.model_id].domains[
-                alignment_obj.domain_num].alignment = alignment_obj.protein_seq
-        self.signatures[
-            alignment_obj.model_id].domains[
-                alignment_obj.domain_num].cigar_alignment = encode(cigar_alignment)
-
 
 class ModelHit:
     """Represent a SMART signature"""
@@ -97,26 +86,6 @@ class DomainHit:
         self.hmm_bounds = None
         self.score = None
         self.evalue = None
-        self.alignment = None  # protein sequence from alignment
-        self.cigar_alignment = None
-
-
-class Alignment:
-    """Parse and repr alignment"""
-    def __init__(self):
-        self.model_id = None
-        self.domain_num = None
-        self.protein_seq = ''
-        self.finished = False
-
-    def get_domain_identifiers(self, value):
-        """Get the sig acc/model ID and domain num at the start of a new alignment.
-        Where value is the line from the file"""
-        self.model_id = value.split(":")[0]
-        self.domain_num = value.split()[2]
-
-    def add_to_protein_seq(self, value):
-        self.protein_seq += value.split()[2]
 
 
 def add_match(
@@ -160,9 +129,14 @@ def add_match(
                     "hmmBounds": domain_obj.hmm_bounds,
                     "evalue": domain_obj.evalue,  # keep as str because can be Xe-Y
                     "score": domain_obj.score,  # keep as str because can be Xe-Y
-                    "postProcessed": "true",
-                    "alignment": domain_obj.alignment,
-                    "cigar_alignment": domain_obj.cigar_alignment,
+                    "postProcessed": "false",
+                    "location-fragments": [
+                        {
+                            "start": int(domain_obj.seq_from),
+                            "end": int(domain_obj.seq_to),
+                            "dc-status": "CONTINUOUS",
+                        }
+                    ]
                 }
             )
 
@@ -179,22 +153,16 @@ def parse_hmmpfam_out(out_file: str) -> dict:
     matches = {}
     stage = 'LOOKING_FOR_METHOD_ACCESSION'
     protein_with_hit = QueryProtein()
-    alignment = Alignment()
 
     with open(out_file, "r") as fh:
         for line in fh.readlines():
             if line.startswith("//"):
-
-                if alignment.protein_seq:  # store alignment we just parsed:
-                    protein_with_hit.get_cigar_alignment(alignment)
-
                 # add new domain to matches
                 if protein_with_hit.signatures:
                     matches = add_match(matches, protein_with_hit, member_db, version)
 
                 # start a new protein instance
                 protein_with_hit = QueryProtein()
-                alignment = Alignment()
                 stage = 'LOOKING_FOR_METHOD_ACCESSION'
 
             elif stage == 'LOOKING_FOR_METHOD_ACCESSION':
@@ -220,24 +188,12 @@ def parse_hmmpfam_out(out_file: str) -> dict:
 
             elif stage == 'LOOKING_FOR_DOMAIN_SECTION':
                 if line.startswith('Alignments of top-scoring domains:'):
-                    stage = 'LOOKING_FOR_ALIGNMENT'
+                    stage = 'LOOKING_FOR_METHOD_ACCESSION'
 
                 else:
                     domain_line_pattern = DOMAIN_DATA_LINE.match(line)
                     if domain_line_pattern:
                         protein_with_hit.get_domain_data(domain_line_pattern)
-
-            elif stage == 'LOOKING_FOR_ALIGNMENT':
-                if line.strip():
-                    if ALN_DOMAIN_LINE.match(line):
-                        if alignment.protein_seq:  # store alignment we just parsed:
-                            protein_with_hit.get_cigar_alignment(alignment)
-
-                        alignment = Alignment()
-                        alignment.get_domain_identifiers(line)
-
-                    elif line.strip().startswith(protein_with_hit.sequence_id[:10]):
-                        alignment.add_to_protein_seq(line)
 
     return matches
 
