@@ -54,7 +54,7 @@ class QueryProtein:
         domain.hmm_from = domain_pattern.group(6)
         domain.hmm_to = domain_pattern.group(7)
         domain.hmm_raw_bounds = domain_pattern.group(8)
-        domain.hmm_raw_bounds = HMM_BOUND_PATTERN[domain_pattern.group(8)]
+        domain.hmm_bounds = HMM_BOUND_PATTERN[domain_pattern.group(8)]
         domain.score = domain_pattern.group(9)
         domain.evalue = domain_pattern.group(10)
         self.signatures[domain.model_id].domains[domain.domain_num] = domain
@@ -171,9 +171,11 @@ def add_match(
 
 def parse_hmmpfam_out(out_file: str) -> dict:
     """Coordinate parsing the HMMER2 Hmmpfam output file"""
-    path_segments = out_file.split("/")[-1].split("._.")
-    version = path_segments[0]
-    member_db = path_segments[1]
+    # path_segments = out_file.split("/")[-1].split("._.")
+    # version = path_segments[0]
+    # member_db = path_segments[1]]
+    version = "test"
+    member_db = "SMART"
     matches = {}
     stage = 'LOOKING_FOR_METHOD_ACCESSION'
     protein_with_hit = QueryProtein()
