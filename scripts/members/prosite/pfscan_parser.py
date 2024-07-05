@@ -15,13 +15,13 @@ def parse(pfscan_out: str, version: str):
             line_strip = line.strip()
             if line_strip:
                 if line.startswith("pfscanV3 is not meant to be used with a single profile"):
-                    return None
+                    return ""
                 parts = line.split()
                 if len(line.split()) > 9:
                     seq_id = parts[0]
                     match_id = parts[2]
                     name = parts[9].strip().replace('SequenceDescription "', '').replace('"', '')
-                    alignment = parts[15].replace('"', '')
+                    alignment = parts[15].replace('"', '').replace('.', '')
                     cigar_alignment = cigar_alignment_parser(alignment)
                     location = {
                         "start": int(parts[3]),
