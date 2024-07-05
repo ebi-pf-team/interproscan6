@@ -24,6 +24,20 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         "end": match_data["locations"][0]["end"],
                         "pvalue": match_data["locations"][0]["pvalue"],
                     }
+
+                if match_key == "transmembrane_prediction":
+                    locations = []
+                    for location in match_data['locations']:
+                        info = {"location": location["location"],
+                            "start": int(location["start"]),
+                            "end": int(location["end"])
+                        }
+                        locations.append(info)
+                    match = {"signature": match_key,
+                        "DeepTMHMM_release": match_data["version"],
+                        "locations": locations
+                    }
+
                 else:
                     try:
                         description = match_data['description']
