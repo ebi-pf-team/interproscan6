@@ -31,7 +31,7 @@ process TMHMM_PARSER {
     """
     python3 $projectDir/scripts/tmhmm/parser.py \
         ${biolib_results}/TMRs.gff3 \
-        ${release}
+        ${release} \
         > tmhmm_parsed.json
     """
 }
