@@ -44,6 +44,14 @@ def tsv_output(seq_matches: dict, output_path: str):
                         ali_from = match["locations"][0]["start"]
                         ali_to = match["locations"][0]["end"]
                         evalue = match["locations"][0]["pvalue"]
+
+                    if match["member_db"].upper() == "DEEPTMHMM":
+                        sig_acc, status = location["location"], ""
+                        ali_from = location["start"]
+                        ali_to = location["end"]
+                        evalue = "-"
+                        status = "T"
+
                     elif match_db.upper() in ["CDD", "HAMAP", "PROSITE_PROFILES"]:
                         sig_acc = match["accession"]
                         status = "T"
