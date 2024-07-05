@@ -50,6 +50,12 @@ def tsv_output(seq_matches: dict, output_path: str):
                         evalue = location["score"]
                         ali_from = location["start"]
                         ali_to = location["end"]
+                    elif match_db.upper() == "PROSITE_PATTERNS":
+                        sig_acc = match["accession"]
+                        status = "T"
+                        evalue = "-"
+                        ali_from = location["start"]
+                        ali_to = location["end"]
                     else:
                         sig_acc = match["accession"]
                         status = "T"
