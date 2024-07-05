@@ -14,7 +14,7 @@ def cigar_alignment_parser(alignment: str) -> str:
         elif char == DELETE_SYMBOL:
             cigar_alignment += DELETE_CHAR
         else:
-            raise ValueError(f"Alignment contains unrecognised character {char}")
+            raise ValueError(f"Alignment contains unrecognised character {char} at {alignment}")
 
     return cigar_alignment
 

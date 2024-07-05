@@ -13,19 +13,23 @@ def parse(pfscan_out: str, version: str):
         ips6_matches = {}
         for line in fh:
             line_strip = line.strip()
+            match_info = line_strip.split('\t')
             if line_strip:
-                if line.startswith("pfscanV3 is not meant to be used with a single profile"):
+                if len(match_info) < 9 or line.startswith("pfscanV3 is not meant to be used with a single profile"):
                     return ""
-                parts = line.split()
-                if len(line.split()) > 9:
-                    seq_id = parts[0]
-                    match_id = parts[2]
-                    name = parts[9].strip().replace('SequenceDescription "', '').replace('"', '')
-                    alignment = parts[15].replace('"', '').replace('.', '')
+                else:
+                    match_details = match_info[8].split(';')
+                    level = match_details[1].strip()
+                    if not level.startswith("LevelTag") or "0" not in level:  # only strong matches
+                        continue
+                    seq_id = match_info[0]
+                    match_id = match_info[2]
+                    name = match_details[0].replace('Name ', '').replace('"', '').strip()
+                    alignment = match_details[2].replace('Sequence ', '').replace('"', '').replace('.', '').strip()
                     cigar_alignment = cigar_alignment_parser(alignment)
                     location = {
-                        "start": int(parts[3]),
-                        "end": int(parts[4]),
+                        "start": int(match_info[3]),
+                        "end": int(match_info[4]),
                         "representative": "false",
                         "level": "STRONG",
                         "cigarAlignment": encode(cigar_alignment),
