@@ -102,6 +102,15 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             info["score"] = float(location["score"])
                             info["alignment"] = str(location["alignment"])
 
+                        elif match_data['member_db'].upper() == "SMART":
+                            info["evalue"] = float(location["evalue"])
+                            info["score"] = float(location["score"])
+                            info["hmmStart"] = int(location["hmmStart"])
+                            info["hmmEnd"] = int(location["hmmEnd"])
+                            info["hmmLength"] = int(location["hmmLength"])
+                            info["hmmBounds"] = location["hmmBounds"]
+                            info["postProcessed"] = boolean_map.get(location["postProcessed"].lower())
+
                         else:
                             info["evalue"] = float(location["evalue"])
                             info["score"] = float(location["score"])
