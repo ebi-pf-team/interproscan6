@@ -166,7 +166,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                     except KeyError:
                         pass
 
-                if len(match_data['locations']) < 1:  # skip matches with no locations (we need to make sure it's valid to all members)
+                if len(match_data['locations']) > 0:  # skip matches with no locations (we need to make sure it's valid to all members)
                     matches.append(match)
 
         result = {
