@@ -339,7 +339,7 @@ workflow SEQUENCE_ANALYSIS {
         PANTHER_POST_PROCESSER.out  // treegrafter output + post-processing params
     )
 
-    // SMART (HMMER 2)
+    // SMART (HMMER2:hmmpfam + kinase filter)
     runner_smart_params = fasta.combine(member_params.smart)
     SMART_HMMER2_RUNNER(runner_smart_params)
     HMMER2_PARSER(SMART_HMMER2_RUNNER.out)
@@ -407,8 +407,6 @@ workflow SEQUENCE_ANALYSIS {
     /*
     Gather the results
     */
-
-
     if (applications.contains("gene3d")) {
         ANTIFAM_HMMER_PARSER.out[0].concat(
             NCBIFAM_HMMER_PARSER.out[0],
