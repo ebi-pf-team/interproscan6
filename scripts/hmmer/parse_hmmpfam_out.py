@@ -185,7 +185,7 @@ def parse_hmmpfam_out(out_file: str) -> dict:
         for line in fh.readlines():
             if line.startswith("//"):
 
-                if alignment.finished:  # store alignment we just parsed:
+                if alignment.protein_seq:  # store alignment we just parsed:
                     protein_with_hit.get_cigar_alignment(alignment)
 
                 # add new domain to matches
@@ -230,17 +230,14 @@ def parse_hmmpfam_out(out_file: str) -> dict:
             elif stage == 'LOOKING_FOR_ALIGNMENT':
                 if line.strip():
                     if ALN_DOMAIN_LINE.match(line):
-                        if alignment.finished:  # store alignment we just parsed:
+                        if alignment.protein_seq:  # store alignment we just parsed:
                             protein_with_hit.get_cigar_alignment(alignment)
 
                         alignment = Alignment()
                         alignment.get_domain_identifiers(line)
 
-                    elif line.strip().startswith(protein_with_hit.sequence_id):
+                    elif line.strip().startswith(protein_with_hit.sequence_id[:10]):
                         alignment.add_to_protein_seq(line)
-
-                    elif line.endswith("<-*"):
-                        alignment.finished = True
 
     return matches
 
