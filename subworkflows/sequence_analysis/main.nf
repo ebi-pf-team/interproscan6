@@ -39,8 +39,9 @@ include {
     GENE3D_FILTER_MATCHES;
     HAMAP_FILTER_MATCHES;
     PANTHER_FILTER_MATCHES;
-    SFLD_FILTER_MATCHES;
     PFAM_FILTER_MATCHES;
+    SFLD_FILTER_MATCHES;
+    SMART_FILTER_MATCHES;
 } from "$projectDir/modules/hmmer/filter/main"
 include {
     PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER
@@ -177,7 +178,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                []
             ]
 
         pfam: member == 'pfam'
@@ -343,6 +343,7 @@ workflow SEQUENCE_ANALYSIS {
     runner_smart_params = fasta.combine(member_params.smart)
     SMART_HMMER2_RUNNER(runner_smart_params)
     HMMER2_PARSER(SMART_HMMER2_RUNNER.out)
+    SMART_FILTER_MATCHES(HMMER2_PARSER.out)
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
@@ -417,6 +418,7 @@ workflow SEQUENCE_ANALYSIS {
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
+            SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
@@ -432,6 +434,7 @@ workflow SEQUENCE_ANALYSIS {
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
+            SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,

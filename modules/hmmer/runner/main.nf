@@ -80,11 +80,11 @@ process SMART_HMMER2_RUNNER {
     label 'hmmer_2_runner'
 
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
+        tuple path(fasta), val(member), path(hmm), val(switches), val(release)
 
     output:
         path "${release}._.${member}._.out"
-        val postprocessing_params
+        path "${fasta}"  // Used for filtering kinase hits in SMART_FILTER_MATCHES
 
     script:
     """

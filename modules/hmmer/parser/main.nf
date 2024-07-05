@@ -32,11 +32,11 @@ process HMMER2_PARSER {
 
     input:
     path out
-    val postprocessing_params
+    path fasta  // used for filtering kinase hits in SMART_FILTER_MATCHES
 
     output:
     path "hmmer_parsed_*"
-    val postprocessing_params
+    path fasta
 
     /*
     get_sites --> "true" or "false" is to tell the domtbl parser if to retrieve site data
