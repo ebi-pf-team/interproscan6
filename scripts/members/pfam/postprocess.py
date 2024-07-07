@@ -40,17 +40,13 @@ def post_process(hmm_matches: str, model2clans: dict) -> dict:
                                 if not _matches_are_nested(candidate_nested, filtered_nested):
                                     overlapping = True
                                     break
-                        if overlapping:
-                            break
-                    if not overlapping:
-                        not_overlapping_locations.append(candidate_location)
+                        if not overlapping:
+                            not_overlapping_locations.append(candidate_location)
 
                     if not not_overlapping_locations:
                         keep = False
-                        break
                     else:
                         domain_details["locations"] = not_overlapping_locations
-
             if keep:
                 filtered_matches[protein_id][domain_id] = domain_details
 
