@@ -104,9 +104,11 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("alignment", str(location["alignment"]))
 
                     elif match_data['member_db'].upper() == "SIGNALP":
+                        location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("end", str(location["end"]))
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("pvalue", str(location["pvalue"]))
+
 
                     elif match_data['member_db'].upper() == "SFLD":
                         location_elem = ET.SubElement(locations_elem, "analysis-location")

@@ -45,11 +45,11 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                 if match_data['member_db'].upper() in ["GENE3D", "FUNFAM"]:
                     accession = match_data['accession']  # GENE3D needs the info after ":" (e.g G3DSA:3.20.20.70)
                 elif match_key == "signal_peptide":
-                    name = accession
                     if match_data['member_db'].upper() == "SIGNALP_EUK":
                         accession = "SignalP-noTM"
                     else:
                         accession = "SignalP-TM"
+                    name = accession
                 else:
                     accession = match_data['accession'].split(":")[0],  # drop subfamily
                     name = match_data['name']
@@ -145,7 +145,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                     match["model-ac"] = match_data['model-ac']
                 elif match_key == "signal_peptide":
                     match["model-ac"] = name
-                    match["orgType"] = match_data['member_db'].upper()
+                    match["orgType"] = ""  # match_data['orgType']
                 else:
                     match["model-ac"] = match_data['accession']
 
