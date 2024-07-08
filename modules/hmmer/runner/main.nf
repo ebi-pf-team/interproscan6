@@ -63,7 +63,6 @@ process FUNFAM_HMMER_RUNNER {
         path "${postprocessing_params[6]}._.funfam._.${cath_superfamily}.dtbl"
         val postprocessing_params
 
-    script:
     """
     /opt/hmmer/bin/hmmsearch \\
         ${postprocessing_params[5]} \\
