@@ -86,6 +86,6 @@ def test_json_output(input_path, expected_output_path, current_output_path, appl
 
     ignore_elements = ['representative', 'evalue', 'pathwayXRefs']
     compare(expected, current, ignore_elements, False, False)
-    # compare(current, expected, ignore_elements, False, False)
+    compare(current, expected, ignore_elements, False, False)
 
     assert expected == current

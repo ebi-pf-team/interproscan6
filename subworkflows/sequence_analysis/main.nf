@@ -101,7 +101,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."gene3d".hmm,
                 params.members."gene3d".switches,
                 params.members."gene3d".release,
-                true,   // build an alignment file
+                false,   // build an alignment file
                 false,   // don't build a hmmer.tbl file path
                 [
                     params.members."gene3d".postprocess.cath_resolve_hits_switches,
@@ -113,7 +113,6 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."funfam".release,
                 ]
             ]
-        
         hamap: member == 'hamap'
             return [
                 "${member}",
@@ -206,7 +205,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".evaluator,
                 params.members."${member}".release,
                 params.members."${member}".switches
-                []  // post-processing params,
             ]
 
         prosite_profiles: member == "prosite_profiles"
