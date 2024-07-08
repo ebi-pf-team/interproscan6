@@ -357,6 +357,7 @@ workflow SEQUENCE_ANALYSIS {
     // PIRSF (+ pirsf.pl)
     runner_pirsf_params = fasta.combine(member_params.pirsf)
     PIRSF_HMMER_RUNNER(runner_pirsf_params)
+    PIRSF_POST_PROCESSER(PIRSF_HMMER_RUNNER.out)
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
@@ -401,6 +402,10 @@ workflow SEQUENCE_ANALYSIS {
     /*
     Gather the results
     */
+<<<<<<< HEAD:interproscan/subworkflows/sequence_analysis/main.nf
+=======
+
+>>>>>>> fd8fc49 (add pirsf own hmmer runner to reduce i/o):subworkflows/sequence_analysis/main.nf
     if (applications.contains("gene3d")) {
         ANTIFAM_HMMER_PARSER.out.concat(
             NCBIFAM_HMMER_PARSER.out,
