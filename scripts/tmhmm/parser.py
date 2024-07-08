@@ -6,30 +6,31 @@ def main():
     parsed_results = parse(args[0], args[1])
     print(json.dumps(parsed_results, indent=2))
 
-
+# Parse tmhmm output to standardised JSON format
+# param tmrgff: path to deep_tmhmm output file ('TMRs.gff3')
+# param version: deep_tmhmm version number, e.g. '2.0c'
 def parse(tmrgff: str, version: str) -> dict:
     results = {}
 
     with open(tmrgff, "r") as f:
         for line in f:
-            ids = list(results.keys())
             if line.startswith(("/", "#")):
                 continue
             protein_id = line.split("\t")[0]
-            location = line.split("\t")[1]
+            location_tag = line.split("\t")[1]
             start = line.split("\t")[2]
             end = line.split("\t")[3]
-            locations = {"location": location, "start": start, "end": end}
+            location = {"location_tag": location_tag, "start": start, "end": end}
             if protein_id in results:
+                results[protein_id]["transmembrane_prediction"]["locations"].append(location)
+            else:
                 results[protein_id] = {
-                    "transmembrane_prediction": {
-                        "member_db": "DeepTMHMM",
-                        "version": version,
-                        "locations": []
-                    }
+                "transmembrane_prediction": {
+                    "member_db": "DeepTMHMM",
+                    "version": version,
+                    "locations": [location]
                 }
-            if protein_id in results:
-            results[protein_id]["transmembrane_prediction"]["locations"].append(locations)
+            }
 
     return results
 
