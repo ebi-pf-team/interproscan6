@@ -102,6 +102,10 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             info["score"] = float(location["score"])
                             info["alignment"] = str(location["alignment"])
 
+                        elif match_data['member_db'].upper() == "PROSITE_PATTERNS":
+                            info["cigarAlignment"] = location["cigarAlignment"]
+                            info["alignment"] = location["alignment"]
+                            info["level"] = location["level"]
                         else:
                             info["evalue"] = float(location["evalue"])
                             info["score"] = float(location["score"])
@@ -136,7 +140,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         "locations": locations
                     }
 
-                    if match_data['member_db'].upper() not in ["CDD", "HAMAP", "PROSITE_PROFILES"]:
+                    if match_data['member_db'].upper() not in ["CDD", "HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS"]:
                         match["evalue"] = float(match_data['evalue'])
                         match["score"] = float(match_data['score'])
 
@@ -154,13 +158,9 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         match["goXRefs"] = entry["goXRefs"] if entry else []
                         signature["description"] = None
                         signature["name"] = match_data['entry']['description']
+                        match['proteinClass'] = match_data['proteinClass']
+                        match['graftPoint'] = match_data['graftPoint']
 
-                        # get protein class and graftpoint for Panther
-                        try:
-                            match['proteinClass'] = match_data['proteinClass']
-                            match['graftPoint'] = match_data['graftPoint']
-                        except KeyError:
-                            pass
 
                 if len(match_data['locations']) > 0:  # skip matches with no locations (we need to make sure it's valid to all members)
                     matches.append(match)

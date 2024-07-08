@@ -48,6 +48,10 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                 except KeyError:
                     pass  # some members may not have evalue or score on this level (e.g. cdd)
 
+                if match_data['member_db'].upper() == "PANTHER":
+                    match_elem.set("protein-class", _check_null(match_data['proteinClass']))
+                    match_elem.set("graft-point", _check_null(match_data['graftPoint']))
+
                 signature_elem = ET.SubElement(match_elem, "signature")
                 if match_data['member_db'].upper() not in ['SIGNALP']:  # member db that don't have sigs, so no accs etc.
                     signature_elem.set("ac", match_data['accession'])
@@ -121,7 +125,12 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("end", str(location["end"]))
                         location_elem.set("alignment", str(location["alignment"]))
-
+                    elif match_data['member_db'].upper() == "PROSITE_PATTERNS":
+                        location_elem = ET.SubElement(locations_elem, "analysis-location")
+                        location_elem.set("start", str(location["start"]))
+                        location_elem.set("end", str(location["end"]))
+                        location_elem.set("alignment", str(location["alignment"]))
+                        location_elem.set("cigar-alignment", str(location["cigarAlignment"]))
                     else:
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("env-end", str(location["envelopeEnd"]))
@@ -147,12 +156,18 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     if 'sites' in location:
                         for site in location['sites']:
                             if match_data['member_db'].upper() == "CDD":
-                                location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
+                                location_frag_elem = ET.SubElement(
+                                    location_frags_elem,
+                                    "analysis-location-fragment"
+                                )
                                 location_frag_elem.set("description", str(site['description']))
                                 location_frag_elem.set("numLocations", str(site['numLocations']))
                             else:
                                 for sitelocation in site['siteLocations']:
-                                    location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
+                                    location_frag_elem = ET.SubElement(
+                                        location_frags_elem,
+                                        "analysis-location-fragment"
+                                    )
                                     location_frag_elem.set("start", str(sitelocation["start"]))
                                     location_frag_elem.set("end", str(sitelocation["end"]))
                                     location_frag_elem.set("residue", str(sitelocation["residue"]))
