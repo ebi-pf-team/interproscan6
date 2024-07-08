@@ -11,19 +11,18 @@ class Gene3dHit:
 
     def add_domain(self, value: str):
         """Where value is a result of line.split()"""
-        match_id = value[3]
+        domain_id = value[0]
+        match_id = value[3].replace(f"_{domain_id}", "")
         domain = DomainHit()
-        domain.signature_acc = value[0]
+        domain.signature_acc = domain_id
         domain.cath_superfamily = value[1]
         domain.match_id = match_id
         domain.score = value[4]
-        domain.evalue = value[-1]
-        domain.start = value[6].split("-")[0]
-        domain.end = value[6].split("-")[1]
-        domain.boundaries_start = value[-5].split("-")[0]
-        domain.boundaries_end = value[-5].split("-")[1]
-        domain.resolved = value[-4]
-        domain.aligned_regions = value[-3]
+        domain.evalue = value[9]
+        domain.boundaries_start = value[5].split("-")[0]
+        domain.boundaries_end = value[5].split("-")[1]
+        domain.resolved = value[6]
+        domain.aligned_regions = value[7]
 
         if match_id not in self.domains:
             self.domains[match_id] = [domain]
@@ -122,8 +121,8 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> tuple[di
         if protein_id not in gene3d_matches:
             continue
 
-        for signature_acc in ips6_data[protein_id]:
-            if signature_acc not in gene3d_matches[protein_id].domains:
+        for match_id in ips6_data[protein_id]:
+            if match_id not in gene3d_matches[protein_id].domains:
                 continue
 
             # retrieve the relevant domain hit
@@ -132,12 +131,12 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> tuple[di
 
             # locations is a list of dicts, each representing a location where the signature
             # matched a region of the query protein sequece
-            for location in ips6_data[protein_id][signature_acc]["locations"]:
-                for domain in gene3d_matches[protein_id].domains[signature_acc]:
-                    if domain.evalue == location["evalue"] \
-                        and domain.score == location["score"] \
-                        and domain.start == location["start"] \
-                        and domain.end == location["end"]:
+            for location in ips6_data[protein_id][match_id]["locations"]:
+                for domain in gene3d_matches[protein_id].domains[match_id]:
+                    if str(domain.evalue) == str(location["evalue"]) \
+                        and str(domain.score) == str(location["score"]) \
+                        and str(domain.boundaries_start) == str(location["start"]) \
+                        and str(domain.boundaries_end) == str(location["end"]):
                         ips6_location = location
                         gene3d_domain = domain
 
@@ -153,7 +152,7 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> tuple[di
                 if gene3d_sig_acc not in processed_ips6[protein_id]:
                     # signature_acc is the domain id
                     # replace the domain id with the Cath superfamily
-                    sig_info = ips6_data[protein_id][signature_acc]
+                    sig_info = ips6_data[protein_id][match_id]
                     sig_info["accession"] = gene3d_sig_acc
 
                     # model ac is the domain id (minus the -... suffix)
