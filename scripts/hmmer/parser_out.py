@@ -3,6 +3,14 @@ import re
 import sys
 from cigar_alignment import cigar_alignment_parser, encode
 
+POST_PROCESSED_MEMBERS = [
+    # "funfam",
+    "gene3d",
+    # "hamap",
+    # "panther",
+    "pfam",
+    # "sfld"
+]
 
 DOMAIN_SECTION_START_PATTERN = re.compile(r"^>>\s+(\S+).*$")
 DOMAIN_ALIGNMENT_LINE_PATTERN = re.compile(r"^\s+==\s+domain\s+(\d+)\s+.*$")
@@ -173,9 +181,7 @@ def get_domain_match(match: re.Match, member_db: str, qlen: str) -> dict:
     :param member_db: name of the member database
     :param qlen: query length
     """
-    post_processed = "false"
-    if member_db == "gene3d" or member_db == "pfam":
-        post_processed = "true"
+    post_processed = "true" if member_db in POST_PROCESSED_MEMBERS else "false"
     domain_match = {}
 
     hmm_bound_pattern = {
