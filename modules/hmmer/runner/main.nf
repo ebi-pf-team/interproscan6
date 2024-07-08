@@ -73,3 +73,35 @@ process FUNFAM_HMMER_RUNNER {
     """
 
 }
+
+
+process PIRST_HMMER_RUNNER {
+    label 'hmmer_runner'
+
+    input:
+        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(build_alignment), val(build_table), val(postprocessing_params)
+    /*
+    The post processing of SFLD, FunFam and Gene3D HMMER hits requires the alignment file
+    But only generate alignmnets for these tool to reduce volume size.
+    Likewise, for the HMMER table file ).tbl)
+    */
+
+    output:
+        path "${release}._.${member}._.out"
+        val postprocessing_params
+        path "${fasta}"
+        path "${hmm}"
+
+    script:
+    """
+    /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl ${build_alignment ? "-A ${member}_alignment" : ""} ${build_table ? "--tblout ${release}._.${member}._.table.tbl" : ""} ${hmm} ${fasta}
+
+
+    if [ ! -f ${member}_alignment ]; then
+        touch ${member}_alignment
+    fi
+    if [ ! -f ${release}._.${member}._.table.tbl ]; then
+        touch ${release}._.${member}._.table.tbl
+    fi
+    """
+}

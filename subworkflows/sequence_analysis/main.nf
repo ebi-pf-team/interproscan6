@@ -12,17 +12,17 @@ include {
     HMMER_RUNNER as SFLD_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
-    HMMER_RUNNER as PIRSF_HMMER_RUNNER;
+    PIRSF_HMMER_RUNNER;
 } from "$projectDir/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
-    HMMER_PARSER as NCBIFAM_HMMER_PARSER;
     HMMER_PARSER as FUNFAM_HMMER_PARSER;
     HMMER_PARSER as GENE3D_HMMER_PARSER;
     HMMER_PARSER as HAMAP_HMMER_PARSER;
-    HMMER_PARSER as SFLD_HMMER_PARSER;
+    HMMER_PARSER as NCBIFAM_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
     HMMER_PARSER as PFAM_HMMER_PARSER;
+    HMMER_PARSER as SFLD_HMMER_PARSER;
 } from "$projectDir/modules/hmmer/parser/main"
 include {
     CATH_RESEOLVE_HITS as FUNFAM_CATH_RESEOLVE_HITS;  // third party tool to minimise suprious hits
@@ -38,8 +38,9 @@ include {
     GENE3D_FILTER_MATCHES;
     HAMAP_FILTER_MATCHES;
     PANTHER_FILTER_MATCHES;
-    SFLD_FILTER_MATCHES;
     PFAM_FILTER_MATCHES;
+    PIRSF_POST_PROCESSER;
+    SFLD_FILTER_MATCHES;
 } from "$projectDir/modules/hmmer/filter/main"
 include {
     PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER
@@ -77,7 +78,8 @@ workflow SEQUENCE_ANALYSIS {
 
         /*
         Member databases that use HMMER:
-        The post processing of some applications (e.g. SFLD) hits requires additional files
+        The post processin
+    output:g of some applications (e.g. SFLD) hits requires additional files
         and parameters relative to the generic hmmer runner and parser
         */
         antifam: member == 'antifam'
@@ -360,6 +362,7 @@ workflow SEQUENCE_ANALYSIS {
     // PIRSF (+ pirsf.pl)
     runner_pirsf_params = fasta.combine(member_params.pirsf)
     PIRSF_HMMER_RUNNER(runner_pirsf_params)
+    PIRSF_POST_PROCESSER(PIRSF_HMMER_RUNNER.out)
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
@@ -408,7 +411,6 @@ workflow SEQUENCE_ANALYSIS {
     /*
     Gather the results
     */
-
 
     if (applications.contains("gene3d")) {
         ANTIFAM_HMMER_PARSER.out[0].concat(
