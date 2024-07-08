@@ -96,13 +96,5 @@ process PIRSF_HMMER_RUNNER {
     script:
     """
     /opt/hmmer/bin/hmmscan ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl ${hmm} ${fasta}
-
-
-    if [ ! -f ${member}_alignment ]; then
-        touch ${member}_alignment
-    fi
-    if [ ! -f ${release}._.${member}._.table.tbl ]; then
-        touch ${release}._.${member}._.table.tbl
-    fi
     """
 }
