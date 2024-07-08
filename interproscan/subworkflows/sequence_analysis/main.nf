@@ -357,7 +357,12 @@ workflow SEQUENCE_ANALYSIS {
     // PIRSF (+ pirsf.pl)
     runner_pirsf_params = fasta.combine(member_params.pirsf)
     PIRSF_HMMER_RUNNER(runner_pirsf_params)
-    PIRSF_POST_PROCESSER(PIRSF_HMMER_RUNNER.out)
+    PIRSF_POST_PROCESSER(
+        PIRSF_HMMER_RUNNER.out[1],  // hmmer.dtbl path
+        PIRSF_HMMER_RUNNER.out[2],  // post-processing-params
+        PIRSF_HMMER_RUNNER.out[3],  // fasta
+        PIRSF_HMMER_RUNNER.out[4]   // hmm
+    )
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
