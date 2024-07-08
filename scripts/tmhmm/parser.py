@@ -3,16 +3,14 @@ import sys
 
 def main():
     args = sys.argv[1:]
-    #parsed_results = parse(args[0], args[1])
     parsed_results = parse(args[0], args[1])
     print(json.dumps(parsed_results, indent=2))
 
 
-def parse(resultsmd: str, version: str) -> dict:
-#def parse(resultsmd: str, version: str) -> dict:
+def parse(tmrgff: str, version: str) -> dict:
     results = {}
 
-    with open(resultsmd, "r") as f:
+    with open(tmrgff, "r") as f:
         for line in f.readlines():
             ids = list(results.keys())
             if line.startswith("/"):
