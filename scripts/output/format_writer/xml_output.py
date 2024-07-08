@@ -15,6 +15,7 @@ MATCH_ELEMENT = {
     'SFLD': 'hmmer3-match',
     'PROSITE_PATTERNS': 'profilescan-match',
     'PROSITE_PROFILES': 'profilesearch-match',  # changed from i5 which is also profilescan-match
+    'DEEPTMHMM': 'transmembrane_prediction',
 }
 
 
@@ -49,7 +50,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     pass  # some members may not have evalue or score on this level (e.g. cdd)
 
                 signature_elem = ET.SubElement(match_elem, "signature")
-                if match_data['member_db'].upper() not in ['SIGNALP']:  # member db that don't have sigs, so no accs etc.
+                if match_data['member_db'].upper() not in ['SIGNALP', 'DEEPTMHMM']:  # member db that don't have sigs, so no accs etc.
                     signature_elem.set("ac", match_data['accession'])
                     signature_elem.set("desc", match_data['name'])
                     signature_elem.set("name", match_data['name'])
@@ -107,6 +108,12 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("end", str(location["end"]))
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("pvalue", str(location["pvalue"]))
+
+                    elif match_data['member_db'].upper() == 'DEEPTMHMM':
+                        location_elem = ET.SubElement(locations_elem, "analysis-location")
+                        location_elem.set("end", str(location["end"]))
+                        location_elem.set("start", str(location["start"]))
+                        location_elem.set("location", str(location["location"]))
 
                     elif match_data['member_db'].upper() == "SFLD":
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
