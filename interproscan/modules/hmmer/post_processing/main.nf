@@ -153,3 +153,31 @@ process SFLD_POST_PROCESSER {
             --output '${out_file}.processed.out'
         """
 }
+
+
+process SUPERFAMILY_POST_PROCESSER {
+    label 'analysis_parser'
+
+    input:
+        path hmmscan_out
+        val postprocessing_params
+        path fasta
+
+    output:
+        path "superfamily_ass3_output"
+
+    /*
+
+    */
+    script:
+    """
+    ls
+    perl ${postprocessing_params[0]} \
+    -s ${postprocessing_params[1]} \
+    -r ${postprocessing_params[2]} \
+    -m ${postprocessing_params[3]} \
+    -p ${postprocessing_params[4]} \
+    ${postprocessing_params[5]} \
+    ${fasta} ${hmmscan_out} > "superfamily_ass3_output"
+    """
+}

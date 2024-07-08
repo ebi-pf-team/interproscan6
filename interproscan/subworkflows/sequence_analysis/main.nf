@@ -13,6 +13,7 @@ include {
     FUNFAM_HMMER_RUNNER;
     HAMAP_HMMER_RUNNER;
     SMART_HMMER2_RUNNER;
+    HMMER_SCAN_RUNNER;
 } from "$projectDir/interproscan/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
@@ -33,6 +34,7 @@ include {
     HAMAP_POST_PROCESSER;
     PANTHER_POST_PROCESSER;
     SFLD_POST_PROCESSER;
+    SUPERFAMILY_POST_PROCESSER;
 } from "$projectDir/interproscan/modules/hmmer/post_processing/main"
 include {
     FUNFAM_FILTER_MATCHES;
@@ -180,6 +182,22 @@ workflow SEQUENCE_ANALYSIS {
                 ]
             ]
 
+         superfamily: member == 'superfamily'
+            return [
+                "${member}",
+                params.members."${member}".hmm,
+                params.members."${member}".switches,
+                params.members."${member}".release,
+                [
+                    params.members."${member}".postprocess.bin,
+                    params.members."${member}".postprocess.self_hits,
+                    params.members."${member}".postprocess.cla,
+                    params.members."${member}".postprocess.model,
+                    params.members."${member}".postprocess.pdbj95d,
+                    params.members."${member}".postprocess.binary_switches,
+                ]
+            ]
+
         /*
         Member databases that do NOT use HMMER
         */
@@ -225,7 +243,7 @@ workflow SEQUENCE_ANALYSIS {
     /*
     Member databases that use HMMER
     */
-    
+
     /*
     Using generic HMMER
     */
@@ -339,6 +357,19 @@ workflow SEQUENCE_ANALYSIS {
         SFLD_HMMER_PARSER.out,     // ips6 json
         SFLD_POST_PROCESSER.out    // post-processing out file
     )
+
+    // Superfamily
+    runner_hmmer_superfamily_params = fasta.combine(member_params.superfamily)
+    HMMER_SCAN_RUNNER(runner_hmmer_superfamily_params)
+    SUPERFAMILY_POST_PROCESSER(
+        HMMER_SCAN_RUNNER.out[0],  // hmmer.out path
+        HMMER_SCAN_RUNNER.out[1],  // post-processing-params
+        HMMER_SCAN_RUNNER.out[2],  // fasta path
+    )
+//     HMMER_SCAN_PARSER(
+//         HMMER_SCAN_RUNNER.out[0],  // hmmer.out path
+//         PFAM_HMMER_RUNNER.out[1],  // post-processing-params
+//     )
 
     /*
     Member databases that do NOT use HMMER
