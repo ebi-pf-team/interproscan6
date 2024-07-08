@@ -154,13 +154,9 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         match["goXRefs"] = entry["goXRefs"] if entry else []
                         signature["description"] = None
                         signature["name"] = match_data['entry']['description']
+                        match['proteinClass'] = match_data['proteinClass']
+                        match['graftPoint'] = match_data['graftPoint']
 
-                        # get protein class and graftpoint for Panther
-                        try:
-                            match['proteinClass'] = match_data['proteinClass']
-                            match['graftPoint'] = match_data['graftPoint']
-                        except KeyError:
-                            pass
 
                 if len(match_data['locations']) > 0:  # skip matches with no locations (we need to make sure it's valid to all members)
                     matches.append(match)
