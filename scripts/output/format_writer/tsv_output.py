@@ -50,6 +50,12 @@ def tsv_output(seq_matches: dict, output_path: str):
                         evalue = location["score"]
                         ali_from = location["start"]
                         ali_to = location["end"]
+                    elif match_db.upper() == "PROSITE_PATTERNS":
+                        sig_acc = match["accession"]
+                        status = "T"
+                        evalue = "-"
+                        ali_from = location["start"]
+                        ali_to = location["end"]
                     else:
                         sig_acc = match["accession"]
                         status = "T"
@@ -114,6 +120,12 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         hmm_length = int(hmm_end) - int(hmm_start)
                         location_score = location["score"]
                         env_end, env_start = "-", "-"
+                    elif member_db.upper() == "PROSITE_PATTERNS":
+                        hmm_start = "-"
+                        hmm_end = "-"
+                        hmm_length = "-"
+                        location_score = "-"
+                        env_end, env_start = "-", "-"
                     elif member_db.upper() == "SIGNALP":
                         hmm_start = location["start"]
                         hmm_end = location["end"]
@@ -154,6 +166,12 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         ali_from = location["start"]
                         ali_to = location["end"]
                         location_evalue = location["score"]
+                    elif member_db.upper() == "PROSITE_PATTERNS":
+                        sig_acc = match["accession"]
+                        evalue = "-"
+                        ali_from = location["start"]
+                        ali_to = location["end"]
+                        location_evalue = "-"
                     else:
                         sig_acc = match["accession"]
                         evalue = location["evalue"]

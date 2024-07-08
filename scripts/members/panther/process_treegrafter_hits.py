@@ -122,10 +122,6 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]], paint_anno_path: Path) -
 
                 for panther_hit in hits[protein_id].domains:
                     if panther_hit["signature-acc:superfamily"].split(":")[0] == signature_acc:
-                        anno_path = paint_anno_path / f"{signature_acc}.json"
-                        with open(anno_path, 'r') as fh:
-                            paint_annotations = json.load(fh)
-                            node_data = paint_annotations[panther_hit["node_id"]]
 
                         if protein_id not in processed_ips6_data:
                             processed_ips6_data[_protein_id] = {}
@@ -160,8 +156,7 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]], paint_anno_path: Path) -
                                     "cigar_alignment": location["cigar_alignment"]
                                 }]
 
-                        processed_ips6_data[_protein_id][signature_acc]["proteinClass"] = node_data[2]
-                        processed_ips6_data[_protein_id][signature_acc]["graftPoint"] = node_data[3]
+                        processed_ips6_data[_protein_id][signature_acc]["node_id"] = panther_hit["node_id"]
                         processed_ips6_data[_protein_id][signature_acc]["accession"] = panther_hit["signature-acc:superfamily"]
                         processed_ips6_data[_protein_id][signature_acc]["model-ac"] = panther_hit["signature-acc:superfamily"]
 
