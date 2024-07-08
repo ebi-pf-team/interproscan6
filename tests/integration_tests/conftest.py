@@ -27,7 +27,7 @@ def input_path(test_input_dir):
 
 @pytest.fixture
 def expected_output_path(test_output_dir):
-    return test_output_dir / "expected_output_hamap"
+    return test_output_dir / "expected_output_gene3d_funfam"
 
 
 @pytest.fixture
@@ -36,13 +36,8 @@ def current_output_path(test_output_dir):
 
 
 @pytest.fixture
-def expected_output_path(test_output_dir):
-    return test_output_dir / "expected_output_pfam_fragm"
-
-
-@pytest.fixture
 def applications():
-    return "pfam"
+    return "gene3d,funfam"
 
 
 @pytest.fixture
