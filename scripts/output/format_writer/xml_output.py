@@ -15,7 +15,7 @@ MATCH_ELEMENT = {
     'SFLD': 'hmmer3-match',
     'PROSITE_PATTERNS': 'profilescan-match',
     'PROSITE_PROFILES': 'profilesearch-match',  # changed from i5 which is also profilescan-match
-    'DEEPTMHMM': 'transmembrane_prediction',
+    'DEEPTMHMM': 'tmhmm-location',
 }
 
 

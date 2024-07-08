@@ -11,27 +11,25 @@ def parse(tmrgff: str, version: str) -> dict:
     results = {}
 
     with open(tmrgff, "r") as f:
-        for line in f.readlines():
+        for line in f:
             ids = list(results.keys())
-            if line.startswith("/"):
+            if line.startswith(("/", "#")):
                 continue
-            if line.startswith("#"):
-                continue
-            id = line.split("\t")[0]
+            protein_id = line.split("\t")[0]
             location = line.split("\t")[1]
             start = line.split("\t")[2]
             end = line.split("\t")[3]
             locations = {"location": location, "start": start, "end": end}
-            if id in ids:
-                results[id]["transmembrane_prediction"]["locations"].append(locations)
-            else:
-                results[id] = {
+            if protein_id in results:
+                results[protein_id] = {
                     "transmembrane_prediction": {
                         "member_db": "DeepTMHMM",
                         "version": version,
-                        "locations": [locations]
+                        "locations": []
                     }
                 }
+            if protein_id in results:
+            results[protein_id]["transmembrane_prediction"]["locations"].append(locations)
 
     return results
 
