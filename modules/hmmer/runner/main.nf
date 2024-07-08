@@ -75,7 +75,7 @@ process FUNFAM_HMMER_RUNNER {
 }
 
 
-process PIRST_HMMER_RUNNER {
+process PIRSF_HMMER_RUNNER {
     label 'hmmer_runner'
 
     input:
