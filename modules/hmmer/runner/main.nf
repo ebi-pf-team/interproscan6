@@ -88,13 +88,14 @@ process PIRSF_HMMER_RUNNER {
 
     output:
         path "${release}._.${member}._.out"
+        path "${release}._.${member}._.dtbl"
         val postprocessing_params
         path "${fasta}"
         path "${hmm}"
 
     script:
     """
-    /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl ${build_alignment ? "-A ${member}_alignment" : ""} ${build_table ? "--tblout ${release}._.${member}._.table.tbl" : ""} ${hmm} ${fasta}
+    /opt/hmmer/bin/hmmscan ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl ${hmm} ${fasta}
 
 
     if [ ! -f ${member}_alignment ]; then
