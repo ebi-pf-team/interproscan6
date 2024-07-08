@@ -43,7 +43,10 @@ include {
     HAMAP_FILTER_MATCHES;
     PANTHER_FILTER_MATCHES;
     PFAM_FILTER_MATCHES;
+<<<<<<< HEAD:interproscan/subworkflows/sequence_analysis/main.nf
     PIRSF_FILTER_MATCHES;
+=======
+>>>>>>> 5b2279b (use hmmscan for pirsf):subworkflows/sequence_analysis/main.nf
     SFLD_FILTER_MATCHES;
     SMART_FILTER_MATCHES;
 } from "$projectDir/interproscan/modules/hmmer/filter/main"
@@ -349,10 +352,6 @@ workflow SEQUENCE_ANALYSIS {
     PIRSF_HMMER_RUNNER(runner_pirsf_params)
     PIRSF_HMMER_PARSER(
         PIRSF_HMMER_RUNNER.out[0],  // hmmer.out path
-        PIRSF_HMMER_RUNNER.out[1],  // hmmer.dtbl path
-        PIRSF_HMMER_RUNNER.out[2],  // post-processing-params
-        tsv_pro,
-        "false"
     )
     PIRSF_FILTER_MATCHES(
         PIRSF_HMMER_PARSER.out,     // ips6-json
