@@ -40,6 +40,7 @@ def applications():
     return "gene3d,funfam"
 
 
+
 @pytest.fixture
 def disable_precalc():
     return True
