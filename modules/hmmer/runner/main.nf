@@ -10,7 +10,7 @@ process HMMER_RUNNER {
 
     script:
     """
-    /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${member}._.out ${hmm} ${fasta}
+    /opt/hmmer3/bin/hmmsearch ${switches} -o ${release}._.${member}._.out ${hmm} ${fasta}
     """
 }
 
@@ -64,7 +64,7 @@ process FUNFAM_HMMER_RUNNER {
 
     script:
     """
-    /opt/hmmer/bin/hmmsearch \\
+    /opt/hmmer3/bin/hmmsearch \\
         ${postprocessing_params[5]} \\
         -o ${postprocessing_params[6]}._.funfam._.${cath_superfamily}.out \\
         "${postprocessing_params[4]}${cath_superfamily.replace('.', '/')}.hmm" \\
@@ -89,5 +89,22 @@ process HAMAP_HMMER_RUNNER {
     script:
     """
     /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --tblout ${release}._.${member}._.table.tbl ${hmm} ${fasta}
+    """
+}
+
+
+process SMART_HMMER2_RUNNER {
+    label 'hmmer_2_runner'
+
+    input:
+        tuple path(fasta), val(member), path(hmm), val(switches), val(release)
+
+    output:
+        path "${release}._.${member}._.out"
+        path "${fasta}"  // Used for filtering kinase hits in SMART_FILTER_MATCHES
+
+    script:
+    """
+    /opt/hmmer2/bin/hmmpfam ${switches} ${hmm} ${fasta} > ${release}._.${member}._.out
     """
 }

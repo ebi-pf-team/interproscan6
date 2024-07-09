@@ -132,6 +132,13 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         hmm_length = int(hmm_end) - int(hmm_start)
                         location_score = location["pvalue"]
                         env_end, env_start = "-", "-"
+                    elif member_db.upper() == "SMART":
+                        hmm_start = location["hmmStart"]
+                        hmm_end = location["hmmEnd"]
+                        hmm_length = location["hmmLength"]
+                        location_score = location["score"]
+                        env_end = "-"
+                        env_start = "-"
                     else:
                         hmm_start = location["hmmStart"]
                         hmm_end = location["hmmEnd"]
