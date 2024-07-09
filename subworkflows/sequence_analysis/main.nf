@@ -22,6 +22,7 @@ include {
     HMMER_PARSER as NCBIFAM_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
     HMMER_PARSER as PFAM_HMMER_PARSER;
+    HMMER_PARSER as PIRSF_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
 } from "$projectDir/modules/hmmer/parser/main"
 include {
@@ -352,7 +353,7 @@ workflow SEQUENCE_ANALYSIS {
         PFAM_HMMER_RUNNER.out[1],  // hmmer.dtbl path
         PFAM_HMMER_RUNNER.out[2],  // post-processing-params
         tsv_pro,
-        "pfam"
+        "false"
     )
     PFAM_FILTER_MATCHES(
         PFAM_HMMER_PARSER.out, // ips6 json
@@ -362,12 +363,19 @@ workflow SEQUENCE_ANALYSIS {
     // PIRSF (+ pirsf.pl)
     runner_pirsf_params = fasta.combine(member_params.pirsf)
     PIRSF_HMMER_RUNNER(runner_pirsf_params)
-    PIRSF_POST_PROCESSER(
+    PIRSF_HMMER_PARSER(
+        PIRSF_HMMER_RUNNER.out[0],  // hmmer.out path
         PIRSF_HMMER_RUNNER.out[1],  // hmmer.dtbl path
         PIRSF_HMMER_RUNNER.out[2],  // post-processing-params
-        PIRSF_HMMER_RUNNER.out[3],  // fasta
-        PIRSF_HMMER_RUNNER.out[4]   // hmm
+        tsv_pro,
+        "false"
     )
+    // PIRSF_POST_PROCESSER(
+    //     PIRSF_HMMER_RUNNER.out[1],  // hmmer.dtbl path
+    //     PIRSF_HMMER_RUNNER.out[2],  // post-processing-params
+    //     PIRSF_HMMER_RUNNER.out[3],  // fasta
+    //     PIRSF_HMMER_RUNNER.out[4]   // hmm
+    // )
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
