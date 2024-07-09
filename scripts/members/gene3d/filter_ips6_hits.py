@@ -77,6 +77,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Path to write out a plain text file listing the CATH superfamilies"
     )
 
+    parser.add_argument(
+        "funfam",
+        type=Path,
+        help="Path to FunFam models dir, e.g. data/funfam/4.3.0/models"
+    )
+
     return parser
 
 
@@ -101,13 +107,19 @@ def parse_cath(cath_out: Path) -> dict[str, Gene3dHit]:
     return matches
 
 
-def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> tuple[dict, set]:
+def filter_matches(
+    ips6: Path,
+    gene3d_matches: dict[str, Gene3dHit],
+    funfam_dir: Path,
+) -> tuple[dict, set]:
     """Parse the IPS6 JSON file, filtering hits to only retains
     those that passed the Gene3D post-processing.
 
     :param ips6: path to internal IPS6 JSON file containing parsed hits from HMMER.out file
     :param gene3d_matches: dict of Gene3dHits, representing hits in the 
         add_cath_superfamilies.py output file
+    :param funfam_dir: path to funfam data dir where all hmms are stored -
+        so it can check if the hmm exists
 
     Return processed IPS6 dict and a list of all cath superfamilies where hits were generated
     """
@@ -147,7 +159,12 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, Gene3dHit]) -> tuple[di
                     processed_ips6[protein_id] = {}
 
                 cath_superfam = gene3d_domain.cath_superfamily
-                all_cath_superfamilies.add(cath_superfam)
+
+                # only take cath-superfam fowards for FunFam analysis if HMM exists
+                hmm_path = funfam_dir / f"{cath_superfam.replace('.', '/')}.hmm"
+                if hmm_path.is_file():
+                    all_cath_superfamilies.add(cath_superfam)
+
                 gene3d_sig_acc = f"G3DSA:{cath_superfam}"
                 if gene3d_sig_acc not in processed_ips6[protein_id]:
                     # signature_acc is the domain id
@@ -208,7 +225,7 @@ def main():
     args = parser.parse_args()
 
     matches = parse_cath(args.cath_out)
-    processed_ips6, superfamilies = filter_matches(args.ips6, matches)
+    processed_ips6, superfamilies = filter_matches(args.ips6, matches, args.funfam)
 
     with open(args.out_json, "w") as fh:
         json.dump(processed_ips6, fh, indent=2)

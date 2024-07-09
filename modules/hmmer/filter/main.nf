@@ -37,6 +37,7 @@ process GENE3D_FILTER_MATCHES {
     input:
         path cath_resolve_out_with_superfams
         path ips6_json
+        val postprocessing_params
     
     output:
         path "${ips6_json}.post.processed.json"
@@ -48,7 +49,8 @@ process GENE3D_FILTER_MATCHES {
         ${ips6_json} \\
         ${cath_resolve_out_with_superfams} \\
         ${ips6_json}.post.processed.json \\
-        cath.superfamilies
+        cath.superfamilies \\
+        ${postprocessing_params[4]}
     """
 }
 
