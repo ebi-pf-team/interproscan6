@@ -45,7 +45,7 @@ def tsv_output(seq_matches: dict, output_path: str):
                         ali_to = match["locations"][0]["end"]
                         evalue = match["locations"][0]["pvalue"]
 
-                    if match["member_db"].upper() == "DEEPTMHMM":
+                    elif match["member_db"].upper() == "DEEPTMHMM":
                         sig_acc, status = location["location_tag"], ""
                         ali_from = location["start"]
                         ali_to = location["end"]
@@ -168,7 +168,7 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         ali_to = match["locations"][0]["end"]
                         location_evalue = match["locations"][0]["pvalue"]
                     elif member_db.upper() == "DEEPTMHMM":
-                        sig_acc, status = location["location_tag"], ""
+                        sig_acc = location["location_tag"],
                         ali_from = location["start"]
                         ali_to = location["end"]
                         location_evalue = "-"
