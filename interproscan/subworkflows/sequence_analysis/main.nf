@@ -341,6 +341,11 @@ workflow SEQUENCE_ANALYSIS {
         PFAM_HMMER_RUNNER.out[0],  // hmmer.out path
         PFAM_HMMER_RUNNER.out[1],  // hmmer.dtbl path
         PFAM_HMMER_RUNNER.out[2],  // post-processing-params
+<<<<<<< HEAD:interproscan/subworkflows/sequence_analysis/main.nf
+=======
+        tsv_pro,
+        "false"
+>>>>>>> c5deeda (add parsing hmmsearch output):subworkflows/sequence_analysis/main.nf
     )
     PFAM_FILTER_MATCHES(
         PFAM_HMMER_PARSER.out, // ips6 json
@@ -352,11 +357,24 @@ workflow SEQUENCE_ANALYSIS {
     PIRSF_HMMER_RUNNER(runner_pirsf_params)
     PIRSF_HMMER_PARSER(
         PIRSF_HMMER_RUNNER.out[0],  // hmmer.out path
+<<<<<<< HEAD:interproscan/subworkflows/sequence_analysis/main.nf
     )
     PIRSF_FILTER_MATCHES(
         PIRSF_HMMER_PARSER.out,     // ips6-json
         PIRSF_HMMER_RUNNER.out[2]   // post-processing-params
+=======
+        PIRSF_HMMER_RUNNER.out[1],  // hmmer.dtbl path
+        PIRSF_HMMER_RUNNER.out[2],  // post-processing-params
+        tsv_pro,
+        "false"
+>>>>>>> c5deeda (add parsing hmmsearch output):subworkflows/sequence_analysis/main.nf
     )
+    // PIRSF_POST_PROCESSER(
+    //     PIRSF_HMMER_RUNNER.out[1],  // hmmer.dtbl path
+    //     PIRSF_HMMER_RUNNER.out[2],  // post-processing-params
+    //     PIRSF_HMMER_RUNNER.out[3],  // fasta
+    //     PIRSF_HMMER_RUNNER.out[4]   // hmm
+    // )
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
