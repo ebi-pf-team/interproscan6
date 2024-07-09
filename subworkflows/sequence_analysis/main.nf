@@ -274,8 +274,6 @@ workflow SEQUENCE_ANALYSIS {
     GENE3D_HMMER_PARSER(
         GENE3D_HMMER_RUNNER.out[0],  // hmmer.out path
         GENE3D_HMMER_RUNNER.out[1],  // post-processing-params
-        GENE3D_HMMER_RUNNER.out[3],  // hmmer.dtbl path
-        "false" // is_sfld
     )
     GENE3D_CATH_RESOLVE_HITS(
         GENE3D_HMMER_RUNNER.out[0],  // hmmer.out path
@@ -299,8 +297,6 @@ workflow SEQUENCE_ANALYSIS {
     FUNFAM_HMMER_PARSER(
         FUNFAM_HMMER_RUNNER.out[0],  // hmmer.out path
         FUNFAM_HMMER_RUNNER.out[1],  // post-processing-params
-        FUNFAM_HMMER_RUNNER.out[3],  // hmmer.dtbl path
-        "false" // is_sfld
     )
     FUNFAM_CATH_RESOLVE_HITS(
         FUNFAM_HMMER_RUNNER.out[0],  // hmmer.out path
@@ -336,7 +332,7 @@ workflow SEQUENCE_ANALYSIS {
         SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
         SFLD_HMMER_RUNNER.out[1],  // post-processing-params
         SFLD_HMMER_RUNNER.out[3],  // hmmer.dtbl path
-        "true" // is_sfld
+        true,  // is_sfld
     )
     SFLD_POST_PROCESSER(
         SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
