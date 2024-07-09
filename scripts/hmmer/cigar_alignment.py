@@ -5,6 +5,10 @@ DELETE_SYMBOL = '-'
 
 
 def cigar_alignment_parser(alignment: str) -> str:
+    """Convert alignment from HMMER3 and HMMER2 to cigar alignment
+
+    :param alignment: The query protein sequence from the alignment
+    """
     cigar_alignment = ""
     for char in alignment:
         if char.isupper():

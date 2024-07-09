@@ -19,7 +19,7 @@ process HMMER_RUNNER {
 
     script:
     """
-    /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl ${build_alignment ? "-A ${member}_alignment" : ""} ${build_table ? "--tblout ${release}._.${member}._.table.tbl" : ""} ${hmm} ${fasta}
+    /opt/hmmer3/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl ${build_alignment ? "-A ${member}_alignment" : ""} ${build_table ? "--tblout ${release}._.${member}._.table.tbl" : ""} ${hmm} ${fasta}
 
 
     if [ ! -f ${member}_alignment ]; then
@@ -65,7 +65,7 @@ process FUNFAM_HMMER_RUNNER {
 
     script:
     """
-    /opt/hmmer/bin/hmmsearch \\
+    /opt/hmmer3/bin/hmmsearch \\
         ${postprocessing_params[5]} \\
         -o ${postprocessing_params[6]}._.funfam._.${cath_superfamily}.out \\
         --domtblout ${postprocessing_params[6]}._.funfam._.${cath_superfamily}.dtbl \\
@@ -73,4 +73,21 @@ process FUNFAM_HMMER_RUNNER {
         ${fasta}
     """
 
+}
+
+
+process SMART_HMMER2_RUNNER {
+    label 'hmmer_2_runner'
+
+    input:
+        tuple path(fasta), val(member), path(hmm), val(switches), val(release)
+
+    output:
+        path "${release}._.${member}._.out"
+        path "${fasta}"  // Used for filtering kinase hits in SMART_FILTER_MATCHES
+
+    script:
+    """
+    /opt/hmmer2/bin/hmmpfam ${switches} ${hmm} ${fasta} > ${release}._.${member}._.out
+    """
 }
