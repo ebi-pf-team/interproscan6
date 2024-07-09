@@ -279,7 +279,11 @@ workflow SEQUENCE_ANALYSIS {
         GENE3D_HMMER_RUNNER.out[2],  // post-processing-params
     )
     GENE3D_ADD_CATH_SUPERFAMILIES(GENE3D_CATH_RESEOLVE_HITS.out)
-    GENE3D_FILTER_MATCHES(GENE3D_ADD_CATH_SUPERFAMILIES.out, GENE3D_HMMER_PARSER.out)
+    GENE3D_FILTER_MATCHES(
+        GENE3D_ADD_CATH_SUPERFAMILIES.out,
+        GENE3D_HMMER_PARSER.out,
+        GENE3D_HMMER_RUNNER.out[2]   // post-processing-params
+    )
 
     // FunFam (+ gene3D + cath-resolve-hits + assing-cath-superfamilies)
     // split into a channel so Nextflow can automatically manage the parallel execution of HmmSearch
