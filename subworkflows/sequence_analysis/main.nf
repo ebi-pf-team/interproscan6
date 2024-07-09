@@ -297,9 +297,9 @@ workflow SEQUENCE_ANALYSIS {
 
     FUNFAM_HMMER_RUNNER(runner_funfam_params_with_cath, applications)
     FUNFAM_HMMER_PARSER(
-        GENE3D_HMMER_RUNNER.out[0],  // hmmer.out path
-        GENE3D_HMMER_RUNNER.out[1],  // post-processing-params
-        GENE3D_HMMER_RUNNER.out[3],  // hmmer.dtbl path
+        FUNFAM_HMMER_RUNNER.out[0],  // hmmer.out path
+        FUNFAM_HMMER_RUNNER.out[1],  // post-processing-params
+        FUNFAM_HMMER_RUNNER.out[3],  // hmmer.dtbl path
         "false" // is_sfld
     )
     FUNFAM_CATH_RESOLVE_HITS(
