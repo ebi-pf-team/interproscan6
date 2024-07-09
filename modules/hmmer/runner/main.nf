@@ -27,7 +27,7 @@ process HMMER_RUNNER_WITH_ALIGNMENTS {
 
     script:
     """
-    /opt/hmmer/bin/hmmsearch ${switches} \
+    /opt/hmmer3/bin/hmmsearch ${switches} \
     -o ${release}._.${member}._.out \
     --domtblout ${release}._.${member}._.dtbl \
     -A ${member}_alignment ${hmm} ${fasta}
@@ -88,7 +88,7 @@ process HAMAP_HMMER_RUNNER {
 
     script:
     """
-    /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --tblout ${release}._.${member}._.table.tbl ${hmm} ${fasta}
+    /opt/hmmer3/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --tblout ${release}._.${member}._.table.tbl ${hmm} ${fasta}
     """
 }
 
