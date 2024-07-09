@@ -167,6 +167,11 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         ali_from = match["locations"][0]["start"]
                         ali_to = match["locations"][0]["end"]
                         location_evalue = match["locations"][0]["pvalue"]
+                    elif member_db.upper() == "DEEPTMHMM":
+                        sig_acc, status = location["location_tag"], ""
+                        ali_from = location["start"]
+                        ali_to = location["end"]
+                        location_evalue = "-"
                     elif member_db.upper() in ["HAMAP", "PROSITE_PROFILES"]:
                         sig_acc = match["accession"]
                         evalue = location["score"]
@@ -176,11 +181,6 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                     elif member_db.upper() == "PROSITE_PATTERNS":
                         sig_acc = match["accession"]
                         evalue = "-"
-                        ali_from = location["start"]
-                        ali_to = location["end"]
-                        location_evalue = "-"
-                    elif member_db.upper() == "DEEPTMHMM":
-                        sig_acc, status = location["location_tag"], ""
                         ali_from = location["start"]
                         ali_to = location["end"]
                         location_evalue = "-"
