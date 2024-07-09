@@ -36,7 +36,6 @@ process HMMER2_PARSER {
 
     output:
     path "hmmer_parsed_*"
-    path fasta
 
     /*
     get_sites --> "true" or "false" is to tell the domtbl parser if to retrieve site data
