@@ -113,7 +113,7 @@ process PIRSF_HMMER_RUNNER {
 
     script:
     """
-    /opt/hmmer/bin/hmmscan ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl ${hmm} ${fasta}
+    /opt/hmmer/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl ${hmm} ${fasta}
     """
 }
 
