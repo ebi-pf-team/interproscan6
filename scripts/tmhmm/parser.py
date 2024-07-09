@@ -1,14 +1,15 @@
 import json
 import sys
+# Parse tmhmm output to standardised JSON format
+# param tmrgff: path to deep_tmhmm output file ('TMRs.gff3')
+# param version: deep_tmhmm version number, e.g. '2.0c'
 
 def main():
     args = sys.argv[1:]
     parsed_results = parse(args[0], args[1])
     print(json.dumps(parsed_results, indent=2))
 
-# Parse tmhmm output to standardised JSON format
-# param tmrgff: path to deep_tmhmm output file ('TMRs.gff3')
-# param version: deep_tmhmm version number, e.g. '2.0c'
+
 def parse(tmrgff: str, version: str) -> dict:
     results = {}
 
