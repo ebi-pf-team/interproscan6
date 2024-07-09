@@ -179,6 +179,11 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         ali_from = location["start"]
                         ali_to = location["end"]
                         location_evalue = "-"
+                    elif member_db.upper() == "DEEPTMHMM":
+                        sig_acc, status = location["location_tag"], ""
+                        ali_from = location["start"]
+                        ali_to = location["end"]
+                        location_evalue = "-"
                     else:
                         sig_acc = match["accession"]
                         evalue = location["evalue"]
