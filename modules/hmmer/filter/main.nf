@@ -137,3 +137,23 @@ process SFLD_FILTER_MATCHES {
         ${ips6_json} > ${ips6_json}.post.processed.json
     """
 }
+
+
+process SMART_FILTER_MATCHES {
+    label 'analysis_parser'
+
+    input:
+        path ips6_json
+        path fasta
+
+    output:
+        path "${ips6_json}.post.processed.json"
+
+    script:
+    """
+    python3 $projectDir/scripts/members/smart/filter_ips6_hits.py \\
+        ${ips6_json} \\
+        ${fasta} \\
+        ${ips6_json}.post.processed.json
+    """
+}

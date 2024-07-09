@@ -13,6 +13,7 @@ MATCH_ELEMENT = {
     'PANTHER': 'hmmer3-match',
     'PFAM': 'hmmer3-match',
     'SFLD': 'hmmer3-match',
+    'SMART': 'hmmer2-match',
     'PROSITE_PATTERNS': 'profilescan-match',
     'PROSITE_PROFILES': 'profilesearch-match',  # changed from i5 which is also profilescan-match
 }
@@ -106,6 +107,20 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     elif match_data['member_db'].upper() == "HAMAP":
                         location_elem.set("score", str(location["score"]))
                         location_elem.set("alignment", str(location["alignment"]))
+                        
+                    elif match_data['member_db'].upper() == "PROSITE_PROFILES":
+                        location_elem = ET.SubElement(locations_elem, "analysis-location")
+                        location_elem.set("score", str(location["score"]))
+                        location_elem.set("start", str(location["start"]))
+                        location_elem.set("end", str(location["end"]))
+                        location_elem.set("alignment", str(location["alignment"]))
+
+                    elif match_data['member_db'].upper() == "PROSITE_PATTERNS":
+                        location_elem = ET.SubElement(locations_elem, "analysis-location")
+                        location_elem.set("start", str(location["start"]))
+                        location_elem.set("end", str(location["end"]))
+                        location_elem.set("alignment", str(location["alignment"]))
+                        location_elem.set("cigar-alignment", str(location["cigarAlignment"]))
 
                     elif match_data['member_db'].upper() == "SIGNALP":
                         location_elem.set("end", str(location["end"]))
@@ -118,19 +133,19 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                             location_elem.set("sites", location["sites"])
                         except KeyError:
                             location_elem.set("sites", [])
-
-                    elif match_data['member_db'].upper() == "PROSITE_PROFILES":
+                            
+                    elif match_data['member_db'].upper() == "SMART":
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("score", str(location["score"]))
+                        location_elem.set("evalue", str(location["evalue"]))
+                        location_elem.set("hmm-start", str(location["hmmStart"]))
+                        location_elem.set("hmm-end", str(location["hmmEnd"]))
+                        location_elem.set("hmm-len", str(location["hmmLength"]))
+                        location_elem.set("hmm-bounds", str(location["hmmBounds"]))
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("end", str(location["end"]))
-                        location_elem.set("alignment", str(location["alignment"]))
-                    elif match_data['member_db'].upper() == "PROSITE_PATTERNS":
-                        location_elem = ET.SubElement(locations_elem, "analysis-location")
-                        location_elem.set("start", str(location["start"]))
-                        location_elem.set("end", str(location["end"]))
-                        location_elem.set("alignment", str(location["alignment"]))
-                        location_elem.set("cigar-alignment", str(location["cigarAlignment"]))
+                        location_elem.set("representative", str(location["representative"]))
+
                     else:
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("env-end", str(location["envelopeEnd"]))
@@ -171,6 +186,12 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                                     location_frag_elem.set("start", str(sitelocation["start"]))
                                     location_frag_elem.set("end", str(sitelocation["end"]))
                                     location_frag_elem.set("residue", str(sitelocation["residue"]))
+                    if 'location-fragments' in location:
+                        for location_fragment in location['location-fragments']:
+                            location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
+                            location_frag_elem.set("start", str(location_fragment["start"]))
+                            location_frag_elem.set("end", str(location_fragment["end"]))
+                            location_frag_elem.set("dc-status", str(location_fragment["dc-status"]))
 
     tree = ET.ElementTree(root)
     ET.indent(tree, space="\t", level=0)

@@ -6,12 +6,13 @@ include {
 include {
     HMMER_RUNNER as ANTIFAM_HMMER_RUNNER;
     HMMER_RUNNER as NCBIFAM_HMMER_RUNNER;
-    FUNFAM_HMMER_RUNNER;
     HMMER_RUNNER as GENE3D_HMMER_RUNNER;
     HMMER_RUNNER as HAMAP_HMMER_RUNNER;
     HMMER_RUNNER as SFLD_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
+    FUNFAM_HMMER_RUNNER;
+    SMART_HMMER2_RUNNER;
 } from "$projectDir/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
@@ -22,6 +23,7 @@ include {
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
     HMMER_PARSER as PFAM_HMMER_PARSER;
+    HMMER2_PARSER;
 } from "$projectDir/modules/hmmer/parser/main"
 include {
     CATH_RESEOLVE_HITS as FUNFAM_CATH_RESEOLVE_HITS;  // third party tool to minimise suprious hits
@@ -37,8 +39,9 @@ include {
     GENE3D_FILTER_MATCHES;
     HAMAP_FILTER_MATCHES;
     PANTHER_FILTER_MATCHES;
-    SFLD_FILTER_MATCHES;
     PFAM_FILTER_MATCHES;
+    SFLD_FILTER_MATCHES;
+    SMART_FILTER_MATCHES;
 } from "$projectDir/modules/hmmer/filter/main"
 include {
     PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER
@@ -166,6 +169,14 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."${member}".postprocess.sites_annotation,
                     params.members."${member}".postprocess.hierarchy,
                 ]
+            ]
+
+        smart: member == 'smart'
+            return [
+                "${member}",
+                params.members."${member}".hmm,
+                params.members."${member}".switches,
+                params.members."${member}".release,
             ]
 
         pfam: member == 'pfam'
@@ -330,6 +341,15 @@ workflow SEQUENCE_ANALYSIS {
         PANTHER_POST_PROCESSER.out  // treegrafter output + post-processing params
     )
 
+    // SMART (HMMER2:hmmpfam + kinase filter)
+    runner_smart_params = fasta.combine(member_params.smart)
+    SMART_HMMER2_RUNNER(runner_smart_params)
+    HMMER2_PARSER(SMART_HMMER2_RUNNER.out)
+    SMART_FILTER_MATCHES(
+        HMMER2_PARSER.out,
+        SMART_HMMER2_RUNNER.out[1],
+    )
+
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_sfld_params)
@@ -392,8 +412,6 @@ workflow SEQUENCE_ANALYSIS {
     /*
     Gather the results
     */
-
-
     if (applications.contains("gene3d")) {
         ANTIFAM_HMMER_PARSER.out[0].concat(
             NCBIFAM_HMMER_PARSER.out[0],
@@ -403,6 +421,7 @@ workflow SEQUENCE_ANALYSIS {
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
+            SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
@@ -418,6 +437,7 @@ workflow SEQUENCE_ANALYSIS {
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
+            SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,

@@ -4,12 +4,14 @@ import sys
 from cigar_alignment import cigar_alignment_parser, encode
 
 POST_PROCESSED_MEMBERS = [
-    "funfam",
+    # "funfam",
     "gene3d",
-    "hamap",
-    "panther",
-    "sfld",
+    # "hamap",
+    # "panther",
+    "pfam",
+    # "sfld"
 ]
+
 DOMAIN_SECTION_START_PATTERN = re.compile(r"^>>\s+(\S+).*$")
 DOMAIN_ALIGNMENT_LINE_PATTERN = re.compile(r"^\s+==\s+domain\s+(\d+)\s+.*$")
 ALIGNMENT_SEQUENCE_PATTERN = re.compile(r"^\s+(\S+)\s+(\S+)\s+([-a-zA-Z]+)\s+(\S+)\s*$")  # replacing (\w+) with (\S+) and adding if to ignore current sequence
