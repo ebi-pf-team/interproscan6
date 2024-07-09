@@ -341,7 +341,10 @@ workflow SEQUENCE_ANALYSIS {
     runner_smart_params = fasta.combine(member_params.smart)
     SMART_HMMER2_RUNNER(runner_smart_params)
     HMMER2_PARSER(SMART_HMMER2_RUNNER.out)
-    SMART_FILTER_MATCHES(HMMER2_PARSER.out)
+    SMART_FILTER_MATCHES(
+        HMMER2_PARSER.out,
+        SMART_HMMER2_RUNNER.out[1],
+    )
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
