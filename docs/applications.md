@@ -59,11 +59,15 @@ sfld {
 ## AntiFam
 
 - `HMMER`
+  - _Run analyses against HMMs_
+    - uses generic hmmer runner
+  - _Parser hmmer.out results_
+    - uses generic hmmer parser
 
 ## Gene3D
 
 - `HMMER`
-    - _Run inital analyses against HMMs_
+    - _Run initial analyses against HMMs_
 - `cath-resolve-hits`
     - _Helps to resolve domain matches_
 - `assign_cath_superfamilies`
@@ -72,6 +76,7 @@ sfld {
     Data files:
         - `model_to_family_map.tsv`
         - `discontinuous_regs.pkl.py3`
+- Filter matches
 
 ## FunFam
 
@@ -88,18 +93,40 @@ sfld {
 ## NCBIfam
 
 - `HMMER`
+  - _Run analyses against HMMs_
+    - uses generic hmmer runner
+  - _Parser hmmer.out results_
+    - uses generic hmmer parser
 
 ## Panther
 
 - `HMMER`
+  - _Run initial analyses against HMMs_
+    - uses generic hmmer runner
+  - _Parser hmmer.out results_
+    - uses generic hmmer parser
+  - Post Processer
+    - Runs TreeGrafter and return processed panther hits
+  - Filter Matches
+    - Runs process_treegrafter_hits.py to filter hits
 
 ## Pfam
 
 - `HMMER`
-- Additional data files:
-    - `seed` alignment file `Pfam_A.seed.gz`
-    - `clan` file `Pfam-C.gz`
-    - `dat` file `Pfam-A.dat.gz`
+  - _Run initial analyses against HMMs_
+    - uses generic hmmer runner
+  - _Parser hmmer.out results_
+    - uses generic hmmer parser
+  - Filter matches
+    - Additional data files:
+      - `seed` alignment file `Pfam_A.seed.gz`
+      - `clan` file `Pfam-C.gz`
+      - `dat` file `Pfam-A.dat.gz`
+    - We ignore a match when (after sort matches to have the most significant matches first):
+      - both matches belong to the same clan
+        - the matches are not nested in the other
+          - the match overlaps another match
+    - Build fragments analysing overlaps on nested matches
 
 ## PirsF
 

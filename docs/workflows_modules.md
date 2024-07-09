@@ -131,7 +131,6 @@ The module `SEQUENCE_ANALYSIS` is used to coordinate checking for matches agains
     * `subworkflows/sequence_analysis/members.config` - define operational parameters to members databases, e.g. binary paths, switches commands, ...
 * Input:
     * Sequences to be analysed and the names of the applications to be included in the analysis.
-    * `TSV_PRO`: true/false to generate a .tsv-pro file (adding the cigar alignment in the analysis)
 * Executes:
     * The specific modules are dependent on the application but in general this entails:
         * Module `RUNNER` 
@@ -171,10 +170,7 @@ All membmer databases that use `HMMER` use the same generic `HMMER_PARSER` modul
 
 * Input:
     1. The output from `HMMER_RUNNER` (path to the `HMMer` output files)
-    2. `tsv_pro` - boolean, whether to write out tsv_pro output
 * Executes:
-    * If `tsv_pro` is true: `hmmer_parser_out`
-    * If `tsv_pro` is false: `hmmer_parser_domtbl`
     * Both scripts parse the output from `HMMer` into  `JSON` file
 * Output:
     * `hmmer_parsed_<output>.json`

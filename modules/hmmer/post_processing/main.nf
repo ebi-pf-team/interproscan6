@@ -5,7 +5,7 @@ parsed and applied to the internal IPS6 JSON structure in the
 filters module/
 */
 
-process CATH_RESEOLVE_HITS {
+process CATH_RESOLVE_HITS {
     label 'analysis_parser'
 
     input:
@@ -14,7 +14,6 @@ process CATH_RESEOLVE_HITS {
 
     output:
         path "${out_file}.cath.resolved.out"
-        val postprocessing_params
 
     // cath_resolve_hits is a third party tool used to minimise suprious hits
     script:
@@ -58,9 +57,9 @@ process HAMAP_POST_PROCESSER {
     label 'analysis_parser'
 
     input:
+        val postprocessing_params
         path fasta
         path tlb
-        val postprocessing_params
     /*
     post-processing params:
     0. models dir
@@ -101,7 +100,6 @@ process PANTHER_POST_PROCESSER {
 
     output:
         path "treegrafter_processed_panther_hits"
-        val postprocessing_params
 
     /*
     Input args for TreeGrafter:
@@ -127,7 +125,6 @@ process PANTHER_POST_PROCESSER {
     """
 }
 
-
 process SFLD_POST_PROCESSER {
     /*
     Runs an in-house post-processing C script that filters the SFLD hits to
@@ -139,14 +136,12 @@ process SFLD_POST_PROCESSER {
 
     input:
         path out_file
-        path out_dtbl
         val postprocessing_params // contains [0] bin and [1] site_annotations file path
         path alignment
-        val tsv_pro
+        path out_dtbl
 
     output:
-        path "${tsv_pro ? "${out_file}.processed.out" : "${out_dtbl}.processed.dtbl"}"
-        val postprocessing_params
+        path "${out_file}.processed.out"
 
     script:
         """
@@ -155,6 +150,6 @@ process SFLD_POST_PROCESSER {
             --dom '${out_dtbl}' \
             --hmmer-out '${out_file}' \
             --site-info '${postprocessing_params[1]}' \
-            --output '${tsv_pro ? "${out_file}.processed.out" : "${out_dtbl}.processed.dtbl"}'
+            --output '${out_file}.processed.out'
         """
 }

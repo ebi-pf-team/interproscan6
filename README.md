@@ -325,7 +325,6 @@ params {
     help = false
     applications = 'AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,Pfam,PIRSF,PIRSR,PRINTS,PrositePatterns,PrositeProfiles,SFLD,SMART,SuperFamily,SignalP' <--- ADD NEW APPLICATION
     disable_precalc = false
-    tsv_pro = false
 }
 
 ### Running `InterProScan6` with `SignalP6` enabled

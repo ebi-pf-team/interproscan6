@@ -9,8 +9,8 @@ workflow XREFS {
     applications
 
     main:
-
     ENTRIES(matches, params.xrefs.entries)
+
     final_result = ENTRIES.out
 
     if ("${applications}".contains('panther')) {
