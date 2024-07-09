@@ -171,6 +171,12 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                                     location_frag_elem.set("start", str(sitelocation["start"]))
                                     location_frag_elem.set("end", str(sitelocation["end"]))
                                     location_frag_elem.set("residue", str(sitelocation["residue"]))
+                    if 'location-fragments' in location:
+                        for location_fragment in location['location-fragments']:
+                            location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
+                            location_frag_elem.set("start", str(location_fragment["start"]))
+                            location_frag_elem.set("end", str(location_fragment["end"]))
+                            location_frag_elem.set("dc-status", str(location_fragment["dc-status"]))
 
     tree = ET.ElementTree(root)
     ET.indent(tree, space="\t", level=0)
