@@ -12,7 +12,7 @@ include {
     HMMER_RUNNER as SFLD_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
-    PIRSF_HMMER_RUNNER;
+    HMMER_RUNNER as PIRSF_HMMER_RUNNER;
 } from "$projectDir/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
@@ -223,7 +223,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".data,
                 params.members."${member}".evaluator,
                 params.members."${member}".release,
-                params.members."${member}".switches
+                params.membeHMMER_RUNNERrs."${member}".switches
             ]
 
         prosite_profiles: member == "prosite_profiles"
@@ -360,7 +360,7 @@ workflow SEQUENCE_ANALYSIS {
         PFAM_HMMER_RUNNER.out[2]  // post-processing-params
     )
 
-    // PIRSF (+ pirsf.pl)
+    // PIRSF (+ filter_ips6_matches.py for post-processing)
     runner_pirsf_params = fasta.combine(member_params.pirsf)
     PIRSF_HMMER_RUNNER(runner_pirsf_params)
     PIRSF_HMMER_PARSER(
