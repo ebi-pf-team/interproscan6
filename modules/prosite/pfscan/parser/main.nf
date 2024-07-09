@@ -6,13 +6,13 @@ process PFSCAN_PARSER {
     label 'analysis_parser'
 
     input:
-        path ps_scan_output
+        path ps_scan_out
 
     output:
-        path "ips6_ps_scan.json"
+        path "${ps_scan_out}_parsed.json"
 
     script:
     """
-    $projectDir/scripts/members/prosite/pfscan_parser.py ${ps_scan_output} > ${ips6_ps_scan.json}
+    python3 $projectDir/scripts/members/prosite/pfscan_parser.py ${ps_scan_out} ${ps_scan_out}_parsed.json
     """
 }
