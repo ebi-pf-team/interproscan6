@@ -44,6 +44,14 @@ def tsv_output(seq_matches: dict, output_path: str):
                         ali_from = match["locations"][0]["start"]
                         ali_to = match["locations"][0]["end"]
                         evalue = match["locations"][0]["pvalue"]
+
+                    if match["member_db"].upper() == "DEEPTMHMM":
+                        sig_acc, status = location["location_tag"], ""
+                        ali_from = location["start"]
+                        ali_to = location["end"]
+                        evalue = "-"
+                        status = "T"
+
                     elif match_db.upper() in ["CDD", "HAMAP", "PROSITE_PROFILES"]:
                         sig_acc = match["accession"]
                         status = "T"
@@ -108,7 +116,7 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
 
                 if 'model-ac' in match:
                     model_ac = match['model-ac']
-                elif member_db.upper() in ["SIGNALP"]:  # will probably apply to TMHMM and Phobius when added
+                elif member_db.upper() in ["SIGNALP", "DEEPTMHMM"]:  # will probably apply to TMHMM and Phobius when added
                     model_ac = "-"
                 else:
                     model_ac = match['accession']
@@ -131,6 +139,12 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         hmm_end = location["end"]
                         hmm_length = int(hmm_end) - int(hmm_start)
                         location_score = location["pvalue"]
+                        env_end, env_start = "-", "-"
+                    elif member_db.upper() == "DEEPTMHMM":
+                        hmm_start = location["start"]
+                        hmm_end = location["end"]
+                        hmm_length = int(hmm_end) - int(hmm_start)
+                        location_score = location["location_tag"]
                         env_end, env_start = "-", "-"
                     else:
                         hmm_start = location["hmmStart"]
@@ -162,11 +176,6 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                     elif member_db.upper() == "PROSITE_PATTERNS":
                         sig_acc = match["accession"]
                         evalue = "-"
-                        ali_from = location["start"]
-                        ali_to = location["end"]
-                        location_evalue = "-"
-                    elif member_db.upper() == "DEEPTMHMM":
-                        sig_acc, status = location["location_tag"], ""
                         ali_from = location["start"]
                         ali_to = location["end"]
                         location_evalue = "-"
