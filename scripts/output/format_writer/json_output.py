@@ -25,7 +25,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         "pvalue": match_data["locations"][0]["pvalue"],
                     }
 
-                if match_key == "transmembrane_prediction":
+                elif match_key == "transmembrane_prediction":
                     locations = []
                     for location in match_data['locations']:
                         info = {"location_tag": location["location_tag"],
