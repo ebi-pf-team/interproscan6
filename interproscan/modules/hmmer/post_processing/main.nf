@@ -171,13 +171,12 @@ process SUPERFAMILY_POST_PROCESSER {
     */
     script:
     """
-    ls
     perl ${postprocessing_params[0]} \
     -s ${postprocessing_params[1]} \
     -r ${postprocessing_params[2]} \
     -m ${postprocessing_params[3]} \
     -p ${postprocessing_params[4]} \
     ${postprocessing_params[5]} \
-    ${fasta} ${hmmscan_out} > "superfamily_ass3_output"
+    ${fasta} ${hmmscan_out} "superfamily_ass3_output"
     """
 }

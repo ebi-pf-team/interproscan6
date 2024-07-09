@@ -126,7 +126,7 @@ process HMMER_SCAN_RUNNER {
 
     script:
     """
-    /opt/hmmer/bin/hmmpress ${hmm}
-    /opt/hmmer/bin/hmmscan ${switches} -o ${release}._.${member}._.out ${hmm} ${fasta}
+    /opt/hmmer3/bin/hmmpress ${hmm}
+    /opt/hmmer3/bin/hmmscan ${switches} -o ${release}._.${member}._.out ${hmm} ${fasta}
     """
 }
