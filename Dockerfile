@@ -13,9 +13,6 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     libssl-dev libtool nghttp2 procps python3.10 python3-venv python3-pip python3-requests \
     tar unzip zlib1g-dev
 
-WORKDIR /test/
-RUN python3 --version > py.v.txt
-
 # Pull pftools for HAMAP and PROSITE
 FROM sibswiss/pftools as pftools
 
