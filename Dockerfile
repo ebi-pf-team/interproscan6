@@ -82,6 +82,8 @@ RUN chmod +x cath-resolve-hits
 
 WORKDIR /opt/interproscan6
 COPY interproscan/ interproscan/
+COPY utilities/ utilities/
+COPY tests/ tests/
 COPY interproscan.nf interproscan.nf
 COPY nextflow.config nextflow.config
 COPY README.md README.md
