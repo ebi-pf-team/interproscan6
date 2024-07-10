@@ -29,7 +29,7 @@ jobs:
       uses: conda-incubator/setup-miniconda@v2
       with:
         activate-environment: test
-        environment-file: environment.yml
+        environment-file: utilities/environment.yml
         python-version: 3.8
         auto-activate-base: false
 
@@ -65,12 +65,12 @@ jobs:
 
     - name: NF-Test subworkflows tests
       run: |
-        conda run --name test nf-test test tests/unit_tests/subworkflows/pre_checks/ &&
-        conda run --name test nf-test test tests/unit_tests/subworkflows/sequence_precalc/
+        conda run --name test nf-test test utilities/tests/unit_tests/subworkflows/pre_checks/ &&
+        conda run --name test nf-test test utilities/tests/unit_tests/subworkflows/sequence_precalc/
     
     - name: PY-Test scripts tests
       run: |
-        conda run --name test python3 -m pytest tests/unit_tests -v --cov=scripts --cov-report xml:.coverage.xml
+        conda run --name test python3 -m pytest utilities/tests/unit_tests -v --cov=scripts --cov-report xml:.coverage.xml
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.0.1
