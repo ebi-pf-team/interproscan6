@@ -248,9 +248,9 @@ workflow SEQUENCE_ANALYSIS {
             ]
         prints: member == 'prints'
             return [
-                params.members.prints.release,
-                params.members.prints.switches,
                 params.members.prints.data.pval,
+                params.members.prints.switches,
+                params.members.prints.release,
                 [
                     params.members.prints.postprocess.kdat,
                     params.members.prints.postprocess.hierarchy
@@ -314,6 +314,7 @@ workflow SEQUENCE_ANALYSIS {
         GENE3D_CATH_RESOLVE_HITS.out, // cath-resolve-hits out file
         GENE3D_HMMER_RUNNER.out[1]    // post-processing-params
     )
+
     GENE3D_FILTER_MATCHES(
         GENE3D_ADD_CATH_SUPERFAMILIES.out,  // add-superfams out file
         GENE3D_HMMER_PARSER.out,            // ips6 json
@@ -416,8 +417,8 @@ workflow SEQUENCE_ANALYSIS {
     // PRINTS
     runner_prints_params = fasta.combine(member_params.prints)
     PRINTS_RUNNER(runner_prints_params)
-    PRINTS_POSTPROCESS(PRINTS_RUNNER.out)
-    PRINTS_PARSER(PRINTS_POSTPROCESS.out)
+    //PRINTS_POSTPROCESS(PRINTS_RUNNER.out)
+    //PRINTS_PARSER(PRINTS_POSTPROCESS.out)
 
     /*
     Gather the results
