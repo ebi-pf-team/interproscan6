@@ -10,6 +10,6 @@ process GOTERMS {
 
     script:
     """
-    python3 $projectDir/scripts/xrefs/goterms.py ${matches} ${goterms} > goterms_${matches}
+    python3 $projectDir/interproscan/scripts/xrefs/goterms.py ${matches} ${goterms} > goterms_${matches}
     """
 }

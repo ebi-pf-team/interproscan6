@@ -2,7 +2,7 @@ include {
     CDD_RUNNER;
     CDD_PARSER;
     CDD_POSTPROCESS;
-} from "$projectDir/modules/cdd/main"
+} from "$projectDir/interproscan/modules/cdd/main"
 include {
     HMMER_RUNNER as ANTIFAM_HMMER_RUNNER;
     HMMER_RUNNER as NCBIFAM_HMMER_RUNNER;
@@ -13,7 +13,7 @@ include {
     FUNFAM_HMMER_RUNNER;
     HAMAP_HMMER_RUNNER;
     SMART_HMMER2_RUNNER;
-} from "$projectDir/modules/hmmer/runner/main"
+} from "$projectDir/interproscan/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
     HMMER_PARSER as NCBIFAM_HMMER_PARSER;
@@ -24,7 +24,7 @@ include {
     HMMER_PARSER as GENE3D_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER2_PARSER;
-} from "$projectDir/modules/hmmer/parser/main"
+} from "$projectDir/interproscan/modules/hmmer/parser/main"
 include {
     CATH_RESOLVE_HITS as FUNFAM_CATH_RESOLVE_HITS;  // third party tool to minimise suprious hits
     ADD_CATH_SUPERFAMILIES as FUNFAM_ADD_CATH_SUPERFAMILIES;  // used for gene3D and Funfam
@@ -33,7 +33,7 @@ include {
     HAMAP_POST_PROCESSER;
     PANTHER_POST_PROCESSER;
     SFLD_POST_PROCESSER;
-} from "$projectDir/modules/hmmer/post_processing/main"
+} from "$projectDir/interproscan/modules/hmmer/post_processing/main"
 include {
     FUNFAM_FILTER_MATCHES;
     GENE3D_FILTER_MATCHES;
@@ -42,23 +42,23 @@ include {
     PFAM_FILTER_MATCHES;
     SFLD_FILTER_MATCHES;
     SMART_FILTER_MATCHES;
-} from "$projectDir/modules/hmmer/filter/main"
+} from "$projectDir/interproscan/modules/hmmer/filter/main"
 include {
     PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER
-} from "$projectDir/modules/prosite/pfsearch/runner/main"
+} from "$projectDir/interproscan/modules/prosite/pfsearch/runner/main"
 include {
     PFSEARCH_PARSER as PROSITE_PROFILES_PARSER
-} from "$projectDir/modules/prosite/pfsearch/parser/main"
+} from "$projectDir/interproscan/modules/prosite/pfsearch/parser/main"
 include {
     PFSCAN_RUNNER as PROSITE_PATTERNS_RUNNER
-} from "$projectDir/modules/prosite/pfscan/runner/main"
+} from "$projectDir/interproscan/modules/prosite/pfscan/runner/main"
 include {
     PFSCAN_PARSER as PROSITE_PATTERNS_PARSER
-} from "$projectDir/modules/prosite/pfscan/parser/main"
+} from "$projectDir/interproscan/modules/prosite/pfscan/parser/main"
 include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER;
-} from "$projectDir/modules/signalp/main"
+} from "$projectDir/interproscan/modules/signalp/main"
 
 
 workflow SEQUENCE_ANALYSIS {
@@ -331,16 +331,8 @@ workflow SEQUENCE_ANALYSIS {
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_sfld_params)
-    SFLD_HMMER_PARSER(
-        SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
-        SFLD_HMMER_RUNNER.out[1]   // post-processing-params
-    )
-    SFLD_POST_PROCESSER(
-        SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
-        SFLD_HMMER_RUNNER.out[1],  // post-processing-params
-        SFLD_HMMER_RUNNER.out[2],  // alignment file
-        SFLD_HMMER_RUNNER.out[3],  // hmmer.dtbl path
-    )
+    SFLD_HMMER_PARSER(SFLD_HMMER_RUNNER.out)
+    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out)
     SFLD_FILTER_MATCHES(
         SFLD_HMMER_PARSER.out,     // ips6 json
         SFLD_POST_PROCESSER.out    // post-processing out file

@@ -78,7 +78,7 @@ process HAMAP_POST_PROCESSER {
     */
     script:
     """
-    python3 $projectDir/scripts/members/hamap/pfsearch_wrapper.py \
+    python3 $projectDir/interproscan/scripts/members/hamap/pfsearch_wrapper.py \
         ${tlb} \
         ${fasta} \
         "seqs_with_hits.faa" \
@@ -113,7 +113,7 @@ process PANTHER_POST_PROCESSER {
     script:
     """
     mkdir data
-    python3 $projectDir/scripts/members/panther/treegrafter.py \
+    python3 $projectDir/interproscan/scripts/members/panther/treegrafter.py \
         run \
         ${fasta} \
         ${out_file} \

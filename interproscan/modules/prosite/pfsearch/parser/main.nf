@@ -10,7 +10,7 @@ process PFSEARCH_PARSER {
 
     script:
     """
-    python3 $projectDir/scripts/members/prosite/pfsearch_parser.py \
+    python3 $projectDir/interproscan/scripts/members/prosite/pfsearch_parser.py \
         ${pfsearch_out} \
         ${pfsearch_out}-filtered.json \
         ${blacklist_file}

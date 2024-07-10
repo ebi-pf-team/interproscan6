@@ -1,7 +1,7 @@
-include { ENTRIES } from "$projectDir/modules/xrefs/entries/main"
-include { GOTERMS } from "$projectDir/modules/xrefs/goterms/main"
-include { PAINT_ANNOTATIONS } from "$projectDir/modules/xrefs/paint_annotations/main"
-include { PATHWAYS } from "$projectDir/modules/xrefs/pathways/main"
+include { ENTRIES } from "$projectDir/interproscan/modules/xrefs/entries/main"
+include { GOTERMS } from "$projectDir/interproscan/modules/xrefs/goterms/main"
+include { PAINT_ANNOTATIONS } from "$projectDir/interproscan/modules/xrefs/paint_annotations/main"
+include { PATHWAYS } from "$projectDir/interproscan/modules/xrefs/pathways/main"
 
 workflow XREFS {
     take:

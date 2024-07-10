@@ -22,7 +22,7 @@ process FUNFAM_FILTER_MATCHES {
 
     script:
     """
-    python3 $projectDir/scripts/members/funfam/filter_ips6_hits.py \\
+    python3 $projectDir/interproscan/scripts/members/funfam/filter_ips6_hits.py \\
         ${ips6_json} \\
         ${cath_resolved_out} \\
         ${ips6_json}.post.processed.json \\
@@ -45,7 +45,7 @@ process GENE3D_FILTER_MATCHES {
 
     script:
     """
-    python3 $projectDir/scripts/members/gene3d/filter_ips6_hits.py \\
+    python3 $projectDir/interproscan/scripts/members/gene3d/filter_ips6_hits.py \\
         ${ips6_json} \\
         ${cath_resolve_out_with_superfams} \\
         ${ips6_json}.post.processed.json \\
@@ -67,7 +67,7 @@ process HAMAP_FILTER_MATCHES {
 
     script:
     """
-    python3 $projectDir/scripts/members/hamap/filter_ips6_hits.py \\
+    python3 $projectDir/interproscan/scripts/members/hamap/filter_ips6_hits.py \\
         ${ips6_json} \\
         ${pfsearch_wrapper_output} \\
         ${ips6_json}.post.processed.json
@@ -88,7 +88,7 @@ process PANTHER_FILTER_MATCHES {
 
     script:
     """
-    python3 $projectDir/scripts/members/panther/process_treegrafter_hits.py \
+    python3 $projectDir/interproscan/scripts/members/panther/process_treegrafter_hits.py \
         ${treegrafter_output} \
         ${ips6_json} \
         ${postprocessing_params[2]} > ${ips6_json}.post.processed.json
@@ -108,7 +108,7 @@ process PFAM_FILTER_MATCHES {
 
     script:
     """
-    python3 $projectDir/scripts/members/pfam/postprocess.py \
+    python3 $projectDir/interproscan/scripts/members/pfam/postprocess.py \
         --hmm_parsed ${ips6_json} \
         --min_length '${postprocessing_params[0]}' \
         --seed '${postprocessing_params[1]}' \
@@ -131,7 +131,7 @@ process SFLD_FILTER_MATCHES {
 
     script:
     """
-    python3 $projectDir/scripts/members/sfld/sfld_process_post_processed.py \\
+    python3 $projectDir/interproscan/scripts/members/sfld/sfld_process_post_processed.py \\
         ${slfd_post_processed_output} \\
         ${ips6_json} > ${ips6_json}.post.processed.json
     """
@@ -155,7 +155,7 @@ process SMART_FILTER_MATCHES {
 
     script:
     """
-    python3 $projectDir/scripts/members/smart/filter_ips6_hits.py \\
+    python3 $projectDir/interproscan/scripts/members/smart/filter_ips6_hits.py \\
         ${ips6_json} \\
         ${fasta} \\
         ${ips6_json}.post.processed.json

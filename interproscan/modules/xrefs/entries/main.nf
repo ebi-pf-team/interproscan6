@@ -10,6 +10,6 @@ process ENTRIES {
 
     script:
     """
-    python3 $projectDir/scripts/xrefs/entries.py ${matches} ${entries} > entries_${matches}
+    python3 $projectDir/interproscan/scripts/xrefs/entries.py ${matches} ${entries} > entries_${matches}
     """
 }

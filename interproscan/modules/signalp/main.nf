@@ -30,7 +30,7 @@ process SIGNALP_PARSER {
 
     script:
     """
-    python3 $projectDir/scripts/members/signalp/parser.py \
+    python3 $projectDir/interproscan/scripts/members/signalp/parser.py \
         ${out}/prediction_results.txt \
         ${pvalue} \
         ${signalp_version} \

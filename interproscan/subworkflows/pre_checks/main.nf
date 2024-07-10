@@ -1,4 +1,4 @@
-include { CHECK_NUCLEIC } from "$projectDir/modules/pre_checks/main"
+include { CHECK_NUCLEIC } from "$projectDir/interproscan/modules/pre_checks/main"
 
 def printHelp() {
     """

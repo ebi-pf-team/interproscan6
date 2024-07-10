@@ -13,6 +13,6 @@ process PFSCAN_PARSER {
 
     script:
     """
-    python3 $projectDir/scripts/members/prosite/pfscan_parser.py ${ps_scan_out} ${ps_scan_out}_parsed.json
+    python3 $projectDir/interproscan/scripts/members/prosite/pfscan_parser.py ${ps_scan_out} ${ps_scan_out}_parsed.json
     """
 }

@@ -9,6 +9,6 @@ process PARSE_SEQUENCE {
 
     script:
     """
-    python3 $projectDir/scripts/parse_sequence.py ${fasta_file} > parsed_sequences
+    python3 $projectDir/interproscan/scripts/parse_sequence.py ${fasta_file} > parsed_sequences
     """
 }

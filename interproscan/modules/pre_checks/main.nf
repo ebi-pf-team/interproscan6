@@ -9,6 +9,6 @@ process CHECK_NUCLEIC {
 
     script:
     """
-    python3 $projectDir/scripts/pre_checks/check_nucleic_seq.py ${fasta_file}
+    python3 $projectDir/interproscan/scripts/pre_checks/check_nucleic_seq.py ${fasta_file}
     """
 }

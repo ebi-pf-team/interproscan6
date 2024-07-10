@@ -11,6 +11,6 @@ process AGGREGATE_RESULTS {
     """
     mkdir -p $projectDir/results
     mkdir -p $projectDir/results/temp
-    python3 $projectDir/scripts/output/aggregate_results.py "${result_files}" > results_aggregated.json
+    python3 $projectDir/interproscan/scripts/output/aggregate_results.py "${result_files}" > results_aggregated.json
     """
 }

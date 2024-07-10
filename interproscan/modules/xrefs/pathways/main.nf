@@ -10,6 +10,6 @@ process PATHWAYS {
 
     script:
     """
-    python3 $projectDir/scripts/xrefs/pathways.py ${matches} ${pathways} > pathways_${matches}
+    python3 $projectDir/interproscan/scripts/xrefs/pathways.py ${matches} ${pathways} > pathways_${matches}
     """
 }

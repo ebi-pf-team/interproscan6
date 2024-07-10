@@ -16,6 +16,6 @@ process LOOKUP_MATCHES {
         """
     else
         """
-        python3 $projectDir/scripts/lookup/lookup_matches.py ${checked_lookup} '${appl}' ${params.url_precalc}${params.matches} > parsed_match_lookup
+        python3 $projectDir/interproscan/scripts/lookup/lookup_matches.py ${checked_lookup} '${appl}' ${params.url_precalc}${params.matches} > parsed_match_lookup
         """
 }
