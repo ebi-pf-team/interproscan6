@@ -6,7 +6,7 @@ pytest -v
 
 import pytest
 
-from scripts.pre_checks import check_nucleic_seq
+from interproscan.scripts.pre_checks import check_nucleic_seq
 
 
 @pytest.fixture

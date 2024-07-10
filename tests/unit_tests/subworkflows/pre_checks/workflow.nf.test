@@ -1,13 +1,13 @@
 nextflow_workflow {
 
     name "Test Workflow PRE_CHECKS"
-    script "subworkflows/pre_checks/main.nf"
+    script "interproscan/subworkflows/pre_checks/main.nf"
     workflow "PRE_CHECKS"
 
 
     stage {
-        symlink "scripts/pre_checks/check_nucleic_seq.py"
-        symlink "modules/pre_checks/main.nf"
+        symlink "interproscan/scripts/pre_checks/check_nucleic_seq.py"
+        symlink "interproscan/modules/pre_checks/main.nf"
     }
 
 

@@ -1,11 +1,11 @@
 nextflow_process {
 
     name "Test Process CHECK_NUCLEIC"
-    script "subworkflows/pre_checks/main.nf"
+    script "interproscan/subworkflows/pre_checks/main.nf"
     process "CHECK_NUCLEIC"
 
     stage {
-        symlink "scripts/pre_checks/check_nucleic_seq.py"
+        symlink "interproscan/scripts/pre_checks/check_nucleic_seq.py"
     }
 
     test("Should pass") {
