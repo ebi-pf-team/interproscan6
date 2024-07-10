@@ -153,7 +153,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".switches,
                 params.members."${member}".release,
                 [
-                    params.members."${member}".postprocess.bin,
                     params.members."${member}".postprocess.sites_annotation,
                     params.members."${member}".postprocess.hierarchy,
                 ]
@@ -331,7 +330,10 @@ workflow SEQUENCE_ANALYSIS {
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_sfld_params)
-    SFLD_HMMER_PARSER(SFLD_HMMER_RUNNER.out)
+    SFLD_HMMER_PARSER(
+        SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
+        SFLD_HMMER_RUNNER.out[1]   // post-processing-params
+    )
     SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out)
     SFLD_FILTER_MATCHES(
         SFLD_HMMER_PARSER.out,     // ips6 json

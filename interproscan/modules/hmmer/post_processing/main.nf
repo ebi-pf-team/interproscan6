@@ -149,7 +149,7 @@ process SFLD_POST_PROCESSER {
             --alignments '${alignment}' \
             --dom '${out_dtbl}' \
             --hmmer-out '${out_file}' \
-            --site-info '${postprocessing_params[1]}' \
+            --site-info '${postprocessing_params[0]}' \
             --output '${out_file}.processed.out'
         """
 }
