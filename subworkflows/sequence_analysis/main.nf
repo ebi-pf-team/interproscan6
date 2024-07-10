@@ -59,6 +59,11 @@ include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER;
 } from "$projectDir/modules/signalp/main"
+include {
+    PRINTS_RUNNER;
+    PRINTS_POSTPROCESS;
+    PRINTS_PARSER;
+} from "$projectDir/modules/prints/main"
 
 
 workflow SEQUENCE_ANALYSIS {
@@ -220,6 +225,16 @@ workflow SEQUENCE_ANALYSIS {
                 params.members.signalp.switches,
                 params.members.signalp.data.pvalue,
                 params.members.signalp.release
+            ]
+        prints: member == 'prints'
+            return [
+                params.members.prints.release,
+                params.members.prints.switches,
+                params.members.prints.data.pval,
+                [
+                    params.members.prints.postprocess.kdat,
+                    params.members.prints.postprocess.hierarchy
+                ]
             ]
     }.set { member_params }
 
@@ -394,6 +409,12 @@ workflow SEQUENCE_ANALYSIS {
     runner_signalp_params = fasta.combine(member_params.signalp)
     SIGNALP_RUNNER(runner_signalp_params)
     SIGNALP_PARSER(SIGNALP_RUNNER.out)
+
+    // PRINTS
+    runner_prints_params = fasta.combine(member_params.prints)
+    PRINTS_RUNNER(runner_prints_params)
+    //PRINTS_POSTPROCESS(PRINTS_RUNNER.out)
+    //PRINTS_PARSER(PRINTS_POSTPROCESS.out)
 
     /*
     Gather the results
