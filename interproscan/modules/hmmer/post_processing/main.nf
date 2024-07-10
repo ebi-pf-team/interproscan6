@@ -145,7 +145,7 @@ process SFLD_POST_PROCESSER {
 
     script:
         """
-        ${postprocessing_params[0]} \
+        $projectDir/interproscan/bin/sfld/sfld_postprocess \
             --alignments '${alignment}' \
             --dom '${out_dtbl}' \
             --hmmer-out '${out_file}' \
