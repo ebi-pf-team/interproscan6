@@ -6,15 +6,15 @@ NXF_ANSI_LOG = "false"
     IMPORT MODULES AND SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { PARSE_SEQUENCE } from "$projectDir/modules/parse_sequence/main"
-include { GET_ORFS } from "$projectDir/modules/get_orfs/main"
-include { AGGREGATE_RESULTS } from "$projectDir/modules/output/aggregate_results/main"
-include { WRITE_RESULTS } from "$projectDir/modules/output/write_results/main"
+include { PARSE_SEQUENCE } from "$projectDir/interproscan/modules/parse_sequence/main"
+include { GET_ORFS } from "$projectDir/interproscan/modules/get_orfs/main"
+include { AGGREGATE_RESULTS } from "$projectDir/interproscan/modules/output/aggregate_results/main"
+include { WRITE_RESULTS } from "$projectDir/interproscan/modules/output/write_results/main"
 
-include { PRE_CHECKS } from "$projectDir/subworkflows/pre_checks/main"
-include { SEQUENCE_PRECALC } from "$projectDir/subworkflows/sequence_precalc/main"
-include { SEQUENCE_ANALYSIS } from "$projectDir/subworkflows/sequence_analysis/main"
-include { XREFS } from "$projectDir/subworkflows/xrefs/main"
+include { PRE_CHECKS } from "$projectDir/interproscan/subworkflows/pre_checks/main"
+include { SEQUENCE_PRECALC } from "$projectDir/interproscan/subworkflows/sequence_precalc/main"
+include { SEQUENCE_ANALYSIS } from "$projectDir/interproscan/subworkflows/sequence_analysis/main"
+include { XREFS } from "$projectDir/interproscan/subworkflows/xrefs/main"
 
 workflow {
     // Perform preliminary validation checks before running the analysis
