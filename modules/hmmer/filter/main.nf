@@ -140,6 +140,11 @@ process SFLD_FILTER_MATCHES {
 
 process SMART_FILTER_MATCHES {
     label 'analysis_parser'
+    /* 
+    It needs the FASTA file becauce when both Ser-Thr and Tyr
+    kinase matches are found in a sequence, the domains 
+    are checked again using regex checks against the protein sequence.
+    */
 
     input:
         path ips6_json
