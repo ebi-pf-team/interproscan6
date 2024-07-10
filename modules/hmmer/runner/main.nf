@@ -14,6 +14,7 @@ process HMMER_RUNNER {
     """
 }
 
+
 process HMMER_RUNNER_WITH_ALIGNMENTS {
     label 'hmmer_runner'
     input:
@@ -27,12 +28,10 @@ process HMMER_RUNNER_WITH_ALIGNMENTS {
 
     script:
     """
-    /opt/hmmer3/bin/hmmsearch ${switches} \
-    -o ${release}._.${member}._.out \
-    --domtblout ${release}._.${member}._.dtbl \
-    -A ${member}_alignment ${hmm} ${fasta}
+    /opt/hmmer3/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl -A ${member}_alignment ${hmm} ${fasta}
     """
 }
+
 
 process FUNFAM_HMMER_RUNNER {
     /*
@@ -71,6 +70,7 @@ process FUNFAM_HMMER_RUNNER {
         ${fasta}
     """
 }
+
 
 process HAMAP_HMMER_RUNNER {
     label 'hmmer_runner'
