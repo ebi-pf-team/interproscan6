@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - Dockerfile
-      - docker_files/signalp/Dockerfile
   workflow_dispatch:
 
 
@@ -31,9 +30,4 @@ jobs:
 
       - name: Test build IPS6 Docker image
         run: |
-          docker image build -t interproscan6 .
-
-      - name: Test build SignalP Docker image
-        run: |
-          cd docker_files/signalp/
           docker image build -t interproscan6 .
