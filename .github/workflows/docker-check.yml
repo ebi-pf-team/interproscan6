@@ -1,11 +1,9 @@
 name: Check Docker Files
 
 on:
-  push:
+  pull_request:
     paths:
       - Dockerfile
-  workflow_dispatch:
-
 
 jobs:
   Check-Docker-files:
