@@ -18,6 +18,7 @@ def printHelp() {
         --output <OUTPUT-FILE-PATH>        Optional. Path to the output file.
                                             If this option is not set, the output will be write on results/ folder.
         --pathways Optional. Include pathway information in the output.
+        --version                          Print the version of InterProScan.
     """
 }
 
@@ -30,6 +31,8 @@ workflow PRE_CHECKS {
     all_params
     user_applications
     output_formats
+    version_msg
+    ips6_version
 
     main:
     if ( !nextflow.version.matches('>=23.10') ) {
@@ -39,6 +42,11 @@ workflow PRE_CHECKS {
 
     if (help_msg) {
         log.info printHelp()
+        exit 0
+    }
+
+    if (version_msg) {
+        log.info "InterProScan version: ${ips6_version}"
         exit 0
     }
 
