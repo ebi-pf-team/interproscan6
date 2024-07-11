@@ -43,6 +43,7 @@ include {
     HAMAP_FILTER_MATCHES;
     PANTHER_FILTER_MATCHES;
     PFAM_FILTER_MATCHES;
+    PIRSF_FILTER_MATCHES;
     SFLD_FILTER_MATCHES;
     SMART_FILTER_MATCHES;
 } from "$projectDir/interproscan/modules/hmmer/filter/main"
@@ -363,12 +364,10 @@ workflow SEQUENCE_ANALYSIS {
         tsv_pro,
         "false"
     )
-    // PIRSF_POST_PROCESSER(
-    //     PIRSF_HMMER_RUNNER.out[1],  // hmmer.dtbl path
-    //     PIRSF_HMMER_RUNNER.out[2],  // post-processing-params
-    //     PIRSF_HMMER_RUNNER.out[3],  // fasta
-    //     PIRSF_HMMER_RUNNER.out[4]   // hmm
-    // )
+    PIRSF_FILTER_MATCHES(
+        PIRSF_HMMER_PARSER.out,     // ips6-json
+        PIRSF_HMMER_RUNNER.out[2]   // post-processing-params
+    )
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
@@ -433,6 +432,7 @@ workflow SEQUENCE_ANALYSIS {
             HAMAP_FILTER_MATCHES.out,
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,
+            PIRSF_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
@@ -449,6 +449,7 @@ workflow SEQUENCE_ANALYSIS {
             HAMAP_FILTER_MATCHES.out,
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,
+            PIRSF_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
