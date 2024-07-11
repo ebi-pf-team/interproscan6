@@ -166,9 +166,6 @@ process SUPERFAMILY_POST_PROCESSER {
     output:
         path "superfamily_ass3_output"
 
-    /*
-
-    */
     script:
     """
     perl ${postprocessing_params[0]} \
