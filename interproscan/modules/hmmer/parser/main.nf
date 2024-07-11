@@ -37,3 +37,21 @@ process HMMER2_PARSER {
         > hmmer_parsed_${out}.json
     """
 }
+
+
+process SUPERFAMILY_PARSER {
+    label 'analysis_parser'
+
+    input:
+    path ass3_out
+    val postprocessing_params
+
+    output:
+    path "superfamily_parsed_*"
+
+    script:
+    """
+    python3 $projectDir/scripts/members/superfamily/parse_superfamily_out.py \\
+        ${postprocessing_params[3]} ${ass3_out} > superfamily_parsed_${ass3_out}.json
+    """
+}

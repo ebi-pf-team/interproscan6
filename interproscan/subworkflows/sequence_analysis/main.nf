@@ -370,6 +370,7 @@ workflow SEQUENCE_ANALYSIS {
     )
     SUPERFAMILY_PARSER(
         SUPERFAMILY_POST_PROCESSER.out,
+        SUPERFAMILY_HMMER_RUNNER.out[1],  // post-processing-params
     )
 
     /*
