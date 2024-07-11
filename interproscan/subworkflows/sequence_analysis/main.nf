@@ -365,12 +365,10 @@ workflow SEQUENCE_ANALYSIS {
         tsv_pro,
         "false"
     )
-    // PIRSF_POST_PROCESSER(
-    //     PIRSF_HMMER_RUNNER.out[1],  // hmmer.dtbl path
-    //     PIRSF_HMMER_RUNNER.out[2],  // post-processing-params
-    //     PIRSF_HMMER_RUNNER.out[3],  // fasta
-    //     PIRSF_HMMER_RUNNER.out[4]   // hmm
-    // )
+    PIRSF_FILTER_MATCHES(
+        PIRSF_HMMER_PARSER.out,     // ips6-json
+        PIRSF_HMMER_RUNNER.out[2]   // post-processing-params
+    )
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
