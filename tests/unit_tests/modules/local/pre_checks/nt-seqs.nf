@@ -1,18 +1,18 @@
 nextflow_process {
 
     name "Test Process CHECK_NUCLEIC"
-    script "subworkflows/pre_checks/main.nf"
+    script "interproscan/modules/pre_checks/main.nf"
     process "CHECK_NUCLEIC"
 
     stage {
-        symlink "scripts/pre_checks/check_nucleic_seq.py"
+        symlink "interproscan/scripts/pre_checks/check_nucleic_seq.py"
     }
 
     test("Should pass") {
 
         when {
             params {
-                input="$projectDir/tests/test_inputs/nt_seqs.fasta"
+                input="$projectDir/tests/unit_tests/test_inputs/pre_analysis_checks/nt_seqs.fasta"
             }
             process {
                 """
@@ -31,7 +31,7 @@ nextflow_process {
 
         when {
             params {
-                input="$projectDir/tests/test_inputs/protein_seqs.fasta"
+                input="$projectDir/tests/unit_tests/test_inputs/pre_analysis_checks/protein_seqs.fasta"
             }
             process {
                 """

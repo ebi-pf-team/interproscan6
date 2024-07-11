@@ -1,8 +1,6 @@
 name: Unit Tests
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -29,7 +27,7 @@ jobs:
       uses: conda-incubator/setup-miniconda@v2
       with:
         activate-environment: test
-        environment-file: environment.yml
+        environment-file: utilities/environment.yml
         python-version: 3.8
         auto-activate-base: false
 

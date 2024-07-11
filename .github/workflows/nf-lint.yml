@@ -1,10 +1,11 @@
 name: Nextflow linting
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
+    paths:
+      - interproscan/subworkflows
+      - interproscan/modules
 
 jobs:
   build:
@@ -24,7 +25,7 @@ jobs:
       uses: conda-incubator/setup-miniconda@v2
       with:
         activate-environment: test
-        environment-file: environment.yml
+        environment-file: utilities/environment.yml
         python-version: 3.8
         auto-activate-base: false
 
@@ -46,7 +47,7 @@ jobs:
     - name: Set up linter-rules-for-nextflow
       run: |
         git clone https://github.com/awslabs/linter-rules-for-nextflow.git
-        bash linter/drop_rules.sh linter-rules-for-nextflow
+        bash utilities/linter/drop_rules.sh linter-rules-for-nextflow
         rm -rf linter-rules-for-nextflow/examples
 
     - name: Build Docker image for linter-rules-for-nextflow
@@ -66,6 +67,7 @@ jobs:
     - name: Run Docker linter
       id: linter
       run: |
+        cd interproscan
         docker run -v $PWD:/data -e ruleset=general linter-rules-for-nextflow > docker.output.txt
         cat docker.output.txt
 

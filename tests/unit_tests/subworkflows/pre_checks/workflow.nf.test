@@ -1,13 +1,13 @@
 nextflow_workflow {
 
     name "Test Workflow PRE_CHECKS"
-    script "subworkflows/pre_checks/main.nf"
+    script "interproscan/subworkflows/pre_checks/main.nf"
     workflow "PRE_CHECKS"
 
 
     stage {
-        symlink "scripts/pre_checks/check_nucleic_seq.py"
-        symlink "modules/pre_checks/main.nf"
+        symlink "interproscan/scripts/pre_checks/check_nucleic_seq.py"
+        symlink "interproscan/modules/pre_checks/main.nf"
     }
 
 
@@ -25,6 +25,7 @@ nextflow_workflow {
                 input[3] = ['input', 'applications', 'disable_precalc', ]
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
+                input[7] = "6.0.0"
                 """
             }
         }
@@ -52,6 +53,7 @@ nextflow_workflow {
                 input[3] = ['input', 'applications', 'disable_precalc', ]
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
+                input[7] = "6.0.0"
                 """
             }
         }
@@ -77,6 +79,7 @@ nextflow_workflow {
                 input[3] = ['input', 'applications', 'disable_precalc', 'help']
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
+                input[7] = "6.0.0"
                 """
             }
         }
@@ -105,6 +108,7 @@ nextflow_workflow {
                 input[3] = ['input', 'applications', 'disable_precalc', 'help']
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
+                input[7] = "6.0.0"
                 """
             }
         }
@@ -133,6 +137,7 @@ nextflow_workflow {
                 input[3] = ['input', 'applications', 'disable_precalc', 'help']
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
+                input[7] = "6.0.0"
                 """
             }
         }
@@ -159,6 +164,7 @@ nextflow_workflow {
                 input[3] = ['input', 'Bilbo']
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
+                input[7] = "6.0.0"
                 """
             }
         }
@@ -185,6 +191,7 @@ nextflow_workflow {
                 input[3] = ['input', 'help']
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
+                input[7] = "6.0.0"
                 """
             }
         }
@@ -210,6 +217,7 @@ nextflow_workflow {
                 input[3] = ['input', 'help']
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
+                input[7] = "6.0.0"
                 """
             }
         }
@@ -236,6 +244,7 @@ nextflow_workflow {
                 input[3] = ['input', 'help']
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
+                input[7] = "6.0.0"
                 """
             }
         }
@@ -243,6 +252,33 @@ nextflow_workflow {
         then {
             assert workflow.failed
             assert workflow.exitStatus == 5
+        }
+
+    }
+
+    test("Print version") {
+
+        when {
+            params {
+                input="$projectDir/tests/unit_tests/test_inputs/pre_analysis_checks/empty.fasta"
+                applications="antifam,CDD"
+                formats="tsv-pro,tsv"
+            }
+            workflow {
+                """
+                input[1] = file("${params.input}")
+                input[3] = ['input', 'help', 'version']
+                input[4] = "${params.applications}"
+                input[5] = "${params.formats}"
+                input[6] = "true"
+                input[7] = "6.0.0"
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert workflow.exitStatus == 0
         }
 
     }
