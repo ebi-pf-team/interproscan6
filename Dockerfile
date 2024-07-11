@@ -87,4 +87,4 @@ COPY tests/ tests/
 COPY interproscan.nf interproscan.nf
 COPY nextflow.config nextflow.config
 COPY README.md README.md
-COPY LINCENCE LINCENCE
+COPY LICENSE LICENSE
