@@ -144,6 +144,26 @@ process SFLD_FILTER_MATCHES {
 
     input:
         path ips6_json
+        val postprocessing_params
+
+    output:
+        path "${ips6_json}.post.processed.json"
+
+    script:
+    """
+    python3 $projectDir/scripts/members/pirsf/filter_ips6_hits.py \
+        ${ips6_json} \
+        '${postprocessing_params[0]}' \
+        '${ips6_json}.post.processed.json'
+    """
+}
+
+
+process SFLD_FILTER_MATCHES {
+    label 'analysis_parser'
+
+    input:
+        path ips6_json
         path slfd_post_processed_output
 
     output:
