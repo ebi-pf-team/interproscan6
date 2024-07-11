@@ -61,11 +61,12 @@ jobs:
 
     - name: Remove tests directory
       run: |
-        rm -rf utilities/tests
+        rm -rf tests
 
     - name: Run Docker linter
       id: linter
       run: |
+        cd interproscan
         docker run -v $PWD:/data -e ruleset=general linter-rules-for-nextflow > docker.output.txt
         cat docker.output.txt
 
