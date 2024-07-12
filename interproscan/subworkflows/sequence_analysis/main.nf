@@ -9,10 +9,10 @@ include {
     HMMER_RUNNER as GENE3D_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
+    HMMER_RUNNER as PIRSF_HMMER_RUNNER;
     HMMER_RUNNER_WITH_ALIGNMENTS as SFLD_HMMER_RUNNER;
     FUNFAM_HMMER_RUNNER;
     HAMAP_HMMER_RUNNER;
-    PIRSF_HMMER_RUNNER;
     SMART_HMMER2_RUNNER;
 } from "$projectDir/interproscan/modules/hmmer/runner/main"
 include {
@@ -173,10 +173,14 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".release,
                 [
 <<<<<<< HEAD
+<<<<<<< HEAD
                     params.members."${member}".postprocess.data
 =======
                     params.members."${member}".postprocess.data,
 >>>>>>> 095da8a (remove unused postporcessing param)
+=======
+                    params.members."${member}".postprocess.data
+>>>>>>> 9acd318 (use the generic hmmer parser and runner)
                 ]
             ]
 
