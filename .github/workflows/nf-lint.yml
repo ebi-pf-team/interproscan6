@@ -49,12 +49,16 @@ jobs:
         git clone https://github.com/awslabs/linter-rules-for-nextflow.git
         bash utilities/linter/drop_rules.sh linter-rules-for-nextflow
         rm -rf linter-rules-for-nextflow/examples
-
-    - name: Build Docker image for linter-rules-for-nextflow
-      run: |
-        cd linter-rules-for-nextflow
-        docker build -t linter-rules-for-nextflow:latest .
-        cd ..
+      
+    - name: Build and load Docker image
+      uses: docker/build-push-action@v3
+      with:
+        context: ./linter-rules-for-nextflow
+        file: ./linter-rules-for-nextflow/Dockerfile
+        load: true
+        tags: linter-rules-for-nextflow:latest
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
 
     - name: Add Nextflow to PATH
       run: |

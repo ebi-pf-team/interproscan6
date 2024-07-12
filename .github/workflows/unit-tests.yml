@@ -51,7 +51,7 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         context: .
-        file: ./Dockerfile
+        file: ./docker_files/unit_tests/Dockerfile
         load: true
         tags: interproscan6:latest
         cache-from: type=local,src=/tmp/.buildx-cache
