@@ -21,6 +21,7 @@ def parse(prints: str, version: str) -> dict:
                 for location in match["locations"]:
                     location.pop("evalue")
                     location.pop("model_id")
+                    location["location-fragments"] = [{"start": int(location["start"]), "end": int(location["end"]), "dc-status": "CONTINUOUS"}]
                 rebuild[protein] = {match["accession"]: match}
 
     return rebuild
