@@ -33,6 +33,7 @@ include {
     ADD_CATH_SUPERFAMILIES as GENE3D_ADD_CATH_SUPERFAMILIES;
     HAMAP_POST_PROCESSER;
     PANTHER_POST_PROCESSER;
+    PIRSF_POST_PROCESSER;
     SFLD_POST_PROCESSER;
 } from "$projectDir/interproscan/modules/hmmer/post_processing/main"
 include {
@@ -41,7 +42,6 @@ include {
     HAMAP_FILTER_MATCHES;
     PANTHER_FILTER_MATCHES;
     PFAM_FILTER_MATCHES;
-    PIRSF_POST_PROCESSER;
     SFLD_FILTER_MATCHES;
     SMART_FILTER_MATCHES;
 } from "$projectDir/interproscan/modules/hmmer/filter/main"
@@ -355,7 +355,12 @@ workflow SEQUENCE_ANALYSIS {
     // PIRSF (+ pirsf.pl)
     runner_pirsf_params = fasta.combine(member_params.pirsf)
     PIRSF_HMMER_RUNNER(runner_pirsf_params)
-    PIRSF_POST_PROCESSER(PIRSF_HMMER_RUNNER.out)
+    PIRSF_POST_PROCESSER(
+        PIRSF_HMMER_RUNNER.out[1],  // hmmer.dtbl path
+        PIRSF_HMMER_RUNNER.out[2],  // post-processing-params
+        PIRSF_HMMER_RUNNER.out[3],  // fasta
+        PIRSF_HMMER_RUNNER.out[4]   // hmm
+    )
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
