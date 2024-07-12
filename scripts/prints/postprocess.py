@@ -97,7 +97,7 @@ def parse_prints(prints_out: str, hierarchy_map: str, version: str) -> dict:
                     if motifname in i["name"]:
                         i["locations"].append(
                             {"motifNumber": nummotif,"pvalue": pvalue, "score": idscore, "start": pos, "end": end,
-                             "representative": False, "evalue": i["evalue"], "model_id": i["accession"]})
+                             "representative": "false", "evalue": i["evalue"], "model_id": i["accession"]})
 
     return results
 
