@@ -7,6 +7,7 @@ import re
 # param prints_out: path to prints output file
 # param hierarchy: path to prints hierarchy db
 
+
 def main():
     args = sys.argv[1:]
     parsed_results = postprocess(args[0], args[1])
@@ -14,26 +15,66 @@ def main():
 
 
 def postprocess(prints_out: str, hierarchy: str) -> dict:
-    results = {}
     hierarchy_map = parse_hierarchy(hierarchy)
     allprintsids = list(hierarchy_map.keys())
     results = parse_prints(prints_out, hierarchy_map)
     sorted_results = sort_results(results)
+    selected_results = select(sorted_results, hierarchy_map)
+    return selected_results
+
+
+def select(sorted_res: dict, hierarchy: dict) -> dict:
+    # from hierarchymap, get evalue for id
+    pass_matches = {}
+    for match in sorted_res:
+        for i in sorted_res[match]:
+            # print(i)
+            fingerprint = i["model_name"]
+            if fingerprint in hierarchy.keys():
+                # process sorted matches step
+                # filter by min motif
+                min_motif = hierarchy[fingerprint]["min_motif_count"]
+                cutoff = float(hierarchy[fingerprint]["evalue_cutoff"])
+                if i["evalue"] <= cutoff and i["num_motif"] > min_motif:
+                    pass
+                    # order by evalue descending for some reason?
+                else:
+                    continue
+
+                if hierarchy[fingerprint]["is_domain"]:
+                    # no filtering required
+                    print("passing is domain check")
+                    # pass_matches.append({"protein_id": match, "fingerprint": fingerprint})
+                    if match in pass_matches:
+                        pass_matches[match].append(i)
+                    else:
+                        pass_matches[match] = [i]
+
+                else:
+                    # store hierarchy members..
+                    # print(hierarchy[fingerprint]["sibling_list"])
+                    if match in pass_matches:
+                        pass_matches[match].append(i)
+                    else:
+                        pass_matches[match] = [i]
+
+    for match in sorted_res:
+        if match not in pass_matches:
+            pass_matches[match] = []
+
+    return pass_matches
 
 
 def sort_results(results: dict) -> dict:
     for protein in results:
-        print(protein)
         # sort models by evalue
-        # aka sort order of dictionaries in a list by one of the values in the dictionary
         results[protein].sort(key=lambda d: (d["evalue"]))
         for model in results[protein]:
-            model["locations"].sort(key=lambda d: (d["model_id"], d["motifnumber"], d["start"], d["end"]))
-            #comp = compare_prints_raw_match(model, model)
-            #print(comp)
-            print(model["evalue"])
-            print(model)
+            model["locations"].sort(
+                key=lambda d: (d["model_id"], d["motifnumber"], d["start"], d["end"])
+            )
         #    model["evalue"] = f"{model['evalue']:.1e}"
+    return results
 
 
 def parse_prints(prints_out: str, hierarchy_map: str) -> dict:
@@ -45,13 +86,29 @@ def parse_prints(prints_out: str, hierarchy_map: str) -> dict:
                 idline = idline.strip("\n")
                 protein_id = idline.split(" ")[0]
             if line.startswith(("2TBN", "2TBH")):
-                fingerprint, nummotif, sumid, aveid, profscore, ppvalue, evalue, graphscan = process_2tb(line)
+                (
+                    fingerprint,
+                    nummotif,
+                    sumid,
+                    aveid,
+                    profscore,
+                    ppvalue,
+                    evalue,
+                    graphscan,
+                ) = process_2tb(line)
+                ) = process_2tb(line)
                 # hierarchy map to get model ac
                 if fingerprint in hierarchy_map:
                     model_acc = hierarchy_map[fingerprint]["model_acc"]
 
-                prints = {"model_acc": model_acc, "model_name": fingerprint, "evalue": float(evalue), "graphscan": graphscan,
-                          "locations": []}
+                prints = {
+                    "model_acc": model_acc,
+                    "model_name": fingerprint,
+                    "evalue": float(evalue),
+                    "num_motif": nummotif,
+                    "graphscan": graphscan,
+                    "locations": [],
+                }
                 if protein_id in results:
                     results[protein_id].append(prints)
                 else:
@@ -62,9 +119,17 @@ def parse_prints(prints_out: str, hierarchy_map: str) -> dict:
                 for i in results[protein_id]:
                     if motifname in i["model_name"]:
                         i["locations"].append(
-                            {"start": pos, "end": end, "representative": False, "pvalue": pvalue, "score": idscore,
-                             "motifnumber": nummotif, "evalue": i["evalue"], "model_id": i["model_acc"]})
-                        #print(i)
+                            {
+                                "start": pos,
+                                "end": end,
+                                "representative": False,
+                                "pvalue": pvalue,
+                                "score": idscore,
+                                "motifnumber": nummotif,
+                                "evalue": i["evalue"],
+                                "model_id": i["model_acc"],
+                            }
+                        )
     return results
 
 
@@ -94,7 +159,7 @@ def parse_hierarchy(hierarchy: str) -> dict:
                     "evalue_cutoff": evalue_cutoff,
                     "min_motif_count": min_motif_count,
                     "sibling_list": hierarchical_rel,
-                    "is_domain": is_domain
+                    "is_domain": is_domain,
                 }
 
     return hierarchymap
@@ -128,7 +193,7 @@ def process_3tb(line):
     pos = line[11]
     high = line[12]
     end = int(pos) + int(length)
-    return motifname, nummotif, idscore, pfscore, pvalue, sequence, length, low, pos, high, end
+    return (motifname, nummotif, idscore, pfscore, pvalue, sequence, length, low, pos, high, end)
 
 
 def parse_model(matches):
@@ -138,35 +203,18 @@ def parse_model(matches):
         idline = idline.strip("\n")
         protein_id = idline.split(" ")[0]
     if line.startswith("2TBN"):
-        fingerprint, nummotif, sumid, aveid, profscore, ppvalue, evalue, graphscan = process_2tb(line)
+        fingerprint, nummotif, sumid, aveid, profscore, ppvalue, evalue, graphscan = (
+            process_2tb(line)
+        )
         model_acc = ""
-        match_info = {"protein_id": protein_id, "evalue": evalue, "graphscan": graphscan, "model_acc": model_acc,
-                      "locations": []}
+        match_info = {
+            "protein_id": protein_id,
+            "evalue": evalue,
+            "graphscan": graphscan,
+            "model_acc": model_acc,
+            "locations": [],
+        }
     return match_info
-
-
-def filter(prints_out: str, hierarchy: str) -> dict:
-    # from hierarchymap, get evalue for id
-    if fingerprint in hierarchy_map.keys():
-        # process sorted matches step
-        # filter by min motif
-        min_motif = hierarchy_map[fingerprint]["min_motif_count"]
-        if num_motif < min_motif:
-            modelpass = True
-        if hierarchy_map[fingerprint]["is_domain"]:
-            # no filtering required
-            modelpass = True
-            pass_matches.append({"protein_id": protein_id, "fingerprint": fingerprint})
-        else:
-            cutoff = hierarchy_map[fingerprint]["evalue_cutoff"]
-            if evalue <= cutoff:
-                modelpass = True
-                pass_matches.append({"protein_id": protein_id, "fingerprint": fingerprint})
-            # hierarchy limitations check
-    else:
-        print("model not found")
-
-    return pass_matches
 
 
 if __name__ == "__main__":
