@@ -51,7 +51,7 @@ process SUPERFAMILY_PARSER {
 
     script:
     """
-    python3 $projectDir/scripts/members/superfamily/parse_superfamily_out.py \\
+    python3 $projectDir/interproscan/scripts/members/superfamily/parse_superfamily_out.py \\
         ${hmm_lib} ${ass3_out} > superfamily_parsed_${ass3_out}.json
     """
 }
