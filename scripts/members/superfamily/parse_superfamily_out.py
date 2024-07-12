@@ -43,7 +43,7 @@ def parse(ass3_out_path: str, modelac2acc: dict) -> dict:
                     new_location = {
                         'start': fragments[0]['start'],
                         'end': fragments[-1]['end'],
-                        'location-fragments': fragments_with_status,
+                        'location-fragments': fragments,
                         'representative': '',
                         'evalue': match['evalue'],
                         'alignment': match['alignment_to_model'],
