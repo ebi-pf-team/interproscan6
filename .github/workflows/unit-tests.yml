@@ -3,6 +3,13 @@ name: Unit Tests
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - interproscan/scripts
+      - interproscan/modules
+      - interproscan/subworkflows
+      - tests
+      - nextflow.config
+      - interproscan.nf
 
 jobs:
   test:

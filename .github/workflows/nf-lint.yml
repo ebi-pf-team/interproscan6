@@ -6,6 +6,7 @@ on:
     paths:
       - interproscan/subworkflows
       - interproscan/modules
+      - interproscan.nf
 
 jobs:
   build:
