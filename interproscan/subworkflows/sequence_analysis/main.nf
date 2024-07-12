@@ -9,6 +9,7 @@ include {
     HMMER_RUNNER as GENE3D_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
+    HMMER_RUNNER as PIRSF_HMMER_RUNNER;
     HMMER_RUNNER_WITH_ALIGNMENTS as SFLD_HMMER_RUNNER;
     FUNFAM_HMMER_RUNNER;
     HAMAP_HMMER_RUNNER;
@@ -146,26 +147,6 @@ workflow SEQUENCE_ANALYSIS {
                 ]
             ]
 
-        sfld: member == 'sfld'
-            return [
-                "${member}",
-                params.members."${member}".hmm,
-                params.members."${member}".switches,
-                params.members."${member}".release,
-                [
-                    params.members."${member}".postprocess.sites_annotation,
-                    params.members."${member}".postprocess.hierarchy,
-                ]
-            ]
-
-        smart: member == 'smart'
-            return [
-                "${member}",
-                params.members."${member}".hmm,
-                params.members."${member}".switches,
-                params.members."${member}".release,
-            ]
-
         pfam: member == 'pfam'
             return [
                 "${member}",
@@ -178,6 +159,44 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."${member}".postprocess.clan,
                     params.members."${member}".postprocess.data,
                 ]
+            ]
+
+        pirsf: member == 'pirsf'
+            return [
+                "${member}",
+                params.members."${member}".hmm,
+                params.members."${member}".switches,
+                params.members."${member}".release,
+                false,  // don't build an alignment file
+                false,   // don't build a hmmer.tbl file path
+                [
+                    params.members."${member}".postprocess.bin,
+                    params.members."${member}".postprocess.data,
+                    params.members."${member}".postprocess.switches,
+                ]
+            ]
+
+       sfld: member == 'sfld'
+            return [
+                "${member}",
+                params.members."${member}".hmm,
+                params.members."${member}".switches,
+                params.members."${member}".release,
+                true,  // build an alignment file
+                false,  // don't build a hmmer.tbl file path
+                [
+                    params.members."${member}".postprocess.bin,
+                    params.members."${member}".postprocess.sites_annotation,
+                    params.members."${member}".postprocess.hierarchy,
+                ]
+            ]
+
+        smart: member == 'smart'
+            return [
+                "${member}",
+                params.members."${member}".hmm,
+                params.members."${member}".switches,
+                params.members."${member}".release,
             ]
 
         /*
@@ -235,39 +254,6 @@ workflow SEQUENCE_ANALYSIS {
     ANTIFAM_HMMER_RUNNER(runner_antifam_params)
     ANTIFAM_HMMER_PARSER(ANTIFAM_HMMER_RUNNER.out)
 
-    // NCBIfam
-    runner_ncbifam_params = fasta.combine(member_params.ncbifam)
-    NCBIFAM_HMMER_RUNNER(runner_ncbifam_params)
-    NCBIFAM_HMMER_PARSER(NCBIFAM_HMMER_RUNNER.out)
-
-    // Panther (+ treegrafter + epa-ng)
-    runner_panther_params = fasta.combine(member_params.panther)
-    PANTHER_HMMER_RUNNER(runner_panther_params)
-    PANTHER_HMMER_PARSER(PANTHER_HMMER_RUNNER.out)
-    PANTHER_POST_PROCESSER(
-        PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
-        PANTHER_HMMER_RUNNER.out[1],  // post-processing-params
-        fasta
-    )
-    PANTHER_FILTER_MATCHES(
-        PANTHER_HMMER_PARSER.out,     // internal ips6 json
-        PANTHER_POST_PROCESSER.out,   // treegrafter output
-        PANTHER_HMMER_RUNNER.out[1],  // post-processing-params
-    )
-
-    // Pfam
-    runner_pfam_params = fasta.combine(member_params.pfam)
-    PFAM_HMMER_RUNNER(runner_pfam_params)
-    PFAM_HMMER_PARSER(PFAM_HMMER_RUNNER.out)
-    PFAM_FILTER_MATCHES(
-        PFAM_HMMER_PARSER.out,        // ips6 json
-        PFAM_HMMER_RUNNER.out[1],     // post-processing-params
-    )
-
-    /*
-    Using specific HMMER runners
-    */
-
     // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
     // These also run for FunFam as Gene3D must be run before FunFam
     runner_gene3d_params = fasta.combine(member_params.gene3d_funfam)
@@ -318,14 +304,55 @@ workflow SEQUENCE_ANALYSIS {
         HAMAP_POST_PROCESSER.out,   // output from pfsearch_wrapper.py
     )
 
-    // SMART (HMMER2:hmmpfam + kinase filter)
-    runner_smart_params = fasta.combine(member_params.smart)
-    SMART_HMMER2_RUNNER(runner_smart_params)
-    HMMER2_PARSER(SMART_HMMER2_RUNNER.out)
-    SMART_FILTER_MATCHES(
-        HMMER2_PARSER.out,
-        SMART_HMMER2_RUNNER.out[1],
+    // NCBIfam
+    runner_hmmer_ncbifam_params = fasta.combine(member_params.ncbifam)
+    NCBIFAM_HMMER_RUNNER(runner_hmmer_ncbifam_params)
+    NCBIFAM_HMMER_PARSER(
+        NCBIFAM_HMMER_RUNNER.out[0], // hmmer.out path
+        NCBIFAM_HMMER_RUNNER.out[1], // hmmer.dtbl path
+        NCBIFAM_HMMER_RUNNER.out[2], // post-processing-params
+        tsv_pro,
+        "false"
     )
+
+    // Panther (+ treegrafter + epa-ng)
+    runner_panther_params = fasta.combine(member_params.panther)
+    PANTHER_HMMER_RUNNER(runner_panther_params)
+    PANTHER_HMMER_PARSER(
+        PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
+        PANTHER_HMMER_RUNNER.out[1],  // hmmer.dtbl path
+        PANTHER_HMMER_RUNNER.out[2],  // post-processing-params
+        tsv_pro,
+        "false"
+    )
+    PANTHER_POST_PROCESSER(
+        PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
+        PANTHER_HMMER_RUNNER.out[2],  // post-processing-params
+        fasta
+    )
+    PANTHER_FILTER_MATCHES(
+        PANTHER_HMMER_PARSER.out,   // internal ips6 json
+        PANTHER_POST_PROCESSER.out  // treegrafter output + post-processing params
+    )
+
+    // Pfam
+    runner_hmmer_pfam_params = fasta.combine(member_params.pfam)
+    PFAM_HMMER_RUNNER(runner_hmmer_pfam_params)
+    PFAM_HMMER_PARSER(
+        PFAM_HMMER_RUNNER.out[0],  // hmmer.out path
+        PFAM_HMMER_RUNNER.out[1],  // hmmer.dtbl path
+        PFAM_HMMER_RUNNER.out[2],  // post-processing-params
+        tsv_pro,
+        "pfam"
+    )
+    PFAM_FILTER_MATCHES(
+        PFAM_HMMER_PARSER.out, // ips6 json
+        PFAM_HMMER_RUNNER.out[2]  // post-processing-params
+    )
+
+    // PIRSF (+ pirsf.pl)
+    runner_pirsf_params = fasta.combine(member_params.pirsf)
+    PIRSF_HMMER_RUNNER(runner_pirsf_params)
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
@@ -334,10 +361,21 @@ workflow SEQUENCE_ANALYSIS {
         SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
         SFLD_HMMER_RUNNER.out[1]   // post-processing-params
     )
-    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out)
-    SFLD_FILTER_MATCHES(
-        SFLD_HMMER_PARSER.out,     // ips6 json
-        SFLD_POST_PROCESSER.out    // post-processing out file
+    SFLD_POST_PROCESSER(
+        SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
+        SFLD_HMMER_RUNNER.out[2],  // post-processing-params
+        SFLD_HMMER_RUNNER.out[3],  // alignment file
+        SFLD_HMMER_RUNNER.out[1],  // hmmer.dtbl path
+    )
+    SFLD_FILTER_MATCHES(SFLD_HMMER_PARSER.out, SFLD_POST_PROCESSER.out)
+
+    // SMART (HMMER2:hmmpfam + kinase filter)
+    runner_smart_params = fasta.combine(member_params.smart)
+    SMART_HMMER2_RUNNER(runner_smart_params)
+    HMMER2_PARSER(SMART_HMMER2_RUNNER.out)
+    SMART_FILTER_MATCHES(
+        HMMER2_PARSER.out,
+        SMART_HMMER2_RUNNER.out[1],
     )
 
     /*
