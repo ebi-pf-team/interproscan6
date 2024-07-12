@@ -3,7 +3,6 @@ process HMMER_PARSER {
 
     input:
     path out
-    val postprocessing_params
 
     output:
     path "hmmer_parsed_${out}.json"
