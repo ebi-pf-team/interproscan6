@@ -77,7 +77,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 "start": int(location["start"]),
                                 "end": int(location["end"]),
                                 "representative": boolean_map.get(location["representative"].lower(), False),
-                                "hmmLength": "",
+                                "hmmLength": match_data['hmm_length'],
                                 "location-fragments": [{
                                     "start": int(location["start"]),
                                     "end": int(location["end"]),
