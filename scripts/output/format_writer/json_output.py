@@ -50,6 +50,12 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                     if match_data['member_db'].upper() == "CDD":
                         description = match_data['name']
 
+                    if match_data['member_db'].upper() == "PRINTS":
+                        try:
+                            description = entry["description"]
+                        except KeyError:
+                            description = "-"
+
                     if match_data['member_db'].upper() in ["GENE3D", "FUNFAM"]:
                         accession = match_data['accession']  # GENE3D needs the info after ":" (e.g G3DSA:3.20.20.70)
                     else:
@@ -116,6 +122,11 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             info["hmmBounds"] = location["hmmBounds"]
                             info["postProcessed"] = boolean_map.get(location["postProcessed"].lower())
 
+                        elif match_data['member_db'].upper() == "PRINTS":
+                            info["pvalue"] = float(location["pvalue"])
+                            info["score"] = float(location["score"])
+                            info["motifNumber"] = float(location["motifNumber"])
+
                         else:
                             info["evalue"] = float(location["evalue"])
                             info["score"] = float(location["score"])
@@ -150,7 +161,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         "locations": locations
                     }
 
-                    if match_data['member_db'].upper() not in ["CDD", "HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS"]:
+                    if match_data['member_db'].upper() not in ["CDD", "HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS", "PRINTS"]:
                         match["evalue"] = float(match_data['evalue'])
                         match["score"] = float(match_data['score'])
 
@@ -171,6 +182,9 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         match['proteinClass'] = match_data['proteinClass']
                         match['graftPoint'] = match_data['graftPoint']
 
+                    elif match_data['member_db'].upper() == "PRINTS":
+                        match["evalue"] = float(match_data['evalue'])
+                        match["graphscan"] = str(match_data["graphscan"])
 
                 if len(match_data['locations']) > 0:  # skip matches with no locations (we need to make sure it's valid to all members)
                     matches.append(match)

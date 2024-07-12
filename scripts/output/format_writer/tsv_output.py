@@ -56,6 +56,12 @@ def tsv_output(seq_matches: dict, output_path: str):
                         evalue = "-"
                         ali_from = location["start"]
                         ali_to = location["end"]
+                    elif match_db.upper() == "PRINTS":
+                        sig_acc = match["accession"]
+                        status = "T"
+                        evalue = match["evalue"]
+                        ali_from = location["start"]
+                        ali_to = location["end"]
                     else:
                         sig_acc = match["accession"]
                         status = "T"
@@ -139,6 +145,13 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         location_score = location["score"]
                         env_end = "-"
                         env_start = "-"
+                    elif member_db.upper() == "PRINTS":
+                        hmm_start = location["start"]
+                        hmm_end = location["end"]
+                        hmm_length = int(hmm_end) - int(hmm_start)
+                        location_score = location["pvalue"]
+                        env_end = "-"
+                        env_start = "-"
                     else:
                         hmm_start = location["hmmStart"]
                         hmm_end = location["hmmEnd"]
@@ -172,6 +185,12 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         ali_from = location["start"]
                         ali_to = location["end"]
                         location_evalue = "-"
+                    elif member_db.upper() == "PRINTS":
+                        sig_acc = match["accession"]
+                        evalue = match["evalue"]
+                        ali_from = location["start"]
+                        ali_to = location["end"]
+                        location_evalue = '-'
                     else:
                         sig_acc = match["accession"]
                         evalue = location["evalue"]
