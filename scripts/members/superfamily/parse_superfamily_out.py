@@ -38,11 +38,8 @@ def parse(ass3_out_path: str, modelac2acc: dict) -> dict:
 
                 if len(fragments) > 1:
                     fragments.sort(key=lambda x: x['start'])
-                    dc_statuses = ["C_TERMINAL_DISC"] + ["INTERNAL"] * (len(fragments) - 2) + ["N_TERMINAL_DISC"]
-                    fragments_with_status = [
-                        {**frag, 'dc-status': dc_status}
-                        for frag, dc_status in zip(fragments, dc_statuses)
-                    ]
+                    fragments[0]['dc-status'] = "C_TERMINAL_DISC"
+                    fragments[-1]['dc-status'] = "N_TERMINAL_DISC"
                     new_location = {
                         'start': fragments[0]['start'],
                         'end': fragments[-1]['end'],
