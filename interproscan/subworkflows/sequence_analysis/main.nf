@@ -311,24 +311,12 @@ workflow SEQUENCE_ANALYSIS {
     // NCBIfam
     runner_hmmer_ncbifam_params = fasta.combine(member_params.ncbifam)
     NCBIFAM_HMMER_RUNNER(runner_hmmer_ncbifam_params)
-    NCBIFAM_HMMER_PARSER(
-        NCBIFAM_HMMER_RUNNER.out[0], // hmmer.out path
-        NCBIFAM_HMMER_RUNNER.out[1], // hmmer.dtbl path
-        NCBIFAM_HMMER_RUNNER.out[2], // post-processing-params
-        tsv_pro,
-        "false"
-    )
+    NCBIFAM_HMMER_PARSER(NCBIFAM_HMMER_RUNNER.out)
 
     // Panther (+ treegrafter + epa-ng)
     runner_panther_params = fasta.combine(member_params.panther)
     PANTHER_HMMER_RUNNER(runner_panther_params)
-    PANTHER_HMMER_PARSER(
-        PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
-        PANTHER_HMMER_RUNNER.out[1],  // hmmer.dtbl path
-        PANTHER_HMMER_RUNNER.out[2],  // post-processing-params
-        tsv_pro,
-        "false"
-    )
+    PANTHER_HMMER_PARSER(PANTHER_HMMER_RUNNER.out)
     PANTHER_POST_PROCESSER(
         PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
         PANTHER_HMMER_RUNNER.out[2],  // post-processing-params
@@ -342,16 +330,10 @@ workflow SEQUENCE_ANALYSIS {
     // Pfam
     runner_hmmer_pfam_params = fasta.combine(member_params.pfam)
     PFAM_HMMER_RUNNER(runner_hmmer_pfam_params)
-    PFAM_HMMER_PARSER(
-        PFAM_HMMER_RUNNER.out[0],  // hmmer.out path
-        PFAM_HMMER_RUNNER.out[1],  // hmmer.dtbl path
-        PFAM_HMMER_RUNNER.out[2],  // post-processing-params
-        tsv_pro,
-        "false"
-    )
+    PFAM_HMMER_PARSER(PFAM_HMMER_RUNNER)
     PFAM_FILTER_MATCHES(
-        PFAM_HMMER_PARSER.out, // ips6 json
-        PFAM_HMMER_RUNNER.out[2]  // post-processing-params
+        PFAM_HMMER_PARSER.out,     // ips6 json
+        PFAM_HMMER_RUNNER.out[2]   // post-processing-params
     )
 
     // PIRSF (+ filter_ips6_matches.py for post-processing)
@@ -359,15 +341,9 @@ workflow SEQUENCE_ANALYSIS {
     PIRSF_HMMER_RUNNER(runner_pirsf_params)
     PIRSF_HMMER_PARSER(
         PIRSF_HMMER_RUNNER.out[0],  // hmmer.out path
-        PIRSF_HMMER_RUNNER.out[1],  // hmmer.dtbl path
         PIRSF_HMMER_RUNNER.out[2],  // post-processing-params
-        tsv_pro,
-        "false"
     )
-    PIRSF_FILTER_MATCHES(
-        PIRSF_HMMER_PARSER.out,     // ips6-json
-        PIRSF_HMMER_RUNNER.out[2]   // post-processing-params
-    )
+    PIRSF_FILTER_MATCHES(PIRSF_HMMER_PARSER.out)
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
@@ -376,12 +352,7 @@ workflow SEQUENCE_ANALYSIS {
         SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
         SFLD_HMMER_RUNNER.out[1]   // post-processing-params
     )
-    SFLD_POST_PROCESSER(
-        SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
-        SFLD_HMMER_RUNNER.out[2],  // post-processing-params
-        SFLD_HMMER_RUNNER.out[3],  // alignment file
-        SFLD_HMMER_RUNNER.out[1],  // hmmer.dtbl path
-    )
+    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out)
     SFLD_FILTER_MATCHES(SFLD_HMMER_PARSER.out, SFLD_POST_PROCESSER.out)
 
     // SMART (HMMER2:hmmpfam + kinase filter)
