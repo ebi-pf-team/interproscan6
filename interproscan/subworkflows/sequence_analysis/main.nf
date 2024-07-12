@@ -9,10 +9,10 @@ include {
     HMMER_RUNNER as GENE3D_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
+    HMMER_RUNNER as PIRSF_HMMER_RUNNER;
     HMMER_RUNNER_WITH_ALIGNMENTS as SFLD_HMMER_RUNNER;
     FUNFAM_HMMER_RUNNER;
     HAMAP_HMMER_RUNNER;
-    PIRSF_HMMER_RUNNER;
     SMART_HMMER2_RUNNER;
 } from "$projectDir/interproscan/modules/hmmer/runner/main"
 include {
@@ -217,7 +217,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".data,
                 params.members."${member}".evaluator,
                 params.members."${member}".release,
-                params.membeHMMER_RUNNERrs."${member}".switches
+                params.members."${member}".switches
             ]
 
         prosite_profiles: member == "prosite_profiles"
@@ -337,12 +337,13 @@ workflow SEQUENCE_ANALYSIS {
     PIRSF_HMMER_PARSER(PIRSF_HMMER_RUNNER.out[0])  // hmmer.out path
     PIRSF_FILTER_MATCHES(
         PIRSF_HMMER_PARSER.out,    // ips6 json
-        PIRSF_HMMER_RUNNER.out[2]  // post-processing-params
+        PIRSF_HMMER_RUNNER.out[1]  // post-processing-params
     )
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_sfld_params)
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
     SFLD_HMMER_PARSER(SFLD_HMMER_RUNNER.out[0])
@@ -357,6 +358,10 @@ workflow SEQUENCE_ANALYSIS {
 >>>>>>> 6a91666 (remove unused i/o params in seq-analysis)
     SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out)
 >>>>>>> e26495b (tidy i/o in seq-analysis)
+=======
+    SFLD_HMMER_PARSER(SFLD_HMMER_RUNNER.out[0])
+    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out)   // hmmer.out, post-process params, alignment, dtbl file
+>>>>>>> 9acd318 (use the generic hmmer parser and runner)
     SFLD_FILTER_MATCHES(SFLD_HMMER_PARSER.out, SFLD_POST_PROCESSER.out)
 
     // SMART (HMMER2:hmmpfam + kinase filter)
