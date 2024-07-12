@@ -131,7 +131,7 @@ process PIRSF_FILTER_MATCHES {
 
     script:
     """
-    python3 $projectDir/scripts/members/pirsf/filter_ips6_hits.py \
+    python3 $projectDir/interproscan/scripts/members/pirsf/filter_ips6_hits.py \
         ${ips6_json} \
         '${postprocessing_params[0]}' \
         '${ips6_json}.post.processed.json'
