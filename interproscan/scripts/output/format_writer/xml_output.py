@@ -12,6 +12,7 @@ MATCH_ELEMENT = {
     'NCBIFAM': 'hmmer3-match',
     'PANTHER': 'hmmer3-match',
     'PFAM': 'hmmer3-match',
+    'PIRSF': 'hmmer3-match',
     'SFLD': 'hmmer3-match',
     'SMART': 'hmmer2-match',
     'PROSITE_PATTERNS': 'profilescan-match',
