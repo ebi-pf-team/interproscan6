@@ -124,7 +124,7 @@ process PIRSF_FILTER_MATCHES {
 
     input:
         path ips6_json
-        val postprocessing_params
+        val postprocessing_params   // [0] path to the PIRSF.dat file
 
     output:
         path "${ips6_json}.post.processed.json"
