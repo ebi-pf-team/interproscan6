@@ -1,5 +1,6 @@
 name: ips6-test-env
 channels:
+  - defaults
   - conda-forge
   - bioconda
 dependencies:
