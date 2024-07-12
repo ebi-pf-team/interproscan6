@@ -232,8 +232,8 @@ workflow SEQUENCE_ANALYSIS {
                 params.members.prints.switches,
                 params.members.prints.release,
                 [
-                    params.members.prints.postprocess.kdat,
-                    params.members.prints.postprocess.hierarchy
+                    params.members.prints.postprocess.hierarchy,
+                    params.members.prints.postprocess.kdat
                 ]
             ]
     }.set { member_params }
@@ -412,8 +412,8 @@ workflow SEQUENCE_ANALYSIS {
     // PRINTS
     runner_prints_params = fasta.combine(member_params.prints)
     PRINTS_RUNNER(runner_prints_params)
-    //PRINTS_POSTPROCESS(PRINTS_RUNNER.out)
-    //PRINTS_PARSER(PRINTS_POSTPROCESS.out)
+    PRINTS_POSTPROCESS(PRINTS_RUNNER.out)
+    PRINTS_PARSER(PRINTS_POSTPROCESS.out)
 
     /*
     Gather the results
@@ -431,7 +431,8 @@ workflow SEQUENCE_ANALYSIS {
             CDD_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
-            SIGNALP_PARSER.out
+            SIGNALP_PARSER.out,
+            PRINTS_PARSER.out
         )
         .set { parsed_results }
     }
@@ -447,7 +448,8 @@ workflow SEQUENCE_ANALYSIS {
             CDD_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
-            SIGNALP_PARSER.out
+            SIGNALP_PARSER.out,
+            PRINTS_PARSER.out
         )
         .set { parsed_results }
     }
