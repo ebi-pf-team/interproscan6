@@ -58,11 +58,9 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                     if match_data['member_db'].upper() == "SUPERFAMILY":
                         description = None
 
-                    name = match_data['name']
-
                     signature = {
                         "accession": accession,
-                        "name": name,
+                        "name": match_data['name'],
                         "description": description,
                         "signatureLibraryRelease": {
                             "library": match_data['member_db'].upper(),
