@@ -174,9 +174,7 @@ workflow SEQUENCE_ANALYSIS {
                 false,  // don't build an alignment file
                 false,   // don't build a hmmer.tbl file path
                 [
-                    params.members."${member}".postprocess.bin,
                     params.members."${member}".postprocess.data,
-                    params.members."${member}".postprocess.switches,
                 ]
             ]
 
