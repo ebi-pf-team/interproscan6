@@ -20,6 +20,7 @@ MATCH_ELEMENT = {
     'SUPERFAMILY': 'hmmer3-match',
     'PROSITE_PATTERNS': 'profilescan-match',
     'PROSITE_PROFILES': 'profilesearch-match',  # changed from i5 which is also profilescan-match
+    'PRINTS': 'fingerprints-match',
 }
 
 
@@ -149,6 +150,15 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("end", str(location["end"]))
                         location_elem.set("representative", str(location["representative"]))
 
+                    elif match_data['member_db'].upper() == "PRINTS":
+                        location_elem = ET.SubElement(locations_elem, "fingerprints-location")
+                        location_elem.set("motifNumber", str(location["motifNumber"]))
+                        location_elem.set("pvalue", str(location["pvalue"]))
+                        location_elem.set("score", str(location["score"]))
+                        location_elem.set("end", str(location["end"]))
+                        location_elem.set("start", str(location["start"]))
+                        location_elem.set("representative", str(location["representative"]))
+
                     elif match_data['member_db'].upper() in ["SUPERFAMILY", "MOBIDB", "COILS"]:
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("start", str(location["start"]))
@@ -182,6 +192,8 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                             location_elem.set("end", str(location["end"]))
 
                         location_elem.set("representative", str(location["representative"]))
+                        if match_data['member_db'].upper() in ["NCBIFAM", "ANTIFAM"]:
+                            location_elem.set("post-processed", str(location["postProcessed"]))
                         try:
                             location_elem.set("alignment", str(location["alignment"]))
                             location_elem.set("cigar-alignment", str(location["cigar_alignment"]))
@@ -209,10 +221,16 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                                     location_frag_elem.set("residue", str(sitelocation["residue"]))
                     if 'location-fragments' in location:
                         for location_fragment in location['location-fragments']:
-                            location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
-                            location_frag_elem.set("start", str(location_fragment["start"]))
-                            location_frag_elem.set("end", str(location_fragment["end"]))
-                            location_frag_elem.set("dc-status", str(location_fragment["dc-status"]))
+                            if match_data['member_db'].upper() == "PRINTS":
+                                location_frag_elem = ET.SubElement(location_frags_elem, "fingerprints-location-fragment")
+                                location_frag_elem.set("start", str(location_fragment["start"]))
+                                location_frag_elem.set("end", str(location_fragment["end"]))
+                                location_frag_elem.set("dc-status", str(location_fragment["dc-status"]))
+                            else:
+                                location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
+                                location_frag_elem.set("start", str(location_fragment["start"]))
+                                location_frag_elem.set("end", str(location_fragment["end"]))
+                                location_frag_elem.set("dc-status", str(location_fragment["dc-status"]))
 
     tree = ET.ElementTree(root)
     ET.indent(tree, space="\t", level=0)
