@@ -1,12 +1,9 @@
 name: ips6-test-env
 channels:
-  - defaults
   - conda-forge
   - bioconda
 dependencies:
-  - python>=3.8
-  - biopython>=1.76
-  - nf-test
+  - python>=3.10
   - pytest
   - coverage
   - pytest-cov
