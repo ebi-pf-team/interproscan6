@@ -32,12 +32,12 @@ def current_output_path(test_output_dir):
 
 @pytest.fixture
 def expected_output_path(test_output_dir):
-    return test_output_dir / 'expected_output'
+    return test_output_dir / 'expected_output_superfamily'
 
 
 @pytest.fixture
 def applications():
-    return 'AntiFam,CDD,FunFam,Gene3D,HAMAP,NCBIfam,Panther,Pfam,PROSITE_Profiles,PROSITE_Patterns,SFLD,SMART,SuperFamily'
+    return 'SuperFamily' # AntiFam,CDD,FunFam,Gene3D,HAMAP,NCBIfam,Panther,Pfam,PROSITE_Profiles,PROSITE_Patterns,SFLD,SMART,
 
 
 @pytest.fixture

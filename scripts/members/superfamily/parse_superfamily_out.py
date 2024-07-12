@@ -5,7 +5,7 @@ import sys
 MATCH_REGIONS_PATTERN = re.compile(r"^\d+-\d+(,\d+-\d+)*$")
 
 
-def parse(ass3_out_path: str, modelac2acc: dict) -> dict:
+def parse(ass3_out_path: str, hmmlib_info: dict) -> dict:
     data = {}
     path_segments = ass3_out_path.split("/")[-1].split("._.")
     version = path_segments[0]
@@ -16,13 +16,17 @@ def parse(ass3_out_path: str, modelac2acc: dict) -> dict:
             for match in raw_matches:
                 sequence_id = match['sequence_id']
                 model_ac = match['model_id']
-                acc_id = f"SSF{modelac2acc[model_ac]}"
+                acc_id = hmmlib_info[model_ac][0]
+                name = hmmlib_info[model_ac][1]
+                hmm_length = hmmlib_info[model_ac][2]
 
                 if sequence_id not in data:
                     data[sequence_id] = {}
                 if acc_id not in data[sequence_id]:
                     data[sequence_id][acc_id] = {
                         'accession': acc_id,
+                        'name': name,
+                        'hmm_length': hmm_length,
                         'member_db': member_db,
                         'version': version,
                         'evalue': match['evalue'],
@@ -103,21 +107,57 @@ def _parse_line(line: str) -> list:
     return matches
 
 
-def modelac2acc(model_tab_path: str):
-    modelac2acc = {}
-    with open(model_tab_path, 'r') as reader:
-        for line in reader:
-            values = line.split()
-            if len(values) < 2:
-                continue
-            modelac2acc[values[0]] = values[1]
-    return modelac2acc
+def parse_hmmlib(hmmlib_path: str) -> dict:
+    NAME_LINE = re.compile(r"^NAME\s+(.+)$")
+    DESC_LINE = re.compile(r"^DESC\s+(.+)$")
+    ACCESSION_PATTERN = re.compile(r"^ACC\s+([A-Z0-9]+)\.?.*$")
+    LENGTH_LINE = re.compile(r"^LENG\s+([0-9]+)$")
+
+    model_info = {}
+
+    with open(hmmlib_path, 'r') as file:
+        acc_id = None
+        model_ac = None
+        description = None
+        length = None
+
+        for line in file:
+            line = line.strip()
+            if line and line.startswith('//'):
+                if model_ac is not None:
+                    model_info[model_ac] = (acc_id, description, length)
+                acc_id = None
+                model_ac = None
+                description = None
+                length = None
+            elif line:
+                if line.startswith('A') and acc_id is None:
+                    match = ACCESSION_PATTERN.match(line)
+                    if match:
+                        acc_id = "SSF" + match.group(1)
+                elif line.startswith('D') and description is None:
+                    match = DESC_LINE.match(line)
+                    if match:
+                        description = match.group(1)
+                elif line.startswith('N') and model_ac is None:
+                    match = NAME_LINE.match(line)
+                    if match:
+                        model_ac = match.group(1)
+                elif line.startswith('L') and length is None:
+                    match = LENGTH_LINE.match(line)
+                    if match:
+                        length = int(match.group(1))
+
+        if model_ac is not None:
+            model_info[model_ac] = (acc_id, description, length)
+
+    return model_info
 
 
 def main():
     args = sys.argv[1:]
-    modelac2acc_dict = modelac2acc(args[0])
-    parsed_result = parse(args[1], modelac2acc_dict)
+    hmmlib_info = parse_hmmlib(args[0])
+    parsed_result = parse(args[1], hmmlib_info)
     print(json.dumps(parsed_result, indent=4))
 
 

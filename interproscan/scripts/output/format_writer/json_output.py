@@ -56,10 +56,9 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         accession = match_data['accession'].split(":")[0]  # drop subfamily
 
                     if match_data['member_db'].upper() == "SUPERFAMILY":
-                        name = match_data['entry']['description']
                         description = None
-                    else:
-                        name = match_data['name']
+
+                    name = match_data['name']
 
                     signature = {
                         "accession": accession,
@@ -145,7 +144,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["postProcessed"] = boolean_map.get(location["postProcessed"].lower())
 
                                 elif match_data['member_db'].upper() == "SUPERFAMILY":
-                                    info["hmmLength"] = ""
+                                    info["hmmLength"] = match_data['hmm_length']
 
                                 else:
                                     info["evalue"] = float(location["evalue"])

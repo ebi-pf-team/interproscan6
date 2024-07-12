@@ -44,7 +44,7 @@ process SUPERFAMILY_PARSER {
 
     input:
     path ass3_out
-    val postprocessing_params
+    path hmm_lib
 
     output:
     path "superfamily_parsed_*"
@@ -52,6 +52,6 @@ process SUPERFAMILY_PARSER {
     script:
     """
     python3 $projectDir/scripts/members/superfamily/parse_superfamily_out.py \\
-        ${postprocessing_params[3]} ${ass3_out} > superfamily_parsed_${ass3_out}.json
+        ${hmm_lib} ${ass3_out} > superfamily_parsed_${ass3_out}.json
     """
 }

@@ -123,6 +123,7 @@ process HMMER_SCAN_RUNNER {
         path "${release}._.${member}._.out"
         val postprocessing_params
         path fasta
+        path hmm
 
     script:
     """
