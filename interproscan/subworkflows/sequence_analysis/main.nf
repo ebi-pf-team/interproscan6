@@ -12,7 +12,7 @@ include {
     HMMER_RUNNER_WITH_ALIGNMENTS as SFLD_HMMER_RUNNER;
     FUNFAM_HMMER_RUNNER;
     HAMAP_HMMER_RUNNER;
-    HMMER_RUNNER as PIRSF_HMMER_RUNNER;
+    PIRSF_HMMER_RUNNER;
     SMART_HMMER2_RUNNER;
 } from "$projectDir/interproscan/modules/hmmer/runner/main"
 include {
@@ -420,10 +420,6 @@ workflow SEQUENCE_ANALYSIS {
     /*
     Gather the results
     */
-<<<<<<< HEAD:interproscan/subworkflows/sequence_analysis/main.nf
-=======
-
->>>>>>> fd8fc49 (add pirsf own hmmer runner to reduce i/o):subworkflows/sequence_analysis/main.nf
     if (applications.contains("gene3d")) {
         ANTIFAM_HMMER_PARSER.out.concat(
             NCBIFAM_HMMER_PARSER.out,
