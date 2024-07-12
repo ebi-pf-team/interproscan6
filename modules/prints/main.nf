@@ -28,12 +28,16 @@ process PRINTS_POSTPROCESS {
 
 
     output:
-    path "prints_processed"
+    path "prints_processed.out"
     val release
 
     script:
     """
-
+    python3 $projectDir/scripts/prints/postprocess.py\
+    prints_output.txt\
+    ${postprocessing_params[0]}\
+    ${release} \
+    > prints_processed.out
     """
 
 }
