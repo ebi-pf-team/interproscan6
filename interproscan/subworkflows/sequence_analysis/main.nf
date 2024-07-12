@@ -17,12 +17,12 @@ include {
 } from "$projectDir/interproscan/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
-    HMMER_PARSER as NCBIFAM_HMMER_PARSER;
-    HMMER_PARSER as HAMAP_HMMER_PARSER;
-    HMMER_PARSER as PANTHER_HMMER_PARSER;
-    HMMER_PARSER as PFAM_HMMER_PARSER;
     HMMER_PARSER as FUNFAM_HMMER_PARSER;
     HMMER_PARSER as GENE3D_HMMER_PARSER;
+    HMMER_PARSER as HAMAP_HMMER_PARSER;
+    HMMER_PARSER as NCBIFAM_HMMER_PARSER;
+    HMMER_PARSER as PANTHER_HMMER_PARSER;
+    HMMER_PARSER as PFAM_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER2_PARSER;
 } from "$projectDir/interproscan/modules/hmmer/parser/main"
@@ -41,6 +41,7 @@ include {
     HAMAP_FILTER_MATCHES;
     PANTHER_FILTER_MATCHES;
     PFAM_FILTER_MATCHES;
+    PIRSF_POST_PROCESSER;
     SFLD_FILTER_MATCHES;
     SMART_FILTER_MATCHES;
 } from "$projectDir/interproscan/modules/hmmer/filter/main"
@@ -79,7 +80,8 @@ workflow SEQUENCE_ANALYSIS {
 
         /*
         Member databases that use HMMER:
-        The post processing of some applications (e.g. SFLD) hits requires additional files
+        The post processin
+    output:g of some applications (e.g. SFLD) hits requires additional files
         and parameters relative to the generic hmmer runner and parser
         */
         antifam: member == 'antifam'
@@ -353,6 +355,7 @@ workflow SEQUENCE_ANALYSIS {
     // PIRSF (+ pirsf.pl)
     runner_pirsf_params = fasta.combine(member_params.pirsf)
     PIRSF_HMMER_RUNNER(runner_pirsf_params)
+    PIRSF_POST_PROCESSER(PIRSF_HMMER_RUNNER.out)
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
@@ -405,6 +408,10 @@ workflow SEQUENCE_ANALYSIS {
     /*
     Gather the results
     */
+<<<<<<< HEAD:interproscan/subworkflows/sequence_analysis/main.nf
+=======
+
+>>>>>>> fd8fc49 (add pirsf own hmmer runner to reduce i/o):subworkflows/sequence_analysis/main.nf
     if (applications.contains("gene3d")) {
         ANTIFAM_HMMER_PARSER.out.concat(
             NCBIFAM_HMMER_PARSER.out,
