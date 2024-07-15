@@ -78,7 +78,7 @@ jobs:
 
     - name: Check linter output
       run: |
-        if grep -q "CodeNarc completed: (p1=0; p2=0;" docker.output.txt; then
+        if grep -q "CodeNarc completed: (p1=0; p2=0;" interproscan/docker.output.txt; then
           echo "Linting passed"
         else
           echo "Linting failed"
