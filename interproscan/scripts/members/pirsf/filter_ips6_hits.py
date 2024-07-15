@@ -145,11 +145,21 @@ def get_best_match(filtered_models: dict[str, pirsfHit]) -> dict:
         # we iterate here to get to the first acc that is not a subfamily
         if pirsf_acc.startswith("PIRSF5"):  # ignore if a sub-family
             continue
+
         processed_match[pirsf_acc] = filtered_models[pirsf_acc].data
+
         # if there is a child subfamily that passes the earlier filtering
-        # also keep this child subfamily
+        # also keep the best child subfamily
+        child_models = {}
         for pirsf_subfam in filtered_models[pirsf_acc].children:
+            child_models[pirsf_subfam] = filtered_models[pirsf_subfam]
+        # sort children by score
+        child_models = dict(
+            sorted(child_models.items(), key=lambda item: item[1].score, reverse=True)
+        )
+        for pirsf_subfam in child_models:
             processed_match[pirsf_subfam] = filtered_models[pirsf_subfam].data
+            break  # we only want the best
 
         break  # we only want the best match!
 
