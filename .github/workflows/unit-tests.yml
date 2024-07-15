@@ -30,6 +30,14 @@ jobs:
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
       
+    - name: Cache Conda/Mamba environment
+      uses: actions/cache@v3
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-mamba-${{ hashFiles('utilities/environment.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-mamba-
+
     - name: Set up Miniconda
       uses: conda-incubator/setup-miniconda@v2
       with:
@@ -37,11 +45,13 @@ jobs:
         environment-file: utilities/environment.yml
         python-version: 3.8
         auto-activate-base: false
+        use-mamba: true
+        use-only-tar-bz2: true
 
     - name: Install dependencies
       run: |
-        conda install bioconda::nextflow &&
-        conda install bioconda::nf-test
+        mamba install bioconda::nextflow &&
+        mamba install bioconda::nf-test
         
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -70,12 +80,12 @@ jobs:
 
     - name: NF-Test subworkflows tests
       run: |
-        conda run --name test nf-test test tests/unit_tests/subworkflows/pre_checks/ &&
-        conda run --name test nf-test test tests/unit_tests/subworkflows/sequence_precalc/
+        mamba run --name test nf-test test tests/unit_tests/subworkflows/pre_checks/ &&
+        mamba run --name test nf-test test tests/unit_tests/subworkflows/sequence_precalc/
     
     - name: PY-Test scripts tests
       run: |
-        conda run --name test python3 -m pytest tests/unit_tests -v --cov=scripts --cov-report xml:.coverage.xml
+        mamba run --name test python3 -m pytest tests/unit_tests -v --cov=scripts --cov-report xml:.coverage.xml
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.0.1
