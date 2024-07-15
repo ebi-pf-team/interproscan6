@@ -169,10 +169,8 @@ def parse(hmmer_out_path: str):
     :param hmmer_out_path: str repr of path to hmmscan out file
     """
     matches = {}
-    # version = hmmer_out_path.split("._.")[0]
-    # member_db = hmmer_out_path.split("._.")[1]
-    member_db = "PIRSF"
-    version = "test"
+    version = hmmer_out_path.split("/")[-1].split("._.")[0]
+    member_db = hmmer_out_path.split("._.")[1]
     query_protein = QueryProtein()
     current_model = None
     stage = "GET_QUERY_PROTEIN"
