@@ -62,12 +62,12 @@ include {
 include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER;
-} from "$projectDir/modules/signalp/main"
+} from "$projectDir/interproscan/modules/signalp/main"
 include {
     PRINTS_RUNNER;
     PRINTS_POSTPROCESS;
     PRINTS_PARSER;
-} from "$projectDir/modules/prints/main"
+} from "$projectDir/interproscan/modules/prints/main"
 
 
 workflow SEQUENCE_ANALYSIS {
