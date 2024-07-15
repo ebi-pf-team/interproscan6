@@ -22,6 +22,14 @@ class pirsfHit:
     def add_model_data(self, model_id: str, match_data: dict):
         self.model_id = model_id
         self.score = match_data["score"]
+        # the PIRSF perl script uses the envelope start/end
+        # instead of the align start/end like other member dbs
+        match_locations = []
+        for location_dict in match_data["locations"]:
+            location_dict["start"] = location_dict["envelopeStart"]
+            location_dict["end"] = location_dict["envelopeEnd"]
+            match_locations.append(location_dict)
+        match_data["locations"] = match_locations
         self.data = match_data
 
     def add_child(self, child_id: str):
@@ -104,17 +112,19 @@ def get_location_data(match: dict) -> tuple[int, int, int, int, int, float]:
     seq_len, seq_start, seq_end, hmm_start, hmm_end, score = [0]*6
     for location in match["locations"]:
         seq_len = location["hmmLength"]
-        seq_start = location["start"]
-        seq_end = location["end"]
+        # Yes, the post-processing perl script for PIRSF uses the envelope start/end as
+        # the seq start and end
+        seq_start = int(location["envelopeStart"])
+        seq_end = int(location["envelopeEnd"])
         hmm_start = location["hmmStart"]
         hmm_end = location["hmmEnd"]
         score += location["score"]
 
         # update to match georgetown 2017 script
-        if location["start"] < seq_start and location["hmmStart"] < hmm_start:
+        if int(location["envelopeStart"]) < seq_start and location["hmmStart"] < hmm_start:
             seq_start = location["start"]
             hmm_start = location["hmmStart"]
-        if location["end"] < seq_end and location["hmmEnd"] < hmm_end:
+        if int(location["envelopeEnd"]) < seq_end and location["hmmEnd"] < hmm_end:
             seq_end = location["end"]
             hmm_end = location["hmmEnd"]
 
