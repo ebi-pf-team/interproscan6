@@ -172,7 +172,11 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".switches,
                 params.members."${member}".release,
                 [
+<<<<<<< HEAD
                     params.members."${member}".postprocess.data
+=======
+                    params.members."${member}".postprocess.data,
+>>>>>>> 095da8a (remove unused postporcessing param)
                 ]
             ]
 
