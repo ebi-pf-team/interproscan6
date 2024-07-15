@@ -99,21 +99,19 @@ process PIRSF_HMMER_RUNNER {
     input:
         tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
     /*
-    The post processing of SFLD, FunFam and Gene3D HMMER hits requires the alignment file
-    But only generate alignmnets for these tool to reduce volume size.
-    Likewise, for the HMMER table file ).tbl)
+    No -Z number was provided in i5, so migrating from hmmscan to hmmsearch
+    results in a chnage in the E-values, so we have to keep with hmmscan
+    for now.
     */
 
     output:
         path "${release}._.${member}._.out"
-        path "${release}._.${member}._.dtbl"
         val postprocessing_params
-        path "${fasta}"
-        path "${hmm}"
 
     script:
     """
-    /opt/hmmer3/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl ${hmm} ${fasta}
+    /opt/hmmer3/bin/hmmpress ${hmm}
+    /opt/hmmer3/bin/hmmscan ${switches} -o ${release}._.${member}._.out ${hmm} ${fasta}
     """
 }
 
