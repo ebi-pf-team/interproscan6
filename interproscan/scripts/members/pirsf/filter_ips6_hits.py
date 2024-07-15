@@ -22,14 +22,6 @@ class pirsfHit:
     def add_model_data(self, model_id: str, match_data: dict):
         self.model_id = model_id
         self.score = match_data["score"]
-        # the PIRSF perl script uses the envelope start/end
-        # instead of the align start/end like other member dbs
-        match_locations = []
-        for location_dict in match_data["locations"]:
-            location_dict["start"] = location_dict["envelopeStart"]
-            location_dict["end"] = location_dict["envelopeEnd"]
-            match_locations.append(location_dict)
-        match_data["locations"] = match_locations
         self.data = match_data
 
     def add_child(self, child_id: str):
