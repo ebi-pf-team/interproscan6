@@ -60,7 +60,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        key: ${{ runner.os }}-buildx-${{ hashFiles('docker_files/unit_tests/Dockerfile') }}
         restore-keys: |
           ${{ runner.os }}-buildx-
 
@@ -71,8 +71,12 @@ jobs:
         file: ./docker_files/unit_tests/Dockerfile
         load: true
         tags: interproscan6:latest
-        cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+        cache-from: |
+          type=local,src=/tmp/.buildx-cache
+          type=gha
+        cache-to: |
+          type=local,dest=/tmp/.buildx-cache,mode=max
+          type=gha,mode=max
 
     - name: Add Nextflow to PATH
       run: |
