@@ -22,14 +22,6 @@ class pirsfHit:
     def add_model_data(self, model_id: str, match_data: dict):
         self.model_id = model_id
         self.score = match_data["score"]
-        # the PIRSF perl script uses the envelope start/end
-        # instead of the align start/end like other member dbs
-        match_locations = []
-        for location_dict in match_data["locations"]:
-            location_dict["start"] = location_dict["envelopeStart"]
-            location_dict["end"] = location_dict["envelopeEnd"]
-            match_locations.append(location_dict)
-        match_data["locations"] = match_locations
         self.data = match_data
 
     def add_child(self, child_id: str):
@@ -103,10 +95,10 @@ def load_dat(dat_path: str) -> tuple[dict, dict]:
 
 def get_location_data(match: dict) -> tuple[int, int, int, int, int, float]:
     """A PIRSF model often match multiple locations in a given query sequence.
-    Combine those locations into one, taking the largest range possible across 
+    Combine those locations into one, taking the largest range possible across
     the match locations, and sum the scores of all the matches together.
 
-    These values are used for deciding whether to keep or reject the 
+    These values are used for deciding whether to keep or reject the
     signature-proteinSeq match.
     """
     seq_len, seq_start, seq_end, hmm_start, hmm_end, score = [0]*6
@@ -114,17 +106,17 @@ def get_location_data(match: dict) -> tuple[int, int, int, int, int, float]:
         seq_len = location["hmmLength"]
         # Yes, the post-processing perl script for PIRSF uses the envelope start/end as
         # the seq start and end
-        seq_start = int(location["envelopeStart"])
-        seq_end = int(location["envelopeEnd"])
+        seq_start = int(location["start"])
+        seq_end = int(location["end"])
         hmm_start = location["hmmStart"]
         hmm_end = location["hmmEnd"]
-        score += location["score"]
+        score += float(location["score"])
 
         # update to match georgetown 2017 script
-        if int(location["envelopeStart"]) < seq_start and location["hmmStart"] < hmm_start:
+        if int(location["start"]) < seq_start and location["hmmStart"] < hmm_start:
             seq_start = location["start"]
             hmm_start = location["hmmStart"]
-        if int(location["envelopeEnd"]) < seq_end and location["hmmEnd"] < hmm_end:
+        if int(location["end"]) < seq_end and location["hmmEnd"] < hmm_end:
             seq_end = location["end"]
             hmm_end = location["hmmEnd"]
 
