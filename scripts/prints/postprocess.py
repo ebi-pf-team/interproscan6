@@ -96,7 +96,7 @@ def parse_prints(prints_out: str, hierarchy_map: str, version: str) -> dict:
                 for i in results[protein_id]:
                     if motifname in i["name"]:
                         i["locations"].append(
-                            {"motifNumber": nummotif,"pvalue": pvalue, "score": idscore, "start": pos, "end": end,
+                            {"motifNumber": int(nummotif),"pvalue": pvalue, "score": idscore, "start": pos, "end": end,
                              "representative": "false", "evalue": i["evalue"], "model_id": i["accession"]})
 
     return results
@@ -152,7 +152,7 @@ def process_3tb(line):
     line = re.sub(r"\s+", "\t", line)
     line = line.split("\t")
     motifname = line[1]
-    nummotif = line[2]
+    nummotif = int(line[2])
     idscore = line[5]
     pfscore = line[6]
     pvalue = line[7]
@@ -161,7 +161,7 @@ def process_3tb(line):
     low = line[10]
     pos = line[11]
     high = line[12]
-    end = int(pos) + int(length)
+    end = int(pos) + int(length) - 1
     return motifname, nummotif, idscore, pfscore, pvalue, sequence, length, low, pos, high, end
 
 
