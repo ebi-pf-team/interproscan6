@@ -14,6 +14,7 @@ MATCH_ELEMENT = {
     'PFAM': 'hmmer3-match',
     'SFLD': 'hmmer3-match',
     'SMART': 'hmmer2-match',
+    'SUPERFAMILY': 'hmmer3-match',
     'PROSITE_PATTERNS': 'profilescan-match',
     'PROSITE_PROFILES': 'profilesearch-match',  # changed from i5 which is also profilescan-match
 }
@@ -54,7 +55,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     match_elem.set("graft-point", _check_null(match_data['graftPoint']))
 
                 signature_elem = ET.SubElement(match_elem, "signature")
-                if match_data['member_db'].upper() not in ['SIGNALP']:  # member db that don't have sigs, so no accs etc.
+                if match_data['member_db'].upper() not in ['SIGNALP', 'SUPERFAMILY']:  # member db that don't have sigs, so no accs etc.
                     signature_elem.set("ac", match_data['accession'])
                     signature_elem.set("desc", match_data['name'])
                     signature_elem.set("name", match_data['name'])
@@ -102,12 +103,11 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("representative", str(location["representative"]))
                         location_elem.set("evalue", str(location["evalue"]))
                         location_elem.set("score", str(location["score"]))
-                        location_elem.set("postProcessed", str(location["postProcessed"]))
 
                     elif match_data['member_db'].upper() == "HAMAP":
                         location_elem.set("score", str(location["score"]))
                         location_elem.set("alignment", str(location["alignment"]))
-                        
+
                     elif match_data['member_db'].upper() == "PROSITE_PROFILES":
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("score", str(location["score"]))
@@ -133,7 +133,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                             location_elem.set("sites", location["sites"])
                         except KeyError:
                             location_elem.set("sites", [])
-                            
+
                     elif match_data['member_db'].upper() == "SMART":
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("score", str(location["score"]))
@@ -142,6 +142,12 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("hmm-end", str(location["hmmEnd"]))
                         location_elem.set("hmm-len", str(location["hmmLength"]))
                         location_elem.set("hmm-bounds", str(location["hmmBounds"]))
+                        location_elem.set("start", str(location["start"]))
+                        location_elem.set("end", str(location["end"]))
+                        location_elem.set("representative", str(location["representative"]))
+
+                    elif match_data['member_db'].upper() == "SUPERFAMILY":
+                        location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("end", str(location["end"]))
                         location_elem.set("representative", str(location["representative"]))
@@ -159,8 +165,6 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("end", str(location["end"]))
                         location_elem.set("representative", str(location["representative"]))
-                        if match_data['member_db'].upper() in ["NCBIFAM", "ANTIFAM"]:
-                            location_elem.set("post-processed", str(location["postProcessed"]))
                         try:
                             location_elem.set("alignment", str(location["alignment"]))
                             location_elem.set("cigar-alignment", str(location["cigar_alignment"]))

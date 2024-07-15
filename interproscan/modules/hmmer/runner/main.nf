@@ -108,3 +108,26 @@ process SMART_HMMER2_RUNNER {
     /opt/hmmer2/bin/hmmpfam ${switches} ${hmm} ${fasta} > ${release}._.${member}._.out
     """
 }
+
+
+process HMMER_SCAN_RUNNER {
+    label 'hmmer_runner'
+
+    input:
+        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
+    /*
+    Superfamily uses a .pl script that create assignments from the output of HMMER3 hmmscan
+    */
+
+    output:
+        path "${release}._.${member}._.out"
+        val postprocessing_params
+        path fasta
+        path hmm
+
+    script:
+    """
+    /opt/hmmer3/bin/hmmpress ${hmm}
+    /opt/hmmer3/bin/hmmscan ${switches} -o ${release}._.${member}._.out ${hmm} ${fasta}
+    """
+}

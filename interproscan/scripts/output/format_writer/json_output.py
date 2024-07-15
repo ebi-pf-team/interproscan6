@@ -55,6 +55,9 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                     else:
                         accession = match_data['accession'].split(":")[0]  # drop subfamily
 
+                    if match_data['member_db'].upper() == "SUPERFAMILY":
+                        description = None
+
                     signature = {
                         "accession": accession,
                         "name": match_data['name'],
@@ -66,114 +69,138 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         "entry": entry
                     }
 
-                    locations = []
-                    for location in match_data['locations']:
-                        info = {
-                            "start": int(location["start"]),
-                            "end": int(location["end"]),
-                            "representative": boolean_map.get(location["representative"].lower(), False)
-                        }
-                        if match_data['member_db'].upper() == "CDD":
-                            info["evalue"] = float(location["evalue"])
-                            info["score"] = float(location["score"])
-
-                        elif match_data['member_db'].upper() == "HAMAP":
-                            info["score"] = float(location["score"])
-                            info["alignment"] = location["alignment"]
-
-                        elif match_data['member_db'].upper() == "PANTHER":
-                            info["hmmStart"] = int(location["hmmStart"])
-                            info["hmmEnd"] = int(location["hmmEnd"])
-                            info["hmmLength"] = 0  # we have hmmLength but in i5 result its always 0
-                            info["hmmBounds"] = location["hmmBounds"]
-                            info["envelopeStart"] = int(location["envelopeStart"])
-                            info["envelopeEnd"] = int(location["envelopeEnd"])
-                            
-                        elif match_data['member_db'].upper() == "PROSITE_PROFILES":
-                            info["score"] = float(location["score"])
-                            info["alignment"] = str(location["alignment"])
-
-                        elif match_data['member_db'].upper() == "PROSITE_PATTERNS":
-                            info["cigarAlignment"] = location["cigarAlignment"]
-                            info["alignment"] = location["alignment"]
-                            info["level"] = location["level"]
-
-                        elif match_data['member_db'].upper() == "SFLD":
-                            info["evalue"] = float(location["evalue"])
-                            info["score"] = float(location["score"])
-                            info["hmmStart"] = int(location["hmmStart"])
-                            info["hmmEnd"] = int(location["hmmEnd"])
-                            info["hmmLength"] = int(location["hmmLength"])
-                            info["envelopeStart"] = int(location["envelopeStart"])
-                            info["envelopeEnd"] = int(location["envelopeEnd"])
-                            
-                        elif match_data['member_db'].upper() == "SMART":
-                            info["evalue"] = float(location["evalue"])
-                            info["score"] = float(location["score"])
-                            info["hmmStart"] = int(location["hmmStart"])
-                            info["hmmEnd"] = int(location["hmmEnd"])
-                            info["hmmLength"] = int(location["hmmLength"])
-                            info["hmmBounds"] = location["hmmBounds"]
-                            info["postProcessed"] = boolean_map.get(location["postProcessed"].lower())
-
-                        else:
-                            info["evalue"] = float(location["evalue"])
-                            info["score"] = float(location["score"])
-                            info["hmmStart"] = int(location["hmmStart"])
-                            info["hmmEnd"] = int(location["hmmEnd"])
-                            info["hmmLength"] = int(location["hmmLength"])
-                            info["hmmBounds"] = location["hmmBounds"]
-                            info["envelopeStart"] = int(location["envelopeStart"])
-                            info["envelopeEnd"] = int(location["envelopeEnd"])
-                            info["postProcessed"] = boolean_map.get(location["postProcessed"].lower())
-
-                        if match_data['member_db'].upper() in ["SFLD", "CDD"]:
-                            try:
-                                info["sites"] = location["sites"]
-                            except KeyError:
-                                info["sites"] = []
-                        try:
-                            info["location-fragments"] = location["location-fragments"]
-                        except KeyError:
-                            single_location = {
+                    if match_data['member_db'].upper() == "SUPERFAMILY" and len(match_data['locations']) > 1:
+                        for location in match_data['locations']:
+                            info = {
                                 "start": int(location["start"]),
                                 "end": int(location["end"]),
-                                "dc-status": "CONTINUOUS"
+                                "representative": boolean_map.get(location["representative"].lower(), False),
+                                "hmmLength": match_data['hmm_length'],
+                                "location-fragments": [{
+                                    "start": int(location["start"]),
+                                    "end": int(location["end"]),
+                                    "dc-status": "CONTINUOUS"
+                                }]
                             }
-                            try:
-                                info["location-fragments"].append(single_location)
-                            except KeyError:
-                                info["location-fragments"] = [single_location]
-                        locations.append(info)
-                    match = {
-                        "signature": signature,
-                        "locations": locations
-                    }
-
-                    if match_data['member_db'].upper() not in ["CDD", "HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS"]:
-                        match["evalue"] = float(match_data['evalue'])
-                        match["score"] = float(match_data['score'])
-
-                    if 'model-ac' in match_data:
-                        match["model-ac"] = match_data['model-ac']
+                            match = {
+                                "signature": signature,
+                                "locations": [info],
+                                "evalue": float(location["evalue"]),
+                                "model-ac": match_data.get('model-ac', match_data['accession'])
+                            }
+                            matches.append(match)
                     else:
-                        match["model-ac"] = match_data['accession']
+                        if len(match_data['locations']) > 0:
+                            locations = []
+                            for location in match_data['locations']:
+                                info = {
+                                    "start": int(location["start"]),
+                                    "end": int(location["end"]),
+                                    "representative": boolean_map.get(location["representative"].lower(), False)
+                                }
+                                if match_data['member_db'].upper() == "CDD":
+                                    info["evalue"] = float(location["evalue"])
+                                    info["score"] = float(location["score"])
 
-                    if match_data['member_db'].upper() == "SFLD":
-                        match["scope"] = None
+                                elif match_data['member_db'].upper() == "HAMAP":
+                                    info["score"] = float(location["score"])
+                                    info["alignment"] = location["alignment"]
 
-                    if match_data['member_db'].upper() == "PANTHER":
-                        match["name"] = match_data['entry']['family_name']
-                        match['accession'] = match_data['accession']
-                        match["goXRefs"] = entry["goXRefs"] if entry else []
-                        signature["description"] = None
-                        signature["name"] = match_data['entry']['description']
-                        match['proteinClass'] = match_data['proteinClass']
-                        match['graftPoint'] = match_data['graftPoint']
+                                elif match_data['member_db'].upper() == "PANTHER":
+                                    info["hmmStart"] = int(location["hmmStart"])
+                                    info["hmmEnd"] = int(location["hmmEnd"])
+                                    info["hmmLength"] = 0  # we have hmmLength but in i5 result its always 0
+                                    info["hmmBounds"] = location["hmmBounds"]
+                                    info["envelopeStart"] = int(location["envelopeStart"])
+                                    info["envelopeEnd"] = int(location["envelopeEnd"])
 
+                                elif match_data['member_db'].upper() == "PROSITE_PROFILES":
+                                    info["score"] = float(location["score"])
+                                    info["alignment"] = str(location["alignment"])
 
-                if len(match_data['locations']) > 0:  # skip matches with no locations (we need to make sure it's valid to all members)
-                    matches.append(match)
+                                elif match_data['member_db'].upper() == "PROSITE_PATTERNS":
+                                    info["cigarAlignment"] = location["cigarAlignment"]
+                                    info["alignment"] = location["alignment"]
+                                    info["level"] = location["level"]
+
+                                elif match_data['member_db'].upper() == "SFLD":
+                                    info["evalue"] = float(location["evalue"])
+                                    info["score"] = float(location["score"])
+                                    info["hmmStart"] = int(location["hmmStart"])
+                                    info["hmmEnd"] = int(location["hmmEnd"])
+                                    info["hmmLength"] = int(location["hmmLength"])
+                                    info["envelopeStart"] = int(location["envelopeStart"])
+                                    info["envelopeEnd"] = int(location["envelopeEnd"])
+
+                                elif match_data['member_db'].upper() == "SMART":
+                                    info["evalue"] = float(location["evalue"])
+                                    info["score"] = float(location["score"])
+                                    info["hmmStart"] = int(location["hmmStart"])
+                                    info["hmmEnd"] = int(location["hmmEnd"])
+                                    info["hmmLength"] = int(location["hmmLength"])
+                                    info["hmmBounds"] = location["hmmBounds"]
+
+                                elif match_data['member_db'].upper() == "SUPERFAMILY":
+                                    info["hmmLength"] = match_data['hmm_length']
+
+                                else:
+                                    info["evalue"] = float(location["evalue"])
+                                    info["score"] = float(location["score"])
+                                    info["hmmStart"] = int(location["hmmStart"])
+                                    info["hmmEnd"] = int(location["hmmEnd"])
+                                    info["hmmLength"] = int(location["hmmLength"])
+                                    info["hmmBounds"] = location["hmmBounds"]
+                                    info["envelopeStart"] = int(location["envelopeStart"])
+                                    info["envelopeEnd"] = int(location["envelopeEnd"])
+
+                                if match_data['member_db'].upper() in ["SFLD", "CDD"]:
+                                    try:
+                                        info["sites"] = location["sites"]
+                                    except KeyError:
+                                        info["sites"] = []
+                                try:
+                                    info["location-fragments"] = location["location-fragments"]
+                                except KeyError:
+                                    single_location = {
+                                        "start": int(location["start"]),
+                                        "end": int(location["end"]),
+                                        "dc-status": "CONTINUOUS"
+                                    }
+                                    try:
+                                        info["location-fragments"].append(single_location)
+                                    except KeyError:
+                                        info["location-fragments"] = [single_location]
+                                locations.append(info)
+                            match = {
+                                "signature": signature,
+                                "locations": locations
+                            }
+
+                            if match_data['member_db'].upper() not in ["CDD", "HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS", "SUPERFAMILY"]:
+                                match["evalue"] = float(match_data['evalue'])
+                                match["score"] = float(match_data['score'])
+
+                            if 'model-ac' in match_data:
+                                match["model-ac"] = match_data['model-ac']
+                            else:
+                                match["model-ac"] = match_data['accession']
+
+                            if match_data['member_db'].upper() == "SFLD":
+                                match["scope"] = None
+
+                            if match_data['member_db'].upper() == "PANTHER":
+                                match["name"] = match_data['entry']['family_name']
+                                match['accession'] = match_data['accession']
+                                match["goXRefs"] = entry["goXRefs"] if entry else []
+                                signature["description"] = None
+                                signature["name"] = match_data['entry']['description']
+                                match['proteinClass'] = match_data['proteinClass']
+                                match['graftPoint'] = match_data['graftPoint']
+
+                            if match_data['member_db'].upper() == "SUPERFAMILY":
+                                match["evalue"] = float(match_data['evalue'])
+
+                            matches.append(match)
 
         result = {
             "sequence": sequence,

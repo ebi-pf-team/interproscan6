@@ -37,3 +37,21 @@ process HMMER2_PARSER {
         > hmmer_parsed_${out}.json
     """
 }
+
+
+process SUPERFAMILY_PARSER {
+    label 'analysis_parser'
+
+    input:
+    path ass3_out
+    path hmm_lib
+
+    output:
+    path "superfamily_parsed_*"
+
+    script:
+    """
+    python3 $projectDir/interproscan/scripts/members/superfamily/parse_superfamily_out.py \\
+        ${hmm_lib} ${ass3_out} > superfamily_parsed_${ass3_out}.json
+    """
+}
