@@ -171,8 +171,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                false,  // don't build an alignment file
-                false,   // don't build a hmmer.tbl file path
                 [
                     params.members."${member}".postprocess.bin,
                     params.members."${member}".postprocess.data,
@@ -186,8 +184,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
                 params.members."${member}".release,
-                true,  // build an alignment file
-                false,  // don't build a hmmer.tbl file path
                 [
                     params.members."${member}".postprocess.bin,
                     params.members."${member}".postprocess.sites_annotation,
@@ -315,8 +311,6 @@ workflow SEQUENCE_ANALYSIS {
         NCBIFAM_HMMER_RUNNER.out[0], // hmmer.out path
         NCBIFAM_HMMER_RUNNER.out[1], // hmmer.dtbl path
         NCBIFAM_HMMER_RUNNER.out[2], // post-processing-params
-        tsv_pro,
-        "false"
     )
 
     // Panther (+ treegrafter + epa-ng)
@@ -326,8 +320,6 @@ workflow SEQUENCE_ANALYSIS {
         PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
         PANTHER_HMMER_RUNNER.out[1],  // hmmer.dtbl path
         PANTHER_HMMER_RUNNER.out[2],  // post-processing-params
-        tsv_pro,
-        "false"
     )
     PANTHER_POST_PROCESSER(
         PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
@@ -346,8 +338,6 @@ workflow SEQUENCE_ANALYSIS {
         PFAM_HMMER_RUNNER.out[0],  // hmmer.out path
         PFAM_HMMER_RUNNER.out[1],  // hmmer.dtbl path
         PFAM_HMMER_RUNNER.out[2],  // post-processing-params
-        tsv_pro,
-        "false"
     )
     PFAM_FILTER_MATCHES(
         PFAM_HMMER_PARSER.out, // ips6 json
@@ -420,10 +410,6 @@ workflow SEQUENCE_ANALYSIS {
     /*
     Gather the results
     */
-<<<<<<< HEAD:interproscan/subworkflows/sequence_analysis/main.nf
-=======
-
->>>>>>> fd8fc49 (add pirsf own hmmer runner to reduce i/o):subworkflows/sequence_analysis/main.nf
     if (applications.contains("gene3d")) {
         ANTIFAM_HMMER_PARSER.out.concat(
             NCBIFAM_HMMER_PARSER.out,
