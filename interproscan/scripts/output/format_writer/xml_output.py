@@ -152,7 +152,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
 
                     elif match_data['member_db'].upper() == "PRINTS":
                         location_elem = ET.SubElement(locations_elem, "fingerprints-location")
-                        location_elem.set("motifNumber", str(location["motifNumber"]))
+                        location_elem.set("motifNumber", str(int(location["motifNumber"])))
                         location_elem.set("pvalue", str(location["pvalue"]))
                         location_elem.set("score", str(location["score"]))
                         location_elem.set("end", str(location["end"]))
