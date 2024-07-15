@@ -13,9 +13,6 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     libssl-dev libtool nghttp2 procps python3.10 python3-venv python3-pip python3-requests \
     tar unzip zlib1g-dev
 
-WORKDIR /test/
-RUN python3 --version > py.v.txt
-
 # Pull pftools for HAMAP and PROSITE
 FROM sibswiss/pftools as pftools
 
@@ -81,9 +78,10 @@ RUN curl -L -o cath-resolve-hits https://github.com/UCLOrengoGroup/cath-tools/re
 RUN chmod +x cath-resolve-hits
 
 WORKDIR /opt/interproscan6
-COPY subworkflows/ subworkflows/
-COPY scripts/ scripts/
-COPY modules/ modules/
+COPY interproscan/ interproscan/
+COPY utilities/ utilities/
+COPY tests/ tests/
 COPY interproscan.nf interproscan.nf
 COPY nextflow.config nextflow.config
 COPY README.md README.md
+COPY LICENSE LICENSE

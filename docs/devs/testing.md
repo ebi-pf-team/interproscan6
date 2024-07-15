@@ -82,7 +82,7 @@ Useful arguments:
 
 To run `pytests` use:
 ```
-python3 -m pytest tests/
+python -m pytest tests/unit_tests
 ```
 This method adds the current directory to `sys.path` which is essential for `pytest` to find the 
 scripts, owing to the structure of this repository.

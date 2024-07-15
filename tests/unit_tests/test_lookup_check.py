@@ -8,7 +8,7 @@ import json
 import pytest
 import urllib.request
 
-from scripts.lookup import lookup_check
+from interproscan.scripts.lookup import lookup_check
 
 
 @pytest.fixture
@@ -51,7 +51,7 @@ def test_check_precalc(monkeypatch):
 
     def mock_urlopen(url):
         return MockResponse()
-    
+
     monkeypatch.setattr(urllib.request, "urlopen", mock_urlopen)
 
     md5_list = ["MD5_1", "MD5_2", "MD5_3", "MD5_4"]
