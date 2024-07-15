@@ -196,7 +196,7 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."${member}".postprocess.cla,
                     params.members."${member}".postprocess.model,
                     params.members."${member}".postprocess.pdbj95d,
-                    params.members."${member}".postprocess.binary_switches,
+                    params.members."${member}".postprocess.ass3_switches,
                 ]
             ]
 
