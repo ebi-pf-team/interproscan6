@@ -139,7 +139,6 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["hmmEnd"] = int(location["hmmEnd"])
                                     info["hmmLength"] = int(location["hmmLength"])
                                     info["hmmBounds"] = location["hmmBounds"]
-                                    info["postProcessed"] = boolean_map.get(location["postProcessed"].lower())
 
                                 elif match_data['member_db'].upper() == "SUPERFAMILY":
                                     info["hmmLength"] = match_data['hmm_length']
@@ -153,7 +152,6 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["hmmBounds"] = location["hmmBounds"]
                                     info["envelopeStart"] = int(location["envelopeStart"])
                                     info["envelopeEnd"] = int(location["envelopeEnd"])
-                                    info["postProcessed"] = boolean_map.get(location["postProcessed"].lower())
 
                                 if match_data['member_db'].upper() in ["SFLD", "CDD"]:
                                     try:
