@@ -27,6 +27,14 @@ jobs:
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
 
+    - name: Cache Mamba packages
+      uses: actions/cache@v3
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-mamba-${{ hashFiles('utilities/environment.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-mamba-
+
     - name: Set up Mambaforge
       uses: conda-incubator/setup-miniconda@v2
       with:
@@ -34,16 +42,6 @@ jobs:
         miniforge-version: latest
         activate-environment: test
         use-mamba: true
-
-    - name: Set up Miniconda
-      uses: conda-incubator/setup-miniconda@v2
-      with:
-        activate-environment: test
-        environment-file: utilities/environment.yml
-        python-version: 3.8
-        auto-activate-base: false
-        use-mamba: true
-        use-only-tar-bz2: true
 
     - name: Install dependencies
       shell: bash -l {0}
