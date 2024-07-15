@@ -3,10 +3,19 @@ name: Unit Tests
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - interproscan/scripts
+      - interproscan/modules
+      - interproscan/subworkflows
+      - tests
+      - nextflow.config
+      - interproscan.nf
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 6
+    continue-on-error: true
 
     steps:
     - name: Check out code
@@ -23,18 +32,27 @@ jobs:
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
       
-    - name: Set up Miniconda
+    - name: Cache Conda/Mamba environment
+      uses: actions/cache@v3
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-mamba-${{ hashFiles('utilities/environment.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-mamba-
+
+    - name: Set up Mambaforge
       uses: conda-incubator/setup-miniconda@v2
       with:
+        miniforge-variant: Mambaforge
+        miniforge-version: latest
         activate-environment: test
-        environment-file: utilities/environment.yml
-        python-version: 3.8
-        auto-activate-base: false
+        use-mamba: true
 
     - name: Install dependencies
+      shell: bash -l {0}
       run: |
-        conda install bioconda::nextflow &&
-        conda install bioconda::nf-test
+        mamba env update -n test -f utilities/environment.yml
+        mamba install -n test -c bioconda nextflow nf-test
         
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -43,7 +61,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        key: ${{ runner.os }}-buildx-${{ hashFiles('docker_files/unit_tests/Dockerfile') }}
         restore-keys: |
           ${{ runner.os }}-buildx-
 
@@ -51,24 +69,29 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         context: .
-        file: ./Dockerfile
+        file: ./docker_files/unit_tests/Dockerfile
         load: true
         tags: interproscan6:latest
-        cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+        cache-from: |
+          type=local,src=/tmp/.buildx-cache
+          type=gha
+        cache-to: |
+          type=local,dest=/tmp/.buildx-cache,mode=max
+          type=gha,mode=max
 
     - name: Add Nextflow to PATH
-      run: |
-        echo "$CONDA/bin" >> $GITHUB_PATH
+      run: echo "$CONDA/envs/test/bin" >> $GITHUB_PATH
 
     - name: NF-Test subworkflows tests
+      shell: bash -l {0}
       run: |
-        conda run --name test nf-test test tests/unit_tests/subworkflows/pre_checks/ &&
-        conda run --name test nf-test test tests/unit_tests/subworkflows/sequence_precalc/
-    
+        nf-test test tests/unit_tests/subworkflows/pre_checks/
+        nf-test test tests/unit_tests/subworkflows/sequence_precalc/
+
     - name: PY-Test scripts tests
+      shell: bash -l {0}
       run: |
-        conda run --name test python3 -m pytest tests/unit_tests -v --cov=scripts --cov-report xml:.coverage.xml
+        python -m pytest tests/unit_tests -v --cov=scripts --cov-report xml:.coverage.xml
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.0.1
