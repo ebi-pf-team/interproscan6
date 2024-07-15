@@ -145,11 +145,8 @@ def add_match(
 
 def parse_hmmpfam_out(out_file: str) -> dict:
     """Coordinate parsing the HMMER2 Hmmpfam output file"""
-    # path_segments = out_file.split("/")[-1].split("._.")
-    # version = path_segments[0]
-    # member_db = path_segments[1]]
-    version = "test"
-    member_db = "SMART"
+    version = out_file.split("/")[-1].split("._.")[0]
+    member_db = out_file.split("._.")[1]
     matches = {}
     stage = 'LOOKING_FOR_METHOD_ACCESSION'
     protein_with_hit = QueryProtein()
