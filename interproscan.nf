@@ -44,8 +44,8 @@ workflow {
     .splitFasta( by: params.batchsize, file: true )
     .set { ch_fasta }
 
-    if (params.signalp_mode.toLowerCase() !in ['fast', 'slow_sequential']) {
-        log.info "SignalP mode '${params.signalp_mode}' in nextflow.config not recognised. Accepted: 'fast', 'slow_sequential'"
+    if (params.signalp_mode.toLowerCase() !in ['fast', 'slow-sequential']) {
+        log.info "SignalP mode '${params.signalp_mode}' in nextflow.config not recognised. Accepted: 'fast', 'slow-sequential'"
         exit 1
     }
 
