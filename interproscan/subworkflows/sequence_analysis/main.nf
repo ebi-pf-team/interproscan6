@@ -339,6 +339,25 @@ workflow SEQUENCE_ANALYSIS {
         PIRSF_HMMER_RUNNER.out[1]  // post-processing-params
     )
 
+    // Pfam
+    runner_hmmer_pfam_params = fasta.combine(member_params.pfam)
+    PFAM_HMMER_RUNNER(runner_hmmer_pfam_params)
+    PFAM_HMMER_PARSER(
+        PFAM_HMMER_RUNNER.out[0],  // hmmer.out path
+        PFAM_HMMER_RUNNER.out[1],  // hmmer.dtbl path
+        PFAM_HMMER_RUNNER.out[2],  // post-processing-params
+        tsv_pro,
+        "pfam"
+    )
+    PFAM_FILTER_MATCHES(
+        PFAM_HMMER_PARSER.out, // ips6 json
+        PFAM_HMMER_RUNNER.out[2]  // post-processing-params
+    )
+
+    // PIRSF (+ pirsf.pl)
+    runner_pirsf_params = fasta.combine(member_params.pirsf)
+    PIRSF_HMMER_RUNNER(runner_pirsf_params)
+
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_sfld_params)
