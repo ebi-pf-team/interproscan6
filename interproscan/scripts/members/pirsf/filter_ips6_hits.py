@@ -12,22 +12,6 @@ replaced with this Python script in IPS6."""
 CHILD_DAT_LINE = re.compile(r">\D+\d+\schild:\s(.*)$")
 
 
-class pirsfHit:
-    def __init__(self):
-        self.model_id = None
-        self.score = None
-        self.data = None
-        self.children = []
-
-    def add_model_data(self, model_id: str, match_data: dict):
-        self.model_id = model_id
-        self.score = match_data["score"]
-        self.data = match_data
-
-    def add_child(self, child_id: str):
-        self.children.append(child_id)
-
-
 class DatEntry:
     def __init__(self):
         self.model_id = None
@@ -54,6 +38,35 @@ class DatEntry:
 
     def add_blast(self, value: str):
         self.blast = 0 if value.split()[1] == "NO" else 1
+
+
+class pirsfHit:
+    def __init__(self):
+        self.model_id = None
+        self.score = None
+        self.data = None
+        self.children = []
+
+    def add_model_data(self, model_id: str, match_data: dict):
+        self.model_id = model_id
+        self.score = match_data["score"]
+        self.data = match_data
+
+    def add_child(self, child_id: str):
+        self.children.append(child_id)
+
+
+def get_signature_lengths(dtbl_path: str) -> dict[str, int]:
+    """Retrieve the tlen (signature length) from the dtbl output file from HMMscan
+    because PIRSF uses the tlen as the HmmLength"""
+    sig_lengths = {}  # signature acc: tlen
+    with open(dtbl_path, "r") as reader:
+        for line in reader:
+            if line.startswith('#'):
+                continue
+            line_segments = line.split()
+            sig_lengths[line_segments[1]] = int(line_segments[2])
+    return sig_lengths
 
 
 def load_dat(dat_path: str) -> tuple[dict, dict]:
@@ -93,7 +106,7 @@ def load_dat(dat_path: str) -> tuple[dict, dict]:
     return dat_entries, children
 
 
-def get_location_data(match: dict) -> tuple[int, int, int, int, int, float]:
+def get_location_data(match: dict) -> tuple[int, int, int, int, float]:
     """A PIRSF model often match multiple locations in a given query sequence.
     Combine those locations into one, taking the largest range possible across
     the match locations, and sum the scores of all the matches together.
@@ -102,7 +115,6 @@ def get_location_data(match: dict) -> tuple[int, int, int, int, int, float]:
     signature-proteinSeq match.
     """
     seq_start, seq_end, hmm_start, hmm_end, score = [0]*5
-    seq_len = match["qlen"]
     for location in match["locations"]:
         # Yes, the post-processing perl script for PIRSF uses the envelope start/end as
         # the seq start and end
@@ -120,10 +132,10 @@ def get_location_data(match: dict) -> tuple[int, int, int, int, int, float]:
             seq_end = location["end"]
             hmm_end = location["hmmEnd"]
 
-    return seq_len, seq_start, seq_end, hmm_start, hmm_end, score
+    return seq_start, seq_end, hmm_start, hmm_end, score
 
 
-def get_best_match(filtered_models: dict[str, pirsfHit]) -> dict:
+def get_best_match(filtered_models: dict[str, pirsfHit], sig_lengths: dict[str, int]) -> dict:
     """Out of the filtered models, select the best match and it's associated subfamily,
     and only retain this model/family.
     """
@@ -139,6 +151,10 @@ def get_best_match(filtered_models: dict[str, pirsfHit]) -> dict:
             continue
 
         processed_match[pirsf_acc] = filtered_models[pirsf_acc].data
+        # there is only one location as the PIRSF post-processing combines all 
+        # locations into a single location
+        # and PIRFT usese the tlen value from the dtbl file as the hmmLength
+        processed_match[pirsf_acc]["locations"][0]["hmmLength"] = sig_lengths[pirsf_acc]
 
         # if there is a child subfamily that passes the earlier filtering
         # also keep the best child subfamily
@@ -151,6 +167,7 @@ def get_best_match(filtered_models: dict[str, pirsfHit]) -> dict:
         )
         for pirsf_subfam in child_models:
             processed_match[pirsf_subfam] = filtered_models[pirsf_subfam].data
+            processed_match[pirsf_subfam]["locations"][0]["hmmLength"] = sig_lengths[pirsf_subfam]
             break  # we only want the best
 
         break  # we only want the best match!
@@ -158,13 +175,14 @@ def get_best_match(filtered_models: dict[str, pirsfHit]) -> dict:
     return processed_match
 
 
-def filter_matches(ips6_json: Path, pirsf_dat: dict, children: dict) -> dict:
+def filter_matches(ips6_json: Path, sig_lengths: dict, pirsf_dat: dict, children: dict) -> dict:
     """
     For each protein in matches, 
         Filter the models to retain only those that pass the threshold
         Then select the best of these filtered models to be kept
 
     :param ips6_json: path to internal IPS6 JSON file with hmmer hits
+    :param sig_lengths: tlen values from the hmmscan dtbl file, signature length
     :param pirsf_dat: dict containing data from the pirsf.dat file
     :param children: dict containing {subfam: parent fam}
     """
@@ -177,7 +195,8 @@ def filter_matches(ips6_json: Path, pirsf_dat: dict, children: dict) -> dict:
 
         # filter the models
         for model_id in matches[protein_id]:
-            seq_len, seq_start, seq_end, hmm_start, hmm_end, score = get_location_data(
+            seq_len = matches[protein_id][model_id]["qlen"]
+            seq_start, seq_end, hmm_start, hmm_end, score = get_location_data(
                 matches[protein_id][model_id]
             )
 
@@ -213,7 +232,7 @@ def filter_matches(ips6_json: Path, pirsf_dat: dict, children: dict) -> dict:
 
         # keep only the best family and associated subfamily for this protein seq
         if filtered_models:
-            processed_matches[protein_id] = get_best_match(filtered_models)
+            processed_matches[protein_id] = get_best_match(filtered_models, sig_lengths)
 
     return processed_matches
 
@@ -229,6 +248,11 @@ def build_parser() -> argparse.ArgumentParser:
         "ips6",
         type=Path,
         help="Path to internal IPS6 JSON containing HMMER matches"
+    )
+    parser.add_argument(
+        "dtbl",
+        type=Path,
+        help="Path to the HmmScan dtbl file"
     )
     parser.add_argument(
         "dat",
@@ -252,8 +276,9 @@ def main():
     parser = build_parser()
     args = parser.parse_args()
 
+    sig_lenths = get_signature_lengths(args.dtbl)
     pirsf_dat, children = load_dat(args.dat)
-    procossed_results = filter_matches(args.ips6, pirsf_dat, children)
+    procossed_results = filter_matches(args.ips6, sig_lenths, pirsf_dat, children)
 
     with open(args.out_json, "w") as fh:
         json.dump(procossed_results, fh, indent=2)

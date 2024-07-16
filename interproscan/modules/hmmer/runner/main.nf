@@ -106,12 +106,13 @@ process PIRSF_HMMER_RUNNER {
 
     output:
         path "${release}._.${member}._.out"
+        path "${release}._.${member}._.dtbl"
         val postprocessing_params
 
     script:
     """
     /opt/hmmer3/bin/hmmpress ${hmm}
-    /opt/hmmer3/bin/hmmscan ${switches} -o ${release}._.${member}._.out ${hmm} ${fasta}
+    /opt/hmmer3/bin/hmmscan ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl ${hmm} ${fasta}
     """
 }
 
