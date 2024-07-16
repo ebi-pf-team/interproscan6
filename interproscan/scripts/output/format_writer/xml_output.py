@@ -157,8 +157,14 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("hmm-end", str(location["hmmEnd"]))
                         location_elem.set("hmm-length", str(location["hmmLength"]))
                         location_elem.set("hmm-bounds", str(location["hmmBounds"]))
-                        location_elem.set("start", str(location["start"]))
-                        location_elem.set("end", str(location["end"]))
+
+                        if match_data['member_db'].upper() == 'PIRSF':
+                            location_elem.set("start", str(location["envelopeStart"]))
+                            location_elem.set("end", str(location["envelopeEnd"]))
+                        else:
+                            location_elem.set("start", str(location["start"]))
+                            location_elem.set("end", str(location["end"]))
+
                         location_elem.set("representative", str(location["representative"]))
                         if match_data['member_db'].upper() in ["NCBIFAM", "ANTIFAM"]:
                             location_elem.set("post-processed", str(location["postProcessed"]))

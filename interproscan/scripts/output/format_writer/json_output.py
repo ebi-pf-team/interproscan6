@@ -68,11 +68,20 @@ def json_output(seq_matches: dict, output_path: str, version: str):
 
                     locations = []
                     for location in match_data['locations']:
-                        info = {
-                            "start": int(location["start"]),
-                            "end": int(location["end"]),
-                            "representative": boolean_map.get(location["representative"].lower(), False)
-                        }
+                        # PIRSF uses the envelop start and end
+                        if match_data['member_db'].upper() == "PIRSF":
+                            info = {
+                                "start": int(location["envelopeStart"]),
+                                "end": int(location["envelopeEnd"])
+                            }
+                        else:
+                            info = {
+                                "start": int(location["start"]),
+                                "end": int(location["end"])
+                            }
+
+                        info["representative"] = boolean_map.get(location["representative"].lower(), False)
+
                         if match_data['member_db'].upper() == "CDD":
                             info["evalue"] = float(location["evalue"])
                             info["score"] = float(location["score"])
@@ -88,7 +97,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             info["hmmBounds"] = location["hmmBounds"]
                             info["envelopeStart"] = int(location["envelopeStart"])
                             info["envelopeEnd"] = int(location["envelopeEnd"])
-                            
+
                         elif match_data['member_db'].upper() == "PROSITE_PROFILES":
                             info["score"] = float(location["score"])
                             info["alignment"] = str(location["alignment"])
@@ -106,7 +115,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             info["hmmLength"] = int(location["hmmLength"])
                             info["envelopeStart"] = int(location["envelopeStart"])
                             info["envelopeEnd"] = int(location["envelopeEnd"])
-                            
+
                         elif match_data['member_db'].upper() == "SMART":
                             info["evalue"] = float(location["evalue"])
                             info["score"] = float(location["score"])
@@ -170,7 +179,6 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         signature["name"] = match_data['entry']['description']
                         match['proteinClass'] = match_data['proteinClass']
                         match['graftPoint'] = match_data['graftPoint']
-
 
                 if len(match_data['locations']) > 0:  # skip matches with no locations (we need to make sure it's valid to all members)
                     matches.append(match)
