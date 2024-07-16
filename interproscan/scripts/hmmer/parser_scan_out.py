@@ -61,7 +61,11 @@ class QueryProtein:
         domain.ali_to = re_match.group(11)
         domain.env_from = re_match.group(13)
         domain.env_to = re_match.group(14)
-        domain.hmm_raw_bounds = re_match.group(9)
+        # In the hmmsearch parser for the other member dbs, we use the hmm_bounds
+        # from between the hmm coord and ali coord
+        # But for PIRSF we use the bounds associated with the envelope
+        # This was something decided by the PIRSF devs
+        domain.hmm_raw_bounds = re_match.group(15)
         domain.hmm_bounds = HMM_BOUND_PATTERN[domain.hmm_raw_bounds]
         domain.acc = re_match.group(16)
         self.signatures[domain.model_id].domains[domain.domain_num] = domain
