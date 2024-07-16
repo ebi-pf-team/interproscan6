@@ -1,0 +1,1 @@
+cat tests/unit_tests/mock_outputs/cdd > $PWD/rpsblast_out

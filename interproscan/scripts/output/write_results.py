@@ -9,7 +9,7 @@ from format_writer.xml_output import xml_output
 
 def write_results(
     sequences_path: str,
-    matches_path: str, 
+    matches_path: str,
     output_format: list,
     output_path: str,
     version: str
@@ -49,7 +49,7 @@ def main():
     output_path = args[3]
     version = args[4]
 
-    formats = formats_str.upper().split(',')
+    formats = set(formats_str.upper().split(','))
     write_results(sequences, matches, formats, output_path, version)
 
 

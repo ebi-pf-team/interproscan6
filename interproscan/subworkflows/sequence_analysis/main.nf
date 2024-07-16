@@ -10,10 +10,12 @@ include {
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
     HMMER_RUNNER_WITH_ALIGNMENTS as SFLD_HMMER_RUNNER;
+    HMMER_SCAN_RUNNER as SUPERFAMILY_HMMER_RUNNER;
     FUNFAM_HMMER_RUNNER;
     HAMAP_HMMER_RUNNER;
     PIRSF_HMMER_RUNNER;
     SMART_HMMER2_RUNNER;
+    HMMER_SCAN_RUNNER;
 } from "$projectDir/interproscan/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
@@ -26,6 +28,7 @@ include {
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_SCAN_PARSER as PIRSF_HMMER_PARSER;
     HMMER2_PARSER;
+    SUPERFAMILY_PARSER;
 } from "$projectDir/interproscan/modules/hmmer/parser/main"
 include {
     CATH_RESOLVE_HITS as FUNFAM_CATH_RESOLVE_HITS;  // third party tool to minimise suprious hits
@@ -36,6 +39,7 @@ include {
     PANTHER_POST_PROCESSER;
     PIRSF_POST_PROCESSER;
     SFLD_POST_PROCESSER;
+    SUPERFAMILY_POST_PROCESSER;
 } from "$projectDir/interproscan/modules/hmmer/post_processing/main"
 include {
     FUNFAM_FILTER_MATCHES;
@@ -188,6 +192,22 @@ workflow SEQUENCE_ANALYSIS {
                 ]
             ]
 
+        superfamily: member == 'superfamily'
+        return [
+            "${member}",
+            params.members."${member}".hmm,
+            params.members."${member}".switches,
+            params.members."${member}".release,
+            [
+                params.members."${member}".postprocess.bin,
+                params.members."${member}".postprocess.self_hits,
+                params.members."${member}".postprocess.cla,
+                params.members."${member}".postprocess.model,
+                params.members."${member}".postprocess.pdbj95d,
+                params.members."${member}".postprocess.ass3_switches,
+            ]
+        ]
+
         // uses HMMER2, has a slightly different set up
         smart: member == 'smart'
             return [
@@ -242,7 +262,7 @@ workflow SEQUENCE_ANALYSIS {
     /*
     Member databases that use HMMER
     */
-    
+
     /*
     Using generic HMMER
     */
@@ -356,6 +376,19 @@ workflow SEQUENCE_ANALYSIS {
         SMART_HMMER2_RUNNER.out[1],
     )
 
+    // Superfamily
+    runner_hmmer_superfamily_params = fasta.combine(member_params.superfamily)
+    SUPERFAMILY_HMMER_RUNNER(runner_hmmer_superfamily_params)
+    SUPERFAMILY_POST_PROCESSER(
+        SUPERFAMILY_HMMER_RUNNER.out[0],  // hmmer.out path
+        SUPERFAMILY_HMMER_RUNNER.out[1],  // post-processing-params
+        SUPERFAMILY_HMMER_RUNNER.out[2],  // fasta path
+    )
+    SUPERFAMILY_PARSER(
+        SUPERFAMILY_POST_PROCESSER.out,
+        SUPERFAMILY_HMMER_RUNNER.out[3],  // hmm path
+    )
+
     /*
     Member databases that do NOT use HMMER
     */
@@ -397,7 +430,8 @@ workflow SEQUENCE_ANALYSIS {
             CDD_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
-            SIGNALP_PARSER.out
+            SIGNALP_PARSER.out,
+            SUPERFAMILY_PARSER.out
         )
         .set { parsed_results }
     }
@@ -414,7 +448,8 @@ workflow SEQUENCE_ANALYSIS {
             CDD_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
-            SIGNALP_PARSER.out
+            SIGNALP_PARSER.out,
+            SUPERFAMILY_PARSER.out
         )
         .set { parsed_results }
     }

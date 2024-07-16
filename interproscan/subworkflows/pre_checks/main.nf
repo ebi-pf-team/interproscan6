@@ -78,7 +78,13 @@ workflow PRE_CHECKS {
     }
 
     // Check if the input parameters are valid
-    def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'translate', 'nucleic', 'formats', 'output', 'xrefs', 'goterms', 'pathways', 'ipsc_version', 'version']
+    def parameters_expected = [
+        'input', 'applications', 'disable_precalc', 'help',
+        'batchsize', 'url_precalc', 'check_precalc', 'matches',
+        'sites', 'bin', 'members', 'translate', 'nucleic',
+        'formats', 'output', 'xrefs', 'goterms', 'pathways',
+        'ipsc_version', 'version'
+    ]
     def parameter_diff = all_params - parameters_expected
     if (parameter_diff.size() != 0){
         log.info printHelp()
@@ -86,7 +92,12 @@ workflow PRE_CHECKS {
     }
 
     // Check if the applications are valid
-    def applications_expected = ['antifam', 'cdd', 'funfam', 'gene3d', 'hamap', 'ncbifam', 'panther', 'pfam', 'pirsf', 'prosite_patterns', 'prosite_profiles', 'sfld', 'signalp', 'smart']
+    def applications_expected = [
+        'antifam', 'cdd', 'funfam', 'gene3d', 'hamap',
+        'ncbifam', 'panther', 'pfam', 'pirsf',
+        'prosite_patterns', 'prosite_profiles',
+        'sfld', 'signalp', 'smart', 'superfamily'
+    ]
     def applications_diff = user_applications.toLowerCase().split(',') - applications_expected
     if (applications_diff.size() != 0){
         log.info printHelp()

@@ -183,3 +183,54 @@ process SFLD_POST_PROCESSER {
             --output '${out_file}.processed.out'
         """
 }
+
+
+process SUPERFAMILY_POST_PROCESSER {
+    label 'analysis_parser'
+
+    input:
+        path hmmscan_out
+        val postprocessing_params
+        path fasta
+
+    output:
+        path "${hmmscan_out}_ass3_output"
+
+    script:
+       /*
+        postprocessing_params[0] = bin
+        postprocessing_params[1] = self_hits
+        postprocessing_params[2] = cla
+        postprocessing_params[3] = model_tab
+        postprocessing_params[4] = pdbj95d
+        postprocessing_params[5] = binary_switches
+       */
+    """
+    perl ${postprocessing_params[0]} \\
+    -s ${postprocessing_params[1]} \\
+    -r ${postprocessing_params[2]} \\
+    -m ${postprocessing_params[3]} \\
+    -p ${postprocessing_params[4]} \\
+    ${postprocessing_params[5]} \\
+    ${fasta} ${hmmscan_out} ${hmmscan_out}_ass3_output
+    """
+}
+
+
+process SUPERFAMILY_PARSER {
+    // parses the output from SUPERFAMILY_POST_PROCESSER
+    label 'analysis_parser'
+
+    input:
+    path ass3_out
+    path hmm_lib
+
+    output:
+    path "superfamily_parsed_*"
+
+    script:
+    """
+    python3 $projectDir/interproscan/scripts/members/superfamily/parse_superfamily_out.py \\
+        ${hmm_lib} ${ass3_out} > superfamily_parsed_${ass3_out}.json
+    """
+}
