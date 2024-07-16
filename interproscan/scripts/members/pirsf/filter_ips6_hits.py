@@ -101,15 +101,15 @@ def get_location_data(match: dict) -> tuple[int, int, int, int, int, float]:
     These values are used for deciding whether to keep or reject the
     signature-proteinSeq match.
     """
-    seq_len, seq_start, seq_end, hmm_start, hmm_end, score = [0]*6
+    seq_start, seq_end, hmm_start, hmm_end, score = [0]*5
+    seq_len = match["qlen"]
     for location in match["locations"]:
-        seq_len = location["hmmLength"]
         # Yes, the post-processing perl script for PIRSF uses the envelope start/end as
         # the seq start and end
-        seq_start = int(location["start"])
-        seq_end = int(location["end"])
-        hmm_start = location["hmmStart"]
-        hmm_end = location["hmmEnd"]
+        seq_start = int(location["start"])   # ali from
+        seq_end = int(location["end"])   # ali to
+        hmm_start = location["hmmStart"]   # hmm from
+        hmm_end = location["hmmEnd"]   # hmm to
         score += float(location["score"])
 
         # update to match georgetown 2017 script
@@ -196,14 +196,16 @@ def filter_matches(ips6_json: Path, pirsf_dat: dict, children: dict) -> dict:
                     filtered_models[model_id] = pirf_hit
 
                     # if we have a subfamily match we should consider the parent to also be a match
-                    parent = children[model_id]  # parent = parent model id
+                    parent_model_id = children[model_id]  # parent = parent model id
                     pirf_hit = pirsfHit()
-                    pirf_hit.add_model_data(parent, matches[protein_id][model_id])
+                    pirf_hit.add_model_data(parent_model_id, matches[protein_id][parent_model_id])
                     pirf_hit.add_child(model_id)
-                    filtered_models[parent] = pirf_hit
+                    filtered_models[parent_model_id] = pirf_hit
 
-            elif (ratio > 0.67 and ovl >= 0.8 and score >= pirsf_dat[model_id].min_s and \
-                  (ld < 3.5 * pirsf_dat[model_id].std_l or ld < 50)):
+            elif ratio > 0.67 and \
+                ovl >= 0.8 and \
+                    (score >= pirsf_dat[model_id].min_s) and \
+                    (ld < 3.5 * pirsf_dat[model_id].std_l or ld < 50):
                 # everything passes the threshold of length, score and standard deviations of length
                 pirf_hit = pirsfHit()
                 pirf_hit.add_model_data(model_id, matches[protein_id][model_id])
