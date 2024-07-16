@@ -4,13 +4,14 @@ import sys
 # param prints_postproc: path to prints_postprocess output file
 # param version: prints version number
 
+
 def main():
     args = sys.argv[1:]
-    parsed_results = parse(args[0], args[1])
+    parsed_results = parse(args[0])
     print(json.dumps(parsed_results, indent=2))
 
 
-def parse(prints: str, version: str) -> dict:
+def parse(prints: str) -> dict:
     rebuild = {}
     with open(prints, 'r') as file:
         prints_dict = json.load(file)
@@ -21,7 +22,9 @@ def parse(prints: str, version: str) -> dict:
                 for location in match["locations"]:
                     location.pop("evalue")
                     location.pop("model_id")
-                    location["location-fragments"] = [{"start": int(location["start"]), "end": int(location["end"]), "dc-status": "CONTINUOUS"}]
+                    location["location-fragments"] = [
+                        {"start": int(location["start"]), "end": int(location["end"]), "dc-status": "CONTINUOUS"}
+                    ]
                 rebuild[protein] = {match["accession"]: match}
 
     return rebuild

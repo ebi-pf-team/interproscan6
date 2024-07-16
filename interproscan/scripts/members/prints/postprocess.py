@@ -6,6 +6,7 @@ import re
 # param prints_out: path to prints output file
 # param hierarchy: path to prints hierarchy db
 
+
 def main():
     args = sys.argv[1:]
     parsed_results = postprocess(args[0], args[1], args[2])
@@ -14,7 +15,6 @@ def main():
 
 def postprocess(prints_out: str, hierarchy: str, version: str) -> dict:
     hierarchy_map = parse_hierarchy(hierarchy)
-    #allprintsids = list(hierarchy_map.keys())
     results = parse_prints(prints_out, hierarchy_map, version)
     sorted_results = sort_results(results)
     selected_results = select(sorted_results, hierarchy_map)
@@ -24,52 +24,39 @@ def postprocess(prints_out: str, hierarchy: str, version: str) -> dict:
 def select(sorted_res: dict, hierarchy: dict) -> dict:
     # from hierarchymap, get evalue for id
     pass_matches = {}
-    for match in sorted_res:
-        for i in sorted_res[match]:
-            #print(i)
-            fingerprint = i["name"]
+    for protein_id in sorted_res:
+        for match in sorted_res[protein_id]:
+            fingerprint = match["name"]
             if fingerprint in hierarchy.keys():
                 # process sorted matches step
                 # filter by min motif
                 min_motif = hierarchy[fingerprint]["min_motif_count"]
                 cutoff = float(hierarchy[fingerprint]["evalue_cutoff"])
-                if i["evalue"] <= cutoff and i["num_motif"] > min_motif:
+                if match["evalue"] <= cutoff and match["num_motif"] > min_motif:
                     pass
-                    # order by evalue descending?
                 else:
                     continue
 
-                if hierarchy[fingerprint]["is_domain"]:
-                    # no filtering required
-                    if match in pass_matches:
-                        pass_matches[match].append(i)
-                    else:
-                        pass_matches[match] = [i]
-
+                if protein_id in pass_matches:
+                    pass_matches[protein_id].append(match)
                 else:
-                    # store hierarchy members?
-                    #print(hierarchy[fingerprint]["sibling_list"])
-                    if match in pass_matches:
-                        pass_matches[match].append(i)
-                    else:
-                        pass_matches[match] = [i]
-        if match not in pass_matches:
-            pass_matches[match] = []
+                    pass_matches[protein_id] = [match]
+
+        if protein_id not in pass_matches:
+            pass_matches[protein_id] = []
 
     return pass_matches
 
 
 def sort_results(results: dict) -> dict:
-    for protein in results:
-        # sort models by evalue
-        results[protein].sort(key=lambda d: (d["evalue"]))
-        for model in results[protein]:
+    for protein_id in results:
+        results[protein_id].sort(key=lambda d: (d["evalue"]))
+        for model in results[protein_id]:
             model["locations"].sort(key=lambda d: (d["model_id"], d["motifNumber"], d["start"], d["end"]))
-        #    model["evalue"] = f"{model['evalue']:.1e}"
     return results
 
 
-def parse_prints(prints_out: str, hierarchy_map: str, version: str) -> dict:
+def parse_prints(prints_out: str, hierarchy_map: dict, version: str) -> dict:
     results = {}
     with open(prints_out) as f:
         for line in f:
@@ -82,22 +69,21 @@ def parse_prints(prints_out: str, hierarchy_map: str, version: str) -> dict:
                 # hierarchy map to get model ac
                 if fingerprint in hierarchy_map:
                     model_acc = hierarchy_map[fingerprint]["model_acc"]
-
-                prints = {"accession": model_acc, "name": fingerprint, "member_db": "PRINTS", "version": version,
+                match = {"accession": model_acc, "name": fingerprint, "member_db": "PRINTS", "version": version,
                           "evalue": float(evalue), "num_motif": nummotif, "graphscan": graphscan,
                           "model-ac": model_acc, "locations": []}
                 if protein_id in results:
-                    results[protein_id].append(prints)
+                    results[protein_id].append(match)
                 else:
-                    results[protein_id] = [prints]
+                    results[protein_id] = [match]
 
             if line.startswith(("3TBN", "3TBH")):
-                motifname, nummotif, idscore, pfscore, pvalue, sequence, length, low, pos, high, end = process_3tb(line)
-                for i in results[protein_id]:
-                    if motifname in i["name"]:
-                        i["locations"].append(
-                            {"motifNumber": int(nummotif),"pvalue": pvalue, "score": idscore, "start": pos, "end": end,
-                             "representative": "false", "evalue": i["evalue"], "model_id": i["accession"]})
+                motifname, motifnum, idscore, pfscore, pvalue, sequence, length, low, pos, high, end = process_3tb(line)
+                for match in results[protein_id]:
+                    if motifname in match["name"]:
+                        match["locations"].append(
+                            {"motifNumber": int(motifnum), "pvalue": pvalue, "score": idscore, "start": pos, "end": end,
+                             "representative": "false", "evalue": match["evalue"], "model_id": match["accession"]})
 
     return results
 
@@ -152,7 +138,7 @@ def process_3tb(line):
     line = re.sub(r"\s+", "\t", line)
     line = line.split("\t")
     motifname = line[1]
-    nummotif = int(line[2])
+    motifnum = int(line[2])
     idscore = line[5]
     pfscore = line[6]
     pvalue = line[7]
@@ -162,7 +148,7 @@ def process_3tb(line):
     pos = line[11]
     high = line[12]
     end = int(pos) + int(length) - 1
-    return motifname, nummotif, idscore, pfscore, pvalue, sequence, length, low, pos, high, end
+    return motifname, motifnum, idscore, pfscore, pvalue, sequence, length, low, pos, high, end
 
 
 if __name__ == "__main__":
