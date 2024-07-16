@@ -185,3 +185,22 @@ process SMART_FILTER_MATCHES {
         ${ips6_json}.post.processed.json
     """
 }
+
+
+process SUPERFAMILY_FILTER_MATCHES {
+    // parses the output from SUPERFAMILY_POST_PROCESSER
+    label 'analysis_parser'
+
+    input:
+    path ass3_out
+    path hmm_lib
+
+    output:
+    path "superfamily_parsed_*"
+
+    script:
+    """
+    python3 $projectDir/interproscan/scripts/members/superfamily/parse_superfamily_out.py \\
+        ${hmm_lib} ${ass3_out} > superfamily_parsed_${ass3_out}.json
+    """
+}

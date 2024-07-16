@@ -28,7 +28,6 @@ include {
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_SCAN_PARSER as PIRSF_HMMER_PARSER;
     HMMER2_PARSER;
-    SUPERFAMILY_PARSER;
 } from "$projectDir/interproscan/modules/hmmer/parser/main"
 include {
     CATH_RESOLVE_HITS as FUNFAM_CATH_RESOLVE_HITS;  // third party tool to minimise suprious hits
@@ -50,6 +49,7 @@ include {
     PIRSF_FILTER_MATCHES;
     SFLD_FILTER_MATCHES;
     SMART_FILTER_MATCHES;
+    SUPERFAMILY_FILTER_MATCHES;
 } from "$projectDir/interproscan/modules/hmmer/filter/main"
 include {
     PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER
@@ -384,7 +384,7 @@ workflow SEQUENCE_ANALYSIS {
         SUPERFAMILY_HMMER_RUNNER.out[1],  // post-processing-params
         SUPERFAMILY_HMMER_RUNNER.out[2],  // fasta path
     )
-    SUPERFAMILY_PARSER(
+    SUPERFAMILY_FILTER_MATCHES(
         SUPERFAMILY_POST_PROCESSER.out,
         SUPERFAMILY_HMMER_RUNNER.out[3],  // hmm path
     )
@@ -431,7 +431,7 @@ workflow SEQUENCE_ANALYSIS {
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
-            SUPERFAMILY_PARSER.out
+            SUPERFAMILY_FILTER_MATCHES.out
         )
         .set { parsed_results }
     }
@@ -449,7 +449,7 @@ workflow SEQUENCE_ANALYSIS {
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
-            SUPERFAMILY_PARSER.out
+            SUPERFAMILY_FILTER_MATCHES.out
         )
         .set { parsed_results }
     }
