@@ -52,6 +52,11 @@ include {
     SUPERFAMILY_FILTER_MATCHES;
 } from "$projectDir/interproscan/modules/hmmer/filter/main"
 include {
+    MOBIDB_RUNNER;
+    MOBIDB_PARSER;
+    MOBIDB_POSTPROCESS;
+} from "$projectDir/interproscan/modules/mobidb/main"
+include {
     PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER
 } from "$projectDir/interproscan/modules/prosite/pfsearch/runner/main"
 include {
