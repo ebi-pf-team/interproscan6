@@ -18,6 +18,7 @@ def printHelp() {
         --output <OUTPUT-FILE-PATH>        Optional. Path to the output file.
                                             If this option is not set, the output will be write on results/ folder.
         --pathways Optional. Include pathway information in the output.
+        --signalp_mode Optional. Sets SignalP/SignalP_EUK run speed, default is fast.
         --version                          Print the version of InterProScan.
     """
 }
@@ -29,6 +30,7 @@ workflow PRE_CHECKS {
     seq_input
     using_nucleic
     all_params
+    signalp_mode
     user_applications
     output_formats
     version_msg
@@ -78,7 +80,7 @@ workflow PRE_CHECKS {
     }
 
     // Check if the input parameters are valid
-    def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'translate', 'nucleic', 'formats', 'output', 'xrefs', 'goterms', 'pathways', 'ipsc_version', 'version']
+    def parameters_expected = ['input', 'applications', 'disable_precalc', 'help', 'batchsize', 'url_precalc', 'check_precalc', 'matches', 'sites', 'bin', 'members', 'translate', 'nucleic', 'formats', 'output', 'xrefs', 'goterms', 'pathways', 'signalp_mode', 'ipsc_version', 'version']
     def parameter_diff = all_params - parameters_expected
     if (parameter_diff.size() != 0){
         log.info printHelp()
