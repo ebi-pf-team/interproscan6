@@ -70,6 +70,7 @@ workflow SEQUENCE_ANALYSIS {
     take:
     fasta
     applications
+    signalp_mode
 
     main:
     boolean gene3d_funfam_processed = false
@@ -234,7 +235,7 @@ workflow SEQUENCE_ANALYSIS {
         signalp: member == 'signalp'
 
             return [
-                params.members.signalp.data.mode,
+                params.signalp_mode,
                 params.members.signalp.data.model_dir,
                 params.members.signalp.data.organism,
                 params.members.signalp.switches,
@@ -245,7 +246,7 @@ workflow SEQUENCE_ANALYSIS {
         signalp_euk: member == 'signalp_euk'
 
             return [
-                params.members.signalp_euk.data.mode,
+                params.signalp_mode,
                 params.members.signalp_euk.data.model_dir,
                 params.members.signalp_euk.data.organism,
                 params.members.signalp_euk.switches,
