@@ -343,25 +343,8 @@ workflow SEQUENCE_ANALYSIS {
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_sfld_params)
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
     SFLD_HMMER_PARSER(SFLD_HMMER_RUNNER.out[0])
     SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out)   // hmmer.out, post-process params, alignment, dtbl file
-=======
-    SFLD_HMMER_PARSER(
-        SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
-        SFLD_HMMER_RUNNER.out[1]   // post-processing-params
-    )
-=======
-    SFLD_HMMER_PARSER(SFLD_HMMER_RUNNER.out[0])  // hmmer.out path
->>>>>>> 6a91666 (remove unused i/o params in seq-analysis)
-    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out)
->>>>>>> e26495b (tidy i/o in seq-analysis)
-=======
-    SFLD_HMMER_PARSER(SFLD_HMMER_RUNNER.out[0])
-    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out)   // hmmer.out, post-process params, alignment, dtbl file
->>>>>>> 9acd318 (use the generic hmmer parser and runner)
     SFLD_FILTER_MATCHES(SFLD_HMMER_PARSER.out, SFLD_POST_PROCESSER.out)
 
     // SMART (HMMER2:hmmpfam + kinase filter)
@@ -400,10 +383,6 @@ workflow SEQUENCE_ANALYSIS {
     /*
     Gather the results
     */
-<<<<<<< HEAD:interproscan/subworkflows/sequence_analysis/main.nf
-=======
-
->>>>>>> fd8fc49 (add pirsf own hmmer runner to reduce i/o):subworkflows/sequence_analysis/main.nf
     if (applications.contains("gene3d")) {
         ANTIFAM_HMMER_PARSER.out.concat(
             NCBIFAM_HMMER_PARSER.out,
