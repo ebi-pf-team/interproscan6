@@ -172,15 +172,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".switches,
                 params.members."${member}".release,
                 [
-<<<<<<< HEAD
-<<<<<<< HEAD
                     params.members."${member}".postprocess.data
-=======
-                    params.members."${member}".postprocess.data,
->>>>>>> 095da8a (remove unused postporcessing param)
-=======
-                    params.members."${member}".postprocess.data
->>>>>>> 9acd318 (use the generic hmmer parser and runner)
                 ]
             ]
 
