@@ -125,6 +125,20 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             info["hmmBounds"] = location["hmmBounds"]
                             info["postProcessed"] = boolean_map.get(location["postProcessed"].lower())
 
+                        elif match_data['member_db'].upper() == "PIRSF":
+                            # PIRSF uses the ali from (start) and ali to (end)
+                            # for the hmmStart and hmmEnd
+                            # and env from/to for the start and end
+                            info["evalue"] = float(location["evalue"])
+                            info["score"] = float(location["score"])
+                            info["hmmStart"] = int(location["start"])
+                            info["hmmEnd"] = int(location["end"])
+                            info["hmmLength"] = int(location["hmmLength"])
+                            info["hmmBounds"] = location["hmmBounds"]
+                            info["envelopeStart"] = int(location["envelopeStart"])
+                            info["envelopeEnd"] = int(location["envelopeEnd"])
+                            info["postProcessed"] = boolean_map.get(location["postProcessed"].lower())
+
                         else:
                             info["evalue"] = float(location["evalue"])
                             info["score"] = float(location["score"])
