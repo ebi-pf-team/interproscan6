@@ -23,12 +23,12 @@ class QueryProtein:
     """Represents an input protein sequence and its associated hits"""
     def __init__(self):
         self.sequence_id = None
-        self.hmmlength = None
+        self.qlen = None
         self.signatures = {}  # sig acc: model hit
 
     def get_seq_id(self, re_acc_line_match):
         self.sequence_id = re_acc_line_match.group(1)
-        self.hmmlength = re_acc_line_match.group(2)
+        self.qlen = re_acc_line_match.group(2)
 
     def get_model_data(self, re_match):
         """Get data on a signature/model that matched.
@@ -125,6 +125,7 @@ def add_match(
                 "accession": model_id,
                 "name": "",
                 "description": "",
+                "qlen": int(protein_with_hit.qlen),
                 "evalue": model_obj.evalue,
                 "score": model_obj.score,
                 "member_db": member_db,
@@ -137,12 +138,12 @@ def add_match(
             # the PIRSF perl script uses the envelope start/end
             matches[protein_with_hit.sequence_id][model_id]["locations"].append(
                 {
-                    "start": int(domain_obj.env_from),
-                    "end": int(domain_obj.env_to),
+                    "start": int(domain_obj.ali_from),
+                    "end": int(domain_obj.ali_to),
                     "representative": "",
                     "hmmStart": int(domain_obj.hmm_from),
                     "hmmEnd": int(domain_obj.hmm_to),
-                    "hmmLength": int(domain_obj.hmm_to) + 1 - int(domain_obj.hmm_from),
+                    "hmmLength": int(protein_with_hit.qlen),
                     "rawHmmBounds": domain_obj.hmm_raw_bounds,
                     "hmmBounds": domain_obj.hmm_bounds,
                     "evalue": domain_obj.i_evalue,  # keep as str because can be Xe-Y
