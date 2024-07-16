@@ -28,6 +28,7 @@ workflow {
         input_file,
         params.nucleic,
         params.keySet(),
+        params.signalp_mode,
         params.applications,
         params.formats,
         params.version,
@@ -42,6 +43,11 @@ workflow {
     .unique()
     .splitFasta( by: params.batchsize, file: true )
     .set { ch_fasta }
+
+    if (params.signalp_mode.toLowerCase() !in ['fast', 'slow_sequential']) {
+        log.info "SignalP mode '${params.signalp_mode}' in nextflow.config not recognised. Accepted: 'fast', 'slow_sequential'"
+        exit 1
+    }
 
     if (params.nucleic) {
         if (params.translate.strand.toLowerCase() !in ['both','plus','minus']) {
@@ -80,7 +86,7 @@ workflow {
                 fasta_to_runner = ch_fasta
             }
         }
-        parsed_analysis = SEQUENCE_ANALYSIS(fasta_to_runner, applications)
+        parsed_analysis = SEQUENCE_ANALYSIS(fasta_to_runner, applications, params.signalp_mode)
     }
 
     all_results = parsed_matches.concat(parsed_analysis)
