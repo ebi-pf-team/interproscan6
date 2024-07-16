@@ -29,7 +29,6 @@ process PRINTS_POSTPROCESS {
 
     output:
     path "prints_processed.out"
-    val release
 
     script:
     """
@@ -48,7 +47,6 @@ process PRINTS_PARSER {
 
     input:
     path "processed_prints.out"
-    val release
 
     output:
     path "prints_parsed.json"
@@ -57,7 +55,6 @@ process PRINTS_PARSER {
     """
     python3 $projectDir/interproscan/scripts/members/prints/parser.py \
     processed_prints.out \
-    ${release} \
     > prints_parsed.json
     """
 
