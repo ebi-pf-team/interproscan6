@@ -153,7 +153,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 elif match_data['member_db'].upper() == "PRINTS":
                                     info["pvalue"] = float(location["pvalue"])
                                     info["score"] = float(location["score"])
-                                    info["motifNumber"] = float(location["motifNumber"])
+                                    info["motifNumber"] = int(location["motifNumber"])
 
                                 else:
                                     info["evalue"] = float(location["evalue"])
