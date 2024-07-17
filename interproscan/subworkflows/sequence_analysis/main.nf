@@ -65,7 +65,6 @@ include {
 } from "$projectDir/interproscan/modules/signalp/main"
 include {
     PRINTS_RUNNER;
-    PRINTS_POSTPROCESS;
     PRINTS_PARSER;
 } from "$projectDir/interproscan/modules/prints/main"
 
@@ -417,8 +416,7 @@ workflow SEQUENCE_ANALYSIS {
     // PRINTS
     runner_prints_params = fasta.combine(member_params.prints)
     PRINTS_RUNNER(runner_prints_params)
-    PRINTS_POSTPROCESS(PRINTS_RUNNER.out)
-    PRINTS_PARSER(PRINTS_POSTPROCESS.out)
+    PRINTS_PARSER(PRINTS_RUNNER.out)
 
     /*
     Gather the results
