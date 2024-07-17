@@ -42,8 +42,6 @@ workflow {
     .splitFasta( by: params.batchsize, file: true )
     .set { ch_fasta }
 
-    // signalp_mode = params.signalp_mode.toLowerCase()
-
     if (params.nucleic) {
         if (params.translate.strand.toLowerCase() !in ['both','plus','minus']) {
             log.info "Strand option '${params.translate.strand.toLowerCase()}' in nextflow.config not recognised. Accepted: 'both', 'plus', 'minus'"
