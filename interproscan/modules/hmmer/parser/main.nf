@@ -1,3 +1,7 @@
+/*
+    This processes invoke scripts that parser the output from HMMER
+    (hmmsearch, hmmscan, hmmpfam) into the IPS6 JSON structure.
+*/
 process HMMER_PARSER {
     label 'analysis_parser'
 
