@@ -154,7 +154,6 @@ def add_match(
                     "score": domain_obj.score,
                     "envelopeStart": int(domain_obj.env_from),
                     "envelopeEnd": int(domain_obj.env_to),
-                    "postProcessed": "false",
                     "location-fragments": [
                         {
                             "start": int(domain_obj.env_from),
