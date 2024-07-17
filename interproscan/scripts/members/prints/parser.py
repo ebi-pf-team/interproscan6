@@ -116,10 +116,13 @@ def process_3tb(line):
     pvalue = line[7]
     sequence = line[8]
     length = line[9]
-    pos = int(line[11])
+    pos = line[11]
+    # corrects for pos merging with next column
+    if len(pos) > 5:
+        pos = pos[:6]
     end = int(pos) + int(length) - 1
     # corrects for motif overhanging start
-    if pos < 1:
+    if int(pos) < 1:
         pos = 1
     # corrects for motif overhanging end
     if sequence.endswith("#"):
