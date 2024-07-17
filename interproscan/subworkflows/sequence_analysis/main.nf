@@ -224,8 +224,8 @@ workflow SEQUENCE_ANALYSIS {
                 params.members.prints.switches,
                 params.members.prints.release,
                 [
-                    params.members.prints.postprocess.hierarchy,
-                    params.members.prints.postprocess.kdat
+                    params.members.prints.data.hierarchy,
+                    params.members.prints.data.kdat
                 ]
             ]
 
@@ -432,7 +432,7 @@ workflow SEQUENCE_ANALYSIS {
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
-            PRINTS_PARSER.out
+            PRINTS_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
@@ -450,7 +450,7 @@ workflow SEQUENCE_ANALYSIS {
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
-            PRINTS_PARSER.out
+            PRINTS_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
