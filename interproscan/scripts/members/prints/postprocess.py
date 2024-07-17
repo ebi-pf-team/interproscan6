@@ -103,12 +103,10 @@ def parse_hierarchy(hierarchy: str) -> dict:
                 model_acc = row[1]
                 evalue_cutoff = row[2]
                 min_motif_count = row[3]
-                hierarchical_rel = row[4].strip("\n")
-                is_domain = False
-                if hierarchical_rel == "":
-                    is_domain = True
-                else:
-                    hierarchical_rel = list([hierarchical_rel.replace(",", ", ")])
+                hierarchical_rel = row[4]
+                is_domain = not hierarchical_rel
+                if not is_domain:
+                    hierarchical_rel = hierarchical_rel.split(",")
                 hierarchymap[model_id] = {
                     "model_acc": model_acc,
                     "evalue_cutoff": evalue_cutoff,
