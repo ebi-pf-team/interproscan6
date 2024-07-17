@@ -48,6 +48,10 @@ include {
     SMART_FILTER_MATCHES;
 } from "$projectDir/interproscan/modules/hmmer/filter/main"
 include {
+    PRINTS_RUNNER;
+    PRINTS_PARSER;
+} from "$projectDir/interproscan/modules/prints/main"
+include {
     PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER
 } from "$projectDir/interproscan/modules/prosite/pfsearch/runner/main"
 include {
@@ -63,10 +67,6 @@ include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER;
 } from "$projectDir/interproscan/modules/signalp/main"
-include {
-    PRINTS_RUNNER;
-    PRINTS_PARSER;
-} from "$projectDir/interproscan/modules/prints/main"
 
 
 workflow SEQUENCE_ANALYSIS {
@@ -218,6 +218,16 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."${member}".postprocess.data,
                 ]
             ]
+        prints: member == 'prints'
+            return [
+                params.members.prints.data.pval,
+                params.members.prints.switches,
+                params.members.prints.release,
+                [
+                    params.members.prints.postprocess.hierarchy,
+                    params.members.prints.postprocess.kdat
+                ]
+            ]
 
         prosite_patterns: member == "prosite_patterns"
             return [
@@ -244,16 +254,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.members.signalp.switches,
                 params.members.signalp.data.pvalue,
                 params.members.signalp.release
-            ]
-        prints: member == 'prints'
-            return [
-                params.members.prints.data.pval,
-                params.members.prints.switches,
-                params.members.prints.release,
-                [
-                    params.members.prints.postprocess.hierarchy,
-                    params.members.prints.postprocess.kdat
-                ]
             ]
     }.set { member_params }
 
@@ -398,6 +398,11 @@ workflow SEQUENCE_ANALYSIS {
     CDD_POSTPROCESS(CDD_RUNNER.out)
     CDD_PARSER(CDD_POSTPROCESS.out)
 
+    // PRINTS
+    runner_prints_params = fasta.combine(member_params.prints)
+    PRINTS_RUNNER(runner_prints_params)
+    PRINTS_PARSER(PRINTS_RUNNER.out)
+
     // PROSITE Patterns (uses pfscanV3)
     runner_patterns = fasta.combine(member_params.prosite_patterns)
     PROSITE_PATTERNS_RUNNER(runner_patterns)
@@ -413,11 +418,6 @@ workflow SEQUENCE_ANALYSIS {
     SIGNALP_RUNNER(runner_signalp_params)
     SIGNALP_PARSER(SIGNALP_RUNNER.out)
 
-    // PRINTS
-    runner_prints_params = fasta.combine(member_params.prints)
-    PRINTS_RUNNER(runner_prints_params)
-    PRINTS_PARSER(PRINTS_RUNNER.out)
-
     /*
     Gather the results
     */
@@ -432,11 +432,11 @@ workflow SEQUENCE_ANALYSIS {
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
+            PRINTS_PARSER.out
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
-            SUPERFAMILY_PARSER.out,
-            PRINTS_PARSER.out
+            SUPERFAMILY_PARSER.out
         )
         .set { parsed_results }
     }
@@ -450,11 +450,11 @@ workflow SEQUENCE_ANALYSIS {
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
+            PRINTS_PARSER.out
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
-            SUPERFAMILY_PARSER.out,
-            PRINTS_PARSER.out
+            SUPERFAMILY_PARSER.out
         )
         .set { parsed_results }
     }
