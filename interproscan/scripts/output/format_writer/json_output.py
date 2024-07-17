@@ -60,10 +60,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
 
                     if match_data['member_db'].upper() == "PRINTS":
                         if description is None:
-                            try:
-                                description = entry["description"]
-                            except KeyError:
-                                description = "-"
+                            description = entry["description"]
 
                     signature = {
                         "accession": accession,
