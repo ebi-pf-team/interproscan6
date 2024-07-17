@@ -93,6 +93,30 @@ process HAMAP_HMMER_RUNNER {
 }
 
 
+process PIRSF_HMMER_RUNNER {
+    label 'hmmer_runner'
+
+    input:
+        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
+    /*
+    No -Z number was provided in i5, so migrating from hmmscan to hmmsearch
+    results in a chnage in the E-values, so we have to keep with hmmscan
+    for now.
+    */
+
+    output:
+        path "${release}._.${member}._.out"
+        path "${release}._.${member}._.dtbl"
+        val postprocessing_params
+
+    script:
+    """
+    /opt/hmmer3/bin/hmmpress ${hmm}
+    /opt/hmmer3/bin/hmmscan ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl ${hmm} ${fasta}
+    """
+}
+
+
 process SMART_HMMER2_RUNNER {
     label 'hmmer_2_runner'
 

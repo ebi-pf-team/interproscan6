@@ -1,9 +1,12 @@
+/*
+    This processes invoke scripts that parser the output from HMMER
+    (hmmsearch, hmmscan, hmmpfam) into the IPS6 JSON structure.
+*/
 process HMMER_PARSER {
     label 'analysis_parser'
 
     input:
     path out
-    val postprocessing_params
 
     output:
     path "hmmer_parsed_${out}.json"
@@ -39,19 +42,17 @@ process HMMER2_PARSER {
 }
 
 
-process SUPERFAMILY_PARSER {
+process HMMER_SCAN_PARSER {
     label 'analysis_parser'
 
     input:
-    path ass3_out
-    path hmm_lib
+    path out
 
     output:
-    path "superfamily_parsed_*"
+    path "hmmer_parsed_${out}.json"
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/members/superfamily/parse_superfamily_out.py \\
-        ${hmm_lib} ${ass3_out} > superfamily_parsed_${ass3_out}.json
+    python3 $projectDir/interproscan/scripts/hmmer/parser_scan_out.py ${out} > hmmer_parsed_${out}.json
     """
 }

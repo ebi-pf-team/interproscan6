@@ -24,10 +24,13 @@ def get_accession_regex(appl: str) -> re.Pattern:
         return re.compile(r"^(Accession:|Query:|Query sequence:)\s+((TIGR|NF)\d+)\.\d+$")
     if appl.upper() == "PANTHER":
         return re.compile(r"^(Accession:|Query:|Query sequence:)\s+(PTHR[^\s]+)\s*\[M=\d+\]$")
-    if appl.upper() == "SFLD":
-        return re.compile(r"^(Accession:|Query:|Query sequence:)\s+(SFLD[^\s]+)\s*$")
     if appl.upper() == "PFAM":
         return re.compile(r"(^[^:]*:)\s+(\w+).*$")
+    if appl.upper() == "PIRSF":
+        return re.compile(r"^(Accession:)\s+(PIRSF\d+)$")
+    if appl.upper() == "SFLD":
+        return re.compile(r"^(Accession:|Query:|Query sequence:)\s+(SFLD[^\s]+)\s*$")
+
 
 
 def parse(out_file: str) -> dict:

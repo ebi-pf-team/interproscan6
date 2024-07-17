@@ -12,6 +12,7 @@ MATCH_ELEMENT = {
     'NCBIFAM': 'hmmer3-match',
     'PANTHER': 'hmmer3-match',
     'PFAM': 'hmmer3-match',
+    'PIRSF': 'hmmer3-match',
     'SFLD': 'hmmer3-match',
     'SMART': 'hmmer2-match',
     'SUPERFAMILY': 'hmmer3-match',
@@ -158,12 +159,26 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("env-start", str(location["envelopeStart"]))
                         location_elem.set("score", str(location["score"]))
                         location_elem.set("evalue", str(location["evalue"]).upper())
-                        location_elem.set("hmm-start", str(location["hmmStart"]))
-                        location_elem.set("hmm-end", str(location["hmmEnd"]))
+
+                        if match_data['member_db'].upper() == 'PIRSF':
+                            # PIRSF uses the ali from/to for the hmmstart/end
+                            location_elem.set("hmm-start", str(location["start"]))
+                            location_elem.set("hmm-end", str(location["end"]))
+                        else:
+                            location_elem.set("hmm-start", str(location["hmmStart"]))
+                            location_elem.set("hmm-end", str(location["hmmEnd"]))
+
                         location_elem.set("hmm-length", str(location["hmmLength"]))
                         location_elem.set("hmm-bounds", str(location["hmmBounds"]))
-                        location_elem.set("start", str(location["start"]))
-                        location_elem.set("end", str(location["end"]))
+
+                        if match_data['member_db'].upper() == 'PIRSF':
+                            # PIRSF uses the env from/to for the start/end
+                            location_elem.set("start", str(location["envelopeStart"]))
+                            location_elem.set("end", str(location["envelopeEnd"]))
+                        else:
+                            location_elem.set("start", str(location["start"]))
+                            location_elem.set("end", str(location["end"]))
+
                         location_elem.set("representative", str(location["representative"]))
                         try:
                             location_elem.set("alignment", str(location["alignment"]))
