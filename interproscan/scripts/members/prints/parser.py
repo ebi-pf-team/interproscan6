@@ -114,9 +114,20 @@ def process_3tb(line):
     motifnum = int(line[2])
     idscore = line[5]
     pvalue = line[7]
+    sequence = line[8]
     length = line[9]
-    pos = line[11]
+    pos = int(line[11])
     end = int(pos) + int(length) - 1
+    # corrects for motif overhanging start
+    if pos < 1:
+        pos = 1
+    # corrects for motif overhanging end
+    if sequence.endswith("#"):
+        motiflength = len(sequence)
+        indexcheck = motiflength - 1
+        while sequence[indexcheck] == "#":
+            indexcheck -= 1
+        end = end - (motiflength - indexcheck) + 1
     return motifname, motifnum, idscore, pvalue, pos, end
 
 
