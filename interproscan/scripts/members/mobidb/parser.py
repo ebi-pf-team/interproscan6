@@ -1,14 +1,15 @@
-import args
+import json
 import re
+import sys
 
 END_OF_RECORD_MARKER = "//"
 PROTEIN_ID_LINE_START = '>'
 DOMAIN_LINE_PATTERN = re.compile(r"^(\S+)\s+(\d+)\s+(\d+).*$")
 
 
-def parse(input_file, library, release):
+def parse(input_file, release):
     match_data = {}
-    raw_matches = parse_file_input(input_file, library, release)
+    raw_matches = parse_file_input(input_file, release)
 
     for raw_match in raw_matches:
         sequence_id = raw_match["sequence_identifier"]
@@ -19,7 +20,7 @@ def parse(input_file, library, release):
 
     return match_data
 
-def parse_file_input(input_file, library, release):
+def parse_file_input(input_file, release):
     matches = []
     with open(input_file, 'r') as reader:
         for line in reader:
@@ -35,7 +36,7 @@ def parse_file_input(input_file, library, release):
                 feature = match.group(4).strip() if match.group(4) else ""
                 matches.append({
                     "sequence_identifier": sequence_identifier,
-                    "member": library,
+                    "member": "mobidb",
                     "release": release,
                     "location_start": location_start,
                     "location_end": location_end,
@@ -46,7 +47,7 @@ def parse_file_input(input_file, library, release):
 
 def main():
     args = sys.argv[1:]
-    matches = parse(args[0], args[1], args[2])
+    matches = parse(args[0], args[1])
 
     print(json.dumps(matches, indent=4))
 

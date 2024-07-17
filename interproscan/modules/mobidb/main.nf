@@ -6,11 +6,10 @@ process MOBIDB_RUNNER {
     no switches needed for idrpred for now
     */
     input:
-    tuple path(fasta), val(library), val(release), val(switches)
+    tuple path(fasta), val(release), val(switches)
 
     output:
     path "idrpred_out"
-    val library
     val release
 
     script:
@@ -25,7 +24,6 @@ process MOBIDB_FILTER {
 
     input:
     path idrpred_out
-    val library
     val release
 
     output:
@@ -33,7 +31,7 @@ process MOBIDB_FILTER {
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/members/mobidb/mobidb_filter.py \\
-        ${idrpred_out} ${library} ${release} > mobidb_filtered.json
+    python3 $projectDir/interproscan/scripts/members/mobidb/parser.py \\
+        ${idrpred_out} ${release} > mobidb_filtered.json
     """
 }

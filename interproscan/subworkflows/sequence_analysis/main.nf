@@ -446,7 +446,8 @@ workflow SEQUENCE_ANALYSIS {
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
-            SUPERFAMILY_FILTER_MATCHES.out
+            SUPERFAMILY_PARSER.out,
+            MOBIDB_FILTER.out
         )
         .set { parsed_results }
     }
@@ -464,7 +465,8 @@ workflow SEQUENCE_ANALYSIS {
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
-            SUPERFAMILY_FILTER_MATCHES.out
+            SUPERFAMILY_PARSER.out,
+            MOBIDB_FILTER.out
         )
         .set { parsed_results }
     }
