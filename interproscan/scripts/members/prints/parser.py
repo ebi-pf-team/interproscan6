@@ -48,6 +48,13 @@ def parse_hierarchy(hierarchy: str) -> dict:
 
 
 def parse_prints(prints_out: str, hierarchy_map: dict, version: str) -> dict:
+    '''
+Extracts fingerprint match info from prints output.
+Sn line: protein_id
+2TBN/2TBH lines: fingerprint match summary values
+3TBN/3TBH lines: fingerprint motif match values
+Other lines: blank or not required
+    '''
     results = {}
     with open(prints_out) as f:
         for line in f:
@@ -56,25 +63,37 @@ def parse_prints(prints_out: str, hierarchy_map: dict, version: str) -> dict:
                 idline = idline.strip("\n")
                 protein_id = idline.split(" ")[0]
             if line.startswith(("2TBN", "2TBH")):
-                fingerprint, nummotif, sumid, aveid, profscore, ppvalue, evalue, graphscan = process_2tb(line)
+                fingerprint, nummotif, evalue, graphscan = process_2tb(line)
                 # hierarchy map to get model ac
                 if fingerprint in hierarchy_map:
                     model_acc = hierarchy_map[fingerprint]["model_acc"]
-                match = {"accession": model_acc, "name": fingerprint, "member_db": "PRINTS", "version": version,
-                          "evalue": float(evalue), "num_motif": nummotif, "graphscan": graphscan,
-                          "model-ac": model_acc, "locations": []}
+                match = {"accession": model_acc,
+                         "name": fingerprint,
+                         "member_db": "PRINTS",
+                         "version": version,
+                         "evalue": float(evalue),
+                         "num_motif": nummotif,
+                         "graphscan": graphscan,
+                         "model-ac": model_acc,
+                         "locations": []}
                 if protein_id in results:
                     results[protein_id].append(match)
                 else:
                     results[protein_id] = [match]
 
             if line.startswith(("3TBN", "3TBH")):
-                motifname, motifnum, idscore, pfscore, pvalue, sequence, length, low, pos, high, end = process_3tb(line)
+                motifname, motifnum, idscore, pvalue, pos, end = process_3tb(line)
                 for match in results[protein_id]:
                     if motifname in match["name"]:
-                        match["locations"].append(
-                            {"motifNumber": int(motifnum), "pvalue": pvalue, "score": idscore, "start": pos, "end": end,
-                             "representative": "false", "evalue": match["evalue"], "model_id": match["accession"]})
+                        match["locations"].append({
+                            "motifNumber": int(motifnum),
+                            "pvalue": pvalue,
+                            "score": idscore,
+                            "start": pos,
+                            "end": end,
+                            "representative": "false",
+                            "evalue": match["evalue"],
+                            "model_id": match["accession"]})
 
     return results
 
@@ -84,13 +103,9 @@ def process_2tb(line):
     line = line.split("\t")
     fingerprint = line[1]
     num_motifs = line[2] + line[3] + line[4]
-    sumid = line[5]
-    aveid = line[6]
-    profscore = line[7]
-    ppvalue = line[8]
     evalue = line[9]
     graphscan = line[10]
-    return fingerprint, num_motifs, sumid, aveid, profscore, ppvalue, evalue, graphscan
+    return fingerprint, num_motifs, evalue, graphscan
 
 
 def process_3tb(line):
@@ -99,22 +114,19 @@ def process_3tb(line):
     motifname = line[1]
     motifnum = int(line[2])
     idscore = line[5]
-    pfscore = line[6]
     pvalue = line[7]
-    sequence = line[8]
     length = line[9]
-    low = line[10]
     pos = line[11]
-    high = line[12]
     end = int(pos) + int(length) - 1
-    return motifname, motifnum, idscore, pfscore, pvalue, sequence, length, low, pos, high, end
+    return motifname, motifnum, idscore, pvalue, pos, end
 
 
 def sort_results(results: dict) -> dict:
     for protein_id in results:
         results[protein_id].sort(key=lambda d: (d["evalue"]))
         for model in results[protein_id]:
-            model["locations"].sort(key=lambda d: (d["model_id"], d["motifNumber"], d["start"], d["end"]))
+            model["locations"].sort(key=lambda d:
+            (d["model_id"], d["motifNumber"], d["start"], d["end"]))
     return results
 
 
@@ -155,7 +167,9 @@ def process_results(prints_dict: dict) -> dict:
                 location.pop("evalue")
                 location.pop("model_id")
                 location["location-fragments"] = [
-                    {"start": int(location["start"]), "end": int(location["end"]), "dc-status": "CONTINUOUS"}
+                    {"start": int(location["start"]),
+                     "end": int(location["end"]),
+                     "dc-status": "CONTINUOUS"}
                 ]
             rebuild[protein] = {match["accession"]: match}
 
