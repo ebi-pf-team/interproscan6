@@ -86,8 +86,7 @@ workflow SEQUENCE_ANALYSIS {
 
         /*
         Member databases that use HMMER:
-        The post processin
-    output:g of some applications (e.g. SFLD) hits requires additional files
+        The post processing of some applications (e.g. SFLD) hits requires additional files
         and parameters relative to the generic hmmer runner and parser
         */
         antifam: member == 'antifam'
