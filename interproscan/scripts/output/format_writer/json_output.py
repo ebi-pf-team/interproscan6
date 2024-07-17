@@ -97,11 +97,23 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         if len(match_data['locations']) > 0:
                             locations = []
                             for location in match_data['locations']:
-                                info = {
-                                    "start": int(location["start"]),
-                                    "end": int(location["end"]),
-                                    "representative": boolean_map.get(location["representative"].lower(), False)
-                                }
+                                # PIRSF usse the envelope start and stop
+                                if match_data['member_db'].upper() == "PIRSF":
+                                    info = {
+                                        "start": int(location["envelopeStart"]),
+                                        "end": int(location["envelopeEnd"])
+                                    }
+                                else:
+                                    info = {
+                                        "start": int(location["start"]),
+                                        "end": int(location["end"])
+                                    }
+
+                                info["representative"] = boolean_map.get(
+                                    location["representative"].lower(),
+                                    False
+                                )
+
                                 if match_data['member_db'].upper() == "CDD":
                                     info["evalue"] = float(location["evalue"])
                                     info["score"] = float(location["score"])
@@ -117,6 +129,20 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["hmmBounds"] = location["hmmBounds"]
                                     info["envelopeStart"] = int(location["envelopeStart"])
                                     info["envelopeEnd"] = int(location["envelopeEnd"])
+
+                                elif match_data['member_db'].upper() == "PIRSF":
+                                    # PIRSF uses the ali from (start) and ali to (end)
+                                    # for the hmmStart and hmmEnd
+                                    # and env from/to for the start and end
+                                    info["evalue"] = float(location["evalue"])
+                                    info["score"] = float(location["score"])
+                                    info["hmmStart"] = int(location["start"])
+                                    info["hmmEnd"] = int(location["end"])
+                                    info["hmmLength"] = int(location["hmmLength"])
+                                    info["hmmBounds"] = location["hmmBounds"]
+                                    info["envelopeStart"] = int(location["envelopeStart"])
+                                    info["envelopeEnd"] = int(location["envelopeEnd"])
+                                    info["postProcessed"] = boolean_map.get(location["postProcessed"].lower())
 
                                 elif match_data['member_db'].upper() == "PROSITE_PROFILES":
                                     info["score"] = float(location["score"])

@@ -56,6 +56,12 @@ def tsv_output(seq_matches: dict, output_path: str):
                         evalue = "-"
                         ali_from = location["start"]
                         ali_to = location["end"]
+                    elif match_db.upper() == "PIRSF":
+                        sig_acc = match["accession"]
+                        status = "T"
+                        evalue = location["evalue"]
+                        ali_from = location["envelopeStart"]
+                        ali_to = location["envelopeEnd"]
                     elif match_db.upper() == "PRINTS":
                         sig_acc = match["accession"]
                         status = "T"

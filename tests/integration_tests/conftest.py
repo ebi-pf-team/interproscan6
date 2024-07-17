@@ -37,7 +37,7 @@ def expected_output_path(test_output_dir):
 
 @pytest.fixture
 def applications():
-    return 'SuperFamily' # AntiFam,CDD,FunFam,Gene3D,HAMAP,NCBIfam,Panther,Pfam,PROSITE_Profiles,PROSITE_Patterns,SFLD,SMART,
+    return 'AntiFam,CDD,FunFam,Gene3D,HAMAP,NCBIfam,Panther,Pfam,PIRSF,PROSITE_Patterns,PROSITE_Profiles,SFLD,SMART,SUPERFAMILY'
 
 
 @pytest.fixture
