@@ -18,7 +18,7 @@ process PRINTS_RUNNER {
 }
 
 
-process PRINTS_POSTPROCESS {
+process PRINTS_PARSER {
     label 'analysis_parser'
 
     input:
@@ -28,33 +28,14 @@ process PRINTS_POSTPROCESS {
 
 
     output:
-    path "prints_processed.out"
-
-    script:
-    """
-    python3 $projectDir/interproscan/scripts/members/prints/postprocess.py\
-    prints_output.txt\
-    ${postprocessing_params[0]}\
-    ${release} \
-    > prints_processed.out
-    """
-
-}
-
-
-process PRINTS_PARSER {
-    label 'analysis_parser'
-
-    input:
-    path "processed_prints.out"
-
-    output:
     path "prints_parsed.json"
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/members/prints/parser.py \
-    processed_prints.out \
+    python3 $projectDir/interproscan/scripts/members/prints/parser.py\
+    prints_output.txt\
+    ${postprocessing_params[0]}\
+    ${release} \
     > prints_parsed.json
     """
 
