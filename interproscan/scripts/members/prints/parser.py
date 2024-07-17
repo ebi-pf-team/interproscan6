@@ -81,7 +81,7 @@ Other lines: blank or not required
                 else:
                     results[protein_id] = [match]
 
-            if line.startswith(("3TBN", "3TBH")):
+            elif line.startswith(("3TBN", "3TBH")):
                 motifname, motifnum, idscore, pvalue, pos, end = process_3tb(line)
                 for match in results[protein_id]:
                     if motifname in match["name"]:
@@ -99,8 +99,7 @@ Other lines: blank or not required
 
 
 def process_2tb(line):
-    line = re.sub(r"\s+", "\t", line)
-    line = line.split("\t")
+    line = line.split()
     fingerprint = line[1]
     num_motifs = line[2] + line[3] + line[4]
     evalue = line[9]
