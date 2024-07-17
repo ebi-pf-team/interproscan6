@@ -72,7 +72,7 @@ class QueryProtein:
 
 
 class ModelHit:
-    """Represent a SMART signature"""
+    """Represent a signature"""
     def __init__(self):
         self.model_id = None
         self.evalue = None
