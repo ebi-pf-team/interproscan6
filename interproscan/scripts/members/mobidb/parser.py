@@ -6,9 +6,9 @@ PROTEIN_ID_LINE_START = '>'
 DOMAIN_LINE_PATTERN = re.compile(r"^(\S+)\s+(\d+)\s+(\d+).*$")
 
 
-def parse(input_file, signature_library, signature_library_release):
+def parse(input_file, library, release):
     match_data = {}
-    raw_matches = parse_file_input(input_file, signature_library, signature_library_release)
+    raw_matches = parse_file_input(input_file, library, release)
 
     for raw_match in raw_matches:
         sequence_id = raw_match["sequence_identifier"]
@@ -19,7 +19,7 @@ def parse(input_file, signature_library, signature_library_release):
 
     return match_data
 
-def parse_file_input(input_file, signature_library, signature_library_release):
+def parse_file_input(input_file, library, release):
     matches = []
     with open(input_file, 'r') as reader:
         for line in reader:
@@ -35,8 +35,8 @@ def parse_file_input(input_file, signature_library, signature_library_release):
                 feature = match.group(4).strip() if match.group(4) else ""
                 matches.append({
                     "sequence_identifier": sequence_identifier,
-                    "signature_library": signature_library,
-                    "signature_library_release": signature_library_release,
+                    "member": library,
+                    "release": release,
                     "location_start": location_start,
                     "location_end": location_end,
                     "feature": feature
@@ -45,15 +45,9 @@ def parse_file_input(input_file, signature_library, signature_library_release):
 
 
 def main():
-    # args = sys.argv[1:]
-    # matches = parse(args[0], args[1], args[2])
-    #
-    # print(json.dumps(matches, indent=4))
+    args = sys.argv[1:]
+    matches = parse(args[0], args[1], args[2])
 
-    signature_library = "MobiDB"
-    signature_library_release = ""
-    input_file = ""
-    matches = parse(input_file, signature_library, signature_library_release)
     print(json.dumps(matches, indent=4))
 
 

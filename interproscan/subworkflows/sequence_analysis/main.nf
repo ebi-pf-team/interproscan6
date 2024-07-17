@@ -234,7 +234,7 @@ workflow SEQUENCE_ANALYSIS {
                 ]
             ]
 
-        cdd: member == "mobidb"
+        mobidb: member == "mobidb"
             return [
                 params.members."${member}".release,
                 params.members."${member}".switches,

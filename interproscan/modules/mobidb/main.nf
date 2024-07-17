@@ -1,17 +1,21 @@
 process MOBIDB_RUNNER {
+    container 'docker.io/library/idrpred'
     label 'mobidb_runner'
 
+    /*
+    no switches needed for idrpred for now
+    */
     input:
-    tuple path(fasta), val(library), val(release), val(switches), val(postprocessing_params)
+    tuple path(fasta), val(library), val(release), val(switches)
 
     output:
     path "idrpred_out"
+    val library
     val release
-    val postprocessing_params
 
     script:
     """
-    /opt/mobidb/idrpred ${switches} --infile ${fasta} --outfile idrpred_out
+    idrpred ${fasta} idrpred_out
     """
 }
 
@@ -21,6 +25,8 @@ process MOBIDB_FILTER {
 
     input:
     path idrpred_out
+    val library
+    val release
 
     output:
     path "mobidb_filtered.json"
@@ -28,6 +34,6 @@ process MOBIDB_FILTER {
     script:
     """
     python3 $projectDir/interproscan/scripts/members/mobidb/mobidb_filter.py \\
-        ${idrpred_out} > mobidb_filtered.json
+        ${idrpred_out} ${library} ${release} > mobidb_filtered.json
     """
 }
