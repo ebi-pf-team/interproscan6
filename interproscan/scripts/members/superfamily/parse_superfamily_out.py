@@ -48,6 +48,8 @@ def parse(ass3_out_path: str, hmmlib_info: dict) -> dict:
                     fragments.sort(key=lambda x: x['start'])
                     fragments[0]['dc-status'] = "C_TERMINAL_DISC"
                     fragments[-1]['dc-status'] = "N_TERMINAL_DISC"
+                    for i in range(1, len(fragments) - 1):
+                        fragments[i]['dc-status'] = "NC_TERMINAL_DISC"
                     new_location = {
                         'start': fragments[0]['start'],
                         'end': fragments[-1]['end'],
