@@ -16,6 +16,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
         }
         if 'matches' in data and data['matches']:
             for match_key, match_data in data['matches'].items():  # match_key == sig_Acc
+                print(match_key, match_data)
                 if match_key == "signal_peptide":
                     match = {
                         "signature": match_key,

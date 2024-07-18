@@ -19,19 +19,19 @@ process MOBIDB_RUNNER {
 }
 
 
-process MOBIDB_FILTER {
-    label 'analysis_filter'
+process MOBIDB_PARSER {
+    label 'analysis_parser'
 
     input:
     path idrpred_out
     val release
 
     output:
-    path "mobidb_filtered.json"
+    path "mobidb_parsed.json"
 
     script:
     """
     python3 $projectDir/interproscan/scripts/members/mobidb/parser.py \\
-        ${idrpred_out} ${release} > mobidb_filtered.json
+        ${idrpred_out} ${release} > mobidb_parsed.json
     """
 }
