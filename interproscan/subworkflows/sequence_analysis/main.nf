@@ -53,7 +53,7 @@ include {
 } from "$projectDir/interproscan/modules/hmmer/filter/main"
 include {
     MOBIDB_RUNNER;
-    MOBIDB_FILTER;
+    MOBIDB_PARSER;
 } from "$projectDir/interproscan/modules/mobidb/main"
 include {
     PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER
@@ -410,7 +410,7 @@ workflow SEQUENCE_ANALYSIS {
     // MOBIDB
     runner_mobidb_params = fasta.combine(member_params.mobidb)
     MOBIDB_RUNNER(runner_mobidb_params)
-    MOBIDB_FILTER(MOBIDB_RUNNER.out)
+    MOBIDB_PARSER(MOBIDB_RUNNER.out)
 
     // PROSITE Patterns (uses pfscanV3)
     runner_patterns = fasta.combine(member_params.prosite_patterns)
@@ -442,7 +442,7 @@ workflow SEQUENCE_ANALYSIS {
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
-            MOBIDB_FILTER.out,
+            MOBIDB_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
@@ -461,7 +461,7 @@ workflow SEQUENCE_ANALYSIS {
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
-            MOBIDB_FILTER.out,
+            MOBIDB_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
