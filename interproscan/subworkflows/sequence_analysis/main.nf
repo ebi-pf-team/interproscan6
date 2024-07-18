@@ -409,7 +409,7 @@ workflow SEQUENCE_ANALYSIS {
     // COILS
     runner_coils_params = fasta.combine(member_params.coils)
     COILS_RUNNER(runner_coils_params)
-    COILS_PARSER(COILS_RUNNER.out)
+    //COILS_PARSER(COILS_RUNNER.out)
 
     // PROSITE Patterns (uses pfscanV3)
     runner_patterns = fasta.combine(member_params.prosite_patterns)
@@ -441,7 +441,6 @@ workflow SEQUENCE_ANALYSIS {
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
-            COILS_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
@@ -460,7 +459,6 @@ workflow SEQUENCE_ANALYSIS {
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
-            COILS_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
