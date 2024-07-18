@@ -1,6 +1,6 @@
-FROM python:3.8-slim
-ENV TZ=Europe/London
-WORKDIR /opt/mobidb
+FROM python:3.12
 
-RUN apt-get update -y && apt-get upgrade -y && apt-get install -y procps git
-RUN pip install git+https://github.com/matthiasblum/idrpred
+RUN apt-get update && apt-get install -y git
+RUN pip install --no-cache-dir git+https://github.com/matthiasblum/idrpred
+
+ENTRYPOINT ["idrpred"]

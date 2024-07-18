@@ -2,46 +2,28 @@ import json
 import re
 import sys
 
-END_OF_RECORD_MARKER = "//"
-PROTEIN_ID_LINE_START = '>'
-DOMAIN_LINE_PATTERN = re.compile(r"^(\S+)\s+(\d+)\s+(\d+).*$")
-
 
 def parse(input_file, release):
-    match_data = {}
-    raw_matches = parse_file_input(input_file, release)
-
-    for raw_match in raw_matches:
-        sequence_id = raw_match["sequence_identifier"]
-        if sequence_id in match_data:
-            match_data[sequence_id].append(raw_match)
-        else:
-            match_data[sequence_id] = [raw_match]
-
-    return match_data
-
-def parse_file_input(input_file, release):
-    matches = []
+    matches = {}
     with open(input_file, 'r') as reader:
         for line in reader:
-            line = line.strip()
-            if line.startswith(PROTEIN_ID_LINE_START) or line == END_OF_RECORD_MARKER:
-                continue
+            line_data = line.split()
+            sequence_id = line_data[0]
+            location_start = int(line_data[1])
+            location_end = int(line_data[2])
+            feature = line_data[3] if line_data[3] else ""
+            info = {
+                "member": "mobidb",
+                "release": release,
+                "location_start": location_start,
+                "location_end": location_end,
+                "feature": feature
+            }
+            try:
+                matches[sequence_id].append(info)
+            except KeyError:
+                matches[sequence_id] = [info]
 
-            match = DOMAIN_LINE_PATTERN.match(line)
-            if match:
-                sequence_identifier = match.group(1)
-                location_start = int(match.group(2))
-                location_end = int(match.group(3))
-                feature = match.group(4).strip() if match.group(4) else ""
-                matches.append({
-                    "sequence_identifier": sequence_identifier,
-                    "member": "mobidb",
-                    "release": release,
-                    "location_start": location_start,
-                    "location_end": location_end,
-                    "feature": feature
-                })
     return matches
 
 
