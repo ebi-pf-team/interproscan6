@@ -1,17 +1,17 @@
 process COILS_RUNNER {
-    container 'docker.io/library/coils'
+    container 'docker.io/biocontainers/ncoils:v2002-7-deb_cv1'
     label 'coils_runner'
 
     input:
-    tuple path(fasta), val(release) val(switches)
+    tuple path(fasta), val(release), val(switches)
 
     output:
-    path "coils_out.txt"
-    val version
+    path "coil_out"
+    val release
 
     script:
     """
-    ncoils ${switches} < ${fasta} > coils_out.txt
+    ncoils ${switches} < ${fasta} &> coil_out
     """
 }
 
