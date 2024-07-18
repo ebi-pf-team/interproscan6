@@ -237,8 +237,7 @@ workflow SEQUENCE_ANALYSIS {
         mobidb: member == "mobidb"
             return [
                 params.members."${member}".release,
-                params.members."${member}".switches,
-                [] // no post-processing
+                params.members."${member}".switches
             ]
 
         prosite_patterns: member == "prosite_patterns"

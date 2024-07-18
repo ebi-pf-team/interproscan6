@@ -9,12 +9,12 @@ process MOBIDB_RUNNER {
     tuple path(fasta), val(release), val(switches)
 
     output:
-    path "idrpred_out"
+    path "idrpred_out.tsv"
     val release
 
     script:
     """
-    idrpred ${fasta} idrpred_out
+    idrpred ${fasta} idrpred_out.tsv
     """
 }
 

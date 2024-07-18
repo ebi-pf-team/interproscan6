@@ -32,7 +32,7 @@ def current_output_path(test_output_dir):
 
 @pytest.fixture
 def expected_output_path(test_output_dir):
-    return test_output_dir / 'expected_output_superfamily'
+    return test_output_dir / 'expected_output_mobidb'
 
 
 @pytest.fixture
