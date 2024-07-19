@@ -52,9 +52,9 @@ include {
     SUPERFAMILY_FILTER_MATCHES;
 } from "$projectDir/interproscan/modules/hmmer/filter/main"
 include {
-    MOBIDB_RUNNER;
-    MOBIDB_PARSER;
-} from "$projectDir/interproscan/modules/mobidb/main"
+    IDRPRED_RUNNER;
+    IDRPRED_PARSER;
+} from "$projectDir/interproscan/modules/idrpred/main"
 include {
     PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER
 } from "$projectDir/interproscan/modules/prosite/pfsearch/runner/main"
@@ -234,7 +234,7 @@ workflow SEQUENCE_ANALYSIS {
                 ]
             ]
 
-        mobidb: member == "mobidb"
+        idrpred: member == "idrpred"
             return [
                 params.members."${member}".release,
                 params.members."${member}".switches
@@ -407,10 +407,10 @@ workflow SEQUENCE_ANALYSIS {
     CDD_POSTPROCESS(CDD_RUNNER.out)
     CDD_PARSER(CDD_POSTPROCESS.out)
 
-    // MOBIDB
-    runner_mobidb_params = fasta.combine(member_params.mobidb)
-    MOBIDB_RUNNER(runner_mobidb_params)
-    MOBIDB_PARSER(MOBIDB_RUNNER.out)
+    // IDRPRED (MOBIDB)
+    runner_idrpred_params = fasta.combine(member_params.idrpred)
+    IDRPRED_RUNNER(runner_idrpred_params)
+    IDRPRED_PARSER(IDRPRED_RUNNER.out)
 
     // PROSITE Patterns (uses pfscanV3)
     runner_patterns = fasta.combine(member_params.prosite_patterns)
@@ -442,7 +442,7 @@ workflow SEQUENCE_ANALYSIS {
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
-            MOBIDB_PARSER.out,
+            IDRPRED_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
@@ -462,7 +462,7 @@ workflow SEQUENCE_ANALYSIS {
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
-            MOBIDB_PARSER.out,
+            IDRPRED_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
