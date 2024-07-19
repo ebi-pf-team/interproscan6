@@ -14,7 +14,7 @@ def parse(coils_out: str, version: float) -> dict:
         for line in coils_file:
             if line.startswith(">"):
                 seq_id = line[1:].strip(">").strip("\n")
-                match = {"member_db": "Coils", "version": version, "locations": []}
+                match = {"Coils": {"member_db": "Coils", "version": version, "name": "Coils", "accession":"Coils", "locations": []}}
                 matches[seq_id] = match
 
             elif not line.startswith((">", "//", "\n")):
@@ -22,8 +22,12 @@ def parse(coils_out: str, version: float) -> dict:
                 if line:
                     location_start = line[0]
                     location_end = line[1]
-                    location = {"start": location_start, "end": location_end}
-                    matches[seq_id]["locations"].append(location)
+                    location = {"start": location_start, "end": location_end, "representative": "false", "location-fragments": [
+                    {"start": int(location_start),
+                     "end": int(location_end),
+                     "dc-status": "CONTINUOUS"}
+                ]}
+                    matches[seq_id]["Coils"]["locations"].append(location)
     return matches
 
 
