@@ -1,5 +1,4 @@
 process COILS_RUNNER {
-    container 'docker.io/biocontainers/ncoils:v2002-7-deb_cv1'
     label 'coils_runner'
 
     input:
@@ -11,7 +10,7 @@ process COILS_RUNNER {
 
     script:
     """
-    ncoils ${switches} < ${fasta} &> coil_out
+    $projectDir/bin/coils/ncoils ${switches} < ${fasta} &> coil_out
     """
 }
 
