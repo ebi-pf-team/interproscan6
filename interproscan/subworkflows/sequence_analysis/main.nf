@@ -420,7 +420,7 @@ workflow SEQUENCE_ANALYSIS {
     // COILS
     runner_coils_params = fasta.combine(member_params.coils)
     COILS_RUNNER(runner_coils_params)
-    //COILS_PARSER(COILS_RUNNER.out)
+    COILS_PARSER(COILS_RUNNER.out)
 
     // MOBIDB
     runner_mobidb_params = fasta.combine(member_params.mobidb)
@@ -462,8 +462,7 @@ workflow SEQUENCE_ANALYSIS {
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
-            SUPERFAMILY_PARSER.out,
-            MOBIDB_FILTER.out
+            SUPERFAMILY_PARSER.out
         )
         .set { parsed_results }
     }
@@ -483,8 +482,7 @@ workflow SEQUENCE_ANALYSIS {
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
-            SUPERFAMILY_PARSER.out,
-            MOBIDB_FILTER.out
+            SUPERFAMILY_PARSER.out
         )
         .set { parsed_results }
     }
