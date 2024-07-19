@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 MATCH_ELEMENT = {
     'SIGNALP': 'signal-peptide',
     'CDD': 'cdd-domain',
+    'COILS': 'coils',
     'ANTIFAM': 'hmmer3-match',
     'FUNFAM': 'hmmer3-match',
     'GENE3D': 'hmmer3-match',
@@ -56,7 +57,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     match_elem.set("graft-point", _check_null(match_data['graftPoint']))
 
                 signature_elem = ET.SubElement(match_elem, "signature")
-                if match_data['member_db'].upper() not in ['SIGNALP', 'SUPERFAMILY']:  # member db that don't have sigs, so no accs etc.
+                if match_data['member_db'].upper() not in ['SIGNALP', 'SUPERFAMILY', 'COILS']:  # member db that don't have sigs, so no accs etc.
                     signature_elem.set("ac", match_data['accession'])
                     signature_elem.set("desc", match_data['name'])
                     signature_elem.set("name", match_data['name'])
@@ -104,6 +105,12 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("representative", str(location["representative"]))
                         location_elem.set("evalue", str(location["evalue"]))
                         location_elem.set("score", str(location["score"]))
+
+                    elif match_data['member_db'].upper() == "COILS":
+                        location_elem = ET.SubElement(locations_elem, "analysis-location")
+                        location_elem.set("end", str(location["end"]))
+                        location_elem.set("start", str(location["start"]))
+                        location_elem.set("representative", str(location["representative"]))
 
                     elif match_data['member_db'].upper() == "HAMAP":
                         location_elem.set("score", str(location["score"]))
