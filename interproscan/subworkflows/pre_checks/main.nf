@@ -94,7 +94,7 @@ workflow PRE_CHECKS {
     // Check if the applications are valid
     def applications_expected = [
         'antifam', 'cdd', 'funfam', 'gene3d', 'hamap',
-        'ncbifam', 'panther', 'pfam', 'pirsf',
+        'ncbifam', 'panther', 'pfam', 'pirsf', 'pirsr',
         'prosite_patterns', 'prosite_profiles',
         'sfld', 'signalp', 'smart', 'superfamily'
     ]

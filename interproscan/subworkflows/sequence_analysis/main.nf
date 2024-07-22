@@ -10,6 +10,7 @@ include {
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
     HMMER_RUNNER_WITH_ALIGNMENTS as SFLD_HMMER_RUNNER;
+    HMMER_RUNNER_WITH_ALIGNMENTS as PIRSR_HMMER_RUNNER;
     HMMER_SCAN_RUNNER as SUPERFAMILY_HMMER_RUNNER;
     FUNFAM_HMMER_RUNNER;
     HAMAP_HMMER_RUNNER;
@@ -25,6 +26,7 @@ include {
     HMMER_PARSER as NCBIFAM_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
     HMMER_PARSER as PFAM_HMMER_PARSER;
+    HMMER_PARSER as PIRSR_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_SCAN_PARSER as PIRSF_HMMER_PARSER;
     HMMER2_PARSER;
@@ -176,6 +178,17 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".release,
                 [
                     params.members."${member}".postprocess.data
+                ]
+            ]
+
+       pirsr: member == 'pirsr'
+            return [
+                "${member}",
+                params.members."${member}".hmm,
+                params.members."${member}".switches,
+                params.members."${member}".release,
+                [
+                    params.members."${member}".postprocess.rules
                 ]
             ]
 
@@ -358,6 +371,11 @@ workflow SEQUENCE_ANALYSIS {
         PIRSF_HMMER_RUNNER.out[1],  // hmmer dtbl file -- needed to get tlen value
         PIRSF_HMMER_RUNNER.out[2]   // post-processing-params
     )
+
+    // PIRSR
+    runner_pirsr_params = fasta.combine(member_params.pirsr)
+    PIRSR_HMMER_RUNNER(runner_pirsr_params)
+    PIRSR_HMMER_PARSER(PIRSR_HMMER_RUNNER.out[0])  // hmmer.out path
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
