@@ -2,7 +2,7 @@ import json
 import sys
 
 
-def parse(input_file, release):
+def parse(input_file: str, release: str) -> dict:
     matches = {}
     with open(input_file, 'r') as reader:
         for line in reader:
