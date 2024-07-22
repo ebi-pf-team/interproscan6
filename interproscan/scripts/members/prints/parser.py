@@ -49,19 +49,19 @@ def parse_hierarchy(hierarchy: str) -> dict:
 
 def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
     '''
-Extracts fingerprint match info from prints output.
-Sn line: protein_id
-2TBN/2TBH lines: fingerprint match summary values
-3TBN/3TBH lines: fingerprint motif match values
-Other lines: blank or not required
+    Extract fingerprint match info from prints output.
+
+    Lines in the output file:
+    Sn line: protein_id
+    2TBN/2TBH lines: fingerprint match summary values
+    3TBN/3TBH lines: fingerprint motif match values
+    Other lines: blank or not required
     '''
     results = {}
     with open(prints_out) as f:
         for line in f:
             if line.startswith("Sn; "):
-                idline = line.replace("Sn; ", "")
-                idline = idline.strip("\n")
-                protein_id = idline.split(" ")[0]
+                protein_id = line.split()[1]
             if line.startswith(("2TBN", "2TBH")):
                 fingerprint, nummotif, evalue, graphscan = process_2tb(line)
                 # hierarchy map to get model ac
@@ -164,8 +164,6 @@ def select_results(sorted_res: dict, hierarchy: dict) -> dict:
                 else:
                     pass_matches[protein_id] = [match]
 
-        if protein_id not in pass_matches:
-            pass_matches[protein_id] = []
 
     return pass_matches
 
