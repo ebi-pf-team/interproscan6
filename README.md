@@ -77,6 +77,7 @@ Please provide absolute paths. You can use the `$projectDir` short cut to repres
 
 4. Build a docker `MobiDB` image (this includes the `idrpred` tool for MobiDB predictions). On `./docker_files/mobidb/` directory, run:
 
+    cd docker_files/mobidb
     docker build -t idrpred .
 
 5. [Optional] install licensed software
