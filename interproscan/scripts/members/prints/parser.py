@@ -10,7 +10,7 @@ import re
 def main():
     args = sys.argv[1:]
     hierarchy_map = parse_hierarchy(args[1])
-    results = parse_prints(args[0], hierarchy_map, args[2])
+    results = parse_prints(args[0], hierarchy_map)
     sorted_results = sort_results(results)
     selected_results = select_results(sorted_results, hierarchy_map)
     parsed_results = process_results(selected_results)
@@ -47,7 +47,7 @@ def parse_hierarchy(hierarchy: str) -> dict:
     return hierarchymap
 
 
-def parse_prints(prints_out: str, hierarchy_map: dict, version: str) -> dict:
+def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
     '''
 Extracts fingerprint match info from prints output.
 Sn line: protein_id
@@ -70,7 +70,7 @@ Other lines: blank or not required
                 match = {"accession": model_acc,
                          "name": fingerprint,
                          "member_db": "PRINTS",
-                         "version": version,
+                         "version": prints_out.split("._.")[0],
                          "evalue": float(evalue),
                          "num_motif": nummotif,
                          "graphscan": graphscan,
