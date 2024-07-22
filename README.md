@@ -80,6 +80,36 @@ Please provide absolute paths. You can use the `$projectDir` short cut to repres
 By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
 because they contain licensed components. In order to activate these analyses please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
 
+## Singularity
+
+Not all systems support using Docker, therefore, the `interproscan6` Docker image will need to be 
+converted to another virtualization system. Singularity is an alternative container runtime to
+Docker. Singularity does not require rooot privileges or a separate daemon process, unlike Docker.
+
+You will need Singularity installed on the system you will use to run the pipeline.
+
+1. Build the `interproscan6` Docker image as set in step 3 in the general set-up instructions above.
+
+2. Save the `interproscan6` Docker image to a `tar` archive.
+```bash
+docker save interproscan6 > interproscan6.tar
+```
+
+3. Build a Singularity image from the archived Docker image:
+```
+singularity build interproscan6.img docker-archive://interproscan6.tar
+```
+
+Keep the Singularity image (`interproscan6.img`) in the root of the `InterProScan6` repository 
+on the sytem you will use to run the pipeline. For example, you can create an `interproscan6.img` on your 
+local laptop, and upload it to the HPC you will use to run `InterProScan6`.
+
+When running `InterProScan6` with Singularity include `singularity` in the `-profiles` option. E.g.:
+```bash
+nextflow run interproscan.nf --input my_seqs.fasta -profiles local,singularity
+```
+The order the profiles are listed after `-profiles` does **not** matter.
+
 # Using `InterProScan6`
 
 ## Quick start
