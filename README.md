@@ -100,6 +100,13 @@ docker save interproscan6 > interproscan6.tar
 singularity build interproscan6.img docker-archive://interproscan6.tar
 ```
 
+4. Test the image on the system you will use to run the pipeline.
+```bash
+singularity shell interproscan6.img
+  $ ls
+  $ exit
+```
+
 Keep the Singularity image (`interproscan6.img`) in the root of the `InterProScan6` repository 
 on the sytem you will use to run the pipeline. For example, you can create an `interproscan6.img` on your 
 local laptop, and upload it to the HPC you will use to run `InterProScan6`.
