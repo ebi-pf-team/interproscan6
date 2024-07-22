@@ -30,7 +30,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                     except KeyError:
                         description = "-"
                     entry = None
-                    if match_data['entry']['accession']:
+                    if match_key != "Coils" and match_data['entry']['accession']:
                         description = match_data['entry']['description']
                         entry = {
                             "accession": match_data['entry']['accession'],
@@ -169,6 +169,9 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 elif match_data['member_db'].upper() == "SUPERFAMILY":
                                     info["hmmLength"] = match_data['hmm_length']
 
+                                elif match_data['member_db'].upper() == "COILS":
+                                    pass
+
                                 else:
                                     info["evalue"] = float(location["evalue"])
                                     info["score"] = float(location["score"])
@@ -202,7 +205,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 "locations": locations
                             }
 
-                            if match_data['member_db'].upper() not in ["CDD", "HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS", "SUPERFAMILY"]:
+                            if match_data['member_db'].upper() not in ["CDD", "COILS", "HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS", "SUPERFAMILY"]:
                                 match["evalue"] = float(match_data['evalue'])
                                 match["score"] = float(match_data['score'])
 
