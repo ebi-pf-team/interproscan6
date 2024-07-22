@@ -170,7 +170,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 elif match_data['member_db'].upper() == "SUPERFAMILY":
                                     info["hmmLength"] = match_data['hmm_length']
 
-                                elif match_data['member_db'].upper() == "IDRPRED":
+                                elif match_data['member_db'].upper() == "MOBIDB":
                                     info["sequence-feature"] = location["sequence-feature"]
 
                                 else:
@@ -206,7 +206,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 "locations": locations
                             }
 
-                            if match_data['member_db'].upper() not in ["CDD", "HAMAP", "IDRPRED", "PROSITE_PROFILES", "PROSITE_PATTERNS", "SUPERFAMILY"]:
+                            if match_data['member_db'].upper() not in ["CDD", "HAMAP", "MOBIDB", "PROSITE_PROFILES", "PROSITE_PATTERNS", "SUPERFAMILY"]:
                                 match["evalue"] = float(match_data['evalue'])
                                 match["score"] = float(match_data['score'])
 
