@@ -26,7 +26,6 @@ include {
     HMMER_PARSER as NCBIFAM_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
     HMMER_PARSER as PFAM_HMMER_PARSER;
-    HMMER_PARSER as PIRSR_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_SCAN_PARSER as PIRSF_HMMER_PARSER;
     HMMER2_PARSER;
@@ -39,6 +38,7 @@ include {
     HAMAP_POST_PROCESSER;
     PANTHER_POST_PROCESSER;
     PIRSF_POST_PROCESSER;
+    PIRSR_POST_PROCESSER;
     SFLD_POST_PROCESSER;
     SUPERFAMILY_POST_PROCESSER;
 } from "$projectDir/interproscan/modules/hmmer/post_processing/main"
@@ -375,7 +375,11 @@ workflow SEQUENCE_ANALYSIS {
     // PIRSR
     runner_pirsr_params = fasta.combine(member_params.pirsr)
     PIRSR_HMMER_RUNNER(runner_pirsr_params)
-    PIRSR_HMMER_PARSER(PIRSR_HMMER_RUNNER.out[0])  // hmmer.out path
+    PIRSR_POST_PROCESSER(
+        PIRSR_HMMER_RUNNER.out[1],  // post-process params
+        PIRSR_HMMER_RUNNER.out[3]  // dtbl file
+    )
+
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)

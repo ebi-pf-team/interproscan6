@@ -155,6 +155,24 @@ process PIRSF_POST_PROCESSER {
 }
 
 
+process PIRSR_POST_PROCESSER {
+    label 'analysis_parser'
+
+    input:
+        val postprocessing_params
+        path out_dtbl
+
+
+    output:
+    path "pirsr_parsed_${out}.json"
+
+    script:
+    """
+    python3 $projectDir/interproscan/scripts/members/pirsr/pirsr.py -i ${out_dtbl} -r ${postprocessing_params[0]} -o pirsr_parsed_${out_dtbl}.json
+    """
+}
+
+
 process SFLD_POST_PROCESSER {
     /*
     Runs an in-house post-processing C script that filters the SFLD hits to

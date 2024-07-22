@@ -23,10 +23,9 @@ usage: pirsr.py [-h] -i QUERY -r RULES -o OUT
 """
 
 import argparse
-import csv
 import json
 import re
-import parsehmmer #2 as parsehmmer
+import parsehmmer  # 2 as parsehmmer
 
 
 def process_row(row, rule):
@@ -57,7 +56,7 @@ def process_row(row, rule):
 
     for grp in rule['Groups'].keys():
 
-        if model_id in result[sequence_id]["domainMatches"] :
+        if model_id in result[sequence_id]["domainMatches"]:
             next
 
         pass_count = 0
@@ -68,8 +67,8 @@ def process_row(row, rule):
             condition = pos['condition']
 
             condition = re.sub('-', '', condition)
-            condition = re.sub('\(', '{', condition)
-            condition = re.sub('\)', '}', condition)
+            condition = re.sub('\\(', '{', condition)
+            condition = re.sub('\\)', '}', condition)
             condition = re.sub('x', '.', condition)
 
             query_seq = re.sub('-', '', seq_align)
@@ -78,11 +77,12 @@ def process_row(row, rule):
                 target_seq = query_seq[map[pos['hmmStart']]: map[pos['hmmEnd']] + 1]
             else:
                 print("Target sequence out of alignment borders for query " +
-                      model_id+' on hit '+sequence_id)
-                print(str('hmmfrom: ' +str(hmm_from) + ', hmmStart: ' + str(pos['hmmStart'])) +', hmmEnd: ' + str(pos['hmmEnd']) + ', len map:' + str(len(map)) );
+                      model_id + ' on hit ' + sequence_id)
+                print(str('hmmfrom: ' + str(hmm_from) + ', hmmStart: ' + str(pos['hmmStart'])) + ', hmmEnd: ' + str(
+                    pos['hmmEnd']) + ', len map:' + str(len(map)))
                 target_seq = ''
 
-            if re.search('\A' + condition + '\Z', target_seq):
+            if re.search('\\A' + condition + '\\Z', target_seq):
                 # we have a pass
                 pass_count += 1
 
@@ -98,9 +98,7 @@ def process_row(row, rule):
             # a group passes only if the whole group is a pass
             rule_sites.extend(rule['Groups'][grp])
 
-
     if rule_sites:
-
         domHit = {
             'domScore': dom_score,
             'domEvalue': dom_evalue,
@@ -113,18 +111,16 @@ def process_row(row, rule):
             'ruleSites': rule_sites,
             'scope': rule['Scope'],
         }
-        domHits =  []
+        domHits = []
         if model_id in result[sequence_id]["domainMatches"]:
             domHits = result[sequence_id]["domainMatches"][model_id]
             domHits.append(domHit)
         else:
             domHits.append(domHit)
         result[sequence_id]["domainMatches"][model_id] = domHits
-        print ('domainMatches found .... ' + model_id + ' ---' + sequence_id)
-        print ('how many dom hits :' + str(len(domHits)))
-        print (result[sequence_id]["domainMatches"][model_id])
-
-
+        print('domainMatches found .... ' + model_id + ' ---' + sequence_id)
+        print('how many dom hits :' + str(len(domHits)))
+        print(result[sequence_id]["domainMatches"][model_id])
 
 
 def map_hmm_to_seq(hmm_pos, hmm, seq):
@@ -141,25 +137,24 @@ def map_hmm_to_seq(hmm_pos, hmm, seq):
     for i in range(0, len(hmm)):
         map[hmm_pos:] = [seq_pos]
 
-        if hmm[i:i+1] != '.':
+        if hmm[i:i + 1] != '.':
             hmm_pos += 1
-        if seq[i:i+1] != '-':
-            seq_pos +=1
+        if seq[i:i + 1] != '-':
+            seq_pos += 1
 
     return map
+
 
 if __name__ == '__main__':
 
     ap = argparse.ArgumentParser()
 
-    #ap.add_argument("-i", "--query", required=True, help="query tsv input file")
     ap.add_argument("-i", "--query", required=True, help="query hmmer input file")
     ap.add_argument("-r", "--rules", required=True, help="processed json rules file")
     ap.add_argument("-o", "--out", required=True, help="output json results file")
     args = vars(ap.parse_args())
 
     hmmer3_raw_output = args['query']
-    #tsv_name = args['query']
     rules_name = args['rules']
     out_file = args['out']
 
@@ -170,23 +165,16 @@ if __name__ == '__main__':
 
     raw_matches = parsehmmer.parse(hmmer3_raw_output)
 
-    print('process the matches ... ' )
+    print('process the matches ... ')
     for row in raw_matches:
         if not bool(row):
             break
-        print (row)
+        print(row)
         if row[1] in rules_hash:
             rule = rules_hash[row[1]]
             process_row(row, rule)
         else:
             print('ERROR: nonexistent rule ' + row[1] + ' in rules file')
 
-
     with open(out_file, 'w') as out_file:
-        json.dump(result, out_file, indent=4,)
-    #hmmer3_output_tsv = hmmer3_raw_output.strip().replace('raw', 'tsv')
-    #raw_matches = parsehmmer.print2file(raw_matches, hmmer3_output_tsv)
-
-    print ("Done.")
-
-
+        json.dump(result, out_file, indent=4)
