@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 MATCH_ELEMENT = {
     'SIGNALP': 'signal-peptide',
     'CDD': 'cdd-domain',
-    'MOBIDB': 'mobidb',
+    'MOBIDB': 'mobidb-match',
     'ANTIFAM': 'hmmer3-match',
     'FUNFAM': 'hmmer3-match',
     'GENE3D': 'hmmer3-match',
