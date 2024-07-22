@@ -35,7 +35,7 @@ Users who have novel nucleotide or protein sequences that they wish to functiona
 * `Nextflow` (version >=23.04.02)
 * `Docker` (version >= 24.0.5)
 
-## Set up
+## General set up
 
 1. Download member data files:
 
@@ -80,7 +80,7 @@ Please provide absolute paths. You can use the `$projectDir` short cut to repres
 By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
 because they contain licensed components. In order to activate these analyses please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
 
-## Singularity
+## Singularity set up
 
 Not all systems support using Docker, therefore, the `interproscan6` Docker image will need to be 
 converted to another virtualization system. Singularity is an alternative container runtime to
@@ -88,7 +88,9 @@ Docker. Singularity does not require rooot privileges or a separate daemon proce
 
 You will need Singularity installed on the system you will use to run the pipeline.
 
-1. Build the `interproscan6` Docker image as set in step 3 in the general set-up instructions above.
+1. Follow the general set up laid out above on the system you are going to run the pipeline. Build
+the `interproscan6` Docker image (in step 3 of the general set up) on a system with Docker enabled -
+you **do not** need have downloaded the InterPro release data in order to build the Docker image.
 
 2. Save the `interproscan6` Docker image to a `tar` archive.
 ```bash
