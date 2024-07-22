@@ -1,6 +1,6 @@
-process IDRPRED_RUNNER {
+process MOBIDB_RUNNER {
     container 'docker.io/library/idrpred'
-    label 'idrpred_runner'
+    label 'mobidb_runner'
 
     /*
     no switches needed for idrpred for now
@@ -9,29 +9,29 @@ process IDRPRED_RUNNER {
     tuple path(fasta), val(release), val(switches)
 
     output:
-    path "idrpred_out.tsv"
+    path "mobidb_out.tsv"
     val release
 
     script:
     """
-    idrpred ${fasta} idrpred_out.tsv
+    idrpred ${fasta} mobidb_out.tsv
     """
 }
 
 
-process IDRPRED_PARSER {
+process MOBIDB_PARSER {
     label 'analysis_parser'
 
     input:
-    path idrpred_out
+    path mobidb_out
     val release
 
     output:
-    path "idrpred_parsed.json"
+    path "mobidb_parsed.json"
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/members/idrpred/parser.py \\
-        ${idrpred_out} ${release} > idrpred_parsed.json
+    python3 $projectDir/interproscan/scripts/members/mobidb/parser.py \\
+        ${mobidb_out} ${release} > mobidb_parsed.json
     """
 }

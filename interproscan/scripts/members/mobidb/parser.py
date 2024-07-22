@@ -12,7 +12,7 @@ def parse(input_file, release):
             end = int(line_data[2])
             feature = line_data[3] if line_data[3] else ""
             try:
-                matches[sequence_id]["idrpred"]["locations"].append({
+                matches[sequence_id]["mobidb"]["locations"].append({
                     "start": start,
                     "end": end,
                     "sequence-feature": feature,
@@ -20,10 +20,10 @@ def parse(input_file, release):
                 })
             except KeyError:
                 matches[sequence_id] = {
-                    "idrpred": {
-                        "member_db": "idrpred",
+                    "mobidb": {
+                        "member_db": "mobidb",
                         "version": release,
-                        "accession": "idrpred",
+                        "accession": "mobidb",
                         "name": "disorder_prediction",
                         "description": "consensus disorder prediction",
                         "locations": []

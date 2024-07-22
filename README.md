@@ -75,7 +75,11 @@ Please provide absolute paths. You can use the `$projectDir` short cut to repres
 
     docker build -t interproscan6 .
 
-4. [Optional] install licensed software
+4. Build a docker `MobiDB` image (this includes the `idrpred` tool for MobiDB predictions). On `./docker_files/mobidb/` directory, run:
+
+    docker build -t idrpred .
+
+5. [Optional] install licensed software
 
 By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
 because they contain licensed components. In order to activate these analyses please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.

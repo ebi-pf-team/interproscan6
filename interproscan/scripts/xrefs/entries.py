@@ -12,7 +12,7 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
     for seq_id, match_info in matches_info.items():
         for match_key, data in match_info.items():
             acc_id = match_key.split(".")[0]
-            if data["member_db"] == "idrpred":
+            if data["member_db"] == "mobidb":
                 match_info[match_key]["entry"] = None
             else:
                 try:
