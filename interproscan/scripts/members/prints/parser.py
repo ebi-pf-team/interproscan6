@@ -13,8 +13,7 @@ def main():
     results = parse_prints(args[0], hierarchy_map)
     sorted_results = sort_results(results)
     selected_results = select_results(sorted_results, hierarchy_map)
-    parsed_results = process_results(selected_results)
-    print(json.dumps(parsed_results, indent=2))
+    print(json.dumps(selected_results, indent=2))
 
 
 def parse_hierarchy(hierarchy: str) -> dict:
@@ -155,36 +154,23 @@ def select_results(sorted_res: dict, hierarchy: dict) -> dict:
                 min_motif = hierarchy[fingerprint]["min_motif_count"]
                 cutoff = float(hierarchy[fingerprint]["evalue_cutoff"])
                 if match["evalue"] <= cutoff and match["num_motif"] > min_motif:
-                    pass
+                    match.pop("num_motif")
+                    for location in match["locations"]:
+                        location.pop("evalue")
+                        location.pop("model_id")
+                        location["location-fragments"] = [
+                            {"start": int(location["start"]),
+                             "end": int(location["end"]),
+                             "dc-status": "CONTINUOUS"}
+                        ]
                 else:
                     continue
 
-                if protein_id in pass_matches:
-                    pass_matches[protein_id].append(match)
-                else:
-                    pass_matches[protein_id] = [match]
+
+                pass_matches[protein_id] = {match["accession"]: match}
 
 
     return pass_matches
-
-
-def process_results(prints_dict: dict) -> dict:
-    rebuild = {}
-    for protein in prints_dict:
-        for match in prints_dict[protein]:
-            rebuild[protein] = {}
-            match.pop("num_motif")
-            for location in match["locations"]:
-                location.pop("evalue")
-                location.pop("model_id")
-                location["location-fragments"] = [
-                    {"start": int(location["start"]),
-                     "end": int(location["end"]),
-                     "dc-status": "CONTINUOUS"}
-                ]
-            rebuild[protein] = {match["accession"]: match}
-
-    return rebuild
 
 
 if __name__ == "__main__":
