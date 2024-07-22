@@ -35,6 +35,8 @@ def tsv_output(seq_matches: dict, output_path: str):
                         goterms.append(go_info["id"])
                     for pwy_info in match["entry"]["pathwayXRefs"]:
                         pathways.append(pwy_info["id"])
+                if match["member_db"].upper() == "COILS":
+                    entry_desc = "Coil"
                 match_db = match["member_db"]
                 xrefs = f"{'|'.join(goterms)}\t{'|'.join(pathways)}"
 
@@ -50,7 +52,7 @@ def tsv_output(seq_matches: dict, output_path: str):
                         evalue = location["score"]
                         ali_from = location["start"]
                         ali_to = location["end"]
-                    elif match_db.upper() == "PROSITE_PATTERNS":
+                    elif match_db.upper() in ["PROSITE_PATTERNS", "COILS"]:
                         sig_acc = match["accession"]
                         status = "T"
                         evalue = "-"
