@@ -12,8 +12,7 @@ def main():
     hierarchy_map = parse_hierarchy(args[1])
     results = parse_prints(args[0], hierarchy_map)
     sorted_results = sort_results(results)
-    selected_results = select_results(sorted_results, hierarchy_map)
-    print(json.dumps(selected_results, indent=2))
+    print(json.dumps(sorted_results, indent=2))
 
 
 def parse_hierarchy(hierarchy: str) -> dict:
@@ -67,8 +66,9 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
                 matches[protein_id] = {}
             if line.startswith("1TBH"):
                 #  keep track of hit motifs and motif names
-                motif = line.split()[1]
-                desc = line.split()[3]
+                tbh = line.split()
+                motif = tbh[1]
+                desc = " ".join(tbh[3:len(tbh)-1])
                 # key value store of hit motif id and motif name
                 protein_hits[motif] = desc
             if line.startswith("2TBH"):
@@ -76,6 +76,10 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
                 # hierarchy map to get model ac
                 if fingerprint in hierarchy_map:
                     model_acc = hierarchy_map[fingerprint]["model_acc"]
+                    min_motif = hierarchy_map[fingerprint]["min_motif_count"]
+                    cutoff = float(hierarchy_map[fingerprint]["evalue_cutoff"])
+                else:
+                    continue
                 match = {"accession": model_acc,
                          "name": fingerprint,
                          "member_db": "PRINTS",
@@ -84,10 +88,10 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
                          "num_motif": nummotif,
                          "graphscan": graphscan,
                          "model-ac": model_acc,
-                         "description": "",
+                         "description": desc,
                          "locations": []}
-                if fingerprint not in matches[protein_id]:
-                    matches[protein_id][fingerprint] = match
+                if model_acc not in matches[protein_id]:
+                    matches[protein_id][model_acc] = match
 
             elif line.startswith("3TBH"):
                 motifname, motifnum, idscore, pvalue, pos, end = process_3tb(line)
@@ -95,7 +99,7 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
                 # use to assign location
                 for hit in protein_hits:
                     if hit == motifname:
-                        matches[protein_id][motifname]["locations"].append({
+                        matches[protein_id][model_acc]["locations"].append({
                             "motifNumber": int(motifnum),
                             "pvalue": pvalue,
                             "score": idscore,
@@ -104,8 +108,7 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
                             "representative": "false",
                             "evalue": match["evalue"],
                             "model_id": match["accession"]})
-                        matches[protein_id][motifname]["description"] = protein_hits[hit]
-                        print(matches[protein_id][motifname])
+                        matches[protein_id][model_acc]["description"] = protein_hits[hit]
 
     return matches
 
