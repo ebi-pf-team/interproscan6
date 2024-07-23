@@ -11,8 +11,7 @@ def main():
     args = sys.argv[1:]
     hierarchy_map = parse_hierarchy(args[1])
     results = parse_prints(args[0], hierarchy_map)
-    sorted_results = sort_results(results)
-    print(json.dumps(sorted_results, indent=2))
+    print(json.dumps(results, indent=2))
 
 
 def parse_hierarchy(hierarchy: str) -> dict:
@@ -110,8 +109,9 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
                             "start": pos,
                             "end": end,
                             "representative": "false",
-                            "evalue": match["evalue"],
-                            "model_id": match["accession"]})
+                            "location-fragments": [{"start": pos,
+                                 "end": end,
+                                 "dc-status": "CONTINUOUS"}]})
                         matches[protein_id][model_acc]["description"] = protein_hits[hit]
 
     return matches
@@ -151,28 +151,6 @@ def process_3tb(line):
             indexcheck -= 1
         end = end - (motiflength - indexcheck) + 1
     return motifname, motifnum, idscore, pvalue, pos, end
-
-
-def sort_results(results: dict) -> dict:
-    sorted_data = {}
-    for protein, matches in results.items():
-        matches_list = list(matches.items())
-        sorted_matches = sorted(matches_list, key=lambda x: x[1]['evalue'])
-        sorted_matches = {match_id: match_info for match_id, match_info in sorted_matches}
-        sorted_data[protein] = sorted_matches
-    #clean up sorted data-
-    for protein_id in sorted_data:
-        for fingerprint in sorted_data[protein_id]:
-            match = sorted_data[protein_id][fingerprint]
-            for location in match["locations"]:
-                location.pop("evalue")
-                location.pop("model_id")
-                location["location-fragments"] = [
-                    {"start": int(location["start"]),
-                     "end": int(location["end"]),
-                     "dc-status": "CONTINUOUS"}]
-
-    return sorted_data
 
 
 if __name__ == "__main__":
