@@ -24,7 +24,7 @@ ENV PATH="/opt/pftools/usr/local/bin:${PATH}"
 # Install NCBI BLAST, only rpsblast (for CDD)
 # Don't pull the NCBI BLAST image has its BIG - Just get the bits we need
 WORKDIR /opt/blast
-RUN curl -L -O https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.15.0+-x64-linux.tar.gz && \
+RUN curl -L -O https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.15.0/ncbi-blast-2.15.0+-x64-linux.tar.gz && \
     tar -zxpf ncbi-blast-2.15.0+-x64-linux.tar.gz && \
     rm ncbi-blast-2.15.0+-x64-linux.tar.gz
 
