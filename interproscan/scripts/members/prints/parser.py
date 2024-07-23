@@ -90,6 +90,10 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
                          "model-ac": model_acc,
                          "description": desc,
                          "locations": []}
+                         # filter by min motif
+                if match["evalue"] <= cutoff and match["num_motif"] > min_motif:
+                    match.pop("num_motif")
+
                 if model_acc not in matches[protein_id]:
                     matches[protein_id][model_acc] = match
 
@@ -156,36 +160,19 @@ def sort_results(results: dict) -> dict:
         sorted_matches = sorted(matches_list, key=lambda x: x[1]['evalue'])
         sorted_matches = {match_id: match_info for match_id, match_info in sorted_matches}
         sorted_data[protein] = sorted_matches
+    #clean up sorted data-
+    for protein_id in sorted_data:
+        for fingerprint in sorted_data[protein_id]:
+            match = sorted_data[protein_id][fingerprint]
+            for location in match["locations"]:
+                location.pop("evalue")
+                location.pop("model_id")
+                location["location-fragments"] = [
+                    {"start": int(location["start"]),
+                     "end": int(location["end"]),
+                     "dc-status": "CONTINUOUS"}]
+
     return sorted_data
-
-
-def select_results(sorted_res: dict, hierarchy: dict) -> dict:
-    # from hierarchymap, get evalue for id
-    pass_matches = {}
-    for protein_id in sorted_res:
-        for fingerprint in sorted_res[protein_id]:
-            if fingerprint in hierarchy.keys():
-                match = sorted_res[protein_id][fingerprint]
-                # process sorted matches step
-                # filter by min motif
-                min_motif = hierarchy[fingerprint]["min_motif_count"]
-                cutoff = float(hierarchy[fingerprint]["evalue_cutoff"])
-                if match["evalue"] <= cutoff and match["num_motif"] > min_motif:
-                    match.pop("num_motif")
-                    for location in match["locations"]:
-                        location.pop("evalue")
-                        location.pop("model_id")
-                        location["location-fragments"] = [
-                            {"start": int(location["start"]),
-                             "end": int(location["end"]),
-                             "dc-status": "CONTINUOUS"}
-                        ]
-                else:
-                    continue
-
-                pass_matches[protein_id] = {match["accession"]: match}
-
-    return pass_matches
 
 
 if __name__ == "__main__":
