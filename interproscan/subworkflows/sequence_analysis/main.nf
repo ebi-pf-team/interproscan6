@@ -87,7 +87,7 @@ workflow SEQUENCE_ANALYSIS {
     .branch { member ->
         release = params.members."${member}".release
         runner = params.members."${member}".runner
-        log.info "Running $member ($runner runner) version $release"
+        log.info "Running $member version $release"
 
         /*
         Member databases that use HMMER:
