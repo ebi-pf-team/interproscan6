@@ -24,6 +24,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         "end": match_data["locations"][0]["end"],
                         "pvalue": match_data["locations"][0]["pvalue"],
                     }
+                    matches.append(match)
                 else:
                     try:
                         description = match_data['description']
@@ -70,25 +71,37 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         "entry": entry
                     }
 
-                    if match_data['member_db'].upper() == "SUPERFAMILY" and len(match_data['locations']) > 1:
+                    if match_data['member_db'].upper() in ["SUPERFAMILY", "MOBIDB"]:
                         for location in match_data['locations']:
                             info = {
                                 "start": int(location["start"]),
                                 "end": int(location["end"]),
                                 "representative": boolean_map.get(location["representative"].lower(), False),
-                                "hmmLength": match_data['hmm_length'],
                                 "location-fragments": [{
                                     "start": int(location["start"]),
                                     "end": int(location["end"]),
                                     "dc-status": "CONTINUOUS"
                                 }]
                             }
-                            match = {
-                                "signature": signature,
-                                "locations": [info],
-                                "evalue": float(location["evalue"]),
-                                "model-ac": match_data.get('model-ac', match_data['accession'])
-                            }
+                            if match_data['member_db'].upper() == "SUPERFAMILY":
+                                info['evalue'] = float(location['evalue'])
+                                try:
+                                    info["hmmLength"] = match_data['hmm_length']
+                                except KeyError:
+                                    print(match_data)
+                                match = {
+                                    "signature": signature,
+                                    "locations": [info],
+                                    "evalue": float(match_data["evalue"]),
+                                    "model-ac": match_data.get('model-ac', match_data['accession'])
+                                }
+                            else:
+                                match = {
+                                    "signature": signature,
+                                    "locations": [info]
+                                }
+                                info["sequence-feature"] = location["sequence-feature"]
+
                             matches.append(match)
                     else:
                         if len(match_data['locations']) > 0:
@@ -139,7 +152,6 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["hmmBounds"] = location["hmmBounds"]
                                     info["envelopeStart"] = int(location["envelopeStart"])
                                     info["envelopeEnd"] = int(location["envelopeEnd"])
-                                    info["postProcessed"] = boolean_map.get(location["postProcessed"].lower())
 
                                 elif match_data['member_db'].upper() == "PROSITE_PROFILES":
                                     info["score"] = float(location["score"])
@@ -166,12 +178,6 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["hmmEnd"] = int(location["hmmEnd"])
                                     info["hmmLength"] = int(location["hmmLength"])
                                     info["hmmBounds"] = location["hmmBounds"]
-
-                                elif match_data['member_db'].upper() == "SUPERFAMILY":
-                                    info["hmmLength"] = match_data['hmm_length']
-
-                                elif match_data['member_db'].upper() == "MOBIDB":
-                                    info["sequence-feature"] = location["sequence-feature"]
 
                                 else:
                                     info["evalue"] = float(location["evalue"])
@@ -206,7 +212,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 "locations": locations
                             }
 
-                            if match_data['member_db'].upper() not in ["CDD", "HAMAP", "MOBIDB", "PROSITE_PROFILES", "PROSITE_PATTERNS", "SUPERFAMILY"]:
+                            if match_data['member_db'].upper() not in ["CDD", "HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS"]:
                                 match["evalue"] = float(match_data['evalue'])
                                 match["score"] = float(match_data['score'])
 
@@ -226,9 +232,6 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 signature["name"] = match_data['entry']['description']
                                 match['proteinClass'] = match_data['proteinClass']
                                 match['graftPoint'] = match_data['graftPoint']
-
-                            if match_data['member_db'].upper() == "SUPERFAMILY":
-                                match["evalue"] = float(match_data['evalue'])
 
                             matches.append(match)
 

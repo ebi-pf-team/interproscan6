@@ -86,7 +86,8 @@ workflow SEQUENCE_ANALYSIS {
     Channel.from(applications.split(','))
     .branch { member ->
         release = params.members."${member}".release
-        log.info "Running $member version $release"
+        runner = params.members."${member}".runner
+        log.info "Running $member ($runner runner) version $release"
 
         /*
         Member databases that use HMMER:
