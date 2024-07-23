@@ -59,8 +59,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         description = None
 
                     if match_data['member_db'].upper() == "PRINTS":
-                        if description is None:
-                            description = entry["description"]
+                        description = match_data["description"]
 
                     signature = {
                         "accession": accession,
