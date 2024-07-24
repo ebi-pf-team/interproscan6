@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 MATCH_ELEMENT = {
     'SIGNALP': 'signal-peptide',
     'CDD': 'cdd-domain',
+    'MOBIDB': 'mobidb-match',
     'ANTIFAM': 'hmmer3-match',
     'FUNFAM': 'hmmer3-match',
     'GENE3D': 'hmmer3-match',
@@ -165,7 +166,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("representative", str(location["representative"]))
 
-                    elif match_data['member_db'].upper() == "SUPERFAMILY":
+                    elif match_data['member_db'].upper() in ["SUPERFAMILY", "MOBIDB"]:
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("end", str(location["end"]))
