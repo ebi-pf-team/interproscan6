@@ -12,32 +12,35 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
     for seq_id, match_info in matches_info.items():
         for match_key, data in match_info.items():
             acc_id = match_key.split(".")[0]
-            try:
-                entry = entries[acc_id]
-                match_info[match_key]["entry"] = {
-                    "accession": entry[0],
-                    "short_name": entry[1],
-                    "name": entry[2],
-                    "description": entry[3],
-                    "type": entry[4],
-                    "goXRefs": [],
-                    "pathwayXRefs": []
-                }
-            except KeyError:
-                acc_id = match_key  # some accs need the '.'  , e.g. Gene3D
+            if data["member_db"] == "mobidb":
+                match_info[match_key]["entry"] = None
+            else:
                 try:
                     entry = entries[acc_id]
                     match_info[match_key]["entry"] = {
-                        "accession": entry[0] if entry[0] is not None else "-",
-                        "short_name": entry[1] if entry[1] is not None else "-",
-                        "name": entry[2] if entry[2] is not None else "-",
-                        "description": entry[3] if entry[3] is not None else "-",
+                        "accession": entry[0],
+                        "short_name": entry[1],
+                        "name": entry[2],
+                        "description": entry[3],
                         "type": entry[4],
                         "goXRefs": [],
                         "pathwayXRefs": []
                     }
                 except KeyError:
-                    match_info[match_key]["entry"] = None
+                    acc_id = match_key  # some accs need the '.'  , e.g. Gene3D
+                    try:
+                        entry = entries[acc_id]
+                        match_info[match_key]["entry"] = {
+                            "accession": entry[0] if entry[0] is not None else "-",
+                            "short_name": entry[1] if entry[1] is not None else "-",
+                            "name": entry[2] if entry[2] is not None else "-",
+                            "description": entry[3] if entry[3] is not None else "-",
+                            "type": entry[4],
+                            "goXRefs": [],
+                            "pathwayXRefs": []
+                        }
+                    except KeyError:
+                        match_info[match_key]["entry"] = None
 
             if data["member_db"].upper() == "PANTHER":
                 acc_id_family = data["accession"]

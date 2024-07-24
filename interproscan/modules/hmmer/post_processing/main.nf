@@ -125,6 +125,36 @@ process PANTHER_POST_PROCESSER {
     """
 }
 
+
+process PIRSF_POST_PROCESSER {
+    label 'analysis_parser'
+
+    input:
+        path out_dtbl
+        val postprocessing_params
+        path fasta
+        path hmm
+    /*
+    Post-processing params:
+    0. Path to perl script
+    1. Path to data .dat file
+    2. Switches
+    */
+
+    // the -path points to the hmmsearch bin in the IPS6 docker image
+    script:
+    """
+    perl ${postprocessing_params[0]} \
+        -fasta ${fasta} \
+        -hmmlib ${hmm} \
+        -dat ${postprocessing_params[1]} \
+        -domtbl ${out_dtbl} \
+        -path /opt/hmmer/bin/ \
+        ${postprocessing_params[2]}
+    """
+}
+
+
 process SFLD_POST_PROCESSER {
     /*
     Runs an in-house post-processing C script that filters the SFLD hits to

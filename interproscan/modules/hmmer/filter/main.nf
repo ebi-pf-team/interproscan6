@@ -119,6 +119,30 @@ process PFAM_FILTER_MATCHES {
 }
 
 
+process PIRSF_FILTER_MATCHES {
+    label 'analysis_parser'
+
+    input:
+        path ips6_json
+        path dtbl_file  // needed to get the sequence length
+        val postprocessing_params   // [0] path to the PIRSF.dat file
+
+    /* PIRSF uses the total sequence len, tlen in the hmmscan dtbl output,
+    for the HmmLength */
+    output:
+        path "${ips6_json}.post.processed.json"
+
+    script:
+    """
+    python3 $projectDir/interproscan/scripts/members/pirsf/filter_ips6_hits.py \
+        ${ips6_json} \
+        ${dtbl_file} \
+        '${postprocessing_params[0]}' \
+        '${ips6_json}.post.processed.json'
+    """
+}
+
+
 process SFLD_FILTER_MATCHES {
     label 'analysis_parser'
 
@@ -159,5 +183,24 @@ process SMART_FILTER_MATCHES {
         ${ips6_json} \\
         ${fasta} \\
         ${ips6_json}.post.processed.json
+    """
+}
+
+
+process SUPERFAMILY_FILTER_MATCHES {
+    // parses the output from SUPERFAMILY_POST_PROCESSER
+    label 'analysis_parser'
+
+    input:
+    path ass3_out
+    path hmm_lib
+
+    output:
+    path "superfamily_parsed_*"
+
+    script:
+    """
+    python3 $projectDir/interproscan/scripts/members/superfamily/parse_superfamily_out.py \\
+        ${hmm_lib} ${ass3_out} > superfamily_parsed_${ass3_out}.json
     """
 }

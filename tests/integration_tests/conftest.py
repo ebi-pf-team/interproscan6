@@ -32,12 +32,12 @@ def current_output_path(test_output_dir):
 
 @pytest.fixture
 def expected_output_path(test_output_dir):
-    return test_output_dir / 'expected_output_superfamily'
+    return test_output_dir / 'expected_output_mobidb'
 
 
 @pytest.fixture
 def applications():
-    return 'SuperFamily' # AntiFam,CDD,FunFam,Gene3D,HAMAP,NCBIfam,Panther,Pfam,PROSITE_Profiles,PROSITE_Patterns,SFLD,SMART,
+    return 'MobiDB'
 
 
 @pytest.fixture
