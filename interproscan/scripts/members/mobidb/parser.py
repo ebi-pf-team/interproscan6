@@ -26,7 +26,12 @@ def parse(input_file: str, release: str) -> dict:
                         "accession": "mobidb",
                         "name": "disorder_prediction",
                         "description": "consensus disorder prediction",
-                        "locations": []
+                        "locations": [{
+                            "start": start,
+                            "end": end,
+                            "sequence-feature": feature,
+                            "representative": "false"
+                        }]
                     }
                 }
     return matches

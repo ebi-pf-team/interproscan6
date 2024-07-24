@@ -85,10 +85,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             }
                             if match_data['member_db'].upper() == "SUPERFAMILY":
                                 info['evalue'] = float(location['evalue'])
-                                try:
-                                    info["hmmLength"] = match_data['hmm_length']
-                                except KeyError:
-                                    print(match_data)
+                                info["hmmLength"] = match_data['hmm_length']
                                 match = {
                                     "signature": signature,
                                     "locations": [info],
@@ -96,11 +93,11 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     "model-ac": match_data.get('model-ac', match_data['accession'])
                                 }
                             else:
+                                info["sequence-feature"] = location["sequence-feature"]
                                 match = {
                                     "signature": signature,
                                     "locations": [info]
                                 }
-                                info["sequence-feature"] = location["sequence-feature"]
 
                             matches.append(match)
                     else:
