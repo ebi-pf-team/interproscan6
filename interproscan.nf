@@ -27,11 +27,11 @@ workflow {
         input_file,
         params.nucleic,
         params.keySet(),
-        params.signalp_mode,
         params.applications,
         params.formats,
         params.version,
-        params.ipsc_version
+        params.ipsc_version,
+        params.signalp_mode
     )
 
     formats = params.formats.toLowerCase()
@@ -42,11 +42,6 @@ workflow {
     .unique()
     .splitFasta( by: params.batchsize, file: true )
     .set { ch_fasta }
-
-    if (params.signalp_mode.toLowerCase() !in ['fast', 'slow-sequential']) {
-        log.info "SignalP mode '${params.signalp_mode}' in nextflow.config not recognised. Accepted: 'fast', 'slow-sequential'"
-        exit 1
-    }
 
     if (params.nucleic) {
         if (params.translate.strand.toLowerCase() !in ['both','plus','minus']) {
@@ -69,6 +64,11 @@ workflow {
         SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications, false)  // final: bool to indicate not a unit test
         sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
         parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
+    }
+
+    if (params.signalp_mode.toLowerCase() !in ['fast', 'slow-sequential']) {
+        log.info "SignalP mode '${params.signalp_mode}' in nextflow.config not recognised. Accepted: 'fast', 'slow-sequential'"
+        exit 1
     }
 
     analysis_result = Channel.empty()

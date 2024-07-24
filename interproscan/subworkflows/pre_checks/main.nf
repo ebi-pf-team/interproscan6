@@ -30,11 +30,11 @@ workflow PRE_CHECKS {
     seq_input
     using_nucleic
     all_params
-    signalp_mode
     user_applications
     output_formats
     version_msg
     ips6_version
+    signalp_mode
 
     main:
     if ( !nextflow.version.matches('>=23.10') ) {
