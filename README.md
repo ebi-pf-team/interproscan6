@@ -75,7 +75,7 @@ Please provide absolute paths. You can use the `$projectDir` short cut to repres
 
     docker build -t interproscan6 .
 
-4. Build a docker `MobiDB` image (this includes the `idrpred` tool for MobiDB predictions). On `./docker_files/mobidb/` directory, run:
+4. Build a docker `MobiDB` image (this includes the `idrpred` tool for MobiDB predictions). From the root of this repository:
 
     cd docker_files/mobidb
     docker build -t idrpred .
