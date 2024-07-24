@@ -1,9 +1,9 @@
 process PATHWAYS {
     label 'io'
-    
+
     input:
     path matches
-    val pathways
+    path pathways
 
     output:
     path "pathways_${matches}"
