@@ -3,7 +3,7 @@ process ENTRIES {
 
     input:
     path matches
-    path entries
+    val entries
 
     output:
     path "entries_${matches}"

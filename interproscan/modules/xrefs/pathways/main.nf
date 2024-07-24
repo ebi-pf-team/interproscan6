@@ -3,7 +3,7 @@ process PATHWAYS {
 
     input:
     path matches
-    path pathways
+    val pathways
 
     output:
     path "pathways_${matches}"
