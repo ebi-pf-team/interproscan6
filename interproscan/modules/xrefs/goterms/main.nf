@@ -3,7 +3,7 @@ process GOTERMS {
 
     input:
     path matches
-    path goterms
+    val goterms
 
     output:
     path "goterms_${matches}"
