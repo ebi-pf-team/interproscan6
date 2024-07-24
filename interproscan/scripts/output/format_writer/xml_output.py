@@ -90,6 +90,9 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                                 pathway_xref_elem.set("id", pathway_xref['id'])
                                 pathway_xref_elem.set("name", pathway_xref['name'])
 
+                        if match_data['member_db'].upper() == "COILS":
+                            signature_elem.set("name", match_data['name'])
+
                 signature_library_elem = ET.SubElement(signature_elem, "signature-library-release")
                 signature_library_elem.set("library", match_data['member_db'].upper())
                 signature_library_elem.set("version", match_data['version'])
