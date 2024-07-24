@@ -92,6 +92,8 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
                          # filter by min motif
                 if match["evalue"] <= cutoff and match["num_motif"] > min_motif:
                     match.pop("num_motif")
+                else:
+                    continue
 
                 if model_acc not in matches[protein_id]:
                     matches[protein_id][model_acc] = match
@@ -127,8 +129,7 @@ def process_2tb(line):
 
 
 def process_3tb(line):
-    line = re.sub(r"\s+", "\t", line)
-    line = line.split("\t")
+    line = line.split()
     motifname = line[1]
     motifnum = int(line[2])
     idscore = line[5]
