@@ -1,9 +1,9 @@
 process GOTERMS {
     label 'io'
-    
+
     input:
     path matches
-    val goterms
+    path goterms
 
     output:
     path "goterms_${matches}"

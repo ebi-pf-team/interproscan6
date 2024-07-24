@@ -85,7 +85,10 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             }
                             if match_data['member_db'].upper() == "SUPERFAMILY":
                                 info['evalue'] = float(location['evalue'])
-                                info["hmmLength"] = match_data['hmm_length']
+                                try:
+                                    info["hmmLength"] = match_data['hmm_length']
+                                except KeyError:
+                                    info["hmmLength"] = location['hmmLength']
                                 match = {
                                     "signature": signature,
                                     "locations": [info],
