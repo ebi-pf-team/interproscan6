@@ -66,7 +66,7 @@ workflow {
         parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
     }
 
-    if (params.signalp_mode.toLowerCase() !in ['fast', 'slow-sequential']) {
+    if (params.signalp_mode.toLowerCase() !in ['fast', 'slow', 'slow-sequential']) {
         log.info "Unrecognised SignalP mode '${params.signalp_mode}'.\nAccepted modes: 'fast', 'slow-sequential'"
         exit 1
     }
