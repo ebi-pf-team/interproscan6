@@ -162,13 +162,12 @@ process PIRSR_POST_PROCESSER {
         val postprocessing_params
         path out_dtbl
 
-
     output:
     path "pirsr_parsed_${out}.json"
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/members/pirsr/pirsr.py -i ${out_dtbl} -r ${postprocessing_params[0]} -o pirsr_parsed_${out_dtbl}.json
+    python3 $projectDir/interproscan/scripts/members/pirsr/pirsr.py -i ${out_dtbl} -r ${postprocessing_params[0]} > pirsr_parsed_${out_dtbl}.json
     """
 }
 

@@ -10,11 +10,11 @@ include {
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
     HMMER_RUNNER_WITH_ALIGNMENTS as SFLD_HMMER_RUNNER;
-    HMMER_RUNNER_WITH_ALIGNMENTS as PIRSR_HMMER_RUNNER;
     HMMER_SCAN_RUNNER as SUPERFAMILY_HMMER_RUNNER;
     FUNFAM_HMMER_RUNNER;
     HAMAP_HMMER_RUNNER;
     PIRSF_HMMER_RUNNER;
+    PIRSR_HMMER_RUNNER;
     SMART_HMMER2_RUNNER;
     HMMER_SCAN_RUNNER;
 } from "$projectDir/interproscan/modules/hmmer/runner/main"
@@ -377,9 +377,8 @@ workflow SEQUENCE_ANALYSIS {
     PIRSR_HMMER_RUNNER(runner_pirsr_params)
     PIRSR_POST_PROCESSER(
         PIRSR_HMMER_RUNNER.out[1],  // post-process params
-        PIRSR_HMMER_RUNNER.out[3]  // dtbl file
+        PIRSR_HMMER_RUNNER.out[2]  // dtbl file
     )
-
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)

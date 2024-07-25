@@ -18,7 +18,7 @@ It then goes though the hmmr3 hits and checks if each hit conforms to pirsr rule
 
 Any hits that conform to the rules are reported in the output json file.
 
-usage: pirsr.py [-h] -i QUERY -r RULES -o OUT
+usage: pirsr.py [-h] -i QUERY -r RULES
 
 """
 
@@ -76,10 +76,6 @@ def process_row(row, rule):
             if pos['hmmStart'] < len(map) and pos['hmmEnd'] < len(map):
                 target_seq = query_seq[map[pos['hmmStart']]: map[pos['hmmEnd']] + 1]
             else:
-                print("Target sequence out of alignment borders for query " +
-                      model_id + ' on hit ' + sequence_id)
-                print(str('hmmfrom: ' + str(hmm_from) + ', hmmStart: ' + str(pos['hmmStart'])) + ', hmmEnd: ' + str(
-                    pos['hmmEnd']) + ', len map:' + str(len(map)))
                 target_seq = ''
 
             if re.search('\\A' + condition + '\\Z', target_seq):
@@ -88,10 +84,8 @@ def process_row(row, rule):
 
                 # expand possible Nter / Cter positions to seq_from / seq_to
                 if rule['Groups'][grp][pos_num]['start'] == 'Nter':
-                    print("Nter rule")
                     rule['Groups'][grp][pos_num]['start'] = seq_from
                 if rule['Groups'][grp][pos_num]['end'] == 'Cter':
-                    print("Nter rule")
                     rule['Groups'][grp][pos_num]['end'] = seq_to
 
         if len(rule['Groups'][grp]) == pass_count:
@@ -118,9 +112,6 @@ def process_row(row, rule):
         else:
             domHits.append(domHit)
         result[sequence_id]["domainMatches"][model_id] = domHits
-        print('domainMatches found .... ' + model_id + ' ---' + sequence_id)
-        print('how many dom hits :' + str(len(domHits)))
-        print(result[sequence_id]["domainMatches"][model_id])
 
 
 def map_hmm_to_seq(hmm_pos, hmm, seq):
@@ -146,35 +137,25 @@ def map_hmm_to_seq(hmm_pos, hmm, seq):
 
 
 if __name__ == '__main__':
-
     ap = argparse.ArgumentParser()
 
     ap.add_argument("-i", "--query", required=True, help="query hmmer input file")
     ap.add_argument("-r", "--rules", required=True, help="processed json rules file")
-    ap.add_argument("-o", "--out", required=True, help="output json results file")
     args = vars(ap.parse_args())
 
     hmmer3_raw_output = args['query']
     rules_name = args['rules']
-    out_file = args['out']
 
     result = {}
-
     with open(rules_name) as rulesfile:
         rules_hash = json.load(rulesfile)
 
     raw_matches = parsehmmer.parse(hmmer3_raw_output)
-
-    print('process the matches ... ')
     for row in raw_matches:
         if not bool(row):
             break
-        print(row)
         if row[1] in rules_hash:
             rule = rules_hash[row[1]]
             process_row(row, rule)
-        else:
-            print('ERROR: nonexistent rule ' + row[1] + ' in rules file')
 
-    with open(out_file, 'w') as out_file:
-        json.dump(result, out_file, indent=4)
+    print(json.dumps(result, indent=4))
