@@ -28,6 +28,7 @@ include {
     HMMER_PARSER as PFAM_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_SCAN_PARSER as PIRSF_HMMER_PARSER;
+    PIRSR_PARSER;
     HMMER2_PARSER;
 } from "$projectDir/interproscan/modules/hmmer/parser/main"
 include {
@@ -38,7 +39,6 @@ include {
     HAMAP_POST_PROCESSER;
     PANTHER_POST_PROCESSER;
     PIRSF_POST_PROCESSER;
-    PIRSR_POST_PROCESSER;
     SFLD_POST_PROCESSER;
     SUPERFAMILY_POST_PROCESSER;
 } from "$projectDir/interproscan/modules/hmmer/post_processing/main"
@@ -375,9 +375,9 @@ workflow SEQUENCE_ANALYSIS {
     // PIRSR
     runner_pirsr_params = fasta.combine(member_params.pirsr)
     PIRSR_HMMER_RUNNER(runner_pirsr_params)
-    PIRSR_POST_PROCESSER(
-        PIRSR_HMMER_RUNNER.out[1],  // post-process params
-        PIRSR_HMMER_RUNNER.out[2]  // dtbl file
+    PIRSR_PARSER(
+        PIRSR_HMMER_RUNNER.out[0],  // out file
+        PIRSR_HMMER_RUNNER.out[1]   // post-process params
     )
 
     // SFLD (+ post-processing binary to add sites and filter hits)
@@ -445,6 +445,7 @@ workflow SEQUENCE_ANALYSIS {
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,
             PIRSF_FILTER_MATCHES.out,
+            PIRSR_PARSER.out,
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
@@ -463,6 +464,7 @@ workflow SEQUENCE_ANALYSIS {
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,
             PIRSF_FILTER_MATCHES.out,
+            PIRSR_PARSER.out,
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
