@@ -317,11 +317,11 @@ signalp {
     }
 }
 ```
-Repeat this step for SignalP_EUK.
+Repeat this step for `SignalP_EUK`.
 ```
 signalp_euk {
     release = "6.0h"  <--- make sure the release is correct
-    runner = "signalp"
+    runner = "signalp_euk"
     data {
         model_dir = "$projectDir/bin/signalp/models"  <--- UPDATE PATH TO models DIR
         organism = "euk"
@@ -331,31 +331,31 @@ signalp_euk {
 > Specifying the eukarya method of `SignalP6` (`SignalP_EUK`) triggers post-processing of the SP predictions by `SignalP6` to prevent spurious results (only predicts type Sec/SPI).
 
 4. Add `SignalP` and `SignalP_EUK` to the application list in `nextflow.config`:
-
+```
 params {
     batchsize = 100
     help = false
     applications = 'AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,Pfam,PIRSF,PIRSR,PRINTS,PrositePatterns,PrositeProfiles,SFLD,SMART,SuperFamily,SignalP,SignalP_EUK' <--- ADD NEW APPLICATION
     disable_precalc = false
 }
-
+```
 ### Running `InterProScan6` with `SignalP6` enabled
 
-Include `signalp` or `signalp_euk` in the list of applications defined using `--applications` flag.
+Include `signalp` and `signalp_euk` in the list of applications defined using `--applications` flag.
 
 For example:
 
     nextflow run interproscan.nf --input files_test/best_to_test.fasta --applications signalp --disable_precalc
+    nextflow run interproscan.nf --input files_test/best_to_test.fasta --applications signalp_euk --disable_precalc
 
 ### Changing mode of `Signalp6` in `InterProScan6`
 
 `SignalP6` supports 3 modes: `fast`, `slow` and `slow-sequential`. The mode can be set using the `--signalp_mode` flag. The default mode is `fast`.
 
 For example:
-
+```
     nextflow run interproscan.nf --input files_test/best_to_test.fasta --applications signalp --disable_precalc --signalp_mode slow
     nextflow run interproscan.nf --input files_test/best_to_test.fasta --applications signalp_euk --disable_precalc --signalp_mode slow-sequential
-
 ```
 
 **Note:** _`InterProScan6` only supports the implementation of one `SignalP` mode at a time. A separate `InterProScan6` but be completed for each mode of interest, in order ro apply multiple modes to the same dataset_.
