@@ -9,6 +9,7 @@ workflow XREFS {
     applications
 
     main:
+    log.info "${params.xrefs.entries}"
     ENTRIES(matches, params.xrefs.entries)
 
     final_result = ENTRIES.out

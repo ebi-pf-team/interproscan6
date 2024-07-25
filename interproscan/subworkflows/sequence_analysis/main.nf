@@ -52,6 +52,10 @@ include {
     SUPERFAMILY_FILTER_MATCHES;
 } from "$projectDir/interproscan/modules/hmmer/filter/main"
 include {
+    MOBIDB_RUNNER;
+    MOBIDB_PARSER;
+} from "$projectDir/interproscan/modules/mobidb/main"
+include {
     PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER
 } from "$projectDir/interproscan/modules/prosite/pfsearch/runner/main"
 include {
@@ -82,6 +86,7 @@ workflow SEQUENCE_ANALYSIS {
     Channel.from(applications.split(','))
     .branch { member ->
         release = params.members."${member}".release
+        runner = params.members."${member}".runner
         log.info "Running $member version $release"
 
         /*
@@ -228,6 +233,12 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."${member}".postprocess.switches,
                     params.members."${member}".postprocess.data,
                 ]
+            ]
+
+        mobidb: member == "mobidb"
+            return [
+                params.members."${member}".release,
+                params.members."${member}".switches
             ]
 
         prosite_patterns: member == "prosite_patterns"
@@ -397,6 +408,11 @@ workflow SEQUENCE_ANALYSIS {
     CDD_POSTPROCESS(CDD_RUNNER.out)
     CDD_PARSER(CDD_POSTPROCESS.out)
 
+    // MOBIDB
+    runner_mobidb_params = fasta.combine(member_params.mobidb)
+    MOBIDB_RUNNER(runner_mobidb_params)
+    MOBIDB_PARSER(MOBIDB_RUNNER.out)
+
     // PROSITE Patterns (uses pfscanV3)
     runner_patterns = fasta.combine(member_params.prosite_patterns)
     PROSITE_PATTERNS_RUNNER(runner_patterns)
@@ -427,6 +443,7 @@ workflow SEQUENCE_ANALYSIS {
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
+            MOBIDB_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
@@ -445,6 +462,7 @@ workflow SEQUENCE_ANALYSIS {
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
+            MOBIDB_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
