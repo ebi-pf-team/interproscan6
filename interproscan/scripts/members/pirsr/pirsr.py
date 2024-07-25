@@ -28,7 +28,7 @@ import re
 import parsehmmer  # 2 as parsehmmer
 
 
-def process_row(row, rule):
+def process_row(row, rule, member_db, version):
     """
     process a row of the input tsv file containing the hmmr3 data
     updates the result data structure with the result from current row
@@ -48,7 +48,6 @@ def process_row(row, rule):
 
     if not sequence_id in result:
         result[sequence_id] = {}
-        result[sequence_id]["domainMatches"] = {}
 
     map = map_hmm_to_seq(hmm_from, hmm_align, seq_align)
 
@@ -56,7 +55,7 @@ def process_row(row, rule):
 
     for grp in rule['Groups'].keys():
 
-        if model_id in result[sequence_id]["domainMatches"]:
+        if model_id in result[sequence_id]:
             next
 
         pass_count = 0
@@ -105,13 +104,21 @@ def process_row(row, rule):
             'ruleSites': rule_sites,
             'scope': rule['Scope'],
         }
-        domHits = []
-        if model_id in result[sequence_id]["domainMatches"]:
-            domHits = result[sequence_id]["domainMatches"][model_id]
-            domHits.append(domHit)
+
+        if model_id in result[sequence_id]:
+            result[sequence_id][model_id]["locations"].append(domHit)
         else:
-            domHits.append(domHit)
-        result[sequence_id]["domainMatches"][model_id] = domHits
+            match_info = {
+                "accession": model_id,
+                "name": model_id,
+                "member_db": member_db,
+                "version": version,
+                "model-ac": model_id.split(":")[0].split(".")[0],
+                "locations": []
+            }
+            result[sequence_id][model_id] = match_info
+            result[sequence_id][model_id]["locations"].append(domHit)
+
 
 
 def map_hmm_to_seq(hmm_pos, hmm, seq):
@@ -150,12 +157,16 @@ if __name__ == '__main__':
     with open(rules_name) as rulesfile:
         rules_hash = json.load(rulesfile)
 
+    path_segments = hmmer3_raw_output.split("/")[-1].split("._.")
+    version = path_segments[0]
+    member_db = path_segments[1]
+
     raw_matches = parsehmmer.parse(hmmer3_raw_output)
     for row in raw_matches:
         if not bool(row):
             break
         if row[1] in rules_hash:
             rule = rules_hash[row[1]]
-            process_row(row, rule)
+            process_row(row, rule, member_db, version)
 
     print(json.dumps(result, indent=4))
