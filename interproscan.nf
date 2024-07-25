@@ -67,7 +67,7 @@ workflow {
     }
 
     if (params.signalp_mode.toLowerCase() !in ['fast', 'slow-sequential']) {
-        log.info "SignalP mode '${params.signalp_mode}' in nextflow.config not recognised. Accepted: 'fast', 'slow-sequential'"
+        log.info "Unrecognised SignalP mode '${params.signalp_mode}'.\nAccepted modes: 'fast', 'slow-sequential'"
         exit 1
     }
 

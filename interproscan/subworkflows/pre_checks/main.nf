@@ -18,7 +18,7 @@ def printHelp() {
         --output <OUTPUT-FILE-PATH>        Optional. Path to the output file.
                                             If this option is not set, the output will be write on results/ folder.
         --pathways Optional. Include pathway information in the output.
-        --signalp_mode Optional. Sets SignalP/SignalP_EUK run speed, default is fast.
+        --signalp_mode Optional. Set which SignalP/SignalP_EUK prediction models are used. Models may have to be installed. Accepted: 'fast', 'slow', 'sequential'. Default: 'fast'.
         --version                          Print the version of InterProScan.
     """
 }
