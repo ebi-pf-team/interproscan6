@@ -1,5 +1,5 @@
 process MOBIDB_RUNNER {
-    ccontainer "${workflow.containerEngine == 'singularity' ?
+    container "${workflow.containerEngine == 'singularity' ?
     '$projectDir/idpred.img' :
     'docker.io/library/idrpred'}"
 
