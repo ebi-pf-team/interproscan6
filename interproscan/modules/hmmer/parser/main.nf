@@ -56,20 +56,3 @@ process HMMER_SCAN_PARSER {
     python3 $projectDir/interproscan/scripts/hmmer/parser_scan_out.py ${out} > hmmer_parsed_${out}.json
     """
 }
-
-
-process PIRSR_PARSER {
-    label 'analysis_parser'
-
-    input:
-        path out
-        val postprocessing_params
-
-    output:
-    path "pirsr_parsed_${out}.json"
-
-    script:
-    """
-    python3 $projectDir/interproscan/scripts/members/pirsr/pirsr.py -i ${out} -r ${postprocessing_params[0]} > pirsr_parsed_${out}.json
-    """
-}

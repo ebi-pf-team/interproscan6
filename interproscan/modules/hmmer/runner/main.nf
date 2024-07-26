@@ -117,23 +117,6 @@ process PIRSF_HMMER_RUNNER {
 }
 
 
-process PIRSR_HMMER_RUNNER {
-    label 'hmmer_runner'
-
-    input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
-
-    output:
-        path "${release}._.${member}._.out"
-        val postprocessing_params
-        path "${release}._.${member}._.dtbl"
-
-    script:
-    """
-    /opt/hmmer3/bin/hmmsearch ${switches} -o ${release}._.${member}._.out --domtblout ${release}._.${member}._.dtbl ${hmm} ${fasta}
-    """
-}
-
 process SMART_HMMER2_RUNNER {
     label 'hmmer_2_runner'
 

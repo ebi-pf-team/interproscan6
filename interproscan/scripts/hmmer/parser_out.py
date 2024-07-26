@@ -28,6 +28,8 @@ def get_accession_regex(appl: str) -> re.Pattern:
         return re.compile(r"(^[^:]*:)\s+(\w+).*$")
     if appl.upper() == "PIRSF":
         return re.compile(r"^(Accession:)\s+(PIRSF\d+)$")
+    if appl.upper() == "PIRSR":
+        return re.compile(r"^(Accession:)\s+(PIRSR\d+-\d+)$")
     if appl.upper() == "SFLD":
         return re.compile(r"^(Accession:|Query:|Query sequence:)\s+(SFLD[^\s]+)\s*$")
 

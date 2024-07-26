@@ -195,25 +195,25 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     except KeyError:
                                         info["sites"] = []
 
-                                if match_data['member_db'].upper() == "PIRSR":
-                                    info["sites"] = []
-                                    for site in location["sites"]:
-                                        site_parsed = {
-                                            "description": site["desc"],
-                                            "group": int(site["group"]),
-                                            "hmmEnd": site["hmmEnd"],
-                                            "hmmStart": site["hmmStart"],
-                                            "label": site["label"],
-                                            "numLocations": 1,
-                                            "siteLocations": [
-                                                {
-                                                    "end": site["end"],
-                                                    "residue": site["condition"],
-                                                    "start": site["start"]
-                                                }
-                                            ]
-                                        }
-                                        info["sites"].append(site_parsed)
+                                # if match_data['member_db'].upper() == "PIRSR":
+                                #     info["sites"] = []
+                                #     for site in location["sites"]:
+                                #         site_parsed = {
+                                #             "description": site["desc"],
+                                #             "group": int(site["group"]),
+                                #             "hmmEnd": site["hmmEnd"],
+                                #             "hmmStart": site["hmmStart"],
+                                #             "label": site["label"],
+                                #             "numLocations": 1,
+                                #             "siteLocations": [
+                                #                 {
+                                #                     "end": site["end"],
+                                #                     "residue": site["condition"],
+                                #                     "start": site["start"]
+                                #                 }
+                                #             ]
+                                #         }
+                                #         info["sites"].append(site_parsed)
 
                                 try:
                                     info["location-fragments"] = location["location-fragments"]
