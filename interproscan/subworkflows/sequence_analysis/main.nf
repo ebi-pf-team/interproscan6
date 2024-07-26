@@ -247,10 +247,10 @@ workflow SEQUENCE_ANALYSIS {
 
         prints: member == 'prints'
             return [
+                params.members.prints.data.hierarchy,
                 params.members.prints.data.pval,
-                params.members.prints.switches,
                 params.members.prints.release,
-                params.members.prints.data.hierarchy
+                params.members.prints.switches
             ]
 
         prosite_patterns: member == "prosite_patterns"
