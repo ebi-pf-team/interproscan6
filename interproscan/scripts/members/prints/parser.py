@@ -1,6 +1,6 @@
 import json
 import sys
-
+import re
 
 # Parse prints output to standardised JSON format
 # param prints_out: path to prints output file
@@ -65,16 +65,11 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
                 matches[protein_id] = {}
             elif line.startswith("1TBH"):
                 #  keep track of hit motifs and motif names
-                #print(line)
-                tbh = line.split()
-                motif = tbh[1]
-                protein_hits[motif] = {}
-                desc = " ".join(tbh[3:len(tbh) - 1])
-                motif_acc = tbh[len(tbh)-1]
+                motif, desc, motif_acc = process_1tb(line)
                 # key value store of hit motif id and motif name
+                protein_hits[motif] = {}
                 protein_hits[motif]["desc"] = desc
                 protein_hits[motif]["acc"] = motif_acc
-                #print(protein_hits[motif])
 
             elif line.startswith("2TBH"):
                 # fingerprint = motif
@@ -106,8 +101,6 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
                     line)
                 acc = protein_hits[motifname]["acc"]
                 if matches[protein_id]:
-                    #print(matches[protein_id])
-                    #sprint(acc)
                     matches[protein_id][acc]["locations"].append({
                     "motifNumber": int(motifnum),
                     "pvalue": pvalue,
@@ -123,27 +116,35 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
     return matches
 
 
+def process_1tb(line):
+    line_pattern = re.compile(r"^(\w+)\s+(\w+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+([A-Za-z0-9\s\-\/\(\)]+?)\s+(\w+)\s*$")
+    rematch = line_pattern.match(line)
+    motif = rematch.group(2)
+    desc = rematch.group(4)
+    acc = rematch.group(5)
+    return motif, desc, acc
+
+
 def process_2tb(line):
-    line = line.split()
-    fingerprint = line[1]
-    num_motifs = line[2]
-    evalue = float(line[9])
-    graphscan = line[10]
+    line_pattern = re.compile(r"^(\w+)\s+(\w+)\s+(\d+)\s+(of\s+\d+)\s+([\d\.]+)\s+([\d\.]+)\s+(\d+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+([\d\.]*\d+e[+-]?\d+|[\d\.])\s+([Ii.]+)\s*$")
+    rematch = line_pattern.match(line)
+    fingerprint = rematch.group(2)
+    num_motifs = rematch.group(3)
+    evalue = float(rematch.group(9))
+    graphscan = rematch.group(10)
     return fingerprint, num_motifs, evalue, graphscan
 
 
 def process_3tb(line):
-    line = line.split()
-    motifname = line[1]
-    motifnum = int(line[2])
-    idscore = line[5]
-    pvalue = line[7]
-    sequence = line[8]
-    length = line[9]
-    pos = line[11]
-    # corrects for pos merging with next column
-    if len(pos) > 5:
-        pos = pos[:6]
+    line_pattern = re.compile(r"^(\w+)\s+(\w+)\s+(\d+)\s+(of\s+\d+)\s+([\d\.]+)\s+(\d+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+(#*[a-zA-Z]+#*)\s+(\d+)\s+(\d+)\s+(\d+)\s*(\d)\s*$")
+    rematch = line_pattern.match(line)
+    motifname = rematch.group(2)
+    motifnum = int(rematch.group(3))
+    idscore = rematch.group(5)
+    pvalue = rematch.group(7)
+    sequence = rematch.group(8)
+    length = rematch.group(9)
+    pos = rematch.group(11)
     end = int(pos) + int(length) - 1
     # corrects for motif overhanging start
     if int(pos) < 1:
