@@ -1,6 +1,5 @@
 import json
 import sys
-import re
 # Parse prints output to standardised JSON format
 # param prints_out: path to prints output file
 # param hierarchy: path to prints hierarchy db
@@ -18,14 +17,12 @@ def parse_hierarchy(hierarchy: str) -> dict:
     hierarchymap = {}
     with open(hierarchy, "r") as f:
 
-        model_ids = []
         for line in f:
             if line.startswith(("/", "#")):
                 continue
             row = line.split("|")
             if len(row) >= 3:
                 model_id = row[0]
-                model_ids.append(model_id)
                 model_acc = row[1]
                 evalue_cutoff = row[2]
                 min_motif_count = row[3]
@@ -60,7 +57,7 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
     with open(prints_out) as f:
         for line in f:
             if line.startswith("Sn; "):
-                protein_id = line.split()[1]
+                protein_id = line.split(maxsplit=2)[1]
                 protein_hits = {}
                 matches[protein_id] = {}
             if line.startswith("1TBH"):
