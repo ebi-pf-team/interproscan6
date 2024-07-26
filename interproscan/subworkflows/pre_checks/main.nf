@@ -94,10 +94,11 @@ workflow PRE_CHECKS {
     // Check if the applications are valid
     def applications_expected = [
         'antifam', 'cdd', 'funfam', 'gene3d', 'hamap',
-        'ncbifam', 'panther', 'pfam', 'pirsf', 'pirsr',
-        'prosite_patterns', 'prosite_profiles',
+        'mobidb', 'ncbifam', 'panther', 'pfam', 'pirsf',
+        'pirsr', 'prosite_patterns', 'prosite_profiles',
         'sfld', 'signalp', 'smart', 'superfamily'
     ]
+
     def applications_diff = user_applications.toLowerCase().split(',') - applications_expected
     if (applications_diff.size() != 0){
         log.info printHelp()
