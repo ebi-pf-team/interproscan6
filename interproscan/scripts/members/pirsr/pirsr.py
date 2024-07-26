@@ -9,27 +9,22 @@ def matches2rules(matches, rule, member_db, version):
     with open(matches, "r") as matches:
         matches_info = json.load(matches)
 
-    for protein_id, domains in matches_info.items():
-        sequence_id = protein_id
+    for sequence_id, domains in matches_info.items():
         for model_id, domain in domains.items():
             rule = rules_hash[model_id]
             for location in domain["locations"]:
                 hmm_from = location["hmmStart"]
-                hmm_to = location["hmmEnd"]
-                hmm_align = location["hmmAlign"]
-                seq_from = location["start"]
-                seq_to = location["end"]
-                hmm_align = location["alignment"]
+                try:
+                    hmm_align = location["hmm_alignment"]
+                except KeyError:
+                    hmm_align = ""
+                seq_align = location["alignment"]
 
                 map = map_hmm_to_seq(hmm_from, hmm_align, seq_align)
 
                 rule_sites = []
 
                 for grp in rule['Groups'].keys():
-
-                    # if model_id in matches[sequence_id]:
-                    #     next
-
                     pass_count = 0
 
                     pos_num = -1
@@ -42,7 +37,7 @@ def matches2rules(matches, rule, member_db, version):
                         condition = re.sub('\\)', '}', condition)
                         condition = re.sub('x', '.', condition)
 
-                        # query_seq = re.sub('-', '', domain[]["alignment"])
+                        query_seq = re.sub('-', '', seq_align)
 
                         if pos['hmmStart'] < len(map) and pos['hmmEnd'] < len(map):
                             target_seq = query_seq[map[pos['hmmStart']]: map[pos['hmmEnd']] + 1]
@@ -65,14 +60,14 @@ def matches2rules(matches, rule, member_db, version):
 
                 if rule_sites:
                     domHit = {
-                        'score': dom_score,
-                        'evalue': dom_evalue,
-                        'hmmStart': hmm_from,
-                        'hmmEnd': hmm_to,
-                        'hmmLength': qlen,
-                        'hmmAlign': hmm_align,
-                        'start': seq_from,
-                        'end': seq_to,
+                        # 'score': dom_score,
+                        # 'evalue': dom_evalue,
+                        # 'hmmStart': hmm_from,
+                        # 'hmmEnd': hmm_to,
+                        # 'hmmLength': qlen,
+                        # 'hmmAlign': hmm_align,
+                        # 'start': seq_from,
+                        # 'end': seq_to,
                         'seqAlign': seq_align,
                         'representative': '',
                         'envelopeStart': 1,  # expected result always returns 1
@@ -81,21 +76,12 @@ def matches2rules(matches, rule, member_db, version):
                         'scope': rule['Scope'],
                     }
 
-                    if model_id in matches[sequence_id]:
-                        matches[sequence_id][model_id]["locations"].append(domHit)
-                    else:
-                        match_info = {
-                            "accession": model_id,
-                            "name": model_id,
-                            "member_db": member_db,
-                            "version": version,
-                            "model-ac": model_id.split(":")[0].split(".")[0],
-                            "locations": []
-                        }
-                        matches[sequence_id][model_id] = match_info
-                        matches[sequence_id][model_id]["locations"].append(domHit)
+                    try:
+                        location["domHit"].append(domHit)
+                    except KeyError:
+                        location["domHit"] = [domHit]
 
-    return matches
+    return matches_info
 
 
 
