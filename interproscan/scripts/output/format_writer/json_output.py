@@ -162,7 +162,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["alignment"] = location["alignment"]
                                     info["level"] = location["level"]
 
-                                elif match_data['member_db'].upper() == "SFLD":
+                                elif match_data['member_db'].upper() in ["SFLD", "PIRSR"]:
                                     info["evalue"] = float(location["evalue"])
                                     info["score"] = float(location["score"])
                                     info["hmmStart"] = int(location["hmmStart"])
@@ -212,7 +212,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 "locations": locations
                             }
 
-                            if match_data['member_db'].upper() not in ["CDD", "HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS"]:
+                            if match_data['member_db'].upper() not in ["CDD", "HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS", "PIRSR"]:
                                 match["evalue"] = float(match_data['evalue'])
                                 match["score"] = float(match_data['score'])
 

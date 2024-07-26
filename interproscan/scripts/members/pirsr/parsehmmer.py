@@ -34,8 +34,9 @@ def parsehmmsearch(hmmer_out):
             if line.startswith('#') or not line.strip():
                 line = fp.readline()
                 continue
-            elif m.match(r'\AQuery:\s+(PIRSR[0-9]+\S+)'):
+            elif m.match(r'\AQuery:\s+(PIRSR[0-9]+\S+)\s+\[M=(\d+)\]'):
                 hmm_id = m.group(1)
+                qlen = int(m.group(2))
                 fp.readline()
                 fp.readline()
                 fp.readline()
@@ -78,6 +79,7 @@ def parsehmmsearch(hmmer_out):
                         quit()
                     domain_id = domain_info[0]
                     domain_hits[query_id][hmm_id][domain_id] = {}
+                    domain_hits[query_id][hmm_id][domain_id]['qlen'] = qlen
                     domain_hits[query_id][hmm_id][domain_id]['score'] = domain_info[2]
                     domain_hits[query_id][hmm_id][domain_id]['bias'] = domain_info[3]
                     domain_hits[query_id][hmm_id][domain_id]['cEvalue'] = domain_info[4]
@@ -173,7 +175,8 @@ def parse(output_file):
                 hmmend = hit[hit_id]['hmmend']
                 domscore = hit[hit_id]['score']
                 domevalue = hit[hit_id]['iEvalue']
-                hit_info = (seq_id, hmm_id, hmmfrom, hmmend, hmmalign, start, end, matchalign, domscore, domevalue)
+                qlen = hit[hit_id]['qlen']
+                hit_info = (seq_id, hmm_id, hmmfrom, hmmend, hmmalign, start, end, matchalign, domscore, domevalue, qlen)
                 raw_matches.append(hit_info)
 
     return set(raw_matches)

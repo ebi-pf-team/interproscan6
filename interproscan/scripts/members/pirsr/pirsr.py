@@ -44,6 +44,7 @@ def process_row(row, rule, member_db, version):
     seq_align = row[7]
     dom_score = row[8]
     dom_evalue = row[9]
+    qlen = int(row[10])
     global result
 
     if not sequence_id in result:
@@ -93,14 +94,18 @@ def process_row(row, rule, member_db, version):
 
     if rule_sites:
         domHit = {
-            'domScore': dom_score,
-            'domEvalue': dom_evalue,
-            'hmmFrom': hmm_from,
-            'hmmTo': hmm_to,
+            'score': dom_score,
+            'evalue': dom_evalue,
+            'hmmStart': hmm_from,
+            'hmmEnd': hmm_to,
+            'hmmLength': qlen,
             'hmmAlign': hmm_align,
-            'seqFrom': seq_from,
-            'seqTo': seq_to,
+            'start': seq_from,
+            'end': seq_to,
             'seqAlign': seq_align,
+            'representative': '',
+            'envelopeStart': 1,  # expected result always returns 1
+            'envelopeEnd': 2,  # expected result always returns 2
             'ruleSites': rule_sites,
             'scope': rule['Scope'],
         }
