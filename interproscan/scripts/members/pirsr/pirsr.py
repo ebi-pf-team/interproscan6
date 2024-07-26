@@ -106,7 +106,7 @@ def process_row(row, rule, member_db, version):
             'representative': '',
             'envelopeStart': 1,  # expected result always returns 1
             'envelopeEnd': 2,  # expected result always returns 2
-            'ruleSites': rule_sites,
+            'sites': rule_sites,
             'scope': rule['Scope'],
         }
 

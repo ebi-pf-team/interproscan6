@@ -194,6 +194,27 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                         info["sites"] = location["sites"]
                                     except KeyError:
                                         info["sites"] = []
+
+                                if match_data['member_db'].upper() == "PIRSR":
+                                    info["sites"] = []
+                                    for site in location["sites"]:
+                                        site_parsed = {
+                                            "description": site["desc"],
+                                            "group": int(site["group"]),
+                                            "hmmEnd": site["hmmEnd"],
+                                            "hmmStart": site["hmmStart"],
+                                            "label": site["label"],
+                                            "numLocations": 1,
+                                            "siteLocations": [
+                                                {
+                                                    "end": site["end"],
+                                                    "residue": site["condition"],
+                                                    "start": site["start"]
+                                                }
+                                            ]
+                                        }
+                                        info["sites"].append(site_parsed)
+
                                 try:
                                     info["location-fragments"] = location["location-fragments"]
                                 except KeyError:
@@ -215,6 +236,10 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             if match_data['member_db'].upper() not in ["CDD", "HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS", "PIRSR"]:
                                 match["evalue"] = float(match_data['evalue'])
                                 match["score"] = float(match_data['score'])
+
+                            if match_data['member_db'].upper() == "PIRSR":
+                                match["evalue"] = float(location['evalue'])
+                                match["score"] = float(location['score'])
 
                             if 'model-ac' in match_data:
                                 match["model-ac"] = match_data['model-ac']
