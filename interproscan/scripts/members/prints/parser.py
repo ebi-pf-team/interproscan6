@@ -1,5 +1,7 @@
 import json
 import sys
+
+
 # Parse prints output to standardised JSON format
 # param prints_out: path to prints output file
 # param hierarchy: path to prints hierarchy db
@@ -47,71 +49,76 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
 
     Lines in the output file:
     Sn line: protein_id
-    2TBN/2TBH lines: fingerprint match summary values
-    3TBN/3TBH lines: fingerprint motif match values
+    1TBH line: fingerprint description
+    2TBH lines: fingerprint match summary values
+    3TBH lines: fingerprint motif match values
     Other lines: blank or not required
     '''
     matches = {}
     protein_id = ""
-
+    version = prints_out.split("._.")[0]
     with open(prints_out) as f:
         for line in f:
             if line.startswith("Sn; "):
                 protein_id = line.split(maxsplit=2)[1]
                 protein_hits = {}
                 matches[protein_id] = {}
-            if line.startswith("1TBH"):
+            elif line.startswith("1TBH"):
                 #  keep track of hit motifs and motif names
+                #print(line)
                 tbh = line.split()
                 motif = tbh[1]
-                desc = " ".join(tbh[3:len(tbh)-1])
+                protein_hits[motif] = {}
+                desc = " ".join(tbh[3:len(tbh) - 1])
+                motif_acc = tbh[len(tbh)-1]
                 # key value store of hit motif id and motif name
-                protein_hits[motif] = desc
-            if line.startswith("2TBH"):
+                protein_hits[motif]["desc"] = desc
+                protein_hits[motif]["acc"] = motif_acc
+                #print(protein_hits[motif])
+
+            elif line.startswith("2TBH"):
+                # fingerprint = motif
                 fingerprint, nummotif, evalue, graphscan = process_2tb(line)
                 # hierarchy map to get model ac
                 if fingerprint in hierarchy_map:
                     model_acc = hierarchy_map[fingerprint]["model_acc"]
                     min_motif = hierarchy_map[fingerprint]["min_motif_count"]
                     cutoff = float(hierarchy_map[fingerprint]["evalue_cutoff"])
-                else:
-                    continue
-                match = {"accession": model_acc,
-                         "name": fingerprint,
-                         "member_db": "PRINTS",
-                         "version": prints_out.split("._.")[0],
-                         "evalue": float(evalue),
-                         "num_motif": nummotif,
-                         "graphscan": graphscan,
-                         "model-ac": model_acc,
-                         "description": desc,
-                         "locations": []}
-                         # filter by min motif
-                if match["evalue"] <= cutoff and match["num_motif"] > min_motif:
-                    match.pop("num_motif")
-                else:
-                    continue
 
-                if model_acc not in matches[protein_id]:
-                    matches[protein_id][model_acc] = match
+                    if evalue <= cutoff and nummotif > min_motif:
+                        match = {"accession": model_acc,
+                                 "name": fingerprint,
+                                 "member_db": "PRINTS",
+                                 "version": version,
+                                 "evalue": evalue,
+                                 "graphscan": graphscan,
+                                 "model-ac": model_acc,
+                                 "description": protein_hits[fingerprint]["desc"],
+                                 "locations": []}
+                        if model_acc not in matches[protein_id]:
+                            matches[protein_id][model_acc] = match
+
+                else:
+                    continue
 
             elif line.startswith("3TBH"):
-                motifname, motifnum, idscore, pvalue, pos, end = process_3tb(line)
-                # compile key value store for model id, model name from 1tb
-                # use to assign location
-                for hit in protein_hits:
-                    if hit == motifname:
-                        matches[protein_id][model_acc]["locations"].append({
-                            "motifNumber": int(motifnum),
-                            "pvalue": pvalue,
-                            "score": idscore,
-                            "start": pos,
-                            "end": end,
-                            "representative": "false",
-                            "location-fragments": [{"start": pos,
-                                 "end": end,
-                                 "dc-status": "CONTINUOUS"}]})
-                        matches[protein_id][model_acc]["description"] = protein_hits[hit]
+                motifname, motifnum, idscore, pvalue, pos, end = process_3tb(
+                    line)
+                acc = protein_hits[motifname]["acc"]
+                if matches[protein_id]:
+                    #print(matches[protein_id])
+                    #sprint(acc)
+                    matches[protein_id][acc]["locations"].append({
+                    "motifNumber": int(motifnum),
+                    "pvalue": pvalue,
+                    "score": idscore,
+                    "start": pos,
+                    "end": end,
+                    "representative": "false",
+                    "location-fragments": [{
+                        "start": pos,
+                        "end": end,
+                        "dc-status": "CONTINUOUS"}]})
 
     return matches
 
@@ -119,8 +126,8 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
 def process_2tb(line):
     line = line.split()
     fingerprint = line[1]
-    num_motifs = line[2] + line[3] + line[4]
-    evalue = line[9]
+    num_motifs = line[2]
+    evalue = float(line[9])
     graphscan = line[10]
     return fingerprint, num_motifs, evalue, graphscan
 
