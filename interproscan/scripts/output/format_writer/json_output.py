@@ -195,25 +195,28 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     except KeyError:
                                         info["sites"] = []
 
-                                # if match_data['member_db'].upper() == "PIRSR":
-                                #     info["sites"] = []
-                                #     for site in location["sites"]:
-                                #         site_parsed = {
-                                #             "description": site["desc"],
-                                #             "group": int(site["group"]),
-                                #             "hmmEnd": site["hmmEnd"],
-                                #             "hmmStart": site["hmmStart"],
-                                #             "label": site["label"],
-                                #             "numLocations": 1,
-                                #             "siteLocations": [
-                                #                 {
-                                #                     "end": site["end"],
-                                #                     "residue": site["condition"],
-                                #                     "start": site["start"]
-                                #                 }
-                                #             ]
-                                #         }
-                                #         info["sites"].append(site_parsed)
+                                if match_data['member_db'].upper() == "PIRSR":
+                                    try:
+                                        info["sites"] = match_data["sites"]
+                                        for site in match_data["sites"]:
+                                            site_parsed = {
+                                                "description": site["desc"],
+                                                "group": int(site["group"]),
+                                                "hmmEnd": site["hmmEnd"],
+                                                "hmmStart": site["hmmStart"],
+                                                "label": site["label"],
+                                                "numLocations": 1,
+                                                "siteLocations": [
+                                                    {
+                                                        "end": site["end"],
+                                                        "residue": site["condition"],
+                                                        "start": site["start"]
+                                                    }
+                                                ]
+                                            }
+                                            info["sites"].append(site_parsed)
+                                    except KeyError:
+                                        info["sites"] = []
 
                                 try:
                                     info["location-fragments"] = location["location-fragments"]
@@ -240,6 +243,10 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             if match_data['member_db'].upper() == "PIRSR":
                                 match["evalue"] = float(location['evalue'])
                                 match["score"] = float(location['score'])
+                                try:
+                                    match["scope"] = match_data["scope"]
+                                except KeyError:
+                                    match["scope"] = None
 
                             if 'model-ac' in match_data:
                                 match["model-ac"] = match_data['model-ac']

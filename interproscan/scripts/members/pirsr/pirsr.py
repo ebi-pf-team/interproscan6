@@ -5,7 +5,7 @@ import re
 import sys
 
 
-def matches2rules(matches, rule, member_db, version):
+def matches2rules(matches, rule):
     with open(matches, "r") as matches:
         matches_info = json.load(matches)
 
@@ -14,19 +14,17 @@ def matches2rules(matches, rule, member_db, version):
             rule = rules_hash[model_id]
             for location in domain["locations"]:
                 hmm_from = location["hmmStart"]
+                seq_align = location["alignment"]
                 try:
                     hmm_align = location["hmm_alignment"]
                 except KeyError:
                     hmm_align = ""
-                seq_align = location["alignment"]
 
                 map = map_hmm_to_seq(hmm_from, hmm_align, seq_align)
 
                 rule_sites = []
-
                 for grp in rule['Groups'].keys():
                     pass_count = 0
-
                     pos_num = -1
                     for pos in rule['Groups'][grp]:
                         pos_num += 1
@@ -47,7 +45,6 @@ def matches2rules(matches, rule, member_db, version):
                         if re.search('\\A' + condition + '\\Z', target_seq):
                             # we have a pass
                             pass_count += 1
-
                             # expand possible Nter / Cter positions to seq_from / seq_to
                             if rule['Groups'][grp][pos_num]['start'] == 'Nter':
                                 rule['Groups'][grp][pos_num]['start'] = seq_from
@@ -59,30 +56,10 @@ def matches2rules(matches, rule, member_db, version):
                         rule_sites.extend(rule['Groups'][grp])
 
                 if rule_sites:
-                    domHit = {
-                        # 'score': dom_score,
-                        # 'evalue': dom_evalue,
-                        # 'hmmStart': hmm_from,
-                        # 'hmmEnd': hmm_to,
-                        # 'hmmLength': qlen,
-                        # 'hmmAlign': hmm_align,
-                        # 'start': seq_from,
-                        # 'end': seq_to,
-                        'seqAlign': seq_align,
-                        'representative': '',
-                        'envelopeStart': 1,  # expected result always returns 1
-                        'envelopeEnd': 2,  # expected result always returns 2
-                        'sites': rule_sites,
-                        'scope': rule['Scope'],
-                    }
-
-                    try:
-                        location["domHit"].append(domHit)
-                    except KeyError:
-                        location["domHit"] = [domHit]
+                    domain["sites"] = rule_sites
+                    domain["scope"] = rule['Scope']
 
     return matches_info
-
 
 
 def map_hmm_to_seq(hmm_pos, hmm, seq):
@@ -113,13 +90,9 @@ if __name__ == '__main__':
     matches = args[0]
     rules_path = args[1]
 
-    path_segments = matches.split("/")[-1].split("._.")
-    version = path_segments[0]
-    member_db = path_segments[1]
-
     with open(rules_path) as rulesfile:
         rules_hash = json.load(rulesfile)
 
-    matches = matches2rules(matches, rules_hash, member_db, version)
+    matches = matches2rules(matches, rules_hash)
 
     print(json.dumps(matches, indent=4))
