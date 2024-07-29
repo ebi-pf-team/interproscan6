@@ -57,11 +57,11 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                     else:
                         accession = match_data['accession'].split(":")[0]  # drop subfamily
 
-                    if match_data['member_db'].upper() == "SUPERFAMILY":
-                        description = None
-
                     if match_data['member_db'].upper() == "PRINTS":
                         description = match_data["description"]
+
+                    if match_data['member_db'].upper() == "SUPERFAMILY":
+                        description = None
 
                     signature = {
                         "accession": accession,
@@ -156,6 +156,11 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["envelopeStart"] = int(location["envelopeStart"])
                                     info["envelopeEnd"] = int(location["envelopeEnd"])
 
+                                elif match_data['member_db'].upper() == "PRINTS":
+                                    info["pvalue"] = float(location["pvalue"])
+                                    info["score"] = float(location["score"])
+                                    info["motifNumber"] = int(location["motifNumber"])
+
                                 elif match_data['member_db'].upper() == "PROSITE_PROFILES":
                                     info["score"] = float(location["score"])
                                     info["alignment"] = str(location["alignment"])
@@ -181,11 +186,6 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["hmmEnd"] = int(location["hmmEnd"])
                                     info["hmmLength"] = int(location["hmmLength"])
                                     info["hmmBounds"] = location["hmmBounds"]
-
-                                elif match_data['member_db'].upper() == "PRINTS":
-                                    info["pvalue"] = float(location["pvalue"])
-                                    info["score"] = float(location["score"])
-                                    info["motifNumber"] = int(location["motifNumber"])
 
                                 else:
                                     info["evalue"] = float(location["evalue"])
@@ -220,7 +220,13 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 "locations": locations
                             }
 
-                            if match_data['member_db'].upper() not in ["CDD", "HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS", "PRINTS"]:
+                            if match_data['member_db'].upper() not in [
+                                "CDD",
+                                "HAMAP",
+                                "PROSITE_PROFILES",
+                                "PROSITE_PATTERNS",
+                                "PRINTS"
+                            ]:
                                 match["evalue"] = float(match_data['evalue'])
                                 match["score"] = float(match_data['score'])
 

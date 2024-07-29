@@ -138,6 +138,13 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         hmm_length = "-"
                         location_score = "-"
                         env_end, env_start = "-", "-"
+                    elif member_db.upper() == "PRINTS":
+                        hmm_start = location["start"]
+                        hmm_end = location["end"]
+                        hmm_length = int(hmm_end) - int(hmm_start)
+                        location_score = location["pvalue"]
+                        env_end = "-"
+                        env_start = "-"
                     elif member_db.upper() == "SIGNALP":
                         hmm_start = location["start"]
                         hmm_end = location["end"]
@@ -149,13 +156,6 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         hmm_end = location["hmmEnd"]
                         hmm_length = location["hmmLength"]
                         location_score = location["score"]
-                        env_end = "-"
-                        env_start = "-"
-                    elif member_db.upper() == "PRINTS":
-                        hmm_start = location["start"]
-                        hmm_end = location["end"]
-                        hmm_length = int(hmm_end) - int(hmm_start)
-                        location_score = location["pvalue"]
                         env_end = "-"
                         env_start = "-"
                     else:
