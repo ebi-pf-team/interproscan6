@@ -155,7 +155,7 @@ process PIRSR_FILTER_MATCHES {
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/members/pirsr/pirsr.py \
+    python3 $projectDir/interproscan/scripts/members/pirsr/filter.py \
     ${ips6_json} ${postprocessing_params[0]} > ${ips6_json}.post.processed.json
     """
 }

@@ -14,6 +14,7 @@ MATCH_ELEMENT = {
     'PANTHER': 'hmmer3-match',
     'PFAM': 'hmmer3-match',
     'PIRSF': 'hmmer3-match',
+    'PIRSR': 'hmmer3-match',
     'SFLD': 'hmmer3-match',
     'SMART': 'hmmer2-match',
     'SUPERFAMILY': 'hmmer3-match',
@@ -129,7 +130,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("pvalue", str(location["pvalue"]))
 
-                    elif match_data['member_db'].upper() == "SFLD":
+                    elif match_data['member_db'].upper() in ["SFLD", "PIRSR"]:
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         try:
                             location_elem.set("sites", location["sites"])
