@@ -3,6 +3,7 @@ import re
 import sys
 from cigar_alignment import cigar_alignment_parser, encode
 
+
 DOMAIN_SECTION_START_PATTERN = re.compile(r"^>>\s+(\S+).*$")
 DOMAIN_ALIGNMENT_LINE_PATTERN = re.compile(r"^\s+==\s+domain\s+(\d+)\s+.*$")
 ALIGNMENT_SEQUENCE_PATTERN = re.compile(r"^\s+(\S+)\s+(\S+)\s+([-a-zA-Z]+)\s+(\S+)\s*$")  # replacing (\w+) with (\S+) and adding if to ignore current sequence
@@ -30,7 +31,6 @@ def get_accession_regex(appl: str) -> re.Pattern:
         return re.compile(r"^(Accession:)\s+(PIRSF\d+)$")
     if appl.upper() == "SFLD":
         return re.compile(r"^(Accession:|Query:|Query sequence:)\s+(SFLD[^\s]+)\s*$")
-
 
 
 def parse(out_file: str) -> dict:
