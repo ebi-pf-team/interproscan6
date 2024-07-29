@@ -6,6 +6,7 @@ from cigar_alignment import cigar_alignment_parser, encode
 DOMAIN_SECTION_START_PATTERN = re.compile(r"^>>\s+(\S+).*$")
 DOMAIN_ALIGNMENT_LINE_PATTERN = re.compile(r"^\s+==\s+domain\s+(\d+)\s+.*$")
 ALIGNMENT_SEQUENCE_PATTERN = re.compile(r"^\s+(\S+)\s+(\S+)\s+([-a-zA-Z]+)\s+(\S+)\s*$")  # replacing (\w+) with (\S+) and adding if to ignore current sequence
+HMMALIGN_SEQUENCE_PATTERN = re.compile(r"^\s+(\S+)\s+(\S+)\s+([-a-zA-Z.]+)\s+(\S+)\s*$")
 DOMAIN_LINE_PATTERN = re.compile(
     "^\\s+(\\d+)\\s+[!?]\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\S+).*$"
 )
@@ -136,12 +137,14 @@ def parse(out_file: str) -> dict:
                                 current_domain = domain_alignment_matcher.group(1)
                         if current_domain and current_sequence:
                             alignment_sequence_pattern = ALIGNMENT_SEQUENCE_PATTERN.match(line)
+                            hmmalign_sequence_pattern = HMMALIGN_SEQUENCE_PATTERN.match(line)
                             if alignment_sequence_pattern:
                                 if alignment_sequence_pattern.group(1) == current_sequence:
                                     align_seq.append(alignment_sequence_pattern.group(3))
                                     domain_match[current_domain]["alignment"] = "".join(align_seq)
-                                elif member_db.upper() == "PIRSR":
-                                    hmm_seq.append(alignment_sequence_pattern.group(3))
+                            if hmmalign_sequence_pattern and member_db.upper() == "PIRSR":
+                                if hmmalign_sequence_pattern.group(1) != current_sequence:
+                                    hmm_seq.append(hmmalign_sequence_pattern.group(3))
                                     domain_match[current_domain]["hmm_alignment"] = "".join(hmm_seq)
                     elif stage == 'LOOKING_FOR_DOMAIN_DATA_LINE':
                         if "Alignments for each domain" in line:
