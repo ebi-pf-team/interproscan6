@@ -58,6 +58,9 @@ def build_fragments(filtered_matches: dict, dat_parsed: dict, min_length: int) -
 
     for protein_id, domains in filtered_matches.items():
         for domain_id, pfam_match in domains.items():
+            if not pfam_match["locations"]:
+                # complete sequence match but no domain matches
+                continue
             model_id = pfam_match['accession']
             nested_models = dat_parsed.get(model_id, [])
 
