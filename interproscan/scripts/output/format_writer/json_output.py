@@ -196,28 +196,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                         info["sites"] = []
 
                                 if match_data['member_db'].upper() == "PIRSR":
-                                    try:
-                                        info["sites"] = match_data["sites"]
-                                        for site in match_data["sites"]:
-                                            site_parsed = {
-                                                "description": site["desc"],
-                                                "group": int(site["group"]),
-                                                "hmmEnd": site["hmmEnd"],
-                                                "hmmStart": site["hmmStart"],
-                                                "label": site["label"],
-                                                "numLocations": 1,
-                                                "siteLocations": [
-                                                    {
-                                                        "end": site["end"],
-                                                        "residue": site["condition"],
-                                                        "start": site["start"]
-                                                    }
-                                                ]
-                                            }
-                                            info["sites"].append(site_parsed)
-                                    except KeyError:
-                                        info["sites"] = []
-
+                                    info["sites"] = location["sites"]
                                 try:
                                     info["location-fragments"] = location["location-fragments"]
                                 except KeyError:
@@ -244,7 +223,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 match["evalue"] = float(location['evalue'])
                                 match["score"] = float(location['score'])
                                 try:
-                                    match["scope"] = match_data["scope"]
+                                    match["scope"] = location["scope"]
                                 except KeyError:
                                     match["scope"] = None
 

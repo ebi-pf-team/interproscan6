@@ -21,14 +21,13 @@ def matches2rules(matches_path: str, rules_hash: dict):
                 seq_from = location["start"]
                 seq_to = location["end"]
                 seq_align = location["alignment"]
-                dom_score = location["score"]
-                dom_evalue = location["evalue"]
 
                 map = map_hmm_to_seq(hmm_from, hmm_align, seq_align)
 
                 rule_sites = []
                 for grp, positions in rule['Groups'].items():
                     pass_count = 0
+                    positions_parsed = []
                     for pos_num, pos in enumerate(positions):
                         condition = re.sub(r'[-()]', lambda x: {'-': '', '(': '{', ')': '}'}[x.group()],
                                            pos['condition'])
@@ -47,20 +46,40 @@ def matches2rules(matches_path: str, rules_hash: dict):
                             if pos['end'] == 'Cter':
                                 pos['end'] = seq_to
 
+                        positions_parsed.append({
+                            'description': pos['desc'],
+                            "group": int(pos['group']),
+                            "hmmEnd": pos['hmmEnd'],
+                            "hmmStart": pos['hmmStart'],
+                            "label": pos['label'],
+                            "numLocations": pos_num + 1,
+                            "siteLocations": [
+                                {
+                                    "end": pos['end'],
+                                    "residue": pos['condition'],
+                                    "start": pos['start']
+                                }
+                            ]
+                        })
+
                     if pass_count == len(positions):
-                        rule_sites.extend(positions)
+                        rule_sites.extend(positions_parsed)
 
                 if rule_sites:
                     domHit = {
-                        'domScore': dom_score,
-                        'domEvalue': dom_evalue,
-                        'hmmFrom': hmm_from,
-                        'hmmTo': hmm_to,
+                        'score': location["score"],
+                        'evalue': location["evalue"],
+                        'hmmStart': hmm_from,
+                        'hmmEnd': hmm_to,
                         'hmmAlign': hmm_align,
-                        'seqFrom': seq_from,
-                        'seqTo': seq_to,
-                        'seqAlign': seq_align,
-                        'ruleSites': rule_sites,
+                        'start': seq_from,
+                        'end': seq_to,
+                        'alignment': seq_align,
+                        'sites': rule_sites,
+                        "representative": '',
+                        "hmmLength": location["hmmLength"],
+                        "envelopeStart": location["envelopeStart"],
+                        "envelopeEnd": location["envelopeEnd"],
                         'scope': rule['Scope'],
                     }
                     domHits.append(domHit)
