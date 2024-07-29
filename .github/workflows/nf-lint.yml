@@ -7,6 +7,7 @@ on:
       - interproscan/subworkflows
       - interproscan/modules
       - interproscan.nf
+      -.github/workflows/nf-lint.yml
 
 jobs:
   build:
