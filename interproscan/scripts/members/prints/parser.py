@@ -141,11 +141,11 @@ def process_3tb(line):
     motifname = rematch.group(2)
     motifnum = int(rematch.group(3))
     idscore = rematch.group(5)
-    pvalue = rematch.group(7)
+    pvalue = float(rematch.group(7))
     sequence = rematch.group(8)
     length = rematch.group(9)
-    pos = rematch.group(11)
-    end = int(pos) + int(length) - 1
+    pos = int(rematch.group(11))
+    end = pos + int(length) - 1
     # corrects for motif overhanging start
     if int(pos) < 1:
         pos = 1

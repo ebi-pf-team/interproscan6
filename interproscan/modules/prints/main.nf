@@ -2,11 +2,11 @@ process PRINTS_RUNNER {
     label 'prints_runner'
 
     input:
-    tuple path(fasta), val(pval), val(switches), val(release), val(postprocessing_params)
+    tuple path(fasta), val(hierarchy), val(pval), val(release), val(switches)
 
     output:
     path "*._.printsOutput.txt"
-    val postprocessing_params
+    val hierarchy
 
     script:
     """
@@ -22,7 +22,7 @@ process PRINTS_PARSER {
 
     input:
     path prints_output
-    val postprocessing_params
+    val hierarchy
 
 
     output:
@@ -32,7 +32,7 @@ process PRINTS_PARSER {
     """
     python3 $projectDir/interproscan/scripts/members/prints/parser.py\
     ${prints_output} \
-    ${postprocessing_params} \
+    ${hierarchy} \
     > prints_parsed.json
     """
 
