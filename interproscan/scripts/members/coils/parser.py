@@ -17,14 +17,14 @@ def parse(coils_out: str, version: float) -> dict:
                 match = {"Coil": {"member_db": "Coils",
                                   "version": version, "name": "Coil",
                                   "accession":"Coil", "locations": []}}
-                matches[seq_id] = match
             else:
                 line = line.split()
                 if len(line) > 1:
-                    location_start = line[0]
-                    location_end = line[1]
-                    location_fragments = {"start": int(location_start),
-                                          "end": int(location_end),
+                    matches[seq_id] = match
+                    location_start = int(line[0])
+                    location_end = int(line[1])
+                    location_fragments = {"start": location_start,
+                                          "end": location_end,
                                           "dc-status": "CONTINUOUS"}
                     location = {"start": location_start,
                                 "end": location_end,
