@@ -1,63 +1,70 @@
-#!/usr/bin/env python
-
 import json
 import re
 import sys
 
 
-def matches2rules(matches, rule):
-    with open(matches, "r") as matches:
+def matches2rules(matches_path: str, rules_hash: dict):
+    with open(matches_path, "r") as matches:
         matches_info = json.load(matches)
 
     for sequence_id, domains in matches_info.items():
         for model_id, domain in domains.items():
             rule = rules_hash[model_id]
+
+            domHits = []
             for location in domain["locations"]:
+                sequence_id = sequence_id
+                model_id = model_id
                 hmm_from = location["hmmStart"]
+                hmm_to = location["hmmEnd"]
+                hmm_align = location["hmm_alignment"]
+                seq_from = location["start"]
+                seq_to = location["end"]
                 seq_align = location["alignment"]
-                try:
-                    hmm_align = location["hmm_alignment"]
-                except KeyError:
-                    hmm_align = ""
+                dom_score = location["score"]
+                dom_evalue = location["evalue"]
 
                 map = map_hmm_to_seq(hmm_from, hmm_align, seq_align)
 
                 rule_sites = []
-                for grp in rule['Groups'].keys():
+                for grp, positions in rule['Groups'].items():
                     pass_count = 0
-                    pos_num = -1
-                    for pos in rule['Groups'][grp]:
-                        pos_num += 1
-                        condition = pos['condition']
-
-                        condition = re.sub('-', '', condition)
-                        condition = re.sub('\\(', '{', condition)
-                        condition = re.sub('\\)', '}', condition)
-                        condition = re.sub('x', '.', condition)
-
-                        query_seq = re.sub('-', '', seq_align)
+                    for pos_num, pos in enumerate(positions):
+                        condition = re.sub(r'[-()]', lambda x: {'-': '', '(': '{', ')': '}'}[x.group()],
+                                           pos['condition'])
+                        condition = condition.replace('x', '.')
+                        query_seq = seq_align.replace('-', '')
 
                         if pos['hmmStart'] < len(map) and pos['hmmEnd'] < len(map):
-                            target_seq = query_seq[map[pos['hmmStart']]: map[pos['hmmEnd']] + 1]
+                            target_seq = query_seq[map[pos['hmmStart']]:map[pos['hmmEnd']] + 1]
                         else:
                             target_seq = ''
 
-                        if re.search('\\A' + condition + '\\Z', target_seq):
-                            # we have a pass
+                        if re.fullmatch(condition, target_seq):
                             pass_count += 1
-                            # expand possible Nter / Cter positions to seq_from / seq_to
-                            if rule['Groups'][grp][pos_num]['start'] == 'Nter':
-                                rule['Groups'][grp][pos_num]['start'] = seq_from
-                            if rule['Groups'][grp][pos_num]['end'] == 'Cter':
-                                rule['Groups'][grp][pos_num]['end'] = seq_to
+                            if pos['start'] == 'Nter':
+                                pos['start'] = seq_from
+                            if pos['end'] == 'Cter':
+                                pos['end'] = seq_to
 
-                    if len(rule['Groups'][grp]) == pass_count:
-                        # a group passes only if the whole group is a pass
-                        rule_sites.extend(rule['Groups'][grp])
+                    if pass_count == len(positions):
+                        rule_sites.extend(positions)
 
                 if rule_sites:
-                    domain["sites"] = rule_sites
-                    domain["scope"] = rule['Scope']
+                    domHit = {
+                        'domScore': dom_score,
+                        'domEvalue': dom_evalue,
+                        'hmmFrom': hmm_from,
+                        'hmmTo': hmm_to,
+                        'hmmAlign': hmm_align,
+                        'seqFrom': seq_from,
+                        'seqTo': seq_to,
+                        'seqAlign': seq_align,
+                        'ruleSites': rule_sites,
+                        'scope': rule['Scope'],
+                    }
+                    domHits.append(domHit)
+            domain["locations"] = domHits
 
     return matches_info
 
@@ -93,6 +100,5 @@ if __name__ == '__main__':
     with open(rules_path) as rulesfile:
         rules_hash = json.load(rulesfile)
 
-    matches = matches2rules(matches, rules_hash)
-
-    print(json.dumps(matches, indent=4))
+    result = matches2rules(matches, rules_hash)
+    print(json.dumps(result, indent=4))
