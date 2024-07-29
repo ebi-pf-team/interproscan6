@@ -35,8 +35,6 @@ def tsv_output(seq_matches: dict, output_path: str):
                         goterms.append(go_info["id"])
                     for pwy_info in match["entry"]["pathwayXRefs"]:
                         pathways.append(pwy_info["id"])
-                if match["member_db"].upper() == "COILS":
-                    entry_desc = "Coil"
                 match_db = match["member_db"]
                 xrefs = f"{'|'.join(goterms)}\t{'|'.join(pathways)}"
 
