@@ -135,8 +135,17 @@ def filter_matches_and_add_site(ips6, hits):
                 else:
                     if protein_id not in processed_ips6_data:
                         processed_ips6_data[protein_id] = {}
-                    if signature_acc not in processed_ips6_data[protein_id]:
-                        processed_ips6_data[protein_id][signature_acc] = ips6_data[protein_id][signature_acc]
+                        processed_ips6_data[
+                            protein_id
+                        ][signature_acc] = ips6_data[
+                            protein_id
+                        ][signature_acc]
+                    elif signature_acc not in processed_ips6_data[protein_id]:
+                        processed_ips6_data[
+                            protein_id
+                        ][signature_acc] = ips6_data[
+                            protein_id
+                        ][signature_acc]
 
                     # add site data, can be multiple SfldSite instances for a sig_acc
                     if signature_acc in hits[protein_id].sites:
@@ -150,7 +159,9 @@ def filter_matches_and_add_site(ips6, hits):
                                 earliest_site, latest_site = int(min(site_positions)), int(max(site_positions))
 
                                 # find the relevant (domain) location
-                                for i, location in enumerate(processed_ips6_data[protein_id][signature_acc]["locations"]):
+                                for i, location in enumerate(
+                                    processed_ips6_data[protein_id][signature_acc]["locations"]
+                                ):
                                     if int(location["start"]) <= earliest_site and int(location["end"]) >= latest_site:
                                         if "sites" not in processed_ips6_data[protein_id][signature_acc]["locations"][i]:
                                             processed_ips6_data[protein_id][signature_acc]["locations"][i]["sites"] = []
@@ -163,7 +174,6 @@ def filter_matches_and_add_site(ips6, hits):
                                         "hmmEnd": 0,
                                         "hmmStart": 0,
                                         "label": None,
-
                                         "numLocations": len(site.site_residues.split(",")),
                                         "siteLocations": []
                                     }
