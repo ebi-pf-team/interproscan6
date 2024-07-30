@@ -1,12 +1,13 @@
 import json
 import sys
+import urllib.request
 import xml.etree.ElementTree as ET
 
-import urllib.request
+from lookup_check import lookup_decorator
 
 
 @lookup_decorator
-def match_lookup(matches_checked: list, url: str) -> str:
+def match_lookup(matches_checked: list, url: str, **kwargs) -> str:
     url_input = ','.join(matches_checked)
     matches = urllib.request.urlopen(f"{url}?md5={url_input}")
     return matches.read().decode('utf-8')
@@ -86,10 +87,14 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
 
 def main():
     args = sys.argv[1:]
+    checked_lookup = args[0]
+    applications = args[1].split(',')
+    url = args[2]
+    retries = int(args[3])
 
-    applications = list(map(lambda x: x.upper(), args[1].split(',')))
+    applications = list(map(lambda x: x.upper(), applications))
 
-    with open(args[0], 'r') as md5_data:
+    with open(checked_lookup, 'r') as md5_data:
         checked_data = json.load(md5_data)
     matches = checked_data["matches"]
     seq_info = checked_data["sequences_info"]
@@ -98,7 +103,7 @@ def main():
     for seq_id, match in seq_info.items():
         md52seq_id[match[-2]] = seq_id
 
-    match_results = match_lookup(matches, args[2])
+    match_results = match_lookup(matches, url, retries=retries)
     match_parsed = parse_match(match_results, applications, md52seq_id)
 
     print(json.dumps(match_parsed, indent=2))

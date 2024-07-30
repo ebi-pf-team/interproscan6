@@ -1,6 +1,6 @@
 process LOOKUP_MATCHES {
     label 'io'
-    
+
     input:
     val checked_lookup
     val appl
@@ -16,6 +16,7 @@ process LOOKUP_MATCHES {
         """
     else
         """
-        python3 $projectDir/interproscan/scripts/lookup/lookup_matches.py ${checked_lookup} '${appl}' ${params.url_precalc}${params.matches} > parsed_match_lookup
+        python3 $projectDir/interproscan/scripts/lookup/lookup_matches.py ${checked_lookup} '${appl}' \\
+        ${params.url_precalc}${params.matches} ${params.retries} > parsed_match_lookup
         """
 }
