@@ -21,7 +21,6 @@ def lookup_decorator(func):
         tries, success, err = 0, False, None
 
         while not success and (tries < kwargs["retries"]):
-            # reset storing error messsage
             err_message = None
             try:
                 result = func(*args, **kwargs)
@@ -45,17 +44,10 @@ def lookup_decorator(func):
 
     return wrapper
 
-attempt_counter = 0
 @lookup_decorator
 def check_precalc(md5: list, url: str, **kwargs) -> list:
     sequences_md5 = ','.join(md5)
-    global attempt_counter
-
-    attempt_counter += 1
-    if attempt_counter <= 3:
-        raise urllib.error.URLError("Erro simulado na conexão")
-    else:
-        checkout = urllib.request.urlopen(f"{url}?md5={sequences_md5}")
+    checkout = urllib.request.urlopen(f"{url}?md5={sequences_md5}")
     is_precalc = checkout.read().decode('utf-8')
     precalc = is_precalc.strip().split("\n")
     return precalc
