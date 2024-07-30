@@ -133,7 +133,7 @@ def process_1tb(line):
 
 
 def process_2tb(line):
-    line_pattern = re.compile(r"^(\w+)\s+(\w+)\s+(\d+)\s+(of\s+\d+)\s+([\d\.]+)\s+([\d\.]+)\s+(\d+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+([\d\.]*\d+e[+-]?\d+|[\d\.])\s+([Ii.]+)\s*$")
+    line_pattern = re.compile(r"^(\w+)\s+(\w+)\s+(\d+)\s+(of\s+\d+)\s+([\d\.]+)\s+([\d\.]+)\s+(\d+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+([\d\.]*\d+e[+-]?\d+|[\d\.]+)\s+([Ii.]+)\s*$")
     # collects groups in order:
     # line, FingerPrint, No.Motifs, SumId, AveId,
     # ProfScore, Ppvalue,Evalue, GraphScan
