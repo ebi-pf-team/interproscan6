@@ -226,13 +226,11 @@ def json_output(seq_matches: dict, output_path: str, version: str):
 
                             if match_data['member_db'].upper() not in [
                                 "CDD",
-                                "COILS"
+                                "COILS",
                                 "HAMAP",
                                 "PROSITE_PROFILES",
                                 "PROSITE_PATTERNS",
-                                "PRINTS"
-                            ]:
-                            if match_data['member_db'].upper() not in ["CDD", "COILS","HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS"]:
+                                "PRINTS"]:
                                 match["evalue"] = float(match_data['evalue'])
                                 match["score"] = float(match_data['score'])
 
