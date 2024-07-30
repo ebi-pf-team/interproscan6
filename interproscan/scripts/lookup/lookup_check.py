@@ -26,8 +26,7 @@ def lookup_decorator(func):
             try:
                 result = func(*args, **kwargs)
                 success = True
-            except (
-                    IOError, URLError, timeout, OSError) as err_message:
+            except (IOError, URLError, timeout, OSError) as err_message:
                 success = False
                 err = err_message
 
@@ -46,11 +45,17 @@ def lookup_decorator(func):
 
     return wrapper
 
-
+attempt_counter = 0
 @lookup_decorator
 def check_precalc(md5: list, url: str, **kwargs) -> list:
     sequences_md5 = ','.join(md5)
-    checkout = urllib.request.urlopen(f"{url}?md5={sequences_md5}")
+    global attempt_counter
+
+    attempt_counter += 1
+    if attempt_counter <= 3:
+        raise urllib.error.URLError("Erro simulado na conexão")
+    else:
+        checkout = urllib.request.urlopen(f"{url}?md5={sequences_md5}")
     is_precalc = checkout.read().decode('utf-8')
     precalc = is_precalc.strip().split("\n")
     return precalc
@@ -68,11 +73,7 @@ def main():
     for seq_id, seq_info in sequences_data.items():
         seq_md5.append(seq_info[-2].upper())
 
-    try:
-        md5_checked_matches = check_precalc(seq_md5, url, retries=retries)
-    except Exception as e:
-        print(f"Failed after {retries} retries: {e}")
-
+    md5_checked_matches = check_precalc(seq_md5, url, retries=retries)
     no_matches_md5 = set(seq_md5) - set(md5_checked_matches)
     checked_result = {"matches": md5_checked_matches,
                       "no_matches": list(no_matches_md5),
