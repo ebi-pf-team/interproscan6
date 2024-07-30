@@ -8,6 +8,59 @@ This differentiates between cases where the previous calculations found not matc
 """
 
 
+def lookup_decorator(func):
+    """Decorator to re-invoke the wrapped function up to 'args.retries' times."""
+
+    def wrapper(*args, **kwargs):
+        logger = logging.getLogger(__name__)
+        tries, success, err = 0, False, None
+
+        while not success and (tries < kwargs['max_tries']):
+            # reset storing error messsage
+            err_message = None
+
+            try:
+                func(*args, **kwargs)
+
+            except (
+                    IOError,
+                    HTTPError,
+                    URLError,
+                    timeout,
+                    ConnectionError,
+                    OSError,
+                    MissingSchema,
+                    RequestError,
+            ) as err_message:
+                success = False
+                err = err_message
+
+            if err is None:
+                success = True
+
+            tries += 1
+
+            if (not success) and (tries < kwargs['max_tries']):
+                logger.warning(
+                    f'Failed to connect to {url} on try {tries}/{kwargs["max_tries"]}\n'
+                    f'Error raised: {err}\n'
+                    'Retrying connection in 10s'
+                )
+                time.sleep(10)
+
+        if success is False:
+            logger.warning(
+                f'Failed to connect to {url} after {kwargs["max_tries"]} tries\n'
+                f'Error raised: {err}\n'
+            )
+            return err
+        else:
+            return None
+
+    return wrapper
+
+
+@lookup_decorator
 def check_precalc(md5: list, url: str) -> list:
     sequences_md5 = ','.join(md5)
     checkout = urllib.request.urlopen(f"{url}?md5={sequences_md5}")

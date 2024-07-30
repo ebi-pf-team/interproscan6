@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 import urllib.request
 
 
+@lookup_decorator
 def match_lookup(matches_checked: list, url: str) -> str:
     url_input = ','.join(matches_checked)
     matches = urllib.request.urlopen(f"{url}?md5={url_input}")
