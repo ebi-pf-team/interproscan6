@@ -13,7 +13,7 @@ def parse(coils_out: str, version: float) -> dict:
     with open(coils_out) as coils_file:
         for line in coils_file:
             if line.startswith(">"):
-                seq_id = line.strip(">").strip("\n").split()[0]
+                seq_id = line.strip(">").split(maxsplit=1)[0]
                 match = {"Coil": {"member_db": "Coils",
                                   "version": version, "name": "Coil",
                                   "accession":"Coil", "locations": []}}
