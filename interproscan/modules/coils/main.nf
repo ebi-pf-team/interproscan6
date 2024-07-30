@@ -20,7 +20,7 @@ process COILS_PARSER {
 
     input:
     path out
-    val version
+    val release
 
     output:
     path "coils_parsed.json"
@@ -29,7 +29,7 @@ process COILS_PARSER {
     """
     python3 $projectDir/interproscan/scripts/members/coils/parser.py \
         ${out} \
-        ${version} \
+        ${release} \
         > coils_parsed.json
     """
 }
