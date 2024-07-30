@@ -100,24 +100,29 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
                 motifname, motifnum, idscore, pvalue, pos, end = process_3tb(
                     line)
                 acc = protein_hits[motifname]["acc"]
-                if matches[protein_id]:
-                    matches[protein_id][acc]["locations"].append({
-                    "motifNumber": int(motifnum),
-                    "pvalue": pvalue,
-                    "score": idscore,
-                    "start": pos,
-                    "end": end,
-                    "representative": "false",
-                    "location-fragments": [{
+                try:
+                    if matches[protein_id][acc]:
+                        matches[protein_id][acc]["locations"].append({
+                        "motifNumber": int(motifnum),
+                        "pvalue": pvalue,
+                        "score": idscore,
                         "start": pos,
                         "end": end,
-                        "dc-status": "CONTINUOUS"}]})
+                        "representative": "false",
+                        "location-fragments": [{
+                            "start": pos,
+                            "end": end,
+                            "dc-status": "CONTINUOUS"}]})
+                except KeyError:
+                    # skip fingerprint motifs for matches below evalue cutoff
+                    continue
 
     return matches
 
 
 def process_1tb(line):
-    line_pattern = re.compile(r"^(\w+)\s+(\w+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+([A-Za-z0-9\s\-\/\(\)]+?)\s+(\w+)\s*$")
+    line_pattern = re.compile(r"^(\w+)\s+(\w+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+([A-Za-z0-9\s\-\/\(\)\,\'\.\|\+\_\:\;]+?)\s+(\w+)\s*$")
+    #print(line)
     # collects groups in order:
     # line, FingerPrint, Evalue, description, accession
     rematch = line_pattern.match(line)
@@ -141,10 +146,11 @@ def process_2tb(line):
 
 
 def process_3tb(line):
-    line_pattern = re.compile(r"^(\w+)\s+(\w+)\s+(\d+)\s+(of\s+\d+)\s+([\d\.]+)\s+(\d+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+(#*[a-zA-Z]+#*)\s+(\d+)\s+(\d+)\s+(\d+)\s*(\d)\s*$")
+    line_pattern = re.compile(r"^(\w+)\s+(\w+)\s+(\d+)\s+(of\s+\d+)\s+([\d\.]+)\s+(\d+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+(#*[a-zA-Z]+#*)\s+(\d+)\s+(\d+)\s+([-]?\d+)\s*(\d)\s*$")
     # collects groups in order:
     # line, MotifName, No.Motifs, of total number of motifs,
     # IdScore, PfScore, Pvalue, Sequence, Length, Low, Position, High
+    #print(line)
     rematch = line_pattern.match(line)
     motifname = rematch.group(2)
     motifnum = int(rematch.group(3))
@@ -169,4 +175,3 @@ def process_3tb(line):
 
 if __name__ == "__main__":
     main()
-
