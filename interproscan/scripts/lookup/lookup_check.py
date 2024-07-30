@@ -1,50 +1,15 @@
 import json
-import logging
 import sys
-import time
 import urllib.request
 
-from socket import timeout
-from urllib.error import HTTPError, URLError
-
+from retry_conn_decorator import lookup_retry_decorator
 
 """
 Checks for pre-calculated matches from any of the member dbs/applications.
 This differentiates between cases where the previous calculations found not matches and when a previous calculation has not been performed during LOOKUP_MATCH.
 """
 
-
-def lookup_decorator(func):
-    """Decorator to re-invoke the wrapped function up to 'args.retries' times."""
-    def wrapper(*args, **kwargs):
-        logger = logging.getLogger(__name__)
-        tries, success, err = 0, False, None
-
-        while not success and (tries < kwargs["retries"]):
-            err_message = None
-            try:
-                result = func(*args, **kwargs)
-                success = True
-            except (IOError, URLError, timeout, OSError) as err_message:
-                success = False
-                err = err_message
-
-            tries += 1
-            if (not success) and (tries < kwargs["retries"]):
-                time.sleep(10)
-
-        if not success:
-            logger.error(
-                f'Failed to connect to lookup url after {kwargs["retries"]} tries\n'
-                f'Error raised: {err}\n'
-            )
-            raise err
-        else:
-            return result
-
-    return wrapper
-
-@lookup_decorator
+@lookup_retry_decorator
 def check_precalc(md5: list, url: str, **kwargs) -> list:
     sequences_md5 = ','.join(md5)
     checkout = urllib.request.urlopen(f"{url}?md5={sequences_md5}")

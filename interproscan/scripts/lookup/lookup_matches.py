@@ -3,10 +3,10 @@ import sys
 import urllib.request
 import xml.etree.ElementTree as ET
 
-from lookup_check import lookup_decorator
+from retry_conn_decorator import lookup_retry_decorator
 
 
-@lookup_decorator
+@lookup_retry_decorator
 def match_lookup(matches_checked: list, url: str, **kwargs) -> str:
     url_input = ','.join(matches_checked)
     matches = urllib.request.urlopen(f"{url}?md5={url_input}")
