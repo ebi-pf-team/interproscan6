@@ -124,6 +124,40 @@ nextflow run interproscan.nf --input my_seqs.fasta -profiles singularity
 ```
 The order the profiles are listed after `-profiles` does **not** matter.
 
+## Apptainer set up
+
+Not all systems support using Docker, therefore, the `interproscan6` Docker image will need to be 
+converted to another virtualization system. Apptainer is an alternative container runtime to
+Docker that does not require root privileges or a separate daemon process, unlike Docker.
+
+You will need Apptainer installed on the system you will use to run the pipeline.
+
+1. Follow the general set up laid out above on the system you are going to run the pipeline. Build
+the `interproscan6` Docker image (in step 3 of the general set up) on a system with Docker enabled -
+you **do not** need have downloaded the InterPro release data in order to build the Docker image.
+
+2. Build a Apptainer image from the Docker image:
+
+```bash
+apptainer build interproscan6.sif docker-daemon://interproscan6:latest
+```
+
+3. [Optional but recommended] Test the image on the system you will use to run the pipeline
+
+```bash
+apptainer run interproscan6.sif
+ls
+exit
+```
+
+Keep the Apptainer image (interproscan6.sif) in the root of the InterProScan repository on the sytem you will use to run the pipeline. For example, you can create an interproscan6.sif on your local laptop, and upload it to the HPC you will use to run InterProScan.
+
+When running `InterProScan6` with Singularity include `apptainer` in the `-profiles` option. E.g.:
+```bash
+nextflow run interproscan.nf --input my_seqs.fasta -profiles apptainer
+```
+The order the profiles are listed after `-profiles` does **not** matter.
+
 # Using `InterProScan6`
 
 ## Quick start
