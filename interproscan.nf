@@ -67,7 +67,7 @@ workflow {
 
         if (parsed_matches.collect().value == null) {
             disable_precalc = true
-            log.info "Error on match lookup service, running analysis locally..."
+            log.info "ERROR: unable to connect to match lookup service. Max retries reached.  Running analysis locally..."
         }
     }
 
