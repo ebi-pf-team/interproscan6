@@ -50,7 +50,7 @@ def tsv_output(seq_matches: dict, output_path: str):
                         evalue = location["score"]
                         ali_from = location["start"]
                         ali_to = location["end"]
-                    elif match_db.upper() in ["PROSITE_PATTERNS", "COILS", "MOBIDB"]:
+                    elif match_db.upper() in ["PROSITE_PATTERNS", "COILS", "MOBIDB", "PHOBIUS"]:
                         sig_acc = match["accession"]
                         status = "T"
                         evalue = "-"
@@ -62,6 +62,9 @@ def tsv_output(seq_matches: dict, output_path: str):
                         evalue = location["evalue"]
                         ali_from = location["envelopeStart"]
                         ali_to = location["envelopeEnd"]
+                    elif match_db.upper() == "PHOBIUS":
+                        entry_desc = match["desc"]
+
                     else:
                         sig_acc = match["accession"]
                         status = "T"
