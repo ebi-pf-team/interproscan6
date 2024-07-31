@@ -49,7 +49,7 @@ def parse(phobius_out: str) -> dict:
             "desc": "C-terminal region of a signal peptide.",
         },
     }
-
+    version = phobius_out.split("._.")[0]
     with open(phobius_out) as ph_file:
         for line in ph_file:
             if line.startswith("ID"):
@@ -72,7 +72,7 @@ def parse(phobius_out: str) -> dict:
                 acc, name, desc = featuredict[featkey].values()
                 match = {
                         "member_db": "Phobius",
-                        "version": "",
+                        "version": version,
                         "name": name,
                         "accession": acc,
                         "desc": desc,
