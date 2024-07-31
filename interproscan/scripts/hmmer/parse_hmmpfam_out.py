@@ -9,7 +9,7 @@ page 26."""
 
 
 ALN_DOMAIN_LINE = re.compile(r'\S+:\s+domain \d+ of \d+,')
-SIGNATURE_DATA_LINE = re.compile(r"^(\w+)\s+(\w*)\s+((\d+\.\d+|\d)+)\s+(\d[a-zA-Z0-9_\-.]+)\s+(\d+)")
+SIGNATURE_DATA_LINE = re.compile(r"^(\w+)\s+([\w+\s]+?)\s+(\d[a-zA-Z0-9_\-.]+)\s+([a-zA-Z0-9_\-.]+)\s+(\d+)$")
 DOMAIN_DATA_LINE = re.compile(r"^(\w+)\s+(\d+/\d+)\s+(\d+)\s+(\d+)\s+([\.\[\]]{2})\s+(\d+)\s+(\d+)\s+([\.\[\]]{2})\s+(\d+|\d+\.\d+)\s+(.+)")
 HMM_BOUND_PATTERN = {
     "[]": "COMPLETE",
@@ -38,8 +38,8 @@ class QueryProtein:
         model.model_id = model_pattern.group(1)
         model.description = model_pattern.group(2)
         model.score = model_pattern.group(3)
-        model.evalue = model_pattern.group(5)
-        model.num_domains = int(model_pattern.group(6))
+        model.evalue = model_pattern.group(4)
+        model.num_domains = int(model_pattern.group(5))
         self.signatures[model.model_id] = model
 
     def get_domain_data(self, domain_pattern):
@@ -190,7 +190,14 @@ def parse_hmmpfam_out(out_file: str) -> dict:
                 else:
                     domain_line_pattern = DOMAIN_DATA_LINE.match(line)
                     if domain_line_pattern:
-                        protein_with_hit.get_domain_data(domain_line_pattern)
+                        try:
+                            protein_with_hit.get_domain_data(domain_line_pattern)
+                        except KeyError:
+                            print(line)
+                            print(protein_with_hit.sequence_id)
+                            print(protein_with_hit.signatures)
+                            import sys
+                            sys.exit(1)
 
     return matches
 
