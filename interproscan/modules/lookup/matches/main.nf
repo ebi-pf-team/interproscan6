@@ -17,7 +17,7 @@ process LOOKUP_MATCHES {
     else
         """
         python3 $projectDir/interproscan/scripts/lookup/lookup_matches.py ${checked_lookup} '${appl}' \\
-        ${params.url_precalc}${params.matches} ${params.retries} > result
+        ${params.url_precalc}${params.matches} ${params.lookup_retries} > result
 
         if [[ -s result ]]; then
             mv result parsed_match_lookup
