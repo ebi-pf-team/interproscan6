@@ -14,6 +14,7 @@ MATCH_ELEMENT = {
     'NCBIFAM': 'hmmer3-match',
     'PANTHER': 'hmmer3-match',
     'PFAM': 'hmmer3-match',
+    'PHOBIUS': 'phobius-match',
     'PIRSF': 'hmmer3-match',
     'SFLD': 'hmmer3-match',
     'SMART': 'hmmer2-match',
@@ -149,7 +150,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("end", str(location["end"]))
                         location_elem.set("representative", str(location["representative"]))
 
-                    elif match_data['member_db'].upper() in ["SUPERFAMILY", "MOBIDB", "COILS"]:
+                    elif match_data['member_db'].upper() in ["SUPERFAMILY", "MOBIDB", "COILS", "PHOBIUS"]:
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("end", str(location["end"]))

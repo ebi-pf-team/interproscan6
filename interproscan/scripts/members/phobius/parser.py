@@ -54,7 +54,6 @@ def parse(phobius_out: str) -> dict:
         for line in ph_file:
             if line.startswith("ID"):
                 seq_id = line.strip("ID").split(maxsplit=1)[0]
-                locations = []
                 matches[seq_id] = {}
             elif line.startswith("FT"):
                 line = line.strip("\n")
@@ -71,27 +70,27 @@ def parse(phobius_out: str) -> dict:
                 featkey = (feature, featuretype)
                 acc, name, desc = featuredict[featkey].values()
                 match = {
-                        "member_db": "Phobius",
-                        "version": version,
-                        "name": name,
-                        "accession": acc,
-                        "desc": desc,
-                        "locations": locations,
-                    }
+                    "member_db": "Phobius",
+                    "version": version,
+                    "name": name,
+                    "accession": acc,
+                    "desc": desc,
+                    "locations": [],
+                }
                 location = {
                     "start": start,
                     "end": end,
                     "representative": "false",
-                    "location-fragments": {
+                    "location-fragments": [{
                         "start": start,
                         "end": end,
                         "dc-status": "CONTINUOUS",
-                    },
+                    }],
                 }
                 if acc not in matches[seq_id]:
                     matches[seq_id][acc] = match
                 if matches[seq_id][acc]:
-                        matches[seq_id][acc]["locations"].append(location)
+                    matches[seq_id][acc]["locations"].append(location)
 
     return matches
 
