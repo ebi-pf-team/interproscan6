@@ -108,8 +108,8 @@ def main():
 
     if err:
         logging.error(err)
-        return None
-    else:
+
+    if match_results:
         match_parsed = parse_match(match_results, applications, md52seq_id)
         print(json.dumps(match_parsed, indent=2))
 

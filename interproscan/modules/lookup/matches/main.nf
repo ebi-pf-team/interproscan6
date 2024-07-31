@@ -7,17 +7,20 @@ process LOOKUP_MATCHES {
     val is_test
 
     output:
-    path "parsed_match_lookup"
+    path("parsed_match_lookup"), optional: true
 
     script:
     if ( is_test )
         """
         cat $projectDir/tests/unit_tests/test_outputs/precalc_match_lookup/lookup_matches_out > parsed_match_lookup
-        echo false > is_empty
         """
     else
         """
         python3 $projectDir/interproscan/scripts/lookup/lookup_matches.py ${checked_lookup} '${appl}' \\
-        ${params.url_precalc}${params.matches} ${params.retries} > parsed_match_lookup
+        ${params.url_precalc}${params.matches} ${params.retries} > result
+
+        if [[ -s result ]]; then
+            mv result parsed_match_lookup
+        fi
         """
 }

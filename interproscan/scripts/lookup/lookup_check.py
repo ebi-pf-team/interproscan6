@@ -10,6 +10,7 @@ Checks for pre-calculated matches from any of the member dbs/applications.
 This differentiates between cases where the previous calculations found not matches and when a previous calculation has not been performed during LOOKUP_MATCH.
 """
 
+
 @lookup_retry_decorator
 def check_precalc(md5: list, url: str, **kwargs) -> list:
     sequences_md5 = ','.join(md5)
