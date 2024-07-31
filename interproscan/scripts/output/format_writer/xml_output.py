@@ -215,6 +215,13 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                             location_frag_elem.set("end", str(location_fragment["end"]))
                             location_frag_elem.set("dc-status", str(location_fragment["dc-status"]))
 
+                if match_data['member_db'].upper() == 'PHOBIUS':
+                    seqlen = data['sequences'][3]
+                    for location in match_data['locations']:
+                        if seqlen == location['start'] + location['end'] -1:
+                            matches_elem.remove(match_elem)
+
+
     tree = ET.ElementTree(root)
     ET.indent(tree, space="\t", level=0)
     tree.write(xml_output, encoding='utf-8')
