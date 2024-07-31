@@ -1,4 +1,5 @@
 import json
+import logging
 import sys
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -103,10 +104,14 @@ def main():
     for seq_id, match in seq_info.items():
         md52seq_id[match[-2]] = seq_id
 
-    match_results = match_lookup(matches, url, retries=retries)
-    match_parsed = parse_match(match_results, applications, md52seq_id)
+    match_results, err = match_lookup(matches, url, retries=retries)
 
-    print(json.dumps(match_parsed, indent=2))
+    if err:
+        logging.error(err)
+        return None
+    else:
+        match_parsed = parse_match(match_results, applications, md52seq_id)
+        print(json.dumps(match_parsed, indent=2))
 
 
 if __name__ == "__main__":

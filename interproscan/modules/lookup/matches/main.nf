@@ -13,6 +13,7 @@ process LOOKUP_MATCHES {
     if ( is_test )
         """
         cat $projectDir/tests/unit_tests/test_outputs/precalc_match_lookup/lookup_matches_out > parsed_match_lookup
+        echo false > is_empty
         """
     else
         """

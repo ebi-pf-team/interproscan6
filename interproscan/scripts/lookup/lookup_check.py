@@ -1,4 +1,5 @@
 import json
+import logging
 import sys
 import urllib.request
 
@@ -30,13 +31,22 @@ def main():
     for seq_id, seq_info in sequences_data.items():
         seq_md5.append(seq_info[-2].upper())
 
-    md5_checked_matches = check_precalc(seq_md5, url, retries=retries)
-    no_matches_md5 = set(seq_md5) - set(md5_checked_matches)
-    checked_result = {"matches": md5_checked_matches,
-                      "no_matches": list(no_matches_md5),
-                      "sequences_info": sequences_data}
+    md5_checked_matches, err = check_precalc(seq_md5, url, retries=retries)
+
+    if err:
+        logging.error(err)
+        #return all matches to be calculated locally
+        checked_result = {"matches": [],
+                          "no_matches": list(seq_md5),
+                          "sequences_info": sequences_data}
+    else:
+        no_matches_md5 = set(seq_md5) - set(md5_checked_matches)
+        checked_result = {"matches": md5_checked_matches,
+                          "no_matches": list(no_matches_md5),
+                          "sequences_info": sequences_data}
 
     print(json.dumps(checked_result))
+
 
 if __name__ == "__main__":
     main()

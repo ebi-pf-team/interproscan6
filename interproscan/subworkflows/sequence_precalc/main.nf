@@ -17,3 +17,4 @@ workflow SEQUENCE_PRECALC {
     sequences_to_analyse = LOOKUP_NO_MATCHES.out
     parsed_matches = LOOKUP_MATCHES.out
 }
+

@@ -1,4 +1,3 @@
-import logging
 import time
 
 from socket import timeout
@@ -8,8 +7,8 @@ from urllib.error import HTTPError, URLError
 def lookup_retry_decorator(func):
     """Decorator to re-invoke the wrapped function up to 'args.retries' times."""
     def wrapper(*args, **kwargs):
-        logger = logging.getLogger(__name__)
         tries, success, err = 0, False, None
+        result = []
 
         while not success and (tries < kwargs["retries"]):
             err_message = None
@@ -25,12 +24,8 @@ def lookup_retry_decorator(func):
                 time.sleep(10)
 
         if not success:
-            logger.error(
-                f'Failed to connect to lookup url after {kwargs["retries"]} tries\n'
-                f'Error raised: {err}\n'
-            )
-            raise err
+            return result, err
         else:
-            return result
+            return result, err
 
     return wrapper
