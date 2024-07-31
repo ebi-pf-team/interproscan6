@@ -385,6 +385,27 @@ cd docker_files/mobidb
 docker build -t idrpred .
 ```
 
+### Singularity
+
+If you are using Singularity you can convert the Docker image to a Singularity image:
+
+```bash
+docker save idpred > idpred.tar
+singularity build idpred.img docker-archive://idpred.tar
+```
+
+Keey the Singularirty image in the root of the `InterProScan` repo.
+
+### Apptainer
+
+If you are using Apptainer you can convert the Docker image to a Apptainer image:
+
+```bash
+apptainer build idpred.sif docker-daemon://idpred:latest
+```
+
+Keey the Apptainer image in the root of the `InterProScan` repo.
+
 ## `SignalP`
 
 ### Adding `SignalP` (version 6) to `InterProScan6`
@@ -436,6 +457,27 @@ params {
     applications = 'AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,Pfam,PIRSF,PIRSR,PRINTS,PrositePatterns,PrositeProfiles,SFLD,SMART,SuperFamily,SignalP' <--- ADD NEW APPLICATION
     disable_precalc = false
 }
+
+### Singularity
+
+If you are using Singularity you can convert the Docker image to a Singularity image:
+
+```bash
+docker save signalp6 > signalp6.tar
+singularity build signalp6.img docker-archive://signalp6.tar
+```
+
+Keey the Singularirty image in the root of the `InterProScan` repo.
+
+### Apptainer
+
+If you are using Apptainer you can convert the Docker image to a Apptainer image:
+
+```bash
+apptainer build signalp6.sif docker-daemon://signalp6:latest
+```
+
+Keey the Apptainer image in the root of the `InterProScan` repo.
 
 ### Running `InterProScan6` with `SignalP6` enabled
 
