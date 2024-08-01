@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 
 MATCH_ELEMENT = {
     'SIGNALP': 'signal-peptide',
+    'SIGNALP_EUK': 'signal-peptide',
     'CDD': 'cdd-domain',
     'MOBIDB': 'mobidb-match',
     'ANTIFAM': 'hmmer3-match',
@@ -57,7 +58,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                     match_elem.set("graft-point", _check_null(match_data['graftPoint']))
 
                 signature_elem = ET.SubElement(match_elem, "signature")
-                if match_data['member_db'].upper() not in ['SIGNALP', 'SUPERFAMILY']:  # member db that don't have sigs, so no accs etc.
+                if match_data['member_db'].upper() not in ['SIGNALP', 'SIGNALP_EUK', 'SUPERFAMILY']:  # member db that don't have sigs, so no accs etc.
                     signature_elem.set("ac", match_data['accession'])
                     signature_elem.set("desc", match_data['name'])
                     signature_elem.set("name", match_data['name'])
@@ -125,7 +126,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("alignment", str(location["alignment"]))
                         location_elem.set("cigar-alignment", str(location["cigarAlignment"]))
 
-                    elif match_data['member_db'].upper() == "SIGNALP":
+                    elif match_data['member_db'].upper() in ["SIGNALP", "SIGNALP_EUK"]:
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("end", str(location["end"]))
                         location_elem.set("start", str(location["start"]))

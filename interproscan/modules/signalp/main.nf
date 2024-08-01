@@ -9,6 +9,7 @@ process SIGNALP_RUNNER {
     path "signalp_out"
     val pvalue
     val signal_version
+    val organism
 
     script:
     """
@@ -24,6 +25,7 @@ process SIGNALP_PARSER {
     path out
     val pvalue
     val signalp_version
+    val organism
 
     output:
     path "signalp_parsed.json"
@@ -34,6 +36,7 @@ process SIGNALP_PARSER {
         ${out}/prediction_results.txt \
         ${pvalue} \
         ${signalp_version} \
+        ${organism} \
         > signalp_parsed.json
     """
 }

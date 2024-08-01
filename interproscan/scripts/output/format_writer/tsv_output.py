@@ -39,7 +39,7 @@ def tsv_output(seq_matches: dict, output_path: str):
                 xrefs = f"{'|'.join(goterms)}\t{'|'.join(pathways)}"
 
                 for location in match["locations"]:
-                    if match["member_db"].upper() == "SIGNALP":
+                    if match["member_db"].upper() in ["SIGNALP", "SIGNALP_EUK"]:
                         sig_acc, status = "Signal Peptide", ""
                         ali_from = match["locations"][0]["start"]
                         ali_to = match["locations"][0]["end"]
@@ -114,7 +114,7 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
 
                 if 'model-ac' in match:
                     model_ac = match['model-ac']
-                elif member_db.upper() in ["SIGNALP"]:  # will probably apply to TMHMM and Phobius when added
+                elif member_db.upper() in ["SIGNALP", "SIGNALP_EUK"]:  # will probably apply to TMHMM and Phobius when added
                     model_ac = "-"
                 else:
                     model_ac = match['accession']
@@ -132,7 +132,7 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         hmm_length = "-"
                         location_score = "-"
                         env_end, env_start = "-", "-"
-                    elif member_db.upper() == "SIGNALP":
+                    elif member_db.upper() in ["SIGNALP", "SIGNALP_EUK"]:
                         hmm_start = location["start"]
                         hmm_end = location["end"]
                         hmm_length = int(hmm_end) - int(hmm_start)
