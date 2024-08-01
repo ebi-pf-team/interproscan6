@@ -2,10 +2,14 @@ import json
 import sys
 import re
 
-# Parse prints output to standardised JSON format
+# Parse PRINTS output to standardised JSON format
 # param prints_out: path to prints output file
 # param hierarchy: path to prints hierarchy db
 # param version: prints version number
+
+SUMMARYPATTERN = re.compile(r"^(\w+)\s+(\w+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+([A-Za-z0-9\s\-\/\(\)\,\'\.\|\+\_\:\;]+?)\s+(\w+)\s*$")
+PRINTPATTERN = re.compile(r"^(\w+)\s+(\w+)\s+(\d+)\s+(of\s+\d+)\s+([\d\.]+)\s+([\d\.]+)\s+(\d+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+([\d\.]*\d+e[+-]?\d+|[\d\.]+)\s+([Ii.]+)\s*$")
+MOTIFPATTERN = re.compile(r"^(\w+)\s+(\w+)\s+(\d+)\s+(of\s+\d+)\s+([\d\.]+)\s+(\d+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+(#*[a-zA-Z]+#*)\s+(\d+)\s+(\d+)\s+([-]?\d+)\s*(\d)\s*$")
 
 
 def main():
@@ -121,11 +125,9 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
 
 
 def process_1tb(line):
-    line_pattern = re.compile(r"^(\w+)\s+(\w+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+([A-Za-z0-9\s\-\/\(\)\,\'\.\|\+\_\:\;]+?)\s+(\w+)\s*$")
-    #print(line)
     # collects groups in order:
     # line, FingerPrint, Evalue, description, accession
-    rematch = line_pattern.match(line)
+    rematch = SUMMARYPATTERN.match(line)
     motif = rematch.group(2)
     desc = rematch.group(4)
     acc = rematch.group(5)
@@ -133,11 +135,10 @@ def process_1tb(line):
 
 
 def process_2tb(line):
-    line_pattern = re.compile(r"^(\w+)\s+(\w+)\s+(\d+)\s+(of\s+\d+)\s+([\d\.]+)\s+([\d\.]+)\s+(\d+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+([\d\.]*\d+e[+-]?\d+|[\d\.]+)\s+([Ii.]+)\s*$")
     # collects groups in order:
     # line, FingerPrint, No.Motifs, SumId, AveId,
     # ProfScore, Ppvalue,Evalue, GraphScan
-    rematch = line_pattern.match(line)
+    rematch = PRINTPATTERN.match(line)
     fingerprint = rematch.group(2)
     num_motifs = rematch.group(3)
     evalue = float(rematch.group(9))
@@ -146,12 +147,10 @@ def process_2tb(line):
 
 
 def process_3tb(line):
-    line_pattern = re.compile(r"^(\w+)\s+(\w+)\s+(\d+)\s+(of\s+\d+)\s+([\d\.]+)\s+(\d+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+(#*[a-zA-Z]+#*)\s+(\d+)\s+(\d+)\s+([-]?\d+)\s*(\d)\s*$")
     # collects groups in order:
     # line, MotifName, No.Motifs, of total number of motifs,
     # IdScore, PfScore, Pvalue, Sequence, Length, Low, Position, High
-    #print(line)
-    rematch = line_pattern.match(line)
+    rematch = MOTIFPATTERN.match(line)
     motifname = rematch.group(2)
     motifnum = int(rematch.group(3))
     idscore = rematch.group(5)
