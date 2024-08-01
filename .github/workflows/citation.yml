@@ -10,11 +10,6 @@ on:
       tags:
         description: 'Manual execution of citation check'
 
-  push:
-    branches: [ main ]
-    paths:
-      - .github/workflows/citation.yml
-
   pull_request:
     paths:
       - CITATION.cff
