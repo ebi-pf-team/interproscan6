@@ -362,13 +362,31 @@ signalp {
 
 ### Converting from CPU to GPU, and back again
 
-:TODO: -- add support for GPU run
-
 The model weights that come with the `SignalP` installation by default run on your CPU.
 If you have a GPU available, you can convert your installation to use the GPU instead. 
 
-1. Convert the `SignalP` installation to GPU by following the `SignalP` [documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#converting-to-gpu)
-2. ....???....
+
+1. (Optional) Remove any previously built SignalP images
+```bash
+docker image rm signalp6:latest
+```
+3. Copy the docker file available in the `./docker_files/signalp_gpu/` directory to your local `SignalP6` directory
+```bash
+# with the terminal point at the root of this repo
+cp docker_files/signalp_gpu/Dockerfile <SIGNALP-DIR>/Dockerfile
+```
+4. Convert the `SignalP` installation to GPU by building a building a docker image using the signalp_gpu docker file. This docker file includes a GPU conversion step. 
+```bash
+# with the terminal pointed at your local signalp dir
+docker build -t signalp6 .
+``` 
+6. Update the `nextflow.config` configuration to run with GPU acceleration for SignalP
+```
+process {
+    withName: SIGNALP_RUNNER { containerOptions = '--gpus all' }
+}
+```
+To convert back to CPU, remove the SignalP image, rebuild with the `./docker_files/signalp/` docker file and undo changes made to `nextflow.config`.
 
 # Citation
 
