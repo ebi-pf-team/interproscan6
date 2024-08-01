@@ -6,11 +6,17 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ /etc/timezone && \
     apt-get update -y && \
     apt-get upgrade -y && \
-    apt-get install -y python3.10 python3-venv python3-pip
+    apt-get install -y openjdk-11-jdk python3.10 python3-venv python3-pip wget
+
+WORKDIR /opt/
+RUN wget -qO- https://get.nextflow.io | bash && \
+    mv nextflow /usr/local/bin/
+RUN wget -qO- https://get.nf-test.com | bash && \
+    mv nf-test /usr/local/bin/
+ENV PATH="/usr/local/bin:$PATH"
 
 # make dirs to store the scripts to mock the bins used in the IRL image
 
-WORKDIR /opt/
 # cath-resolve-hits
 RUN mkdir -p cath-tools/
 # CDD
@@ -63,4 +69,3 @@ COPY interproscan.nf interproscan.nf
 COPY nextflow.config nextflow.config
 COPY README.md README.md
 COPY LICENSE LICENSE
-COPY nf-test nf-test
