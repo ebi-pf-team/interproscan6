@@ -67,7 +67,7 @@ workflow {
     }
 
     if (params.signalp_mode.toLowerCase() !in ['fast', 'slow', 'slow-sequential']) {
-        log.info "Unrecognised SignalP mode '${params.signalp_mode}'.\nAccepted modes: 'fast', 'slow-sequential'"
+        log.info "Unrecognised SignalP mode '${params.signalp_mode}'.\nAccepted modes: 'fast', 'slow', 'slow-sequential'"
         exit 1
     }
 
