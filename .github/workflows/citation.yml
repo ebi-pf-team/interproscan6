@@ -1,6 +1,15 @@
 name: Validate Citation
 
 on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
+      tags:
+        description: 'Manual execution of citation check'
+
   pull_request:
     paths:
       - CITATION.cff

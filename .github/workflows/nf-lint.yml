@@ -1,6 +1,15 @@
 name: Nextflow linting
 
 on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
+      tags:
+        description: 'Manual execution of NF linting'
+
   push:
     branches: [ main ]
     paths:
