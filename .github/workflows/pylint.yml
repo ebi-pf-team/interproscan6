@@ -10,10 +10,16 @@ on:
       tags:
         description: 'Manual execution of Python linting'
 
+  push:
+    branches: [ main ]
+    paths:
+      - .github/workflows/pylint.yml
+
   pull_request:
     branches: [ main ]
     paths:
       - interproscan/scripts
+      - .github/workflows/pylint.yml
 
 jobs:
   build:

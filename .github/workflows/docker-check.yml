@@ -10,9 +10,16 @@ on:
       tags:
         description: 'Manual execution of Docker check'
 
+  push:
+    branches: [ main ]
+    paths:
+      - .github/workflows/docker-check.yml
+
   pull_request:
     paths:
       - Dockerfile
+      - .github/workflows/docker-check.yml
+
 
 jobs:
   Check-Docker-files:
