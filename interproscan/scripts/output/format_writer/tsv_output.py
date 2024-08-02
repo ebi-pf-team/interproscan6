@@ -68,7 +68,7 @@ def tsv_output(seq_matches: dict, output_path: str):
                         evalue = "-"
                         ali_from = location["start"]
                         ali_to = location["end"]
-                        entry_desc = match["desc"]
+                        entry_desc = match["description"]
                         if seq_len == ali_from + ali_to - 1:
                             break
                     else:

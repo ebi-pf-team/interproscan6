@@ -74,7 +74,7 @@ def parse(phobius_out: str) -> dict:
                     "version": version,
                     "name": name,
                     "accession": acc,
-                    "desc": desc,
+                    "description": desc,
                     "locations": [],
                 }
                 location = {
