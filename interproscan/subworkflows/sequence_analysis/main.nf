@@ -4,6 +4,10 @@ include {
     CDD_POSTPROCESS;
 } from "$projectDir/interproscan/modules/cdd/main"
 include {
+    COILS_RUNNER;
+    COILS_PARSER;
+} from "$projectDir/interproscan/modules/coils/main"
+include {
     HMMER_RUNNER as ANTIFAM_HMMER_RUNNER;
     HMMER_RUNNER as NCBIFAM_HMMER_RUNNER;
     HMMER_RUNNER as GENE3D_HMMER_RUNNER;
@@ -236,6 +240,11 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."${member}".postprocess.data,
                 ]
             ]
+        coils: member == "coils"
+            return [
+            params.members."${member}".release,
+            params.members."${member}".switches
+            ]
 
         mobidb: member == "mobidb"
             return [
@@ -421,6 +430,11 @@ workflow SEQUENCE_ANALYSIS {
     CDD_POSTPROCESS(CDD_RUNNER.out)
     CDD_PARSER(CDD_POSTPROCESS.out)
 
+    // COILS
+    runner_coils_params = fasta.combine(member_params.coils)
+    COILS_RUNNER(runner_coils_params)
+    COILS_PARSER(COILS_RUNNER.out)
+
     // MOBIDB
     runner_mobidb_params = fasta.combine(member_params.mobidb)
     MOBIDB_RUNNER(runner_mobidb_params)
@@ -461,6 +475,7 @@ workflow SEQUENCE_ANALYSIS {
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
+            COILS_PARSER.out,
             MOBIDB_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
@@ -481,6 +496,7 @@ workflow SEQUENCE_ANALYSIS {
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
+            COILS_PARSER.out,
             MOBIDB_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
