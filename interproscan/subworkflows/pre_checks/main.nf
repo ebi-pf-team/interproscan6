@@ -98,6 +98,7 @@ workflow PRE_CHECKS {
         'prosite_patterns', 'prosite_profiles',
         'sfld', 'signalp', 'smart', 'superfamily'
     ]
+
     def applications_diff = user_applications.toLowerCase().split(',') - applications_expected
     if (applications_diff.size() != 0){
         log.info printHelp()

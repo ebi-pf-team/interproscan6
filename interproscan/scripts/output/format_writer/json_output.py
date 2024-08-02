@@ -179,8 +179,9 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["hmmLength"] = int(location["hmmLength"])
                                     info["hmmBounds"] = location["hmmBounds"]
 
-                                elif match_data['member_db'].upper() == "SUPERFAMILY":
-                                    info["hmmLength"] = match_data['hmm_length']
+
+                                elif match_data['member_db'].upper() == "COILS":
+                                    pass
 
                                 elif match_data['member_db'].upper() == "COILS":
                                     pass
