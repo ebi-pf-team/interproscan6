@@ -1,9 +1,10 @@
+// Scripts for Prosite Profiles
+
 process PFSEARCH_RUNNER {
     /*
     We use an inhouse python script to coordinate running pfsearch for 
     all provided PROSTITE Profiles
     */
-    // container 'docker.io/sibswiss/pftools'
     label 'prosite_pfsearch_runner'
 
     input:
@@ -13,8 +14,6 @@ process PFSEARCH_RUNNER {
         path "${release}._.prosite_profiles.out"
         path blacklist_file
 
-    // change to use just pfsearchV3 not the full project dir path
-    // when we move over to the single docker file
     script:
     """
     python3 $projectDir/interproscan/scripts/members/prosite/run_pfsearchv3.py \
@@ -23,5 +22,25 @@ process PFSEARCH_RUNNER {
         ${release}._.prosite_profiles.out \
         "/opt/pftools/var/lib/pftools/bin/pfsearchV3" \
         ${switches}
+    """
+}
+
+
+process PFSEARCH_PARSER {
+    label 'analysis_parser'
+
+    input:
+        path pfsearch_out
+        path blacklist_file
+
+    output:
+        path "${pfsearch_out}-filtered.json"
+
+    script:
+    """
+    python3 $projectDir/interproscan/scripts/members/prosite/pfsearch_parser.py \
+        ${pfsearch_out} \
+        ${pfsearch_out}-filtered.json \
+        ${blacklist_file}
     """
 }
