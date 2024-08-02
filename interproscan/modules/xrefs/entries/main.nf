@@ -1,5 +1,5 @@
 process ENTRIES {
-    label 'io'
+    label 'xref'
 
     input:
     path matches

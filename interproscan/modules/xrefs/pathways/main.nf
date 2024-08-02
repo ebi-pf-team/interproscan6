@@ -1,5 +1,5 @@
 process PATHWAYS {
-    label 'io'
+    label 'xref'
 
     input:
     path matches
