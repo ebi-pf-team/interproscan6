@@ -79,19 +79,13 @@ jobs:
           type=local,dest=/tmp/.buildx-cache,mode=max
           type=gha,mode=max
 
-    - name: Debug nf-test installation
-      run: |
-        echo $PATH
-        find . -name nf-test
-        ls -l ./nf-test
-
     - name: NF-Test subworkflows tests
       shell: bash -l {0}
       run: |
         export PATH=$PATH:$GITHUB_WORKSPACE/nf-test
         which nf-test
-        nf-test test tests/unit_tests/subworkflows/pre_checks/
-        nf-test test tests/unit_tests/subworkflows/sequence_precalc/
+        ./nf-test test tests/unit_tests/subworkflows/pre_checks/
+        ./nf-test test tests/unit_tests/subworkflows/sequence_precalc/
 
     - name: PY-Test scripts tests
       shell: bash -l {0}
