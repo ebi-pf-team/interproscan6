@@ -2,11 +2,11 @@ include {
     CDD_RUNNER;
     CDD_PARSER;
     CDD_POSTPROCESS;
-} from "$projectDir/interproscan/modules/cdd/main"
+} from "$projectDir/interproscan/modules/members/cdd/main"
 include {
     COILS_RUNNER;
     COILS_PARSER;
-} from "$projectDir/interproscan/modules/coils/main"
+} from "$projectDir/interproscan/modules/members/coils/main"
 include {
     HMMER_RUNNER as ANTIFAM_HMMER_RUNNER;
     HMMER_RUNNER as NCBIFAM_HMMER_RUNNER;
@@ -58,23 +58,19 @@ include {
 include {
     MOBIDB_RUNNER;
     MOBIDB_PARSER;
-} from "$projectDir/interproscan/modules/mobidb/main"
+} from "$projectDir/interproscan/modules/members/mobidb/main"
 include {
-    PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER
-} from "$projectDir/interproscan/modules/prosite/pfsearch/runner/main"
-include {
+    PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER;
     PFSEARCH_PARSER as PROSITE_PROFILES_PARSER
-} from "$projectDir/interproscan/modules/prosite/pfsearch/parser/main"
+} from "$projectDir/interproscan/modules/members/prosite/pfsearch/main"
 include {
-    PFSCAN_RUNNER as PROSITE_PATTERNS_RUNNER
-} from "$projectDir/interproscan/modules/prosite/pfscan/runner/main"
-include {
+    PFSCAN_RUNNER as PROSITE_PATTERNS_RUNNER;
     PFSCAN_PARSER as PROSITE_PATTERNS_PARSER
-} from "$projectDir/interproscan/modules/prosite/pfscan/parser/main"
+} from "$projectDir/interproscan/modules/members/prosite/pfscan/main"
 include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER;
-} from "$projectDir/interproscan/modules/signalp/main"
+} from "$projectDir/interproscan/modules/members/signalp/main"
 
 
 workflow SEQUENCE_ANALYSIS {
