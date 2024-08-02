@@ -52,6 +52,7 @@ jobs:
       run: |
         pip install -r utilities/requirements-dev.txt
         pip install nextflow
+        pip install nextflow pytest pytest-cov
         bash utilities/install_nf-test.sh
         
     - name: Set up Docker Buildx
