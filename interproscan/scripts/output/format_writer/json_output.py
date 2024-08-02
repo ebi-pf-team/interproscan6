@@ -60,6 +60,9 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                     if match_data['member_db'].upper() == "SUPERFAMILY":
                         description = None
 
+                    if match_data['member_db'].upper() == "PRINTS":
+                        description = match_data["description"]
+
                     signature = {
                         "accession": accession,
                         "name": match_data['name'],
@@ -183,8 +186,10 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 elif match_data['member_db'].upper() == "COILS":
                                     pass
 
-                                elif match_data['member_db'].upper() == "COILS":
-                                    pass
+                                elif match_data['member_db'].upper() == "PRINTS":
+                                    info["pvalue"] = float(location["pvalue"])
+                                    info["score"] = float(location["score"])
+                                    info["motifNumber"] = int(location["motifNumber"])
 
                                 else:
                                     info["evalue"] = float(location["evalue"])
@@ -219,7 +224,11 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 "locations": locations
                             }
 
+<<<<<<< HEAD
                             if match_data['member_db'].upper() not in ["CDD", "COILS", "HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS", "SUPERFAMILY"]:
+=======
+                            if match_data['member_db'].upper() not in ["CDD", "COILS","HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS", "PRINTS"]:
+>>>>>>> main
                                 match["evalue"] = float(match_data['evalue'])
                                 match["score"] = float(match_data['score'])
 
@@ -239,6 +248,10 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 signature["name"] = match_data['entry']['description']
                                 match['proteinClass'] = match_data['proteinClass']
                                 match['graftPoint'] = match_data['graftPoint']
+
+                            elif match_data['member_db'].upper() == "PRINTS":
+                                match["evalue"] = float(match_data['evalue'])
+                                match["graphscan"] = str(match_data["graphscan"])
 
                             matches.append(match)
 
