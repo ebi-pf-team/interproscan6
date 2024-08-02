@@ -59,6 +59,10 @@ include {
     MOBIDB_PARSER;
 } from "$projectDir/interproscan/modules/mobidb/main"
 include {
+    PRINTS_RUNNER;
+    PRINTS_PARSER;
+} from "$projectDir/interproscan/modules/prints/main"
+include {
     PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER
 } from "$projectDir/interproscan/modules/prosite/pfsearch/runner/main"
 include {
@@ -249,6 +253,14 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".switches
             ]
 
+        prints: member == 'prints'
+            return [
+                params.members.prints.data.hierarchy,
+                params.members.prints.data.pval,
+                params.members.prints.release,
+                params.members.prints.switches
+            ]
+
         prosite_patterns: member == "prosite_patterns"
             return [
                 params.members."${member}".data,
@@ -275,6 +287,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members.signalp.data.pvalue,
                 params.members.signalp.release
             ]
+
     }.set { member_params }
 
     /*
@@ -300,6 +313,7 @@ workflow SEQUENCE_ANALYSIS {
         GENE3D_CATH_RESOLVE_HITS.out, // cath-resolve-hits out file
         GENE3D_HMMER_RUNNER.out[1]    // post-processing-params
     )
+
     GENE3D_FILTER_MATCHES(
         GENE3D_ADD_CATH_SUPERFAMILIES.out,  // add-superfams out file
         GENE3D_HMMER_PARSER.out,            // ips6 json
@@ -426,6 +440,11 @@ workflow SEQUENCE_ANALYSIS {
     MOBIDB_RUNNER(runner_mobidb_params)
     MOBIDB_PARSER(MOBIDB_RUNNER.out)
 
+    // PRINTS
+    runner_prints_params = fasta.combine(member_params.prints)
+    PRINTS_RUNNER(runner_prints_params)
+    PRINTS_PARSER(PRINTS_RUNNER.out)
+
     // PROSITE Patterns (uses pfscanV3)
     runner_patterns = fasta.combine(member_params.prosite_patterns)
     PROSITE_PATTERNS_RUNNER(runner_patterns)
@@ -458,6 +477,7 @@ workflow SEQUENCE_ANALYSIS {
             CDD_PARSER.out,
             COILS_PARSER.out,
             MOBIDB_PARSER.out,
+            PRINTS_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
@@ -478,6 +498,7 @@ workflow SEQUENCE_ANALYSIS {
             CDD_PARSER.out,
             COILS_PARSER.out,
             MOBIDB_PARSER.out,
+            PRINTS_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
