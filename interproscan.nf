@@ -1,10 +1,5 @@
 nextflow.enable.dsl=2
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT MODULES AND SUBWORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
 include { PARSE_SEQUENCE } from "$projectDir/interproscan/modules/parse_sequence/main"
 include { GET_ORFS } from "$projectDir/interproscan/modules/get_orfs/main"
 include { AGGREGATE_RESULTS } from "$projectDir/interproscan/modules/output/aggregate_results/main"
@@ -34,7 +29,6 @@ workflow {
     )
 
     formats = params.formats.toLowerCase()
-
     applications = params.applications.toLowerCase()
 
     Channel.fromPath( params.input , checkIfExists: true)
@@ -42,6 +36,8 @@ workflow {
     .splitFasta( by: params.batchsize, file: true )
     .set { ch_fasta }
 
+    // if nucleic acid seqs provided, predict ORFs
+    // either way, then break up input FASTA into batches
     if (params.nucleic) {
         if (params.translate.strand.toLowerCase() !in ['both','plus','minus']) {
             log.info "Strand option '${params.translate.strand.toLowerCase()}' in nextflow.config not recognised. Accepted: 'both', 'plus', 'minus'"
@@ -56,6 +52,7 @@ workflow {
         PARSE_SEQUENCE(ch_fasta)
     }
 
+    // if enabled, check for pre-calculated matches via the Match Lookup Service
     sequences_to_analyse = null
     parsed_matches = Channel.empty()
     if (!params.disable_precalc) {
@@ -65,6 +62,7 @@ workflow {
         parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
     }
 
+    // Run analyses on sequences that have no pre-calculated matches
     analysis_result = Channel.empty()
     if (params.disable_precalc || sequences_to_analyse) {
         log.info "Running sequence analysis"
@@ -86,6 +84,12 @@ workflow {
 
     AGGREGATE_RESULTS(all_results.collect())
 
+    /* XREFS:
+    Add signature and entry desc and names
+    Add PAINT annotations (if panther was unabled)
+    Add go terms (if enabled)
+    Add pathways (if enabled)
+    */
     XREFS(AGGREGATE_RESULTS.out, applications)
 
     Channel.from(formats.split(','))
