@@ -89,7 +89,8 @@ jobs:
       - name: check files
         run: |
           echo $PWD
-          echo ls -a
+          ls -a
+          ls -a ./..
 
       - name: Check linter output
         run: |
