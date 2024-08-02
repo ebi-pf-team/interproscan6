@@ -1,6 +1,8 @@
-include { LOOKUP_CHECK } from "$projectDir/interproscan/modules/lookup/check/main"
-include { LOOKUP_MATCHES } from "$projectDir/interproscan/modules/lookup/matches/main"
-include { LOOKUP_NO_MATCHES } from "$projectDir/interproscan/modules/lookup/no_matches/main"
+include {
+    LOOKUP_CHECK;
+    LOOKUP_MATCHES;
+    LOOKUP_NO_MATCHES;
+} from "$projectDir/interproscan/modules/lookup/main"
 
 workflow SEQUENCE_PRECALC {
     take:
