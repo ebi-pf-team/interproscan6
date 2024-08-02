@@ -40,7 +40,6 @@ include {
     ADD_CATH_SUPERFAMILIES as GENE3D_ADD_CATH_SUPERFAMILIES;
     HAMAP_POST_PROCESSER;
     PANTHER_POST_PROCESSER;
-    PIRSF_POST_PROCESSER;
     SFLD_POST_PROCESSER;
     SUPERFAMILY_POST_PROCESSER;
 } from "$projectDir/interproscan/modules/hmmer/post_processing/main"
