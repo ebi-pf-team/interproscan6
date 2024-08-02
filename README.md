@@ -343,22 +343,20 @@ params {
 
 Include `signalp` and `signalp_euk` in the list of applications defined using `--applications` flag.
 
-For example:
-
-    nextflow run interproscan.nf --input files_test/best_to_test.fasta --applications signalp --disable_precalc
-    nextflow run interproscan.nf --input files_test/best_to_test.fasta --applications signalp_euk --disable_precalc
+    nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp --disable_precalc
+    nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp_euk --disable_precalc
 
 ### Changing mode of `Signalp6` in `InterProScan6`
 
 `SignalP6` supports 3 modes: `fast`, `slow` and `slow-sequential`. The mode can be set using the `--signalp_mode` flag. The default mode is `fast`.
 
-For example, to run `InterproScan` with input file `best_to_test.fasta`, using SignalP with all models in slow mode, use the command:
+For example, to run `InterProScan` with input file `best_to_test.fasta`, using SignalP with all models in slow mode, use the command:
 ```
-    nextflow run interproscan.nf --input files_test/best_to_test.fasta --applications signalp --disable_precalc --signalp_mode slow
+    nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp --disable_precalc --signalp_mode slow
 ```
 To run in slow-sequential mode and with only Eukaryotic models, use the command:
 ```
-    nextflow run interproscan.nf --input files_test/best_to_test.fasta --applications signalp_euk --disable_precalc --signalp_mode slow-sequential
+    nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp_euk --disable_precalc --signalp_mode slow-sequential
 ```
 
 **Note:** _`InterProScan6` only supports the implementation of one `SignalP` mode at a time. A separate `InterProScan6` but be completed for each mode of interest, in order ro apply multiple modes to the same dataset_.
