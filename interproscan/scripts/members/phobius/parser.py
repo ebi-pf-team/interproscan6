@@ -2,6 +2,48 @@ import json
 import sys
 import re
 
+FT_PATTERN = re.compile(
+    r"^(\w+)\s+(\w+)\s+(\d+)\s+(\d+)\s+([\w+\-\s?\.]+)?$"
+)
+
+FEATUREDICT = {
+    ("SIGNAL", None): {
+        "acc": "SIGNAL_PEPTIDE",
+        "name": "Signal Peptide",
+        "desc": "Signal peptide region",
+    },
+    ("DOMAIN", "CYTOPLASMIC."): {
+        "acc": "CYTOPLASMIC_DOMAIN",
+        "name": "Cytoplasmic domain",
+        "desc": "Region of a membrane-bound protein predicted to be outside the membrane, in the cytoplasm.",
+    },
+    ("DOMAIN", "NON CYTOPLASMIC."): {
+        "acc": "NON_CYTOPLASMIC_DOMAIN",
+        "name": "Non cytoplasmic domain",
+        "desc": "Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region.",
+    },
+    ("TRANSMEM", None): {
+        "acc": "TRANSMEMBRANE",
+        "name": "Transmembrane region",
+        "desc": "Region of a membrane-bound protein predicted to be embedded in the membrane.",
+    },
+    ("DOMAIN", "N-REGION."): {
+        "acc": "SIGNAL_PEPTIDE_N_REGION",
+        "name": "Signal peptide N-region",
+        "desc": "N-terminal region of a signal peptide.",
+    },
+    ("DOMAIN", "H-REGION."): {
+        "acc": "SIGNAL_PEPTIDE_H_REGION",
+        "name": "Signal peptide H-region",
+        "desc": "Hydrophobic region of a signal peptide.",
+    },
+    ("DOMAIN", "C-REGION."): {
+        "acc": "SIGNAL_PEPTIDE_C_REGION",
+        "name": "Signal peptide C-region",
+        "desc": "C-terminal region of a signal peptide.",
+    },
+}
+
 
 def main():
     args = sys.argv[1:]
@@ -11,44 +53,6 @@ def main():
 
 def parse(phobius_out: str) -> dict:
     matches = {}
-
-    featuredict = {
-        ("SIGNAL", None): {
-            "acc": "SIGNAL_PEPTIDE",
-            "name": "Signal Peptide",
-            "desc": "Signal peptide region",
-        },
-        ("DOMAIN", "CYTOPLASMIC."): {
-            "acc": "CYTOPLASMIC_DOMAIN",
-            "name": "Cytoplasmic domain",
-            "desc": "Region of a membrane-bound protein predicted to be outside the membrane, in the cytoplasm.",
-        },
-        ("DOMAIN", "NON CYTOPLASMIC."): {
-            "acc": "NON_CYTOPLASMIC_DOMAIN",
-            "name": "Non cytoplasmic domain",
-            "desc": "Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region.",
-        },
-        ("TRANSMEM", None): {
-            "acc": "TRANSMEMBRANE",
-            "name": "Transmembrane region",
-            "desc": "Region of a membrane-bound protein predicted to be embedded in the membrane.",
-        },
-        ("DOMAIN", "N-REGION."): {
-            "acc": "SIGNAL_PEPTIDE_N_REGION",
-            "name": "Signal peptide N-region",
-            "desc": "N-terminal region of a signal peptide.",
-        },
-        ("DOMAIN", "H-REGION."): {
-            "acc": "SIGNAL_PEPTIDE_H_REGION",
-            "name": "Signal peptide H-region",
-            "desc": "Hydrophobic region of a signal peptide.",
-        },
-        ("DOMAIN", "C-REGION."): {
-            "acc": "SIGNAL_PEPTIDE_C_REGION",
-            "name": "Signal peptide C-region",
-            "desc": "C-terminal region of a signal peptide.",
-        },
-    }
     version = phobius_out.split("._.")[0]
     with open(phobius_out) as ph_file:
         for line in ph_file:
@@ -57,10 +61,8 @@ def parse(phobius_out: str) -> dict:
                 matches[seq_id] = {}
             elif line.startswith("FT"):
                 line = line.strip("\n")
-                ft_pattern = re.compile(
-                    r"^(\w+)\s+(\w+)\s+(\d+)\s+(\d+)\s+([\w+\-\s?\.]+)?$"
-                )
-                ftmatch = ft_pattern.match(line)
+
+                ftmatch = FT_PATTERN.match(line)
                 feature = ftmatch.group(2)
                 featuretype = None
                 start = int(ftmatch.group(3))
@@ -68,7 +70,7 @@ def parse(phobius_out: str) -> dict:
                 if ftmatch.group(5):
                     featuretype = ftmatch.group(5)
                 featkey = (feature, featuretype)
-                acc, name, desc = featuredict[featkey].values()
+                acc, name, desc = FEATUREDICT[featkey].values()
                 match = {
                     "member_db": "Phobius",
                     "version": version,
