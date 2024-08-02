@@ -370,6 +370,35 @@ If you have a GPU available, you can convert your installation to use the GPU in
 1. Convert the `SignalP` installation to GPU by following the `SignalP` [documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#converting-to-gpu)
 2. ....???....
 
+## `Phobius`
+### Adding `Phobius` (version 1.01) to `InterProScan6`
+
+1. Download Phobius from the Phobius  [server](https://software.sbc.su.se/phobius.html)
+
+2. Unpack `Phobius` `tar` in your desired directory
+```
+tar -xzf phobius101_linux.tgz -C <PHOBIUS-DIR>
+```
+3. Copy the docker file available in the `./docker_files/phobius/` directory to your local `Phobius` directory
+```bash
+# with the terminal point at the root of this repo
+cp docker_files/phobius/Dockerfile <PHOBIUS-DIR>/Dockerfile
+```
+
+4. Build a docker image - _the Nextflow pipeline needs all third party tools to be stored within linux containers_.
+```bash
+# with the terminal pointed at your local phobius dir
+docker build -t phobius .
+```
+5. Check the `subworkflows/sequence_analysis/members.config` file to make sure the `Phobius` version is correct.
+```
+    phobius {
+            release = "1.01" <---- update if necessary
+            runner = "phobius"
+        }
+```        
+
+
 # Citation
 
 If you use `InterProScan` or `InterPro` in your work, please cite the following publications:
