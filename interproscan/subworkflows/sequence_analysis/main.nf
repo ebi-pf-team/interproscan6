@@ -78,10 +78,6 @@ include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER;
 } from "$projectDir/interproscan/modules/signalp/main"
-include {
-    PRINTS_RUNNER;
-    PRINTS_PARSER;
-} from "$projectDir/interproscan/modules/prints/main"
 
 
 workflow SEQUENCE_ANALYSIS {
@@ -291,16 +287,7 @@ workflow SEQUENCE_ANALYSIS {
                 params.members.signalp.data.pvalue,
                 params.members.signalp.release
             ]
-        prints: member == 'prints'
-            return [
-                params.members.prints.data.pval,
-                params.members.prints.switches,
-                params.members.prints.release,
-                [
-                    params.members.prints.postprocess.hierarchy,
-                    params.members.prints.postprocess.kdat
-                ]
-            ]
+
     }.set { member_params }
 
     /*
@@ -473,11 +460,6 @@ workflow SEQUENCE_ANALYSIS {
     SIGNALP_RUNNER(runner_signalp_params)
     SIGNALP_PARSER(SIGNALP_RUNNER.out)
 
-    // PRINTS
-    runner_prints_params = fasta.combine(member_params.prints)
-    PRINTS_RUNNER(runner_prints_params)
-    PRINTS_PARSER(PRINTS_RUNNER.out)
-
     /*
     Gather the results
     */
@@ -499,8 +481,7 @@ workflow SEQUENCE_ANALYSIS {
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
-            SUPERFAMILY_FILTER_MATCHES.out,
-            PRINTS_PARSER.out
+            SUPERFAMILY_FILTER_MATCHES.out
         )
         .set { parsed_results }
     }
@@ -521,8 +502,7 @@ workflow SEQUENCE_ANALYSIS {
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
-            SUPERFAMILY_FILTER_MATCHES.out,
-            PRINTS_PARSER.out
+            SUPERFAMILY_FILTER_MATCHES.out
         )
         .set { parsed_results }
     }
