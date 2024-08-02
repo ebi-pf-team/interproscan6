@@ -1,6 +1,15 @@
 name: Unit Tests
 
 on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
+      tags:
+        description: 'Manual execution of unit tests'
+
   push:
     branches: [ main ]
     paths:
@@ -43,6 +52,7 @@ jobs:
       run: |
         pip install -r utilities/requirements-dev.txt
         pip install nextflow
+        pip install nextflow pytest pytest-cov
         bash utilities/install_nf-test.sh
         
     - name: Set up Docker Buildx
@@ -73,8 +83,10 @@ jobs:
     - name: NF-Test subworkflows tests
       shell: bash -l {0}
       run: |
-        nf-test test tests/unit_tests/subworkflows/pre_checks/
-        nf-test test tests/unit_tests/subworkflows/sequence_precalc/
+        export PATH=$PATH:$GITHUB_WORKSPACE/nf-test
+        which nf-test
+        ./nf-test test tests/unit_tests/subworkflows/pre_checks/
+        ./nf-test test tests/unit_tests/subworkflows/sequence_precalc/
 
     - name: PY-Test scripts tests
       shell: bash -l {0}
