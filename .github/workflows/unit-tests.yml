@@ -82,8 +82,8 @@ jobs:
     - name: Debug nf-test installation
       run: |
         echo $PATH
-        ls -l ./nf-test
         find . -name nf-test
+        ls -l ./nf-test
 
     - name: NF-Test subworkflows tests
       shell: bash -l {0}
