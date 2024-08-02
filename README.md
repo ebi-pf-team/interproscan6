@@ -67,29 +67,26 @@ Please provide absolute paths. You can use the `$projectDir` short cut to repres
 
 This stores the InterPro data in the `data_xrefs/` directory.
 
-If you store these data in an alternative directory, please update the paths under the `xrefs` heading in the Nextflow configuration file (`./nextflow.config`).
+If you store these data in an alternative directory, please update the paths under the `xrefs` 
+heading in the corresponding configuration file (`./interproscan/subworkflows/xrefs/xrefs.config`).
 
-Please provide absolute paths. You can use the `$projectDir` short cut to represent the path to the root directory of `InterProScan6`.
+Please provide absolute paths. You can use the `$projectDir` short cut to represent the path to 
+the root directory of `InterProScan6`.
 
 3. Build a docker `InterProScan6` base image (this includes all non-licensed dependencies including `HMMER`, `BLAST`, `BioPython`, `easel`, etc.)
 
     docker build -t interproscan6 .
 
-4. Build a docker `MobiDB` image (this includes the `idrpred` tool for MobiDB predictions). From the root of this repository:
+4. [Optional] install licensed software
 
-    cd docker_files/mobidb
-    docker build -t idrpred .
-
-5. [Optional] install licensed software
-
-By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
+By default `MobiDB`, `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
 because they contain licensed components. In order to activate these analyses please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
 
 ## Singularity set up
 
 Not all systems support using Docker, therefore, the `interproscan6` Docker image will need to be 
 converted to another virtualization system. Singularity is an alternative container runtime to
-Docker. Singularity does not require rooot privileges or a separate daemon process, unlike Docker.
+Docker that does not require root privileges or a separate daemon process, unlike Docker.
 
 You will need Singularity installed on the system you will use to run the pipeline.
 
@@ -98,16 +95,19 @@ the `interproscan6` Docker image (in step 3 of the general set up) on a system w
 you **do not** need have downloaded the InterPro release data in order to build the Docker image.
 
 2. Save the `interproscan6` Docker image to a `tar` archive.
+
 ```bash
 docker save interproscan6 > interproscan6.tar
 ```
 
 3. Build a Singularity image from the archived Docker image:
-```
+
+```bash
 singularity build interproscan6.img docker-archive://interproscan6.tar
 ```
 
 4. Test the image on the system you will use to run the pipeline.
+
 ```bash
 singularity shell interproscan6.img
   $ ls
@@ -120,7 +120,41 @@ local laptop, and upload it to the HPC you will use to run `InterProScan6`.
 
 When running `InterProScan6` with Singularity include `singularity` in the `-profiles` option. E.g.:
 ```bash
-nextflow run interproscan.nf --input my_seqs.fasta -profiles local,singularity
+nextflow run interproscan.nf --input my_seqs.fasta -profiles singularity
+```
+The order the profiles are listed after `-profiles` does **not** matter.
+
+## Apptainer set up
+
+Not all systems support using Docker, therefore, the `interproscan6` Docker image will need to be 
+converted to another virtualization system. Apptainer is an alternative container runtime to
+Docker that does not require root privileges or a separate daemon process, unlike Docker.
+
+You will need Apptainer installed on the system you will use to run the pipeline.
+
+1. Follow the general set up laid out above on the system you are going to run the pipeline. Build
+the `interproscan6` Docker image (in step 3 of the general set up) on a system with Docker enabled -
+you **do not** need have downloaded the InterPro release data in order to build the Docker image.
+
+2. Build a Apptainer image from the Docker image:
+
+```bash
+apptainer build interproscan6.sif docker-daemon://interproscan6:latest
+```
+
+3. [Optional but recommended] Test the image on the system you will use to run the pipeline
+
+```bash
+apptainer run interproscan6.sif
+ls
+exit
+```
+
+Keep the Apptainer image (interproscan6.sif) in the root of the InterProScan repository on the sytem you will use to run the pipeline. For example, you can create an interproscan6.sif on your local laptop, and upload it to the HPC you will use to run InterProScan.
+
+When running `InterProScan6` with Singularity include `apptainer` in the `-profiles` option. E.g.:
+```bash
+nextflow run interproscan.nf --input my_seqs.fasta -profiles apptainer
 ```
 The order the profiles are listed after `-profiles` does **not** matter.
 
@@ -130,18 +164,35 @@ The order the profiles are listed after `-profiles` does **not** matter.
 
 How to run:
 
-    nextflow run interproscan.nf --input <path to fasta file> [resume]
+    nextflow run interproscan.nf --input <path to fasta file> -profile <container runtime, and executor>
+
+If running `InterProScan6` locally, you need only provide the corresponding container runtime 
+profile. Currently, Docker (profile: `docker`), Singularity (profile: `singularity`), and Apptainer 
+(profile: `apptainer`) are supported.
+
+If running `InterProScan6` on a cluster you will need to *additionally* supply the executor profile,
+for example, for running on a cluster using the SLURM scheduler, add the SLURM profile, for example:
+
+```bash
+  nextflow run interproscan.nf 
+    --input <path to fasta file> 
+    -profile slurm,singularity
+```
 
 The results will apear in `result/` folder.  
 For debugging, you an find all working files generated by the pipeline in the `work/` dir.
 
-Batchsize parameter in `nextflow.config` defines the number maximum number of sequences submitted within each batch, and thus the quantity of threads of parallelism.
+An example command to run `InterProScan6`, only using the `AntiFam` member database and 
+`SignalP`, without checking for pre-calculated matches in InterPro (using an example input file), 
+using a local system and Docker:
 
-**IMPORTANT:** Change the input params in the `input.yaml` file if you want to test different flows (see in `main.nf`)
-
-An example command to run `InterProScan6`, only using the `AntiFam` member database and `SignalP`, without checking for pre-calculated matches in InterPro (using an example input file):
-
-    nextflow run interproscan.nf --input files_test/best_to_test.fasta --applications signalp,antifam --disable_precalc
+```bash
+  nextflow run interproscan.nf \
+    --input files_test/best_to_test.fasta \
+    --applications signalp,antifam \
+    --disable_precalc \
+    -profile docker
+```
 
 ## Using DNA sequences
 
@@ -319,6 +370,42 @@ numbers are the same as those supported by your current `InterProScan6` installa
 
 Files can be placed in any location.
 
+## `MobiDB`
+
+Some of the compoments within `MobiDBLite` are GPL-licensed, meaning all software and data, and thus 
+work that uses this software, also needs to be GPL-licensed. This may not be ideal or suitable
+for all users. Therefore, we provide a version of the `MobiDBLite` analytical software that 
+is not GPL-licensed, called `idpred`.
+
+To setup `MobiDB`/`idpred` for InterProScan6 you only need to create a Docker image using the 
+provided Dockerfile: From the root of this repository:
+
+```bash
+cd docker_files/mobidb
+docker build -t idrpred .
+```
+
+### Singularity
+
+If you are using Singularity you can convert the Docker image to a Singularity image:
+
+```bash
+docker save idpred > idpred.tar
+singularity build idpred.img docker-archive://idpred.tar
+```
+
+Keey the Singularirty image in the root of the `InterProScan` repo.
+
+### Apptainer
+
+If you are using Apptainer you can convert the Docker image to a Apptainer image:
+
+```bash
+apptainer build idpred.sif docker-daemon://idpred:latest
+```
+
+Keey the Apptainer image in the root of the `InterProScan` repo.
+
 ## `SignalP`
 
 ### Adding `SignalP` (version 6) to `InterProScan6`
@@ -370,6 +457,27 @@ params {
     applications = 'AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,Pfam,PIRSF,PIRSR,PRINTS,PrositePatterns,PrositeProfiles,SFLD,SMART,SuperFamily,SignalP' <--- ADD NEW APPLICATION
     disable_precalc = false
 }
+
+### Singularity
+
+If you are using Singularity you can convert the Docker image to a Singularity image:
+
+```bash
+docker save signalp6 > signalp6.tar
+singularity build signalp6.img docker-archive://signalp6.tar
+```
+
+Keey the Singularirty image in the root of the `InterProScan` repo.
+
+### Apptainer
+
+If you are using Apptainer you can convert the Docker image to a Apptainer image:
+
+```bash
+apptainer build signalp6.sif docker-daemon://signalp6:latest
+```
+
+Keey the Apptainer image in the root of the `InterProScan` repo.
 
 ### Running `InterProScan6` with `SignalP6` enabled
 
