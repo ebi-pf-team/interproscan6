@@ -1,10 +1,13 @@
 """Parse output from pfsearchV3 wrapper run_prosite.py and
 filter out blacklisted models"""
-import sys
+
 import json
+import re
+import sys
 
 from dataclasses import dataclass
 
+DATA_LINE = re.compile(r"^([\w\|]+)\s+(\d+)\s+(\-?\d+)\s+([\w+\|]+|\s+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.?\d+)\s+([\+\-])\s+([\w\-]+)$")
 
 @dataclass
 class PrositeHit:
@@ -22,19 +25,19 @@ class PrositeHit:
 
     @classmethod
     def from_list(cls, value: list[str]) -> 'PrositeHit':
-        profile, profile_name = value[0].split("|")
+        profile, profile_name = value.group(1).split("|")
         return cls(
             profile=profile,
             profile_name=profile_name,
-            motif_start=int(value[1]),
-            motif_end=int(value[2]),
-            sequence_id=value[3],
-            start=int(value[4]),
-            end=int(value[5]),
-            raw_score=float(value[6]),
-            norm_score=float(value[7]),
-            symbol=value[8],
-            alignment=value[9]
+            motif_start=int(value.group(2)),
+            motif_end=int(value.group(3)),
+            sequence_id=value.group(4),
+            start=int(value.group(5)),
+            end=int(value.group(6)),
+            raw_score=float(value.group(7)),
+            norm_score=float(value.group(8)),
+            symbol=value.group(9),
+            alignment=value.group(10)
         )
 
 
@@ -61,12 +64,20 @@ def parse_and_filter(pfsearch_out: str, blacklist: list[str], release: str) -> d
     with open(pfsearch_out, 'r') as fh:
         for line in fh:
             if line.strip():
-                line_data = line.split()
+                line_data = DATA_LINE.match(line)
+                if not line_data:
+                    print("ERROR: the following line did not match the expected architecture")
+                    print(line)
 
-                if line_data[0].split("|")[0] in blacklist:
+                if line_data.group(1).split("|")[0] in blacklist:
                     continue
 
-                hit = PrositeHit.from_list(line_data)
+                try:
+                    hit = PrositeHit.from_list(line_data)
+                except Exception:
+                    print(line)
+                    import sys
+                    sys.exit(1)
 
                 if hit.sequence_id not in ips6_matches:
                     ips6_matches[hit.sequence_id] = {}
