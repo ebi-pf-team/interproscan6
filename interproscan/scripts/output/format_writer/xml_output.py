@@ -4,8 +4,8 @@ import xml.etree.ElementTree as ET
 
 MATCH_ELEMENT = {
     'ANTIFAM': 'hmmer3-match',
-    'CDD': 'cdd-domain',
-    'COILS': 'coils',
+    'CDD': 'cdd-match',
+    'COILS': 'coils-match',
     'FUNFAM': 'hmmer3-match',
     'GENE3D': 'hmmer3-match',
     'HAMAP': 'hmmer3-match',
@@ -14,13 +14,13 @@ MATCH_ELEMENT = {
     'PANTHER': 'hmmer3-match',
     'PFAM': 'hmmer3-match',
     'PIRSF': 'hmmer3-match',
-    'SIGNALP': 'signal-peptide',
-    'SFLD': 'hmmer3-match',
-    'SMART': 'hmmer2-match',
-    'SUPERFAMILY': 'hmmer3-match',
+    'PRINTS': 'fingerprints-match',
     'PROSITE_PATTERNS': 'profilescan-match',
     'PROSITE_PROFILES': 'profilesearch-match',  # changed from i5 which is also profilescan-match
-    'PRINTS': 'fingerprints-match',
+    'SFLD': 'hmmer3-match',
+    'SIGNALP': 'signalp-peptide',
+    'SMART': 'hmmer2-match',
+    'SUPERFAMILY': 'hmmer3-match',
 }
 
 
@@ -161,7 +161,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("end", str(location["end"]))
                         location_elem.set("representative", str(location["representative"]))
 
-                    elif match_data['member_db'].upper() in ["SUPERFAMILY", "MOBIDB", "COILS"]:
+                    elif match_data['member_db'].upper() in ["COILS", "MOBIDB", "SUPERFAMILY"]:
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("end", str(location["end"]))
@@ -219,6 +219,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                                     location_frag_elem.set("start", str(sitelocation["start"]))
                                     location_frag_elem.set("end", str(sitelocation["end"]))
                                     location_frag_elem.set("residue", str(sitelocation["residue"]))
+
                     if 'location-fragments' in location:
                         for location_fragment in location['location-fragments']:
                             location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
