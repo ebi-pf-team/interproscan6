@@ -51,17 +51,15 @@ def json_output(seq_matches: dict, output_path: str, version: str):
 
                     if match_data['member_db'].upper() == "CDD":
                         description = match_data['name']
+                    elif match_data['member_db'].upper() == "PRINTS":
+                        description = match_data["description"]
+                    elif match_data['member_db'].upper() == "SUPERFAMILY":
+                        description = None
 
                     if match_data['member_db'].upper() in ["GENE3D", "FUNFAM"]:
                         accession = match_data['accession']  # GENE3D needs the info after ":" (e.g G3DSA:3.20.20.70)
                     else:
                         accession = match_data['accession'].split(":")[0]  # drop subfamily
-
-                    if match_data['member_db'].upper() == "SUPERFAMILY":
-                        description = None
-
-                    if match_data['member_db'].upper() == "PRINTS":
-                        description = match_data["description"]
 
                     signature = {
                         "accession": accession,
@@ -132,7 +130,8 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["score"] = float(location["score"])
 
                                 elif match_data['member_db'].upper() == "COILS":
-                                    pass
+                                    # location data already added with lines 118-126
+                                    pass  # pass not continue so that location fragment data is added
 
                                 elif match_data['member_db'].upper() == "HAMAP":
                                     info["score"] = float(location["score"])
@@ -205,6 +204,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                         info["sites"] = location["sites"]
                                     except KeyError:
                                         info["sites"] = []
+
                                 try:
                                     info["location-fragments"] = location["location-fragments"]
                                 except KeyError:
@@ -218,12 +218,16 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     except KeyError:
                                         info["location-fragments"] = [single_location]
                                 locations.append(info)
+
                             match = {
                                 "signature": signature,
                                 "locations": locations
                             }
 
-                            if match_data['member_db'].upper() not in ["CDD", "COILS", "HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS", "PRINTS", "SUPERFAMILY"]:
+                            if match_data['member_db'].upper() not in [
+                                "CDD", "COILS", "HAMAP", "PROSITE_PROFILES",
+                                "PROSITE_PATTERNS", "PRINTS", "SUPERFAMILY"
+                            ]:
                                 match["evalue"] = float(match_data['evalue'])
                                 match["score"] = float(match_data['score'])
 
@@ -231,9 +235,6 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 match["model-ac"] = match_data['model-ac']
                             else:
                                 match["model-ac"] = match_data['accession']
-
-                            if match_data['member_db'].upper() == "SFLD":
-                                match["scope"] = None
 
                             if match_data['member_db'].upper() == "PANTHER":
                                 match["name"] = match_data['entry']['family_name']
@@ -247,6 +248,9 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             elif match_data['member_db'].upper() == "PRINTS":
                                 match["evalue"] = float(match_data['evalue'])
                                 match["graphscan"] = str(match_data["graphscan"])
+
+                            elif match_data['member_db'].upper() == "SFLD":
+                                match["scope"] = None
 
                             matches.append(match)
 
