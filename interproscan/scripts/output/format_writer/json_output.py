@@ -131,6 +131,9 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["evalue"] = float(location["evalue"])
                                     info["score"] = float(location["score"])
 
+                                elif match_data['member_db'].upper() == "COILS":
+                                    pass
+
                                 elif match_data['member_db'].upper() == "HAMAP":
                                     info["score"] = float(location["score"])
                                     info["alignment"] = location["alignment"]
@@ -142,6 +145,11 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["hmmBounds"] = location["hmmBounds"]
                                     info["envelopeStart"] = int(location["envelopeStart"])
                                     info["envelopeEnd"] = int(location["envelopeEnd"])
+
+                                elif match_data['member_db'].upper() == "PRINTS":
+                                    info["pvalue"] = float(location["pvalue"])
+                                    info["score"] = float(location["score"])
+                                    info["motifNumber"] = int(location["motifNumber"])
 
                                 elif match_data['member_db'].upper() == "PIRSF":
                                     # PIRSF uses the ali from (start) and ali to (end)
@@ -182,15 +190,6 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["hmmLength"] = int(location["hmmLength"])
                                     info["hmmBounds"] = location["hmmBounds"]
 
-
-                                elif match_data['member_db'].upper() == "COILS":
-                                    pass
-
-                                elif match_data['member_db'].upper() == "PRINTS":
-                                    info["pvalue"] = float(location["pvalue"])
-                                    info["score"] = float(location["score"])
-                                    info["motifNumber"] = int(location["motifNumber"])
-
                                 else:
                                     info["evalue"] = float(location["evalue"])
                                     info["score"] = float(location["score"])
@@ -224,11 +223,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 "locations": locations
                             }
 
-<<<<<<< HEAD
-                            if match_data['member_db'].upper() not in ["CDD", "COILS", "HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS", "SUPERFAMILY"]:
-=======
-                            if match_data['member_db'].upper() not in ["CDD", "COILS","HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS", "PRINTS"]:
->>>>>>> main
+                            if match_data['member_db'].upper() not in ["CDD", "COILS", "HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS", "PRINTS", "SUPERFAMILY"]:
                                 match["evalue"] = float(match_data['evalue'])
                                 match["score"] = float(match_data['score'])
 
