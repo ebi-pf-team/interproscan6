@@ -9,8 +9,8 @@ include {
 } from "$projectDir/interproscan/modules/members/coils/main"
 include {
     HMMER_RUNNER as ANTIFAM_HMMER_RUNNER;
-    HMMER_RUNNER as NCBIFAM_HMMER_RUNNER;
     HMMER_RUNNER as GENE3D_HMMER_RUNNER;
+    HMMER_RUNNER as NCBIFAM_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
     HMMER_RUNNER_WITH_ALIGNMENTS as SFLD_HMMER_RUNNER;
@@ -19,7 +19,6 @@ include {
     HAMAP_HMMER_RUNNER;
     PIRSF_HMMER_RUNNER;
     SMART_HMMER2_RUNNER;
-    HMMER_SCAN_RUNNER;
 } from "$projectDir/interproscan/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
@@ -59,6 +58,10 @@ include {
     MOBIDB_PARSER;
 } from "$projectDir/interproscan/modules/members/mobidb/main"
 include {
+    PRINTS_RUNNER;
+    PRINTS_PARSER;
+} from "$projectDir/interproscan/modules/members/prints/main"
+include {
     PFSCAN_RUNNER as PROSITE_PATTERNS_RUNNER;
     PFSCAN_PARSER as PROSITE_PATTERNS_PARSER
 } from "$projectDir/interproscan/modules/members/prosite/pfscan/main"
@@ -66,10 +69,6 @@ include {
     PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER;
     PFSEARCH_PARSER as PROSITE_PROFILES_PARSER
 } from "$projectDir/interproscan/modules/members/prosite/pfsearch/main"
-include {
-    PRINTS_RUNNER;
-    PRINTS_PARSER;
-} from "$projectDir/interproscan/modules/members/prints/main"
 include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER;
