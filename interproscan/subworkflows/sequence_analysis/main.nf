@@ -59,13 +59,17 @@ include {
     MOBIDB_PARSER;
 } from "$projectDir/interproscan/modules/members/mobidb/main"
 include {
+    PFSCAN_RUNNER as PROSITE_PATTERNS_RUNNER;
+    PFSCAN_PARSER as PROSITE_PATTERNS_PARSER
+} from "$projectDir/interproscan/modules/members/prosite/pfscan/main"
+include {
     PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER;
     PFSEARCH_PARSER as PROSITE_PROFILES_PARSER
 } from "$projectDir/interproscan/modules/members/prosite/pfsearch/main"
 include {
-    PFSCAN_RUNNER as PROSITE_PATTERNS_RUNNER;
-    PFSCAN_PARSER as PROSITE_PATTERNS_PARSER
-} from "$projectDir/interproscan/modules/members/prosite/pfscan/main"
+    PRINTS_RUNNER;
+    PRINTS_PARSER;
+} from "$projectDir/interproscan/modules/members/prints/main"
 include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER;
