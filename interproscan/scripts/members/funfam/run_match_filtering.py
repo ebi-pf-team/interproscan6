@@ -17,7 +17,7 @@ def main():
     Args include:
     All hmmer.out files from HMMER_PARSER
     All output files from cath-resolve hits
-    post-processing params
+    Ending with the release number of FunFam from members.config
     """
     release = None
     files = {}  # keyed by cath superfamily
