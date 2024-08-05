@@ -10,15 +10,16 @@ class FunfamHit:
         self.domains = {}
 
     def add_domain(self, value: str):
-        match_id = value.split()[1]
+        value = value.split()
+        match_id = value[1]
         domain = DomainHit()
         domain.signature_acc = match_id
-        domain.score = value.split()[2]
-        domain.evalue = value.split()[-1]
-        domain.boundaries_start = value.split()[3].split("-")[0]
-        domain.boundaries_end = value.split()[3].split("-")[1]
-        domain.resolved = value.split()[4]
-        domain.aligned_regions = value.split()[-3]
+        domain.score = value[2]
+        domain.evalue = value[-1]
+        domain.boundaries_start = value[3].split("-")[0]
+        domain.boundaries_end = value[3].split("-")[1]
+        domain.resolved = value[4]
+        domain.aligned_regions = value[-3]
 
         if match_id not in self.domains:
             self.domains[match_id] = [domain]
