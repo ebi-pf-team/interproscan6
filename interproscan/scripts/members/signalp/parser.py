@@ -6,6 +6,13 @@ COMMENT_LINE = "#"
 
 
 def main():
+    """
+    Input params for SignalP parser:
+    1. SignalP output file path
+    2. SignalP p-value threshold
+    3. SignalP version
+    4. SignalP organism
+"""
     args = sys.argv[1:]
     parsed_results = parse(args[0], float(args[1]), args[2], args[3])
     print(json.dumps(parsed_results, indent=2))
@@ -18,6 +25,7 @@ def parse(signalp_out: str, threshold: float, signalp_version: str, signalp_db =
         ('prediction_results.txt')
     :param threshold: p-value threshold that must be met or exceeded
     :param signalp_version: str, version num of signalP e.g. '6.0h'
+    :param signalp_db: str, organism arg, used to assign member database
     """
     sequence_matches = {}
 
