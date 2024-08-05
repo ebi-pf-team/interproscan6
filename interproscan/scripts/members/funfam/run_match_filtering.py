@@ -29,8 +29,8 @@ def main():
                 files[cath_superfam] = {}
             files[cath_superfam]["cath.resolve"] = input_arg
             continue
-        _file = JSON_PATTERN.match(input_arg)
 
+        _file = JSON_PATTERN.match(input_arg)
         if _file:
             cath_superfam = _file.group(1)
             if cath_superfam not in files:
@@ -64,20 +64,21 @@ class FunfamHit:
 
     def add_domain(self, value: str):
         value = value.split()
-        match_id = value[1]
-        domain = DomainHit()
-        domain.signature_acc = match_id
-        domain.score = value[2]
-        domain.evalue = value[-1]
-        domain.boundaries_start = value[3].split("-")[0]
-        domain.boundaries_end = value[3].split("-")[1]
-        domain.resolved = value[4]
-        domain.aligned_regions = value[-3]
+        # carried over from i5:
+        # treat each domain range in resolved hits as a separate domain
+        for domain_range in value[4].split(","):
+            match_id = value[1]
+            domain = DomainHit()
+            domain.signature_acc = match_id
+            domain.score = value[2]
+            domain.evalue = value[-1]
+            domain.boundaries_start = domain_range.split("-")[0]
+            domain.boundaries_end = domain_range.split("-")[-1]
 
-        if match_id not in self.domains:
-            self.domains[match_id] = [domain]
-        else:
-            self.domains[match_id].append(domain)
+            if match_id not in self.domains:
+                self.domains[match_id] = [domain]
+            else:
+                self.domains[match_id].append(domain)
 
 
 class DomainHit:
@@ -85,10 +86,8 @@ class DomainHit:
         self.signature_acc = None
         self.score = None  # bit score
         self.evalue = None  # indp-evalue
-        self.boundaries_start = None  # envelope boundaries
-        self.boundaries_end = None
-        self.resolved = None
-        self.aligned_regions = None
+        self.boundaries_start = None  # resolved region
+        self.boundaries_end = None  # resolved region
 
 
 def parse_cath(cath_out: str) -> dict[str, FunfamHit]:
