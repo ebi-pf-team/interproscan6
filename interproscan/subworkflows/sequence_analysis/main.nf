@@ -34,10 +34,10 @@ include {
     HMMER2_PARSER;
 } from "$projectDir/interproscan/modules/hmmer/parser/main"
 include {
-    CATH_RESOLVE_HITS as FUNFAM_CATH_RESOLVE_HITS;  // third party tool to minimise suprious hits
-    ADD_CATH_SUPERFAMILIES as FUNFAM_ADD_CATH_SUPERFAMILIES;  // used for gene3D and Funfam
     CATH_RESOLVE_HITS as GENE3D_CATH_RESOLVE_HITS;
     ADD_CATH_SUPERFAMILIES as GENE3D_ADD_CATH_SUPERFAMILIES;
+    FUNFAM_CATH_RESOLVE_HITS;
+    ADD_CATH_SUPERFAMILIES as FUNFAM_ADD_CATH_SUPERFAMILIES;
     HAMAP_POST_PROCESSER;
     PANTHER_POST_PROCESSER;
     SFLD_POST_PROCESSER;
@@ -325,7 +325,7 @@ workflow SEQUENCE_ANALYSIS {
     runner_funfam_params = fasta.combine(member_params.gene3d_funfam)
     FUNFAM_HMMER_RUNNER(runner_funfam_params, GENE3D_FILTER_MATCHES.out[1], applications)
     FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out[0])  // hmmer.out pathS - one per cath gene3d superfam
-    // // // FUNFAM_CATH_RESOLVE_HITS(FUNFAM_HMMER_RUNNER.out)
+    FUNFAM_CATH_RESOLVE_HITS(FUNFAM_HMMER_RUNNER.out)
     // // // FUNFAM_FILTER_MATCHES(
     // // //     FUNFAM_HMMER_PARSER.out,           // add-superfams out file
     // // //     FUNFAM_CATH_RESOLVE_HITS.out,      // ips6 json
