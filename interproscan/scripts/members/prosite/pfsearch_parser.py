@@ -7,7 +7,7 @@ import sys
 
 from dataclasses import dataclass
 
-DATA_LINE = re.compile(r"^([\w\|]+)\s+(\d+)\s+(\-?\d+)\s+([\w+\|\.]+|\s+)\s+(\d+)\s+(\d+)\s+(\-?\d+)\s+(\d+\.?\d+)\s+([\+\-])\s+([\w\-]+)$")
+DATA_LINE = re.compile(r"^([\w\|]+)\s+(\d+)\s+(\-?\d+)\s+([\w+\|\.\-\_]+|\s+)\s+(\d+)\s+(\d+)\s+(\-?\d+)\s+(\d+\.?\d+)\s+([\+\-])\s+([\w\-]+)$")
 
 @dataclass
 class PrositeHit:
