@@ -19,8 +19,10 @@ process HMMER_PARSER {
 
 
 process FUNFAM_HMMER_PARSER {
-    /* Parses output from HMMER3, but takes in multiple hmmer.out files,
-    and concatenates json files into one. */
+    /*
+    Parses output from HMMER3, but takes in multiple hmmer.out files, and generates
+    an JSON file for each --> output all generated json files
+    */
     label 'analysis_parser'
     
     input:
