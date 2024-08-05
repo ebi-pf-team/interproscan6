@@ -23,13 +23,13 @@ include {
 } from "$projectDir/interproscan/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
-    HMMER_PARSER as FUNFAM_HMMER_PARSER;
     HMMER_PARSER as GENE3D_HMMER_PARSER;
     HMMER_PARSER as HAMAP_HMMER_PARSER;
     HMMER_PARSER as NCBIFAM_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
     HMMER_PARSER as PFAM_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
+    FUNFAM_HMMER_PARSER;
     HMMER_SCAN_PARSER as PIRSF_HMMER_PARSER;
     HMMER2_PARSER;
 } from "$projectDir/interproscan/modules/hmmer/parser/main"
@@ -313,29 +313,24 @@ workflow SEQUENCE_ANALYSIS {
         GENE3D_CATH_RESOLVE_HITS.out, // cath-resolve-hits out file
         GENE3D_HMMER_RUNNER.out[1]    // post-processing-params
     )
-
     GENE3D_FILTER_MATCHES(
         GENE3D_ADD_CATH_SUPERFAMILIES.out,  // add-superfams out file
         GENE3D_HMMER_PARSER.out,            // ips6 json
         GENE3D_HMMER_RUNNER.out[1]          // post-processing-params
     )
+    // Gene3D filter matches out puts (0) ips6 json; (1) cath superfamilies txt file
 
     // FunFam (+ gene3D + cath-resolve-hits + assing-cath-superfamilies)
     // split into a channel so Nextflow can automatically manage the parallel execution of HmmSearch
-    GENE3D_FILTER_MATCHES.out[1]
-        .splitText() { it.replace('\n', '') }
-        .set { funfam_cath_superfamilies }
     runner_funfam_params = fasta.combine(member_params.gene3d_funfam)
-    runner_funfam_params_with_cath = runner_funfam_params.combine(funfam_cath_superfamilies)
-
-    FUNFAM_HMMER_RUNNER(runner_funfam_params_with_cath, applications)
-    FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out[0])  // hmmer.out path
-    FUNFAM_CATH_RESOLVE_HITS(FUNFAM_HMMER_RUNNER.out)
-    FUNFAM_FILTER_MATCHES(
-        FUNFAM_HMMER_PARSER.out,           // add-superfams out file
-        FUNFAM_CATH_RESOLVE_HITS.out,      // ips6 json
-        FUNFAM_HMMER_RUNNER.out[1]         // post-processing-params
-    )
+    FUNFAM_HMMER_RUNNER(runner_funfam_params, GENE3D_FILTER_MATCHES.out[1], applications)
+    FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out[0])  // hmmer.out pathS - one per cath gene3d superfam
+    // // // FUNFAM_CATH_RESOLVE_HITS(FUNFAM_HMMER_RUNNER.out)
+    // // // FUNFAM_FILTER_MATCHES(
+    // // //     FUNFAM_HMMER_PARSER.out,           // add-superfams out file
+    // // //     FUNFAM_CATH_RESOLVE_HITS.out,      // ips6 json
+    // // //     FUNFAM_HMMER_RUNNER.out[1]         // post-processing-params
+    // // // )
 
     // HAMAP (+ pfsearch_wrapper.py)
     runner_hamap_params = fasta.combine(member_params.hamap)
@@ -466,7 +461,6 @@ workflow SEQUENCE_ANALYSIS {
     if (applications.contains("gene3d")) {
         ANTIFAM_HMMER_PARSER.out.concat(
             NCBIFAM_HMMER_PARSER.out,
-            FUNFAM_FILTER_MATCHES.out[0],
             GENE3D_FILTER_MATCHES.out[0],
             HAMAP_FILTER_MATCHES.out,
             PANTHER_FILTER_MATCHES.out,
@@ -488,7 +482,6 @@ workflow SEQUENCE_ANALYSIS {
     else {
         ANTIFAM_HMMER_PARSER.out.concat(
             NCBIFAM_HMMER_PARSER.out,
-            FUNFAM_FILTER_MATCHES.out[0],
             HAMAP_FILTER_MATCHES.out,
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,
