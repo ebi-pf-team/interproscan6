@@ -375,20 +375,20 @@ If you have a GPU available, you can convert your installation to use the GPU in
 
 1. Download Phobius from the Phobius  [server](https://software.sbc.su.se/phobius.html)
 
-2. Unpack `Phobius` `tar` in your desired directory
+2. Unpack the `tar` file in your desired directory
 ```
 tar -xzf phobius101_linux.tgz -C <PHOBIUS-DIR>
 ```
 3. Copy the docker file available in the `./docker_files/phobius/` directory to your local `Phobius` directory
 ```bash
-# with the terminal point at the root of this repo
+# with the terminal pointed at the root of this repo
 cp docker_files/phobius/Dockerfile <PHOBIUS-DIR>/Dockerfile
 ```
 
 4. Build a docker image - _the Nextflow pipeline needs all third party tools to be stored within linux containers_.
 ```bash
 # with the terminal pointed at your local phobius dir
-docker build -t phobius .
+docker image build -t phobius .
 ```
 5. Check the `subworkflows/sequence_analysis/members.config` file to make sure the `Phobius` version is correct.
 ```

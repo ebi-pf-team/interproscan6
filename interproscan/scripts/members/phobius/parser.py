@@ -60,17 +60,15 @@ def parse(phobius_out: str) -> dict:
                 seq_id = line.strip("ID").split(maxsplit=1)[0]
                 matches[seq_id] = {}
             elif line.startswith("FT"):
-                line = line.strip("\n")
 
                 ftmatch = FT_PATTERN.match(line)
-                feature = ftmatch.group(2)
-                featuretype = None
-                start = int(ftmatch.group(3))
-                end = int(ftmatch.group(4))
-                if ftmatch.group(5):
-                    featuretype = ftmatch.group(5)
-                featkey = (feature, featuretype)
-                acc, name, desc = FEATUREDICT[featkey].values()
+                if ftmatch:
+                    featurekey = (ftmatch.group(2), ftmatch.group(5) if ftmatch.group(5) else None)
+                    start = int(ftmatch.group(3))
+                    end = int(ftmatch.group(4))
+                else:
+                    # raise error for unrecognised or incorrectly formatted line
+                acc, name, desc = FEATUREDICT[feature].values()
                 match = {
                     "member_db": "Phobius",
                     "version": version,
