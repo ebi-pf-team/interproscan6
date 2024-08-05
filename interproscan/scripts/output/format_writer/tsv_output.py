@@ -138,7 +138,7 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         hmm_length = "-"
                         location_score = "-"
                         env_end, env_start = "-", "-"
-                    elif member_db.upper() in ["SIGNALP", "SIGNALP_EUK", "PRINTS"]:
+                    elif member_db.upper() in ["PRINTS", "SIGNALP", "SIGNALP_EUK"]:
                         hmm_start = location["start"]
                         hmm_end = location["end"]
                         hmm_length = int(hmm_end) - int(hmm_start)

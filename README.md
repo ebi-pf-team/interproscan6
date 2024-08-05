@@ -330,7 +330,7 @@ signalp_euk {
 ```
 > Specifying the eukarya method of `SignalP6` (`SignalP_EUK`) triggers post-processing of the SP predictions by `SignalP6` to prevent spurious results (only predicts type Sec/SPI).
 
-4. Add `SignalP` and `SignalP_EUK` to the application list in `nextflow.config`:
+4. [Optional] If you want `SignalP` and `SignalP_EUK` to be included in the default applications that are run when running `InterProScan` without the `--applications` flag, add `SignalP` and `SignalP_EUK` to the application list in `nextflow.config`:
 ```
 params {
     batchsize = 100
@@ -341,7 +341,7 @@ params {
 ```
 ### Running `InterProScan6` with `SignalP6` enabled
 
-Include `signalp` and `signalp_euk` in the list of applications defined using `--applications` flag.
+Include `signalp` and `signalp_euk` in the list of applications defined using the `--applications` flag.
 
     nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp --disable_precalc
     nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp_euk --disable_precalc

@@ -21,10 +21,7 @@ def parse(signalp_out: str, threshold: float, signalp_version: str, signalp_db =
     """
     sequence_matches = {}
 
-    if signalp_db == "other":
-        member_db =  "SignalP"
-    elif signalp_db == "euk":
-        member_db = "SignalP_EUK"
+    member_db = "SignalP" if signalp_db == "other" else "SignalP_EUK"
 
     with open(signalp_out, "r") as fh:
         for line in fh:
