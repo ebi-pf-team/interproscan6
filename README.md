@@ -1,7 +1,7 @@
 # InterProScan6
 
 [![nf-test](https://img.shields.io/badge/tested_with-nf--test-337ab7.svg)](https://github.com/askimed/nf-test) 
-![Unit tests](https://github.com/ebi-pf-team/interproscan6/actions/workflows/main.yml/badge.svg)  
+![Unit tests](https://github.com/ebi-pf-team/interproscan6/actions/workflows/unit-tests.yml/badge.svg)  
 [![codecov](https://codecov.io/gh/ebi-pf-team/interproscan6/graph/badge.svg?token=7MP9WCJHAQ)](https://codecov.io/gh/ebi-pf-team/interproscan6)
 [![Citation](https://github.com/ebi-pf-team/interproscan6/actions/workflows/citation.yml/badge.svg)](#citation)
 
