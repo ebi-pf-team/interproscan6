@@ -91,7 +91,14 @@ workflow {
     Channel.from(formats.split(','))
     .set { ch_format }
 
-    WRITE_RESULTS(PARSE_SEQUENCE.out.collect(), XREFS.out.collect(), ch_format, params.output, params.ipsc_version)
+    WRITE_RESULTS(
+        PARSE_SEQUENCE.out.collect(),
+        XREFS.out.collect(),
+        ch_format,
+        params.output,
+        params.ipsc_version,
+        params.nucleic
+    )
 }
 
 workflow.onComplete = {
