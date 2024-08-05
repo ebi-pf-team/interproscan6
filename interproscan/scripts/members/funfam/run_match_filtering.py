@@ -7,9 +7,9 @@ output file, and then runs filter_ips6_hits.py for each pair
 of matches output files"""
 
 
-RELEASE_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 CATH_PATTERN = re.compile(r"^.*\._\.(\d+\.\d+\.\d+\.\d+)\.cath\.resolved\.out$")
 JSON_PATTERN = re.compile(r"^hmmer_parsed_.*\._\.(\d+\.\d+\.\d+\.\d+)\.json$")
+RELEASE_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 
 
 def main():
