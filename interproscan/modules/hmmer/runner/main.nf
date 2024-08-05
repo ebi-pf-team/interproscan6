@@ -49,7 +49,8 @@ process FUNFAM_HMMER_RUNNER {
         "${applications}".contains('funfam')
 
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params), val(cath_superfamily)
+        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
+        path cath_superfamilies
         val applications
     /*
     post-processing params:
@@ -57,17 +58,22 @@ process FUNFAM_HMMER_RUNNER {
     5. FunFam HMMsearch switches
     6. FunFam release number
     */
+
     output:
-        path "${postprocessing_params[6]}._.funfam._.${cath_superfamily}.out"
+        path "${postprocessing_params[6]}._.funfam._.*.out"
         val postprocessing_params
 
     script:
     """
-    /opt/hmmer3/bin/hmmsearch \\
-        ${postprocessing_params[5]} \\
-        -o ${postprocessing_params[6]}._.funfam._.${cath_superfamily}.out \\
-        "${postprocessing_params[4]}${cath_superfamily.replace('.', '/')}.hmm" \\
-        ${fasta}
+    while IFS= read -r cath_superfamily
+    do
+        hmm_file="\${cath_superfamily//./\\/}.hmm"
+        /opt/hmmer3/bin/hmmsearch \\
+            ${postprocessing_params[5]} \\
+            -o ${postprocessing_params[6]}._.funfam._.\${cath_superfamily}.out \\
+            "${postprocessing_params[4]}/\$hmm_file" \\
+            ${fasta}
+    done < ${cath_superfamilies}
     """
 }
 
