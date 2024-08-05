@@ -12,7 +12,8 @@ output file, and then runs filter_ips6_hits.py for each pair
 of matches output files"""
 
 
-CATH_PATTERN = re.compile(r"^(\d+\.\d+\.\d+).*\._\.(\d+\.\d+\.\d+\.\d+)\.cath\.resolved\.out$")
+RELEASE_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
+CATH_PATTERN = re.compile(r"^.*\._\.(\d+\.\d+\.\d+\.\d+)\.cath\.resolved\.out$")
 JSON_PATTERN = re.compile(r"^hmmer_parsed_.*\._\.(\d+\.\d+\.\d+\.\d+)\.json$")
 
 
@@ -28,11 +29,10 @@ def main():
     for input_arg in sys.argv[1:]:
         _file = CATH_PATTERN.match(input_arg)
         if _file:
-            cath_superfam = _file.group(2)
+            cath_superfam = _file.group(1)
             if cath_superfam not in files:
                 files[cath_superfam] = {}
-            files[cath_superfam]["ips6.json"] = input_arg
-            release = _file.group(1)
+            files[cath_superfam]["cath.resolve"] = input_arg
             continue
         _file = JSON_PATTERN.match(input_arg)
 
@@ -40,14 +40,14 @@ def main():
             cath_superfam = _file.group(1)
             if cath_superfam not in files:
                 files[cath_superfam] = {}
-            files[_file.group(1)]["cath.resolve"] = input_arg
+            files[_file.group(1)]["ips6.json"] = input_arg
+            continue
+
+        if RELEASE_PATTERN.match(input_arg):
+            release = input_arg
             continue
 
         print(f"Did not recognise this input file {input_arg}")
-        sys.exit(1)
-
-    if not release:
-        print("Could not get release from cath resolve output files. Terminating")
         sys.exit(1)
 
     for cath_superfam, file_info in files.items():
