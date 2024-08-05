@@ -328,7 +328,8 @@ workflow SEQUENCE_ANALYSIS {
     FUNFAM_CATH_RESOLVE_HITS(FUNFAM_HMMER_RUNNER.out)
     FUNFAM_FILTER_MATCHES(
         FUNFAM_HMMER_PARSER.out,           // add-superfams out file
-        FUNFAM_CATH_RESOLVE_HITS.out       // ips6 json
+        FUNFAM_CATH_RESOLVE_HITS.out,      // ips6 json
+        FUNFAM_HMMER_RUNNER.out[1]         // post-processing-params
     )
 
     // HAMAP (+ pfsearch_wrapper.py)
