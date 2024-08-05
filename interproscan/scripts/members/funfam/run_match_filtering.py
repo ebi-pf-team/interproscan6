@@ -74,6 +74,7 @@ class FunfamHit:
             domain.evalue = value[-1]
             domain.boundaries_start = domain_range.split("-")[0]
             domain.boundaries_end = domain_range.split("-")[-1]
+            domain.resolved = value[4]
 
             if match_id not in self.domains:
                 self.domains[match_id] = [domain]
@@ -88,6 +89,7 @@ class DomainHit:
         self.evalue = None  # indp-evalue
         self.boundaries_start = None  # resolved region
         self.boundaries_end = None  # resolved region
+        self.resolved = None
 
 
 def parse_cath(cath_out: str) -> dict[str, FunfamHit]:
