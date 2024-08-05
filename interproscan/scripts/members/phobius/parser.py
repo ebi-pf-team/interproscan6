@@ -63,11 +63,11 @@ def parse(phobius_out: str) -> dict:
 
                 ftmatch = FT_PATTERN.match(line)
                 if ftmatch:
-                    featurekey = (ftmatch.group(2), ftmatch.group(5) if ftmatch.group(5) else None)
+                    feature = (ftmatch.group(2), ftmatch.group(5) if ftmatch.group(5) else None)
                     start = int(ftmatch.group(3))
                     end = int(ftmatch.group(4))
                 else:
-                    # raise error for unrecognised or incorrectly formatted line
+                    raise Exception("Unrecognised line formatting")
                 acc, name, desc = FEATUREDICT[feature].values()
                 match = {
                     "member_db": "Phobius",
