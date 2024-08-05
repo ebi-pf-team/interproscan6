@@ -3,7 +3,7 @@ import sys
 import re
 
 FT_PATTERN = re.compile(
-    r"^(\w+)\s+(\w+)\s+(\d+)\s+(\d+)\s+([\w+\-\s?\.]+)?$"
+    r"^(\w+)\s+(\w+)\s+(\d+)\s+(\d+)\s+([\w+\-\s*]+\.)?(\n)$"
 )
 
 FEATUREDICT = {
@@ -63,11 +63,11 @@ def parse(phobius_out: str) -> dict:
 
                 ftmatch = FT_PATTERN.match(line)
                 if ftmatch:
-                    feature = (ftmatch.group(2), ftmatch.group(5) if ftmatch.group(5) else None)
+                    feature = (ftmatch.group(2), ftmatch.group(5) if ftmatch.group(6) else None)
                     start = int(ftmatch.group(3))
                     end = int(ftmatch.group(4))
                 else:
-                    raise Exception("Unrecognised line formatting")
+                    raise Exception("Unrecognised line formatting:", line)
                 acc, name, desc = FEATUREDICT[feature].values()
                 match = {
                     "member_db": "Phobius",
@@ -89,7 +89,6 @@ def parse(phobius_out: str) -> dict:
                 }
                 if acc not in matches[seq_id]:
                     matches[seq_id][acc] = match
-                if matches[seq_id][acc]:
                     matches[seq_id][acc]["locations"].append(location)
 
     return matches
