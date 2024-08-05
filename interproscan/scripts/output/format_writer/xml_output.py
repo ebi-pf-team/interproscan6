@@ -141,6 +141,8 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("end", str(location["end"]))
                         location_elem.set("start", str(location["start"]))
+                        location_elem.set("cleavage_start", str(location["cleavage_start"]))
+                        location_elem.set("cleavage_end", str(location["cleavage_end"]))
                         location_elem.set("pvalue", str(location["pvalue"]))
 
                     elif match_data['member_db'].upper() == "SFLD":
