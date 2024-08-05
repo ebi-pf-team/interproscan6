@@ -23,9 +23,9 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                         signal_release_key: match_data["version"],
                         "start": match_data["locations"][0]["start"],
                         "end": match_data["locations"][0]["end"],
+                        "pvalue": match_data["locations"][0]["pvalue"],
                         "cleavage_start": match_data["locations"][0]["cleavage_start"],
                         "cleavage_end": match_data["locations"][0]["cleavage_end"],
-                        "pvalue": match_data["locations"][0]["pvalue"],
                     }
                     matches.append(match)
                 else:
