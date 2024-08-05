@@ -50,10 +50,10 @@ def parse(signalp_out: str, signalp_cs: str, threshold: float, signalp_version: 
                     start = line.split("\t")[3]
                     end = line.split("\t")[4]
                     pvalue = float(predict_pvalue)
-
+            # checks if there is only one signal peptide prediction per protein
             if acc in sequence_matches:
-                raise Exception(f"Protein {acc} had more than one SignalP match")
-
+                raise Exception(f"Protein {acc} has more than one SignalP match")
+            # reports signal peptide start and end location
             if start:
                 sequence_matches[acc] = {
                     "signal_peptide": {
@@ -67,7 +67,7 @@ def parse(signalp_out: str, signalp_cs: str, threshold: float, signalp_version: 
                     }
                 }
 
-
+    acc_list = []
     with open(signalp_cs, "r") as fh:
         for line in fh:
             if line.startswith(COMMENT_LINE):
@@ -76,23 +76,25 @@ def parse(signalp_out: str, signalp_cs: str, threshold: float, signalp_version: 
             acc = seq_identifer.split(" ")[0].strip()
             cs_start = None
             cs_end = None
-            pvalue = None
+            #pvalue = None
 
             cs_prediction = line.split("\t")[-1]
             if len(cs_prediction) > 1:
                 # reports start and end of cleavage site
-                # to do: report signal peptide location
                 if float(cs_prediction.split("Pr:")[-1].strip()) >= threshold:
                     cs_start = int(cs_prediction.split(". ")[0].strip("CS pos: ").split("-")[0].strip())
                     cs_end = int(cs_prediction.split(". ")[0].strip("CS pos: ").split("-")[1].strip())
-                    pvalue = float(cs_prediction.split("Pr:")[-1].strip())
-            # add check if multiple signal peptides predicted, raise error
+                    #pvalue = float(cs_prediction.split("Pr:")[-1].strip())
+                    acc_list.append(acc)
+
             if cs_start:
                 for location in sequence_matches[acc]["signal_peptide"]["locations"]:
-                    if location["pvalue"] == pvalue:
-                        location["cleavage_start"] = cs_start
-                        location["cleavage_end"] = cs_end
+                    location["cleavage_start"] = cs_start
+                    location["cleavage_end"] = cs_end
 
+    # checks there is only one cleavage prediction per protein
+    if len(acc_list) > len(sequence_matches):
+        raise Exception("Protein has more than one SignalP match")
 
     return sequence_matches
 
