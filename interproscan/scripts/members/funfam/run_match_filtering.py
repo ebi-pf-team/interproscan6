@@ -2,11 +2,6 @@ import json
 import re
 import sys
 
-from filter_ips6_hits import (
-    parse_cath,
-    filter_matches
-)
-
 """Matches up the corresponding IPS6 JSON file with the cath_resolve 
 output file, and then runs filter_ips6_hits.py for each pair
 of matches output files"""
@@ -117,12 +112,16 @@ def parse_cath(cath_out: str) -> dict[str, FunfamHit]:
     return matches
 
 
-def filter_matches(ips6: str, gene3d_matches: dict[str, FunfamHit], release: str) -> tuple[dict, set]:
+def filter_matches(
+    ips6: str,
+    funfam_matches: dict[str, FunfamHit],
+    release: str
+) -> tuple[dict, set]:
     """Parse the IPS6 JSON file, filtering hits to only retains
     those that passed the Gene3D post-processing.
 
     :param ips6: str repr of path to internal IPS6 JSON file containing parsed hits from HMMER.out file
-    :param gene3d_matches: dict of FunfamHits, representing hits in the 
+    :param funfam_matches: dict of FunfamHits, representing hits in the 
         add_cath_superfamilies.py output file
     :param release: FunFam release version
 
@@ -133,27 +132,28 @@ def filter_matches(ips6: str, gene3d_matches: dict[str, FunfamHit], release: str
         ips6_data = json.load(fh)
 
     for protein_id in ips6_data:
-        if protein_id not in gene3d_matches:
+        if protein_id not in funfam_matches:
             continue
 
         for signature_acc in ips6_data[protein_id]:  # e.g. 3.40.50.1170-FF-000001
-            if signature_acc not in gene3d_matches[protein_id].domains:
+            if signature_acc not in funfam_matches[protein_id].domains:
                 continue
 
             # retrieve the relevant domain hit
             ips6_location = None  # from the IPS6 data
             funfam_domain = None  # from the cath-superfamilies output
             for location in ips6_data[protein_id][signature_acc]["locations"]:  # list of locations
-                for domain in gene3d_matches[protein_id].domains[signature_acc]:
+                for domain in funfam_matches[protein_id].domains[signature_acc]:
                     # Iterate the list of DomainHit instances
-                    if domain.evalue == location["evalue"] \
-                        and domain.score == location["score"] \
-                        and domain.boundaries_start == location["envelopeStart"] \
-                        and domain.boundaries_end == location["envelopeEnd"]:
+                    if str(domain.evalue) == str(location["evalue"]) \
+                        and float(domain.score) == float(location["score"]) \
+                        and int(domain.boundaries_start) == int(location["envelopeStart"]) \
+                        and int(domain.boundaries_end) == int(location["envelopeEnd"]):
                         ips6_location = location  # dict of hmmer match data
                         funfam_domain = domain  # DomainHit instance
 
                 if not ips6_location:
+                    print("2", protein_id, signature_acc)
                     continue
 
                 if protein_id not in processed_ips6:
