@@ -326,11 +326,10 @@ workflow SEQUENCE_ANALYSIS {
     FUNFAM_HMMER_RUNNER(runner_funfam_params, GENE3D_FILTER_MATCHES.out[1], applications)
     FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out[0])  // hmmer.out pathS - one per cath gene3d superfam
     FUNFAM_CATH_RESOLVE_HITS(FUNFAM_HMMER_RUNNER.out)
-    // // // FUNFAM_FILTER_MATCHES(
-    // // //     FUNFAM_HMMER_PARSER.out,           // add-superfams out file
-    // // //     FUNFAM_CATH_RESOLVE_HITS.out,      // ips6 json
-    // // //     FUNFAM_HMMER_RUNNER.out[1]         // post-processing-params
-    // // // )
+    FUNFAM_FILTER_MATCHES(
+        FUNFAM_HMMER_PARSER.out,           // add-superfams out file
+        FUNFAM_CATH_RESOLVE_HITS.out       // ips6 json
+    )
 
     // HAMAP (+ pfsearch_wrapper.py)
     runner_hamap_params = fasta.combine(member_params.hamap)
@@ -462,6 +461,7 @@ workflow SEQUENCE_ANALYSIS {
         ANTIFAM_HMMER_PARSER.out.concat(
             NCBIFAM_HMMER_PARSER.out,
             GENE3D_FILTER_MATCHES.out[0],
+            FUNFAM_FILTER_MATCHES.out,
             HAMAP_FILTER_MATCHES.out,
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,
@@ -483,6 +483,7 @@ workflow SEQUENCE_ANALYSIS {
         ANTIFAM_HMMER_PARSER.out.concat(
             NCBIFAM_HMMER_PARSER.out,
             HAMAP_FILTER_MATCHES.out,
+            FUNFAM_FILTER_MATCHES.out,
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,
             PIRSF_FILTER_MATCHES.out,
