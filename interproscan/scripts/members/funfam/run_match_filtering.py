@@ -42,7 +42,7 @@ def main():
             release = input_arg
             continue
 
-        print(f"Did not recognise this input file {input_arg}")
+        print(f"Did not recognise this input arg {input_arg}")
         sys.exit(1)
 
     for cath_superfam, file_info in files.items():
