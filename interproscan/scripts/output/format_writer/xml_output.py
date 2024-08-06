@@ -54,12 +54,13 @@ def build_xml_output_nucleic(seq_matches: dict, output_path: str, version: str):
     root.set("interproscan-version", version)
 
     for seq_id, data in seq_matches.items():
+        print(data)
         nt_seq_elem = ET.SubElement(root, "nucleotide-sequence")
         sequence_elem = ET.SubElement(nt_seq_elem, "sequence")
         sequence_elem.text = data['sequences'][1]
         sequence_elem.set("md5", data['sequences'][2])
         xref_elem = ET.SubElement(nt_seq_elem, "xref")
-        xref_elem.set("id", seq_id)
+        xref_elem.set("id", data['sequences'][0].split(maxsplit=1)[0])  # drops the source sequence id prefix
         xref_elem.set("name", data['sequences'][0])
 
         orf_elem = ET.SubElement(nt_seq_elem, "orf")
