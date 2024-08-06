@@ -5,7 +5,7 @@ import sys
 from format_writer.tsv_output import tsv_pro_output
 from format_writer.tsv_output import tsv_output
 from format_writer.json_output import json_output
-from format_writer.xml_output import xml_output
+from format_writer.xml_output import build_xml_output_protein, build_xml_output_nucleic
 
 
 NT_PATTERN = re.compile(r"^orf\d+\s+source=(.*)\s+coords=.*$")
@@ -54,7 +54,10 @@ def write_results(
     if "JSON" in output_format:
         json_output(seq_matches, output_path, version)
     if "XML" in output_format:
-        xml_output(seq_matches, output_path, version)
+        if nucleic:
+            build_xml_output_nucleic(seq_matches, output_path, version)
+        else:
+            build_xml_output_protein(seq_matches, output_path, version)
 
 
 def main():
