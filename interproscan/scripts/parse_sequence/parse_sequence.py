@@ -14,7 +14,21 @@ def is_fasta_check(fasta_file: str):
             raise ValueError(f"{fasta_file} is not in FASTA format")
 
 
-def get_sequences(fasta_file: str, nucleic=False) -> dict:
+def get_sequences(fasta_file: str) -> dict:
+    sequences = {}
+    with open(fasta_file, "r") as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.strip()
+            if line.startswith(">"):
+                seq_key = line[1:]
+                sequences[seq_key] = ""
+            else:
+                sequences[seq_key] += line
+    return sequences
+
+
+def get_nucleic_seqs(fasta_file: str) -> dict:
     sequences = {}
     with open(fasta_file, "r") as f:
         lines = f.readlines()
@@ -22,12 +36,11 @@ def get_sequences(fasta_file: str, nucleic=False) -> dict:
             line = line.strip()
             if line.startswith(">"):
                 # split on the first white space to match GETORF handling of seqIDs
-                seq_key = line[1:] if not nucleic else line[1:].split(maxsplit=1)[0]
-                sequences[seq_key] = ""
+                seq_key = line[1:].split(maxsplit=1)[0]
+                sequences[seq_key] = {'sequence': "", "name": line[1:]}
             else:
-                sequences[seq_key] += line
+                sequences[seq_key]['sequence'] += line
     return sequences
-
 
 def parse(sequences: dict):
     results = {}
@@ -51,7 +64,10 @@ def parse_nucleic(sequences: dict, nt_seqs: dict):
         sequence_info.append(sequence)
         sequence_info.append(hashlib.md5(sequence.encode()).hexdigest())
         sequence_info.append(len(sequence))
-        sequence_info.append(nt_seqs[NT_SEQ_ID_PATTERN.match(key).group(1)])
+        nt_seq_id = NT_SEQ_ID_PATTERN.match(key).group(1)
+        sequence_info.append(nt_seqs[nt_seq_id]['name'])
+        sequence_info.append(hashlib.md5(nt_seqs[nt_seq_id]['sequence'].encode()).hexdigest())
+        sequence_info.append(nt_seqs[nt_seq_id]['sequence'])
         results[acc] = sequence_info
     return results
 
@@ -69,7 +85,7 @@ def main():
 
     if args[2] == "true":
         is_fasta_check(args[1])
-        nt_seqs = get_sequences(args[1], nucleic=True)
+        nt_seqs = get_nucleic_seqs(args[1])
         sequence_parsed = parse_nucleic(sequences, nt_seqs)
     else:
         sequence_parsed = parse(sequences)

@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 
 
 NT_SEQ_ID_PATTERN = re.compile(r"^orf\d+\s+source=(.*)\s+coords=(\d+\.+\d+)\s+.+frame=(\d+)\s+desc=(.*)$")
+NT_KEY_PATTERN = re.compile(r"^(.*)_orf\d+$")
 MATCH_ELEMENT = {
     'ANTIFAM': 'hmmer3-match',
     'CDD': 'cdd-domain',
@@ -49,36 +50,54 @@ def build_xml_output_protein(seq_matches: dict, output_path: str, version: str):
 
 def build_xml_output_nucleic(seq_matches: dict, output_path: str, version: str):
     """Build the root of the XML when the input to IPS6 was Nuclei sequences"""
+    def _get_orf_keys(seq_matches: dict):
+        """Retrieve the keys from seq_matches for all ORFs for each input nucleic seq"""
+        current_nt = ""
+        nt_keys = {}
+        for key in seq_matches:
+            nt = NT_KEY_PATTERN.match(key).group(1)
+            if nt != current_nt:
+                current_nt = nt
+                nt_keys[nt] = [key]
+            else:
+                nt_keys[nt].append(key)
+        return nt_keys
+
     xml_output = os.path.join(output_path + '.xml')
     root = ET.Element("nucleotide-sequence-matches", xmlns="https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/schemas")
     root.set("interproscan-version", version)
 
-    for seq_id, data in seq_matches.items():
-        print(data)
+    nt_keys = _get_orf_keys(seq_matches)
+    for nt_seq_id, orf_ids in nt_keys.items():
+        # grab the data for the nucleic seq from the first ORF
+        data = seq_matches[orf_ids[0]]
         nt_seq_elem = ET.SubElement(root, "nucleotide-sequence")
         sequence_elem = ET.SubElement(nt_seq_elem, "sequence")
-        sequence_elem.text = data['sequences'][1]
-        sequence_elem.set("md5", data['sequences'][2])
+        sequence_elem.text = data['sequences'][-1]
+        sequence_elem.set("md5", data['sequences'][-2])
         xref_elem = ET.SubElement(nt_seq_elem, "xref")
-        xref_elem.set("id", data['sequences'][0].split(maxsplit=1)[0])  # drops the source sequence id prefix
-        xref_elem.set("name", data['sequences'][0])
+        xref_elem.set("id", data['sequences'][-3].split(maxsplit=1)[0])
+        xref_elem.set("name", data['sequences'][-3])
 
-        orf_elem = ET.SubElement(nt_seq_elem, "orf")
-        seq_data = NT_SEQ_ID_PATTERN.match(data['sequences'][0])
-        strand = "SENSE" if int(seq_data.group(3)) < 4 else "ANTISENSE"
-        coords = seq_data.group(2).split("..")
-        orf_elem.set("end", coords[1])
-        orf_elem.set("start", coords[0])
-        orf_elem.set("strand", strand)
+        # add data for each ORF. One ORF = One Protein elem
+        for seq_id in orf_ids:
+            data = seq_matches[seq_id]
+            orf_elem = ET.SubElement(nt_seq_elem, "orf")
+            seq_data = NT_SEQ_ID_PATTERN.match(data['sequences'][0])
+            strand = "SENSE" if int(seq_data.group(3)) < 4 else "ANTISENSE"
+            coords = seq_data.group(2).split("..")
+            orf_elem.set("end", coords[1])
+            orf_elem.set("start", coords[0])
+            orf_elem.set("strand", strand)
 
-        protein_elem = ET.SubElement(orf_elem, "protein")
-        sequence_elem = ET.SubElement(protein_elem, "sequence")
-        sequence_elem.text = data['sequences'][1]
-        sequence_elem.set("md5", data['sequences'][2])
-        xref_elem = ET.SubElement(protein_elem, "xref")
-        xref_elem.set("id", seq_id)
-        xref_elem.set("name", data['sequences'][0])
-        protein_elem = add_xml_output_matches(protein_elem, data)
+            protein_elem = ET.SubElement(orf_elem, "protein")
+            sequence_elem = ET.SubElement(protein_elem, "sequence")
+            sequence_elem.text = data['sequences'][1]
+            sequence_elem.set("md5", data['sequences'][2])
+            xref_elem = ET.SubElement(protein_elem, "xref")
+            xref_elem.set("id", f"orf{seq_id.split('_orf')[1]}")
+            xref_elem.set("name", data['sequences'][0])
+            protein_elem = add_xml_output_matches(protein_elem, data)
 
     tree = ET.ElementTree(root)
     ET.indent(tree, space="\t", level=0)
@@ -108,7 +127,8 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                 match_elem.set("graft-point", _check_null(match_data['graftPoint']))
 
             signature_elem = ET.SubElement(match_elem, "signature")
-            if match_data['member_db'].upper() not in ['SIGNALP', 'SUPERFAMILY']:  # member db that don't have sigs, so no accs etc.
+            if match_data['member_db'].upper() not in ['SIGNALP', 'SUPERFAMILY']:
+                # member db that don't have sigs, so no accs etc.
                 signature_elem.set("ac", match_data['accession'])
                 signature_elem.set("desc", match_data['name'])
                 signature_elem.set("name", match_data['name'])
