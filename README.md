@@ -1,11 +1,12 @@
 # InterProScan6
 
-[![nf-test](https://img.shields.io/badge/tested_with-nf--test-337ab7.svg)](https://github.com/askimed/nf-test) 
-![Unit tests](https://github.com/ebi-pf-team/interproscan6/actions/workflows/unit-tests.yml/badge.svg)  
+[![nf-test](https://img.shields.io/badge/tested_with-nf--test-337ab7.svg)](https://github.com/askimed/nf-test)
+![Unit tests](https://github.com/ebi-pf-team/interproscan6/actions/workflows/unit-tests.yml/badge.svg)
 [![codecov](https://codecov.io/gh/ebi-pf-team/interproscan6/graph/badge.svg?token=7MP9WCJHAQ)](https://codecov.io/gh/ebi-pf-team/interproscan6)
 [![Citation](https://github.com/ebi-pf-team/interproscan6/actions/workflows/citation.yml/badge.svg)](#citation)
 
-**!! UNDER DEVELOPMENT !!**
+> [!CAUTION]
+> InterProScan6 is currently under active development and is not yet stable enough for public release.
 
 [InterPro](http://www.ebi.ac.uk/interpro/) is a database which integrates together predictive information about proteins’ function from a number of partner resources, giving an overview of the families that a protein belongs to and the domains and sites it contains.
 
@@ -39,12 +40,14 @@ Users who have novel nucleotide or protein sequences that they wish to functiona
 
 1. Download member data files:
 
-    curl ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.67-99.0/alt/interproscan-data-5.67-99.0.tar.gz \
-        --output interproscan-data-5.67-99.0.tar.gz
-    tar -pxzf interproscan-data-5.67-99.0.tar.gz
-    mv interproscan-5.67-99.0/data .
-    rm interproscan-5.67-99.0 -rf
-    rm interproscan-data-5.67-99.0.tar.gz
+```sh
+curl ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.67-99.0/alt/interproscan-data-5.67-99.0.tar.gz \
+    --output interproscan-data-5.67-99.0.tar.gz
+tar -pxzf interproscan-data-5.67-99.0.tar.gz
+mv interproscan-5.67-99.0/data .
+rm interproscan-5.67-99.0 -rf
+rm interproscan-data-5.67-99.0.tar.gz
+```
 
 These commands download and store all member database data in the `data/` directory.
 
