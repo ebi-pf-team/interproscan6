@@ -164,7 +164,9 @@ The order the profiles are listed after `-profiles` does **not** matter.
 
 How to run:
 
-    nextflow run interproscan.nf --input <path to fasta file> -profile <container runtime, and executor>
+    nextflow run interproscan.nf \
+        --input <path to fasta file> \
+        -profile <container runtime, and executor>
 
 If running `InterProScan6` locally, you need only provide the corresponding container runtime 
 profile. Currently, Docker (profile: `docker`), Singularity (profile: `singularity`), and Apptainer 
