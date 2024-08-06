@@ -152,7 +152,7 @@ exit
 
 Keep the Apptainer image (interproscan6.sif) in the root of the InterProScan repository on the sytem you will use to run the pipeline. For example, you can create an interproscan6.sif on your local laptop, and upload it to the HPC you will use to run InterProScan.
 
-When running `InterProScan6` with Singularity include `apptainer` in the `-profiles` option. E.g.:
+When running `InterProScan6` with Apptainer include `apptainer` in the `-profiles` option. E.g.:
 ```bash
 nextflow run interproscan.nf --input my_seqs.fasta -profiles apptainer
 ```
