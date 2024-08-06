@@ -5,24 +5,24 @@ import xml.etree.ElementTree as ET
 
 NT_SEQ_ID_PATTERN = re.compile(r"^orf\d+\s+source=(.*)\s+coords=(\d+\.+\d+)\s+.+frame=(\d+)\s+desc=(.*)$")
 MATCH_ELEMENT = {
-    'SIGNALP': 'signal-peptide',
+    'ANTIFAM': 'hmmer3-match',
     'CDD': 'cdd-domain',
     'COILS': 'coils',
-    'MOBIDB': 'mobidb-match',
-    'ANTIFAM': 'hmmer3-match',
     'FUNFAM': 'hmmer3-match',
     'GENE3D': 'hmmer3-match',
     'HAMAP': 'hmmer3-match',
+    'MOBIDB': 'mobidb-match',
     'NCBIFAM': 'hmmer3-match',
     'PANTHER': 'hmmer3-match',
     'PFAM': 'hmmer3-match',
     'PIRSF': 'hmmer3-match',
-    'SFLD': 'hmmer3-match',
-    'SMART': 'hmmer2-match',
-    'SUPERFAMILY': 'hmmer3-match',
+    'PRINTS': 'fingerprints-match',
     'PROSITE_PATTERNS': 'profilescan-match',
     'PROSITE_PROFILES': 'profilesearch-match',  # changed from i5 which is also profilescan-match
-    'PRINTS': 'fingerprints-match',
+    'SFLD': 'hmmer3-match',
+    'SIGNALP': 'signal-peptide',
+    'SMART': 'hmmer2-match',
+    'SUPERFAMILY': 'hmmer3-match',
 }
 
 
@@ -209,7 +209,7 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                     location_elem.set("end", str(location["end"]))
                     location_elem.set("representative", str(location["representative"]))
 
-                elif match_data['member_db'].upper() in ["SUPERFAMILY", "MOBIDB", "COILS"]:
+                elif match_data['member_db'].upper() in ["COILS", "MOBIDB", "SUPERFAMILY"]:
                     location_elem = ET.SubElement(locations_elem, "analysis-location")
                     location_elem.set("start", str(location["start"]))
                     location_elem.set("end", str(location["end"]))
