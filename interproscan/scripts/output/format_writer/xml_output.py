@@ -16,6 +16,7 @@ MATCH_ELEMENT = {
     'NCBIFAM': 'hmmer3-match',
     'PANTHER': 'hmmer3-match',
     'PFAM': 'hmmer3-match',
+    'PHOBIUS': 'phobius-match',
     'PIRSF': 'hmmer3-match',
     'PRINTS': 'fingerprints-match',
     'PROSITE_PATTERNS': 'profilescan-match',
@@ -239,7 +240,7 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                     location_elem.set("end", str(location["end"]))
                     location_elem.set("representative", str(location["representative"]))
 
-                elif match_data['member_db'].upper() in ["COILS", "MOBIDB", "SUPERFAMILY"]:
+                elif match_data['member_db'].upper() in ["COILS", "MOBIDB", "PHOBIUS", "SUPERFAMILY"]:
                     location_elem = ET.SubElement(locations_elem, "analysis-location")
                     location_elem.set("start", str(location["start"]))
                     location_elem.set("end", str(location["end"]))
@@ -303,5 +304,11 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                         location_frag_elem.set("start", str(location_fragment["start"]))
                         location_frag_elem.set("end", str(location_fragment["end"]))
                         location_frag_elem.set("dc-status", str(location_fragment["dc-status"]))
+
+            if match_data['member_db'].upper() == 'PHOBIUS':
+                seqlen = data['sequences'][3]
+                for location in match_data['locations']:
+                    if seqlen == location['start'] + location['end'] -1:
+                        matches_elem.remove(match_elem)
 
     return protein_elem

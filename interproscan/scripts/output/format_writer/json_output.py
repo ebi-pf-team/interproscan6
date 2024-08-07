@@ -104,7 +104,7 @@ def get_matches(data: dict):
                 try:
                     description = match_data['description']
                 except KeyError:
-                    description = "-"
+                    description = None if match_data['member_db'].upper() == "SUPERFAMILY" else "-"
                 entry = None
                 if match_data['entry']:
                     if match_data['entry']['accession']:
@@ -124,19 +124,8 @@ def get_matches(data: dict):
                         except KeyError:
                             pass
 
-                if match_data['member_db'].upper() == "CDD":
-                    description = match_data['name']
-
-                if match_data['member_db'].upper() in ["GENE3D", "FUNFAM"]:
-                    accession = match_data['accession']  # GENE3D needs the info after ":" (e.g G3DSA:3.20.20.70)
-                else:
-                    accession = match_data['accession'].split(":")[0]  # drop subfamily
-
-                if match_data['member_db'].upper() == "SUPERFAMILY":
-                    description = None
-
-                if match_data['member_db'].upper() == "PRINTS":
-                    description = match_data["description"]
+                # drop the subfamily, else if gene3d/funfam then keep info after ":", e.g. G3DSA:3.20.20.70
+                accession = match_data['accession'].split(":")[0] if match_data['member_db'].upper() not in ["GENE3D", "FUNFAM"] else match_data['accession']
 
                 signature = {
                     "accession": accession,
@@ -149,7 +138,7 @@ def get_matches(data: dict):
                     "entry": entry
                 }
 
-                if match_data['member_db'].upper() in ["SUPERFAMILY", "MOBIDB"]:
+                if match_data['member_db'].upper() in ["MOBIDB", "SUPERFAMILY"]:
                     for location in match_data['locations']:
                         info = {
                             "start": int(location["start"]),
@@ -206,6 +195,9 @@ def get_matches(data: dict):
                                 info["evalue"] = float(location["evalue"])
                                 info["score"] = float(location["score"])
 
+                            elif match_data['member_db'].upper() == "COILS":
+                                pass  # data alreadt listed in into
+
                             elif match_data['member_db'].upper() == "HAMAP":
                                 info["score"] = float(location["score"])
                                 info["alignment"] = location["alignment"]
@@ -230,6 +222,11 @@ def get_matches(data: dict):
                                 info["hmmBounds"] = location["hmmBounds"]
                                 info["envelopeStart"] = int(location["envelopeStart"])
                                 info["envelopeEnd"] = int(location["envelopeEnd"])
+
+                            elif match_data['member_db'].upper() == "PRINTS":
+                                info["pvalue"] = float(location["pvalue"])
+                                info["score"] = float(location["score"])
+                                info["motifNumber"] = int(location["motifNumber"])
 
                             elif match_data['member_db'].upper() == "PROSITE_PROFILES":
                                 info["score"] = float(location["score"])
@@ -257,14 +254,6 @@ def get_matches(data: dict):
                                 info["hmmLength"] = int(location["hmmLength"])
                                 info["hmmBounds"] = location["hmmBounds"]
 
-                            elif match_data['member_db'].upper() == "COILS":
-                                pass
-
-                            elif match_data['member_db'].upper() == "PRINTS":
-                                info["pvalue"] = float(location["pvalue"])
-                                info["score"] = float(location["score"])
-                                info["motifNumber"] = int(location["motifNumber"])
-
                             else:
                                 info["evalue"] = float(location["evalue"])
                                 info["score"] = float(location["score"])
@@ -276,10 +265,7 @@ def get_matches(data: dict):
                                 info["envelopeEnd"] = int(location["envelopeEnd"])
 
                             if match_data['member_db'].upper() in ["SFLD", "CDD"]:
-                                try:
-                                    info["sites"] = location["sites"]
-                                except KeyError:
-                                    info["sites"] = []
+                                info["sites"] = location["sites"] if "sites" in location else []
                             try:
                                 info["location-fragments"] = location["location-fragments"]
                             except KeyError:
@@ -298,7 +284,11 @@ def get_matches(data: dict):
                             "locations": locations
                         }
 
-                        if match_data['member_db'].upper() not in ["CDD", "COILS","HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS", "PRINTS"]:
+                        if match_data['member_db'].upper() not in [
+                            "CDD", "COILS", "HAMAP",
+                            "PROSITE_PROFILES", "PROSITE_PATTERNS",
+                            "PRINTS"
+                        ]:
                             match["evalue"] = float(match_data['evalue'])
                             match["score"] = float(match_data['score'])
 
@@ -310,7 +300,7 @@ def get_matches(data: dict):
                         if match_data['member_db'].upper() == "SFLD":
                             match["scope"] = None
 
-                        if match_data['member_db'].upper() == "PANTHER":
+                        elif match_data['member_db'].upper() == "PANTHER":
                             match["name"] = match_data['entry']['family_name']
                             match['accession'] = match_data['accession']
                             match["goXRefs"] = entry["goXRefs"] if entry else []
