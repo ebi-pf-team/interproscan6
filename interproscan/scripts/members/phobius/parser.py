@@ -83,13 +83,20 @@ def parse(phobius_out: str, seqs_dict: dict) -> dict:
     seq_id = None
     with open(phobius_out) as ph_file:
         for line in ph_file:
+
             if line.startswith("ID"):
                 if seq_id:
-                    # drop previous protein if any location covers the seq entirely
+                    # drop a match if any location covers the seq entirely
                     # filtering step brought over from i5
-                    for location in matches[seq_id][]
+                    seq_len = seqs_dict[seq_id]
+                    for acc in matches[seq_id]:
+                        for location in matches[seq_id][acc]["locations"]:
+                            if seq_len == location["start"] + location["end"] - 1:
+                                del matches[seq_id][acc]
+
                 seq_id = line.strip("ID").split(maxsplit=1)[0]
                 matches[seq_id] = {}
+
             elif line.startswith("FT"):
                 ftmatch = FT_PATTERN.match(line)
                 if ftmatch:
