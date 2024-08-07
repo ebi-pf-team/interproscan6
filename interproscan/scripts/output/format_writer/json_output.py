@@ -195,7 +195,7 @@ def get_matches(data: dict):
                                 info["evalue"] = float(location["evalue"])
                                 info["score"] = float(location["score"])
 
-                            elif match_data['member_db'].upper() == "COILS":
+                            elif match_data['member_db'].upper() in ["COILS", "PHOBIUS"]:
                                 pass  # data alreadt listed in into
 
                             elif match_data['member_db'].upper() == "HAMAP":
@@ -285,7 +285,7 @@ def get_matches(data: dict):
                         }
 
                         if match_data['member_db'].upper() not in [
-                            "CDD", "COILS", "HAMAP",
+                            "CDD", "COILS", "HAMAP", "PHOBIUS",
                             "PROSITE_PROFILES", "PROSITE_PATTERNS",
                             "PRINTS"
                         ]:
@@ -314,5 +314,11 @@ def get_matches(data: dict):
                             match["graphscan"] = str(match_data["graphscan"])
 
                         matches.append(match)
+
+                        if match_data['member_db'].upper() == "PHOBIUS":
+                            seqlen = data['sequences'][3]
+                            for info in locations:
+                                if seqlen == info["start"] + info["end"] - 1:
+                                    matches.pop()
 
     return matches
