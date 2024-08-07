@@ -52,6 +52,16 @@ def main():
 
 
 def parse(phobius_out: str) -> dict:
+    """Example Phobius hit from the output file. Data is grouped by the query protein seq ID:
+     //
+    ID   sp|O16846|1AK_HETMG
+    FT   SIGNAL        1     22       
+    FT   DOMAIN        1      5       N-REGION.
+    FT   DOMAIN        6     17       H-REGION.
+    FT   DOMAIN       18     22       C-REGION.
+    FT   DOMAIN       23     74       NON CYTOPLASMIC.
+    //
+    """
     matches = {}
     version = phobius_out.split("._.")[0]
     with open(phobius_out) as ph_file:
