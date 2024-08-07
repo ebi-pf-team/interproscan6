@@ -4,8 +4,8 @@ import sys
 
 from format_writer.tsv_output import tsv_pro_output
 from format_writer.tsv_output import tsv_output
-from format_writer.json_output import json_output
-from format_writer.xml_output import build_xml_output_protein, build_xml_output_nucleic
+from format_writer.json_output import build_json_output_nucleic, build_json_output_protein
+from format_writer.xml_output import build_xml_output_nucleic, build_xml_output_protein
 
 
 NT_PATTERN = re.compile(r"^orf\d+\s+source=(.*)\s+coords=.*$")
@@ -52,7 +52,10 @@ def write_results(
     if "TSV-PRO" in output_format:
         tsv_pro_output(seq_matches, output_path)
     if "JSON" in output_format:
-        json_output(seq_matches, output_path, version)
+        if nucleic:
+            build_json_output_nucleic(seq_matches, output_path, version)
+        else:
+            build_json_output_protein(seq_matches, output_path, version)
     if "XML" in output_format:
         if nucleic:
             build_xml_output_nucleic(seq_matches, output_path, version)
