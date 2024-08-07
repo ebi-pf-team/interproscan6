@@ -46,12 +46,28 @@ FEATUREDICT = {
 
 
 def main():
+    # args 0 = fasta file parsed by phobius (to get seq lens)
+    # args 1 = output form phobius
     args = sys.argv[1:]
-    parsed_results = parse(args[0])
+    load_seqs = args[0]
+    parsed_results = parse(args[0], load_seqs)
     print(json.dumps(parsed_results, indent=2))
 
 
-def parse(phobius_out: str) -> dict:
+def load_seqs(fasta: str) -> dict:
+    seqs = {}
+    current_seq = ""
+    with open(fasta, "r") as fh:
+        for line in fh:
+            if line.startswith(">"):
+                current_seq = line.strip(">")
+                seqs[current_seq] = 0
+            else:
+                seqs[current_seq] += len(line.strip())
+    return seqs
+
+
+def parse(phobius_out: str, seqs_dict: dict) -> dict:
     """Example Phobius hit from the output file. Data is grouped by the query protein seq ID:
      //
     ID   sp|O16846|1AK_HETMG
@@ -64,13 +80,17 @@ def parse(phobius_out: str) -> dict:
     """
     matches = {}
     version = phobius_out.split("._.")[0]
+    seq_id = None
     with open(phobius_out) as ph_file:
         for line in ph_file:
             if line.startswith("ID"):
+                if seq_id:
+                    # drop previous protein if any location covers the seq entirely
+                    # filtering step brought over from i5
+                    for location in matches[seq_id][]
                 seq_id = line.strip("ID").split(maxsplit=1)[0]
                 matches[seq_id] = {}
             elif line.startswith("FT"):
-
                 ftmatch = FT_PATTERN.match(line)
                 if ftmatch:
                     feature = (ftmatch.group(2), ftmatch.group(5) if ftmatch.group(6) else None)
@@ -97,9 +117,10 @@ def parse(phobius_out: str) -> dict:
                         "dc-status": "CONTINUOUS",
                     }],
                 }
+
                 if acc not in matches[seq_id]:
                     matches[seq_id][acc] = match
-                    matches[seq_id][acc]["locations"].append(location)
+                matches[seq_id][acc]["locations"].append(location)
 
     return matches
 
