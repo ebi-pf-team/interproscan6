@@ -67,6 +67,12 @@ def parse(signalp_out: str, signalp_cs: str, threshold: float, signalp_version: 
                     }
                 }
 
+    matches = get_cleavage_site(signalp_cs, sequence_matches, threshold)
+
+    return matches
+
+
+def get_cleavage_site(signalp_cs: str, matches: dict, threshold: float) -> dict:
     acc_list = []
     with open(signalp_cs, "r") as fh:
         for line in fh:
@@ -88,15 +94,15 @@ def parse(signalp_out: str, signalp_cs: str, threshold: float, signalp_version: 
                     acc_list.append(acc)
 
             if cs_start:
-                for location in sequence_matches[acc]["signal_peptide"]["locations"]:
+                for location in matches[acc]["signal_peptide"]["locations"]:
                     location["cleavage_start"] = cs_start
                     location["cleavage_end"] = cs_end
 
     # checks there is only one cleavage prediction per protein
-    if len(acc_list) > len(sequence_matches):
+    if len(acc_list) > len(matches):
         raise Exception("Protein has more than one SignalP match")
 
-    return sequence_matches
+    return matches
 
 
 if __name__ == "__main__":
