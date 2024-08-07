@@ -13,7 +13,7 @@ def main():
     3. SignalP p-value threshold
     4. SignalP version
     5. SignalP organism
-"""
+    """
     args = sys.argv[1:]
     parsed_results = parse(args[0], args[1], float(args[2]), args[3], args[4])
     print(json.dumps(parsed_results, indent=2))
