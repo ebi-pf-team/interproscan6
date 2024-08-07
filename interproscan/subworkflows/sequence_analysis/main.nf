@@ -63,6 +63,10 @@ include {
     PRINTS_PARSER;
 } from "$projectDir/interproscan/modules/prints/main"
 include {
+    PHOBIUS_RUNNER;
+    PHOBIUS_PARSER;
+} from "$projectDir/interproscan/modules/phobius/main"
+include {
     PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER
 } from "$projectDir/interproscan/modules/prosite/pfsearch/runner/main"
 include {
@@ -253,6 +257,11 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".switches
             ]
 
+        phobius: member == "phobius"
+            return [
+                params.members."${member}".release
+            ]
+
         prints: member == 'prints'
             return [
                 params.members.prints.data.hierarchy,
@@ -440,6 +449,11 @@ workflow SEQUENCE_ANALYSIS {
     MOBIDB_RUNNER(runner_mobidb_params)
     MOBIDB_PARSER(MOBIDB_RUNNER.out)
 
+    // PHOBIUS
+    runner_phobius_params = fasta.combine(member_params.phobius)
+    PHOBIUS_RUNNER(runner_phobius_params)
+    PHOBIUS_PARSER(PHOBIUS_RUNNER.out)
+
     // PRINTS
     runner_prints_params = fasta.combine(member_params.prints)
     PRINTS_RUNNER(runner_prints_params)
@@ -477,6 +491,7 @@ workflow SEQUENCE_ANALYSIS {
             CDD_PARSER.out,
             COILS_PARSER.out,
             MOBIDB_PARSER.out,
+            PHOBIUS_PARSER.out,
             PRINTS_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
@@ -498,6 +513,7 @@ workflow SEQUENCE_ANALYSIS {
             CDD_PARSER.out,
             COILS_PARSER.out,
             MOBIDB_PARSER.out,
+            PHOBIUS_PARSER.out,
             PRINTS_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,

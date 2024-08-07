@@ -183,7 +183,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["hmmBounds"] = location["hmmBounds"]
 
 
-                                elif match_data['member_db'].upper() == "COILS":
+                                elif match_data['member_db'].upper() in ["COILS", "PHOBIUS"]:
                                     pass
 
                                 elif match_data['member_db'].upper() == "PRINTS":
@@ -224,7 +224,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 "locations": locations
                             }
 
-                            if match_data['member_db'].upper() not in ["CDD", "COILS","HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS", "PRINTS"]:
+                            if match_data['member_db'].upper() not in ["CDD", "COILS","HAMAP", "PHOBIUS","PROSITE_PROFILES", "PROSITE_PATTERNS", "PRINTS"]:
                                 match["evalue"] = float(match_data['evalue'])
                                 match["score"] = float(match_data['score'])
 
@@ -250,6 +250,12 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 match["graphscan"] = str(match_data["graphscan"])
 
                             matches.append(match)
+
+                            if match_data['member_db'].upper() == "PHOBIUS":
+                                seqlen = data['sequences'][3]
+                                for info in locations:
+                                    if seqlen == info["start"] + info["end"] - 1:
+                                        matches.pop()
 
         result = {
             "sequence": sequence,
