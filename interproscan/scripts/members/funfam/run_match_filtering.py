@@ -154,7 +154,6 @@ def filter_matches(
                         funfam_domain = domain  # DomainHit instance
 
                 if not ips6_location:
-                    print("2", protein_id, signature_acc)
                     continue
 
                 if protein_id not in processed_ips6:
