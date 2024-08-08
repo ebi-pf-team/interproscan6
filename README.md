@@ -361,35 +361,43 @@ signalp {
 }
 ```
 
-**Note:** _`InterProScan6` only supports the implementation of one `SignalP` mode at a time. A separate `InterProScan6` but be completed for each mode of interest, in order ro apply multiple modes to the same dataset_.
+**Note:** _`InterProScan6` only supports the implementation of one `SignalP` mode at a time. A separate `InterProScan6` but be completed for each mode of interest, in order to apply multiple modes to the same dataset_.
 
 ### Converting from CPU to GPU, and back again
 
-The model weights that come with the `SignalP` installation by default run on your CPU.
-If you have a GPU available, you can convert your installation to use the GPU instead. 
-
+By default, `SignalP` runs on your CPU. If you have a GPU available, you can convert the `SignalP` model weights so that your installation will use GPU instead.
+You will need to install `SignalP` in order to convert to GPU models.
 
 1. (Optional) Remove any previously built SignalP images
 ```bash
 docker image rm signalp6:latest
 ```
-3. Copy the docker file available in the `./docker_files/signalp_gpu/` directory to your local `SignalP6` directory
+2. Install `SignalP` 
 ```bash
-# with the terminal point at the root of this repo
-cp docker_files/signalp_gpu/Dockerfile <SIGNALP-DIR>/Dockerfile
+cd <SIGNALP_DIR>
+pip install .
 ```
-4. Convert the `SignalP` installation to GPU by building a building a docker image using the signalp_gpu docker file. This docker file includes a GPU conversion step. 
+3. Convert the models to GPU
+```bash
+signalp6_convert_models gpu /path/to/models
+```
+4. Build a docker image
 ```bash
 # with the terminal pointed at your local signalp dir
-docker build -t signalp6 .
-``` 
-6. Update the `nextflow.config` configuration to run with GPU acceleration for SignalP
+docker image build -t signalp6 .
 ```
-process {
-    withName: SIGNALP_RUNNER { containerOptions = '--gpus all' }
-}
+5. To run `SignalP` with GPU with `InterProScan6` use the flag `--signalp_gpu`. 
+```bash
+nextflow run interproscan.nf --input <fasta file> --applications signalp --signalp_gpu
 ```
-To convert back to CPU, remove the SignalP image, rebuild with the `./docker_files/signalp/` docker file and undo changes made to `nextflow.config`.
+Alternatively, if you do not always want to use the flag to run `SignalP`, you can update the `nextflow.config` file from "signalp_gpu = false" to "signalp_gpu = true".
+6. If you wish to convert back to CPU, run the following commands:
+```bash
+docker image rm signalp6:latest
+signalp6_convert_models cpu /path/to/models
+# with the terminal pointed at your local signalp dir
+docker image build -t signalp6 .
+```
 
 ## `Phobius`
 ### Adding `Phobius` (version 1.01) to `InterProScan6`
