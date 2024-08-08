@@ -18,13 +18,8 @@ def main():
     print(json.dumps(parsed_results, indent=2))
 
 
-def parse(
-    signalp_out: str,
-    signalp_cs: str,
-    threshold: float,
-    signalp_version: str,
-    signalp_db=str,
-):
+def parse(signalp_out: str, signalp_cs: str, threshold: float,
+          signalp_version: str, signalp_db=str):
     """Parse signalP output into JSON file standardised for InterProScan
 
     :param signalp_out: path to signalP signal peptide location output file
@@ -64,15 +59,13 @@ def parse(
                     "signal_peptide": {
                         "member_db": member_db,
                         "version": signalp_version,
-                        "locations": [
-                            {
-                                "start": start,
-                                "end": end,
-                                "pvalue": pvalue,
-                                "cleavage_start": "",
-                                "cleavage_end": "",
-                            }
-                        ],
+                        "locations": [{
+                            "start": start,
+                            "end": end,
+                            "pvalue": pvalue,
+                            "cleavage_start": "",
+                            "cleavage_end": ""
+                        }]
                     }
                 }
 
