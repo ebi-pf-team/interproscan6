@@ -50,7 +50,7 @@ def build_xml_output_protein(seq_matches: dict, output_path: str, version: str):
 
 
 def build_xml_output_nucleic(seq_matches: dict, output_path: str, version: str):
-    """Build the root of the XML when the input to IPS6 was Nuclei sequences"""
+    """Build the root of the XML when the input to IPS6 is nucleic sequences"""
     def _get_orf_keys(seq_matches: dict):
         """Retrieve the keys from seq_matches for all ORFs for each input nucleic seq"""
         current_nt = ""
