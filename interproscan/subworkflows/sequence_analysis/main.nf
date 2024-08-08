@@ -322,7 +322,11 @@ workflow SEQUENCE_ANALYSIS {
     // FunFam (+ gene3D + cath-resolve-hits + assing-cath-superfamilies)
     // split into a channel so Nextflow can automatically manage the parallel execution of HmmSearch
     runner_funfam_params = fasta.combine(member_params.gene3d_funfam)
-    FUNFAM_HMMER_RUNNER(runner_funfam_params, GENE3D_FILTER_MATCHES.out[1], applications)
+    FUNFAM_HMMER_RUNNER(
+        runner_funfam_params,              // hmmer runner input tuple
+        GENE3D_FILTER_MATCHES.out[1],      // cath_superfamilies txt file
+        applications                       // str listing selected applications
+    )
     FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out[0])  // hmmer.out pathS - one per cath gene3d superfam
     FUNFAM_CATH_RESOLVE_HITS(FUNFAM_HMMER_RUNNER.out)
     FUNFAM_FILTER_MATCHES(
