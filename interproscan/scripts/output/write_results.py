@@ -37,10 +37,6 @@ def write_results(
     else:
         # map ORF<id> to the original nucleic seq
         for key, value in all_sequences.items():
-            # key == orf<id>
-            # value eg. == ["orf1 source=Bob coords=143..286 length=48
-            # frame=2 desc=", "AAARLRRALARWALKNARPKLRINRRARRWARACCWKNIPPTCCCARL",
-            # "f721ded069c8a767dac17d73641c938d", 48]
             result_id = f"{NT_PATTERN.match(value[0]).group(1)}_{key}"
             seq_matches[result_id] = {
                 'sequences': value,
