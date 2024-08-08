@@ -29,7 +29,7 @@ MATCH_ELEMENT = {
 
 
 def build_xml_output_protein(seq_matches: dict, output_path: str, version: str):
-    """Build the root of the XML when the input to IPS6 was Protein sequences"""
+    """Build the root of the XML when the input to IPS6 is Protein sequences"""
     xml_output = os.path.join(output_path + '.xml')
     root = ET.Element("protein-matches", xmlns="https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/schemas")
     root.set("interproscan-version", version)
