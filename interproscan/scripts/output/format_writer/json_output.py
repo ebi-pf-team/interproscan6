@@ -138,9 +138,11 @@ def get_matches(data: dict):
                     "entry": entry
                 }
 
-                if match_data['member_db'].upper() in ["MOBIDB", "SUPERFAMILY"]:
+                # For these member dbs we write each domain location as a separate
+                # 'signature' match in the final results
+                if match_data['member_db'].upper() in ["MOBIDB", "PHOBIUS", "SUPERFAMILY"]:
                     for location in match_data['locations']:
-                        info = {
+                        location_info = {
                             "start": int(location["start"]),
                             "end": int(location["end"]),
                             "representative": BOOLEAN_MAP.get(location["representative"].lower(), False),
@@ -150,23 +152,30 @@ def get_matches(data: dict):
                                 "dc-status": "CONTINUOUS"
                             }]
                         }
-                        if match_data['member_db'].upper() == "SUPERFAMILY":
-                            info['evalue'] = float(location['evalue'])
-                            try:
-                                info["hmmLength"] = match_data['hmm_length']
-                            except KeyError:
-                                info["hmmLength"] = location['hmmLength']
+                        if match_data['member_db'].upper() == "PHOBIUS":
                             match = {
                                 "signature": signature,
-                                "locations": [info],
+                                "locations": [location_info],
+                                "model-ac": accession
+                            }
+
+                        elif match_data['member_db'].upper() == "SUPERFAMILY":
+                            location_info['evalue'] = float(location['evalue'])
+                            try:
+                                location_info["hmmLength"] = match_data['hmm_length']
+                            except KeyError:
+                                location_info["hmmLength"] = location['hmmLength']
+                            match = {
+                                "signature": signature,
+                                "locations": [location_info],
                                 "evalue": float(match_data["evalue"]),
                                 "model-ac": match_data.get('model-ac', match_data['accession'])
                             }
                         else:
-                            info["sequence-feature"] = location["sequence-feature"]
+                            location_info["sequence-feature"] = location["sequence-feature"]
                             match = {
                                 "signature": signature,
-                                "locations": [info]
+                                "locations": [location_info]
                             }
 
                         matches.append(match)
