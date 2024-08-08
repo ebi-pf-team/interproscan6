@@ -54,7 +54,14 @@ FEATUREDICT = {
 
 
 class PhobiusHit:
-    """Represent protein and associated hits in the Phobius output file"""
+    """Represent protein and associated hits in the Phobius output file.
+
+    We store or like domain hits (signal peptide, transmembrane and 
+    (non-)cytoplasmic domain)) together as one hit with multiple locations.
+    In the final output each domain hit is written as a separate
+    'signature' hit - this approach ensures all locations are
+    retrieved. Each domain type can be found in multiple locations.
+    """
     def __init__(self):
         self.seq_id = None  # query protein seq id
         self.signal_peptides = {}  # 4 potential keys: SIGNAL_PEPTIDE, SIGNAL_PEPTIDE_N/H/C_REGION
@@ -97,20 +104,18 @@ class PhobiusHit:
             end = int(ftmatch.group(3))
         else:
             raise Exception("Unrecognised line formatting:", line)
-        acc, name, desc = FEATUREDICT[feature].values()
 
+        acc, name, desc = FEATUREDICT[feature].values()
         if acc.startswith("SIGNAL_PEPTIDE"):
             self.add_domain(
                 self.signal_peptides,
                 acc, name, desc, version, start, end
             )
-
         elif acc == "TRANSMEMBRANE":
             self.add_domain(
                 self.transmembrane_domains,
                 acc, name, desc, version, start, end
             )
-
         else: 
             self.add_domain(
                 self.other_domains,
@@ -159,7 +164,7 @@ def parse(phobius_out: str, seqs_dict: dict) -> dict:
 
             if line.startswith("ID"):
                 if protein.seq_id:
-                    # Only store details of proteins with at least on signal peptide or 
+                    # Only store details of proteins with at least one signal peptide or 
                     # transmembrane domain region.
                     # Proteins with only "CYTOPLASMIC" or "NON-CYTOPLASMIC" domains
                     # are junk according to the Phobius domcumentation
