@@ -30,7 +30,8 @@ workflow {
         params.applications,
         params.formats,
         params.version,
-        params.ipsc_version
+        params.ipsc_version,
+        params.signalp_gpu
     )
 
     formats = params.formats.toLowerCase()
