@@ -3,12 +3,27 @@ import json
 import sys
 
 ILLEGAL_CHARAS = {
-    "antifam": ['-'], "cdd": [],"coils": [], "hamap":['-','*','_'],
-    "panther":['-','*'],"pfam":['-','*'],"pirsf":['-'],
-    "prints":['-','.','_'],"prosite_patterns":[],"prosite_profiles":['-','.','_','*'],"sfld":['-','.','_'],
-    "smart":[],"superfamily":['-'],
-    "signalp":[],"phobius":['-','*','.','_']
+    "antifam": ["-"],
+    "cdd": [],
+    "coils": [],
+    "funfam": ["-", "*", "_", "."],
+    "gene3d": ["-", "*", "_", "."],
+    "hamap": ["-", "*", "_"],
+    "mobidb": ["-", ".", "_", "*"],
+    "ncbifam": ["-", ".", "_", "*"],
+    "panther": ["-", "*"],
+    "pfam": ["-", "*"],
+    "pirsf": ["-"],
+    "prints": ["-", ".", "_"],
+    "prosite_patterns": [],
+    "prosite_profiles": ["-", ".", "_", "*"],
+    "sfld": ["-", ".", "_"],
+    "smart": [],
+    "superfamily": ["-"],
+    "signalp": [],
+    "phobius": ["-", "*", ".", "_"],
 }
+
 
 def is_fasta_check(fasta_file: str):
     with open(fasta_file, "r") as f:
@@ -37,7 +52,6 @@ def check_sequence(sequences: dict, applications: str):
     for application in applications:
         for chara in ILLEGAL_CHARAS[application]:
             illegal_char_list.add(chara)
-
 
     for key, sequence in sequences.items():
         if ">" in sequence:
