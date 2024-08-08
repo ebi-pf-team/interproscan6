@@ -303,10 +303,4 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                         location_frag_elem.set("end", str(location_fragment["end"]))
                         location_frag_elem.set("dc-status", str(location_fragment["dc-status"]))
 
-            if match_data['member_db'].upper() == 'PHOBIUS':
-                seqlen = data['sequences'][3]
-                for location in match_data['locations']:
-                    if seqlen == location['start'] + location['end'] -1:
-                        matches_elem.remove(match_elem)
-
     return protein_elem

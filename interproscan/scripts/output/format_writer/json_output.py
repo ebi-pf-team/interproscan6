@@ -315,10 +315,4 @@ def get_matches(data: dict):
 
                         matches.append(match)
 
-                        if match_data['member_db'].upper() == "PHOBIUS":
-                            seqlen = data['sequences'][3]
-                            for info in locations:
-                                if seqlen == info["start"] + info["end"] - 1:
-                                    matches.pop()
-
     return matches
