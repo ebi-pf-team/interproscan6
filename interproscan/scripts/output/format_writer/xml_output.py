@@ -124,6 +124,23 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
         for match_key, match_data in data['matches'].items():
             match_elem = ET.SubElement(matches_elem, MATCH_ELEMENT[match_data['member_db'].upper()])
 
+            # Write each signal peptide/transM domain/(non-)cytoplasmic location as
+            # a separate phobius-match
+            if match_data['member_db'].upper() == "PHOBIUS":
+                for location in match_data["locations"]:
+                    signature_elem = ET.SubElement(match_elem, "signature")
+                    signature_elem.set("ac", match_data['accession'])
+                    signature_elem.set("desc", match_data['name'])
+                    signature_elem.set("name", match_data['name'])
+                    model_ac_elem = ET.SubElement(match_elem, "model-ac")
+                    model_ac_elem.text = match_key
+                    locations_elem = ET.SubElement(match_elem, "locations")
+                    location_elem = ET.SubElement(locations_elem, "analysis-location")
+                    location_elem.set("start", str(location["start"]))
+                    location_elem.set("end", str(location["end"]))
+                    location_elem.set("representative", str(location["representative"]))
+                continue
+
             try:
                 match_elem.set("evalue", str(match_data['evalue']).upper())
                 match_elem.set("score", str(match_data["score"]))
@@ -238,7 +255,7 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                     location_elem.set("end", str(location["end"]))
                     location_elem.set("representative", str(location["representative"]))
 
-                elif match_data['member_db'].upper() in ["COILS", "MOBIDB", "PHOBIUS", "SUPERFAMILY"]:
+                elif match_data['member_db'].upper() in ["COILS", "MOBIDB", "SUPERFAMILY"]:
                     location_elem = ET.SubElement(locations_elem, "analysis-location")
                     location_elem.set("start", str(location["start"]))
                     location_elem.set("end", str(location["end"]))
