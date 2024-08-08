@@ -144,9 +144,9 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                     location_elem.set("representative", str(location["representative"]))
                     location_frags_elem = ET.SubElement(location_elem, "location-fragments")
                     location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
-                    location_frag_elem.set("start", str(location["start"]))
-                    location_frag_elem.set("end", str(location["end"]))
-                    location_frag_elem.set("dc-status", str(location["dc-status"]))
+                    location_frag_elem.set("start", str(location["location-fragments"][0]["start"]))
+                    location_frag_elem.set("end", str(location["location-fragments"][0]["end"]))
+                    location_frag_elem.set("dc-status", str(location["location-fragments"][0]["dc-status"]))
                 continue
 
             try:
