@@ -18,8 +18,13 @@ def main():
     print(json.dumps(parsed_results, indent=2))
 
 
-def parse(signalp_out: str, signalp_cs: str, threshold: float,
-          signalp_version: str, signalp_db=str):
+def parse(
+    signalp_out: str,
+    signalp_cs: str,
+    threshold: float,
+    signalp_version: str,
+    signalp_db=str,
+):
     """Parse signalP output into JSON file standardised for InterProScan
 
     :param signalp_out: path to signalP signal peptide location output file
@@ -52,22 +57,22 @@ def parse(signalp_out: str, signalp_cs: str, threshold: float,
                     pvalue = float(predict_pvalue)
             # checks if there is only one signal peptide prediction per protein
             if acc in sequence_matches:
-                raise Exception(
-                    f"Protein {acc} has more than one SignalP match")
+                raise Exception(f"Protein {acc} has more than one SignalP match")
             # reports signal peptide start and end location
             if start:
                 sequence_matches[acc] = {
                     "signal_peptide": {
                         "member_db": member_db,
                         "version": signalp_version,
-                        "locations": [{
-                            "start": start,
-                            "end": end,
-                            "pvalue": pvalue,
-                            "cleavage_start": "",
-                            "cleavage_end": ""
-
-                        }]
+                        "locations": [
+                            {
+                                "start": start,
+                                "end": end,
+                                "pvalue": pvalue,
+                                "cleavage_start": "",
+                                "cleavage_end": "",
+                            }
+                        ],
                     }
                 }
 
@@ -76,8 +81,7 @@ def parse(signalp_out: str, signalp_cs: str, threshold: float,
     return matches
 
 
-def get_cleavage_site(signalp_cs: str, seq_matches: dict,
-                      threshold: float) -> dict:
+def get_cleavage_site(signalp_cs: str, seq_matches: dict, threshold: float):
     acc_list = []
     with open(signalp_cs, "r") as fh:
         for line in fh:
@@ -101,8 +105,7 @@ def get_cleavage_site(signalp_cs: str, seq_matches: dict,
 
             if cs_start and acc in seq_matches:
                 acc_list.append(acc)
-                for location in seq_matches[acc]["signal_peptide"][
-                    "locations"]:
+                for location in seq_matches[acc]["signal_peptide"]["locations"]:
                     location["cleavage_start"] = cs_start
                     location["cleavage_end"] = cs_end
 
