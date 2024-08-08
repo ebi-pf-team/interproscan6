@@ -117,9 +117,7 @@ def build_xml_output_nucleic(seq_matches: dict, output_path: str, version: str):
 def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
     """Add the matches to the XML tree"""
     def _check_null(value, acc=False):
-        if acc:
-            return str(value) if str(value).lower() not in ["none", "null", ""] else "-"
-        return str(value) if str(value).lower() not in ["none", "null", ""] else ""
+        return str(value) if str(value).lower() not in ["none", "null", ""] else "-" if acc else ""
 
     matches_elem = ET.SubElement(protein_elem, "matches")
     if 'matches' in data and data['matches']:
