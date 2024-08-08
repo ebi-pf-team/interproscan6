@@ -122,12 +122,12 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
     matches_elem = ET.SubElement(protein_elem, "matches")
     if 'matches' in data and data['matches']:
         for match_key, match_data in data['matches'].items():
-            match_elem = ET.SubElement(matches_elem, MATCH_ELEMENT[match_data['member_db'].upper()])
 
             # Write each signal peptide/transM domain/(non-)cytoplasmic location as
             # a separate phobius-match
             if match_data['member_db'].upper() == "PHOBIUS":
                 for location in match_data["locations"]:
+                    match_elem = ET.SubElement(matches_elem, MATCH_ELEMENT[match_data['member_db'].upper()])
                     signature_elem = ET.SubElement(match_elem, "signature")
                     signature_elem.set("ac", match_data['accession'])
                     signature_elem.set("desc", match_data['description'])
@@ -148,6 +148,8 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                     location_frag_elem.set("end", str(location["location-fragments"][0]["end"]))
                     location_frag_elem.set("dc-status", str(location["location-fragments"][0]["dc-status"]))
                 continue
+
+            match_elem = ET.SubElement(matches_elem, MATCH_ELEMENT[match_data['member_db'].upper()])
 
             try:
                 match_elem.set("evalue", str(match_data['evalue']).upper())
