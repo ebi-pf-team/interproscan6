@@ -69,7 +69,7 @@ def load_seqs(fasta: str) -> dict:
 
 def parse(phobius_out: str, seqs_dict: dict) -> dict:
     """Example Phobius hit from the output file. Data is grouped by the query protein seq ID:
-     //
+    //
     ID   sp|O16846|1AK_HETMG
     FT   SIGNAL        1     22       
     FT   DOMAIN        1      5       N-REGION.
