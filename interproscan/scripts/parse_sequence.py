@@ -2,6 +2,13 @@ import hashlib
 import json
 import sys
 
+ILLEGAL_CHARAS = {
+    "antifam": ['-'], "cdd": [],"coils": [], "hamap":['-','*','_'],
+    "panther":['-','*'],"pfam":['-','*'],"pirsf":['-'],
+    "prints":['-','.','_'],"prosite_patterns":[],"prosite_profiles":['-','.','_','*'],"sfld":['-','.','_'],
+    "smart":[],"superfamily":['-'],
+    "signalp":[],"phobius":['-','*','.','_']
+}
 
 def is_fasta_check(fasta_file: str):
     with open(fasta_file, "r") as f:
@@ -24,6 +31,24 @@ def get_sequences(fasta_file: str) -> dict:
     return sequences
 
 
+def check_sequence(sequences: dict, applications: str):
+    illegal_char_list = set()
+    applications = applications.split(",")
+    for application in applications:
+        for chara in ILLEGAL_CHARAS[application]:
+            illegal_char_list.add(chara)
+
+
+    for key, sequence in sequences.items():
+        if ">" in sequence:
+            raise ValueError(f"{key} contains illegal character '>'")
+        for i in illegal_char_list:
+            if i in sequence:
+                raise ValueError(f"{key} contains illegal character {i}")
+
+    return sequences
+
+
 def parse(sequences: dict):
     results = {}
     for key, sequence in sequences.items():
@@ -41,6 +66,7 @@ def main():
     args = sys.argv[1:]
     is_fasta_check(args[0])
     sequences = get_sequences(args[0])
+    sequences = check_sequence(sequences, args[1])
     sequence_parsed = parse(sequences)
     print(json.dumps(sequence_parsed))
 

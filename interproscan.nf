@@ -50,10 +50,10 @@ workflow {
         GET_ORFS(ch_fasta, params.translate.strand, params.translate.methionine, params.translate.min_len, params.translate.genetic_code)
         GET_ORFS.out.splitFasta( by: params.batchsize, file: true )
         .set { orfs_fasta }
-        PARSE_SEQUENCE(orfs_fasta)
+        PARSE_SEQUENCE(orfs_fasta, applications)
     }
     else {
-        PARSE_SEQUENCE(ch_fasta)
+        PARSE_SEQUENCE(ch_fasta, applications)
     }
 
     sequences_to_analyse = null
