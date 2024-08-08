@@ -42,11 +42,13 @@ process FUNFAM_HMMER_RUNNER {
 
     There will be one hmmer.out and one hmmer.dtbl file per FunFam hmm profile
     used in the search.
+
+    This process will only run in at least one Cath superfamily is specified.
     */
     label 'hmmer_runner'
 
     when:
-        "${applications}".contains('funfam')
+        cath_superfamilies.size() > 0 && "${applications}".contains('funfam')
 
     input:
         tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
