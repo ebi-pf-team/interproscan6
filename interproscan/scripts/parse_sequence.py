@@ -8,7 +8,7 @@ ILLEGAL_CHARAS = {
     "coils": [],
     "funfam": ["-", "*", "_", "."],
     "gene3d": ["-", "*", "_", "."],
-    "hamap": ["-", "*", "_"],
+    "hamap": ["-", "*", "_", "b", "o","x","u","z","j"],
     "mobidb": ["-", ".", "_", "*"],
     "ncbifam": ["-", ".", "_", "*"],
     "panther": ["-", "*"],
@@ -21,7 +21,7 @@ ILLEGAL_CHARAS = {
     "smart": [],
     "superfamily": ["-"],
     "signalp": [],
-    "phobius": ["-", "*", ".", "_"],
+    "phobius": ["-", "*", ".", "_", "o","x","u","z","j"],
 }
 
 
@@ -52,13 +52,17 @@ def check_sequence(sequences: dict, applications: str):
     for application in applications:
         for chara in ILLEGAL_CHARAS[application]:
             illegal_char_list.add(chara)
-
+    app_list = []
     for key, sequence in sequences.items():
         if ">" in sequence:
             raise ValueError(f"{key} contains illegal character '>'")
         for i in illegal_char_list:
             if i in sequence:
-                raise ValueError(f"{key} contains illegal character {i}")
+                for application in applications:
+                    if i in ILLEGAL_CHARAS[application]:
+                        app_list.append(application)
+                raise ValueError(f"{key} contains illegal character {i}: cannot be used with {app_list}")
+
 
     return sequences
 
