@@ -79,9 +79,8 @@ def matches2rules(matches_path: str, rules_hash: dict):
                         'sites': rule_sites,
                         "representative": '',
                         "hmmLength": location["hmmLength"],
-                        "envelopeStart": 1,  # always 1 on i5 but we have location["envelopeStart"]
-                        "envelopeEnd": 2,  # always 2 on i5 but we have location["envelopeEnd"]
-                        'scope': rule['Scope'],
+                        "envelopeStart": location["envelopeStart"],
+                        "envelopeEnd": location["envelopeEnd"]
                     }
                     domHits.append(domHit)
             domain["locations"] = domHits
