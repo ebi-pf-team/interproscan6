@@ -137,15 +137,16 @@ def parse(out_file: str) -> dict:
                                 current_domain = domain_alignment_matcher.group(1)
                         if current_domain and current_sequence:
                             alignment_sequence_pattern = ALIGNMENT_SEQUENCE_PATTERN.match(line)
-                            hmmalign_sequence_pattern = HMMALIGN_SEQUENCE_PATTERN.match(line)
                             if alignment_sequence_pattern:
                                 if alignment_sequence_pattern.group(1) == current_sequence:
                                     align_seq.append(alignment_sequence_pattern.group(3))
                                     domain_match[current_domain]["alignment"] = "".join(align_seq)
-                            if hmmalign_sequence_pattern and member_db.upper() == "PIRSR":
-                                if hmmalign_sequence_pattern.group(1) != current_sequence:
-                                    hmm_seq.append(hmmalign_sequence_pattern.group(3))
-                                    domain_match[current_domain]["hmm_alignment"] = "".join(hmm_seq)
+                            if member_db.upper() == "PIRSR":
+                                hmmalign_sequence_pattern = HMMALIGN_SEQUENCE_PATTERN.match(line)
+                                if hmmalign_sequence_pattern
+                                    if hmmalign_sequence_pattern.group(1) != current_sequence:
+                                        hmm_seq.append(hmmalign_sequence_pattern.group(3))
+                                        domain_match[current_domain]["hmm_alignment"] = "".join(hmm_seq)
                     elif stage == 'LOOKING_FOR_DOMAIN_DATA_LINE':
                         if "Alignments for each domain" in line:
                             stage = 'LOOKING_FOR_DOMAIN_SECTION'
