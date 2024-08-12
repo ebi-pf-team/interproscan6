@@ -9,7 +9,6 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     apt-get install -y python3.10 python3-venv python3-pip
 
 # make dirs to store the scripts to mock the bins used in the IRL image
-
 WORKDIR /opt/
 # cath-resolve-hits
 RUN mkdir -p cath-tools/
