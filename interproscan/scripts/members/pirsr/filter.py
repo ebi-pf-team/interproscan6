@@ -9,7 +9,10 @@ def matches2rules(matches_path: str, rules_hash: dict):
 
     for sequence_id, domains in matches_info.items():
         for model_id, domain in domains.items():
-            rule = rules_hash[model_id]
+            try:
+                rule = rules_hash[model_id]
+            except KeyError:
+                rule = None
 
             domHits = []
             sorted_locations = sorted(domain["locations"], key=lambda x: (x["evalue"], -x["score"]))
@@ -26,45 +29,46 @@ def matches2rules(matches_path: str, rules_hash: dict):
                 map = map_hmm_to_seq(hmm_from, hmm_align, seq_align)
 
                 rule_sites = []
-                for grp, positions in rule['Groups'].items():
-                    pass_count = 0
-                    positions_parsed = []
-                    for pos_num, pos in enumerate(positions):
-                        condition = re.sub(r'[-()]', lambda x: {'-': '', '(': '{', ')': '}'}[x.group()],
-                                           pos['condition'])
-                        condition = condition.replace('x', '.')
-                        query_seq = seq_align.replace('-', '')
+                if rule:
+                    for grp, positions in rule['Groups'].items():
+                        pass_count = 0
+                        positions_parsed = []
+                        for pos_num, pos in enumerate(positions):
+                            condition = re.sub(r'[-()]', lambda x: {'-': '', '(': '{', ')': '}'}[x.group()],
+                                               pos['condition'])
+                            condition = condition.replace('x', '.')
+                            query_seq = seq_align.replace('-', '')
 
-                        if pos['hmmStart'] < len(map) and pos['hmmEnd'] < len(map):
-                            target_seq = query_seq[map[pos['hmmStart']]:map[pos['hmmEnd']] + 1]
-                        else:
-                            target_seq = ''
+                            if pos['hmmStart'] < len(map) and pos['hmmEnd'] < len(map):
+                                target_seq = query_seq[map[pos['hmmStart']]:map[pos['hmmEnd']] + 1]
+                            else:
+                                target_seq = ''
 
-                        if re.fullmatch(condition, target_seq):
-                            pass_count += 1
-                            if pos['start'] == 'Nter':
-                                pos['start'] = seq_from
-                            if pos['end'] == 'Cter':
-                                pos['end'] = seq_to
+                            if re.fullmatch(condition, target_seq):
+                                pass_count += 1
+                                if pos['start'] == 'Nter':
+                                    pos['start'] = seq_from
+                                if pos['end'] == 'Cter':
+                                    pos['end'] = seq_to
 
-                        positions_parsed.append({
-                            'description': pos['desc'],
-                            "group": int(pos['group']),
-                            "hmmEnd": pos['hmmEnd'],
-                            "hmmStart": pos['hmmStart'],
-                            "label": pos['label'],
-                            "numLocations": 1,  # always 1 on i5 (change to len(positions)?)
-                            "siteLocations": [
-                                {
-                                    "end": pos['end'],  # different value on i5
-                                    "residue": pos['condition'],
-                                    "start": pos['start']  # different value on i5
-                                }
-                            ]
-                        })
+                            positions_parsed.append({
+                                'description': pos['desc'],
+                                "group": int(pos['group']),
+                                "hmmEnd": pos['hmmEnd'],
+                                "hmmStart": pos['hmmStart'],
+                                "label": pos['label'],
+                                "numLocations": 1,  # always 1 on i5 (change to len(positions)?)
+                                "siteLocations": [
+                                    {
+                                        "end": pos['end'],  # different value on i5
+                                        "residue": pos['condition'],
+                                        "start": pos['start']  # different value on i5
+                                    }
+                                ]
+                            })
 
-                    if pass_count == len(positions):
-                        rule_sites.extend(positions_parsed)
+                        if pass_count == len(positions):
+                            rule_sites.extend(positions_parsed)
 
                 if rule_sites:
                     domHit = {

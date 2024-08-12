@@ -143,7 +143,7 @@ def parse(out_file: str) -> dict:
                                     domain_match[current_domain]["alignment"] = "".join(align_seq)
                             if member_db.upper() == "PIRSR":
                                 hmmalign_sequence_pattern = HMMALIGN_SEQUENCE_PATTERN.match(line)
-                                if hmmalign_sequence_pattern
+                                if hmmalign_sequence_pattern:
                                     if hmmalign_sequence_pattern.group(1) != current_sequence:
                                         hmm_seq.append(hmmalign_sequence_pattern.group(3))
                                         domain_match[current_domain]["hmm_alignment"] = "".join(hmm_seq)
