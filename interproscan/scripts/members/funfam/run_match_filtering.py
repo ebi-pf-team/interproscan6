@@ -54,7 +54,7 @@ def main():
         )
 
         with open(f"{file_info['ips6.json']}.processed.json", "w") as fh:
-            json.dump(processed_ips6, fh, indent=2)
+            json.dump(processed_ips6, fh)
 
 
 class FunfamHit:
