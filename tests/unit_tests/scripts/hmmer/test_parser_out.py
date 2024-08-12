@@ -14,68 +14,59 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from interproscan.scripts.hmmer.parser_out import parse, get_accession_regex
 
 HMMER_OUT_MULTIPLE_SEQUENCES = textwrap.dedent("""
-Query:       PALP  [M=295]
-Accession:   PF00291.30
-Description: Pyridoxal-phosphate dependent enzyme
-Scores for complete sequences (score includes all domains):
- --- full sequence ---   --- best 1 domain ---    -#dom-
-  E-value  score  bias    E-value  score  bias    exp  N  Sequence       Description
-  ------- ------ -----    ------- ------ -----   ---- --  --------       -----------
-  9.3e-39  145.1   0.0    1.1e-38  144.8   0.0    1.0  1  OUTROSEMLOOKUP
-  5.5e-13   60.5   0.1    6.6e-13   60.2   0.1    1.0  1  TESTESEMLOOKUP
-
-
-Domain annotation for each sequence (and alignments):
->> OUTROSEMLOOKUP
- #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
----   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
- 1 !  144.8   0.0   3.7e-46   1.1e-38       4     287 ..      12     315 ..       9     320 .. 0.91
-
-Alignments for each domain:
-== domain 1  score: 144.8 bits;  conditional E-value: 3.7e-46
-                   CSSS--EEEECCTCCCTTCE..EEEEEGGGST...TSBTTHHHHHHHHHH.HHTTTTTSEEEEEBSSHHHHHHHHHHHHHT-EEEEEEETTS-.. CS
-          PALP   4 gigpTPlvrlprlskelgve..vylKlEslnp...tgSfKdRgalnllar.lkegkggktvveassGNhGaalAaaaarlGlkvtivvpekas.. 90
-                     gp P+ +l+rls++lg++  +y+K+E++n    +g++K R++++l+ + +++g+++ + + + ++N  + +Aa+aa+lG+k+++v +++++
-OUTROSEMLOOKUP  12 TFGPSPITPLKRLSQHLGGKveLYAKREDCNSglaFGGNKTRKLEYLIPEaIEQGCDTLVSIGGIQSNQTRQVAAVAAHLGMKCVLVQENWVNys 106
-                   579****************************8799***************6777799999999999***************************88 PP
-
-                   ......HHHHHHHHHTT-EEEEECCH....HHHHHHH.HHHHHHHSTTCEE--TTT..SHHHHHHHHTHHHHHH...HHHTTTEEEEEEE-SSSH CS
-          PALP  91 ......peklaliralGaevvlvggd....ydeavel.akelaeegegayyinqyd..npaniegyktiglEil...eqlggkpdavvvpvGgGg 169
-                          +++++ r +Ga+v+l  ++    ++ + e+ + +++e+g +++ i+ +   +p++  g+   + E+    ++lg k+d++vv+  +G+
-OUTROSEMLOOKUP 107 davydrVGNIEMSRIMGADVRLDAAGfdigIRPSWEKaMSDVVEQGGKPFPIPAGCseHPYGGLGFVGFAEEVRqqeKELGFKFDYIVVCSVTGS 201
-                   7777766****************66623333333333355899999********9999***************97777777************** PP
-
-                   HHHHHHHHHHHHSTTSEEEEEEECTTCGGTTCCS--S-SS--B-SSS-CCSTCSTCGTTCCHHHHSEEEEEEEEEEHHHHHHHHHHHHHHHSB-B CS
-          PALP 170 liaGiarglkelgpevrvigvepegapalaksleagrpvkvksadtiadglgvgpepgelalelldeyvdevvtvsdeealeamrllarregilv 264
-                   + aG++ g+++ g + +vig++++  p  +k+        +  a+++a+ ++ g e +e+++ l  +   + +++++e +lea+rl  + eg+l+
-OUTROSEMLOOKUP 202 TQAGMVVGFAADGRSKNVIGIDASAKPEQTKAQ------ILRIARHTAELVELGREITEEDVVLDTRFAYPEYGLPNEGTLEAIRLCGSLEGVLT 290
-                   ***********88888*******9888888888......88889*************************************************** PP
-
-                   -H.HHHHHHHHH.HHHHHHCCTTCE CS
-          PALP 265 ep.ssaaalaal.klreagelkegd 287
-                   +p + +++++++ +++++ge++eg+
-OUTROSEMLOOKUP 291 DPvYEGKSMHGMiEMVRRGEFPEGS 315
-                   **********************994 PP
-
->> TESTESEMLOOKUP
- #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
----   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
- 1 !   60.2   0.1   2.1e-20   6.6e-13      14     104 ..      12     116 ..      10     118 .. 0.87
-
-Alignments for each domain:
-== domain 1  score: 60.2 bits;  conditional E-value: 2.1e-20
-                   CCTCCCTTCE..EEEEEGGGST...TSBTTHHHHHHHHHHHHTTTTTSEEEEEBS..SHHHHHHHHHHHHHT-EEEEEEETTS-........HHH CS
-          PALP  14 prlskelgve..vylKlEslnp...tgSfKdRgalnllarlkegkggktvveass..GNhGaalAaaaarlGlkvtivvpekas........pek 93
-                   +rls++lg++  +y+K+E++n    +g++K R++++++ ++    g++t+v  ++  +Nh + +Aa+aa+ G+k+++v +++++         ++
-TESTESEMLOOKUP  12 SRLSAHLGGKvdLYAKREDCNSglaFGGNKLRKLEYIVPDAIAS-GADTLVSIGGvqSNHTRMVAAVAAKIGMKCRLVQEAWVPhedavydrVGN 105
-                   5899******9**********8799***************7666.666666666555*********************999999666565555** PP
-
-                   HHHHHHTT-EE CS
-          PALP  94 laliralGaev 104
-                   + l r +Ga+v
-TESTESEMLOOKUP 106 IMLSRIMGADV 116
-                   *********98 PP
-//
+    Query:       PALP  [M=295]
+    Accession:   PF00291.30
+    Description: Pyridoxal-phosphate dependent enzyme
+    Scores for complete sequences (score includes all domains):
+       --- full sequence ---   --- best 1 domain ---    -#dom-
+        E-value  score  bias    E-value  score  bias    exp  N  Sequence       Description
+        ------- ------ -----    ------- ------ -----   ---- --  --------       -----------
+        9.3e-39  145.1   0.0    1.1e-38  144.8   0.0    1.0  1  OUTROSEMLOOKUP  
+        5.5e-13   60.5   0.1    6.6e-13   60.2   0.1    1.0  1  TESTESEMLOOKUP  
+    Domain annotation for each sequence (and alignments):
+    >> OUTROSEMLOOKUP  
+       #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+     ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+       1 !  144.8   0.0   3.7e-46   1.1e-38       4     287 ..      12     315 ..       9     320 .. 0.91
+      Alignments for each domain:
+      == domain 1  score: 144.8 bits;  conditional E-value: 3.7e-46
+                         CSSS--EEEECCTCCCTTCE..EEEEEGGGST...TSBTTHHHHHHHHHH.HHTTTTTSEEEEEBSSHHHHHHHHHHHHHT-EEEEEEETTS-.. CS
+                PALP   4 gigpTPlvrlprlskelgve..vylKlEslnp...tgSfKdRgalnllar.lkegkggktvveassGNhGaalAaaaarlGlkvtivvpekas.. 90 
+                           gp P+ +l+rls++lg++  +y+K+E++n    +g++K R++++l+ + +++g+++ + + + ++N  + +Aa+aa+lG+k+++v +++++  
+      OUTROSEMLOOKUP  12 TFGPSPITPLKRLSQHLGGKveLYAKREDCNSglaFGGNKTRKLEYLIPEaIEQGCDTLVSIGGIQSNQTRQVAAVAAHLGMKCVLVQENWVNys 106
+                         579****************************8799***************6777799999999999***************************88 PP
+                         ......HHHHHHHHHTT-EEEEECCH....HHHHHHH.HHHHHHHSTTCEE--TTT..SHHHHHHHHTHHHHHH...HHHTTTEEEEEEE-SSSH CS
+                PALP  91 ......peklaliralGaevvlvggd....ydeavel.akelaeegegayyinqyd..npaniegyktiglEil...eqlggkpdavvvpvGgGg 169
+                                +++++ r +Ga+v+l  ++    ++ + e+ + +++e+g +++ i+ +   +p++  g+   + E+    ++lg k+d++vv+  +G+
+      OUTROSEMLOOKUP 107 davydrVGNIEMSRIMGADVRLDAAGfdigIRPSWEKaMSDVVEQGGKPFPIPAGCseHPYGGLGFVGFAEEVRqqeKELGFKFDYIVVCSVTGS 201
+                         7777766****************66623333333333355899999********9999***************97777777************** PP
+                         HHHHHHHHHHHHSTTSEEEEEEECTTCGGTTCCS--S-SS--B-SSS-CCSTCSTCGTTCCHHHHSEEEEEEEEEEHHHHHHHHHHHHHHHSB-B CS
+                PALP 170 liaGiarglkelgpevrvigvepegapalaksleagrpvkvksadtiadglgvgpepgelalelldeyvdevvtvsdeealeamrllarregilv 264
+                         + aG++ g+++ g + +vig++++  p  +k+        +  a+++a+ ++ g e +e+++ l  +   + +++++e +lea+rl  + eg+l+
+      OUTROSEMLOOKUP 202 TQAGMVVGFAADGRSKNVIGIDASAKPEQTKAQ------ILRIARHTAELVELGREITEEDVVLDTRFAYPEYGLPNEGTLEAIRLCGSLEGVLT 290
+                         ***********88888*******9888888888......88889*************************************************** PP
+                         -H.HHHHHHHHH.HHHHHHCCTTCE CS
+                PALP 265 ep.ssaaalaal.klreagelkegd 287
+                         +p + +++++++ +++++ge++eg+
+      OUTROSEMLOOKUP 291 DPvYEGKSMHGMiEMVRRGEFPEGS 315
+                         **********************994 PP
+    >> TESTESEMLOOKUP  
+       #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+     ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+       1 !   60.2   0.1   2.1e-20   6.6e-13      14     104 ..      12     116 ..      10     118 .. 0.87
+      Alignments for each domain:
+      == domain 1  score: 60.2 bits;  conditional E-value: 2.1e-20
+                         CCTCCCTTCE..EEEEEGGGST...TSBTTHHHHHHHHHHHHTTTTTSEEEEEBS..SHHHHHHHHHHHHHT-EEEEEEETTS-........HHH CS
+                PALP  14 prlskelgve..vylKlEslnp...tgSfKdRgalnllarlkegkggktvveass..GNhGaalAaaaarlGlkvtivvpekas........pek 93 
+                         +rls++lg++  +y+K+E++n    +g++K R++++++ ++    g++t+v  ++  +Nh + +Aa+aa+ G+k+++v +++++         ++
+      TESTESEMLOOKUP  12 SRLSAHLGGKvdLYAKREDCNSglaFGGNKLRKLEYIVPDAIAS-GADTLVSIGGvqSNHTRMVAAVAAKIGMKCRLVQEAWVPhedavydrVGN 105
+                         5899******9**********8799***************7666.666666666555*********************999999666565555** PP
+                         HHHHHHTT-EE CS
+                PALP  94 laliralGaev 104
+                         + l r +Ga+v
+      TESTESEMLOOKUP 106 IMLSRIMGADV 116
+                         *********98 PP
+    //
 """)
 EXPECTED_RESULT_MULTIPLE_SEQUENCES = {
   "OUTROSEMLOOKUP": {
@@ -414,6 +405,26 @@ def mock_hmmer_out_multiple_sequences_multiple_domains(tmpdir):
     return input_file_path
 
 
+def test_check_output_types(mock_hmmer_out_multiple_domains):
+    result = parse(mock_hmmer_out_multiple_domains)
+
+    sequence_data = result["WP_338726824.1"]["3jt0B00-i2"]
+
+    # Make sure about correct types is extremely important for some members filtering
+    assert isinstance(sequence_data["evalue"], float)
+    assert isinstance(sequence_data["score"], float)
+    assert isinstance(sequence_data["qlen"], int)
+
+    location = sequence_data["locations"][0]
+    assert isinstance(location["start"], int)
+    assert isinstance(location["end"], int)
+    assert isinstance(location["hmmStart"], int)
+    assert isinstance(location["hmmEnd"], int)
+    assert isinstance(location["hmmLength"], int)
+    assert isinstance(location["evalue"], float)
+    assert isinstance(location["score"], float)
+
+
 @pytest.mark.parametrize("expected_result", [EXPECTED_RESULT_MULTIPLE_SEQUENCES])
 def test_parse_multiple_sequences(mock_hmmer_out_multiple_sequences, expected_result):
     result = parse(mock_hmmer_out_multiple_sequences)
@@ -430,26 +441,3 @@ def test_parse_multiple_domains(mock_hmmer_out_multiple_domains, expected_result
 def test_parse_multiple_sequences_multiple_domains(mock_hmmer_out_multiple_sequences_multiple_domains, expected_result):
     result = parse(mock_hmmer_out_multiple_sequences_multiple_domains)
     assert result == expected_result
-
-
-# def test_check_output_types(mock_hmmer_out_multiple_sequences):
-#     result = parse(mock_hmmer_out_multiple_sequences)
-#
-#     sequence_data = result["OUTROSEMLOOKUP"]["PF00291"]
-#
-#     # Make sure about correct types is extremely important for some members filtering
-#     assert isinstance(sequence_data["evalue"], float)
-#     assert isinstance(sequence_data["score"], float)
-#     assert isinstance(sequence_data["qlen"], int)
-#     assert isinstance(sequence_data["bias"], float)
-#
-#     location = sequence_data["locations"][0]
-#     assert isinstance(location["start"], int)
-#     assert isinstance(location["end"], int)
-#     assert isinstance(location["hmmStart"], int)
-#     assert isinstance(location["hmmEnd"], int)
-#     assert isinstance(location["hmmLength"], int)
-#     assert isinstance(location["evalue"], float)
-#     assert isinstance(location["score"], float)
-#     assert isinstance(location["envelopeStart"], int)
-#     assert isinstance(location["envelopeEnd"], int)
