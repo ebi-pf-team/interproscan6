@@ -35,7 +35,7 @@ def main():
             cath_superfam = _file.group(1)
             if cath_superfam not in files:
                 files[cath_superfam] = {}
-            files[_file.group(1)]["ips6.json"] = input_arg
+            files[cath_superfam]["ips6.json"] = input_arg
             continue
 
         if RELEASE_PATTERN.match(input_arg):
