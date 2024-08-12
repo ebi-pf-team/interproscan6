@@ -57,7 +57,7 @@ def check_sequence(sequences: dict, applications: str):
         if ">" in sequence:
             raise ValueError(f"{key} contains illegal character '>'")
         for i in illegal_char_list:
-            if i in sequence:
+            if i in sequence.lower():
                 app_list = [
                     application
                     for application in applications
