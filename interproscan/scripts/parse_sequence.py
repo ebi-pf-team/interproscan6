@@ -47,24 +47,20 @@ def get_sequences(fasta_file: str) -> dict:
 
 
 def check_sequence(sequences: dict, applications: str):
-    illegal_char_list = set()
     applications = applications.split(",")
-    for application in applications:
-        for chara in ILLEGAL_CHARAS[application]:
-            illegal_char_list.add(chara)
-
+    illegal_char_list = {chara for application in applications for chara in ILLEGAL_CHARAS[application]}
     for key, sequence in sequences.items():
         if ">" in sequence:
             raise ValueError(f"{key} contains illegal character '>'")
-        for i in illegal_char_list:
-            if i in sequence.lower():
+        for character in illegal_char_list:
+            if character in sequence.lower():
                 app_list = [
                     application
                     for application in applications
-                    if i in ILLEGAL_CHARAS[application]
+                    if character in ILLEGAL_CHARAS[application]
                 ]
                 raise ValueError(
-                    f"{key} contains illegal character '{i}' "
+                    f"{key} contains illegal character '{character}' "
                     f"which cannot be used with {','.join(x for x in app_list)}"
                 )
 
