@@ -10,7 +10,7 @@ ILLEGAL_CHARAS = {
     "gene3d": ["-", "*", "_", "."],
     "hamap": ["-", "*", "_", "b", "o", "x", "u", "z", "j"],
     "mobidb": [],
-    "ncbifam": ["-", ".", "_", "*"],
+    "ncbifam": ["-"],
     "panther": ["-", "*"],
     "pfam": ["-", "*"],
     "pirsf": ["-"],
