@@ -1,5 +1,6 @@
 process PARSE_SEQUENCE {
     label 'io'
+    errorStrategy { task.exitStatus in [143,1] ? 'terminate' : 'ignore' }
 
     input:
     val fasta_file

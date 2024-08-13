@@ -62,9 +62,10 @@ def parse(sequences: dict, applications: str):
             error_message = f"{acc} contains illegal character(s): \n"
             match_record = {match: [application for application in applications if match in ILLEGAL_CHARAS[application]] for match in illegal_matches}
             for match, tools in match_record.items():
-                error_message += f"'{match}' not allowed in {','.join(x for x in tools)} \n"
+                error_message += f"'{match}' not allowed in {','.join(x for x in tools)}\n"
                 #pass
-            raise ValueError(error_message)
+            print(error_message, file=sys.stderr)
+            sys.exit(1)
         sequence_info.append(key)
         sequence_info.append(sequence)
         sequence_info.append(hashlib.md5(sequence.encode()).hexdigest())
