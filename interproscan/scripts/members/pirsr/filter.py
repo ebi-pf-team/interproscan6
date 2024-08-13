@@ -17,8 +17,6 @@ def matches2rules(matches_path: str, rules_hash: dict):
             domHits = []
             sorted_locations = sorted(domain["locations"], key=lambda x: (x["evalue"], -x["score"]))
             for location in sorted_locations:
-                sequence_id = sequence_id
-                model_id = model_id
                 hmm_from = location["hmmStart"]
                 hmm_to = location["hmmEnd"]
                 hmm_align = location["hmm_alignment"]
