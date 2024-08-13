@@ -13,6 +13,7 @@ include {
     HMMER_RUNNER as GENE3D_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
+    HMMER_RUNNER as PIRSR_HMMER_RUNNER;
     HMMER_RUNNER_WITH_ALIGNMENTS as SFLD_HMMER_RUNNER;
     HMMER_SCAN_RUNNER as SUPERFAMILY_HMMER_RUNNER;
     FUNFAM_HMMER_RUNNER;
@@ -29,6 +30,7 @@ include {
     HMMER_PARSER as NCBIFAM_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
     HMMER_PARSER as PFAM_HMMER_PARSER;
+    HMMER_PARSER as PIRSR_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
     HMMER_SCAN_PARSER as PIRSF_HMMER_PARSER;
     HMMER2_PARSER;
@@ -50,6 +52,7 @@ include {
     PANTHER_FILTER_MATCHES;
     PFAM_FILTER_MATCHES;
     PIRSF_FILTER_MATCHES;
+    PIRSR_FILTER_MATCHES;
     SFLD_FILTER_MATCHES;
     SMART_FILTER_MATCHES;
     SUPERFAMILY_FILTER_MATCHES;
@@ -192,6 +195,17 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".release,
                 [
                     params.members."${member}".postprocess.data
+                ]
+            ]
+
+       pirsr: member == 'pirsr'
+            return [
+                "${member}",
+                params.members."${member}".hmm,
+                params.members."${member}".switches,
+                params.members."${member}".release,
+                [
+                    params.members."${member}".postprocess.rules
                 ]
             ]
 
@@ -401,6 +415,17 @@ workflow SEQUENCE_ANALYSIS {
         PIRSF_HMMER_RUNNER.out[2]   // post-processing-params
     )
 
+    // PIRSR
+    runner_pirsr_params = fasta.combine(member_params.pirsr)
+    PIRSR_HMMER_RUNNER(runner_pirsr_params)
+    PIRSR_HMMER_PARSER(
+        PIRSR_HMMER_RUNNER.out[0]  // out file
+    )
+    PIRSR_FILTER_MATCHES(
+        PIRSR_HMMER_PARSER.out,  // ips6 json
+        PIRSR_HMMER_RUNNER.out[1]  // post-processing-params
+    )
+
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_sfld_params)
@@ -486,6 +511,7 @@ workflow SEQUENCE_ANALYSIS {
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,
             PIRSF_FILTER_MATCHES.out,
+            PIRSR_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
@@ -508,6 +534,7 @@ workflow SEQUENCE_ANALYSIS {
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,
             PIRSF_FILTER_MATCHES.out,
+            PIRSR_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
