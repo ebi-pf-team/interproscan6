@@ -96,8 +96,8 @@ def map_hmm_to_seq(hmm_pos, hmm, seq):
     """
     map base positions from alignment, from query HMM coords to (ungapped) target sequence coords
    :param hmm_pos: Is hmm_from from hmmer.out file
-   :param hmm_align_seq: Is hmm_align from hmmer.out file
-   :param query_align_seq: Is seq alignment from hmmer.out file
+   :param hmm: Is hmm_align from hmmer.out file
+   :param seq: Is seq alignment from hmmer.out file
     """
     seq_pos = 0
     map = [0]
