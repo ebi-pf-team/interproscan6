@@ -3,25 +3,25 @@ import json
 import sys
 
 ILLEGAL_CHARAS = {
-    "antifam": ["-"],
-    "cdd": [],
-    "coils": [],
-    "funfam": ["-", "*", "_", "."],
-    "gene3d": ["-", "*", "_", "."],
-    "hamap": ["-", "*", "_", "b", "o", "x", "u", "z", "j"],
-    "mobidb": [],
-    "ncbifam": ["-"],
-    "panther": ["-", "*"],
-    "pfam": ["-", "*"],
-    "pirsf": ["-"],
-    "prints": ["-", ".", "_"],
-    "prosite_patterns": [],
-    "prosite_profiles": ["-", ".", "_", "*"],
-    "sfld": ["-", ".", "_"],
-    "smart": [],
-    "superfamily": ["-"],
-    "signalp": [],
-    "phobius": ["-", "*", ".", "_", "o", "x", "u", "z", "j"],
+    "antifam": "-",
+    "cdd": "",
+    "coils": "",
+    "funfam": "-*_.",
+    "gene3d": "-*_.",
+    "hamap": "-*_boxuzj",
+    "mobidb": "",
+    "ncbifam": "-",
+    "panther": "-*",
+    "pfam": "-*",
+    "pirsf": "-",
+    "prints": "-._",
+    "prosite_patterns": "",
+    "prosite_profiles": "-._*",
+    "sfld": "-._",
+    "smart": "",
+    "superfamily": "-",
+    "signalp": "",
+    "phobius": "-*._oxuzj",
 }
 
 
@@ -46,32 +46,25 @@ def get_sequences(fasta_file: str) -> dict:
     return sequences
 
 
-def check_sequence(sequences: dict, applications: str):
-    applications = applications.split(",")
-    illegal_char_list = {chara for application in applications for chara in ILLEGAL_CHARAS[application]}
-    for key, sequence in sequences.items():
-        if ">" in sequence:
-            raise ValueError(f"{key} contains illegal character '>'")
-        for character in illegal_char_list:
-            if character in sequence.lower():
-                app_list = [
-                    application
-                    for application in applications
-                    if character in ILLEGAL_CHARAS[application]
-                ]
-                raise ValueError(
-                    f"{key} contains illegal character '{character}' "
-                    f"which cannot be used with {','.join(x for x in app_list)}"
-                )
-
-    return sequences
-
-
-def parse(sequences: dict):
+def parse(sequences: dict, applications: str):
     results = {}
+    applications = applications.split(",")
+    illegal_char_set= {chara for application in applications for chara in ILLEGAL_CHARAS[application]}
     for key, sequence in sequences.items():
         sequence_info = []
+        seq = sequence.lower()
         acc = key.split(" ", 1)[0]
+        if ">" in sequence:
+            raise ValueError(f"{acc} contains illegal character '>'")
+        set(seq).intersection(illegal_char_set)
+        illegal_matches = set(seq).intersection(illegal_char_set)
+        if illegal_matches:
+            error_message = f"{acc} contains illegal character(s): \n"
+            match_record = {match: [application for application in applications if match in ILLEGAL_CHARAS[application]] for match in illegal_matches}
+            for match, tools in match_record.items():
+                error_message += f"'{match}' not allowed in {','.join(x for x in tools)} \n"
+                #pass
+            raise ValueError(error_message)
         sequence_info.append(key)
         sequence_info.append(sequence)
         sequence_info.append(hashlib.md5(sequence.encode()).hexdigest())
@@ -84,8 +77,7 @@ def main():
     args = sys.argv[1:]
     is_fasta_check(args[0])
     sequences = get_sequences(args[0])
-    sequences = check_sequence(sequences, args[1])
-    sequence_parsed = parse(sequences)
+    sequence_parsed = parse(sequences, args[1])
     print(json.dumps(sequence_parsed))
 
 
