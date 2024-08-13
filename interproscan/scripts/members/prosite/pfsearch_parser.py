@@ -7,7 +7,7 @@ import sys
 
 from dataclasses import dataclass
 
-DATA_LINE = re.compile(r"^([\w\|]+)\s+(\d+)\s+(\-?\d+)\s+([\w+\|\.\-\_]+|\s+)\s+(\d+)\s+(\d+)\s+(\-?\d+)\s+(\d+\.?\d+)\s+([\+\-])\s+([\w\-]+)$")
+DATA_LINE = re.compile(r"^([\w\|]+)\s+(\d+)\s+(\-?\d+)\s+([\d\)\(\w+\|\.\-\_]+|\s+)\s+(\d+)\s+(\d+)\s+(\-?\d+)\s+(\d+\.?\d+)\s+([\+\-])\s+([\w\-]+)$")
 
 @dataclass
 class PrositeHit:
@@ -69,8 +69,14 @@ def parse_and_filter(pfsearch_out: str, blacklist: list[str], release: str) -> d
                     print("ERROR: the following line did not match the expected architecture")
                     print(line)
 
-                if line_data.group(1).split("|")[0] in blacklist:
-                    continue
+                try:
+                    if line_data.group(1).split("|")[0] in blacklist:
+                        continue
+                except AttributeError:
+                    print("**")
+                    print(line)
+                    import sys
+                    sys.exit(1)
 
                 try:
                     hit = PrositeHit.from_list(line_data)
