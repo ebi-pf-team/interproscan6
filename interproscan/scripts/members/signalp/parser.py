@@ -19,7 +19,7 @@ def main():
 
 
 def parse(signalp_out: str, signalp_cs: str, threshold: float,
-          signalp_version: str, signalp_db=str):
+          signalp_version: str, signalp_db: str):
     """Parse signalP output into JSON file standardised for InterProScan
 
     :param signalp_out: path to signalP signal peptide location output file
