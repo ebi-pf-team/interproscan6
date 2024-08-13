@@ -3,7 +3,13 @@ import re
 import sys
 
 
-def matches2rules(matches_path: str, rules_hash: dict):
+def matches2rules(matches_path: str, rules_hash: dict) -> dict:
+    """
+    add rule information to matches
+    :param matches_path: the matches from hmmer parser
+    :param rules_hash: data file with rules (sr_uru.json)
+    :return: matches_info: matches with rules info
+    """
     with open(matches_path, "r") as matches:
         matches_info = json.load(matches)
 
@@ -32,6 +38,7 @@ def matches2rules(matches_path: str, rules_hash: dict):
                         pass_count = 0
                         positions_parsed = []
                         for pos_num, pos in enumerate(positions):
+                            # replacing characters to match regex pattern (e.g. condition: Q-x(5)-[ST] -> Q.{5}[ST])
                             condition = re.sub(r'[-()]', lambda x: {'-': '', '(': '{', ')': '}'}[x.group()],
                                                pos['condition'])
                             condition = condition.replace('x', '.')
@@ -42,6 +49,7 @@ def matches2rules(matches_path: str, rules_hash: dict):
                             else:
                                 target_seq = ''
 
+                            # comparing the target sequence with the condition
                             if re.fullmatch(condition, target_seq):
                                 pass_count += 1
                                 if pos['start'] == 'Nter':
@@ -58,9 +66,9 @@ def matches2rules(matches_path: str, rules_hash: dict):
                                 "numLocations": 1,  # always 1 on i5 (change to len(positions)?)
                                 "siteLocations": [
                                     {
-                                        "end": pos['end'],  # different value on i5
+                                        "end": pos['end'],
                                         "residue": pos['condition'],
-                                        "start": pos['start']  # different value on i5
+                                        "start": pos['start']
                                     }
                                 ]
                             })
