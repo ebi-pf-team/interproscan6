@@ -7,4 +7,4 @@ docker_files/.nextflow.log
 *__pycache__*
 work/
 results/
-signalp-6-package/
+*signalp-6-package/
