@@ -9,7 +9,7 @@ script in 2019 in i5 when a bug fix was required. That perl script was
 replaced with this Python script in IPS6."""
 
 
-CHILD_DAT_LINE = re.compile(r">\D+\d+\schild:\s(.*)$")
+CHILD_DAT_LINE = re.compile(r">PIRSF\d+\schild:\s(.*)$")
 
 
 class DatEntry:
@@ -25,7 +25,7 @@ class DatEntry:
         self.children = []
 
     def add_model_id(self, value: str):
-        self.model_id = value.split()[0].replace(">", "")
+        self.model_id = value.split()[0].strip(">")
         line_match = CHILD_DAT_LINE.match(value)
         if line_match:
             self.children = line_match.group(1).split()
@@ -102,6 +102,11 @@ def load_dat(dat_path: str) -> tuple[dict, dict]:
             elif stage == 'GET_BLAST':
                 entry.add_blast(line)
                 stage = 'GET_MODEL_ID'
+
+    if entry:
+        dat_entries[entry.model_id] = entry
+        for child in entry.children:
+            children[child] = entry.model_id
 
     return dat_entries, children
 
