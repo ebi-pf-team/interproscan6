@@ -50,7 +50,8 @@ RUN curl -L -O https://ftp.ncbi.nih.gov/pub/mmdb/cdd/rpsbproc/RpsbProc-x64-linux
     tar -xzf RpsbProc-x64-linux.tar.gz && \
     rm RpsbProc-x64-linux.tar.gz
 
-# Install HMMER3
+# Install HMMER3 and easel (which is packaged into hmmer3)
+# easel is used for predicting open reading frames (ORFs)
 WORKDIR /opt/
 RUN mkdir /opt/hmmer3 && \
     curl -L -O http://eddylab.org/software/hmmer/hmmer-3.3.tar.gz && \
@@ -62,12 +63,10 @@ RUN mkdir /opt/hmmer3 && \
     make install && \
     rm -rf /opt/hmmer3/share && \
     cd /opt/hmmer3/bin && \
-    find . -type f ! -name 'hmmpress' ! -name 'hmmsearch' ! -name 'hmmscan' -delete
-
-# Install easel for predicting open reading frames (ORFs)
-RUN mv /opt/hmmer-3.3/easel /opt/easel
-WORKDIR /opt/easel
-RUN autoconf && \
+    find . -type f ! -name 'hmmpress' ! -name 'hmmsearch' ! -name 'hmmscan' -delete && \
+    mv /opt/hmmer-3.3/easel /opt/easel && \
+    cd /opt/easel && \
+    autoconf && \
     ./configure && \
     make && \
     make check && \
@@ -77,7 +76,6 @@ RUN autoconf && \
     rm -rf /opt/hmmer-3.3
 
 # Install HMMER2 (for SMART)
-WORKDIR /opt/
 RUN mkdir /opt/hmmer2 && \
     curl -L -O http://eddylab.org/software/hmmer/2.3.2/hmmer-2.3.2.tar.gz && \
     tar -xzf hmmer-2.3.2.tar.gz && \
@@ -92,7 +90,6 @@ RUN mkdir /opt/hmmer2 && \
     find . -type f ! -name 'hmmpfam' -delete
 
 # Install epa-ng and biopython for Panther post-processing
-WORKDIR /opt/
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN git clone https://github.com/pierrebarbera/epa-ng && \
@@ -102,8 +99,8 @@ RUN pip install biopython==1.83
 
 # Install Cath-tools for Gene3D and FunFam
 WORKDIR /opt/cath-tools
-RUN curl -L -o cath-resolve-hits https://github.com/UCLOrengoGroup/cath-tools/releases/download/v0.16.10/cath-resolve-hits.ubuntu-20.04
-RUN chmod +x cath-resolve-hits
+RUN curl -L -o cath-resolve-hits https://github.com/UCLOrengoGroup/cath-tools/releases/download/v0.16.10/cath-resolve-hits.ubuntu-20.04 && \
+    chmod +x cath-resolve-hits
 
 WORKDIR /opt/interproscan6
 COPY interproscan/ interproscan/
