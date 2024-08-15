@@ -63,12 +63,7 @@ update the paths for:
 
 Please provide absolute paths. You can use the `$projectDir` short cut to represent the path to the root directory of `InterProScan6`.
 
-2. Download InterPro data files (xref (entries, goterms and pathways)):
-
-    mkdir i6data
-    python interproscan6/data_xrefs/get_data_to_i6.py  # for devs
-
-This stores the InterPro data in the `data_xrefs/` directory.
+2. Download InterPro data files (xref (entries, goterms and pathways)) in the `data/xref/` directory.
 
 If you store these data in an alternative directory, please update the paths under the `xrefs` heading in the Nextflow configuration file (`./nextflow.config`).
 
