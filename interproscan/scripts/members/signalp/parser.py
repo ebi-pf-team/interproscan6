@@ -33,6 +33,7 @@ def parse(signalp_out: str, signalp_cs: str, threshold: float,
     sequence_matches = {}
 
     member_db = "SignalP" if signalp_db == "other" else "SignalP_EUK"
+    org = "Other" if signalp_db == "other" else "Eukarya"
 
     with open(signalp_out, "r") as f:
         for line in f:
@@ -55,16 +56,23 @@ def parse(signalp_out: str, signalp_cs: str, threshold: float,
                 raise Exception(f"Protein {acc} has more than one SignalP match")
             # reports signal peptide start and end location
             if start:
+                location_fragment = {"start": start, "end": end, "dc-status": "CONTINUOUS"}
                 sequence_matches[acc] = {
                     "signal_peptide": {
+                        "accession": "SignalP",
+                        "name": "SignalP",
                         "member_db": member_db,
                         "version": signalp_version,
+                        "orgType": org,
+                        "model-ac": "SignalP",
                         "locations": [{
                             "start": start,
                             "end": end,
-                            "pvalue": pvalue,
+                            "score": pvalue,
                             "cleavage_start": "",
-                            "cleavage_end": ""
+                            "cleavage_end": "",
+                            "representative": "false",
+                            "location-fragments": [location_fragment]
                         }]
                     }
                 }
