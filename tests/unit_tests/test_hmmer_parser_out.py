@@ -25,14 +25,14 @@ def test_check_output_types(test_input_dir):
     assert isinstance(sequence_data["score"], float)
     assert isinstance(sequence_data["qlen"], int)
 
-    location = sequence_data["locations"][0]
-    assert isinstance(location["start"], int)
-    assert isinstance(location["end"], int)
-    assert isinstance(location["hmmStart"], int)
-    assert isinstance(location["hmmEnd"], int)
-    assert isinstance(location["hmmLength"], int)
-    assert isinstance(location["evalue"], float)
-    assert isinstance(location["score"], float)
+    for location in sequence_data["locations"]:
+      assert isinstance(location["start"], int)
+      assert isinstance(location["end"], int)
+      assert isinstance(location["hmmStart"], int)
+      assert isinstance(location["hmmEnd"], int)
+      assert isinstance(location["hmmLength"], int)
+      assert isinstance(location["evalue"], float)
+      assert isinstance(location["score"], float)
 
 
 @pytest.mark.parametrize(
