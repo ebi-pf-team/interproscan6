@@ -36,7 +36,7 @@ RUN coils_url="https://raw.githubusercontent.com/ebi-pf-team/interproscan/master
     find . -type f ! -name 'ncoils' -delete
 
 # Install NCBI BLAST, only rpsblast (for CDD)
-# Don't pull the NCBI BLAST image has its BIG - Just get the bits we need
+# Don't pull the NCBI BLAST image as its BIG! - Just get the bits we need
 WORKDIR /opt/blast
 RUN curl -L -O https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.15.0/ncbi-blast-2.15.0+-x64-linux.tar.gz && \
     tar -zxpf ncbi-blast-2.15.0+-x64-linux.tar.gz && \
