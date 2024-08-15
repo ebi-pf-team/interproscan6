@@ -69,12 +69,12 @@ def parse(signalp_out: str, signalp_cs: str, threshold: float,
                     }
                 }
 
-    matches = get_cleavage_site(signalp_cs, sequence_matches, threshold)
+    matches = get_cleavage_site(signalp_cs, sequence_matches)
 
     return matches
 
 
-def get_cleavage_site(signalp_cs: str, seq_matches: dict, threshold: float):
+def get_cleavage_site(signalp_cs: str, seq_matches: dict):
     acc_list = []
     with open(signalp_cs, "r") as fh:
         for line in fh:
@@ -84,7 +84,6 @@ def get_cleavage_site(signalp_cs: str, seq_matches: dict, threshold: float):
             acc = seq_identifer.split(" ")[0].strip()
             cs_start = None
             cs_end = None
-            # pvalue = None
 
             cs_prediction = line.split("\t")[-1]
             if len(cs_prediction) > 1:
@@ -94,7 +93,6 @@ def get_cleavage_site(signalp_cs: str, seq_matches: dict, threshold: float):
                 cs_end = int(
                     cs_prediction.split(". ")[0].strip("CS pos: ").split("-")[
                         1].strip())
-                # pvalue = float(cs_prediction.split("Pr:")[-1].strip())
 
             if cs_start and acc in seq_matches:
                 acc_list.append(acc)
@@ -102,9 +100,9 @@ def get_cleavage_site(signalp_cs: str, seq_matches: dict, threshold: float):
                     location["cleavage_start"] = cs_start
                     location["cleavage_end"] = cs_end
 
-    # checks there is only one cleavage prediction per protein
-    if len(acc_list) > len(seq_matches):
-        raise Exception("Protein has more than one SignalP match")
+            elif acc in seq_matches and not cs_start:
+                raise Exception(f"{acc} is missing cleavage start in prediction_results.txt")
+            # if acc not in seq matches, signalp prediction did not pass p-value threshold
 
     return seq_matches
 
