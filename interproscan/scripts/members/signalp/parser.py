@@ -68,7 +68,7 @@ def parse(signalp_out: str, signalp_cs: str, threshold: float,
                         "locations": [{
                             "start": start,
                             "end": end,
-                            "score": pvalue,
+                            "pvalue": pvalue,
                             "cleavage_start": "",
                             "cleavage_end": "",
                             "representative": "false",
