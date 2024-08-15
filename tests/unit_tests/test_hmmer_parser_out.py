@@ -20,7 +20,7 @@ def test_check_output_types(test_input_dir):
 
     sequence_data = result["sp|A2SLW2|1A1D_METPP"]["PF00291"]
 
-    # Make sure about correct types is extremely important for some members filtering
+    # Ensuring the correct types is extremely important for filtering matches for some members
     assert isinstance(sequence_data["evalue"], float)
     assert isinstance(sequence_data["score"], float)
     assert isinstance(sequence_data["qlen"], int)
