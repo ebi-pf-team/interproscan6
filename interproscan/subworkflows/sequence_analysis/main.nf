@@ -100,9 +100,8 @@ workflow SEQUENCE_ANALYSIS {
     // Divide members up into their respective analysis pipelines/methods
     Channel.from(applications.split(','))
     .branch { member ->
-        release = params.members."${member}".release
         runner = params.members."${member}".runner
-        log.info "Running $member version $release"
+//         log.info "Running $member version $release"
 
         /*
         Member databases that use HMMER:
@@ -114,7 +113,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
                 [] // no post-processing
             ]
 
@@ -128,7 +126,6 @@ workflow SEQUENCE_ANALYSIS {
                 "gene3d",
                 params.members."gene3d".hmm,
                 params.members."gene3d".switches,
-                params.members."gene3d".release,
                 [
                     params.members."gene3d".postprocess.cath_resolve_hits_switches,
                     params.members."gene3d".postprocess.model2sf_map,
@@ -136,7 +133,6 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."gene3d".postprocess.assign_cath_superfamilies,
                     params.members."funfam".hmm,
                     params.members."funfam".switches,
-                    params.members."funfam".release,
                 ]
             ]
 
@@ -145,7 +141,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
                 [
                     params.members."${member}".postprocess.models_dir,
                     params.members."${member}".postprocess.pfsearchv3_switches,
@@ -157,7 +152,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
                 [] // no post-processing
             ]
 
@@ -166,7 +160,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
                 [
                     params.members."${member}".postprocess.data_dir,
                     params.members."${member}".postprocess.evalue,
@@ -179,7 +172,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
                 [
                     params.members."${member}".postprocess.min_length,
                     params.members."${member}".postprocess.seed,
@@ -193,7 +185,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
                 [
                     params.members."${member}".postprocess.data
                 ]
@@ -204,7 +195,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
                 [
                     params.members."${member}".postprocess.rules
                 ]
@@ -215,7 +205,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
                 [
                     params.members."${member}".postprocess.sites_annotation,
                     params.members."${member}".postprocess.hierarchy,
@@ -227,7 +216,6 @@ workflow SEQUENCE_ANALYSIS {
             "${member}",
             params.members."${member}".hmm,
             params.members."${member}".switches,
-            params.members."${member}".release,
             [
                 params.members."${member}".postprocess.bin,
                 params.members."${member}".postprocess.self_hits,
@@ -244,7 +232,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
             ]
 
         /*
@@ -253,7 +240,6 @@ workflow SEQUENCE_ANALYSIS {
         cdd: member == "cdd"
             return [
                 params.members."${member}".library,
-                params.members."${member}".release,
                 params.members."${member}".switches,
                 [
                     params.members."${member}".postprocess.switches,
@@ -262,26 +248,21 @@ workflow SEQUENCE_ANALYSIS {
             ]
         coils: member == "coils"
             return [
-            params.members."${member}".release,
             params.members."${member}".switches
             ]
 
         mobidb: member == "mobidb"
             return [
-                params.members."${member}".release,
                 params.members."${member}".switches
             ]
 
         phobius: member == "phobius"
-            return [
-                params.members."${member}".release
-            ]
+            return []
 
         prints: member == 'prints'
             return [
                 params.members.prints.data.hierarchy,
                 params.members.prints.data.pval,
-                params.members.prints.release,
                 params.members.prints.switches
             ]
 
@@ -289,14 +270,12 @@ workflow SEQUENCE_ANALYSIS {
             return [
                 params.members."${member}".data,
                 params.members."${member}".evaluator,
-                params.members."${member}".release,
                 params.members."${member}".switches
             ]
 
         prosite_profiles: member == "prosite_profiles"
             return [
                 params.members."${member}".data,
-                params.members."${member}".release,
                 params.members."${member}".switches,
                 params.members."${member}".skip_flagged_profiles
             ]
@@ -307,7 +286,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.signalp_mode,
                 params.members.signalp.data.organism,
                 params.members.signalp.data.pvalue,
-                params.members.signalp.release
             ]
 
         signalp_euk: member == 'signalp_euk'

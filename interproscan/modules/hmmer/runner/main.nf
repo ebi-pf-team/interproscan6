@@ -2,7 +2,7 @@ process HMMER_RUNNER {
     label 'hmmer_runner'
 
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
+        tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
 
     output:
         path "${member}._.out"
@@ -18,7 +18,7 @@ process HMMER_RUNNER {
 process HMMER_RUNNER_WITH_ALIGNMENTS {
     label 'hmmer_runner'
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
+        tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
 
     output:
         path "${member}._.out"
@@ -51,14 +51,13 @@ process FUNFAM_HMMER_RUNNER {
         cath_superfamilies.size() > 0 && "${applications}".contains('funfam')
 
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
+        tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
         path cath_superfamilies
         val applications
     /*
     post-processing params:
     4. FunFam HMM dir
     5. FunFam HMMsearch switches
-    6. FunFam release number
     */
 
     output:
@@ -86,7 +85,7 @@ process HAMAP_HMMER_RUNNER {
     The post processing of HAMAP requires the tbl file
     */
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
+        tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
 
     output:
         path "${member}._.out"
@@ -105,7 +104,7 @@ process PIRSF_HMMER_RUNNER {
     label 'hmmer_runner'
 
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
+        tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
     /*
     No -Z number was provided in i5, so migrating from hmmscan to hmmsearch
     results in a chnage in the E-values, so we have to keep with hmmscan
@@ -129,7 +128,7 @@ process SMART_HMMER2_RUNNER {
     label 'hmmer_2_runner'
 
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(release)
+        tuple path(fasta), val(member), path(hmm), val(switches)
 
     output:
         path "${member}._.out"
@@ -146,7 +145,7 @@ process HMMER_SCAN_RUNNER {
     label 'hmmer_runner'
 
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(release), val(postprocessing_params)
+        tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
     /*
     Superfamily uses a .pl script that create assignments from the output of HMMER3 hmmscan
     */

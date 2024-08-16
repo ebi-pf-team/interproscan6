@@ -7,7 +7,7 @@ process PFSEARCH_RUNNER {
     label 'prosite_pfsearch_runner'
 
     input:
-        tuple path(fasta), path(models_dir), val(release), val(switches), path(blacklist_file)
+        tuple path(fasta), path(models_dir), val(switches), path(blacklist_file)
 
     output:
         path "prosite_profiles.out"

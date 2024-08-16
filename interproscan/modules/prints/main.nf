@@ -2,7 +2,7 @@ process PRINTS_RUNNER {
     label 'prints_runner'
 
     input:
-    tuple path(fasta), val(hierarchy), val(pval), val(release), val(switches)
+    tuple path(fasta), val(hierarchy), val(pval), val(switches)
 
     output:
     path "*._.printsOutput.txt"
