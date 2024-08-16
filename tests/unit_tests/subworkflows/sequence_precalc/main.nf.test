@@ -5,9 +5,7 @@ nextflow_workflow {
     workflow "SEQUENCE_PRECALC"
 
     stage {
-        symlink "interproscan/modules/lookup/check/main.nf"
-        symlink "interproscan/modules/lookup/matches/main.nf"
-        symlink "interproscan/modules/lookup/no_matches/main.nf"
+        symlink "interproscan/modules/lookup/main.nf"
         symlink "interproscan/scripts/lookup/lookup_check.py"
         symlink "interproscan/scripts/lookup/lookup_matches.py"
         copy "interproscan/scripts/lookup/lookup_no_matches.py"
