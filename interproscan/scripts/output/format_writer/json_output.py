@@ -165,7 +165,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["alignment"] = location["alignment"]
                                     info["level"] = location["level"]
 
-                                elif match_data['member_db'].upper() == "SFLD":
+                                elif match_data['member_db'].upper() in ["SFLD", "PIRSR"]:
                                     info["evalue"] = float(location["evalue"])
                                     info["score"] = float(location["score"])
                                     info["hmmStart"] = int(location["hmmStart"])
@@ -183,7 +183,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["hmmBounds"] = location["hmmBounds"]
 
 
-                                elif match_data['member_db'].upper() == "COILS":
+                                elif match_data['member_db'].upper() in ["COILS", "PHOBIUS"]:
                                     pass
 
                                 elif match_data['member_db'].upper() == "PRINTS":
@@ -206,6 +206,9 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                         info["sites"] = location["sites"]
                                     except KeyError:
                                         info["sites"] = []
+
+                                if match_data['member_db'].upper() == "PIRSR":
+                                    info["sites"] = location["sites"]
                                 try:
                                     info["location-fragments"] = location["location-fragments"]
                                 except KeyError:
@@ -224,9 +227,17 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 "locations": locations
                             }
 
-                            if match_data['member_db'].upper() not in ["CDD", "COILS","HAMAP", "PROSITE_PROFILES", "PROSITE_PATTERNS", "PRINTS"]:
+                            if match_data['member_db'].upper() not in ["CDD", "COILS","HAMAP", "PHOBIUS","PROSITE_PROFILES", "PROSITE_PATTERNS", "PRINTS", "PIRSR"]:
                                 match["evalue"] = float(match_data['evalue'])
                                 match["score"] = float(match_data['score'])
+
+                            if match_data['member_db'].upper() == "PIRSR":
+                                match["evalue"] = float(location['evalue'])
+                                match["score"] = float(location['score'])
+                                try:
+                                    match["scope"] = location["scope"]
+                                except KeyError:
+                                    match["scope"] = None
 
                             if 'model-ac' in match_data:
                                 match["model-ac"] = match_data['model-ac']
@@ -250,6 +261,12 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 match["graphscan"] = str(match_data["graphscan"])
 
                             matches.append(match)
+
+                            if match_data['member_db'].upper() == "PHOBIUS":
+                                seqlen = data['sequences'][3]
+                                for info in locations:
+                                    if seqlen == info["start"] + info["end"] - 1:
+                                        matches.pop()
 
         result = {
             "sequence": sequence,

@@ -50,7 +50,7 @@ process HMMER2_PARSER {
     path fasta  // used for filtering kinase hits in SMART_FILTER_MATCHES
 
     output:
-    path "hmmer_parsed_*"
+    path "hmmer_parsed_${out}.json"
 
     /*
     get_sites --> "true" or "false" is to tell the domtbl parser if to retrieve site data
