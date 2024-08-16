@@ -55,7 +55,7 @@ def parse(sequences: dict):
     return results
 
 
-def parse_nucleic(sequences: dict, nt_seqs: dict):
+def parse_nucleic(sequences: dict, nt_seqs: dict) -> dict[str, list]:
     results = {}
     for key, sequence in sequences.items():
         sequence_info = []
