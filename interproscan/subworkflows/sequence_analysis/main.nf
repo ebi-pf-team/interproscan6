@@ -286,7 +286,6 @@ workflow SEQUENCE_ANALYSIS {
                 params.signalp_mode,
                 params.members.signalp.data.organism,
                 params.members.signalp.data.pvalue,
-                params.members.signalp.release
             ]
 
         signalp_euk: member == 'signalp_euk'
