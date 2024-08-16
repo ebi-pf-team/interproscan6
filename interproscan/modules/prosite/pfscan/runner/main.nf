@@ -16,7 +16,7 @@ process PFSCAN_RUNNER {
     */
 
     output:
-        path "${release}._.ps_scan.out"
+        path "ps_scan.out"
 
     script:
     """
@@ -25,6 +25,6 @@ process PFSCAN_RUNNER {
         -d ${data} \
         --pfscan /opt/pftools/pfscanV3 \
         -b ${evaluator} \
-        ${switches} > ${release}._.ps_scan.out
+        ${switches} > ps_scan.out
     """
 }

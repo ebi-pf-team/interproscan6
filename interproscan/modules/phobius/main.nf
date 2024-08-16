@@ -9,7 +9,7 @@ process PHOBIUS_RUNNER {
 
     script:
     """
-    phobius ${fasta} > ${release}._.phobius_out.txt
+    phobius ${fasta} > phobius_out.txt
     """
 }
 

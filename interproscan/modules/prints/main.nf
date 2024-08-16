@@ -11,7 +11,7 @@ process PRINTS_RUNNER {
     script:
     """
     $projectDir/bin/prints/fingerPRINTScan \
-    ${pval} ${fasta} ${switches} > ${release}._.printsOutput.txt
+    ${pval} ${fasta} ${switches} > printsOutput.txt
     """
 
 }
