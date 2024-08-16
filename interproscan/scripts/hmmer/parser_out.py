@@ -1,7 +1,6 @@
 import json
 import re
 import sys
-from cigar_alignment import cigar_alignment_parser, encode
 
 
 DOMAIN_SECTION_START_PATTERN = re.compile(r"^>>\s+(\S+).*$")
@@ -11,6 +10,11 @@ HMMALIGN_SEQUENCE_PATTERN = re.compile(r"^\s+(\S+)\s+(\S+)\s+([-a-zA-Z.]+)\s+(\S
 DOMAIN_LINE_PATTERN = re.compile(
     "^\\s+(\\d+)\\s+[!?]\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\S+).*$"
 )
+
+MATCH_CHAR = 'M'
+INSERT_CHAR = 'I'
+DELETE_CHAR = 'D'
+DELETE_SYMBOL = '-'
 
 
 def get_accession_regex(appl: str) -> re.Pattern:
@@ -247,6 +251,43 @@ def get_sequence_match(
         sequence_match[sequence_id][model_id].update(match_info)
 
     return sequence_match
+
+
+def cigar_alignment_parser(alignment: str) -> str:
+    """Convert alignment from HMMER3 and HMMER2 to cigar alignment
+
+    :param alignment: The query protein sequence from the alignment
+    """
+    cigar_alignment = ""
+    for char in alignment:
+        if char.isupper():
+            cigar_alignment += MATCH_CHAR
+        elif char.islower():
+            cigar_alignment += INSERT_CHAR
+        elif char == DELETE_SYMBOL:
+            cigar_alignment += DELETE_CHAR
+        else:
+            raise ValueError(f"Alignment contains unrecognised character {char}")
+
+    return cigar_alignment
+
+
+def encode(cigar_alignment: str) -> str:
+    encoded_alignment = ""
+    prev_char = ""
+    count = 0
+
+    for char in cigar_alignment:
+        if char == prev_char:
+            count += 1
+        else:
+            if prev_char:
+                encoded_alignment += str(count) + prev_char
+            count = 1
+            prev_char = char
+    encoded_alignment += str(count) + prev_char
+
+    return encoded_alignment
 
 
 def main():

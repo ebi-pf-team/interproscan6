@@ -22,10 +22,10 @@ process PFSCAN_RUNNER {
 
     script:
     """
-        perl /opt/pftools/var/lib/pftools/bin/ps_scan.pl \
+        perl /opt/pftools/ps_scan.pl \
         ${fasta} \
         -d ${data} \
-        --pfscan /opt/pftools/var/lib/pftools/bin/pfscanV3 \
+        --pfscan /opt/pftools/pfscanV3 \
         -b ${evaluator} \
         ${switches} > ${release}._.ps_scan.out
     """

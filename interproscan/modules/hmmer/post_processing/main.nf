@@ -26,6 +26,36 @@ process CATH_RESOLVE_HITS {
 }
 
 
+process FUNFAM_CATH_RESOLVE_HITS {
+    /* Funfam has one hmmer.out file per cath superfamily
+    Runs cath_resolve hits for each hmmer.out file as a 
+    single job. 
+    Generates an output file per hmmer.out file.
+    */
+    label 'analysis_parser'
+
+    input:
+        path hmmer_out_files
+        val postprocessing_params  // [0] evalue [1] control factor
+
+    output:
+        path "*.cath.resolved.out"
+
+    // cath_resolve_hits is a third party tool used to minimise spurious hits
+    script:
+    """
+    for hmmer_file in ${hmmer_out_files}
+    do
+        base_name=\$(basename \$hmmer_file .out)
+        /opt/cath-tools/cath-resolve-hits \\
+            \$hmmer_file \\
+            --input-for hmmsearch_out \\
+            ${postprocessing_params[0]} > "\${base_name}.cath.resolved.out"
+    done
+    """
+}
+
+
 process ADD_CATH_SUPERFAMILIES {
     label 'analysis_parser'
 
@@ -84,7 +114,7 @@ process HAMAP_POST_PROCESSER {
         "seqs_with_hits.faa" \
         "hamap_pfsearch_output" \
         ${postprocessing_params[0]} \
-        "/opt/pftools/var/lib/pftools/bin/pfsearchV3" \
+        "/opt/pftools/pfsearchV3" \
         ${postprocessing_params[1]} > "print.statements.out"
     """
 }
