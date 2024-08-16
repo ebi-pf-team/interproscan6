@@ -11,8 +11,8 @@ process CDD_RUNNER {
 
     script:
     """
-    export LD_LIBRARY_PATH="/opt/blast/ncbi-blast-2.15.0+/lib"
-    /opt/blast/ncbi-blast-2.15.0+/bin/rpsblast -query ${fasta} -db ${library} -out rpsblast_out ${switches}
+    export LD_LIBRARY_PATH="/opt/blast/lib"
+    /opt/blast/rpsblast -query ${fasta} -db ${library} -out rpsblast_out ${switches}
     """
 }
 
