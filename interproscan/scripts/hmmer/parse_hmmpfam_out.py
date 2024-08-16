@@ -190,14 +190,7 @@ def parse_hmmpfam_out(out_file: str) -> dict:
                 else:
                     domain_line_pattern = DOMAIN_DATA_LINE.match(line)
                     if domain_line_pattern:
-                        try:
-                            protein_with_hit.get_domain_data(domain_line_pattern)
-                        except KeyError:
-                            print(line)
-                            print(protein_with_hit.sequence_id)
-                            print(protein_with_hit.signatures)
-                            import sys
-                            sys.exit(1)
+                        protein_with_hit.get_domain_data(domain_line_pattern)
 
     return matches
 
