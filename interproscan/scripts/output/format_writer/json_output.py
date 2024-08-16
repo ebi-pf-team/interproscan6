@@ -129,7 +129,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["evalue"] = float(location["evalue"])
                                     info["score"] = float(location["score"])
 
-                                elif match_data['member_db'].upper() == "COILS":
+                                elif match_data['member_db'].upper() in ["COILS", "PHOBIUS"]:
                                     # location data already added with lines 118-126
                                     pass  # pass not continue so that location fragment data is added
 
@@ -172,7 +172,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["alignment"] = location["alignment"]
                                     info["level"] = location["level"]
 
-                                elif match_data['member_db'].upper() == "SFLD":
+                                elif match_data['member_db'].upper() in ["SFLD", "PIRSR"]:
                                     info["evalue"] = float(location["evalue"])
                                     info["score"] = float(location["score"])
                                     info["hmmStart"] = int(location["hmmStart"])
@@ -199,7 +199,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                     info["envelopeStart"] = int(location["envelopeStart"])
                                     info["envelopeEnd"] = int(location["envelopeEnd"])
 
-                                if match_data['member_db'].upper() in ["SFLD", "CDD"]:
+                                if match_data['member_db'].upper() in ["CDD", "PIRSR", "SFLD"]:
                                     try:
                                         info["sites"] = location["sites"]
                                     except KeyError:
@@ -217,6 +217,7 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                         info["location-fragments"].append(single_location)
                                     except KeyError:
                                         info["location-fragments"] = [single_location]
+
                                 locations.append(info)
 
                             match = {
@@ -225,11 +226,19 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                             }
 
                             if match_data['member_db'].upper() not in [
-                                "CDD", "COILS", "HAMAP", "PROSITE_PROFILES",
-                                "PROSITE_PATTERNS", "PRINTS", "SUPERFAMILY"
+                                "CDD", "COILS", "HAMAP", "PHOBIUS", "PROSITE_PROFILES",
+                                "PROSITE_PATTERNS", "PRINTS", "PIRSR", "SUPERFAMILY"
                             ]:
                                 match["evalue"] = float(match_data['evalue'])
                                 match["score"] = float(match_data['score'])
+
+                            if match_data['member_db'].upper() == "PIRSR":
+                                match["evalue"] = float(location['evalue'])
+                                match["score"] = float(location['score'])
+                                try:
+                                    match["scope"] = location["scope"]
+                                except KeyError:
+                                    match["scope"] = None
 
                             if 'model-ac' in match_data:
                                 match["model-ac"] = match_data['model-ac']
@@ -253,6 +262,12 @@ def json_output(seq_matches: dict, output_path: str, version: str):
                                 match["scope"] = None
 
                             matches.append(match)
+
+                            if match_data['member_db'].upper() == "PHOBIUS":
+                                seqlen = data['sequences'][3]
+                                for info in locations:
+                                    if seqlen == info["start"] + info["end"] - 1:
+                                        matches.pop()
 
         result = {
             "sequence": sequence,

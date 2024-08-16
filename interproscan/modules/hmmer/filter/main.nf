@@ -143,6 +143,24 @@ process PIRSF_FILTER_MATCHES {
 }
 
 
+process PIRSR_FILTER_MATCHES {
+    label 'analysis_parser'
+
+    input:
+        path ips6_json
+        val postprocessing_params   // [0] path to rules file
+
+    output:
+        path "${ips6_json}.post.processed.json"
+
+    script:
+    """
+    python3 $projectDir/interproscan/scripts/members/pirsr/filter.py \
+    ${ips6_json} ${postprocessing_params[0]} > ${ips6_json}.post.processed.json
+    """
+}
+
+
 process SFLD_FILTER_MATCHES {
     label 'analysis_parser'
 
@@ -164,9 +182,9 @@ process SFLD_FILTER_MATCHES {
 
 process SMART_FILTER_MATCHES {
     label 'analysis_parser'
-    /* 
+    /*
     It needs the FASTA file becauce when both Ser-Thr and Tyr
-    kinase matches are found in a sequence, the domains 
+    kinase matches are found in a sequence, the domains
     are checked again using regex checks against the protein sequence.
     */
 

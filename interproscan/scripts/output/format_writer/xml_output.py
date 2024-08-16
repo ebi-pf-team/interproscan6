@@ -13,7 +13,9 @@ MATCH_ELEMENT = {
     'NCBIFAM': 'hmmer3-match',
     'PANTHER': 'hmmer3-match',
     'PFAM': 'hmmer3-match',
+    'PHOBIUS': 'phobius-match',
     'PIRSF': 'hmmer3-match',
+    'PIRSR': 'hmmer3-match',
     'PRINTS': 'fingerprints-match',
     'PROSITE_PATTERNS': 'profilescan-match',
     'PROSITE_PROFILES': 'profilesearch-match',  # changed from i5 which is also profilescan-match
@@ -142,7 +144,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("pvalue", str(location["pvalue"]))
 
-                    elif match_data['member_db'].upper() == "SFLD":
+                    elif match_data['member_db'].upper() in ["SFLD", "PIRSR"]:
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         try:
                             location_elem.set("sites", location["sites"])
@@ -161,7 +163,7 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                         location_elem.set("end", str(location["end"]))
                         location_elem.set("representative", str(location["representative"]))
 
-                    elif match_data['member_db'].upper() in ["COILS", "MOBIDB", "SUPERFAMILY"]:
+                    elif match_data['member_db'].upper() in ["COILS", "MOBIDB", "PHOBIUS", "SUPERFAMILY"]:
                         location_elem = ET.SubElement(locations_elem, "analysis-location")
                         location_elem.set("start", str(location["start"]))
                         location_elem.set("end", str(location["end"]))
@@ -226,6 +228,13 @@ def xml_output(seq_matches: dict, output_path: str, version: str):
                             location_frag_elem.set("start", str(location_fragment["start"]))
                             location_frag_elem.set("end", str(location_fragment["end"]))
                             location_frag_elem.set("dc-status", str(location_fragment["dc-status"]))
+
+                if match_data['member_db'].upper() == 'PHOBIUS':
+                    seqlen = data['sequences'][3]
+                    for location in match_data['locations']:
+                        if seqlen == location['start'] + location['end'] -1:
+                            matches_elem.remove(match_elem)
+
 
     tree = ET.ElementTree(root)
     ET.indent(tree, space="\t", level=0)
