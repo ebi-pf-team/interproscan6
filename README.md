@@ -63,10 +63,6 @@ update the paths for:
 
 Please provide absolute paths. You can use the `$projectDir` short cut to represent the path to the root directory of `InterProScan6`.
 
-2. Download InterPro data files (xref (entries, goterms and pathways)) in the `data/xref/` directory.
-
-If you store these data in an alternative directory, please update the paths under the `xrefs` heading in the Nextflow configuration file (`./nextflow.config`).
-
 Please provide absolute paths. You can use the `$projectDir` short cut to represent the path to the root directory of `InterProScan6`.
 
 3. Build a docker `InterProScan6` base image (this includes all non-licensed dependencies including `HMMER`, `BLAST`, `BioPython`, `easel`, etc.)
