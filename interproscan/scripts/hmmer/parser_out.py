@@ -1,14 +1,19 @@
 import json
 import re
 import sys
-from cigar_alignment import cigar_alignment_parser, encode
 
 DOMAIN_SECTION_START_PATTERN = re.compile(r"^>>\s+(\S+).*$")
 DOMAIN_ALIGNMENT_LINE_PATTERN = re.compile(r"^\s+==\s+domain\s+(\d+)\s+.*$")
 ALIGNMENT_SEQUENCE_PATTERN = re.compile(r"^\s+(\S+)\s+(\S+)\s+([-a-zA-Z]+)\s+(\S+)\s*$")  # replacing (\w+) with (\S+) and adding if to ignore current sequence
+HMMALIGN_SEQUENCE_PATTERN = re.compile(r"^\s+(\S+)\s+(\S+)\s+([-a-zA-Z.]+)\s+(\S+)\s*$")
 DOMAIN_LINE_PATTERN = re.compile(
     "^\\s+(\\d+)\\s+[!?]\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\d+)\\s+(\\d+)\\s+\\S+\\s+(\\S+).*$"
 )
+
+MATCH_CHAR = 'M'
+INSERT_CHAR = 'I'
+DELETE_CHAR = 'D'
+DELETE_SYMBOL = '-'
 
 
 def get_accession_regex(appl: str) -> re.Pattern:
@@ -28,9 +33,10 @@ def get_accession_regex(appl: str) -> re.Pattern:
         return re.compile(r"(^[^:]*:)\s+(\w+).*$")
     if appl.upper() == "PIRSF":
         return re.compile(r"^(Accession:)\s+(PIRSF\d+)$")
+    if appl.upper() == "PIRSR":
+        return re.compile(r"^(Accession:)\s+(PIRSR\d+-\d+)$")
     if appl.upper() == "SFLD":
         return re.compile(r"^(Accession:|Query:|Query sequence:)\s+(SFLD[^\s]+)\s*$")
-
 
 
 def parse(out_file: str) -> dict:
@@ -130,6 +136,7 @@ def parse(out_file: str) -> dict:
                             domain_alignment_matcher = DOMAIN_ALIGNMENT_LINE_PATTERN.match(line)
                             if domain_alignment_matcher:
                                 align_seq = []
+                                hmm_seq = []
                                 current_domain = domain_alignment_matcher.group(1)
                         if current_domain and current_sequence:
                             alignment_sequence_pattern = ALIGNMENT_SEQUENCE_PATTERN.match(line)
@@ -137,7 +144,12 @@ def parse(out_file: str) -> dict:
                                 if alignment_sequence_pattern.group(1) == current_sequence:
                                     align_seq.append(alignment_sequence_pattern.group(3))
                                     domain_match[current_domain]["alignment"] = "".join(align_seq)
-
+                            if member_db.upper() == "PIRSR":
+                                hmmalign_sequence_pattern = HMMALIGN_SEQUENCE_PATTERN.match(line)
+                                if hmmalign_sequence_pattern:
+                                    if hmmalign_sequence_pattern.group(1) != current_sequence:
+                                        hmm_seq.append(hmmalign_sequence_pattern.group(3))
+                                        domain_match[current_domain]["hmm_alignment"] = "".join(hmm_seq)
                     elif stage == 'LOOKING_FOR_DOMAIN_DATA_LINE':
                         if "Alignments for each domain" in line:
                             stage = 'LOOKING_FOR_DOMAIN_SECTION'
@@ -238,6 +250,43 @@ def get_sequence_match(
         sequence_match[sequence_id][model_id].update(match_info)
 
     return sequence_match
+
+
+def cigar_alignment_parser(alignment: str) -> str:
+    """Convert alignment from HMMER3 and HMMER2 to cigar alignment
+
+    :param alignment: The query protein sequence from the alignment
+    """
+    cigar_alignment = ""
+    for char in alignment:
+        if char.isupper():
+            cigar_alignment += MATCH_CHAR
+        elif char.islower():
+            cigar_alignment += INSERT_CHAR
+        elif char == DELETE_SYMBOL:
+            cigar_alignment += DELETE_CHAR
+        else:
+            raise ValueError(f"Alignment contains unrecognised character {char}")
+
+    return cigar_alignment
+
+
+def encode(cigar_alignment: str) -> str:
+    encoded_alignment = ""
+    prev_char = ""
+    count = 0
+
+    for char in cigar_alignment:
+        if char == prev_char:
+            count += 1
+        else:
+            if prev_char:
+                encoded_alignment += str(count) + prev_char
+            count = 1
+            prev_char = char
+    encoded_alignment += str(count) + prev_char
+
+    return encoded_alignment
 
 
 def main():
