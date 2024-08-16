@@ -10,7 +10,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     apt-get install --no-install-recommends -y \
     autoconf automake autotools-dev bison build-essential cmake curl \
     flex git libcurl3-gnutls libdivsufsort3 liblmdb0 libdw1 libgomp1 libnghttp2-dev \
-    libssl-dev libtool nghttp2 procps python3.10 python3-venv python3-pip \
+    libssl-dev libtool nghttp2 procps python3.10 python3-venv python3-pip python3-requests \
     tar zlib1g-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
