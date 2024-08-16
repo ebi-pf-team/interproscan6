@@ -72,7 +72,7 @@ def filter_matches(ips6: Path, hamap_matches: dict[str, HamapHit]) -> tuple[dict
     those that passed the Gene3D post-processing.
 
     :param ips6: path to internal IPS6 JSON file containing parsed hits from HMMER.out file
-    :param hamap_matches: dict of HamapHits, representing hits in the 
+    :param hamap_matches: dict of HamapHits, representing hits in the
         pfsearch_wrapper.py output file
 
     Return processed IPS6 dict and a list of all cath superfamilies where hits were generated
@@ -102,7 +102,6 @@ def filter_matches(ips6: Path, hamap_matches: dict[str, HamapHit]) -> tuple[dict
                 processed_ips6[protein_id][signature_acc]["name"] = hmmer_match["name"]
                 processed_ips6[protein_id][signature_acc]["description"] = hmmer_match["description"]
                 processed_ips6[protein_id][signature_acc]["member_db"] = hmmer_match["member_db"]
-                processed_ips6[protein_id][signature_acc]["version"] = hmmer_match["version"]
                 processed_ips6[protein_id][signature_acc]["model-ac"] = hmmer_match["model-ac"]
                 processed_ips6[protein_id][signature_acc]["locations"] = []
 

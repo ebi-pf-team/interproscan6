@@ -113,7 +113,6 @@ def add_match(
     matches: dict,
     protein_with_hit: QueryProtein,
     member_db: str,
-    version: str,
 ) -> dict:
     """Store data for protein with hits against SMART HMM profiles.
 
@@ -133,7 +132,6 @@ def add_match(
                 "evalue": model_obj.evalue,
                 "score": model_obj.score,
                 "member_db": member_db,
-                "version": version,
                 "model-ac": model_id,
                 "locations": []
             }
@@ -173,7 +171,6 @@ def parse(hmmer_out_path: str):
     :param hmmer_out_path: str repr of path to hmmscan out file
     """
     matches = {}
-    version = hmmer_out_path.split("/")[-1].split("._.")[0]
     member_db = hmmer_out_path.split("._.")[1]
     query_protein = QueryProtein()
     current_model = None
@@ -184,7 +181,7 @@ def parse(hmmer_out_path: str):
 
             if line.startswith("//"):
                 if query_protein.signatures:
-                    matches = add_match(matches, query_protein, member_db, version)
+                    matches = add_match(matches, query_protein, member_db)
                 # start a new protein instance
                 query_protein = QueryProtein()
                 stage = 'LOOKING_FOR_METHOD_ACCESSION'

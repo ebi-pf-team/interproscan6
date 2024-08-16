@@ -122,9 +122,8 @@ def filter_matches(
     those that passed the Gene3D post-processing.
 
     :param ips6: str repr of path to internal IPS6 JSON file containing parsed hits from HMMER.out file
-    :param funfam_matches: dict of FunfamHits, representing hits in the 
+    :param funfam_matches: dict of FunfamHits, representing hits in the
         add_cath_superfamilies.py output file
-    :param release: FunFam release version
 
     Return processed IPS6 dict and a list of all cath superfamilies where hits were generated
     """
@@ -163,7 +162,6 @@ def filter_matches(
                 if funfam_sig_acc not in processed_ips6[protein_id]:
                     sig_info = ips6_data[protein_id][signature_acc]
                     sig_info["member_db"] = "funfam"
-                    sig_info["version"] = release
                     sig_info["accession"] = funfam_sig_acc
 
                     # model ac is the domain id (minus the -... suffix)
@@ -171,7 +169,7 @@ def filter_matches(
 
                     processed_ips6[protein_id][funfam_sig_acc] = sig_info
                     processed_ips6[protein_id][funfam_sig_acc]["locations"] = []
-                    # start locations as empty as not all hits/locations in ips6 
+                    # start locations as empty as not all hits/locations in ips6
                     # may have parsed the post-processing
 
                 # add the location fragments (the 'aligned-regions') to the domain location data

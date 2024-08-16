@@ -80,7 +80,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "funfam",
         type=Path,
-        help="Path to FunFam models dir, e.g. data/funfam/4.3.0/models"
+        help="Path to FunFam models dir, e.g. data/funfam/models"
     )
 
     return parser
@@ -116,7 +116,7 @@ def filter_matches(
     those that passed the Gene3D post-processing.
 
     :param ips6: path to internal IPS6 JSON file containing parsed hits from HMMER.out file
-    :param gene3d_matches: dict of Gene3dHits, representing hits in the 
+    :param gene3d_matches: dict of Gene3dHits, representing hits in the
         add_cath_superfamilies.py output file
     :param funfam_dir: path to funfam data dir where all hmms are stored -
         so it can check if the hmm exists
@@ -177,7 +177,7 @@ def filter_matches(
 
                     processed_ips6[protein_id][gene3d_sig_acc] = sig_info
                     processed_ips6[protein_id][gene3d_sig_acc]["locations"] = []
-                    # start locations as empty as not all hits/locations in ips6 
+                    # start locations as empty as not all hits/locations in ips6
                     # may have parsed the post-processing
 
                 # add the location fragments (the 'aligned-regions') to the domain location data

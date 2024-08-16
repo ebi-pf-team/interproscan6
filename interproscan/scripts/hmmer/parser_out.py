@@ -45,8 +45,7 @@ def parse(out_file: str) -> dict:
     :parama out_file: str representation of path to HMMER.out file
     """
     path_segments = out_file.split("/")[-1].split("._.")
-    version = path_segments[0]
-    member_db = path_segments[1]
+    member_db = path_segments[0]
     current_sequence = None
     current_domain = None
     sequence_match = {}
@@ -115,7 +114,6 @@ def parse(out_file: str) -> dict:
                                 model_id,
                                 query_name,
                                 description,
-                                version,
                                 member_db,
                                 qlen
                             )
@@ -217,7 +215,6 @@ def get_sequence_match(
     model_id: str,
     query_name: str,
     description: str,
-    version: str,
     member_db: str,
     qlen: str
 ) -> dict:
@@ -236,7 +233,6 @@ def get_sequence_match(
             "qlen": int(qlen),
             "bias": match.group(3),
             "member_db": member_db,
-            "version": version,
             "model-ac": model_id.split(":")[0].split(".")[0],
             "locations": []
         }

@@ -8,7 +8,7 @@ import sys
 from cigar_alignment import cigar_alignment_parser, encode
 
 
-def parse(pfscan_out: str, version: str):
+def parse(pfscan_out: str):
     with open(pfscan_out, 'r') as fh:
         ips6_matches = {}
         for line in fh:
@@ -43,7 +43,6 @@ def parse(pfscan_out: str, version: str):
                             "name": name,
                             "description": "-",
                             "member_db": "PROSITE_PATTERNS",
-                            "version": version,
                             "locations": []
                         }
                     ips6_matches[seq_id][match_id]["locations"].append(location)
@@ -55,9 +54,7 @@ def main():
     pfscan_out = sys.argv[1]  # output file from PFSCAN_RUNNER module
     output_file = sys.argv[2]  # str rep of path for internal IPS6 JSON
 
-    version = pfscan_out.split("._.")[0]
-
-    ips6_matches = parse(pfscan_out, version)
+    ips6_matches = parse(pfscan_out)
 
     with open(output_file, "w") as fh:
         json.dump(ips6_matches, fh, indent=2)

@@ -13,8 +13,7 @@ LENGTH_LINE = re.compile(r"^LENG\s+([0-9]+)$")
 def parse(ass3_out_path: str, hmmlib_info: dict) -> dict:
     data = {}
     path_segments = ass3_out_path.split("/")[-1].split("._.")
-    version = path_segments[0]
-    member_db = path_segments[1]
+    member_db = path_segments[0]
 
     with open(ass3_out_path, 'r') as reader:
         for line in reader:
@@ -32,7 +31,6 @@ def parse(ass3_out_path: str, hmmlib_info: dict) -> dict:
                         'name': name,
                         'hmm_length': hmm_length,
                         'member_db': member_db,
-                        'version': version,
                         'evalue': match['evalue'],
                         'model-ac': match['model_id'],
                         'locations': []
