@@ -43,7 +43,7 @@ def tsv_output(seq_matches: dict, output_path: str):
                         sig_acc, status = "Signal peptide", ""
                         ali_from = match["locations"][0]["start"]
                         ali_to = match["locations"][0]["end"]
-                        #evalue = match["locations"][0]["pvalue"]
+                        evalue = match["locations"][0]["pvalue"]
                     elif match_db.upper() in ["CDD", "HAMAP", "PROSITE_PROFILES"]:
                         sig_acc = match["accession"]
                         status = "T"
