@@ -124,28 +124,13 @@ class PhobiusHit:
 
 
 def main():
-    # args 0 = fasta file parsed by phobius (to get seq lens)
-    # args 1 = output form phobius
+    # args 0 = output form phobius
     args = sys.argv[1:]
-    load_seqs = args[0]
-    parsed_results = parse(args[0], load_seqs)
+    parsed_results = parse(args[0])
     print(json.dumps(parsed_results, indent=2))
 
 
-def load_seqs(fasta: str) -> dict:
-    seqs = {}
-    current_seq = ""
-    with open(fasta, "r") as fh:
-        for line in fh:
-            if line.startswith(">"):
-                current_seq = line.strip(">")
-                seqs[current_seq] = 0
-            else:
-                seqs[current_seq] += len(line.strip())
-    return seqs
-
-
-def parse(phobius_out: str, seqs_dict: dict) -> dict:
+def parse(phobius_out: str) -> dict:
     """Example Phobius hit from the output file. Data is grouped by the query protein seq ID:
     //
     ID   sp|O16846|1AK_HETMG
