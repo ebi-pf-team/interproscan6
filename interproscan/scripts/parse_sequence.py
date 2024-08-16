@@ -56,7 +56,6 @@ def parse(sequences: dict, applications: str):
         acc = key.split(" ", 1)[0]
         if ">" in sequence:
             raise ValueError(f"{acc} contains illegal character '>'")
-        set(seq).intersection(illegal_char_set)
         illegal_matches = set(seq).intersection(illegal_char_set)
         if illegal_matches:
             error_message = f"{acc} contains illegal character(s): \n"
