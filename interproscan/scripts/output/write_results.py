@@ -1,10 +1,14 @@
 import json
+import re
 import sys
 
 from format_writer.tsv_output import tsv_pro_output
 from format_writer.tsv_output import tsv_output
-from format_writer.json_output import json_output
-from format_writer.xml_output import xml_output
+from format_writer.json_output import build_json_output_nucleic, build_json_output_protein
+from format_writer.xml_output import build_xml_output_nucleic, build_xml_output_protein
+
+
+NT_PATTERN = re.compile(r"^orf\d+\s+source=(.*)\s+coords=.*$")
 
 
 def write_results(
@@ -12,10 +16,10 @@ def write_results(
     matches_path: str,
     output_format: list,
     output_path: str,
-    version: str
+    version: str,
+    nucleic: bool,
 ):
     seq_matches = {}
-
     all_sequences = {}
     with open(matches_path, 'r') as match_data:
         all_matches = json.load(match_data)
@@ -24,20 +28,35 @@ def write_results(
             sequence = json.loads(line)
             all_sequences.update(sequence)
 
-    for key, value in all_sequences.items():
-        seq_matches[key] = {
-            'sequences': value,
-            'matches': all_matches.get(key, {})
-        }
+    if not nucleic:
+        for key, value in all_sequences.items():
+            seq_matches[key] = {
+                'sequences': value,
+                'matches': all_matches.get(key, {})
+            }
+    else:
+        # map ORF<id> to the original nucleic seq
+        for key, value in all_sequences.items():
+            result_id = f"{NT_PATTERN.match(value[0]).group(1)}_{key}"
+            seq_matches[result_id] = {
+                'sequences': value,
+                'matches': all_matches.get(key, {})
+            }
 
     if "TSV" in output_format:
         tsv_output(seq_matches, output_path)
     if "TSV-PRO" in output_format:
         tsv_pro_output(seq_matches, output_path)
     if "JSON" in output_format:
-        json_output(seq_matches, output_path, version)
+        if nucleic:
+            build_json_output_nucleic(seq_matches, output_path, version)
+        else:
+            build_json_output_protein(seq_matches, output_path, version)
     if "XML" in output_format:
-        xml_output(seq_matches, output_path, version)
+        if nucleic:
+            build_xml_output_nucleic(seq_matches, output_path, version)
+        else:
+            build_xml_output_protein(seq_matches, output_path, version)
 
 
 def main():
@@ -48,9 +67,10 @@ def main():
     formats_str = args[2]
     output_path = args[3]
     version = args[4]
+    nucleic = True if args[5] == "true" else False
 
     formats = set(formats_str.upper().split(','))
-    write_results(sequences, matches, formats, output_path, version)
+    write_results(sequences, matches, formats, output_path, version, nucleic)
 
 
 if __name__ == "__main__":

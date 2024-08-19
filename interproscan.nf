@@ -47,13 +47,22 @@ workflow {
             log.info "Strand option '${params.translate.strand.toLowerCase()}' in nextflow.config not recognised. Accepted: 'both', 'plus', 'minus'"
             exit 1
         }
-        GET_ORFS(ch_fasta, params.translate.strand, params.translate.methionine, params.translate.min_len, params.translate.genetic_code)
+        GET_ORFS(
+            ch_fasta,
+            params.translate.strand,
+            params.translate.methionine,
+            params.translate.min_len,
+            params.translate.genetic_code
+        )
         GET_ORFS.out.splitFasta( by: params.batchsize, file: true )
         .set { orfs_fasta }
-        PARSE_SEQUENCE(orfs_fasta, applications)
+        /* Provide the translated ORFs and the original nts seqs
+        So that the ORFs can be associated with the source nucleic seq
+        in the final output */
+        PARSE_SEQUENCE(orfs_fasta, ch_fasta, params.nucleic, applications)
     }
     else {
-        PARSE_SEQUENCE(ch_fasta, applications)
+        PARSE_SEQUENCE(ch_fasta, ch_fasta, params.nucleic, applications)
     }
 
     sequences_to_analyse = null
@@ -91,7 +100,14 @@ workflow {
     Channel.from(formats.split(','))
     .set { ch_format }
 
-    WRITE_RESULTS(PARSE_SEQUENCE.out.collect(), XREFS.out.collect(), ch_format, params.output, params.ipsc_version)
+    WRITE_RESULTS(
+        PARSE_SEQUENCE.out.collect(),
+        XREFS.out.collect(),
+        ch_format,
+        params.output,
+        params.ipsc_version,
+        params.nucleic
+    )
 }
 
 workflow.onComplete = {

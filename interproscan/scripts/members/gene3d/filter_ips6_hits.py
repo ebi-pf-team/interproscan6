@@ -228,7 +228,7 @@ def main():
     processed_ips6, superfamilies = filter_matches(args.ips6, matches, args.funfam)
 
     with open(args.out_json, "w") as fh:
-        json.dump(processed_ips6, fh, indent=2)
+        json.dump(processed_ips6, fh)
     with open(args.out_superfamilies, "w") as fh:
         for superfam in superfamilies:
             fh.write(f"{superfam}\n")

@@ -1,0 +1,10 @@
+*.DS_Store
+.idea/
+.nextflow.log*
+.nextflow/
+data/
+docker_files/.nextflow.log
+*__pycache__*
+work/
+results/
+*signalp-6-package/

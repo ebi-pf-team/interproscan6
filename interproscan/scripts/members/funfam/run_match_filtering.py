@@ -1,7 +1,60 @@
-import argparse
 import json
+import re
+import sys
 
-from pathlib import Path
+"""Matches up the corresponding IPS6 JSON file with the cath_resolve 
+output file, and then runs filter_ips6_hits.py for each pair
+of matches output files"""
+
+
+CATH_PATTERN = re.compile(r"^.*\._\.(\d+\.\d+\.\d+\.\d+)\.cath\.resolved\.out$")
+JSON_PATTERN = re.compile(r"^hmmer_parsed_.*\._\.(\d+\.\d+\.\d+\.\d+)\.json$")
+RELEASE_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
+
+
+def main():
+    """
+    Args include:
+    All hmmer.out files from HMMER_PARSER
+    All output files from cath-resolve hits
+    Ending with the release number of FunFam from members.config
+    """
+    release = None
+    files = {}  # keyed by cath superfamily
+    for input_arg in sys.argv[1:]:
+        _file = CATH_PATTERN.match(input_arg)
+        if _file:
+            cath_superfam = _file.group(1)
+            if cath_superfam not in files:
+                files[cath_superfam] = {}
+            files[cath_superfam]["cath.resolve"] = input_arg
+            continue
+
+        _file = JSON_PATTERN.match(input_arg)
+        if _file:
+            cath_superfam = _file.group(1)
+            if cath_superfam not in files:
+                files[cath_superfam] = {}
+            files[cath_superfam]["ips6.json"] = input_arg
+            continue
+
+        if RELEASE_PATTERN.match(input_arg):
+            release = input_arg
+            continue
+
+        print(f"Did not recognise this input arg {input_arg}")
+        sys.exit(1)
+
+    for cath_superfam, file_info in files.items():
+        cath_out = parse_cath(file_info["cath.resolve"])
+        processed_ips6 = filter_matches(
+            file_info["ips6.json"],
+            cath_out,
+            release
+        )
+
+        with open(f"{file_info['ips6.json']}.processed.json", "w") as fh:
+            json.dump(processed_ips6, fh)
 
 
 class FunfamHit:
@@ -10,20 +63,23 @@ class FunfamHit:
         self.domains = {}
 
     def add_domain(self, value: str):
-        match_id = value.split()[1]
-        domain = DomainHit()
-        domain.signature_acc = match_id
-        domain.score = value.split()[2]
-        domain.evalue = value.split()[-1]
-        domain.boundaries_start = value.split()[3].split("-")[0]
-        domain.boundaries_end = value.split()[3].split("-")[1]
-        domain.resolved = value.split()[4]
-        domain.aligned_regions = value.split()[-3]
+        value = value.split()
+        # carried over from i5:
+        # treat each domain range in resolved hits as a separate domain
+        for domain_range in value[4].split(","):
+            match_id = value[1]
+            domain = DomainHit()
+            domain.signature_acc = match_id
+            domain.score = value[2]
+            domain.evalue = value[-1]
+            domain.boundaries_start = domain_range.split("-")[0]
+            domain.boundaries_end = domain_range.split("-")[-1]
+            domain.resolved = value[4]
 
-        if match_id not in self.domains:
-            self.domains[match_id] = [domain]
-        else:
-            self.domains[match_id].append(domain)
+            if match_id not in self.domains:
+                self.domains[match_id] = [domain]
+            else:
+                self.domains[match_id].append(domain)
 
 
 class DomainHit:
@@ -31,54 +87,15 @@ class DomainHit:
         self.signature_acc = None
         self.score = None  # bit score
         self.evalue = None  # indp-evalue
-        self.boundaries_start = None  # envelope boundaries
-        self.boundaries_end = None
+        self.boundaries_start = None  # resolved region
+        self.boundaries_end = None  # resolved region
         self.resolved = None
-        self.aligned_regions = None
 
 
-def build_parser() -> argparse.ArgumentParser:
-    """Build cmd-line argument parser"""
-    parser = argparse.ArgumentParser(
-        prog="fiter_ips6_hits",
-        description="""
-        Parse the output from the cath_resolve_hits,
-        filtering and adding data to the hits in the interal IPS6 JSON structure
-        """,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-
-    parser.add_argument(
-        "ips6",
-        type=Path,
-        help="Path to an internal IPS6 JSON file"
-    )
-
-    parser.add_argument(
-        "cath_out",
-        type=Path,
-        help="Path to cath resolve output file"
-    )
-
-    parser.add_argument(
-        "out_json",
-        type=Path,
-        help="Path to write the output JSON file"
-    )
-
-    parser.add_argument(
-        "release",
-        type=str,
-        help="FunFam release version"
-    )
-
-    return parser
-
-
-def parse_cath(cath_out: Path) -> dict[str, FunfamHit]:
+def parse_cath(cath_out: str) -> dict[str, FunfamHit]:
     """Parse cath_out file into a dictionary
 
-    :param cath_out: Path to add_cath_superfamilies.py output file
+    :param cath_out: str repr of path to add_cath_superfamilies.py output file
     """
     matches = {}  # prot seq id: domains
 
@@ -96,12 +113,16 @@ def parse_cath(cath_out: Path) -> dict[str, FunfamHit]:
     return matches
 
 
-def filter_matches(ips6: Path, gene3d_matches: dict[str, FunfamHit], release: str) -> tuple[dict, set]:
+def filter_matches(
+    ips6: str,
+    funfam_matches: dict[str, FunfamHit],
+    release: str
+) -> tuple[dict, set]:
     """Parse the IPS6 JSON file, filtering hits to only retains
     those that passed the Gene3D post-processing.
 
-    :param ips6: path to internal IPS6 JSON file containing parsed hits from HMMER.out file
-    :param gene3d_matches: dict of FunfamHits, representing hits in the 
+    :param ips6: str repr of path to internal IPS6 JSON file containing parsed hits from HMMER.out file
+    :param funfam_matches: dict of FunfamHits, representing hits in the 
         add_cath_superfamilies.py output file
     :param release: FunFam release version
 
@@ -112,23 +133,23 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, FunfamHit], release: st
         ips6_data = json.load(fh)
 
     for protein_id in ips6_data:
-        if protein_id not in gene3d_matches:
+        if protein_id not in funfam_matches:
             continue
 
         for signature_acc in ips6_data[protein_id]:  # e.g. 3.40.50.1170-FF-000001
-            if signature_acc not in gene3d_matches[protein_id].domains:
+            if signature_acc not in funfam_matches[protein_id].domains:
                 continue
 
             # retrieve the relevant domain hit
             ips6_location = None  # from the IPS6 data
             funfam_domain = None  # from the cath-superfamilies output
             for location in ips6_data[protein_id][signature_acc]["locations"]:  # list of locations
-                for domain in gene3d_matches[protein_id].domains[signature_acc]:
+                for domain in funfam_matches[protein_id].domains[signature_acc]:
                     # Iterate the list of DomainHit instances
-                    if domain.evalue == location["evalue"] \
-                        and domain.score == location["score"] \
-                        and domain.boundaries_start == location["envelopeStart"] \
-                        and domain.boundaries_end == location["envelopeEnd"]:
+                    if str(domain.evalue) == str(location["evalue"]) \
+                        and float(domain.score) == float(location["score"]) \
+                        and int(domain.boundaries_start) == int(location["envelopeStart"]) \
+                        and int(domain.boundaries_end) == int(location["envelopeEnd"]):
                         ips6_location = location  # dict of hmmer match data
                         funfam_domain = domain  # DomainHit instance
 
@@ -191,17 +212,6 @@ def filter_matches(ips6: Path, gene3d_matches: dict[str, FunfamHit], release: st
                 processed_ips6[protein_id][funfam_sig_acc]["locations"].append(ips6_location)
 
     return processed_ips6
-
-
-def main():
-    parser = build_parser()
-    args = parser.parse_args()
-
-    matches = parse_cath(args.cath_out)
-    processed_ips6 = filter_matches(args.ips6, matches, args.release)
-
-    with open(args.out_json, "w") as fh:
-        json.dump(processed_ips6, fh, indent=2)
 
 
 if __name__ == "__main__":

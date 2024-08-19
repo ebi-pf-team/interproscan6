@@ -10,7 +10,7 @@ process COILS_RUNNER {
 
     script:
     """
-    $projectDir/bin/coils/ncoils ${switches} < ${fasta} > coil_out
+    /opt/coils/ncoils ${switches} < ${fasta} > coil_out
     """
 }
 
