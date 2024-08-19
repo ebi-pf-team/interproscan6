@@ -105,6 +105,7 @@ def get_matches(data: dict):
                     description = match_data['description']
                 except KeyError:
                     description = None if match_data['member_db'].upper() == "SUPERFAMILY" else "-"
+
                 entry = None
                 if match_data['entry']:
                     if match_data['entry']['accession']:
@@ -125,7 +126,9 @@ def get_matches(data: dict):
                             pass
 
                 # drop the subfamily, else if gene3d/funfam then keep info after ":", e.g. G3DSA:3.20.20.70
-                accession = match_data['accession'].split(":")[0] if match_data['member_db'].upper() not in ["GENE3D", "FUNFAM"] else match_data['accession']
+                accession = match_data['accession'].split(":")[0] \
+                    if match_data['member_db'].upper() not in ["GENE3D", "FUNFAM"] \
+                    else match_data['accession']
 
                 signature = {
                     "accession": accession,
@@ -246,7 +249,7 @@ def get_matches(data: dict):
                                 info["alignment"] = location["alignment"]
                                 info["level"] = location["level"]
 
-                            elif match_data['member_db'].upper() == "SFLD":
+                            elif match_data['member_db'].upper() in ["PIRSR", "SFLD"]:
                                 info["evalue"] = float(location["evalue"])
                                 info["score"] = float(location["score"])
                                 info["hmmStart"] = int(location["hmmStart"])
@@ -273,8 +276,9 @@ def get_matches(data: dict):
                                 info["envelopeStart"] = int(location["envelopeStart"])
                                 info["envelopeEnd"] = int(location["envelopeEnd"])
 
-                            if match_data['member_db'].upper() in ["SFLD", "CDD"]:
+                            if match_data['member_db'].upper() in ["CDD", "PIRSR", "SFLD"]:
                                 info["sites"] = location["sites"] if "sites" in location else []
+
                             try:
                                 info["location-fragments"] = location["location-fragments"]
                             except KeyError:
@@ -294,7 +298,7 @@ def get_matches(data: dict):
                         }
 
                         if match_data['member_db'].upper() not in [
-                            "CDD", "COILS", "HAMAP", "PHOBIUS",
+                            "CDD", "COILS", "HAMAP", "PHOBIUS", "PIRSR",
                             "PROSITE_PROFILES", "PROSITE_PATTERNS",
                             "PRINTS"
                         ]:

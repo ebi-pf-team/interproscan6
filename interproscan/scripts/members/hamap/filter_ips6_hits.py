@@ -164,7 +164,7 @@ def main():
     processed_ips6 = filter_matches(args.ips6, matches)
 
     with open(args.out_json, "w") as fh:
-        json.dump(processed_ips6, fh, indent=2)
+        json.dump(processed_ips6, fh)
 
 
 if __name__ == "__main__":

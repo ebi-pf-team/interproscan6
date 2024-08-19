@@ -9,24 +9,20 @@ process FUNFAM_FILTER_MATCHES {
     label 'analysis_parser'
 
     input:
-        path ips6_json
-        path cath_resolved_out
+        path ips6_jsons
+        path cath_resolved_outs
         val postprocessing_params
-    /*
-    Post-processing params are needed when cath_resolved hits
-    process feeds into add_cath_superfamilies process
-    */
+    // postprocessing_params[6] funfam release
 
     output:
-        path "${ips6_json}.post.processed.json"
+        path "*.processed.json"
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/members/funfam/filter_ips6_hits.py \\
-        ${ips6_json} \\
-        ${cath_resolved_out} \\
-        ${ips6_json}.post.processed.json \\
-        ${postprocessing_params[6]}
+    python3 $projectDir/interproscan/scripts/members/funfam/run_match_filtering.py \\
+        ${ips6_jsons} \\
+        ${cath_resolved_outs} \\
+        ${postprocessing_params[6]} > debug
     """
 }
 
@@ -143,6 +139,24 @@ process PIRSF_FILTER_MATCHES {
 }
 
 
+process PIRSR_FILTER_MATCHES {
+    label 'analysis_parser'
+
+    input:
+        path ips6_json
+        val postprocessing_params   // [0] path to rules file
+
+    output:
+        path "${ips6_json}.post.processed.json"
+
+    script:
+    """
+    python3 $projectDir/interproscan/scripts/members/pirsr/filter.py \
+    ${ips6_json} ${postprocessing_params[0]} > ${ips6_json}.post.processed.json
+    """
+}
+
+
 process SFLD_FILTER_MATCHES {
     label 'analysis_parser'
 
@@ -164,9 +178,9 @@ process SFLD_FILTER_MATCHES {
 
 process SMART_FILTER_MATCHES {
     label 'analysis_parser'
-    /* 
+    /*
     It needs the FASTA file becauce when both Ser-Thr and Tyr
-    kinase matches are found in a sequence, the domains 
+    kinase matches are found in a sequence, the domains
     are checked again using regex checks against the protein sequence.
     */
 

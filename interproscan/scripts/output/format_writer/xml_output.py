@@ -18,6 +18,7 @@ MATCH_ELEMENT = {
     'PFAM': 'hmmer3-match',
     'PHOBIUS': 'phobius-match',
     'PIRSF': 'hmmer3-match',
+    'PIRSR': 'hmmer3-match',
     'PRINTS': 'fingerprints-match',
     'PROSITE_PATTERNS': 'profilescan-match',
     'PROSITE_PROFILES': 'profilesearch-match',  # changed from i5 which is also profilescan-match
@@ -246,7 +247,7 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                     location_elem.set("start", str(location["start"]))
                     location_elem.set("pvalue", str(location["pvalue"]))
 
-                elif match_data['member_db'].upper() == "SFLD":
+                elif match_data['member_db'].upper() in ["PIRSR", "SFLD"]:
                     location_elem = ET.SubElement(locations_elem, "analysis-location")
                     try:
                         location_elem.set("sites", location["sites"])
