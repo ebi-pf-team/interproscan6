@@ -60,10 +60,10 @@ workflow {
         /* Provide the translated ORFs and the original nts seqs
         So that the ORFs can be associated with the source nucleic seq
         in the final output */
-        PARSE_SEQUENCE(orfs_fasta, ch_fasta, params.nucleic)
+        PARSE_SEQUENCE(orfs_fasta, ch_fasta, params.nucleic, applications)
     }
     else {
-        PARSE_SEQUENCE(ch_fasta, ch_fasta, params.nucleic)
+        PARSE_SEQUENCE(ch_fasta, ch_fasta, params.nucleic, applications)
     }
 
     sequences_to_analyse = null
