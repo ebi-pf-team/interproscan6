@@ -83,13 +83,15 @@ include {
 include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER;
+    SIGNALP_RUNNER as SIGNALP_EUK_RUNNER;
+    SIGNALP_PARSER as SIGNALP_EUK_PARSER;
 } from "$projectDir/interproscan/modules/signalp/main"
-
 
 workflow SEQUENCE_ANALYSIS {
     take:
     fasta
     applications
+    signalp_mode
 
     main:
     boolean gene3d_funfam_processed = false
@@ -302,7 +304,7 @@ workflow SEQUENCE_ANALYSIS {
         signalp: member == 'signalp'
 
             return [
-                params.members.signalp.data.mode,
+                params.signalp_mode,
                 params.members.signalp.data.model_dir,
                 params.members.signalp.data.organism,
                 params.members.signalp.switches,
@@ -310,6 +312,16 @@ workflow SEQUENCE_ANALYSIS {
                 params.members.signalp.release
             ]
 
+        signalp_euk: member == 'signalp_euk'
+
+            return [
+                params.signalp_mode,
+                params.members.signalp_euk.data.model_dir,
+                params.members.signalp_euk.data.organism,
+                params.members.signalp_euk.switches,
+                params.members.signalp_euk.data.pvalue,
+                params.members.signalp_euk.release
+            ]
     }.set { member_params }
 
     /*
@@ -497,6 +509,11 @@ workflow SEQUENCE_ANALYSIS {
     SIGNALP_RUNNER(runner_signalp_params)
     SIGNALP_PARSER(SIGNALP_RUNNER.out)
 
+    // SignalP_euk
+    runner_signalp_euk_params = fasta.combine(member_params.signalp_euk)
+    SIGNALP_EUK_RUNNER(runner_signalp_euk_params)
+    SIGNALP_EUK_PARSER(SIGNALP_EUK_RUNNER.out)
+
     /*
     Gather the results
     */
@@ -520,6 +537,7 @@ workflow SEQUENCE_ANALYSIS {
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
+            SIGNALP_EUK_PARSER.out,
             SUPERFAMILY_FILTER_MATCHES.out
         )
         .set { parsed_results }
@@ -543,6 +561,7 @@ workflow SEQUENCE_ANALYSIS {
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
+            SIGNALP_EUK_PARSER.out,
             SUPERFAMILY_FILTER_MATCHES.out
         )
         .set { parsed_results }

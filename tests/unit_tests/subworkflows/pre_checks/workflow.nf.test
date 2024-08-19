@@ -26,6 +26,7 @@ nextflow_workflow {
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
                 input[7] = "6.0.0"
+                input[8] = "fast"
                 """
             }
         }
@@ -54,6 +55,7 @@ nextflow_workflow {
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
                 input[7] = "6.0.0"
+                input[8] = "fast"
                 """
             }
         }
@@ -80,6 +82,7 @@ nextflow_workflow {
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
                 input[7] = "6.0.0"
+                input[8] = "fast"
                 """
             }
         }
@@ -109,6 +112,7 @@ nextflow_workflow {
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
                 input[7] = "6.0.0"
+                input[8] = "fast"
                 """
             }
         }
@@ -138,6 +142,7 @@ nextflow_workflow {
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
                 input[7] = "6.0.0"
+                input[8] = "fast"
                 """
             }
         }
@@ -165,6 +170,7 @@ nextflow_workflow {
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
                 input[7] = "6.0.0"
+                input[8] = "fast"
                 """
             }
         }
@@ -192,6 +198,7 @@ nextflow_workflow {
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
                 input[7] = "6.0.0"
+                input[8] = "fast"
                 """
             }
         }
@@ -218,6 +225,7 @@ nextflow_workflow {
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
                 input[7] = "6.0.0"
+                input[8] = "fast"
                 """
             }
         }
@@ -245,6 +253,7 @@ nextflow_workflow {
                 input[4] = "${params.applications}"
                 input[5] = "${params.formats}"
                 input[7] = "6.0.0"
+                input[8] = "fast"
                 """
             }
         }
@@ -272,6 +281,7 @@ nextflow_workflow {
                 input[5] = "${params.formats}"
                 input[6] = "true"
                 input[7] = "6.0.0"
+                input[8] = "fast"
                 """
             }
         }

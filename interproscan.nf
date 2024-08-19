@@ -30,7 +30,8 @@ workflow {
         params.applications,
         params.formats,
         params.version,
-        params.ipsc_version
+        params.ipsc_version,
+        params.signalp_mode
     )
 
     formats = params.formats.toLowerCase()
@@ -74,6 +75,11 @@ workflow {
         parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
     }
 
+    if (params.signalp_mode.toLowerCase() !in ['fast', 'slow', 'slow-sequential']) {
+        log.info "Unrecognised SignalP mode '${params.signalp_mode}'.\nAccepted modes: 'fast', 'slow', 'slow-sequential'"
+        exit 1
+    }
+
     analysis_result = Channel.empty()
     if (params.disable_precalc || sequences_to_analyse) {
         log.info "Running sequence analysis"
@@ -88,7 +94,7 @@ workflow {
                 fasta_to_runner = ch_fasta
             }
         }
-        parsed_analysis = SEQUENCE_ANALYSIS(fasta_to_runner, applications)
+        parsed_analysis = SEQUENCE_ANALYSIS(fasta_to_runner, applications, params.signalp_mode)
     }
 
     all_results = parsed_matches.concat(parsed_analysis)
