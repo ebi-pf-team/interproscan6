@@ -4,7 +4,6 @@ process PARSE_SEQUENCE {
 
     input:
     val fasta_file
-    val applications
     val original_fasta_file
     val nucleic
     /*
@@ -14,6 +13,7 @@ process PARSE_SEQUENCE {
     associated with the corresponding ORF in the
     final output.
     */
+    val applications
 
     output:
     path "parsed_sequences"
@@ -22,8 +22,8 @@ process PARSE_SEQUENCE {
     """
     python3 $projectDir/interproscan/scripts/parse_sequence/parse_sequence.py \\
         ${fasta_file} \\
-        ${applications} \\
         ${original_fasta_file} \\
-        ${nucleic} > parsed_sequences
+        ${nucleic} \\
+        ${applications} > parsed_sequences
     """
 }
