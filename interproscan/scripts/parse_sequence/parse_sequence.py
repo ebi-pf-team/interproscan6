@@ -14,7 +14,7 @@ def is_fasta_check(fasta_file: str):
             raise ValueError(f"{fasta_file} is not in FASTA format")
 
 
-def get_sequences(fasta_file: str) -> dict:
+def get_sequences(fasta_file: str) -> dict[str, str]:
     sequences = {}
     with open(fasta_file, "r") as f:
         lines = f.readlines()
@@ -28,7 +28,7 @@ def get_sequences(fasta_file: str) -> dict:
     return sequences
 
 
-def get_nucleic_seqs(fasta_file: str) -> dict:
+def get_nucleic_seqs(fasta_file: str) -> dict[str, dict]:
     sequences = {}
     with open(fasta_file, "r") as f:
         lines = f.readlines()
