@@ -40,7 +40,7 @@ def tsv_output(seq_matches: dict, output_path: str):
 
                 for location in match["locations"]:
                     if match["member_db"].upper() in ["SIGNALP", "SIGNALP_EUK"]:
-                        sig_acc, status = "Signal peptide", ""
+                        sig_acc, status = "Signal Peptide", ""
                         ali_from = match["locations"][0]["start"]
                         ali_to = match["locations"][0]["end"]
                         evalue = match["locations"][0]["pvalue"]
