@@ -5,7 +5,7 @@ process PRINTS_RUNNER {
     tuple path(fasta), val(hierarchy), val(pval), val(switches)
 
     output:
-    path "*._.printsOutput.txt"
+    path "printsOutput.txt"
     val hierarchy
 
     script:

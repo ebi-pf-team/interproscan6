@@ -5,7 +5,7 @@ process PHOBIUS_RUNNER {
     input: path fasta
 
     output:
-    path "*._.phobius_out.txt"
+    path "phobius_out.txt"
 
     script:
     """

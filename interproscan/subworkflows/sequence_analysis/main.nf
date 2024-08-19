@@ -248,7 +248,7 @@ workflow SEQUENCE_ANALYSIS {
             ]
         coils: member == "coils"
             return [
-            params.members."${member}".switches
+                params.members."${member}".switches
             ]
 
         mobidb: member == "mobidb"
