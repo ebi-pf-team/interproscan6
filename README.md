@@ -369,7 +369,7 @@ To run in slow-sequential mode and with only Eukaryotic models, use the command:
 By default, `SignalP` runs on your CPU. If you have a GPU available, you can convert the `SignalP` model weights so that your installation will use GPU instead.
 You will need to install `SignalP` in order to convert to GPU models.
 
-1. (Optional) Remove any previously built SignalP images
+1. (Optional) Remove any previously built SignalP images if you no longer want to run `SignalP` with CPU
 ```bash
 docker image rm signalp6:latest
 ```
@@ -382,23 +382,16 @@ pip install .
 ```bash
 signalp6_convert_models gpu /path/to/models
 ```
-4. Build a docker image
+4. Build a docker image for `SignalP` with GPU
 ```bash
 # with the terminal pointed at your local signalp dir
-docker image build -t signalp6 .
+docker image build -t signalp6_gpu .
 ```
-5. To run `SignalP` with GPU with `InterProScan6` use the flag `--signalp_gpu`. 
+5. To run `SignalP` with GPU with `InterProScan6` use the flag `--signalp_gpu`
 ```bash
 nextflow run interproscan.nf --input <fasta file> --applications signalp --signalp_gpu
 ```
 Alternatively, if you do not always want to use the flag to run `SignalP`, you can update the `nextflow.config` file from "signalp_gpu = false" to "signalp_gpu = true".
-6. If you wish to convert back to CPU, run the following commands:
-```bash
-docker image rm signalp6:latest
-signalp6_convert_models cpu /path/to/models
-# with the terminal pointed at your local signalp dir
-docker image build -t signalp6 .
-```
 
 ## `Phobius`
 ### Adding `Phobius` (version 1.01) to `InterProScan6`
