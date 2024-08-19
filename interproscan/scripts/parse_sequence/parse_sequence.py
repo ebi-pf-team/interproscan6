@@ -42,7 +42,7 @@ def get_nucleic_seqs(fasta_file: str) -> dict:
                 sequences[seq_key]['sequence'] += line
     return sequences
 
-def parse(sequences: dict):
+def parse(sequences: dict) -> dict[str, list]:
     results = {}
     for key, sequence in sequences.items():
         sequence_info = []
@@ -55,7 +55,7 @@ def parse(sequences: dict):
     return results
 
 
-def parse_nucleic(sequences: dict, nt_seqs: dict):
+def parse_nucleic(sequences: dict, nt_seqs: dict) -> dict[str, list]:
     results = {}
     for key, sequence in sequences.items():
         sequence_info = []

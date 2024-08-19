@@ -56,7 +56,7 @@ FEATUREDICT = {
 class PhobiusHit:
     """Represent protein and associated hits in the Phobius output file.
 
-    We store or like domain hits (signal peptide, transmembrane and 
+    We store like domain hits (signal peptide, transmembrane and 
     (non-)cytoplasmic domain)) together as one hit with multiple locations.
     In the final output each domain hit is written as a separate
     'signature' hit - this approach ensures all locations are
