@@ -62,7 +62,7 @@ include {
 include {
     PHOBIUS_RUNNER;
     PHOBIUS_PARSER;
-} from "$projectDir/interproscan/modules/phobius/main"
+} from "$projectDir/interproscan/modules/members/phobius/main"
 include {
     PFSCAN_RUNNER as PROSITE_PATTERNS_RUNNER;
     PFSCAN_PARSER as PROSITE_PATTERNS_PARSER
