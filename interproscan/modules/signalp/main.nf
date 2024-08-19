@@ -3,7 +3,7 @@ process SIGNALP_RUNNER {
     label 'signalp_runner'
 
     input:
-    tuple path(fasta), val(mode), path(model_dir), val(organism), val(switches), val(pvalue), val(signal_version)
+    tuple path(fasta), val(mode), val(organism), val(pvalue), val(signal_version)
 
     output:
     path "signalp_out"
