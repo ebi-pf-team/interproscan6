@@ -40,7 +40,52 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
             databases_versions = entries["databases"]
             entries_info = entries['entries']
             acc_id = match_key.split(".")[0]
+<<<<<<< HEAD
             member_db = data["member_db"].upper()
+=======
+            try:
+                entry = entries[acc_id]
+                match_info[match_key]["entry"] = {
+                    "accession": entry["integrated"],
+                    "name": entry["name"],
+                    "description": entry["description"],
+                    "type": entry["type"],
+                    "version": entry["database"]["version"],
+                    "member_db": entry["database"]["name"],
+                    "goXRefs": [],
+                    "pathwayXRefs": []
+                }
+            except KeyError:
+                acc_id = match_key  # some accs need the '.'  , e.g. Gene3D
+                try:
+                    entry = entries[acc_id]
+                    match_info[match_key]["entry"] = {
+                        "accession": entry["integrated"],
+                        "name": entry["name"],
+                        "description": entry["description"],
+                        "type": entry["type"],
+                        "version": entry["database"]["version"],
+                        "member_db": entry["database"]["name"],
+                        "goXRefs": [],
+                        "pathwayXRefs": []
+                    }
+                except KeyError:  # members with no match in entries
+                    member_db_lower = data["member_db"].lower()
+                    for key in entries['databases']:
+                        if key.lower() == member_db_lower:
+                            version = entries['databases'][key]
+
+                    match_info[match_key]["entry"] = {
+                        "accession": None,
+                        "name": None,
+                        "description": None,
+                        "type": None,
+                        "database": data["member_db"],
+                        "goXRefs": [],
+                        "pathwayXRefs": [],
+                        "version": version
+                    }
+>>>>>>> ae98c3aa (removing desc and name from all parser)
 
             match_info[match_key]['member_db'] = member_db
             match_info[match_key]['library'] = map_databases[member_db]
