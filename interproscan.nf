@@ -31,6 +31,7 @@ workflow {
         params.formats,
         params.version,
         params.ipsc_version,
+        params.signalp_mode,
         params.signalp_gpu
     )
 
@@ -48,13 +49,22 @@ workflow {
             log.info "Strand option '${params.translate.strand.toLowerCase()}' in nextflow.config not recognised. Accepted: 'both', 'plus', 'minus'"
             exit 1
         }
-        GET_ORFS(ch_fasta, params.translate.strand, params.translate.methionine, params.translate.min_len, params.translate.genetic_code)
+        GET_ORFS(
+            ch_fasta,
+            params.translate.strand,
+            params.translate.methionine,
+            params.translate.min_len,
+            params.translate.genetic_code
+        )
         GET_ORFS.out.splitFasta( by: params.batchsize, file: true )
         .set { orfs_fasta }
-        PARSE_SEQUENCE(orfs_fasta)
+        /* Provide the translated ORFs and the original nts seqs
+        So that the ORFs can be associated with the source nucleic seq
+        in the final output */
+        PARSE_SEQUENCE(orfs_fasta, ch_fasta, params.nucleic)
     }
     else {
-        PARSE_SEQUENCE(ch_fasta)
+        PARSE_SEQUENCE(ch_fasta, ch_fasta, params.nucleic)
     }
 
     sequences_to_analyse = null
@@ -64,6 +74,11 @@ workflow {
         SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications, false)  // final: bool to indicate not a unit test
         sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
         parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
+    }
+
+    if (params.signalp_mode.toLowerCase() !in ['fast', 'slow', 'slow-sequential']) {
+        log.info "Unrecognised SignalP mode '${params.signalp_mode}'.\nAccepted modes: 'fast', 'slow', 'slow-sequential'"
+        exit 1
     }
 
     analysis_result = Channel.empty()
@@ -80,7 +95,7 @@ workflow {
                 fasta_to_runner = ch_fasta
             }
         }
-        parsed_analysis = SEQUENCE_ANALYSIS(fasta_to_runner, applications)
+        parsed_analysis = SEQUENCE_ANALYSIS(fasta_to_runner, applications, params.signalp_mode)
     }
 
     all_results = parsed_matches.concat(parsed_analysis)
@@ -92,7 +107,14 @@ workflow {
     Channel.from(formats.split(','))
     .set { ch_format }
 
-    WRITE_RESULTS(PARSE_SEQUENCE.out.collect(), XREFS.out.collect(), ch_format, params.output, params.ipsc_version)
+    WRITE_RESULTS(
+        PARSE_SEQUENCE.out.collect(),
+        XREFS.out.collect(),
+        ch_format,
+        params.output,
+        params.ipsc_version,
+        params.nucleic
+    )
 }
 
 workflow.onComplete = {

@@ -18,6 +18,30 @@ process HMMER_PARSER {
 }
 
 
+process FUNFAM_HMMER_PARSER {
+    /*
+    Parses output from HMMER3, but takes in multiple hmmer.out files, and generates
+    an JSON file for each --> output all generated json files
+    */
+    label 'analysis_parser'
+    
+    input:
+    path hmmer_out_files
+    
+    output:
+    path "hmmer_parsed_*.json"
+    
+    script:
+    """
+    for hmmer_file in ${hmmer_out_files}
+    do
+        base_name=\$(basename \$hmmer_file .out)
+        python3 $projectDir/interproscan/scripts/hmmer/parser_out.py \$hmmer_file > hmmer_parsed_\${base_name}.json
+    done
+    """
+}
+
+
 process HMMER2_PARSER {
     label 'analysis_parser'
 
@@ -26,7 +50,7 @@ process HMMER2_PARSER {
     path fasta  // used for filtering kinase hits in SMART_FILTER_MATCHES
 
     output:
-    path "hmmer_parsed_*"
+    path "hmmer_parsed_${out}.json"
 
     /*
     get_sites --> "true" or "false" is to tell the domtbl parser if to retrieve site data
