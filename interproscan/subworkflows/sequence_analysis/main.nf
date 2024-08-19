@@ -305,9 +305,7 @@ workflow SEQUENCE_ANALYSIS {
 
             return [
                 params.signalp_mode,
-                params.members.signalp.data.model_dir,
                 params.members.signalp.data.organism,
-                params.members.signalp.switches,
                 params.members.signalp.data.pvalue,
                 params.members.signalp.release
             ]
