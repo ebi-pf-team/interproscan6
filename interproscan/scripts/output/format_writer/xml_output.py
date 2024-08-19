@@ -23,7 +23,8 @@ MATCH_ELEMENT = {
     'PROSITE_PATTERNS': 'profilescan-match',
     'PROSITE_PROFILES': 'profilesearch-match',  # changed from i5 which is also profilescan-match
     'SFLD': 'hmmer3-match',
-    'SIGNALP': 'signal-peptide',
+    'SIGNALP': 'signalp-match',
+    'SIGNALP_EUK': 'signalp-euk-match',
     'SMART': 'hmmer2-match',
     'SUPERFAMILY': 'hmmer3-match',
 }
@@ -163,10 +164,14 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                 match_elem.set("graft-point", _check_null(match_data['graftPoint']))
 
             signature_elem = ET.SubElement(match_elem, "signature")
-            if match_data['member_db'].upper() not in ['SIGNALP', 'SUPERFAMILY']:
+            if match_data['member_db'].upper() not in ['SIGNALP', 'SIGNALP_EUK', 'SUPERFAMILY']:
                 # member db that don't have sigs, so no accs etc.
                 signature_elem.set("ac", match_data['accession'])
                 signature_elem.set("desc", match_data['name'])
+                signature_elem.set("name", match_data['name'])
+
+            if match_data['member_db'].upper() in ['SIGNALP', 'SIGNALP_EUK']:
+                signature_elem.set("ac", match_data['accession'])
                 signature_elem.set("name", match_data['name'])
 
             if match_data['entry']:
@@ -241,11 +246,14 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                     location_elem.set("alignment", str(location["alignment"]))
                     location_elem.set("cigar-alignment", str(location["cigarAlignment"]))
 
-                elif match_data['member_db'].upper() == "SIGNALP":
+                elif match_data['member_db'].upper() in ["SIGNALP", "SIGNALP_EUK"]:
                     location_elem = ET.SubElement(locations_elem,"analysis-location")
                     location_elem.set("end", str(location["end"]))
                     location_elem.set("start", str(location["start"]))
                     location_elem.set("pvalue", str(location["pvalue"]))
+                    location_elem.set("cleavage_start", str(location["cleavage_start"]))
+                    location_elem.set("cleavage_end", str(location["cleavage_end"]))
+                    location_elem.set("representative", str(location["representative"]))
 
                 elif match_data['member_db'].upper() in ["PIRSR", "SFLD"]:
                     location_elem = ET.SubElement(locations_elem, "analysis-location")
