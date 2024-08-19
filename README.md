@@ -248,6 +248,8 @@ are automatially named after the input FASTA file.
 * `--pathways` - Optional, switch on lookup of corresponding Pathway annotation (IMPLIES - `lookup_file` is defined) [Boolean]
 * `--lookup_file` - Lookup of corresponding InterPro annotation in the TSV and GFF3 output formats.
 
+Tip: For InterproScan6 parameters use --, for Nextflow parameters use - (e.g. -resume)
+
 ### Nextflow configuration
 
 Configure the `InterProScan6` utility operations by updating `./nextflow.config`:

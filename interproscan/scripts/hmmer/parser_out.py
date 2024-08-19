@@ -44,15 +44,13 @@ def parse(out_file: str) -> dict:
 
     :parama out_file: str representation of path to HMMER.out file
     """
-    path_segments = out_file.split("/")[-1].split("._.")
-    member_db = path_segments[0]
+    member_db = out_file.split("/")[-1].split("._.")[0]
     current_sequence = None
     current_domain = None
     sequence_match = {}
     domain_match = {}
     stage = 'LOOKING_FOR_METHOD_ACCESSION'
     member_accession = get_accession_regex(member_db)
-    description = ""
     model_id = ""
 
     with open(out_file, "r") as f:
@@ -71,7 +69,6 @@ def parse(out_file: str) -> dict:
                             sequence_match[current_sequence][model_id]
                         )
                         domain_match = {}
-                    description = ""
                     stage = "LOOKING_FOR_METHOD_ACCESSION"
                 else:
                     if stage == 'LOOKING_FOR_METHOD_ACCESSION':
@@ -88,22 +85,12 @@ def parse(out_file: str) -> dict:
 
                         if line.startswith("Query:"):
                             try:
-                                query_name = line.split()[1]
-                            except IndexError:
-                                query_name = line.strip()
-                                # The lines for a new record in hmmer.out may be (real data)
-                                # //
-                                # Query:
-                                # Query:       4by6B00-i2  [M=191]
-                            try:
                                 qlen = line.split("[")[1].split("]")[0].replace("M=", "")
                             except IndexError:  # e.g. line = "Query:       5xqwL01-i2]"
                                 qlen = ""
 
                     elif stage == 'LOOKING_FOR_SEQUENCE_MATCHES':
-                        if line.startswith("Description:"):
-                            description = line.replace("Description:", "")
-                        elif line.strip() == "":
+                        if line.strip() == "":
                             stage = 'LOOKING_FOR_DOMAIN_SECTION'
                             current_domain = None
                             current_sequence = None
@@ -112,8 +99,6 @@ def parse(out_file: str) -> dict:
                                 sequence_match,
                                 line,
                                 model_id,
-                                query_name,
-                                description,
                                 member_db,
                                 qlen
                             )
@@ -213,8 +198,6 @@ def get_sequence_match(
     sequence_match: dict,
     sequence_line: str,
     model_id: str,
-    query_name: str,
-    description: str,
     member_db: str,
     qlen: str
 ) -> dict:
@@ -226,8 +209,6 @@ def get_sequence_match(
     if match:
         match_info = {
             "accession": model_id,
-            "name": query_name,
-            "description": description.strip(),
             "evalue": float(match.group(1)),
             "score": float(match.group(2)),
             "qlen": int(qlen),

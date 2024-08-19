@@ -125,7 +125,7 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                     signature_elem.set("name", match_data['name'])
                     signature_library_elem = ET.SubElement(signature_elem, "signature-library-release")
                     signature_library_elem.set("library", match_data['member_db'].upper())
-                    signature_library_elem.set("version", match_data['version'])
+                    signature_library_elem.set("version", match_data['entry']['database']['version'])
                     model_ac_elem = ET.SubElement(match_elem, "model-ac")
                     model_ac_elem.text = match_key
                     locations_elem = ET.SubElement(match_elem, "locations")
@@ -192,7 +192,7 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
 
             signature_library_elem = ET.SubElement(signature_elem, "signature-library-release")
             signature_library_elem.set("library", match_data['member_db'].upper())
-            signature_library_elem.set("version", match_data['version'])
+            signature_library_elem.set("version", match_data['entry']['database']['version'])
             model_ac_elem = ET.SubElement(match_elem, "model-ac")
             model_ac_elem.text = match_key
 

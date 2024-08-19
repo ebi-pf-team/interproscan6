@@ -27,8 +27,8 @@ def tsv_output(seq_matches: dict, output_path: str):
                 goterms, pathways = [], []
                 if match["entry"]:
                     entry_acc = match["entry"]["accession"]
-                    entry_name = match["entry"]["short_name"]
-                    entry_desc = match["entry"]["name"]
+                    entry_name = match["entry"]["name"]
+                    entry_desc = match["entry"]["description"]
                     for go_info in match["entry"]["goXRefs"]:
                         goterms.append(go_info["id"])
                     for pwy_info in match["entry"]["pathwayXRefs"]:
@@ -111,11 +111,16 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
 
             for match_acc, match in matches.items():
                 member_db = match["member_db"]
-                try:
-                    version_major, version_minor = match['version'].split('.')
-                except ValueError:
-                    version_major = match['version']
-                    version_minor = "0"
+                if match['entry']:
+                    version = match['entry']['database']['version']
+                    try:
+                        version_major, version_minor = version.split('.')
+                    except ValueError:
+                        version_major = version
+                        version_minor = "0"
+                else:
+                    version = None
+
                 try:  # cdd does not have evalue and score on this level
                     evalue = match["evalue"]
                     score = match["score"]
