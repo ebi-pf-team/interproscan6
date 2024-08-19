@@ -121,8 +121,8 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                     match_elem = ET.SubElement(matches_elem, MATCH_ELEMENT[match_data['member_db'].upper()])
                     signature_elem = ET.SubElement(match_elem, "signature")
                     signature_elem.set("ac", match_data['accession'])
-                    signature_elem.set("desc", match_data['description'])
-                    signature_elem.set("name", match_data['name'])
+                    signature_elem.set("desc", match_data['entry']['description'])
+                    signature_elem.set("name", match_data['entry']['name'])
                     signature_library_elem = ET.SubElement(signature_elem, "signature-library-release")
                     signature_library_elem.set("library", match_data['member_db'].upper())
                     signature_library_elem.set("version", match_data['entry']['database']['version'])
@@ -156,8 +156,6 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
             if match_data['member_db'].upper() not in ['SIGNALP', 'SIGNALP_EUK', 'SUPERFAMILY']:
                 # member db that don't have sigs, so no accs etc.
                 signature_elem.set("ac", match_data['accession'])
-                signature_elem.set("desc", match_data['name'])
-                signature_elem.set("name", match_data['name'])
 
             if match_data['member_db'].upper() in ['SIGNALP', 'SIGNALP_EUK']:
                 signature_elem.set("ac", match_data['accession'])
@@ -167,14 +165,14 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                 acc = _check_null(match_data['entry']['accession'], acc=True)
                 sig_type = _check_null(match_data['entry']['type'])
                 desc = _check_null(match_data["entry"]['description'])
-                short_name = _check_null(match_data["entry"]['short_name'])
+                name = _check_null(match_data["entry"]['name'])
                 signature_elem.set("desc", desc)
-                signature_elem.set("name", short_name)
+                signature_elem.set("name", name)
                 if match_data['entry']['accession'] != "-":
                     entry_elem = ET.SubElement(signature_elem, "entry")
                     entry_elem.set("ac", acc)
                     entry_elem.set("desc", desc)
-                    entry_elem.set("name", short_name)
+                    entry_elem.set("name", name)
                     entry_elem.set("type", sig_type)
                     if match_data['entry']['goXRefs']:
                         for go_xref in match_data['entry']['goXRefs']:
@@ -192,7 +190,10 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
 
             signature_library_elem = ET.SubElement(signature_elem, "signature-library-release")
             signature_library_elem.set("library", match_data['member_db'].upper())
-            signature_library_elem.set("version", match_data['entry']['database']['version'])
+            if match_data['entry']:
+                signature_library_elem.set("version", match_data['entry']['database']['version'])
+            else:
+                signature_library_elem.set("version", "-")
             model_ac_elem = ET.SubElement(match_elem, "model-ac")
             model_ac_elem.text = match_key
 
