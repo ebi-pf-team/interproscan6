@@ -3,12 +3,13 @@ process SIGNALP_RUNNER {
     label 'signalp_runner'
 
     input:
-    tuple path(fasta), val(mode), path(model_dir), val(organism), val(switches), val(pvalue), val(signal_version)
+    tuple path(fasta), val(mode), val(organism), val(pvalue), val(signal_version)
 
     output:
     path "signalp_out"
     val pvalue
     val signal_version
+    val organism
 
     script:
     """
@@ -24,6 +25,7 @@ process SIGNALP_PARSER {
     path out
     val pvalue
     val signalp_version
+    val organism
 
     output:
     path "signalp_parsed.json"
@@ -31,9 +33,11 @@ process SIGNALP_PARSER {
     script:
     """
     python3 $projectDir/interproscan/scripts/members/signalp/parser.py \
+        ${out}/output.gff3 \
         ${out}/prediction_results.txt \
         ${pvalue} \
         ${signalp_version} \
+        ${organism} \
         > signalp_parsed.json
     """
 }

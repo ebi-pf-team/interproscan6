@@ -13,6 +13,7 @@ include {
     HMMER_RUNNER as GENE3D_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
+    HMMER_RUNNER as PIRSR_HMMER_RUNNER;
     HMMER_RUNNER_WITH_ALIGNMENTS as SFLD_HMMER_RUNNER;
     HMMER_SCAN_RUNNER as SUPERFAMILY_HMMER_RUNNER;
     FUNFAM_HMMER_RUNNER;
@@ -23,21 +24,21 @@ include {
 } from "$projectDir/interproscan/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
-    HMMER_PARSER as FUNFAM_HMMER_PARSER;
     HMMER_PARSER as GENE3D_HMMER_PARSER;
     HMMER_PARSER as HAMAP_HMMER_PARSER;
     HMMER_PARSER as NCBIFAM_HMMER_PARSER;
     HMMER_PARSER as PANTHER_HMMER_PARSER;
     HMMER_PARSER as PFAM_HMMER_PARSER;
+    HMMER_PARSER as PIRSR_HMMER_PARSER;
     HMMER_PARSER as SFLD_HMMER_PARSER;
+    FUNFAM_HMMER_PARSER;
     HMMER_SCAN_PARSER as PIRSF_HMMER_PARSER;
     HMMER2_PARSER;
 } from "$projectDir/interproscan/modules/hmmer/parser/main"
 include {
-    CATH_RESOLVE_HITS as FUNFAM_CATH_RESOLVE_HITS;  // third party tool to minimise suprious hits
-    ADD_CATH_SUPERFAMILIES as FUNFAM_ADD_CATH_SUPERFAMILIES;  // used for gene3D and Funfam
     CATH_RESOLVE_HITS as GENE3D_CATH_RESOLVE_HITS;
     ADD_CATH_SUPERFAMILIES as GENE3D_ADD_CATH_SUPERFAMILIES;
+    FUNFAM_CATH_RESOLVE_HITS;
     HAMAP_POST_PROCESSER;
     PANTHER_POST_PROCESSER;
     SFLD_POST_PROCESSER;
@@ -50,6 +51,7 @@ include {
     PANTHER_FILTER_MATCHES;
     PFAM_FILTER_MATCHES;
     PIRSF_FILTER_MATCHES;
+    PIRSR_FILTER_MATCHES;
     SFLD_FILTER_MATCHES;
     SMART_FILTER_MATCHES;
     SUPERFAMILY_FILTER_MATCHES;
@@ -81,13 +83,15 @@ include {
 include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER;
+    SIGNALP_RUNNER as SIGNALP_EUK_RUNNER;
+    SIGNALP_PARSER as SIGNALP_EUK_PARSER;
 } from "$projectDir/interproscan/modules/signalp/main"
-
 
 workflow SEQUENCE_ANALYSIS {
     take:
     fasta
     applications
+    signalp_mode
 
     main:
     boolean gene3d_funfam_processed = false
@@ -195,6 +199,17 @@ workflow SEQUENCE_ANALYSIS {
                 ]
             ]
 
+       pirsr: member == 'pirsr'
+            return [
+                "${member}",
+                params.members."${member}".hmm,
+                params.members."${member}".switches,
+                params.members."${member}".release,
+                [
+                    params.members."${member}".postprocess.rules
+                ]
+            ]
+
        sfld: member == 'sfld'
             return [
                 "${member}",
@@ -289,14 +304,22 @@ workflow SEQUENCE_ANALYSIS {
         signalp: member == 'signalp'
 
             return [
-                params.members.signalp.data.mode,
-                params.members.signalp.data.model_dir,
+                params.signalp_mode,
                 params.members.signalp.data.organism,
-                params.members.signalp.switches,
                 params.members.signalp.data.pvalue,
                 params.members.signalp.release
             ]
 
+        signalp_euk: member == 'signalp_euk'
+
+            return [
+                params.signalp_mode,
+                params.members.signalp_euk.data.model_dir,
+                params.members.signalp_euk.data.organism,
+                params.members.signalp_euk.switches,
+                params.members.signalp_euk.data.pvalue,
+                params.members.signalp_euk.release
+            ]
     }.set { member_params }
 
     /*
@@ -322,23 +345,22 @@ workflow SEQUENCE_ANALYSIS {
         GENE3D_CATH_RESOLVE_HITS.out, // cath-resolve-hits out file
         GENE3D_HMMER_RUNNER.out[1]    // post-processing-params
     )
-
     GENE3D_FILTER_MATCHES(
         GENE3D_ADD_CATH_SUPERFAMILIES.out,  // add-superfams out file
         GENE3D_HMMER_PARSER.out,            // ips6 json
         GENE3D_HMMER_RUNNER.out[1]          // post-processing-params
     )
+    // Gene3D filter matches out puts (0) ips6 json; (1) cath superfamilies txt file
 
     // FunFam (+ gene3D + cath-resolve-hits + assing-cath-superfamilies)
     // split into a channel so Nextflow can automatically manage the parallel execution of HmmSearch
-    GENE3D_FILTER_MATCHES.out[1]
-        .splitText() { it.replace('\n', '') }
-        .set { funfam_cath_superfamilies }
     runner_funfam_params = fasta.combine(member_params.gene3d_funfam)
-    runner_funfam_params_with_cath = runner_funfam_params.combine(funfam_cath_superfamilies)
-
-    FUNFAM_HMMER_RUNNER(runner_funfam_params_with_cath, applications)
-    FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out[0])  // hmmer.out path
+    FUNFAM_HMMER_RUNNER(
+        runner_funfam_params,              // hmmer runner input tuple
+        GENE3D_FILTER_MATCHES.out[1],      // cath_superfamilies txt file
+        applications                       // str listing selected applications
+    )
+    FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out[0])  // hmmer.out pathS - one per cath gene3d superfam
     FUNFAM_CATH_RESOLVE_HITS(FUNFAM_HMMER_RUNNER.out)
     FUNFAM_FILTER_MATCHES(
         FUNFAM_HMMER_PARSER.out,           // add-superfams out file
@@ -399,6 +421,17 @@ workflow SEQUENCE_ANALYSIS {
         PIRSF_HMMER_PARSER.out,     // ips6 json
         PIRSF_HMMER_RUNNER.out[1],  // hmmer dtbl file -- needed to get tlen value
         PIRSF_HMMER_RUNNER.out[2]   // post-processing-params
+    )
+
+    // PIRSR
+    runner_pirsr_params = fasta.combine(member_params.pirsr)
+    PIRSR_HMMER_RUNNER(runner_pirsr_params)
+    PIRSR_HMMER_PARSER(
+        PIRSR_HMMER_RUNNER.out[0]  // out file
+    )
+    PIRSR_FILTER_MATCHES(
+        PIRSR_HMMER_PARSER.out,  // ips6 json
+        PIRSR_HMMER_RUNNER.out[1]  // post-processing-params
     )
 
     // SFLD (+ post-processing binary to add sites and filter hits)
@@ -474,18 +507,24 @@ workflow SEQUENCE_ANALYSIS {
     SIGNALP_RUNNER(runner_signalp_params)
     SIGNALP_PARSER(SIGNALP_RUNNER.out)
 
+    // SignalP_euk
+    runner_signalp_euk_params = fasta.combine(member_params.signalp_euk)
+    SIGNALP_EUK_RUNNER(runner_signalp_euk_params)
+    SIGNALP_EUK_PARSER(SIGNALP_EUK_RUNNER.out)
+
     /*
     Gather the results
     */
     if (applications.contains("gene3d")) {
         ANTIFAM_HMMER_PARSER.out.concat(
             NCBIFAM_HMMER_PARSER.out,
-            FUNFAM_FILTER_MATCHES.out[0],
             GENE3D_FILTER_MATCHES.out[0],
+            FUNFAM_FILTER_MATCHES.out,
             HAMAP_FILTER_MATCHES.out,
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,
             PIRSF_FILTER_MATCHES.out,
+            PIRSR_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
@@ -496,6 +535,7 @@ workflow SEQUENCE_ANALYSIS {
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
+            SIGNALP_EUK_PARSER.out,
             SUPERFAMILY_FILTER_MATCHES.out
         )
         .set { parsed_results }
@@ -503,11 +543,12 @@ workflow SEQUENCE_ANALYSIS {
     else {
         ANTIFAM_HMMER_PARSER.out.concat(
             NCBIFAM_HMMER_PARSER.out,
-            FUNFAM_FILTER_MATCHES.out[0],
             HAMAP_FILTER_MATCHES.out,
+            FUNFAM_FILTER_MATCHES.out,
             PANTHER_FILTER_MATCHES.out,
             PFAM_FILTER_MATCHES.out,
             PIRSF_FILTER_MATCHES.out,
+            PIRSR_FILTER_MATCHES.out,
             SFLD_FILTER_MATCHES.out,
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
@@ -518,6 +559,7 @@ workflow SEQUENCE_ANALYSIS {
             PROSITE_PATTERNS_PARSER.out,
             PROSITE_PROFILES_PARSER.out,
             SIGNALP_PARSER.out,
+            SIGNALP_EUK_PARSER.out,
             SUPERFAMILY_FILTER_MATCHES.out
         )
         .set { parsed_results }
