@@ -118,7 +118,7 @@ def add_match(
 
     Keyed by query protein ID, into dict:
     Keyed by signature accession, into dict:
-        accession, name, descriptiion, etc. locations: [],"""
+        accession, evalue, score, etc. locations: [],"""
     if protein_with_hit.sequence_id not in matches:
         matches[protein_with_hit.sequence_id] = {}
 
@@ -126,8 +126,6 @@ def add_match(
         if model_id not in matches[protein_with_hit.sequence_id]:
             matches[protein_with_hit.sequence_id][model_id] = {
                 "accession": model_id,
-                "name": "",
-                "description": "",
                 "qlen": int(protein_with_hit.qlen),
                 "evalue": model_obj.evalue,
                 "score": model_obj.score,

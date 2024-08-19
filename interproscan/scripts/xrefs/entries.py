@@ -12,9 +12,20 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
     for seq_id, match_info in matches_info.items():
         for match_key, data in match_info.items():
             acc_id = match_key.split(".")[0]
-            if data["member_db"] == "mobidb":
-                match_info[match_key]["entry"] = None
-            else:
+            try:
+                entry = entries[acc_id]
+                match_info[match_key]["entry"] = {
+                    "accession": entry["integrated"],
+                    "name": entry["name"],
+                    "description": entry["description"],
+                    "type": entry["type"],
+                    "version": entry["database"]["version"],
+                    "member_db": entry["database"]["name"],
+                    "goXRefs": [],
+                    "pathwayXRefs": []
+                }
+            except KeyError:
+                acc_id = match_key  # some accs need the '.'  , e.g. Gene3D
                 try:
                     entry = entries[acc_id]
                     match_info[match_key]["entry"] = {
@@ -22,25 +33,27 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
                         "name": entry["name"],
                         "description": entry["description"],
                         "type": entry["type"],
-                        "database": entry["database"],
+                        "version": entry["database"]["version"],
+                        "member_db": entry["database"]["name"],
                         "goXRefs": [],
                         "pathwayXRefs": []
                     }
-                except KeyError:
-                    acc_id = match_key  # some accs need the '.'  , e.g. Gene3D
-                    try:
-                        entry = entries[acc_id]
-                        match_info[match_key]["entry"] = {
-                            "accession": entry["integrated"],
-                            "name": entry["name"],
-                            "description": entry["description"],
-                            "type": entry["type"],
-                            "database": entry["database"],
-                            "goXRefs": [],
-                            "pathwayXRefs": []
-                        }
-                    except KeyError:
-                        match_info[match_key]["entry"] = None
+                except KeyError:  # members with no match in entries
+                    member_db_lower = data["member_db"].lower()
+                    for key in entries['databases']:
+                        if key.lower() == member_db_lower:
+                            version = entries['databases'][key]
+
+                    match_info[match_key]["entry"] = {
+                        "accession": None,
+                        "name": None,
+                        "description": None,
+                        "type": None,
+                        "database": data["member_db"],
+                        "goXRefs": [],
+                        "pathwayXRefs": [],
+                        "version": version
+                    }
 
             if data["member_db"].upper() == "PANTHER":
                 acc_id_family = data["accession"]

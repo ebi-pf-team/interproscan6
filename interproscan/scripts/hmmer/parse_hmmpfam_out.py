@@ -36,7 +36,6 @@ class QueryProtein:
         self.has_hits = True
         model = ModelHit()
         model.model_id = model_pattern.group(1)
-        model.description = model_pattern.group(2)
         model.score = model_pattern.group(3)
         model.evalue = model_pattern.group(5)
         model.num_domains = int(model_pattern.group(6))
@@ -63,7 +62,6 @@ class ModelHit:
     """Represent a SMART signature"""
     def __init__(self):
         self.model_id = None
-        self.description = None
         self.score = None
         self.evalue = None
         self.num_domains = None
@@ -97,7 +95,7 @@ def add_match(
 
     Keyed by query protein ID, into dict:
     Keyed by signature accession, into dict:
-        accession, name, descriptiion, etc. locations: [],"""
+        accession, evalue, score, etc. locations: [],"""
     if protein_with_hit.sequence_id not in matches:
         matches[protein_with_hit.sequence_id] = {}
 
@@ -105,8 +103,6 @@ def add_match(
         if model_id not in matches[protein_with_hit.sequence_id]:
             matches[protein_with_hit.sequence_id][model_id] = {
                 "accession": model_id,
-                "name": "",
-                "description": "",
                 "evalue": model_obj.evalue,
                 "score": model_obj.score,
                 "member_db": member_db,

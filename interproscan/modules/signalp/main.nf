@@ -3,11 +3,12 @@ process SIGNALP_RUNNER {
     label 'signalp_runner'
 
     input:
-    tuple path(fasta), val(mode), val(organism), val(pvalue)
+    tuple path(fasta), val(mode), val(organism), val(pvalue), val(signal_version)
 
     output:
     path "signalp_out"
     val pvalue
+    val signal_version
     val organism
 
     script:
@@ -23,6 +24,7 @@ process SIGNALP_PARSER {
     input:
     path out
     val pvalue
+    val signalp_version
     val organism
 
     output:
@@ -34,6 +36,7 @@ process SIGNALP_PARSER {
         ${out}/output.gff3 \\
         ${out}/prediction_results.txt \\
         ${pvalue} \\
+        ${signalp_version} \\
         ${organism} \\
         signalp_parsed.json
     """

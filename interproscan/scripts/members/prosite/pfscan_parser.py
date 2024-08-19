@@ -24,7 +24,6 @@ def parse(pfscan_out: str):
                         continue
                     seq_id = match_info[0]
                     match_id = match_info[2]
-                    name = match_details[0].replace('Name ', '').replace('"', '').strip()
                     alignment = match_details[2].replace('Sequence ', '').replace('"', '').replace('.', '').strip()
                     cigar_alignment = cigar_alignment_parser(alignment)
                     location = {
@@ -40,8 +39,6 @@ def parse(pfscan_out: str):
                     if match_id not in ips6_matches[seq_id]:
                         ips6_matches[seq_id][match_id] = {
                             "accession": match_id,
-                            "name": name,
-                            "description": "-",
                             "member_db": "PROSITE_PATTERNS",
                             "locations": []
                         }

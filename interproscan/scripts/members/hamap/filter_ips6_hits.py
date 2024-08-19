@@ -99,8 +99,6 @@ def filter_matches(ips6: Path, hamap_matches: dict[str, HamapHit]) -> tuple[dict
             if signature_acc not in processed_ips6[protein_id]:
                 processed_ips6[protein_id][signature_acc] = {}
                 processed_ips6[protein_id][signature_acc]["accession"] = hmmer_match["accession"]
-                processed_ips6[protein_id][signature_acc]["name"] = hmmer_match["name"]
-                processed_ips6[protein_id][signature_acc]["description"] = hmmer_match["description"]
                 processed_ips6[protein_id][signature_acc]["member_db"] = hmmer_match["member_db"]
                 processed_ips6[protein_id][signature_acc]["model-ac"] = hmmer_match["model-ac"]
                 processed_ips6[protein_id][signature_acc]["locations"] = []

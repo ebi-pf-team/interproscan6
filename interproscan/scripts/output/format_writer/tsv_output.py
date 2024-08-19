@@ -112,7 +112,7 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
             for match_acc, match in matches.items():
                 member_db = match["member_db"]
                 if match['entry']:
-                    version = match['entry']['database']['version']
+                    version = match['entry']['version']
                     try:
                         version_major, version_minor = version.split('.')
                     except ValueError:
