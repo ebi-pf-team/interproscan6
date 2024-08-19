@@ -2,7 +2,7 @@ process PHOBIUS_RUNNER {
     container 'docker.io/library/phobius'
     label 'phobius_runner'
 
-    input: tuple path(fasta)
+    input: path fasta
 
     output:
     path "*._.phobius_out.txt"
