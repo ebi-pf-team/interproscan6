@@ -85,7 +85,7 @@ workflow PRE_CHECKS {
         'batchsize', 'url_precalc', 'check_precalc', 'matches',
         'sites', 'bin', 'members', 'translate', 'nucleic',
         'formats', 'output', 'xrefs', 'goterms', 'pathways', 'signalp_mode',
-        'ipsc_version', 'version'
+        'ipsc_version', 'version', 'lookup_retries'
     ]
     def parameter_diff = all_params - parameters_expected
     if (parameter_diff.size() != 0){

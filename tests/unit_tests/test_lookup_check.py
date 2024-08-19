@@ -6,8 +6,11 @@ pytest -v
 
 import json
 import pytest
+import os
+import sys
 import urllib.request
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../interproscan/scripts/lookup')))
 from interproscan.scripts.lookup import lookup_check
 
 
@@ -37,7 +40,7 @@ def test_lookup_check_main(parsed_seqs_path, lookup_check_out_dir, capsys, monke
         expected_output = json.load(fh)
 
     lookup_check.main()
-    captured_output = json.loads(capsys.readouterr().out) 
+    captured_output = json.loads(capsys.readouterr().out)
 
     assert expected_output['matches'] == captured_output['matches']
     # the no_matches keys can store seqs in different orders so only check length

@@ -1,7 +1,7 @@
 import time
 
 from socket import timeout
-from urllib.error import HTTPError, URLError
+from urllib.error import URLError
 
 
 def lookup_retry_decorator(func):
@@ -11,7 +11,6 @@ def lookup_retry_decorator(func):
         result = []
 
         while not success and (tries < kwargs["retries"]):
-            err_message = None
             try:
                 result = func(*args, **kwargs)
                 success = True
