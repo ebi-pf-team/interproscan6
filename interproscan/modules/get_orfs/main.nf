@@ -15,7 +15,7 @@ process GET_ORFS {
     def analysed_strand = (strand == "both") ? "" : (strand == "plus") ? "--watson" : "--crick"
 
     """
-    /opt/hmmer-3.3/easel/miniapps/esl-translate \\
+    /opt/easel/miniapps/esl-translate \\
     -c ${genetic_code} \\
     -l ${min_len} \\
     ${analysed_strand} \\
