@@ -17,7 +17,7 @@ ILLEGAL_CHARAS = {
     "panther": "-",
     "pfam": "-",
     "pirsf": "-",
-    "pirsr": "-._*",
+    "pirsr": "-",
     "prints": "-._",
     "prosite_patterns": "",
     "prosite_profiles": "-._",
