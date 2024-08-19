@@ -41,22 +41,20 @@ def parse(signalp_out: str, signalp_cs: str, threshold: float,
                 continue
             seq_identifer = line.split("\t")[0]
             acc = seq_identifer.split(" ")[0].strip()
-            start = None
-            end = None
-            pvalue = None
-            predict_pvalue = line.split("\t")[5]
+            pvalue = line.split("\t")[5]
 
-            if len(predict_pvalue) > 1:
-                if float(predict_pvalue) >= threshold:
+            if len(pvalue) > 1:
+                if float(pvalue) >= threshold:
                     start = line.split("\t")[3]
                     end = line.split("\t")[4]
-                    pvalue = float(predict_pvalue)
+                    pvalue = float(pvalue)
+                else:
+                    start, end, pvalue = None, None, None
             # checks if there is only one signal peptide prediction per protein
             if acc in sequence_matches:
                 raise Exception(f"Protein {acc} has more than one SignalP match")
             # reports signal peptide start and end location
             if start:
-                location_fragment = {"start": start, "end": end, "dc-status": "CONTINUOUS"}
                 sequence_matches[acc] = {
                     "signal_peptide": {
                         "accession": "SignalP",
@@ -71,8 +69,7 @@ def parse(signalp_out: str, signalp_cs: str, threshold: float,
                             "pvalue": pvalue,
                             "cleavage_start": "",
                             "cleavage_end": "",
-                            "representative": "false",
-                            "location-fragments": [location_fragment]
+                            "representative": "false"
                         }]
                     }
                 }
@@ -105,8 +102,8 @@ def get_cleavage_site(signalp_cs: str, seq_matches: dict):
             if cs_start and acc in seq_matches:
                 acc_list.append(acc)
                 for location in seq_matches[acc]["signal_peptide"]["locations"]:
-                    location["cleavage_start"] = cs_start
-                    location["cleavage_end"] = cs_end
+                    location["cleavage_start"] = int(cs_start)
+                    location["cleavage_end"] = int(cs_end)
 
             elif acc in seq_matches and not cs_start:
                 raise Exception(f"{acc} is missing cleavage start in prediction_results.txt")
