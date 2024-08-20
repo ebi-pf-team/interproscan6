@@ -3,34 +3,34 @@ import os
 import sys
 
 
-def aggregate_results(aggreated_results_path: str, result_files: list) -> dict:
-    """Parsers a list of strs, each representing a path to a JSON file
-    containing the output from an application's analysis.
+def aggregate_results(aggreated_results_path: str, results_file: list) -> dict:
+    """Parsers an internal IPS6 JSON, adding the results to the growing file 
+    of all aggregated IPS6 hits.
 
-    Each JSON file is keyed by the protein sequence ID, and valued by
+    Each  internal IPS6 JSON file is keyed by the protein sequence ID, and valued by
     a dict, keyed by the signature accession and valued by information on the 
     hit (name, evalue, member_db, locations, etc.)
 
-    The content of these JSON files is combined into a single dict
+    :param aggreated_results_path: str repr of path to the growing IPS6 JSON object of all hits
+    :param results_file: str repr of path to single IPS6 JSON to be added to aggreated_results
     """
     with open(aggreated_results_path, "r") as fh:
         all_results = json.load(fh)
 
-    for file_path in result_files:
-        if file_path:
-            with open(file_path, 'r') as file:
-                if os.path.getsize(file_path) > 0:
-                    try:
-                        data = json.load(file)
-                    except json.JSONDecodeError:
-                        pass
-            for seq_id, match_info in data.items():
-                # where match_info is a dict
-                # keyed by signature accs and valued by hit data
-                try:
-                    all_results[seq_id].update(match_info)
-                except KeyError:
-                    all_results[seq_id] = match_info
+    with open(results_file.strip(), 'r') as file:
+        if os.path.getsize(results_file) > 0:
+            try:
+                data = json.load(file)
+            except json.JSONDecodeError:
+                pass
+
+    for seq_id, match_info in data.items():
+        # where match_info is a dict
+        # keyed by signature accs and valued by hit data
+        try:
+            all_results[seq_id].update(match_info)
+        except KeyError:
+            all_results[seq_id] = match_info
 
     return all_results
 
@@ -42,9 +42,9 @@ def main():
     1. str repr of path to results_aggregated.json output file
     """
     args = sys.argv[1:]
-    result_files = args[0].strip('[').strip(']').strip().replace(" ", "").split(',')
-    aggreated_results_path = args[1]
-    all_results = aggregate_results(aggreated_results_path, result_files)
+    aggreated_results_path = args[0]
+    results_file = args[1].strip().strip('[').strip(']')
+    all_results = aggregate_results(aggreated_results_path, results_file)
     with open(aggreated_results_path, "w") as fh:
         json.dump(all_results, fh)
 

@@ -16,13 +16,14 @@ process AGGREGATE_RESULTS {
     """
     mkdir -p $projectDir/results
     mkdir -p $projectDir/results/temp
+    
     echo "{}" > results_aggregated.json
-    IFS=',' read -ra paths <<< "${result_files}"
-    for ((i = 0; i < \${#paths[@]}; i += 20)); do
-        batch=("\${paths[@]:i:20}")
-        python3 $projectDir/interproscan/scripts/output/aggregate_results.py \\
-        "\${batch[@]}" \\
-        results_aggregated.json
+    
+    paths=(\$(echo "${result_files}" | tr -d '[]' | tr ',' ' '))
+    for file in "\${paths[@]}"; do
+        python3 $projectDir/interproscan/scripts/output/aggregate_results.py \
+        results_aggregated.json \
+        \$file
     done
     """
 }
