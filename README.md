@@ -443,71 +443,51 @@ signalp {
     release = "6.0h"  <--- make sure the release is correct
     runner = "signalp"
     data {
-        mode = "fast"    <--- UPDATE MODE: fast, slow, or slow-sequential
         model_dir = "$projectDir/bin/signalp/models"  <--- UPDATE PATH TO models DIR
         organism = "other"
     }
 }
 ```
-
-**Note:** _Set `organism` in `nextflow.config` to `"eukaryote"` or `"euk"` to limit the predictions to Sec/SPI, or leave as `"other"` to apply all models in `SignalP6`, as per the `SignalP6` documentation:_
-
+Repeat this step for `SignalP_EUK`.
+```
+signalp_euk {
+    release = "6.0h"  <--- make sure the release is correct
+    runner = "signalp_euk"
+    data {
+        model_dir = "$projectDir/bin/signalp/models"  <--- UPDATE PATH TO models DIR
+        organism = "euk"
+    }
+}
+```
 > Specifying the eukarya method of `SignalP6` (`SignalP_EUK`) triggers post-processing of the SP predictions by `SignalP6` to prevent spurious results (only predicts type Sec/SPI).
 
-4. Add `SignalP` to the application list in `nextflow.config`:
-
+4. [Optional] If you want `SignalP` and `SignalP_EUK` to be included in the default applications that are run when running `InterProScan` without the `--applications` flag, add `SignalP` and `SignalP_EUK` to the application list in `nextflow.config`:
+```
 params {
     batchsize = 100
     help = false
-    applications = 'AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,Pfam,PIRSF,PIRSR,PRINTS,PrositePatterns,PrositeProfiles,SFLD,SMART,SuperFamily,SignalP' <--- ADD NEW APPLICATION
+    applications = 'AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,Pfam,PIRSF,PIRSR,PRINTS,PrositePatterns,PrositeProfiles,SFLD,SMART,SuperFamily,SignalP,SignalP_EUK' <--- ADD NEW APPLICATION
     disable_precalc = false
 }
-
-### Singularity
-
-If you are using Singularity you can convert the Docker image to a Singularity image:
-
-```bash
-docker save signalp6 > signalp6.tar
-singularity build signalp6.img docker-archive://signalp6.tar
 ```
-
-Keey the Singularirty image in the root of the `InterProScan` repo.
-
-### Apptainer
-
-If you are using Apptainer you can convert the Docker image to a Apptainer image:
-
-```bash
-apptainer build signalp6.sif docker-daemon://signalp6:latest
-```
-
-Keey the Apptainer image in the root of the `InterProScan` repo.
-
 ### Running `InterProScan6` with `SignalP6` enabled
 
-Include `signalp` in the list of applications defined using `--applications` flag.
+Include `signalp` and `signalp_euk` in the list of applications defined using the `--applications` flag.
 
-For example:
+    nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp --disable_precalc
+    nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp_euk --disable_precalc
 
-    nextflow run interproscan.nf --input files_test/best_to_test.fasta --applications signalp --disable_precalc
+### Changing mode of `Signalp6` in `InterProScan6`
 
-### Changing mode
+`SignalP6` supports 3 modes: `fast`, `slow` and `slow-sequential`. The mode can be set using the `--signalp_mode` flag. The default mode is `fast`.
 
-`SignalP6` supports 3 modes: `fast`, `slow` and `slow-sequential`. To change the mode of `SignalP6`:
-
-1. Incorporate the new mode into your `SignalP6` installtion as per the `SignalP6` [documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#installing-additional-modes).
-
-2. Update the `member.config` configuration (`subworkflows/sequence_analysis/members.config`)
+For example, to run `InterProScan` with input file `best_to_test.fasta`, using SignalP with all models in slow mode, use the command:
 ```
-signalp {
-    runner = "signalp"
-    data {
-        mode = "fast"    <--- UPDATE MODE: fast, slow, or slow-sequential
-        model_dir = "$projectDir/bin/signalp/models"
-        organism = "other"
-    }
-}
+    nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp --disable_precalc --signalp_mode slow
+```
+To run in slow-sequential mode and with only Eukaryotic models, use the command:
+```
+    nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp_euk --disable_precalc --signalp_mode slow-sequential
 ```
 
 **Note:** _`InterProScan6` only supports the implementation of one `SignalP` mode at a time. A separate `InterProScan6` but be completed for each mode of interest, in order ro apply multiple modes to the same dataset_.

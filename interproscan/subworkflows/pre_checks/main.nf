@@ -18,6 +18,7 @@ def printHelp() {
         --output <OUTPUT-FILE-PATH>        Optional. Path to the output file.
                                             If this option is not set, the output will be write on results/ folder.
         --pathways Optional. Include pathway information in the output.
+        --signalp_mode Optional. Set which SignalP/SignalP_EUK prediction models are used. Models may have to be installed. Accepted: 'fast', 'slow', 'sequential'. Default: 'fast'.
         --version                          Print the version of InterProScan.
     """
 }
@@ -33,6 +34,7 @@ workflow PRE_CHECKS {
     output_formats
     version_msg
     ips6_version
+    signalp_mode
 
     main:
     if ( !nextflow.version.matches('>=23.04') ) {
@@ -52,12 +54,12 @@ workflow PRE_CHECKS {
 
     if (!seq_input) {
         log.error """
-                Please provide an input file.
-                The typical command for running the pipeline is:
-                    nextflow run interproscan.nf --input <path to fasta file>
-                For more information, please use the --help flag.
-                """
-                exit 5
+            Please provide an input file.
+            The typical command for running the pipeline is:
+            nextflow run interproscan.nf --input <path to fasta file>
+            For more information, please use the --help flag.
+        """
+        exit 5
     }
 
     // is user specifies the input is nucleic acid seqs
@@ -82,7 +84,7 @@ workflow PRE_CHECKS {
         'input', 'applications', 'disable_precalc', 'help',
         'batchsize', 'url_precalc', 'check_precalc', 'matches',
         'sites', 'bin', 'members', 'translate', 'nucleic',
-        'formats', 'output', 'xrefs', 'goterms', 'pathways',
+        'formats', 'output', 'xrefs', 'goterms', 'pathways', 'signalp_mode',
         'ipsc_version', 'version'
     ]
     def parameter_diff = all_params - parameters_expected
@@ -96,13 +98,18 @@ workflow PRE_CHECKS {
         'antifam', 'cdd', 'coils','funfam', 'gene3d', 'hamap',
         'mobidb', 'ncbifam', 'panther', 'pfam', 'phobius','pirsf', 'pirsr',
         'prints', 'prosite_patterns', 'prosite_profiles',
-        'sfld', 'signalp', 'smart', 'superfamily'
+        'sfld', 'signalp', 'signalp_euk', 'smart', 'superfamily'
     ]
 
     def applications_diff = user_applications.toLowerCase().split(',') - applications_expected
     if (applications_diff.size() != 0){
         log.info printHelp()
         exit 22, "Applications not valid: $applications_diff. Valid applications are: $applications_expected"
+    }
+
+    if ("${signalp_mode}".toLowerCase() !in ['fast', 'slow', 'slow-sequential']) {
+        log.info "Unrecognised SignalP mode '${signalp_mode}'.\nAccepted modes: 'fast', 'slow', 'slow-sequential'"
+        exit 22
     }
 
     // Check if the formats are valid
