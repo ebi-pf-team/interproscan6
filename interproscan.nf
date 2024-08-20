@@ -31,7 +31,8 @@ workflow {
         params.formats,
         params.version,
         params.ipsc_version,
-        params.signalp_mode
+        params.signalp_mode,
+        params.signalp_gpu
     )
 
     formats = params.formats.toLowerCase()
@@ -79,11 +80,6 @@ workflow {
             disable_precalc = true
             log.info "ERROR: unable to connect to match lookup service. Max retries reached. Running analysis locally..."
         }
-    }
-
-    if (params.signalp_mode.toLowerCase() !in ['fast', 'slow', 'slow-sequential']) {
-        log.info "Unrecognised SignalP mode '${params.signalp_mode}'.\nAccepted modes: 'fast', 'slow', 'slow-sequential'"
-        exit 1
     }
 
     analysis_result = Channel.empty()
