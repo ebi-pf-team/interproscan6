@@ -3,7 +3,7 @@ import os
 import sys
 
 
-def aggregate_results(result_files: list) -> dict:
+def aggregate_results(aggreated_results_path: str, result_files: list) -> dict:
     """Parsers a list of strs, each representing a path to a JSON file
     containing the output from an application's analysis.
 
@@ -13,7 +13,9 @@ def aggregate_results(result_files: list) -> dict:
 
     The content of these JSON files is combined into a single dict
     """
-    all_results = {}
+    with open(aggreated_results_path, "r") as fh:
+        all_results = json.load(fh)
+
     for file_path in result_files:
         if file_path:
             with open(file_path, 'r') as file:
@@ -34,10 +36,17 @@ def aggregate_results(result_files: list) -> dict:
 
 
 def main():
+    """
+    args:
+    0. str representation of list of internal IPS6 JSON files
+    1. str repr of path to results_aggregated.json output file
+    """
     args = sys.argv[1:]
-    result_files = args[0].strip('[]').replace(" ", "").split(',')
-    all_results = aggregate_results(result_files)
-    print(json.dumps(all_results, indent=4))
+    result_files = args[0].strip('[').strip(']').strip().replace(" ", "").split(',')
+    aggreated_results_path = args[1]
+    all_results = aggregate_results(aggreated_results_path, result_files)
+    with open(aggreated_results_path, "w") as fh:
+        json.dump(all_results, fh)
 
 
 if __name__ == "__main__":
