@@ -1,6 +1,31 @@
 import json
 import sys
 
+map_databases = {
+    "SFLD": "SFLD",
+    "PRINTS": "PRINTS",
+    "PFAM": "Pfam",
+    "INTERPRO": "InterPro",
+    "CDD": "CDD",
+    "PROSITE_PROFILES": "PROSITE profiles",
+    "NCBIFAM": "NCBIfam",
+    "PROSITE_PATTERNS": "PROSITE patterns",
+    "HAMAP": "HAMAP",
+    "SMART": "SMART",
+    "PIRSF": "PIRSF",
+    "PANTHER": "PANTHER",
+    "GENE3D": "CATH-Gene3D",
+    "SUPERFAMILY": "SUPERFAMILY",
+    "ANTIFAM": "AntiFam",
+    "FUNFAM": "FunFam",
+    "MOBIDB": "MobiDB Lite",
+    "PHOBIUS": "Phobius",
+    "SIGNALP": ["SignalP_Euk", "SignalP_Gram_positive", "SignalP_Gram_negative"],
+    "TMHMM": "TMHMM",
+    "COILS": "COILS",
+    "PIRSR": "PIRSR"
+}
+
 
 def add_entries(matches_path: str, entries_path: str) -> dict:
     matches2entries = {}
@@ -12,8 +37,11 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
     for seq_id, match_info in matches_info.items():
         for match_key, data in match_info.items():
             acc_id = match_key.split(".")[0]
-            match_info[match_key]['member_db'] = data['member_db']
-            match_info[match_key]['version'] = entries[data["member_db"]]['version']
+            databases_versions = entries["databases"]
+            member_db = data["member_db"].upper()
+            match_info[match_key]['member_db'] = member_db
+            match_info[match_key]['library'] = map_databases[member_db]
+            match_info[match_key]['version'] = databases_versions[map_databases[member_db]]
             try:
                 entry = entries[acc_id]
                 match_info[match_key]["entry"] = {
@@ -57,7 +85,7 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
                         "version": version
                     }
 
-            if data["member_db"].upper() == "PANTHER":
+            if member_db == "PANTHER":
                 acc_id_family = data["accession"]
                 try:
                     match_info[match_key]["entry"]["family_name"] = entries[acc_id_family]["name"]

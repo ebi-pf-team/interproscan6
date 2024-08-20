@@ -9,17 +9,13 @@ of matches output files"""
 
 CATH_PATTERN = re.compile(r"^.*\._\.(\d+\.\d+\.\d+\.\d+)\.cath\.resolved\.out$")
 JSON_PATTERN = re.compile(r"^hmmer_parsed_.*\._\.(\d+\.\d+\.\d+\.\d+)\.json$")
-RELEASE_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
-
 
 def main():
     """
     Args include:
     All hmmer.out files from HMMER_PARSER
     All output files from cath-resolve hits
-    Ending with the release number of FunFam from members.config
     """
-    release = None
     files = {}  # keyed by cath superfamily
     for input_arg in sys.argv[1:]:
         _file = CATH_PATTERN.match(input_arg)
@@ -36,21 +32,12 @@ def main():
             if cath_superfam not in files:
                 files[cath_superfam] = {}
             files[cath_superfam]["ips6.json"] = input_arg
-            continue
-
-        if RELEASE_PATTERN.match(input_arg):
-            release = input_arg
-            continue
-
-        print(f"Did not recognise this input arg {input_arg}")
-        sys.exit(1)
 
     for cath_superfam, file_info in files.items():
         cath_out = parse_cath(file_info["cath.resolve"])
         processed_ips6 = filter_matches(
             file_info["ips6.json"],
-            cath_out,
-            release
+            cath_out
         )
 
         with open(f"{file_info['ips6.json']}.processed.json", "w") as fh:
@@ -115,8 +102,7 @@ def parse_cath(cath_out: str) -> dict[str, FunfamHit]:
 
 def filter_matches(
     ips6: str,
-    funfam_matches: dict[str, FunfamHit],
-    release: str
+    funfam_matches: dict[str, FunfamHit]
 ) -> tuple[dict, set]:
     """Parse the IPS6 JSON file, filtering hits to only retains
     those that passed the Gene3D post-processing.

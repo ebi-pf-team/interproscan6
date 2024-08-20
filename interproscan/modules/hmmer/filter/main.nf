@@ -12,7 +12,6 @@ process FUNFAM_FILTER_MATCHES {
         path ips6_jsons
         path cath_resolved_outs
         val postprocessing_params
-    // postprocessing_params[6] funfam release
 
     output:
         path "*.processed.json"
@@ -21,8 +20,7 @@ process FUNFAM_FILTER_MATCHES {
     """
     python3 $projectDir/interproscan/scripts/members/funfam/run_match_filtering.py \\
         ${ips6_jsons} \\
-        ${cath_resolved_outs} \\
-        ${postprocessing_params[6]} > debug
+        ${cath_resolved_outs} > debug
     """
 }
 

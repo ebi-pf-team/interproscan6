@@ -405,14 +405,6 @@ cp docker_files/phobius/Dockerfile <PHOBIUS-DIR>/Dockerfile
 # with the terminal pointed at your local phobius dir
 docker image build -t phobius .
 ```
-5. Check the `subworkflows/sequence_analysis/members.config` file to make sure the `Phobius` version is correct.
-```
-    phobius {
-            release = "1.01" <---- update if necessary
-            runner = "phobius"
-        }
-```        
-
 
 # Citation
 

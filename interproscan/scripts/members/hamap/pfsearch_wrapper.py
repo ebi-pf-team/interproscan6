@@ -1,6 +1,6 @@
 """Script to parse the hmmer3 tbl file and run the pfsearch binary
 
-It does not filter the matches (reports only normal (0) amd strong (1) matches) 
+It does not filter the matches (reports only normal (0) amd strong (1) matches)
 We capture the flag but do not need to check it.
 But there are some PROSITE profiles that are considered are ambiguous,
 generating too many FPs, these profiles are black listed and all
@@ -63,6 +63,7 @@ def get_sequences(fasta_file: str) -> dict:
                 fasta_dict[seq_id] = ''
             else:
                 fasta_dict[seq_id] += line + '\n'
+
     return fasta_dict
 
 

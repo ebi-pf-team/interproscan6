@@ -11,8 +11,8 @@ def get_profile_paths(directory):
 
 
 def main():
-    if len(sys.argv) < 6:
-        sys.exit("Error: expected more than 6 arguments, check your command again")
+    if len(sys.argv) < 5:
+        sys.exit("Error: expected more than 5 arguments, check your command again")
 
     models_dir = sys.argv[1]
     fasta_file = sys.argv[2]

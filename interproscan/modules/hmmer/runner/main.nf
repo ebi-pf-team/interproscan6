@@ -61,7 +61,7 @@ process FUNFAM_HMMER_RUNNER {
     */
 
     output:
-        path "${postprocessing_params[6]}._.funfam._.*.out"
+        path "funfam._.*.out"
         val postprocessing_params
 
     script:
@@ -71,7 +71,7 @@ process FUNFAM_HMMER_RUNNER {
         hmm_file="\${cath_superfamily//./\\/}.hmm"
         /opt/hmmer3/bin/hmmsearch \\
             ${postprocessing_params[5]} \\
-            -o ${postprocessing_params[6]}._.funfam._.\${cath_superfamily}.out \\
+            -o funfam._.\${cath_superfamily}.out \\
             "${postprocessing_params[4]}/\$hmm_file" \\
             ${fasta}
     done < ${cath_superfamilies}
