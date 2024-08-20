@@ -54,12 +54,12 @@ workflow PRE_CHECKS {
 
     if (!seq_input) {
         log.error """
-                Please provide an input file.
-                The typical command for running the pipeline is:
-                    nextflow run interproscan.nf --input <path to fasta file>
-                For more information, please use the --help flag.
-                """
-                exit 5
+            Please provide an input file.
+            The typical command for running the pipeline is:
+            nextflow run interproscan.nf --input <path to fasta file>
+            For more information, please use the --help flag.
+        """
+        exit 5
     }
 
     // is user specifies the input is nucleic acid seqs
@@ -105,6 +105,11 @@ workflow PRE_CHECKS {
     if (applications_diff.size() != 0){
         log.info printHelp()
         exit 22, "Applications not valid: $applications_diff. Valid applications are: $applications_expected"
+    }
+
+    if ("${signalp_mode}".toLowerCase() !in ['fast', 'slow', 'slow-sequential']) {
+        log.info "Unrecognised SignalP mode '${signalp_mode}'.\nAccepted modes: 'fast', 'slow', 'slow-sequential'"
+        exit 22
     }
 
     // Check if the formats are valid

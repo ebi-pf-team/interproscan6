@@ -75,11 +75,6 @@ workflow {
         parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
     }
 
-    if (params.signalp_mode.toLowerCase() !in ['fast', 'slow', 'slow-sequential']) {
-        log.info "Unrecognised SignalP mode '${params.signalp_mode}'.\nAccepted modes: 'fast', 'slow', 'slow-sequential'"
-        exit 1
-    }
-
     analysis_result = Channel.empty()
     if (params.disable_precalc || sequences_to_analyse) {
         log.info "Running sequence analysis"
