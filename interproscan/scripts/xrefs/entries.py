@@ -12,6 +12,8 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
     for seq_id, match_info in matches_info.items():
         for match_key, data in match_info.items():
             acc_id = match_key.split(".")[0]
+            match_info[match_key]['member_db'] = data['member_db']
+            match_info[match_key]['version'] = entries[data["member_db"]]['version']
             try:
                 entry = entries[acc_id]
                 match_info[match_key]["entry"] = {
