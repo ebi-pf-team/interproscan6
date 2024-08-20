@@ -362,17 +362,36 @@ To run in slow-sequential mode and with only Eukaryotic models, use the command:
     nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp_euk --disable_precalc --signalp_mode slow-sequential
 ```
 
-**Note:** _`InterProScan6` only supports the implementation of one `SignalP` mode at a time. A separate `InterProScan6` but be completed for each mode of interest, in order ro apply multiple modes to the same dataset_.
+**Note:** _`InterProScan6` only supports the implementation of one `SignalP` mode at a time. A separate `InterProScan6` but be completed for each mode of interest, in order to apply multiple modes to the same dataset_.
 
 ### Converting from CPU to GPU, and back again
 
-:TODO: -- add support for GPU run
+By default, `SignalP` runs on your CPU. If you have a GPU available, you can convert the `SignalP` model weights so that your installation will use GPU instead.
+You will need to install `SignalP` in order to convert to GPU models.
 
-The model weights that come with the `SignalP` installation by default run on your CPU.
-If you have a GPU available, you can convert your installation to use the GPU instead. 
-
-1. Convert the `SignalP` installation to GPU by following the `SignalP` [documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#converting-to-gpu)
-2. ....???....
+1. (Optional) Remove any previously built SignalP images if you no longer want to run `SignalP` with CPU
+```bash
+docker image rm signalp6:latest
+```
+2. Install `SignalP` 
+```bash
+cd <SIGNALP_DIR>
+pip install .
+```
+3. Convert the models to GPU
+```bash
+signalp6_convert_models gpu /path/to/models
+```
+4. Build a docker image for `SignalP` with GPU
+```bash
+# with the terminal pointed at your local signalp dir
+docker image build -t signalp6_gpu .
+```
+5. To run `SignalP` with GPU with `InterProScan6` use the flag `--signalp_gpu`
+```bash
+nextflow run interproscan.nf --input <fasta file> --applications signalp --signalp_gpu
+```
+Alternatively, if you do not always want to use the flag to run `SignalP`, you can update the `nextflow.config` file from "signalp_gpu = false" to "signalp_gpu = true".
 
 ## `Phobius`
 ### Adding `Phobius` (version 1.01) to `InterProScan6`

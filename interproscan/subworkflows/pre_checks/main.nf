@@ -35,6 +35,7 @@ workflow PRE_CHECKS {
     version_msg
     ips6_version
     signalp_mode
+    signalp_gpu
 
     main:
     if ( !nextflow.version.matches('>=23.10') ) {
@@ -85,7 +86,7 @@ workflow PRE_CHECKS {
         'batchsize', 'url_precalc', 'check_precalc', 'matches',
         'sites', 'bin', 'members', 'translate', 'nucleic',
         'formats', 'output', 'xrefs', 'goterms', 'pathways', 'signalp_mode',
-        'ipsc_version', 'version'
+        'ipsc_version', 'version', 'signalp_gpu'
     ]
     def parameter_diff = all_params - parameters_expected
     if (parameter_diff.size() != 0){
