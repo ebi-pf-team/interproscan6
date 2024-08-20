@@ -11,7 +11,6 @@ def get_profile_paths(directory):
 
 
 def main():
-
     models_dir = sys.argv[1]
     fasta_file = sys.argv[2]
     output_file = sys.argv[3]
