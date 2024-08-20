@@ -75,11 +75,6 @@ workflow {
         SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications, false)  // final: bool to indicate not a unit test
         sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
         parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
-
-        if (parsed_matches.collect().value == null) {
-            disable_precalc = true
-            log.info "ERROR: unable to connect to match lookup service. Max retries reached. Running analysis locally..."
-        }
     }
 
     analysis_result = Channel.empty()
