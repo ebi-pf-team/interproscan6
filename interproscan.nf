@@ -77,6 +77,12 @@ workflow {
         parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
     }
 
+    if (parsed_matches.collect() == null) {
+            // cases in which the lookup check ran successfully but lookup matches not
+            disable_precalc = true
+            log.info "ERROR: unable to connect to match lookup service. Max retries reached. Running analysis locally..."
+        }
+
     analysis_result = Channel.empty()
     if (disable_precalc || sequences_to_analyse) {
         log.info "Running sequence analysis"
