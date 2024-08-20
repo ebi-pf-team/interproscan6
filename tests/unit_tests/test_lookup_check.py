@@ -33,7 +33,7 @@ def test_lookup_check_main(parsed_seqs_path, lookup_check_out_dir, capsys, monke
     def mock_check_precalc(*args, **kwards):
         return ["MD5_1", "MD5_2"]
 
-    monkeypatch.setattr("sys.argv", ["lookup_check", str(parsed_seqs_path), "fake_url"])
+    monkeypatch.setattr("sys.argv", ["lookup_check", str(parsed_seqs_path), "fake_url", 3])
     monkeypatch.setattr(lookup_check, "check_precalc", mock_check_precalc)
 
     with open((lookup_check_out_dir / "lookup_check_out_script.json"), "r") as fh:
@@ -59,6 +59,6 @@ def test_check_precalc(monkeypatch):
 
     md5_list = ["MD5_1", "MD5_2", "MD5_3", "MD5_4"]
     url = "https://fake_url"
-    result = lookup_check.check_precalc(md5_list, url)
+    result = lookup_check.check_precalc(md5_list, url, retries=3)
 
-    assert result == ["MD5_1", "MD5_2", "MD5_3"]
+    assert result == (["MD5_1", "MD5_2", "MD5_3"], None)
