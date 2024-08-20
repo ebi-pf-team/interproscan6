@@ -77,7 +77,7 @@ workflow {
 
         if (parsed_matches.collect().value == null) {
             disable_precalc = true
-            log.info "ERROR: unable to connect to match lookup service. Max retries reached.  Running analysis locally..."
+            log.info "ERROR: unable to connect to match lookup service. Max retries reached. Running analysis locally..."
         }
     }
 
@@ -89,7 +89,7 @@ workflow {
     analysis_result = Channel.empty()
     if (disable_precalc || sequences_to_analyse) {
         log.info "Running sequence analysis"
-        if (sequences_to_analyse && ! disable_precalc) {
+        if (sequences_to_analyse && !disable_precalc) {
             fasta_to_runner = sequences_to_analyse
         }
         else {

@@ -22,9 +22,6 @@ def lookup_retry_decorator(func):
             if (not success) and (tries < kwargs["retries"]):
                 time.sleep(10)
 
-        if not success:
-            return result, err
-        else:
-            return result, err
+        return result, err
 
     return wrapper

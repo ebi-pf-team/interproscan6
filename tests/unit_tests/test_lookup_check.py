@@ -31,7 +31,7 @@ def parsed_seqs_path(lookup_check_input_dir):
 
 def test_lookup_check_main(parsed_seqs_path, lookup_check_out_dir, capsys, monkeypatch):
     def mock_check_precalc(*args, **kwards):
-        return ["MD5_1", "MD5_2"]
+        return (["MD5_1", "MD5_2"], None)
 
     monkeypatch.setattr("sys.argv", ["lookup_check", str(parsed_seqs_path), "fake_url", 3])
     monkeypatch.setattr(lookup_check, "check_precalc", mock_check_precalc)
