@@ -1,6 +1,6 @@
 process LOOKUP_CHECK {
     label 'io'
-    
+
     input:
     val hash_seq
     val is_test
@@ -15,6 +15,7 @@ process LOOKUP_CHECK {
         """
     else
         """
-        python3 $projectDir/interproscan/scripts/lookup/lookup_check.py ${hash_seq} ${params.url_precalc}${params.check_precalc} > checked_md5
+        python3 $projectDir/interproscan/scripts/lookup/lookup_check.py ${hash_seq} \\
+        ${params.url_precalc}${params.check_precalc} ${params.lookup_retries} > checked_md5
         """
 }

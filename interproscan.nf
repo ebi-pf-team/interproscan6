@@ -67,19 +67,25 @@ workflow {
         PARSE_SEQUENCE(ch_fasta, ch_fasta, params.nucleic, applications)
     }
 
+    disable_precalc = params.disable_precalc
     sequences_to_analyse = null
     parsed_matches = Channel.empty()
-    if (!params.disable_precalc) {
+    if (!disable_precalc) {
         log.info "Using precalculated match lookup service"
         SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications, false)  // final: bool to indicate not a unit test
         sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
         parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
+
+        if (parsed_matches.collect().value == null) {
+            disable_precalc = true
+            log.info "ERROR: unable to connect to match lookup service. Max retries reached. Running analysis locally..."
+        }
     }
 
     analysis_result = Channel.empty()
-    if (params.disable_precalc || sequences_to_analyse) {
+    if (disable_precalc || sequences_to_analyse) {
         log.info "Running sequence analysis"
-        if (sequences_to_analyse) {
+        if (sequences_to_analyse && !disable_precalc) {
             fasta_to_runner = sequences_to_analyse
         }
         else {
