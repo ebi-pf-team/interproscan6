@@ -15,6 +15,7 @@ def aggregate_results(aggreated_results_path: str, result_files: list) -> dict:
     """
     with open(aggreated_results_path, "r") as fh:
         all_results = json.load(fh)
+
     for file_path in result_files:
         if file_path:
             with open(file_path, 'r') as file:

@@ -11,16 +11,18 @@ process AGGREGATE_RESULTS {
     a 126 exit status and 'Arugment list too long' error. Therefore, the
     str respresentation of a list that is results_files is 
     broken up into chunks, and each chunk is added to the final 
-    results_aggregated.json file. */
+    results_aggregated.json file.*/
     script:
     """
     mkdir -p $projectDir/results
     mkdir -p $projectDir/results/temp
     echo "{}" > results_aggregated.json
     IFS=',' read -ra paths <<< "${result_files}"
-    for ((i = 0; i < ${#paths[@]}; i += 20)); do
+    for ((i = 0; i < \${#paths[@]}; i += 20)); do
+        batch=("\${paths[@]:i:20}")
         python3 $projectDir/interproscan/scripts/output/aggregate_results.py \\
         "\${batch[@]}" \\
         results_aggregated.json
+    done
     """
 }
