@@ -475,6 +475,7 @@ workflow SEQUENCE_ANALYSIS {
     SUPERFAMILY_FILTER_MATCHES(
         SUPERFAMILY_POST_PROCESSER.out,
         SUPERFAMILY_HMMER_RUNNER.out[4],  // hmm path
+        SUPERFAMILY_HMMER_RUNNER.out[2]   // member db
     )
 
     /*

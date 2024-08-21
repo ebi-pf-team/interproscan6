@@ -10,10 +10,8 @@ ACCESSION_PATTERN = re.compile(r"^ACC\s+([A-Z0-9]+)\.?.*$")
 LENGTH_LINE = re.compile(r"^LENG\s+([0-9]+)$")
 
 
-def parse(ass3_out_path: str, hmmlib_info: dict) -> dict:
+def parse(ass3_out_path: str, hmmlib_info: dict, member_db: str) -> dict:
     data = {}
-    path_segments = ass3_out_path.split("/")[-1].split("._.")
-    member_db = path_segments[0]
 
     with open(ass3_out_path, 'r') as reader:
         for line in reader:
@@ -139,12 +137,13 @@ def main():
     """CL input:
     0. Str repr of path to the hmm lib
     1. Str repr of path to the ass3 output file
-    2. Str repr of path to write the output file
+    2. member database
+    3. Str repr of path to write the output file
     """
     args = sys.argv[1:]
     hmmlib_info = parse_hmmlib(args[0])
-    parsed_result = parse(args[1], hmmlib_info)
-    with open(args[2], "w") as fh:
+    parsed_result = parse(args[1], hmmlib_info, args[1])
+    with open(args[3], "w") as fh:
         json.dump(parsed_result, fh)
 
 
