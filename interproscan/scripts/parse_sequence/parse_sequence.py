@@ -1,11 +1,12 @@
 import hashlib
 import json
+import logging
 import re
 import sys
 
 
 NT_SEQ_ID_PATTERN = re.compile(r"^orf\d+\s+source=(.*)\s+coords=(\d+\.+\d+)\s+.+frame=\d+\s+desc=.*$")
-ILLEGAL_CHARAS = {
+ILLEGAL_CHARS = {
     "antifam": "-",
     "cdd": "",
     "coils": "",
@@ -28,83 +29,128 @@ ILLEGAL_CHARAS = {
     "phobius": "-*._oxuzj",
 }
 
-def is_fasta_check(fasta_file: str):
-    with open(fasta_file, "r") as f:
-        line = f.readline().strip()
-        if not line.startswith(">"):
+
+logger = logging.getLogger()
+
+
+class IllegalCharError(Exception):
+    def __init__(self, fasta: str, errors: dict[str, dict[str, set]]):
+        self.fasta = fasta
+        self.errors = errors
+        self.message = None
+
+    def _get_error_msg(self):
+        msg = f"Illegal characters detected in {self.fasta}\n"
+        for seq_key in self.errors:
+            for app in self.errors[seq_key]:
+                app_placeholder = f" for {app}" if app != "GENERAL" else ""
+                msg += (
+                    f"Sequence {seq_key.split(maxsplit=1)[0]} contains the illegal "
+                    f"character(s){app_placeholder}: {', '.join(self.errors[seq_key][app])}\n"
+                )
+        self.message = msg
+
+    def __str__(self) -> str:
+        self._get_error_msg()
+        return self.message
+
+
+class Sequence:
+    seq_key = None
+    name = None
+    sequence = ""
+
+    def get_seq_key(self, line: str, nucleic: bool):
+        self.seq_key = line[1:].split(maxsplit=1)[0] if nucleic else line[1:]
+        self.name = line[1:] if nucleic else None
+
+    def get_seq(self, line: str):
+        self.sequence += line
+
+    def get_error_msg(self, errors: dict[str, dict[str, str]], line: str, applications: list):
+        if self.seq_key not in errors:
+            errors[self.seq_key] = {}
+        invalid_chars = re.findall(r"[^A-Za-z_\-\*\.]*", line)
+        if ' ' in line:
+            invalid_chars.append(' ')
+        invalid_chars = [f"'{_char}'" for _match in set(invalid_chars)
+                            for _char in _match if len(_match) > 0]
+        if invalid_chars:
+            if 'GENERAL' not in errors[self.seq_key]:
+                errors[self.seq_key]['GENERAL'] = set()
+            errors[self.seq_key]['GENERAL'] = errors[self.seq_key]['GENERAL'].union(invalid_chars)
+
+        for app in applications:
+            app_chars = [f"'{_}'" for _ in set(line).intersection(set(ILLEGAL_CHARS[app]))]
+            if app_chars:
+                if app.upper() not in errors[self.seq_key]:
+                    errors[self.seq_key][app.upper()] = set()
+                errors[self.seq_key][app.upper()] = errors[self.seq_key][app.upper()].union(app_chars)
+        return errors
+
+
+def parse(
+    fasta_file: str,
+    applications: str,
+    passing_nucleic=False,
+    nucleic_seqs=None
+) -> dict[str, dict[str, any]]:
+    """
+    :param fasta_file: str repr of path to FASTA file
+    :param passing_nucleic: bool, passing nucleic acid seq FASTA
+    :param applications: str repr of list of applications to be used in IPS6 run
+    :param nucleic_seqs: dict of seqs from input nucleic acid seq FASTA
+    """
+    seq_obj = None
+    sequences = {}
+    errors = {}
+    applications = applications.split(",")
+    all_illegal_chars = {chara for app in applications for chara in ILLEGAL_CHARS[app]}.union({' '})
+
+    with open(fasta_file, "r") as fh:
+        if not fh.readline().strip().startswith(">"):
             raise ValueError(f"{fasta_file} is not in FASTA format")
 
-
-def get_sequences(fasta_file: str) -> dict[str, str]:
-    sequences = {}
-    with open(fasta_file, "r") as f:
-        lines = f.readlines()
-        for line in lines:
+    with open(fasta_file, "r") as fh:
+        for line in fh:
             line = line.strip()
+
             if line.startswith(">"):
-                seq_key = line[1:]
-                sequences[seq_key] = ""
+                # store completed seq
+                if seq_obj:
+                    acc = seq_obj.seq_key.split(maxsplit=1)[0]
+                    if passing_nucleic:
+                        sequences[acc] = seq_obj
+                    else:
+                        sequences[acc] = {
+                            'key': seq_obj.seq_key,
+                            'name': seq_obj.name,
+                            'sequence': seq_obj.sequence,
+                            'md5': hashlib.md5(seq_obj.sequence.encode()).hexdigest(),
+                            'length': len(seq_obj.sequence)
+                        }
+                        if nucleic_seqs:
+                            # Passing ORF FASTA after input nucleic FASTA
+                            # Add additional nt data for mapping ORF to the nt seq in the output
+                            sequences[acc]['nt_name'] = nucleic_seqs[acc].name
+                            sequences[acc]['nt_sequence'] = nucleic_seqs[acc].sequence
+                            sequences[acc]['nt_md5'] = hashlib.md5(
+                                nucleic_seqs[acc].sequence.encode()).hexdigest()
+
+                # start with new seq
+                seq_obj = Sequence()
+                seq_obj.get_seq_key(line, passing_nucleic)
+
             else:
-                sequences[seq_key] += line
+                if set(line.lower()).intersection(all_illegal_chars) or re.findall(r"[^A-Za-z_\-\*\.]*", line):
+                    errors = seq_obj.get_error_msg(errors, line, applications)
+
+                seq_obj.get_seq(line)
+
+    if errors:
+        sys.tracebacklimit = 0
+        raise IllegalCharError(fasta_file, errors)
     return sequences
-
-
-def get_nucleic_seqs(fasta_file: str) -> dict[str, dict]:
-    sequences = {}
-    with open(fasta_file, "r") as f:
-        lines = f.readlines()
-        for line in lines:
-            line = line.strip()
-            if line.startswith(">"):
-                # split on the first white space to match GETORF handling of seqIDs
-                seq_key = line[1:].split(maxsplit=1)[0]
-                sequences[seq_key] = {'sequence': "", "name": line[1:]}
-            else:
-                sequences[seq_key]['sequence'] += line
-    return sequences
-
-def parse(sequences: dict, applications: str) -> dict[str, list]:
-    results = {}
-    applications = applications.split(",")
-    illegal_char_set = {chara for application in applications for chara in
-                        ILLEGAL_CHARAS[application]}
-    for key, sequence in sequences.items():
-        sequence_info = []
-        seq = sequence.lower()
-        acc = key.split(" ", 1)[0]
-        if ">" in sequence:
-            raise ValueError(f"{acc} contains illegal character '>'")
-        illegal_matches = set(seq).intersection(illegal_char_set)
-        if illegal_matches:
-            error_message = f"{acc} contains illegal character(s): \n"
-            match_record = {match: [application for application in applications if match in ILLEGAL_CHARAS[application]] for match in illegal_matches}
-            for match, tools in match_record.items():
-                error_message += f"'{match}' not allowed in {','.join(x for x in tools)}\n"
-            print(error_message, file=sys.stderr)
-            sys.exit(1)
-        sequence_info.append(key)
-        sequence_info.append(sequence)
-        sequence_info.append(hashlib.md5(sequence.encode()).hexdigest())
-        sequence_info.append(len(sequence))
-        results[acc] = sequence_info
-    return results
-
-
-def parse_nucleic(sequences: dict, nt_seqs: dict) -> dict[str, list]:
-    results = {}
-    for key, sequence in sequences.items():
-        sequence_info = []
-        acc = key.split(" ", 1)[0]
-        sequence_info.append(key)
-        sequence_info.append(sequence)
-        sequence_info.append(hashlib.md5(sequence.encode()).hexdigest())
-        sequence_info.append(len(sequence))
-        nt_seq_id = NT_SEQ_ID_PATTERN.match(key).group(1)
-        sequence_info.append(nt_seqs[nt_seq_id]['name'])
-        sequence_info.append(hashlib.md5(nt_seqs[nt_seq_id]['sequence'].encode()).hexdigest())
-        sequence_info.append(nt_seqs[nt_seq_id]['sequence'])
-        results[acc] = sequence_info
-    return results
 
 
 def main():
@@ -115,19 +161,13 @@ def main():
         (may contain the original nucleic sequences)
     args[2] = str repr of bool, if nucleic seqs provided ('true') or not ('false')
     args[3] = str of applications
+    args[4] = str repr of path to write output
     """
     args = sys.argv[1:]
-    is_fasta_check(args[0])
-    sequences = get_sequences(args[0])
-
-    if args[2] == "true":
-        is_fasta_check(args[1])
-        nt_seqs = get_nucleic_seqs(args[1])
-        sequence_parsed = parse_nucleic(sequences, nt_seqs)
-    else:
-        sequence_parsed = parse(sequences, args[3])
-
-    print(json.dumps(sequence_parsed))
+    nt_seqs = parse(args[1], args[3], passing_nucleic=True) if args[2] == "true" else None
+    parsed_seqs = parse(args[0], args[3], nucleic_seqs=nt_seqs)
+    with open(args[4], "w") as fh:
+        json.dump(parsed_seqs, fh)
 
 
 if __name__ == "__main__":
