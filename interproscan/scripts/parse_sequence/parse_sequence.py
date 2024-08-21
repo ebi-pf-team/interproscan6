@@ -71,8 +71,6 @@ class Sequence:
         if self.seq_key not in errors:
             errors[self.seq_key] = {}
         invalid_chars = re.findall(r"[^A-Za-z_\-\*\.]*", line)
-        if ' ' in line:
-            invalid_chars.append(' ')
         invalid_chars = [f"'{_char}'" for _match in set(invalid_chars)
                             for _char in _match if len(_match) > 0]
         if invalid_chars:
