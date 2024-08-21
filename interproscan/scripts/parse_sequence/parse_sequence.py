@@ -45,7 +45,7 @@ class IllegalCharError(Exception):
             for app in self.errors[seq_key]:
                 app_placeholder = f" for {app}" if app != "GENERAL" else ""
                 msg += (
-                    f"Sequence {seq_key.split(maxsplit=1)[0]} contains the illegal "
+                    f"Sequence {seq_key.split(maxsplit=1)[0]} contains illegal "
                     f"character(s){app_placeholder}: {', '.join(self.errors[seq_key][app])}\n"
                 )
         self.message = msg
