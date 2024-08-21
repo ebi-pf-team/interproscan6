@@ -6,9 +6,9 @@ import sys
 output file, and then runs filter_ips6_hits.py for each pair
 of matches output files"""
 
+CATH_PATTERN = re.compile(r"^.*_(\d+\.\d+\.\d+\.\d+)\.cath\.resolved\.out$")
+JSON_PATTERN = re.compile(r"^hmmer_parsed_.*_(\d+\.\d+\.\d+\.\d+)\.json$")
 
-CATH_PATTERN = re.compile(r"^.*\._\.(\d+\.\d+\.\d+\.\d+)\.cath\.resolved\.out$")
-JSON_PATTERN = re.compile(r"^hmmer_parsed_.*\._\.(\d+\.\d+\.\d+\.\d+)\.json$")
 
 def main():
     """

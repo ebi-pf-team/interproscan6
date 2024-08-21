@@ -163,13 +163,13 @@ def add_match(
     return matches
 
 
-def parse(hmmer_out_path: str):
+def parse(hmmer_out_path: str, member_db: str):
     """Parse the output from HMMER3 hmmscan into a dict
 
     :param hmmer_out_path: str repr of path to hmmscan out file
+    :param member_db: str repr of member database
     """
     matches = {}
-    member_db = hmmer_out_path.split("._.")[0]
     query_protein = QueryProtein()
     current_model = None
     stage = "GET_QUERY_PROTEIN"
@@ -214,9 +214,14 @@ def parse(hmmer_out_path: str):
 
 
 def main():
+    """
+    :args 0: str repr of path to hmmer file to be parsed
+    :args 1: str repr of member database
+    :args 2: str repr of path to output file
+    """
     args = sys.argv[1:]
-    parse_result = parse(args[0])
-    with open(args[1], "w") as fh:
+    parse_result = parse(args[0], args[1])
+    with open(args[2], "w") as fh:
         json.dump(parse_result, fh)
 
 

@@ -5,12 +5,13 @@ process HMMER_RUNNER {
         tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
 
     output:
-        path "${member}._.out"
+        path "${member}_out"
         val postprocessing_params
+        val member
 
     script:
     """
-    /opt/hmmer3/bin/hmmsearch ${switches} -o ${member}._.out ${hmm} ${fasta}
+    /opt/hmmer3/bin/hmmsearch ${switches} -o ${member}_out ${hmm} ${fasta}
     """
 }
 
@@ -21,14 +22,15 @@ process HMMER_RUNNER_WITH_ALIGNMENTS {
         tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
 
     output:
-        path "${member}._.out"
+        path "${member}_out"
         val postprocessing_params
+        val member
         path "${member}_alignment"
-        path "${member}._.dtbl"
+        path "${member}_dtbl"
 
     script:
     """
-    /opt/hmmer3/bin/hmmsearch ${switches} -o ${member}._.out --domtblout ${member}._.dtbl -A ${member}_alignment ${hmm} ${fasta}
+    /opt/hmmer3/bin/hmmsearch ${switches} -o ${member}_out --domtblout ${member}_dtbl -A ${member}_alignment ${hmm} ${fasta}
     """
 }
 
@@ -61,8 +63,9 @@ process FUNFAM_HMMER_RUNNER {
     */
 
     output:
-        path "funfam._.*.out"
+        path "funfam_*.out"
         val postprocessing_params
+        val member
 
     script:
     """
@@ -71,7 +74,7 @@ process FUNFAM_HMMER_RUNNER {
         hmm_file="\${cath_superfamily//./\\/}.hmm"
         /opt/hmmer3/bin/hmmsearch \\
             ${postprocessing_params[5]} \\
-            -o funfam._.\${cath_superfamily}.out \\
+            -o funfam_\${cath_superfamily}.out \\
             "${postprocessing_params[4]}/\$hmm_file" \\
             ${fasta}
     done < ${cath_superfamilies}
@@ -88,14 +91,15 @@ process HAMAP_HMMER_RUNNER {
         tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
 
     output:
-        path "${member}._.out"
+        path "${member}_out"
         val postprocessing_params
+        val member
         path fasta
-        path "${member}._.table.tbl"
+        path "${member}_table.tbl"
 
     script:
     """
-    /opt/hmmer3/bin/hmmsearch ${switches} -o ${member}._.out --tblout ${member}._.table.tbl ${hmm} ${fasta}
+    /opt/hmmer3/bin/hmmsearch ${switches} -o ${member}_out --tblout ${member}_table.tbl ${hmm} ${fasta}
     """
 }
 
@@ -112,14 +116,15 @@ process PIRSF_HMMER_RUNNER {
     */
 
     output:
-        path "${member}._.out"
-        path "${member}._.dtbl"
+        path "${member}_out"
         val postprocessing_params
+        val member
+        path "${member}_dtbl"
 
     script:
     """
     /opt/hmmer3/bin/hmmpress ${hmm}
-    /opt/hmmer3/bin/hmmscan ${switches} -o ${member}._.out --domtblout ${member}._.dtbl ${hmm} ${fasta}
+    /opt/hmmer3/bin/hmmscan ${switches} -o ${member}_out --domtblout ${member}_dtbl ${hmm} ${fasta}
     """
 }
 
@@ -131,12 +136,13 @@ process SMART_HMMER2_RUNNER {
         tuple path(fasta), val(member), path(hmm), val(switches)
 
     output:
-        path "${member}._.out"
+        path "${member}_out"
         path "${fasta}"  // Used for filtering kinase hits in SMART_FILTER_MATCHES
+        val member
 
     script:
     """
-    /opt/hmmer2/bin/hmmpfam ${switches} ${hmm} ${fasta} > ${member}._.out
+    /opt/hmmer2/bin/hmmpfam ${switches} ${hmm} ${fasta} > ${member}_out
     """
 }
 
@@ -151,14 +157,15 @@ process HMMER_SCAN_RUNNER {
     */
 
     output:
-        path "${member}._.out"
+        path "${member}_out"
         val postprocessing_params
+        val member
         path fasta
         path hmm
 
     script:
     """
     /opt/hmmer3/bin/hmmpress ${hmm}
-    /opt/hmmer3/bin/hmmscan ${switches} -o ${member}._.out ${hmm} ${fasta}
+    /opt/hmmer3/bin/hmmscan ${switches} -o ${member}_out ${hmm} ${fasta}
     """
 }

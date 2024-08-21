@@ -39,9 +39,10 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
             acc_id = match_key.split(".")[0]
             databases_versions = entries["databases"]
             member_db = data["member_db"].upper()
+            version = databases_versions[map_databases[member_db]]
             match_info[match_key]['member_db'] = member_db
             match_info[match_key]['library'] = map_databases[member_db]
-            match_info[match_key]['version'] = databases_versions[map_databases[member_db]]
+            match_info[match_key]['version'] = version
             try:
                 entry = entries[acc_id]
                 match_info[match_key]["entry"] = {
@@ -69,11 +70,6 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
                         "pathwayXRefs": []
                     }
                 except KeyError:  # members with no match in entries
-                    member_db_lower = data["member_db"].lower()
-                    for key in entries['databases']:
-                        if key.lower() == member_db_lower:
-                            version = entries['databases'][key]
-
                     match_info[match_key]["entry"] = {
                         "accession": None,
                         "name": None,
@@ -86,10 +82,10 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
                     }
 
             if member_db == "PANTHER":
-                acc_id_family = data["accession"]
+                acc_subfamily = data["accession"]
                 try:
-                    match_info[match_key]["entry"]["family_name"] = entries[acc_id_family]["name"]
-                    match_info[match_key]["entry"]["family_type"] = entries[acc_id_family]["type"]
+                    match_info[match_key]["entry"]["subfamily_name"] = entries[acc_subfamily]["name"]
+                    match_info[match_key]["entry"]["subfamily_type"] = entries[acc_subfamily]["type"]
                 except KeyError:
                     pass
 

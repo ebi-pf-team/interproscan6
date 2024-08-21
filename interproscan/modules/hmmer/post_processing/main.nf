@@ -28,8 +28,8 @@ process CATH_RESOLVE_HITS {
 
 process FUNFAM_CATH_RESOLVE_HITS {
     /* Funfam has one hmmer.out file per cath superfamily
-    Runs cath_resolve hits for each hmmer.out file as a 
-    single job. 
+    Runs cath_resolve hits for each hmmer.out file as a
+    single job.
     Generates an output file per hmmer.out file.
     */
     label 'analysis_parser'
@@ -168,6 +168,7 @@ process SFLD_POST_PROCESSER {
     input:
         path out_file
         val postprocessing_params // contains [0] bin and [1] site_annotations file path
+        val member
         path alignment
         path out_dtbl
 

@@ -39,12 +39,11 @@ def get_accession_regex(appl: str) -> re.Pattern:
         return re.compile(r"^(Accession:|Query:|Query sequence:)\s+(SFLD[^\s]+)\s*$")
 
 
-def parse(out_file: str) -> dict:
+def parse(out_file: str, member_db: str) -> dict:
     """Main parser for the hmmer.out file.
 
     :parama out_file: str representation of path to HMMER.out file
     """
-    member_db = out_file.split("/")[-1].split("._.")[0]
     current_sequence = None
     current_domain = None
     sequence_match = {}
@@ -269,13 +268,13 @@ def encode(cigar_alignment: str) -> str:
 def main():
     """
     :args 0: str repr of path to hmmer file to be parsed
-    :args 1: str repr of path to write output
+    :args 1: member database
+    :args 2: str repr of path to write output
     """
     args = sys.argv[1:]
-    parse_result = parse(args[0])
-    output = args[1]
+    parse_result = parse(args[0], args[1])
 
-    with open(output, "w") as fh:
+    with open(args[2], "w") as fh:
         json.dump(parse_result, fh)
 
 
