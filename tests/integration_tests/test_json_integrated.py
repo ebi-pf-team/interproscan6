@@ -84,7 +84,7 @@ def test_json_output(input_path, expected_output_path, current_output_path, appl
     with open('tests/integration_tests/temp_current.json', 'w') as file:
         json.dump(current, file, indent=2)
 
-    ignore_elements = ['representative', 'description', "scope", "envelopeEnd", "envelopeStart"]
+    ignore_elements = ['representative', 'postProcessed', 'scope', 'pathwayXRefs']
     compare(expected, current, ignore_elements, False, False)
     # compare(current, expected, ignore_elements, False, False)
 
