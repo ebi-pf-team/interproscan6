@@ -16,7 +16,7 @@ def write_results(
     sequences_path: str,
     matches_path: str,
     output_format: list,
-    fasta_name: str,
+    out_file_name: str,
     version: str,
     nucleic: bool,
 ):
@@ -45,19 +45,19 @@ def write_results(
             }
 
     if "TSV" in output_format:
-        tsv_output(seq_matches, os.path.join(fasta_name + '.ips6.tsv'))
+        tsv_output(seq_matches, os.path.join(out_file_name + '.ips6.tsv'))
     if "TSV-PRO" in output_format:
-        tsv_pro_output(seq_matches, os.path.join(fasta_name + '.ips6.tsv-pro.tsv'))
+        tsv_pro_output(seq_matches, os.path.join(out_file_name + '.ips6.tsv-pro.tsv'))
     if "JSON" in output_format:
         if nucleic:
-            build_json_output_nucleic(seq_matches, os.path.join(fasta_name + '.ips6.json'), version)
+            build_json_output_nucleic(seq_matches, os.path.join(out_file_name + '.ips6.json'), version)
         else:
-            build_json_output_protein(seq_matches, os.path.join(fasta_name + '.ips6.json'), version)
+            build_json_output_protein(seq_matches, os.path.join(out_file_name + '.ips6.json'), version)
     if "XML" in output_format:
         if nucleic:
-            build_xml_output_nucleic(seq_matches, os.path.join(fasta_name + '.ips6.xml'), version)
+            build_xml_output_nucleic(seq_matches, os.path.join(out_file_name + '.ips6.xml'), version)
         else:
-            build_xml_output_protein(seq_matches, os.path.join(fasta_name + '.ips6.xml'), version)
+            build_xml_output_protein(seq_matches, os.path.join(out_file_name + '.ips6.xml'), version)
 
 
 def main():
@@ -66,12 +66,12 @@ def main():
     sequences = args[0]
     matches = args[1]
     formats_str = args[2]
-    fasta_name = args[3]  # name of the input fasta file
+    out_file_name = args[3]
     version = args[4]
     nucleic = True if args[5] == "true" else False
 
     formats = set(formats_str.upper().split(','))
-    write_results(sequences, matches, formats, fasta_name, version, nucleic)
+    write_results(sequences, matches, formats, out_file_name, version, nucleic)
 
 
 if __name__ == "__main__":

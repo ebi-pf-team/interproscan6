@@ -2,7 +2,7 @@ process WRITE_RESULTS {
     label 'write_results'
 
     input:
-    val fasta
+    val file_name
     val sequences
     path matches
     val format
@@ -15,13 +15,12 @@ process WRITE_RESULTS {
 
     script:
     """
-    file_name=\$(basename $fasta)
     cat ${sequences.join(" ")} > sequences_hash.json
     python3 $projectDir/interproscan/scripts/output/write_results.py \\
         sequences_hash.json \\
         ${matches} \\
         ${format} \\
-        \${file_name} \\
+        ${file_name} \\
         $version \\
         ${nucleic} > debug_out
     """
