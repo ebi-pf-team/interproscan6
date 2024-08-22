@@ -117,9 +117,10 @@ workflow {
 workflow.onComplete = {
     def input_file = file(params.input)
     def outputFileName = input_file.getName()
+    def outputDir = params.outdir.endsWith('/') ? params.outdir[0..-2] : params.outdir
 
     println "InterProScan workflow completed successfully: $workflow.success."
-    println "Results are located at ${params.outdir}/${outputFileName}.ips6.*"
+    println "Results are located at ${outputDir}/${outputFileName}.ips6.*"
     println "Duration: $workflow.duration"
 }
 
