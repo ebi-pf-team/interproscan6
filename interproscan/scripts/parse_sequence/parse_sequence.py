@@ -87,6 +87,36 @@ class Sequence:
         return errors
 
 
+def store_seq(
+    seq_obj: Sequence,
+    sequences: dict[str, dict[str, Sequence]],
+    nucleic_seqs=None,
+    passing_nucleic=False
+):
+    acc = seq_obj.seq_key.split(maxsplit=1)[0]
+    if passing_nucleic:
+        sequences[acc] = seq_obj
+    else:
+        sequences[acc] = {
+            'seq_id': seq_obj.seq_key,
+            'name': seq_obj.name,
+            'sequence': seq_obj.sequence,
+            'md5': hashlib.md5(seq_obj.sequence.encode()).hexdigest(),
+            'length': len(seq_obj.sequence)
+        }
+        if nucleic_seqs:
+            nt_acc = NT_SEQ_ID_PATTERN.match(seq_obj.seq_key)
+            nt_acc = nt_acc.group(1)
+            # Passing ORF FASTA after input nucleic FASTA
+            # Add additional nt data for mapping ORF to the nt seq in the output
+            sequences[acc]['nt_seq_id'] = nucleic_seqs[nt_acc].seq_key
+            sequences[acc]['nt_name'] = nucleic_seqs[nt_acc].name
+            sequences[acc]['nt_sequence'] = nucleic_seqs[nt_acc].sequence
+            sequences[acc]['nt_md5'] = hashlib.md5(
+                nucleic_seqs[nt_acc].sequence.encode()).hexdigest()
+    return sequences
+
+
 def parse(
     fasta_file: str,
     applications: str,
@@ -116,25 +146,10 @@ def parse(
             if line.startswith(">"):
                 # store completed seq
                 if seq_obj:
-                    acc = seq_obj.seq_key.split(maxsplit=1)[0]
-                    if passing_nucleic:
-                        sequences[acc] = seq_obj
-                    else:
-                        sequences[acc] = {
-                            'seq_id': seq_obj.seq_key,
-                            'name': seq_obj.name,
-                            'sequence': seq_obj.sequence,
-                            'md5': hashlib.md5(seq_obj.sequence.encode()).hexdigest(),
-                            'length': len(seq_obj.sequence)
-                        }
-                        if nucleic_seqs:
-                            # Passing ORF FASTA after input nucleic FASTA
-                            # Add additional nt data for mapping ORF to the nt seq in the output
-                            sequences[acc]['nt_seq_id'] = nucleic_seqs[acc].seq_key
-                            sequences[acc]['nt_name'] = nucleic_seqs[acc].name
-                            sequences[acc]['nt_sequence'] = nucleic_seqs[acc].sequence
-                            sequences[acc]['nt_md5'] = hashlib.md5(
-                                nucleic_seqs[acc].sequence.encode()).hexdigest()
+                    sequences = store_seq(
+                        seq_obj, sequences,
+                        nucleic_seqs=nucleic_seqs, passing_nucleic=passing_nucleic
+                    )
 
                 # start with new seq
                 seq_obj = Sequence()
@@ -146,11 +161,20 @@ def parse(
 
                 seq_obj.get_seq(line)
 
+    # store the final sequence
+    if seq_obj:
+        sequences = store_seq(
+            seq_obj, sequences,
+            nucleic_seqs=nucleic_seqs, passing_nucleic=passing_nucleic
+        )
+
     errors = {k: v for k, v in errors.items() if v != {}}
     if errors:
         sys.tracebacklimit = 0
         raise IllegalCharError(fasta_file, errors)
+
     return sequences
+    
 
 
 def main():
