@@ -86,7 +86,7 @@ workflow PRE_CHECKS {
         'input', 'applications', 'disable_precalc', 'help',
         'batchsize', 'url_precalc', 'check_precalc', 'matches',
         'sites', 'bin', 'members', 'translate', 'nucleic',
-        'formats', 'output', 'xrefs', 'goterms', 'pathways', 'signalp_mode',
+        'formats', 'outdir', 'xrefs', 'goterms', 'pathways', 'signalp_mode',
         'ipsc_version', 'version', 'lookup_retries', 'signalp_gpu'
     ]
     def parameter_diff = all_params - parameters_expected
