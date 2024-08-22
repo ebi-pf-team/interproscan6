@@ -103,23 +103,12 @@ workflow {
     Channel.from(formats.split(','))
     .set { ch_format }
 
-    def outputFileName
-    if (params.output == '.') {
-        outputFileName = input_file.getName()
-    } else if (params.output.endsWith('/')) {
-        outputFileName = input_file.getName()
-    } else if (!params.output.contains('/')) {
-        outputFileName = params.output
-    } else {
-        outputFileName = params.output.substring(params.output.lastIndexOf('/') + 1)
-    }
-
     WRITE_RESULTS(
-        outputFileName,
+        input_file.getName(),
         PARSE_SEQUENCE.out.collect(),
         XREFS.out.collect(),
         ch_format,
-        params.output,
+        params.outdir,
         params.ipsc_version,
         params.nucleic
     )
@@ -128,19 +117,12 @@ workflow {
 workflow.onComplete = {
     def input_file = file(params.input)
     def outputFileName = input_file.getName()
-    def resultPath
-    if (params.output == '.') {
-        resultPath = "./${outputFileName}.ips6.*"
-    } else if (params.output.endsWith('/')) {
-        resultPath = "${params.output}${outputFileName}.ips6.*"
-    } else {
-        resultPath = "${params.output}.ips6.*"
-    }
 
     println "InterProScan workflow completed successfully: $workflow.success."
-    println "Results are located at ${resultPath}"
+    println "Results are located at ${params.outdir}/${outputFileName}.ips6.*"
     println "Duration: $workflow.duration"
 }
+
 
 log.info """
 If you use InterProScan in your work please cite:
