@@ -252,7 +252,9 @@ applications: AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,P
 * `--goterms` - Whether to retrieve and include Gene Ontology terms from InterPro in the output files. [Boolean]
 * `--help` - Whether to disble the help message - `InterProScan6` will not run any analysis when `help` is set to true. [Boolean]
 * `--input` - Path to input FASTA file
-* `--output` - Path to output dir. Default: `results/` in present working dir.
+* `--output` - Path to output dir. Default: present working dir, named after the input FASTA file.
+If the provided `--output` path ends with '/', this will be interpreted as a dir path.
+Output files will be written to this dir, and named after the input fasta file.
 * `--pathways` - Optional, switch on lookup of corresponding Pathway annotation (IMPLIES - `lookup_file` is defined) [Boolean]
 * `--lookup_file` - Lookup of corresponding InterPro annotation in the TSV and GFF3 output formats.
 

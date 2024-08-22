@@ -15,8 +15,10 @@ def printHelp() {
         --help                             Optional, display help information
         --input <INPUT-FILE-PATH>          [REQUIRED] Path to fasta file that should be loaded on Master startup.
         --nucleic                          Optional. Input comprises nucleic acid sequences.
-        --output <OUTPUT-DIR-PATH>        Optional. Path to the output dir.
-                                            If this option is not set, the output will be written to results/ in the currect working dir.
+        --output <OUTPUT-FILE-PATH>        Optional. Path to the output file.
+                                            If this option is not set, the output will be written to the present working dir and files will be
+                                            named after the input file. If the provided path ends with '/', this will be interpreted as a dir path.
+                                            Output files will be written to this dir, and named after the input fasta file.
         --pathways Optional. Include pathway information in the output.
         --signalp_mode Optional. Set which SignalP/SignalP_EUK prediction models are used. Models may have to be installed. Accepted: 'fast', 'slow', 'sequential'. Default: 'fast'.
         --version                          Print the version of InterProScan.
