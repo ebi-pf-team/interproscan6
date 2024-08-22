@@ -104,10 +104,12 @@ workflow {
     .set { ch_format }
 
     def outputFileName
-    if (params.output.endsWith('/')) {
+    if (params.output == '.') {
+        outputFileName = input_file.getName()
+    } else if (params.output.endsWith('/')) {
         outputFileName = input_file.getName()
     } else if (!params.output.contains('/')) {
-        outputFileName = input_file.getName()
+        outputFileName = params.output
     } else {
         outputFileName = params.output.substring(params.output.lastIndexOf('/') + 1)
     }
