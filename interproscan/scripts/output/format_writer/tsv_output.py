@@ -21,8 +21,8 @@ def tsv_output(seq_matches: dict, output_path: str):
             sequence_data = info['sequences']
             matches = info["matches"]
             seq_id = seq_target
-            md5 = sequence_data[2]
-            seq_len = sequence_data[3]
+            md5 = sequence_data['md5']
+            seq_len = sequence_data['length']
 
             for match_acc, match in matches.items():
                 entry_acc, entry_name, entry_desc = "-", "-", "-"
