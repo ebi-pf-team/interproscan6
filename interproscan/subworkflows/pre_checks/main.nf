@@ -1,5 +1,3 @@
-include { CHECK_NUCLEIC } from "$projectDir/interproscan/modules/pre_checks/main"
-
 def printHelp() {
     """
     Usage example:
@@ -61,23 +59,6 @@ workflow PRE_CHECKS {
             For more information, please use the --help flag.
         """
         exit 5
-    }
-
-    // is user specifies the input is nucleic acid seqs
-    // check the input only contains nucleic acid seqs
-    if (using_nucleic) {
-        try {
-            CHECK_NUCLEIC(seq_input)
-        } catch (all) {
-            println """Error in input sequences"""
-            log.error """
-            The '--nucleic' flag was used, but the input FASTA file
-            appears to contain at least one sequence that contains a
-            non-nucleic acid residue ('A','G','C','T','*','-', case insensitive).
-            Please check your input is correct.
-            """
-            exit 1
-        }
     }
 
     // Check if the input parameters are valid
