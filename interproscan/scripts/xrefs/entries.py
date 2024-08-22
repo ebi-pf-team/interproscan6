@@ -20,7 +20,7 @@ map_databases = {
     "FUNFAM": "FunFam",
     "MOBIDB": "MobiDB Lite",
     "PHOBIUS": "Phobius",
-    "SIGNALP": ["SignalP_Euk", "SignalP_Gram_positive", "SignalP_Gram_negative"],
+    "SIGNALP": "SignalP_Euk",
     "TMHMM": "TMHMM",
     "COILS": "COILS",
     "PIRSR": "PIRSR"
@@ -36,15 +36,17 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
 
     for seq_id, match_info in matches_info.items():
         for match_key, data in match_info.items():
-            acc_id = match_key.split(".")[0]
             databases_versions = entries["databases"]
+            entries_info = entries['entries']
+            acc_id = match_key.split(".")[0]
             member_db = data["member_db"].upper()
             version = databases_versions[map_databases[member_db]]
+
             match_info[match_key]['member_db'] = member_db
             match_info[match_key]['library'] = map_databases[member_db]
             match_info[match_key]['version'] = version
-            try:
-                entry = entries[acc_id]
+            entry = entries_info.get(acc_id) or entries_info.get(match_key)
+            if entry:
                 match_info[match_key]["entry"] = {
                     "accession": entry["integrated"],
                     "name": entry["name"],
@@ -55,37 +57,23 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
                     "goXRefs": [],
                     "pathwayXRefs": []
                 }
-            except KeyError:
-                acc_id = match_key  # some accs need the '.'  , e.g. Gene3D
-                try:
-                    entry = entries[acc_id]
-                    match_info[match_key]["entry"] = {
-                        "accession": entry["integrated"],
-                        "name": entry["name"],
-                        "description": entry["description"],
-                        "type": entry["type"],
-                        "version": entry["database"]["version"],
-                        "member_db": entry["database"]["name"],
-                        "goXRefs": [],
-                        "pathwayXRefs": []
-                    }
-                except KeyError:  # members with no match in entries
-                    match_info[match_key]["entry"] = {
-                        "accession": None,
-                        "name": None,
-                        "description": None,
-                        "type": None,
-                        "database": data["member_db"],
-                        "goXRefs": [],
-                        "pathwayXRefs": [],
-                        "version": version
-                    }
+            else:  # members with no match in entries
+                match_info[match_key]["entry"] = {
+                    "accession": None,
+                    "name": None,
+                    "description": None,
+                    "type": None,
+                    "database": member_db,
+                    "goXRefs": [],
+                    "pathwayXRefs": [],
+                    "version": version
+                }
 
             if member_db == "PANTHER":
                 acc_subfamily = data["accession"]
                 try:
-                    match_info[match_key]["entry"]["subfamily_name"] = entries[acc_subfamily]["name"]
-                    match_info[match_key]["entry"]["subfamily_type"] = entries[acc_subfamily]["type"]
+                    match_info[match_key]["entry"]["subfamily_name"] = entries_info[acc_subfamily]["name"]
+                    match_info[match_key]["entry"]["subfamily_type"] = entries_info[acc_subfamily]["type"]
                 except KeyError:
                     pass
 
@@ -100,10 +88,8 @@ def main():
     1. Str repr of the path to the XREFS entries JSON file
     2. Str repr of the path for the output file"""
     args = sys.argv[1:]
-
     matches = args[0]
     entries = args[1]
-
     matches2entries = add_entries(matches, entries)
     with open(args[2], "w") as fh:
         json.dump(matches2entries, fh)
