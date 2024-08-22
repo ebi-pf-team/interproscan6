@@ -6,7 +6,6 @@ import sys
 
 
 NT_SEQ_ID_PATTERN = re.compile(r"^orf\d+\s+source=(.*)\s+coords=(\d+\.+\d+)\s+.+frame=\d+\s+desc=.*$")
-NUCEIC_CHARS = ['A', 'T', 'C', 'G', 'U', 'a', 't', 'c', 'g', 'u', '*', '-', '_', '*', '.']
 ILLEGAL_CHARS = {
     "antifam": "-",
     "cdd": "",
@@ -56,14 +55,6 @@ class IllegalCharError(Exception):
         return self.message
 
 
-class NuleicError(Exception):
-    def __init__(self, message):
-        self.message = message
-
-    def __str__(self):
-        return self.message
-
-
 class Sequence:
     seq_key = None
     name = None
@@ -75,9 +66,6 @@ class Sequence:
 
     def get_seq(self, line: str):
         self.sequence += line
-
-    def is_nucleic(self):
-        return all(char in NUCEIC_CHARS for char in self.sequence.upper())
 
     def get_error_msg(self, errors: dict[str, dict[str, str]], line: str, applications: list):
         if self.seq_key not in errors:
@@ -130,16 +118,6 @@ def parse(
                 if seq_obj:
                     acc = seq_obj.seq_key.split(maxsplit=1)[0]
                     if passing_nucleic:
-                        if not seq_obj.is_nucleic():
-                            sys.tracebacklimit = 0
-                            raise NuleicError(
-                                """ERROR:
-                                The '--nucleic' flag was used, but the input FASTA file
-                                appears to contain at least one sequence that contains a
-                                non-nucleic acid residue ('A','G','C','T','*','-', case insensitive).
-                                Please check your input is correct.
-                                """
-                            )
                         sequences[acc] = seq_obj
                     else:
                         sequences[acc] = {
