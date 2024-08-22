@@ -121,7 +121,7 @@ def parse(
                         sequences[acc] = seq_obj
                     else:
                         sequences[acc] = {
-                            'key': seq_obj.seq_key,
+                            'seq_id': seq_obj.seq_key,
                             'name': seq_obj.name,
                             'sequence': seq_obj.sequence,
                             'md5': hashlib.md5(seq_obj.sequence.encode()).hexdigest(),
@@ -130,6 +130,7 @@ def parse(
                         if nucleic_seqs:
                             # Passing ORF FASTA after input nucleic FASTA
                             # Add additional nt data for mapping ORF to the nt seq in the output
+                            sequences[acc]['nt_seq_id'] = nucleic_seqs[acc].seq_key
                             sequences[acc]['nt_name'] = nucleic_seqs[acc].name
                             sequences[acc]['nt_sequence'] = nucleic_seqs[acc].sequence
                             sequences[acc]['nt_md5'] = hashlib.md5(
@@ -145,6 +146,7 @@ def parse(
 
                 seq_obj.get_seq(line)
 
+    errors = {k: v for k, v in errors.items() if v != {}}
     if errors:
         sys.tracebacklimit = 0
         raise IllegalCharError(fasta_file, errors)
