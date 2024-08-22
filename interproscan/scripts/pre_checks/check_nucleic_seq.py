@@ -35,6 +35,7 @@ def main(fasta):
             contains_non_nucleic_seq = 1
 
     if contains_non_nucleic_seq != 0:
+        sys.tracebacklimit = 0
         raise NuleicError(
             """ERROR:
             The '--nucleic' flag was used, but the input FASTA file
