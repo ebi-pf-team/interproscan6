@@ -1,8 +1,8 @@
 process WRITE_RESULTS {
-    label 'io'
-    publishDir "$projectDir/results/", mode: 'copy'
+    label 'write_results'
 
     input:
+    val fasta
     val sequences
     path matches
     val format
@@ -11,16 +11,17 @@ process WRITE_RESULTS {
     val nucleic
 
     output:
-    val ""
+    path "*.ips6.*"
 
     script:
     """
-    cat ${sequences.join(" ")} > $projectDir/results/temp/sequences_hash.tmp
+    file_name=\$(basename $fasta)
+    cat ${sequences.join(" ")} > sequences_hash.json
     python3 $projectDir/interproscan/scripts/output/write_results.py \\
-        $projectDir/results/temp/sequences_hash.tmp \\
+        sequences_hash.json \\
         ${matches} \\
         ${format} \\
-        $projectDir/${output_path} \\
+        \${file_name} \\
         $version \\
         ${nucleic} > debug_out
     """
