@@ -379,8 +379,8 @@
       },
       "entry" : {
         "accession" : "IPR050377",
-        "name" : "Radical_SAM_sf_enzymes",
-        "description" : "Radical SAM superfamily enzymes",
+        "name" : "Radical_SAM_PqqE_MftC-like",
+        "description" : "Radical SAM PqqA peptide cyclase/Mycofactocin maturase MftC-like",
         "type" : "FAMILY",
         "goXRefs" : [ ],
         "pathwayXRefs" : [ {
@@ -519,7 +519,7 @@
     } ],
     "accession" : "PTHR42834:SF1",
     "name" : "ENDONUCLEASE_EXONUCLEASE_PHOSPHATASE FAMILY PROTEIN (AFU_ORTHOLOGUE AFUA_3G09210)",
-    "evalue" : 1.6E-200,
+    "evalue" : 0.0,
     "score" : 680.1,
     "proteinClass" : null,
     "graftPoint" : "SHEON|Gene_ORFName=SO_1066|UniProtKB=Q8EHY8",
@@ -802,7 +802,7 @@
   "matches" : [ {
     "signature" : {
       "accession" : "PTHR19441",
-      "name" : "WHEY ACDIC PROTEIN WAP",
+      "name" : "WHEY ACDIC PROTEIN  WAP",
       "description" : null,
       "signatureLibraryRelease" : {
         "library" : "PANTHER",
@@ -815,6 +815,10 @@
         "type" : "FAMILY",
         "goXRefs" : [ ],
         "pathwayXRefs" : [ {
+          "name" : "Antimicrobial peptides",
+          "databaseName" : "Reactome",
+          "id" : "R-SSC-6803157"
+        }, {
           "name" : "Neutrophil degranulation",
           "databaseName" : "Reactome",
           "id" : "R-MMU-6798695"
@@ -822,6 +826,14 @@
           "name" : "Neutrophil degranulation",
           "databaseName" : "Reactome",
           "id" : "R-HSA-6798695"
+        }, {
+          "name" : "Formation of the cornified envelope",
+          "databaseName" : "Reactome",
+          "id" : "R-SSC-6809371"
+        }, {
+          "name" : "Formation of the nephric duct",
+          "databaseName" : "Reactome",
+          "id" : "R-HSA-9830364"
         } ]
       }
     },
@@ -848,15 +860,15 @@
     "proteinClass" : "PC00191",
     "graftPoint" : "PIG|Gene=SLPI|UniProtKB=P22298",
     "goXRefs" : [ {
-      "name" : "extracellular space",
-      "databaseName" : "GO",
-      "category" : "CELLULAR_COMPONENT",
-      "id" : "GO:0005615"
-    }, {
       "name" : "serine-type endopeptidase inhibitor activity",
       "databaseName" : "GO",
       "category" : "MOLECULAR_FUNCTION",
       "id" : "GO:0004867"
+    }, {
+      "name" : "extracellular space",
+      "databaseName" : "GO",
+      "category" : "CELLULAR_COMPONENT",
+      "id" : "GO:0005615"
     } ],
     "model-ac" : "PTHR19441:SF44"
   } ],

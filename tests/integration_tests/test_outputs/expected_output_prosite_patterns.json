@@ -45,6 +45,59 @@
   "md5" : "f91cb3cf61f2d7c7f5aaf6ea04e07868",
   "matches" : [ {
     "signature" : {
+      "accession" : "PS00144",
+      "name" : "ASN_GLN_ASE_1",
+      "description" : "Asparaginase / glutaminase active site signature 1.",
+      "signatureLibraryRelease" : {
+        "library" : "PROSITE_PATTERNS",
+        "version" : "2023_05"
+      },
+      "entry" : {
+        "accession" : "IPR020827",
+        "name" : "Asparaginase/glutaminase_AS1",
+        "description" : "Asparaginase/glutaminase, active site 1",
+        "type" : "ACTIVE_SITE",
+        "goXRefs" : [ {
+          "name" : "amino acid metabolic process",
+          "databaseName" : "GO",
+          "category" : "BIOLOGICAL_PROCESS",
+          "id" : "GO:0006520"
+        } ],
+        "pathwayXRefs" : [ {
+          "name" : "UDP-3-acetamido-2,3-dideoxy-2-(seryl)amino-alpha-D-glucuronamide biosynthesis",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-8229"
+        }, {
+          "name" : "6-methylpretetramide biosynthesis",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-7811"
+        }, {
+          "name" : "siroheme amide biosynthesis",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-5297"
+        }, {
+          "name" : "N-(1-deoxy-D-fructos-1-yl)-L-asparagine degradation",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-8402"
+        } ]
+      }
+    },
+    "locations" : [ {
+      "start" : 54,
+      "end" : 62,
+      "representative" : false,
+      "level" : "STRONG",
+      "cigarAlignment" : "1M1I7M",
+      "alignment" : "IlATGGTIA",
+      "location-fragments" : [ {
+        "start" : 54,
+        "end" : 62,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "model-ac" : "PS00144"
+  }, {
+    "signature" : {
       "accession" : "PS00917",
       "name" : "ASN_GLN_ASE_2",
       "description" : "Asparaginase / glutaminase active site signature 2.",
@@ -107,59 +160,6 @@
       } ]
     } ],
     "model-ac" : "PS00917"
-  }, {
-    "signature" : {
-      "accession" : "PS00144",
-      "name" : "ASN_GLN_ASE_1",
-      "description" : "Asparaginase / glutaminase active site signature 1.",
-      "signatureLibraryRelease" : {
-        "library" : "PROSITE_PATTERNS",
-        "version" : "2023_05"
-      },
-      "entry" : {
-        "accession" : "IPR020827",
-        "name" : "Asparaginase/glutaminase_AS1",
-        "description" : "Asparaginase/glutaminase, active site 1",
-        "type" : "ACTIVE_SITE",
-        "goXRefs" : [ {
-          "name" : "amino acid metabolic process",
-          "databaseName" : "GO",
-          "category" : "BIOLOGICAL_PROCESS",
-          "id" : "GO:0006520"
-        } ],
-        "pathwayXRefs" : [ {
-          "name" : "UDP-3-acetamido-2,3-dideoxy-2-(seryl)amino-alpha-D-glucuronamide biosynthesis",
-          "databaseName" : "MetaCyc",
-          "id" : "PWY-8229"
-        }, {
-          "name" : "6-methylpretetramide biosynthesis",
-          "databaseName" : "MetaCyc",
-          "id" : "PWY-7811"
-        }, {
-          "name" : "siroheme amide biosynthesis",
-          "databaseName" : "MetaCyc",
-          "id" : "PWY-5297"
-        }, {
-          "name" : "N-(1-deoxy-D-fructos-1-yl)-L-asparagine degradation",
-          "databaseName" : "MetaCyc",
-          "id" : "PWY-8402"
-        } ]
-      }
-    },
-    "locations" : [ {
-      "start" : 54,
-      "end" : 62,
-      "representative" : false,
-      "level" : "STRONG",
-      "cigarAlignment" : "1M1I7M",
-      "alignment" : "IlATGGTIA",
-      "location-fragments" : [ {
-        "start" : 54,
-        "end" : 62,
-        "dc-status" : "CONTINUOUS"
-      } ]
-    } ],
-    "model-ac" : "PS00144"
   } ],
   "xref" : [ {
     "name" : "UPI0002E0D40B status=active",
@@ -183,15 +183,15 @@
         "description" : "Glycoside hydrolase, family 6, conserved site",
         "type" : "CONSERVED_SITE",
         "goXRefs" : [ {
-          "name" : "carbohydrate metabolic process",
-          "databaseName" : "GO",
-          "category" : "BIOLOGICAL_PROCESS",
-          "id" : "GO:0005975"
-        }, {
           "name" : "hydrolase activity, hydrolyzing O-glycosyl compounds",
           "databaseName" : "GO",
           "category" : "MOLECULAR_FUNCTION",
           "id" : "GO:0004553"
+        }, {
+          "name" : "carbohydrate metabolic process",
+          "databaseName" : "GO",
+          "category" : "BIOLOGICAL_PROCESS",
+          "id" : "GO:0005975"
         } ],
         "pathwayXRefs" : [ {
           "name" : "dhurrin degradation",
@@ -336,6 +336,69 @@
     "model-ac" : "PS00655"
   }, {
     "signature" : {
+      "accession" : "PS00561",
+      "name" : "CBM2_A",
+      "description" : "CBM2a (carbohydrate-binding type-2) domain signature.",
+      "signatureLibraryRelease" : {
+        "library" : "PROSITE_PATTERNS",
+        "version" : "2023_05"
+      },
+      "entry" : {
+        "accession" : "IPR018366",
+        "name" : "CBM2_CS",
+        "description" : "Carbohydrate-binding type-2, conserved site",
+        "type" : "CONSERVED_SITE",
+        "goXRefs" : [ {
+          "name" : "carbohydrate binding",
+          "databaseName" : "GO",
+          "category" : "MOLECULAR_FUNCTION",
+          "id" : "GO:0030246"
+        }, {
+          "name" : "hydrolase activity, hydrolyzing O-glycosyl compounds",
+          "databaseName" : "GO",
+          "category" : "MOLECULAR_FUNCTION",
+          "id" : "GO:0004553"
+        }, {
+          "name" : "carbohydrate metabolic process",
+          "databaseName" : "GO",
+          "category" : "BIOLOGICAL_PROCESS",
+          "id" : "GO:0005975"
+        } ],
+        "pathwayXRefs" : [ {
+          "name" : "cellulose degradation II (fungi)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6788"
+        }, {
+          "name" : "chitin degradation II (Vibrio)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6902"
+        }, {
+          "name" : "chitin degradation III (Serratia)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-7822"
+        }, {
+          "name" : "chitin degradation I (archaea)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6855"
+        } ]
+      }
+    },
+    "locations" : [ {
+      "start" : 391,
+      "end" : 404,
+      "representative" : false,
+      "level" : "STRONG",
+      "cigarAlignment" : "5M2I1M1I1M2I2M",
+      "alignment" : "WNADVstSgSsvTA",
+      "location-fragments" : [ {
+        "start" : 391,
+        "end" : 404,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "model-ac" : "PS00561"
+  }, {
+    "signature" : {
       "accession" : "PS00656",
       "name" : "GLYCOSYL_HYDROL_F6_2",
       "description" : "Glycosyl hydrolases family 6 signature 2.",
@@ -349,15 +412,15 @@
         "description" : "Glycoside hydrolase, family 6, conserved site",
         "type" : "CONSERVED_SITE",
         "goXRefs" : [ {
-          "name" : "carbohydrate metabolic process",
-          "databaseName" : "GO",
-          "category" : "BIOLOGICAL_PROCESS",
-          "id" : "GO:0005975"
-        }, {
           "name" : "hydrolase activity, hydrolyzing O-glycosyl compounds",
           "databaseName" : "GO",
           "category" : "MOLECULAR_FUNCTION",
           "id" : "GO:0004553"
+        }, {
+          "name" : "carbohydrate metabolic process",
+          "databaseName" : "GO",
+          "category" : "BIOLOGICAL_PROCESS",
+          "id" : "GO:0005975"
         } ],
         "pathwayXRefs" : [ {
           "name" : "dhurrin degradation",
@@ -500,69 +563,6 @@
       } ]
     } ],
     "model-ac" : "PS00656"
-  }, {
-    "signature" : {
-      "accession" : "PS00561",
-      "name" : "CBM2_A",
-      "description" : "CBM2a (carbohydrate-binding type-2) domain signature.",
-      "signatureLibraryRelease" : {
-        "library" : "PROSITE_PATTERNS",
-        "version" : "2023_05"
-      },
-      "entry" : {
-        "accession" : "IPR018366",
-        "name" : "CBM2_CS",
-        "description" : "Carbohydrate-binding type-2, conserved site",
-        "type" : "CONSERVED_SITE",
-        "goXRefs" : [ {
-          "name" : "carbohydrate binding",
-          "databaseName" : "GO",
-          "category" : "MOLECULAR_FUNCTION",
-          "id" : "GO:0030246"
-        }, {
-          "name" : "carbohydrate metabolic process",
-          "databaseName" : "GO",
-          "category" : "BIOLOGICAL_PROCESS",
-          "id" : "GO:0005975"
-        }, {
-          "name" : "hydrolase activity, hydrolyzing O-glycosyl compounds",
-          "databaseName" : "GO",
-          "category" : "MOLECULAR_FUNCTION",
-          "id" : "GO:0004553"
-        } ],
-        "pathwayXRefs" : [ {
-          "name" : "cellulose degradation II (fungi)",
-          "databaseName" : "MetaCyc",
-          "id" : "PWY-6788"
-        }, {
-          "name" : "chitin degradation II (Vibrio)",
-          "databaseName" : "MetaCyc",
-          "id" : "PWY-6902"
-        }, {
-          "name" : "chitin degradation III (Serratia)",
-          "databaseName" : "MetaCyc",
-          "id" : "PWY-7822"
-        }, {
-          "name" : "chitin degradation I (archaea)",
-          "databaseName" : "MetaCyc",
-          "id" : "PWY-6855"
-        } ]
-      }
-    },
-    "locations" : [ {
-      "start" : 391,
-      "end" : 404,
-      "representative" : false,
-      "level" : "STRONG",
-      "cigarAlignment" : "5M2I1M1I1M2I2M",
-      "alignment" : "WNADVstSgSsvTA",
-      "location-fragments" : [ {
-        "start" : 391,
-        "end" : 404,
-        "dc-status" : "CONTINUOUS"
-      } ]
-    } ],
-    "model-ac" : "PS00561"
   } ],
   "xref" : [ {
     "name" : "P26222",
