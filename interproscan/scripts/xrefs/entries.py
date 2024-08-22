@@ -45,10 +45,12 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
             match_info[match_key]['member_db'] = member_db
             match_info[match_key]['library'] = map_databases[member_db]
             match_info[match_key]['version'] = version
+
             entry = entries_info.get(acc_id) or entries_info.get(match_key)
             if entry:
+                interpro_key = entry['integrated']
                 match_info[match_key]["entry"] = {
-                    "accession": entry["integrated"],
+                    "accession": interpro_key,
                     "name": entry["name"],
                     "description": entry["description"],
                     "type": entry["type"],
@@ -57,6 +59,12 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
                     "goXRefs": [],
                     "pathwayXRefs": []
                 }
+                ipr_info = entries_info.get(interpro_key)
+                if ipr_info:
+                    match_info[match_key]["entry"]["ipr_name"] = ipr_info["name"]
+                    match_info[match_key]["entry"]["ipr_description"] = ipr_info["description"]
+                    match_info[match_key]["entry"]["ipr_type"] = ipr_info["type"]
+
             else:  # members with no match in entries
                 match_info[match_key]["entry"] = {
                     "accession": None,
