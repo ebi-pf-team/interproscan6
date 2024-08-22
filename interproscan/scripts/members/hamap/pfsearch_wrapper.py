@@ -64,10 +64,10 @@ def get_sequences(fasta_file: str) -> dict:
                 fasta_dict[seq_id] = ''
             else:
                 fasta_dict[seq_id] += line + '\n'
-                if len(line) > 80:
-                    raise ValueError(
-                        'Input fasta file format problem for pfsearch, line length greater than 80'
-                    )
+                # if len(line) > 80:
+                #     raise ValueError(
+                #         'Input fasta file format problem for pfsearch, line length greater than 80'
+                #     )
     return fasta_dict
 
 
