@@ -104,20 +104,26 @@ workflow {
     .set { ch_format }
 
     WRITE_RESULTS(
+        input_file.getName(),
         PARSE_SEQUENCE.out.collect(),
         XREFS.out.collect(),
         ch_format,
-        params.output,
+        params.outdir,
         params.ipsc_version,
         params.nucleic
     )
 }
 
 workflow.onComplete = {
+    def input_file = file(params.input)
+    def outputFileName = input_file.getName()
+    def outputDir = params.outdir.endsWith('/') ? params.outdir[0..-2] : params.outdir
+
     println "InterProScan workflow completed successfully: $workflow.success."
-    println "Results are located at ${params.output}.*"
+    println "Any results are located at ${outputDir}/${outputFileName}.ips6.*"
     println "Duration: $workflow.duration"
 }
+
 
 log.info """
 If you use InterProScan in your work please cite:
