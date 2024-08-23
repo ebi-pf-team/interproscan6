@@ -93,7 +93,7 @@ process HAMAP_POST_PROCESSER {
     /*
     post-processing params:
     0. models dir
-    1. flags for pfserach
+    1. flags for pfsearch
     */
 
     output:
