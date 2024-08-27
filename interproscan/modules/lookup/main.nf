@@ -25,7 +25,7 @@ process LOOKUP_MATCHES {
     label 'io'
 
     input:
-    val checked_lookup
+    val checked_md5
     val appl
     val is_test
 
@@ -39,7 +39,7 @@ process LOOKUP_MATCHES {
         """
     else
         """
-        python3 $projectDir/interproscan/scripts/lookup/lookup_matches.py ${checked_lookup} '${appl}' \\
+        python3 $projectDir/interproscan/scripts/lookup/lookup_matches.py ${checked_md5} '${appl}' \\
         ${params.url_precalc}${params.matches} ${params.lookup_retries} > result
 
         if [[ -s result ]]; then
@@ -53,14 +53,14 @@ process LOOKUP_NO_MATCHES {
     label 'io'
 
     input:
-    val checked_lookup
+    val checked_md5
 
     output:
     path "no_match_lookup_fasta.fasta", optional: true
 
     script:
     """
-    output=\$(python3 $projectDir/interproscan/scripts/lookup/lookup_no_matches.py "${checked_lookup}")
+    output=\$(python3 $projectDir/interproscan/scripts/lookup/lookup_no_matches.py "${checked_md5}")
     
     if [ -n "\$output" ]; then
         echo "\$output" > no_match_lookup_fasta.fasta
