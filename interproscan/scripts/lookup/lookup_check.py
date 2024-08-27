@@ -35,7 +35,7 @@ def main():
     with open(sequences, 'r') as seq_data:
         sequences_data = json.load(seq_data)
     for seq_id, seq_info in sequences_data.items():
-        seq_md5.append(seq_info[-2].upper())
+        seq_md5.append(seq_info['md5'].upper())
 
     md5_checked_matches, err = check_precalc(seq_md5, url, retries=retries)
 

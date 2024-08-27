@@ -25,6 +25,6 @@ process PARSE_SEQUENCE {
         ${original_fasta_file} \\
         ${nucleic} \\
         ${applications} \\
-        parsed_sequences
+        "parsed_sequences"
     """
 }
