@@ -125,12 +125,12 @@ def get_matches(data: dict):
             if member_db in ["MOBIDB", "PHOBIUS", "SUPERFAMILY"]:
                 for location in match_data['locations']:
                     location_info = {
-                        "start": int(location["start"]),
-                        "end": int(location["end"]),
+                        "start": location["start"],
+                        "end": location["end"],
                         "representative": location["representative"],
                         "location-fragments": [{
-                            "start": int(location["start"]),
-                            "end": int(location["end"]),
+                            "start": location["start"],
+                            "end": location["end"],
                             "dc-status": "CONTINUOUS"
                         }]
                     }
@@ -174,8 +174,8 @@ def get_matches(data: dict):
                             }
                         else:
                             info = {
-                                "start": int(location["start"]),
-                                "end": int(location["end"])
+                                "start": location["start"],
+                                "end": location["end"]
                             }
 
                         info["representative"] = location["representative"]
@@ -265,8 +265,8 @@ def get_matches(data: dict):
                             info["location-fragments"] = location["location-fragments"]
                         except KeyError:
                             single_location = {
-                                "start": int(location["start"]),
-                                "end": int(location["end"]),
+                                "start": location["start"],
+                                "end": location["end"],
                                 "dc-status": "CONTINUOUS"
                             }
                             try:

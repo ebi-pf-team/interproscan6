@@ -87,7 +87,6 @@ class PhobiusHit:
         self_domains[acc]["locations"].append({
             "start": start,
             "end": end,
-            "representative": "false",
             "location-fragments": [{
                 "start": start,
                 "end": end,
