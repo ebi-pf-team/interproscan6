@@ -81,6 +81,7 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
                 acc_subfamily = data["accession"]
                 try:
                     match_info[match_key]["entry"]["subfamily_name"] = entries_info[acc_subfamily]["name"]
+                    match_info[match_key]["entry"]["subfamily_description"] = entries_info[acc_subfamily]["description"]
                     match_info[match_key]["entry"]["subfamily_type"] = entries_info[acc_subfamily]["type"]
                 except KeyError:
                     pass
