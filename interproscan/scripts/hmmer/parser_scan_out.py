@@ -220,7 +220,7 @@ def parse(hmmer_out_path: str):
 
 def main():
     args = sys.argv[1:]
-    parse_result = parse([0])
+    parse_result = parse(args[0])
     with open(args[1], "w") as fh:
         json.dump(parse_result, fh)
 
