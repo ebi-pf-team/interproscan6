@@ -13,7 +13,9 @@ process HMMER_PARSER {
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/hmmer/parser_out.py ${out} hmmer_parsed_${out}.json
+    python3 $projectDir/interproscan/scripts/hmmer/parser_out.py \\
+        ${out} \\
+        hmmer_parsed_${out}.json
     """
 }
 
@@ -61,7 +63,7 @@ process HMMER2_PARSER {
     """
     python3 $projectDir/interproscan/scripts/hmmer/parse_hmmpfam_out.py \\
         ${out} \\
-        > hmmer_parsed_${out}.json
+        hmmer_parsed_${out}.json
     """
 }
 
@@ -77,6 +79,8 @@ process HMMER_SCAN_PARSER {
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/hmmer/parser_scan_out.py ${out} hmmer_parsed_${out}.json
+    python3 $projectDir/interproscan/scripts/hmmer/parser_scan_out.py \\
+        ${out} \\
+        hmmer_parsed_${out}.json
     """
 }
