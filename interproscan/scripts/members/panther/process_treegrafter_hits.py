@@ -39,6 +39,7 @@ def main():
     0. Output file from treegradter
     1. Internal IPS6 JSON
     2. Str repr of path to the PAINT ANNOTATIONS data dir
+    3. Str repr of path for the output file
     """
     args = sys.argv[1:]
     treegrafter_out = args[0]
@@ -46,8 +47,10 @@ def main():
     paint_anno_dir = args[2]
 
     hits = parse_treegrafter(treegrafter_out)
-    updated_ips6 = update_ips6(ips6_json, hits, paint_anno_dir)
-    print(json.dumps(updated_ips6))
+    updated_ips6_hits = update_ips6(ips6_json, hits, paint_anno_dir)
+
+    with open(args[3], "w") as fh:
+        json.dump(updated_ips6_hits, fh)
 
 
 def parse_treegrafter(treegrafter: Path) -> dict[str, list[str]]:

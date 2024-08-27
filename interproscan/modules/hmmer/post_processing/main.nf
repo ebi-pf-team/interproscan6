@@ -143,14 +143,14 @@ process PANTHER_POST_PROCESSER {
     script:
     """
     mkdir data
-    python3 $projectDir/interproscan/scripts/members/panther/treegrafter.py \
-        run \
-        ${fasta} \
-        ${out_file} \
-        ${postprocessing_params[0]} \
-        -e ${postprocessing_params[1]} \
-        -o treegrafter_processed_panther_hits \
-        --epa-ng /opt/epa-ng/bin/epa-ng \
+    python3 $projectDir/interproscan/scripts/members/panther/treegrafter.py \\
+        run \\
+        ${fasta} \\
+        ${out_file} \\
+        ${postprocessing_params[0]} \\
+        -e ${postprocessing_params[1]} \\
+        -o treegrafter_processed_panther_hits \\
+        --epa-ng /opt/epa-ng/bin/epa-ng \\
         --keep
     """
 }

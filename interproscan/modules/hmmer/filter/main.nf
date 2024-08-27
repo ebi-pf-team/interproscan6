@@ -84,10 +84,11 @@ process PANTHER_FILTER_MATCHES {
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/members/panther/process_treegrafter_hits.py \
-        ${treegrafter_output} \
-        ${ips6_json} \
-        ${postprocessing_params[2]} > ${ips6_json}.post.processed.json
+    python3 $projectDir/interproscan/scripts/members/panther/process_treegrafter_hits.py \\
+        ${treegrafter_output} \\
+        ${ips6_json} \\
+        ${postprocessing_params[2]} \\
+        ${ips6_json}.post.processed.json
     """
 }
 
