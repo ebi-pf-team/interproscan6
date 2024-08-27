@@ -183,7 +183,8 @@ process SFLD_FILTER_MATCHES {
     """
     python3 $projectDir/interproscan/scripts/members/sfld/sfld_process_post_processed.py \\
         ${slfd_post_processed_output} \\
-        ${ips6_json} > ${ips6_json}.post.processed.json
+        ${ips6_json} \\
+        ${ips6_json}.post.processed.json
     """
 }
 

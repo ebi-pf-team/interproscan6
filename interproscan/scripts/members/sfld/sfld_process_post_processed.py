@@ -36,13 +36,15 @@ def main():
     """CL input:
     0. Post-processed SFLD results, output from bin
     1. Internal IPS6 JSON with raw SFLD hits from HMMER
+    2. Str repr of path for the output file
     """
     args = sys.argv[1:]
     sfld = args[0]
     ips6_json = args[1]
     hits = parse_sfld(sfld)
     updated_ips6 = filter_matches_and_add_site(ips6_json, hits)
-    print(json.dumps(updated_ips6, indent=2))
+    with open(args[2], "w") as fh:
+        json.dump(updated_ips6, fh)
 
 
 def parse_sfld(sfld: Path) -> dict[str, SfldHit]:
