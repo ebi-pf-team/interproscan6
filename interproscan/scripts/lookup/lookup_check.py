@@ -21,6 +21,11 @@ def check_precalc(md5: list, url: str, **kwargs) -> list:
 
 
 def main():
+    """CL input:
+    0. Str repr of path to the JSON file of the input sequences
+    1. URL for the MLS
+    2. Num of times to retry a failed connection
+    3. Str repr of the path for the output file"""
     args = sys.argv[1:]
 
     sequences = args[0]
@@ -46,7 +51,8 @@ def main():
                           "no_matches": list(no_matches_md5),
                           "sequences_info": sequences_data}
 
-    print(json.dumps(checked_result))
+    with open(args[3], "w") as fh:
+        json.dump(checked_result, fh)
 
 
 if __name__ == "__main__":

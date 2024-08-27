@@ -129,9 +129,11 @@ if __name__ == '__main__':
 
     matches = args[0]
     rules_path = args[1]
+    outpath = args[2]
 
     with open(rules_path) as rulesfile:
         rules_hash = json.load(rulesfile)
 
     result = matches2rules(matches, rules_hash)
-    print(json.dumps(result, indent=4))
+    with open(outpath, "w") as fh:
+        json.dump(result, fh)

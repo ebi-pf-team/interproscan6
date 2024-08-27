@@ -25,8 +25,8 @@ process PHOBIUS_PARSER {
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/members/phobius/parser.py \
-        ${phobius_out} \
-        > phobius_parsed.json
+    python3 $projectDir/interproscan/scripts/members/phobius/parser.py \\
+        ${phobius_out} \\
+        phobius_parsed.json
     """
 }

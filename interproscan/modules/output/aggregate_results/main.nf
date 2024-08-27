@@ -9,6 +9,8 @@ process AGGREGATE_RESULTS {
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/output/aggregate_results.py "${result_files}" > results_aggregated.json
+    python3 $projectDir/interproscan/scripts/output/aggregate_results.py \\
+        "${result_files}" \\
+        results_aggregated.json
     """
 }

@@ -38,10 +38,15 @@ def parse(input_file: str, release: str) -> dict:
 
 
 def main():
+    """CL input:
+    0. Str repr of path to mobidb-lite (idpred) output
+    1. release number
+    2. Str repr of path to output file"""
     args = sys.argv[1:]
     matches = parse(args[0], args[1])
 
-    print(json.dumps(matches, indent=4))
+    with open(args[2], "w") as fh:
+        json.dump(matches, fh)
 
 
 if __name__ == "__main__":

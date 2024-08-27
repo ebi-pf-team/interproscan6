@@ -292,11 +292,14 @@ def encode(cigar_alignment: str) -> str:
 def main():
     """
     :args 0: str repr of path to hmmer file to be parsed
+    :args 1: str repr of path to write output
     """
     args = sys.argv[1:]
     parse_result = parse(args[0])
+    output = args[1]
 
-    print(json.dumps(parse_result, indent=2))
+    with open(output, "w") as fh:
+        json.dump(parse_result, fh)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
-import argparse
 import json
+import sys
 
 from pathlib import Path
 
@@ -32,36 +32,19 @@ class SiteMatch:
         self.site_desc = None
 
 
-def build_parser() -> argparse.ArgumentParser:
-    """Build cmd-line argument parser"""
-    parser = argparse.ArgumentParser(
-        prog="process_post_processed_SFLD_hits",
-        description="Filter results of HMMER search on SFLD HMMs",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-
-    parser.add_argument(
-        "sfld",
-        type=Path,
-        help="Path to post-processed SFLD results"
-    )
-
-    parser.add_argument(
-        "ips6",
-        type=Path,
-        default=None,
-        help="Path to internal IPS6 JSON structure (from HMMER_PARSER)",
-    )
-
-    return parser
-
-
 def main():
-    parser = build_parser()
-    args = parser.parse_args()
-    hits = parse_sfld(args.sfld)
-    updated_ips6 = filter_matches_and_add_site(args.ips6, hits)
-    print(json.dumps(updated_ips6, indent=2))
+    """CL input:
+    0. Post-processed SFLD results, output from bin
+    1. Internal IPS6 JSON with raw SFLD hits from HMMER
+    2. Str repr of path for the output file
+    """
+    args = sys.argv[1:]
+    sfld = args[0]
+    ips6_json = args[1]
+    hits = parse_sfld(sfld)
+    updated_ips6 = filter_matches_and_add_site(ips6_json, hits)
+    with open(args[2], "w") as fh:
+        json.dump(updated_ips6, fh)
 
 
 def parse_sfld(sfld: Path) -> dict[str, SfldHit]:

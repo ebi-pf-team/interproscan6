@@ -7,15 +7,17 @@ COMMENT_LINE = "#"
 def main():
     """
     Input params for SignalP parser:
-    1. SignalP output gff3 file path
-    2. SignalP output csv file path
-    3. SignalP p-value threshold
-    4. SignalP version
-    5. SignalP organism
+    0. SignalP output gff3 file path
+    1. SignalP output csv file path
+    2. SignalP p-value threshold
+    3. SignalP version
+    4. SignalP organism
+    5. Str repr of path for the output file
     """
     args = sys.argv[1:]
     parsed_results = parse(args[0], args[1], float(args[2]), args[3], args[4])
-    print(json.dumps(parsed_results, indent=2))
+    with open(args[5], "w") as fh:
+        json.dump(parsed_results, fh)
 
 
 def parse(signalp_out: str, signalp_cs: str, threshold: float,

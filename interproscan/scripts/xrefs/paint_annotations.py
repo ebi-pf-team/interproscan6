@@ -30,6 +30,10 @@ def add_paint_annotations(matches_path: str, paint_anno_dir: Path) -> dict:
 
 
 def main():
+    """CL input:
+    0. Str repr of the path to the internal IPS6 JSON file
+    1. Str repr of the paint annotation dir
+    2. Str repr of the path for the output file"""
     args = sys.argv[1:]
 
     matches = args[0]
@@ -37,7 +41,8 @@ def main():
 
     parsed_matches = add_paint_annotations(matches, paint_anno_dir)
 
-    print(json.dumps(parsed_matches, indent=2))
+    with open(args[2], "w") as fh:
+        json.dump(parsed_matches, fh)
 
 
 if __name__ == "__main__":

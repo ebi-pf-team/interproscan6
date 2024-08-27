@@ -56,14 +56,18 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
 
 
 def main():
+    """CL input:
+    0. Str repr of the path to the internal IPS6 JSON file
+    1. Str repr of the path to the XREFS entries JSON file
+    2. Str repr of the path for the output file"""
     args = sys.argv[1:]
 
     matches = args[0]
     entries = args[1]
 
     matches2entries = add_entries(matches, entries)
-
-    print(json.dumps(matches2entries, indent=2))
+    with open(args[2], "w") as fh:
+        json.dump(matches2entries, fh)
 
 
 if __name__ == "__main__":
