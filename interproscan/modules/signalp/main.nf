@@ -32,12 +32,12 @@ process SIGNALP_PARSER {
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/members/signalp/parser.py \
-        ${out}/output.gff3 \
-        ${out}/prediction_results.txt \
-        ${pvalue} \
-        ${signalp_version} \
-        ${organism} \
-        > signalp_parsed.json
+    python3 $projectDir/interproscan/scripts/members/signalp/parser.py \\
+        ${out}/output.gff3 \\
+        ${out}/prediction_results.txt \\
+        ${pvalue} \\
+        ${signalp_version} \\
+        ${organism} \\
+        signalp_parsed.json
     """
 }
