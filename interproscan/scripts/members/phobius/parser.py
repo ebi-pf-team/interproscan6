@@ -124,10 +124,15 @@ class PhobiusHit:
 
 
 def main():
-    # args 0 = output form phobius
+    """CL input:
+    0. Str repr of path to the output from Phobius
+    1. Str repr of path for the output file
+    """
+    # args 
     args = sys.argv[1:]
     parsed_results = parse(args[0])
-    print(json.dumps(parsed_results, indent=2))
+    with open(args[1], "w") as fh:
+        json.dump(parsed_results, fh)
 
 
 def parse(phobius_out: str) -> dict:
