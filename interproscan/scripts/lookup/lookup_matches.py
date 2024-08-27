@@ -63,7 +63,6 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     "hmmLength": int(hit_data[12]),
                     "hmmBoundsRaw": hit_data[9],
                     "hmmBounds": hmm_bounds,
-                    "evalue": float(hit_data[16]),
                     "score": hit_data[15],
                     "envelopeStart": int(hit_data[13]),
                     "envelopeEnd": int(hit_data[14]),
@@ -73,6 +72,11 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     "alignment": "",
                     "cigar_alignment": hit_data[17]
                 }
+
+                if hit_appl != "PRINTS":
+                    location["evalue"] = float(hit_data[16])
+                else:
+                    location["pvalue"] = float(hit_data[16])
 
                 if target_key not in matches:
                     matches[target_key] = {}
