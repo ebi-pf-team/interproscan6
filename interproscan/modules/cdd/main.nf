@@ -64,6 +64,7 @@ process CDD_PARSER {
     """
     python3 $projectDir/interproscan/scripts/members/cdd/cdd_parser.py \\
         ${rpsblast_processed} \\
-        ${release} > cdd_parsed.json
+        ${release} \\
+        cdd_parsed.json
     """
 }

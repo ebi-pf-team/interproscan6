@@ -3,9 +3,15 @@ import sys
 
 
 def main():
+    """CL input:
+    0. Str repr of path to the output from rpsblast
+    1. release
+    2. Str repr of path to the output file
+    """
     args = sys.argv[1:]
     parsed_results = parse(args[0], args[1])
-    print(json.dumps(parsed_results, indent=2))
+    with open(args[2], "w") as fh:
+        json.dump(parsed_results, fh)
 
 
 def parse(coils_out: str, version: float) -> dict:
