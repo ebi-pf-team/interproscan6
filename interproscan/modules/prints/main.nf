@@ -30,10 +30,10 @@ process PRINTS_PARSER {
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/members/prints/parser.py\
-    ${prints_output} \
-    ${hierarchy} \
-    > prints_parsed.json
+    python3 $projectDir/interproscan/scripts/members/prints/parser.py \\
+    ${prints_output} \\
+    ${hierarchy} \\
+    prints_parsed.json
     """
 
 }
