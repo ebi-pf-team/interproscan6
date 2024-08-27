@@ -9,6 +9,11 @@ process LOOKUP_MATCHES {
     output:
     path("parsed_match_lookup"), optional: true
 
+    /*
+    'parsed_match_lookup' will only be generated if any matches are returned from
+    the MLS. If no matches are retrieved from the MLS, 'parsed_match_lookup'
+    will not be created.
+    */
     script:
     if ( is_test )
         """
@@ -16,11 +21,11 @@ process LOOKUP_MATCHES {
         """
     else
         """
-        python3 $projectDir/interproscan/scripts/lookup/lookup_matches.py ${checked_lookup} '${appl}' \\
-        ${params.url_precalc}${params.matches} ${params.lookup_retries} > result
-
-        if [[ -s result ]]; then
-            mv result parsed_match_lookup
-        fi
+        python3 $projectDir/interproscan/scripts/lookup/lookup_matches.py \\
+            ${checked_lookup} \\
+            '${appl}' \\
+            ${params.url_precalc}${params.matches} \\
+            ${params.lookup_retries} \\
+            parsed_match_lookup
         """
 }

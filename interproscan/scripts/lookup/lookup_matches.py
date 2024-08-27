@@ -87,6 +87,13 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
 
 
 def main():
+    """CL input:
+    0. Str repr of path to a JSON file containing the MD5 hashed sequences
+    1. Str repr of list of selected application
+    2. Url for MLS
+    3. Num of times to retry the connection
+    4. Str repr of path for the output file
+    """
     args = sys.argv[1:]
     checked_lookup = args[0]
     applications = args[1].split(',')
@@ -111,7 +118,9 @@ def main():
 
     if match_results:
         match_parsed = parse_match(match_results, applications, md52seq_id)
-        print(json.dumps(match_parsed, indent=2))
+        if len(match_parsed) > 0:
+            with open(args[4], "w") as fh:
+                json.dump(match_parsed, fh)
 
 
 if __name__ == "__main__":
