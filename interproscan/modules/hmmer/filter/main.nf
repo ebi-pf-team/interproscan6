@@ -102,15 +102,24 @@ process PFAM_FILTER_MATCHES {
     output:
         path "${ips6_json}.post.processed.json"
 
+    /*
+    CL input to postprocess.py:
+    0. Str repr of the path to the internal IPS6 JSON of raw PFAM results
+    1. The min length specified in post-processing params in the members.config file
+    2. Str repr of the path to the PFAM seed file
+    3. Str repr of the path to the PFAM clan file
+    4. Str repr of the path to the PFAM dat file
+    5. Str repr for the output file path
+    */
     script:
     """
-    python3 $projectDir/interproscan/scripts/members/pfam/postprocess.py \
-        --hmm_parsed ${ips6_json} \
-        --min_length '${postprocessing_params[0]}' \
-        --seed '${postprocessing_params[1]}' \
-        --clans '${postprocessing_params[2]}' \
-        --dat '${postprocessing_params[3]}' \
-        > '${ips6_json}.post.processed.json'
+    python3 $projectDir/interproscan/scripts/members/pfam/postprocess.py \\
+        ${ips6_json} \\
+        '${postprocessing_params[0]}' \\
+        '${postprocessing_params[1]}' \\
+        '${postprocessing_params[2]}' \\
+        '${postprocessing_params[3]}' \\
+        '${ips6_json}.post.processed.json'
     """
 }
 
