@@ -32,6 +32,8 @@ process MOBIDB_PARSER {
     script:
     """
     python3 $projectDir/interproscan/scripts/members/mobidb/parser.py \\
-        ${mobidb_out} ${release} > mobidb_parsed.json
+        ${mobidb_out} \\
+        ${release} \\
+        mobidb_parsed.json
     """
 }
