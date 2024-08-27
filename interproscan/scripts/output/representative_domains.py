@@ -13,15 +13,16 @@ def add_representative_domains(matches_path: str) -> list[dict]:
     :return: domains with representative domains field added
     """
 
-    with open(matches_path, "r") as matches:
-        matches = json.load(matches)
-
-    for sequence, matches_info in matches:
+    with open(matches_path, "r") as f:
+        matches = json.load(f)
+    for sequence, matches_info in matches.items():
         domains = []
-        for acc, info in matches_info:
+        for acc, info in matches_info.items():
             member_db = info["member_db"]
             for location in info["locations"]:
                 location["representative"] = False
+                if member_db not in REPR_DOM_DATABASES:
+                    continue
 
                 pos_start = location["start"]
                 pos_end = location["end"]

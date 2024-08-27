@@ -3,7 +3,6 @@ import os
 
 from .regex import NT_SEQ_ID_PATTERN
 
-
 BOOLEAN_MAP = {"true": True, "false": False}
 
 
@@ -128,7 +127,7 @@ def get_matches(data: dict):
                     location_info = {
                         "start": int(location["start"]),
                         "end": int(location["end"]),
-                        "representative": BOOLEAN_MAP.get(location["representative"].lower()),
+                        "representative": location["representative"],
                         "location-fragments": [{
                             "start": int(location["start"]),
                             "end": int(location["end"]),
@@ -179,10 +178,7 @@ def get_matches(data: dict):
                                 "end": int(location["end"])
                             }
 
-                        info["representative"] = BOOLEAN_MAP.get(
-                            location["representative"].lower(),
-                            False
-                        )
+                        info["representative"] = location["representative"]
 
                         if member_db == "CDD":
                             info["evalue"] = float(location["evalue"])
