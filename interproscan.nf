@@ -26,7 +26,8 @@ workflow {
         params.formats,
         params.version,
         params.ipsc_version,
-        params.signalp_mode
+        params.signalp_mode,
+        params.signalp_gpu
     )
 
     formats = params.formats.toLowerCase()
@@ -62,10 +63,10 @@ workflow {
         PARSE_SEQUENCE(ch_fasta, ch_fasta, params.nucleic, applications)
     }
 
-    // if enabled, check for pre-calculated matches via the Match Lookup Service
+    disable_precalc = params.disable_precalc
     sequences_to_analyse = null
     parsed_matches = Channel.empty()
-    if (!params.disable_precalc) {
+    if (!disable_precalc) {
         log.info "Using precalculated match lookup service"
         SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications, false)  // final: bool to indicate not a unit test
         sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
@@ -74,9 +75,9 @@ workflow {
 
     // Run analyses on sequences that have no pre-calculated matches
     analysis_result = Channel.empty()
-    if (params.disable_precalc || sequences_to_analyse) {
+    if (disable_precalc || sequences_to_analyse) {
         log.info "Running sequence analysis"
-        if (sequences_to_analyse) {
+        if (sequences_to_analyse && !disable_precalc) {
             fasta_to_runner = sequences_to_analyse
         }
         else {
@@ -106,20 +107,26 @@ workflow {
     .set { ch_format }
 
     WRITE_RESULTS(
+        input_file.getName(),
         PARSE_SEQUENCE.out.collect(),
         XREFS.out.collect(),
         ch_format,
-        params.output,
+        params.outdir,
         params.ipsc_version,
         params.nucleic
     )
 }
 
 workflow.onComplete = {
+    def input_file = file(params.input)
+    def outputFileName = input_file.getName()
+    def outputDir = params.outdir.endsWith('/') ? params.outdir[0..-2] : params.outdir
+
     println "InterProScan workflow completed successfully: $workflow.success."
-    println "Results are located at ${params.output}.*"
+    println "Any results are located at ${outputDir}/${outputFileName}.ips6.*"
     println "Duration: $workflow.duration"
 }
+
 
 log.info """
 If you use InterProScan in your work please cite:

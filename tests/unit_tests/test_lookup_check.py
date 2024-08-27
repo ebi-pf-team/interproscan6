@@ -6,8 +6,11 @@ pytest -v
 
 import json
 import pytest
+import os
+import sys
 import urllib.request
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../interproscan/scripts/lookup')))
 from interproscan.scripts.lookup import lookup_check
 
 
@@ -28,16 +31,16 @@ def parsed_seqs_path(lookup_check_input_dir):
 
 def test_lookup_check_main(parsed_seqs_path, lookup_check_out_dir, capsys, monkeypatch):
     def mock_check_precalc(*args, **kwards):
-        return ["MD5_1", "MD5_2"]
+        return (["MD5_1", "MD5_2"], None)
 
-    monkeypatch.setattr("sys.argv", ["lookup_check", str(parsed_seqs_path), "fake_url"])
+    monkeypatch.setattr("sys.argv", ["lookup_check", str(parsed_seqs_path), "fake_url", 3])
     monkeypatch.setattr(lookup_check, "check_precalc", mock_check_precalc)
 
     with open((lookup_check_out_dir / "lookup_check_out_script.json"), "r") as fh:
         expected_output = json.load(fh)
 
     lookup_check.main()
-    captured_output = json.loads(capsys.readouterr().out) 
+    captured_output = json.loads(capsys.readouterr().out)
 
     assert expected_output['matches'] == captured_output['matches']
     # the no_matches keys can store seqs in different orders so only check length
@@ -56,6 +59,6 @@ def test_check_precalc(monkeypatch):
 
     md5_list = ["MD5_1", "MD5_2", "MD5_3", "MD5_4"]
     url = "https://fake_url"
-    result = lookup_check.check_precalc(md5_list, url)
+    result = lookup_check.check_precalc(md5_list, url, retries=3)
 
-    assert result == ["MD5_1", "MD5_2", "MD5_3"]
+    assert result == (["MD5_1", "MD5_2", "MD5_3"], None)

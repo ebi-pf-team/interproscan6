@@ -14,9 +14,6 @@ process AGGREGATE_RESULTS {
     results_aggregated.json file.*/
     script:
     """
-    mkdir -p $projectDir/results
-    mkdir -p $projectDir/results/temp
-    
     echo "{}" > results_aggregated.json
     
     paths=(\$(echo "${result_files}" | tr -d '[]' | tr ',' ' '))
