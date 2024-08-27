@@ -128,7 +128,7 @@ def get_matches(data: dict):
                     location_info = {
                         "start": int(location["start"]),
                         "end": int(location["end"]),
-                        "representative": BOOLEAN_MAP.get(location["representative"].lower(), False),
+                        "representative": BOOLEAN_MAP.get(location["representative"].lower()),
                         "location-fragments": [{
                             "start": int(location["start"]),
                             "end": int(location["end"]),
