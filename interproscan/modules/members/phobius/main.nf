@@ -1,5 +1,4 @@
 process PHOBIUS_RUNNER {
-    container 'docker.io/library/phobius'
     label 'phobius_runner'
 
     input: tuple path(fasta), val(release)
