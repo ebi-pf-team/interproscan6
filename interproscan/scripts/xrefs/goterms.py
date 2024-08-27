@@ -33,14 +33,19 @@ def add_goterms(matches_path: str, goterm_path: str):
 
 
 def main():
+    """CL input:
+    0. Str repr of the path to the internal IPS6 JSON file
+    1. Str repr of the path to the XREFS goterms JSON file
+    2. Str repr of the path for the output file"""
     args = sys.argv[1:]
 
     matches = args[0]
-    pathways = args[1]
+    goterms = args[1]
 
-    matches2goterms = add_goterms(matches, pathways)
+    matches2goterms = add_goterms(matches, goterms)
 
-    print(json.dumps(matches2goterms, indent=2))
+    with open(args[2], "w") as fh:
+        json.dump(matches2goterms, fh)
 
 
 if __name__ == "__main__":

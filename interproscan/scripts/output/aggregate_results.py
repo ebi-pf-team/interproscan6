@@ -34,10 +34,14 @@ def aggregate_results(result_files: list) -> dict:
 
 
 def main():
+    """CL input:
+    0. Str repr of a list of paths to internal IPS6 JSON files
+    1. Str repr of the path for the output file"""
     args = sys.argv[1:]
     result_files = args[0].strip('[]').replace(" ", "").split(',')
     all_results = aggregate_results(result_files)
-    print(json.dumps(all_results, indent=4))
+    with open(args[1], "w") as fh:
+        json.dump(all_results, fh)
 
 
 if __name__ == "__main__":

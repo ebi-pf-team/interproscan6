@@ -32,6 +32,10 @@ def add_pathways(matches_path: str, pathway_path: str):
 
 
 def main():
+    """CL input:
+    0. Str repr of the path to the internal IPS6 JSON with all hits
+    1. Str repr of the path to the XREFS Pathways JSON file
+    2. Str repr of the path for the output file"""
     args = sys.argv[1:]
 
     matches = args[0]
@@ -39,7 +43,8 @@ def main():
 
     matches2pathways = add_pathways(matches, pathways)
 
-    print(json.dumps(matches2pathways, indent=2))
+    with open(args[2], "w") as fh:
+        json.dump(matches2pathways, fh)
 
 
 if __name__ == "__main__":
