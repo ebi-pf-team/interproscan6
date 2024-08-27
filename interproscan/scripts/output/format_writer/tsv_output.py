@@ -13,9 +13,7 @@ def tsv_output(seq_matches: dict, output_path: str):
             f"{current_date}\t{interpro_acc}\t{interpro_name}\t{xrefs}\n"
         ))
 
-    tsv_output = os.path.join(output_path + '.tsv')
-
-    with open(tsv_output, 'w') as tsv_file:
+    with open(output_path, 'w') as tsv_file:
         current_date = datetime.now().strftime('%d-%m-%Y')
         for seq_target, info in seq_matches.items():
             sequence_data = info['sequences']
@@ -106,9 +104,7 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
             f"{location_evalue}\t{cigar_alignment}\n"
         ))
 
-    tsv_output = os.path.join(output_path + '.tsv-pro')
-
-    with open(tsv_output, 'w') as tsv_file:
+    with open(output_path, 'w') as tsv_file:
         for seq_target, info in seq_matches.items():
             matches = info["matches"]
             seq_id = seq_target

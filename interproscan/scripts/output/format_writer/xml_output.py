@@ -32,7 +32,6 @@ MATCH_ELEMENT = {
 
 def build_xml_output_protein(seq_matches: dict, output_path: str, version: str):
     """Build the root of the XML when the input to IPS6 is Protein sequences"""
-    xml_output = os.path.join(output_path + '.xml')
     root = ET.Element("protein-matches", xmlns="https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/schemas")
     root.set("interproscan-version", version)
 
@@ -48,7 +47,7 @@ def build_xml_output_protein(seq_matches: dict, output_path: str, version: str):
 
     tree = ET.ElementTree(root)
     ET.indent(tree, space="\t", level=0)
-    tree.write(xml_output, encoding='utf-8')
+    tree.write(output_path, encoding='utf-8')
 
 
 def build_xml_output_nucleic(seq_matches: dict, output_path: str, version: str):
@@ -66,7 +65,6 @@ def build_xml_output_nucleic(seq_matches: dict, output_path: str, version: str):
                 nt_keys[nt].append(key)
         return nt_keys
 
-    xml_output = os.path.join(output_path + '.xml')
     root = ET.Element("nucleotide-sequence-matches", xmlns="https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/schemas")
     root.set("interproscan-version", version)
 
@@ -104,7 +102,7 @@ def build_xml_output_nucleic(seq_matches: dict, output_path: str, version: str):
 
     tree = ET.ElementTree(root)
     ET.indent(tree, space="\t", level=0)
-    tree.write(xml_output, encoding='utf-8')
+    tree.write(output_path, encoding='utf-8')
 
 
 def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
