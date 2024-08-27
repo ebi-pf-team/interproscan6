@@ -219,9 +219,10 @@ def parse(hmmer_out_path: str):
 
 
 def main():
-
-    parse_result = parse(sys.argv[1])
-    print(json.dumps(parse_result, indent=2))
+    args = sys.argv[1:]
+    parse_result = parse([0])
+    with open(args[1], "w") as fh:
+        json.dump(parse_result, fh)
 
 
 if __name__ == "__main__":
