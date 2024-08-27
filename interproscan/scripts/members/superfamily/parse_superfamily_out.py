@@ -138,11 +138,16 @@ def parse_hmmlib(hmmlib_path: str) -> dict:
 
 
 def main():
+    """CL input:
+    0. Str repr of path to the hmm lib
+    1. Str repr of path to the ass3 output file
+    2. Str repr of path to write the output file
+    """
     args = sys.argv[1:]
     hmmlib_info = parse_hmmlib(args[0])
     parsed_result = parse(args[1], hmmlib_info)
-
-    print(json.dumps(parsed_result, indent=4))
+    with open(args[2], "w") as fh:
+        json.dump(parsed_result, fh)
 
 
 if __name__ == "__main__":

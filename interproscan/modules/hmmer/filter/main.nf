@@ -215,6 +215,8 @@ process SUPERFAMILY_FILTER_MATCHES {
     script:
     """
     python3 $projectDir/interproscan/scripts/members/superfamily/parse_superfamily_out.py \\
-        ${hmm_lib} ${ass3_out} > superfamily_parsed_${ass3_out}.json
+        ${hmm_lib} \\
+        ${ass3_out} \\
+        superfamily_parsed_${ass3_out}.json
     """
 }
