@@ -28,8 +28,8 @@ process COILS_PARSER {
     script:
     """
     python3 $projectDir/interproscan/scripts/members/coils/parser.py \
-        ${out} \
-        ${release} \
-        > coils_parsed.json
+        ${out} \\
+        ${release} \\
+        coils_parsed.json
     """
 }
