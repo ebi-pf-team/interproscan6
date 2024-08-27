@@ -38,18 +38,15 @@ def main():
     CL input:
     0. Output file from treegradter
     1. Internal IPS6 JSON
-    2. Str repr of path to the PAINT ANNOTATIONS data dir
-    3. Str repr of path for the output file
+    2. Str repr of path for the output file
     """
     args = sys.argv[1:]
     treegrafter_out = args[0]
     ips6_json = args[1]
-    paint_anno_dir = args[2]
-
     hits = parse_treegrafter(treegrafter_out)
-    updated_ips6_hits = update_ips6(ips6_json, hits, paint_anno_dir)
+    updated_ips6_hits = update_ips6(ips6_json, hits)
 
-    with open(args[3], "w") as fh:
+    with open(args[2], "w") as fh:
         json.dump(updated_ips6_hits, fh)
 
 
@@ -73,7 +70,7 @@ def parse_treegrafter(treegrafter: Path) -> dict[str, list[str]]:
     return hits
 
 
-def update_ips6(ips6: Path, hits: dict[str, list[str]], paint_anno_path: Path) -> None:
+def update_ips6(ips6: Path, hits: dict[str, list[str]]) -> None:
     """Parse ips6 json containing hits from the hmmer.out file,
     removing hits not in TreeGrafter output.
 
@@ -81,7 +78,6 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]], paint_anno_path: Path) -
     :param hits: dict of hits from panther post-processed output
         (i.e. TreeGrafter output)
         {protein_id: [(sig_acc, node_id)]}
-    :param paint_anno_path: path to Panther release Paint Annotation file
     """
     with open(ips6, "r") as fh:
         ips6_data = json.load(fh)

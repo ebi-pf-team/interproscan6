@@ -77,7 +77,6 @@ process PANTHER_FILTER_MATCHES {
     input:
         path ips6_json
         path treegrafter_output
-        val postprocessing_params
 
     output:
         path "${ips6_json}.post.processed.json"
@@ -87,7 +86,6 @@ process PANTHER_FILTER_MATCHES {
     python3 $projectDir/interproscan/scripts/members/panther/process_treegrafter_hits.py \\
         ${treegrafter_output} \\
         ${ips6_json} \\
-        ${postprocessing_params[2]} \\
         ${ips6_json}.post.processed.json
     """
 }

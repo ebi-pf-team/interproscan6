@@ -400,8 +400,7 @@ workflow SEQUENCE_ANALYSIS {
     )
     PANTHER_FILTER_MATCHES(
         PANTHER_HMMER_PARSER.out,     // internal ips6 json
-        PANTHER_POST_PROCESSER.out,   // treegrafter output + post-processing params
-        PANTHER_HMMER_RUNNER.out[1]   // post-processing-params
+        PANTHER_POST_PROCESSER.out    // treegrafter output
     )
 
     // Pfam
