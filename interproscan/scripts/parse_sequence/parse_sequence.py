@@ -185,23 +185,6 @@ def main():
         (may contain the original nucleic sequences)
     args[2] = str repr of bool, if nucleic seqs provided ('true') or not ('false')
     args[3] = str of applications
-<<<<<<< HEAD
-    args[4] = str repr of path for the output file
-    """
-    args = sys.argv[1:]
-    is_fasta_check(args[0])
-    sequences = get_sequences(args[0])
-
-    if args[2] == "true":
-        is_fasta_check(args[1])
-        nt_seqs = get_nucleic_seqs(args[1])
-        sequence_parsed = parse_nucleic(sequences, nt_seqs)
-    else:
-        sequence_parsed = parse(sequences, args[3])
-
-    with open(args[4], "w") as fh:
-        json.dump(sequence_parsed, fh)
-=======
     args[4] = str repr of path to write output
     """
     args = sys.argv[1:]
@@ -209,7 +192,6 @@ def main():
     parsed_seqs = parse(args[0], args[3], nucleic_seqs=nt_seqs)
     with open(args[4], "w") as fh:
         json.dump(parsed_seqs, fh)
->>>>>>> main
 
 
 if __name__ == "__main__":
