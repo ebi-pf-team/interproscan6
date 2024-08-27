@@ -13,7 +13,7 @@ process HMMER_PARSER {
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/hmmer/parser_out.py ${out} > hmmer_parsed_${out}.json
+    python3 $projectDir/interproscan/scripts/hmmer/parser_out.py ${out} hmmer_parsed_${out}.json
     """
 }
 
@@ -36,7 +36,7 @@ process FUNFAM_HMMER_PARSER {
     for hmmer_file in ${hmmer_out_files}
     do
         base_name=\$(basename \$hmmer_file .out)
-        python3 $projectDir/interproscan/scripts/hmmer/parser_out.py \$hmmer_file > hmmer_parsed_\${base_name}.json
+        python3 $projectDir/interproscan/scripts/hmmer/parser_out.py \$hmmer_file hmmer_parsed_\${base_name}.json
     done
     """
 }
