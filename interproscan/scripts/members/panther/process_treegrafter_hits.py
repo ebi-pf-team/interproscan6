@@ -1,5 +1,5 @@
-import argparse
 import json
+import sys
 
 from copy import copy
 
@@ -34,41 +34,20 @@ class PantherHit:
 
 
 def main():
-    parser = build_parser()
-    args = parser.parse_args()
+    """
+    CL input:
+    0. Output file from treegradter
+    1. Internal IPS6 JSON
+    2. Str repr of path to the PAINT ANNOTATIONS data dir
+    """
+    args = sys.argv[1:]
+    treegrafter_out = args[0]
+    ips6_json = args[1]
+    paint_anno_dir = args[2]
 
-    hits = parse_treegrafter(args.treegrafter)
-    updated_ips6 = update_ips6(args.ips6, hits, args.paint_annnotations)
-    print(json.dumps(updated_ips6, indent=2))
-
-
-def build_parser() -> argparse.ArgumentParser:
-    """Build cmd-line argument parser"""
-    parser = argparse.ArgumentParser(
-        prog="process_post_processed_panther_hits",
-        description="Filter results of HMMER search on Pather HMMs by parsing the TreeGrafter output",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-
-    parser.add_argument(
-        "treegrafter",
-        type=Path,
-        help="Path to TreeGrafter output file"
-    )
-
-    parser.add_argument(
-        "ips6",
-        type=Path,
-        help="Path to IPS6 JSON file containing parsed content from HMMER.out file"
-    )
-
-    parser.add_argument(
-        "paint_annnotations",
-        type=Path,
-        help="Path to PAINT annotations file from the Panther release"
-    )
-
-    return parser
+    hits = parse_treegrafter(treegrafter_out)
+    updated_ips6 = update_ips6(ips6_json, hits, paint_anno_dir)
+    print(json.dumps(updated_ips6))
 
 
 def parse_treegrafter(treegrafter: Path) -> dict[str, list[str]]:
