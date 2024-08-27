@@ -5,7 +5,7 @@ import sys
 def md52fasta(md5: set, sequence: dict):
     md52seqinfo = {}
     for seq_id, seq_info in sequence.items():
-        md52seqinfo[seq_info[-2]] = f"{seq_info[0]}\n{seq_info[1]}"
+        md52seqinfo[seq_info['md5']] = f"{seq_info['seq_id']}\n{seq_info['sequence']}"
 
     seq_fasta = ""
     for hash_key in md5:

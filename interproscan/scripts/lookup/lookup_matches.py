@@ -102,7 +102,7 @@ def main():
 
     md52seq_id = {}
     for seq_id, match in seq_info.items():
-        md52seq_id[match[-2]] = seq_id
+        md52seq_id[match['md5']] = seq_id
 
     match_results, err = match_lookup(matches, url, retries=retries)
 
