@@ -15,7 +15,13 @@ workflow SEQUENCE_PRECALC {
     LOOKUP_MATCHES(LOOKUP_CHECK.out, applications, is_test)
     LOOKUP_NO_MATCHES(LOOKUP_CHECK.out)
 
+    if (LOOKUP_MATCHES.out.isEmpty()) {
+        parsed_matches = null
+    } else {
+        parsed_matches = LOOKUP_MATCHES.out
+    }
+
     emit:
     sequences_to_analyse = LOOKUP_NO_MATCHES.out
-    parsed_matches = LOOKUP_MATCHES.out
+    parsed_matches
 }
