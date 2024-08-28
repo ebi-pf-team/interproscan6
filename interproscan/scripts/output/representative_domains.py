@@ -4,6 +4,12 @@ import sys
 MAX_DOM_BY_GROUP = 20
 DOM_OVERLAP_THRESHOLD = 0.3
 REPR_DOM_DATABASES = ["PFAM", "CDD", "PROSITE_PROFILES", "SMART", "NCBIFAM"]
+dc_status_map = {
+    "CONTINUOUS": "S",
+    "N_TERMINAL_DISC": "N",
+    "C_TERMINAL_DISC": "C",
+    "NC_TERMINAL_DISC": "NC"
+}
 
 
 def add_representative_domains(matches_path: str) -> list[dict]:
@@ -30,7 +36,8 @@ def add_representative_domains(matches_path: str) -> list[dict]:
                     fragments = location["location-fragments"]
                     frags_str = ""
                     for fragment in fragments:
-                        frags_str += f"{fragment['start']}-{fragment['end']}-{fragment['dc-status']},"
+                        dc_status = dc_status_map.get(fragment['dc-status'], fragment['dc-status'])
+                        frags_str += f"{fragment['start']}-{fragment['end']}-{dc_status},"
                     frags_str = frags_str[:-1]
                 except KeyError:
                     frags_str = f"{pos_start}-{pos_end}-S"
@@ -52,18 +59,6 @@ def add_representative_domains(matches_path: str) -> list[dict]:
                         location["representative"] = True
                         break
     return matches
-    #     placeholders = ','.join(':' + str(i + 1)
-    #                             for i in range(len(REPR_DOM_DATABASES)))
-
-    #         WHERE H.DBCODE in ({placeholders})
-    #         AND (D.SIG_TYPE = 'D' OR D.SIG_TYPE = 'R')
-    #         ORDER BY PROTEIN_AC
-    #         """,
-    #         REPR_DOM_DATABASES
-    #     )
-
-
-
 
 
 def _select_repr_domains(domains: list[dict]):
