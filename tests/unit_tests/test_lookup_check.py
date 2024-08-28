@@ -6,11 +6,8 @@ pytest -v
 
 import json
 import pytest
-import os
-import sys
 import urllib.request
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../interproscan/scripts/lookup')))
 from interproscan.scripts.lookup import lookup_check
 
 
