@@ -23,12 +23,11 @@ def tsv_output(seq_matches: dict, output_path: str):
             seq_len = sequence_data['length']
 
             for match_acc, match in matches.items():
-                entry_acc, entry_name, entry_desc = "-", "-", "-"
                 goterms, pathways = [], []
                 if match["entry"]:
-                    entry_acc = match["entry"]["accession"]
-                    entry_name = match["entry"]["name"]
-                    entry_desc = match["entry"]["description"]
+                    entry_acc = match['entry'].get('accession', "-")
+                    sig_desc = match['entry'].get('description') or match['entry'].get('name', "-")
+                    entry_desc = match['entry'].get('ipr_description') or match['entry'].get('ipr_name', "-")
                     for go_info in match["entry"]["goXRefs"]:
                         goterms.append(go_info["id"])
                     for pwy_info in match["entry"]["pathwayXRefs"]:
@@ -84,9 +83,9 @@ def tsv_output(seq_matches: dict, output_path: str):
 
                     write_to_tsv(
                         seq_id, md5, seq_len, match_db,
-                        sig_acc, entry_desc, ali_from, ali_to,
+                        sig_acc, sig_desc, ali_from, ali_to,
                         evalue, status, current_date, entry_acc,
-                        entry_name, xrefs)
+                        entry_desc, xrefs)
 
 
 def tsv_pro_output(seq_matches: dict, output_path: str):
@@ -111,15 +110,12 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
 
             for match_acc, match in matches.items():
                 member_db = match["member_db"]
-                if match['entry']:
-                    version = match['entry']['version']
-                    try:
-                        version_major, version_minor = version.split('.')
-                    except ValueError:
-                        version_major = version
-                        version_minor = "0"
-                else:
-                    version = None
+                version = match['entry']['version']
+                try:
+                    version_major, version_minor = version.split('.')
+                except ValueError:
+                    version_major = version
+                    version_minor = "0"
 
                 try:  # cdd does not have evalue and score on this level
                     evalue = match["evalue"]
@@ -218,4 +214,3 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         score, evalue, raw_hmm_bound, hmm_start, hmm_end,
                         hmm_length, env_start, env_end, location_score,
                         location_evalue, cigar_alignment)
-

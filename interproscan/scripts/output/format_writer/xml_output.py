@@ -166,13 +166,15 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                 sig_type = _check_null(match_data['entry']['type'])
                 desc = _check_null(match_data["entry"]['description'])
                 name = _check_null(match_data["entry"]['name'])
+                entry_desc = _check_null(match_data["entry"].get('ipr_description', "-"))
+                entry_name = _check_null(match_data["entry"].get('ipr_name', "-"))
                 signature_elem.set("desc", desc)
                 signature_elem.set("name", name)
                 if match_data['entry']['accession'] != "-":
                     entry_elem = ET.SubElement(signature_elem, "entry")
                     entry_elem.set("ac", acc)
-                    entry_elem.set("desc", desc)
-                    entry_elem.set("name", name)
+                    entry_elem.set("desc", entry_desc)
+                    entry_elem.set("name", entry_name)
                     entry_elem.set("type", sig_type)
                     if match_data['entry']['goXRefs']:
                         for go_xref in match_data['entry']['goXRefs']:
