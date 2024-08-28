@@ -486,6 +486,17 @@ For example, check root privileges have been provided to the docker socket
 
     sudo chmod 666 /var/run/docker.sock
 
+## Segmentation fault
+
+If you a recieve an error such as the following:
+```bash
+Command error:
+  .command.sh: line 2:     7 Segmentation fault      (core dumped) /opt/hmmer3/bin/hmmsearch --cut_ga --cpu 1 -o 7.0._.antifam._.out AntiFam.hmm mini_test.1.fasta
+```
+This is generally due to HMMER being unable to find a necessary data file.
+Make sure the data directory is correctly structured and populated and `InterProScan` is 
+pointed to the correct data directory using the `--data` flag if not using the default data
+directory location in the project dir.
 
 ## Cannot access or failed to open output files for writing
 
