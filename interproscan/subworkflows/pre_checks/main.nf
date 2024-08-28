@@ -19,7 +19,7 @@ def printHelp() {
                                             Output files are automatically named after the input file, with the 
                                             suffix '.ips6.*'. Default: present working dir.
         --pathways Optional. Include pathway information in the output.
-        --signalp_mode Optional. Set which SignalP/SignalP_EUK prediction models are used. Models may have to be installed. Accepted: 'fast', 'slow', 'sequential'. Default: 'fast'.
+        --signalp_mode Optional. Set which SignalP/SignalP_EUK prediction models are used. Models may have to be installed. Accepted: 'fast', 'slow', 'slow-sequential'. Default: 'fast'.
         --version                          Print the version of InterProScan.
     """
 }
