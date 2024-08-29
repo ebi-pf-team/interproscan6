@@ -84,10 +84,6 @@ def parse_matches_into_dict(match_list: list[dict[str, dict]]) -> dict[str, dict
 
 
 def test_build_json_protein(j_prot_seq_matches, j_out_path, j_expected_protein, monkeypatch):
-    """Tests the function runs.
-    The output of get_matches() is assessed in its own function and the overall
-    output is assessed in the integration tests.
-    """
     def mock_get_matches(*args, **kwards):
         return []
 
@@ -106,10 +102,6 @@ def test_build_json_protein(j_prot_seq_matches, j_out_path, j_expected_protein, 
 
 
 def test_build_json_nucleic(j_nucleic_seq_matches, j_out_path, j_expected_nucleic, monkeypatch):
-    """Tests the function runs.
-    The output of get_matches() is assessed in its own function and the overall
-    output is assessed in the integration tests.
-    """
     def mock_get_matches(*args, **kwards):
         return []
 
@@ -375,13 +367,38 @@ def test_mobidb_json_match(j_matches_input_dir, j_matches_output_dir):
             )
 
 
-# def test_panther_json_match(j_matches_input_dir):
-#     match_data = load_match_data("PANTHER", j_matches_input_dir)
+def test_panther_json_match(j_matches_input_dir, j_matches_output_dir):
+    member_db = "PANTHER"
+    match_data = load_match_data(member_db, j_matches_input_dir)
 
-#     result = json_output.get_matches(match_data)
+    result_list = json_output.get_matches(match_data)
 
-#     with open("tests/unit_tests/test_outputs/format_writer/matches/json/PANTHER.match.json", "w") as fh:
-#         json.dump(result, fh)
+    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
+
+    # check the number of matches is the same
+    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
+
+    # check the match data matches
+    result_dict = parse_matches_into_dict(result_list)
+    expected_dict = parse_matches_into_dict(expected_list)
+
+    for sig_acc, match_data in result_dict. items():
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        if sig_acc in expected_dict:
+            # compare the signature details
+            expected_data = expected_dict[sig_acc]
+            compare_signature_details(match_data, expected_data, sig_acc, member_db)
+            locations = match_data['locations']
+            expected_locations = expected_data['locations']
+            compare_location_details(
+                locations, expected_locations,
+                [
+                    'representative', 'hmmStart', 'hmmEnd',
+                    'hmmLength', 'hmmBounds',
+                    'envelopeStart', 'envelopeEnd'
+                ],
+                sig_acc, member_db
+            )
 
 
 def test_phobius_json_match(j_matches_input_dir, j_matches_output_dir):
