@@ -12,8 +12,8 @@ from interproscan.scripts.hmmer.parser_out import parse
 
 
 def test_check_output_types(test_input_dir):
-    input_path = str(test_input_dir / "0.0._.pfam._.out")
-    result = parse(input_path)
+    input_path = str(test_input_dir / "pfam_out")
+    result = parse(input_path, "pfam")
 
     sequence_data = result["sp|A2SLW2|1A1D_METPP"]["PF00291"]
 
@@ -33,18 +33,18 @@ def test_check_output_types(test_input_dir):
 
 
 @pytest.mark.parametrize(
-    "input_path, expected_result",
+    "input_path, member_db, expected_result",
     [
-        ("0.0._.pfam._.out", "0.0_pfam_parsed.json"),
-        ("0.0._.gene3d._.out", "0.0_gene3d_parsed.json"),
-        ("0.0._.panther._.out", "0.0_panther_parsed.json")
+        ("pfam_out", "pfam", "pfam_parsed.json"),
+        ("gene3d_out", "gene3d", "gene3d_parsed.json"),
+        ("panther_out", "panther", "panther_parsed.json")
     ]
 )
-def test_parse_multiple_sequences(test_input_dir, test_output_dir, input_path, expected_result):
+def test_parse_multiple_sequences(test_input_dir, test_output_dir, input_path, member_db, expected_result):
     input_file_path = test_input_dir / input_path
     output_file_path = test_output_dir / expected_result
 
-    result = parse(str(input_file_path))
+    result = parse(str(input_file_path), member_db)
     with output_file_path.open('r') as file:
         expected_result = json.load(file)
 
