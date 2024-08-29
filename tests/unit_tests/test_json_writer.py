@@ -198,22 +198,115 @@ def test_cdd_json_match(j_matches_input_dir, j_matches_output_dir):
                     ))
 
 
-# def test_coils_json_match(j_matches_input_dir):
-#     match_data = load_match_data("COILS", j_matches_input_dir)
+def test_coils_json_match(j_matches_input_dir, j_matches_output_dir):
+    member_db = "COILS"
+    match_data = load_match_data(member_db, j_matches_input_dir)
 
-#     result = json_output.get_matches(match_data)
+    result_list = json_output.get_matches(match_data)
+    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
-#     with open("tests/unit_tests/test_outputs/format_writer/matches/json/COILS.match.json", "w") as fh:
-#         json.dump(result, fh)
+    # check the number of matches is the same
+    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
+
+    # check the match data matches
+    result_dict = parse_matches_into_dict(result_list)
+    expected_dict = parse_matches_into_dict(expected_list)
+
+    for sig_acc, match_data in result_dict. items():
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        if sig_acc in expected_dict:
+            # compare the signature details
+            expected_data = expected_dict[sig_acc]
+            compare_signature_details(match_data, expected_data, sig_acc, member_db)
+
+            # compare locations
+            assert len(match_data['locations']) == len(expected_data['locations']), f"Mismatched number of locations for {sig_acc}, {member_db}"
+            for location in match_data['locations']:
+                found = False
+                for expected_location in expected_data['locations']:
+                    if location['start'] == expected_location['start'] \
+                        and location['end'] == expected_location['end']:
+                        found = True
+                        assert len(location['location-fragments']) == len(expected_location['location-fragments'])
+                        # gritty detailed comparison can be handeled by the intergration test
+                if not found:
+                    pytest.fail((
+                        f"Location with start {location['start']} and end {location['end']} "
+                        f"not found in expected data for {sig_acc}, {member_db}"
+                    ))
+            for expected_location in expected_data['locations']:
+                found = False
+                for location in match_data['locations']:
+                    if location['start'] == expected_location['start'] \
+                        and location['end'] == expected_location['end']:
+                        found = True
+                if not found:
+                    pytest.fail((
+                        f"Expected location with start {location['start']} and end {location['end']} "
+                        f"not found in test result data for {sig_acc}, {member_db}"
+                    ))
 
 
-# def test_funfam_json_match(j_matches_input_dir):
-#     match_data = load_match_data("FUNFAM", j_matches_input_dir)
+def test_funfam_json_match(j_matches_input_dir, j_matches_output_dir):
+    member_db = "FUNFAM"
+    match_data = load_match_data(member_db, j_matches_input_dir)
 
-#     result = json_output.get_matches(match_data)
+    result_list = json_output.get_matches(match_data)
 
-#     with open("tests/unit_tests/test_outputs/format_writer/matches/json/FUNFAM.match.json", "w") as fh:
-#         json.dump(result, fh)
+    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
+
+    # check the number of matches is the same
+    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
+
+    # check the match data matches
+    result_dict = parse_matches_into_dict(result_list)
+    expected_dict = parse_matches_into_dict(expected_list)
+
+    for sig_acc, match_data in result_dict. items():
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        if sig_acc in expected_dict:
+            # compare the signature details
+            expected_data = expected_dict[sig_acc]
+            compare_signature_details(match_data, expected_data, sig_acc, member_db)
+
+            # compare locations
+            assert len(match_data['locations']) == len(expected_data['locations']), f"Mismatched number of locations for {sig_acc}, {member_db}"
+            for location in match_data['locations']:
+                found = False
+                for expected_location in expected_data['locations']:
+                    if location['start'] == expected_location['start'] \
+                        and location['end'] == expected_location['end']:
+                        found = True
+                        assert all(
+                            location[key] == expected_location[key]
+                            for key in [
+                                'representative', 'evalue', 'score',
+                                'hmmStart', 'hmmEnd', 'hmmLength', 'hmmBounds',
+                                'envelopeStart', 'envelopeEnd'
+                            ]
+                        ), (
+                            f"Mismatch in 'location' details for {sig_acc}, {member_db} "
+                            f"(start: {location['start']} - end {location['end']})"
+                        )
+                        assert len(location['location-fragments']) == len(expected_location['location-fragments'])
+                        # gritty detailed comparison can be handeled by the intergration test
+                if not found:
+                    pytest.fail((
+                        f"Location with start {location['start']} and end {location['end']} "
+                        f"not found in expected data for {sig_acc}, {member_db}"
+                    ))
+            for expected_location in expected_data['locations']:
+                found = False
+                for location in match_data['locations']:
+                    if location['start'] == expected_location['start'] \
+                        and location['end'] == expected_location['end']:
+                        found = True
+                if not found:
+                    pytest.fail((
+                        f"Expected location with start {location['start']} and end {location['end']} "
+                        f"not found in test result data for {sig_acc}, {member_db}"
+                    ))
+
 
 
 # def test_gene3d_json_match(j_matches_input_dir):
