@@ -4,7 +4,7 @@ import sys
 import urllib.request
 import xml.etree.ElementTree as ET
 
-from retry_conn_decorator import lookup_retry_decorator
+from .retry_conn_decorator import lookup_retry_decorator
 
 
 @lookup_retry_decorator

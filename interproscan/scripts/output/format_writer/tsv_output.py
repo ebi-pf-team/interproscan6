@@ -1,7 +1,5 @@
-import os
 from datetime import datetime
 
-import json
 
 def tsv_output(seq_matches: dict, output_path: str):
     with open(output_path, 'w') as tsv_file:
