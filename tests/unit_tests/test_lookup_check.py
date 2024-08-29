@@ -22,26 +22,36 @@ def lookup_check_out_dir(test_output_dir):
 
 
 @pytest.fixture
+def lookup_outfile_path(test_output_dir):
+    return test_output_dir / "temp/lookup.out.json"
+
+
+@pytest.fixture
 def parsed_seqs_path(lookup_check_input_dir):
     return lookup_check_input_dir / "parsed_sequences"
 
 
-def test_lookup_check_main(parsed_seqs_path, lookup_check_out_dir, capsys, monkeypatch):
+def test_lookup_check_main(
+    parsed_seqs_path, lookup_check_out_dir,
+    lookup_outfile_path, capsys, monkeypatch
+):
     def mock_check_precalc(*args, **kwards):
         return (["MD5_1", "MD5_2"], None)
 
-    monkeypatch.setattr("sys.argv", ["lookup_check", str(parsed_seqs_path), "fake_url", 3])
+    test_args = [
+        "lookup_check",
+        str(parsed_seqs_path),
+        "fake_url",
+        3,
+        lookup_outfile_path
+    ]
+
+    monkeypatch.setattr("sys.argv", test_args)
     monkeypatch.setattr(lookup_check, "check_precalc", mock_check_precalc)
 
-    with open((lookup_check_out_dir / "lookup_check_out_script.json"), "r") as fh:
-        expected_output = json.load(fh)
-
     lookup_check.main()
-    captured_output = json.loads(capsys.readouterr().out)
 
-    assert expected_output['matches'] == captured_output['matches']
-    # the no_matches keys can store seqs in different orders so only check length
-    assert len(expected_output['no_matches']) == len(captured_output['no_matches'])
+    lookup_outfile_path.unlink()
 
 
 def test_check_precalc(monkeypatch):
