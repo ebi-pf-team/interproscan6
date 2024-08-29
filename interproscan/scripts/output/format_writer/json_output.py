@@ -23,14 +23,11 @@ def build_json_output_protein(seq_matches: dict, output_path: str, version: str)
 
     final_data = {"interproscan-version": version, 'results': results}
     with open(output_path, 'w') as json_file:
-        json_file.write(json.dumps(final_data, indent=2))
-
-    return final_data
+        json_file.write(json.dumps(final_data))
 
 
 def build_json_output_nucleic(seq_matches: dict, output_path: str, version: str):
     """Iterate through the ORFs in seq_matches."""
-    json_output = os.path.join(output_path + '.json')
     results = {}  # nucleic seq id: {}
 
     # seq_id = <nucleic acid seq id>_orf<id>
@@ -70,9 +67,7 @@ def build_json_output_nucleic(seq_matches: dict, output_path: str, version: str)
 
     final_data = {"interproscan-version": version, 'results': list(results.values())}
     with open(output_path, 'w') as json_file:
-        json_file.write(json.dumps(final_data, indent=2))
-
-    return final_data
+        json_file.write(json.dumps(final_data))
 
 
 def get_matches(data: dict):

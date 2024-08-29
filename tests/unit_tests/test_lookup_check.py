@@ -1,7 +1,7 @@
 """Test the python script scripts/lookup/lookup_check.py
 
 These test are intened to be run from the root of the repository using:
-pytest -v
+python -m pytest -v
 """
 
 import json
