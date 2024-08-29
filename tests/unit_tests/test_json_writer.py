@@ -145,7 +145,6 @@ def compare_location_details(
     :param location_keys: list, keys in 'locations' to compare
     :param sig_acc: str, accession of the associated signature
     :param member_db: str, name of the associated member db
-    :param sites: bool, member db calculates sites
     """
     assert len(locations) == len(expected_locations), f"Mismatched number of locations for {sig_acc}, {member_db}"
     for location in locations:
