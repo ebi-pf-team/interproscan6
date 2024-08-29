@@ -50,14 +50,14 @@ def add_representative_domains(matches_path: str) -> list[dict]:
                     "rank": REPR_DOM_DATABASES.index(member_db)
                 })
 
-        if domains:
-            repr_domains = _select_repr_domains(domains)
-            for representative in repr_domains:
-                repr_acc = representative["signature"]
-                for location in matches_info[repr_acc]["locations"]:
-                    if location["start"] == representative["start"] and location["end"] == representative["end"]:
-                        location["representative"] = True
-                        break
+            if domains:
+                repr_domains = _select_repr_domains(domains)
+                for representative in repr_domains:
+                    repr_acc = representative["signature"]
+                    for location in matches_info[repr_acc]["locations"]:
+                        if location["start"] == representative["start"] and location["end"] == representative["end"]:
+                            location["representative"] = True
+                            break
     return matches
 
 
