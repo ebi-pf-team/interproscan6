@@ -67,7 +67,13 @@ class Sequence:
     def get_seq(self, line: str):
         self.sequence += line
 
-    def get_error_msg(self, errors: dict[str, dict[str, str]], line: str, applications: list):
+    def get_error_msg(
+            self, 
+            errors: dict[str, dict[str, str]], 
+            line: str,
+            applications: list,
+            passing_nucleic: bool
+        ):
         if self.seq_key not in errors:
             errors[self.seq_key] = {}
         invalid_chars = re.findall(r"[^A-Za-z_\-\*\.]*", line)
@@ -81,6 +87,11 @@ class Sequence:
         for app in applications:
             app_chars = [f"'{_}'" for _ in set(line).intersection(set(ILLEGAL_CHARS[app]))]
             if app_chars:
+                # 'u; is an illegal char for phobius but allow it when
+                # passing a nucleic acid sequence
+                if passing_nucleic and app.lower() == 'phobius' and "'u'" in app_chars:
+                    app_chars.remove("'u'")
+                    continue
                 if app.upper() not in errors[self.seq_key]:
                     errors[self.seq_key][app.upper()] = set()
                 errors[self.seq_key][app.upper()] = errors[self.seq_key][app.upper()].union(app_chars)
@@ -157,7 +168,7 @@ def parse(
 
             else:
                 if set(line.lower()).intersection(all_illegal_chars) or re.findall(r"[^A-Za-z_\-\*\.]*", line):
-                    errors = seq_obj.get_error_msg(errors, line, applications)
+                    errors = seq_obj.get_error_msg(errors, line, applications, passing_nucleic)
 
                 seq_obj.get_seq(line)
 
