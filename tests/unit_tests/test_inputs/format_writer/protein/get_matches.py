@@ -9,11 +9,13 @@ the JSON and XML outputs.
 PREFIX = "tests/unit_tests/test_inputs/format_writer/matches"
 SEQ_MAT_PATH = "tests/unit_tests/test_inputs/format_writer/protein/seq_match_dict.json"
 MEMBERS = [
+    "ANTIFAM",
     "CDD", "COILS",
     "FUNFAM", "GENE3D",
     "HAMAP",
     "MOBIDB", "NCBIFAM",
-    "PANTHER", "PFAM", "PHOBIUS", "PIRSF", "PIRSR", "PRINTS",
+    "PANTHER", "PFAM", "PHOBIUS",
+    "PIRSF", "PIRSR", "PRINTS",
     "PROSITE_PATTERNS", "PROSITE_PROFILES",
     "SFLD", "SIGNALP", "SMART", "SUPERFAMILY"
 ]
