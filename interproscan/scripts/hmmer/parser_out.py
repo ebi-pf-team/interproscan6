@@ -89,7 +89,7 @@ def parse(out_file: str, member_db: str) -> dict:
                                 qlen = ""
 
                     elif stage == 'LOOKING_FOR_SEQUENCE_MATCHES':
-                        if line.strip() == "":
+                        if not line.strip():
                             stage = 'LOOKING_FOR_DOMAIN_SECTION'
                             current_domain = None
                             current_sequence = None
