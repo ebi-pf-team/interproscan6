@@ -1,4 +1,4 @@
-"""Test the python script that coordinates writing the output.
+"""Test the python script that writes the JSON output.
 
 Fixtures are prefixed with 'j_' to indicate they are used in unit
 testing the JSON format writer.
