@@ -121,7 +121,8 @@ def test_build_json_nucleic(j_nucleic_seq_matches, j_out_path, j_expected_nuclei
 
 def compare_signature_details(match_data: dict, expected_data: dict, sig_acc: str, member_db: str) -> None:
     if 'model-ac' in expected_data:
-        assert match_data['model-ac'] == expected_data['model-ac'], f"Mismatched 'model-ac for {sig_acc}, {member_db}"
+        assert match_data['model-ac'] == expected_data['model-ac'], \
+            f"Mismatched model-ac for {sig_acc}, {member_db}"
     assert all(
         match_data['signature'][key] == expected_data['signature'][key]
         for key in ['accession', 'name', 'description']
@@ -197,8 +198,8 @@ def test_cdd_json_match(j_matches_input_dir, j_matches_output_dir):
     result_dict = parse_matches_into_dict(result_list)
     expected_dict = parse_matches_into_dict(expected_list)
 
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+    for sig_acc, match_data in result_dict.items():
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
             expected_data = expected_dict[sig_acc]
             compare_signature_details(match_data, expected_data, sig_acc, member_db)
@@ -209,6 +210,10 @@ def test_cdd_json_match(j_matches_input_dir, j_matches_output_dir):
                 ['representative', 'evalue', 'score'],
                 sig_acc, member_db
             )
+    
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_coils_json_match(j_matches_input_dir, j_matches_output_dir):
@@ -226,7 +231,7 @@ def test_coils_json_match(j_matches_input_dir, j_matches_output_dir):
     expected_dict = parse_matches_into_dict(expected_list)
 
     for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
             # compare the signature details
             expected_data = expected_dict[sig_acc]
@@ -238,6 +243,10 @@ def test_coils_json_match(j_matches_input_dir, j_matches_output_dir):
                 ['representative'],
                 sig_acc, member_db
             )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_funfam_json_match(j_matches_input_dir, j_matches_output_dir):
@@ -256,7 +265,7 @@ def test_funfam_json_match(j_matches_input_dir, j_matches_output_dir):
     expected_dict = parse_matches_into_dict(expected_list)
 
     for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
             # compare the signature details
             expected_data = expected_dict[sig_acc]
@@ -271,6 +280,10 @@ def test_funfam_json_match(j_matches_input_dir, j_matches_output_dir):
                     'envelopeStart', 'envelopeEnd'
                 ],
                 sig_acc, member_db)
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_gene3d_json_match(j_matches_input_dir, j_matches_output_dir):
@@ -289,7 +302,7 @@ def test_gene3d_json_match(j_matches_input_dir, j_matches_output_dir):
     expected_dict = parse_matches_into_dict(expected_list)
 
     for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
             # compare the signature details
             expected_data = expected_dict[sig_acc]
@@ -304,6 +317,10 @@ def test_gene3d_json_match(j_matches_input_dir, j_matches_output_dir):
                     'envelopeStart', 'envelopeEnd'
                 ],
                 sig_acc, member_db)
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_hamap_json_match(j_matches_input_dir, j_matches_output_dir):
@@ -322,7 +339,7 @@ def test_hamap_json_match(j_matches_input_dir, j_matches_output_dir):
     expected_dict = parse_matches_into_dict(expected_list)
 
     for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
             # compare the signature details
             expected_data = expected_dict[sig_acc]
@@ -333,6 +350,10 @@ def test_hamap_json_match(j_matches_input_dir, j_matches_output_dir):
                 locations, expected_locations,
                 ['representative', 'score', 'alignment'],
                 sig_acc, member_db)
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 
@@ -352,7 +373,7 @@ def test_mobidb_json_match(j_matches_input_dir, j_matches_output_dir):
     expected_dict = parse_matches_into_dict(expected_list)
 
     for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
             # compare the signature details
             expected_data = expected_dict[sig_acc]
@@ -364,6 +385,10 @@ def test_mobidb_json_match(j_matches_input_dir, j_matches_output_dir):
                 ['representative'],
                 sig_acc, member_db
             )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_panther_json_match(j_matches_input_dir, j_matches_output_dir):
@@ -382,7 +407,7 @@ def test_panther_json_match(j_matches_input_dir, j_matches_output_dir):
     expected_dict = parse_matches_into_dict(expected_list)
 
     for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
             # compare the signature details
             expected_data = expected_dict[sig_acc]
@@ -398,6 +423,10 @@ def test_panther_json_match(j_matches_input_dir, j_matches_output_dir):
                 ],
                 sig_acc, member_db
             )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_phobius_json_match(j_matches_input_dir, j_matches_output_dir):
@@ -416,7 +445,7 @@ def test_phobius_json_match(j_matches_input_dir, j_matches_output_dir):
     expected_dict = parse_matches_into_dict(expected_list)
 
     for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
             # compare the signature details
             expected_data = expected_dict[sig_acc]
@@ -428,6 +457,10 @@ def test_phobius_json_match(j_matches_input_dir, j_matches_output_dir):
                 ['representative'],
                 sig_acc, member_db
             )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_pirsf_json_match(j_matches_input_dir, j_matches_output_dir):
@@ -446,7 +479,7 @@ def test_pirsf_json_match(j_matches_input_dir, j_matches_output_dir):
     expected_dict = parse_matches_into_dict(expected_list)
 
     for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
             # compare the signature details
             expected_data = expected_dict[sig_acc]
@@ -462,6 +495,10 @@ def test_pirsf_json_match(j_matches_input_dir, j_matches_output_dir):
                 ],
                 sig_acc, member_db
             )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_pirsr_json_match(j_matches_input_dir, j_matches_output_dir):
@@ -480,7 +517,7 @@ def test_pirsr_json_match(j_matches_input_dir, j_matches_output_dir):
     expected_dict = parse_matches_into_dict(expected_list)
 
     for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
             # compare the signature details
             expected_data = expected_dict[sig_acc]
@@ -496,6 +533,10 @@ def test_pirsr_json_match(j_matches_input_dir, j_matches_output_dir):
                 ],
                 sig_acc, member_db
             )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_prints_json_match(j_matches_input_dir, j_matches_output_dir):
@@ -514,7 +555,7 @@ def test_prints_json_match(j_matches_input_dir, j_matches_output_dir):
     expected_dict = parse_matches_into_dict(expected_list)
 
     for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
             # compare the signature details
             expected_data = expected_dict[sig_acc]
@@ -526,6 +567,10 @@ def test_prints_json_match(j_matches_input_dir, j_matches_output_dir):
                 ['representative', 'pvalue', 'score', 'motifNumber'],
                 sig_acc, member_db
             )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_prosite_pattern_json_match(j_matches_input_dir, j_matches_output_dir):
@@ -544,7 +589,7 @@ def test_prosite_pattern_json_match(j_matches_input_dir, j_matches_output_dir):
     expected_dict = parse_matches_into_dict(expected_list)
 
     for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
             # compare the signature details
             expected_data = expected_dict[sig_acc]
@@ -556,6 +601,10 @@ def test_prosite_pattern_json_match(j_matches_input_dir, j_matches_output_dir):
                 ['representative', 'cigarAlignment', 'alignment', 'level'],
                 sig_acc, member_db
             )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_prosite_profile_json_match(j_matches_input_dir, j_matches_output_dir):
@@ -574,7 +623,7 @@ def test_prosite_profile_json_match(j_matches_input_dir, j_matches_output_dir):
     expected_dict = parse_matches_into_dict(expected_list)
 
     for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
             # compare the signature details
             expected_data = expected_dict[sig_acc]
@@ -586,6 +635,10 @@ def test_prosite_profile_json_match(j_matches_input_dir, j_matches_output_dir):
                 ['representative', 'score', 'alignment'],
                 sig_acc, member_db
             )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_sfld_json_match(j_matches_input_dir, j_matches_output_dir):
@@ -604,7 +657,7 @@ def test_sfld_json_match(j_matches_input_dir, j_matches_output_dir):
     expected_dict = parse_matches_into_dict(expected_list)
 
     for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
             # compare the signature details
             expected_data = expected_dict[sig_acc]
@@ -620,6 +673,10 @@ def test_sfld_json_match(j_matches_input_dir, j_matches_output_dir):
                 ],
                 sig_acc, member_db
             )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_signalp_json_match(j_matches_input_dir, j_matches_output_dir):
@@ -638,7 +695,7 @@ def test_signalp_json_match(j_matches_input_dir, j_matches_output_dir):
     expected_dict = parse_matches_into_dict(expected_list)
 
     for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
             # compare the signature details
             expected_data = expected_dict[sig_acc]
@@ -653,6 +710,10 @@ def test_signalp_json_match(j_matches_input_dir, j_matches_output_dir):
                 ],
                 sig_acc, member_db
             )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_smart_json_match(j_matches_input_dir, j_matches_output_dir):
@@ -671,7 +732,7 @@ def test_smart_json_match(j_matches_input_dir, j_matches_output_dir):
     expected_dict = parse_matches_into_dict(expected_list)
 
     for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
             # compare the signature details
             expected_data = expected_dict[sig_acc]
@@ -686,6 +747,10 @@ def test_smart_json_match(j_matches_input_dir, j_matches_output_dir):
                 ],
                 sig_acc, member_db
             )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_superfamily_json_match(j_matches_input_dir, j_matches_output_dir):
@@ -704,7 +769,7 @@ def test_superfamily_json_match(j_matches_input_dir, j_matches_output_dir):
     expected_dict = parse_matches_into_dict(expected_list)
 
     for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results"
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
             # compare the signature details
             expected_data = expected_dict[sig_acc]
@@ -718,3 +783,7 @@ def test_superfamily_json_match(j_matches_input_dir, j_matches_output_dir):
                 ],
                 sig_acc, member_db
             )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
