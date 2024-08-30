@@ -20,7 +20,8 @@ map_databases = {
     "FUNFAM": "FunFam",
     "MOBIDB": "MobiDB Lite",
     "PHOBIUS": "Phobius",
-    "SIGNALP": "SignalP_Euk",
+    "SIGNALP": "SignalP",
+    "SIGNALP_EUK": "SignalP_Euk"
     "TMHMM": "TMHMM",
     "COILS": "COILS",
     "PIRSR": "PIRSR"
