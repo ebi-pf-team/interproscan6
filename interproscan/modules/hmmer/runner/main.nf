@@ -30,7 +30,13 @@ process HMMER_RUNNER_WITH_ALIGNMENTS {
 
     script:
     """
-    /opt/hmmer3/bin/hmmsearch ${switches} -o ${member}_out --domtblout ${member}_dtbl -A ${member}_alignment ${hmm} ${fasta}
+    /opt/hmmer3/bin/hmmsearch \\
+        ${switches} -o \\
+        ${member}_out \\
+        --domtblout ${member}_dtbl \\
+        -A ${member}_alignment \\
+        ${hmm} \\
+        ${fasta}
     """
 }
 
