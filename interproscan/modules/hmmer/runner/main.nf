@@ -99,7 +99,11 @@ process HAMAP_HMMER_RUNNER {
 
     script:
     """
-    /opt/hmmer3/bin/hmmsearch ${switches} -o ${member}_out --tblout ${member}_table.tbl ${hmm} ${fasta}
+    /opt/hmmer3/bin/hmmsearch \\
+        ${switches} -o ${member}_out \\
+        --tblout ${member}_table.tbl \\
+        ${hmm} \\
+        ${fasta}
     """
 }
 
