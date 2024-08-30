@@ -1,0 +1,20 @@
+<protein-matches xmlns="" interproscan-version="unit.test">
+	<protein>
+		<matches>
+			<mobidb-match>
+				<signature ac="mobidb" desc="disorder_prediction" name="disorder_prediction">
+					<signature-library-release library="MOBIDB" version="2.0" />
+				</signature>
+				<model-ac>mobidb</model-ac>
+				<locations>
+					<analysis-location start="317" end="343" representative="false">
+						<location-fragments />
+					</analysis-location>
+					<analysis-location start="323" end="341" representative="false">
+						<location-fragments />
+					</analysis-location>
+				</locations>
+			</mobidb-match>
+		</matches>
+	</protein>
+</protein-matches>

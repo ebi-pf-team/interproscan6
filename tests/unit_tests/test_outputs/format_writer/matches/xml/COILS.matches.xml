@@ -1,0 +1,20 @@
+<protein-matches xmlns="" interproscan-version="unit.test">
+	<protein>
+		<matches>
+			<coils>
+				<signature ac="Coil" desc="Coil" name="">
+					<entry ac="-" desc="Coil" name="" type="Region" />
+					<signature-library-release library="COILS" version="2.2.1" />
+				</signature>
+				<model-ac>Coil</model-ac>
+				<locations>
+					<analysis-location start="27" end="47" representative="false">
+						<location-fragments>
+							<analysis-location-fragment start="27" end="47" dc-status="CONTINUOUS" />
+						</location-fragments>
+					</analysis-location>
+				</locations>
+			</coils>
+		</matches>
+	</protein>
+</protein-matches>

@@ -356,7 +356,6 @@ def test_hamap_json_match(j_matches_input_dir, j_matches_output_dir):
             f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
-
 def test_mobidb_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "MOBIDB"
     match_data = load_match_data(member_db, j_matches_input_dir)
