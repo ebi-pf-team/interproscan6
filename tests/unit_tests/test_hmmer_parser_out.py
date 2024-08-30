@@ -35,9 +35,9 @@ def test_check_output_types(test_input_dir):
 @pytest.mark.parametrize(
     "input_path, member_db, expected_result",
     [
-        ("pfam_out", "pfam", "pfam_parsed.json"),
-        ("gene3d_out", "gene3d", "gene3d_parsed.json"),
-        ("panther_out", "panther", "panther_parsed.json")
+        ("hmmer3_parser/pfam_out", "pfam", "hmmer3_parser/pfam_parsed.json"),
+        ("hmmer3_parser/gene3d_out", "gene3d", "hmmer3_parser/gene3d_parsed.json"),
+        ("hmmer3_parser/panther_out", "panther", "hmmer3_parser/panther_parsed.json")
     ]
 )
 def test_parse_multiple_sequences(test_input_dir, test_output_dir, input_path, member_db, expected_result):
