@@ -124,7 +124,12 @@ process PIRSF_HMMER_RUNNER {
     script:
     """
     /opt/hmmer3/bin/hmmpress ${hmm}
-    /opt/hmmer3/bin/hmmscan ${switches} -o ${member}_out --domtblout ${member}_dtbl ${hmm} ${fasta}
+    /opt/hmmer3/bin/hmmscan \\
+        ${switches} -o \\
+        ${member}_out \\
+        --domtblout ${member}_dtbl \\
+        ${hmm} \\
+        ${fasta}
     """
 }
 
