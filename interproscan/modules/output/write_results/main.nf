@@ -15,9 +15,8 @@ process WRITE_RESULTS {
 
     script:
     """
-    cat ${sequences.join(" ")} > sequences_hash.json
     python3 $projectDir/interproscan/scripts/output/write_results.py \\
-        sequences_hash.json \\
+        ${sequences} \\
         ${matches} \\
         ${format} \\
         ${file_name} \\

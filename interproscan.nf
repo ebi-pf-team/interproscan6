@@ -1,13 +1,9 @@
 nextflow.enable.dsl=2
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT MODULES AND SUBWORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
 include { PARSE_SEQUENCE } from "$projectDir/interproscan/modules/parse_sequence/main"
 include { GET_ORFS } from "$projectDir/interproscan/modules/get_orfs/main"
 include { AGGREGATE_RESULTS } from "$projectDir/interproscan/modules/output/aggregate_results/main"
+include { AGGREGATE_PARSED_SEQS } from "$projectDir/interproscan/modules/output/aggregate_parsed_seqs/main"
 include { WRITE_RESULTS } from "$projectDir/interproscan/modules/output/write_results/main"
 
 include { PRE_CHECKS } from "$projectDir/interproscan/subworkflows/pre_checks/main"
@@ -103,6 +99,7 @@ workflow {
     all_results = parsed_matches.concat(parsed_analysis)
 
     AGGREGATE_RESULTS(all_results.collect())
+    AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
 
     XREFS(AGGREGATE_RESULTS.out, applications)
 
@@ -111,7 +108,7 @@ workflow {
 
     WRITE_RESULTS(
         input_file.getName(),
-        PARSE_SEQUENCE.out.collect(),
+        AGGREGATE_PARSED_SEQS.out,
         XREFS.out.collect(),
         ch_format,
         params.outdir,
