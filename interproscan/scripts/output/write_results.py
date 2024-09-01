@@ -26,7 +26,6 @@ def write_results(
         all_matches = json.load(match_data)
     with open(sequences_path, 'r') as seq_data:
         for line in seq_data:
-            print("NOVA LINHA", line)
             sequence = json.loads(line)
             all_sequences.update(sequence)
 
