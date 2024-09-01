@@ -21,7 +21,7 @@ map_databases = {
     "MOBIDB": "MobiDB Lite",
     "PHOBIUS": "Phobius",
     "SIGNALP": "SignalP",
-    "SIGNALP_EUK": "SignalP_Euk"
+    "SIGNALP_EUK": "SignalP_Euk",
     "TMHMM": "TMHMM",
     "COILS": "COILS",
     "PIRSR": "PIRSR"
@@ -41,11 +41,12 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
             entries_info = entries['entries']
             acc_id = match_key.split(".")[0]
             member_db = data["member_db"].upper()
-            version = databases_versions[map_databases[member_db]]
 
             match_info[match_key]['member_db'] = member_db
             match_info[match_key]['library'] = map_databases[member_db]
-            match_info[match_key]['version'] = version
+            if 'version' not in match_info[match_key]:  # mobidb, signalp and tmhmm get version from members.config
+                version = databases_versions[map_databases[member_db]]
+                match_info[match_key]['version'] = version
 
             entry = entries_info.get(acc_id) or entries_info.get(match_key)
             if entry:
@@ -75,7 +76,7 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
                     "database": member_db,
                     "goXRefs": [],
                     "pathwayXRefs": [],
-                    "version": version
+                    "version": match_info[match_key]['version']
                 }
 
             if member_db == "PANTHER":

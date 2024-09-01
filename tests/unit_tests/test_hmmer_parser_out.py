@@ -12,7 +12,7 @@ from interproscan.scripts.hmmer.parser_out import parse
 
 
 def test_check_output_types(test_input_dir):
-    input_path = str(test_input_dir / "pfam_out")
+    input_path = str(test_input_dir / "hmmer3_parser/pfam_out")
     result = parse(input_path, "pfam")
 
     sequence_data = result["sp|A2SLW2|1A1D_METPP"]["PF00291"]

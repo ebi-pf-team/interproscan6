@@ -142,7 +142,7 @@ def main():
     """
     args = sys.argv[1:]
     hmmlib_info = parse_hmmlib(args[0])
-    parsed_result = parse(args[1], hmmlib_info, args[1])
+    parsed_result = parse(args[1], hmmlib_info, args[2])
     with open(args[3], "w") as fh:
         json.dump(parsed_result, fh)
 

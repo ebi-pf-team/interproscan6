@@ -1,5 +1,5 @@
-import argparse
 import json
+import sys
 
 from pathlib import Path
 
@@ -43,47 +43,6 @@ class DomainHit:
         self.boundaries_end = None
         self.resolved = None
         self.aligned_regions = None
-
-
-def build_parser() -> argparse.ArgumentParser:
-    """Build cmd-line argument parser"""
-    parser = argparse.ArgumentParser(
-        prog="gene3d_and_funfam_match_parser",
-        description="Parse the output from the add_cath_superfamilies.py into the interal IPS6 JSON structure",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-
-    parser.add_argument(
-        "ips6",
-        type=Path,
-        help="Path to an internal IPS6 JSON file"
-    )
-
-    parser.add_argument(
-        "cath_out",
-        type=Path,
-        help="Path to cath_out file"
-    )
-
-    parser.add_argument(
-        "out_json",
-        type=Path,
-        help="Path to write the output JSON file"
-    )
-
-    parser.add_argument(
-        "out_superfamilies",
-        type=Path,
-        help="Path to write out a plain text file listing the CATH superfamilies"
-    )
-
-    parser.add_argument(
-        "funfam",
-        type=Path,
-        help="Path to FunFam models dir, e.g. data/funfam/models"
-    )
-
-    return parser
 
 
 def parse_cath(cath_out: Path) -> dict[str, Gene3dHit]:
@@ -221,15 +180,26 @@ def filter_matches(
 
 
 def main():
-    parser = build_parser()
-    args = parser.parse_args()
+    """CL input:
+    0. Path to an internal IPS6 JSON file
+    1. Path to cath_out file
+    2. Path to write the output JSON file
+    3. Path to write out a plain text file listing the CATH superfamilies
+    4. Path to FunFam models dir, e.g. data/funfam/models
+    """
+    args = sys.argv[1:]
+    ips6 = Path(args[0])
+    cath_out = Path(args[1])
+    out_json = Path(args[2])
+    out_superfamilies = Path(args[3])
+    funfam = Path(args[4])
 
-    matches = parse_cath(args.cath_out)
-    processed_ips6, superfamilies = filter_matches(args.ips6, matches, args.funfam)
+    matches = parse_cath(cath_out)
+    processed_ips6, superfamilies = filter_matches(ips6, matches, funfam)
 
-    with open(args.out_json, "w") as fh:
+    with open(out_json, "w") as fh:
         json.dump(processed_ips6, fh)
-    with open(args.out_superfamilies, "w") as fh:
+    with open(out_superfamilies, "w") as fh:
         for superfam in superfamilies:
             fh.write(f"{superfam}\n")
 

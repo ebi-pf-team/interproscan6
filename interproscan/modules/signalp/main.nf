@@ -3,12 +3,13 @@ process SIGNALP_RUNNER {
     label 'signalp_runner'
 
     input:
-    tuple path(fasta), val(mode), val(organism), val(pvalue)
+    tuple path(fasta), val(mode), val(organism), val(pvalue), val(signalp_version)
 
     output:
     path "signalp_out"
     val pvalue
     val organism
+    val signalp_version
 
     script:
     """
@@ -24,6 +25,7 @@ process SIGNALP_PARSER {
     path out
     val pvalue
     val organism
+    val signalp_version
 
     output:
     path "signalp_parsed.json"

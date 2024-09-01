@@ -101,7 +101,6 @@ workflow SEQUENCE_ANALYSIS {
     Channel.from(applications.split(','))
     .branch { member ->
         runner = params.members."${member}".runner
-//         log.info "Running $member version $release"
 
         /*
         Member databases that use HMMER:
@@ -253,7 +252,8 @@ workflow SEQUENCE_ANALYSIS {
 
         mobidb: member == "mobidb"
             return [
-                params.members."${member}".switches
+                params.members."${member}".switches,
+                params.members."${member}".release
             ]
 
         phobius: member == "phobius"
@@ -293,9 +293,7 @@ workflow SEQUENCE_ANALYSIS {
 
             return [
                 params.signalp_mode,
-                params.members.signalp_euk.data.model_dir,
                 params.members.signalp_euk.data.organism,
-                params.members.signalp_euk.switches,
                 params.members.signalp_euk.data.pvalue,
                 params.members.signalp_euk.release
             ]
