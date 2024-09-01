@@ -280,7 +280,6 @@ def compare_location_details(
 def test_cdd_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "CDD"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
@@ -307,7 +306,6 @@ def test_cdd_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm)
 def test_coils_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "COILS"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
@@ -334,7 +332,6 @@ def test_coils_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_el
 def test_funfam_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "FUNFAM"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
@@ -365,7 +362,6 @@ def test_funfam_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_e
 def test_gene3d_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "GENE3D"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
@@ -396,7 +392,6 @@ def test_gene3d_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_e
 def test_hamap_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "HAMAP"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
@@ -422,7 +417,6 @@ def test_hamap_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_el
 def test_mobidb_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "MOBIDB"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
@@ -449,7 +443,6 @@ def test_mobidb_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_e
 def test_ncbifam_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "NCBIFAM"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
@@ -481,7 +474,6 @@ def test_ncbifam_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_
 def test_panther_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "PANTHER"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
@@ -517,7 +509,6 @@ def test_panther_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_
 def test_pfam_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "PFAM"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
@@ -544,7 +535,6 @@ def test_pfam_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm
 def test_phobius_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "PHOBIUS"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
@@ -571,7 +561,6 @@ def test_phobius_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_
 def test_pirsf_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "PIRSF"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
@@ -637,7 +626,6 @@ def test_pirsf_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_el
 def test_prints_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "PRINTS"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
@@ -667,7 +655,6 @@ def test_prints_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_e
 def test_prosite_pattern_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "PROSITE_PATTERNS"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
@@ -694,7 +681,6 @@ def test_prosite_pattern_xml_match(x_matches_input_dir, x_matches_output_dir, x_
 def test_prosite_profile_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "PROSITE_PROFILES"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
@@ -748,10 +734,10 @@ def test_prosite_profile_xml_match(x_matches_input_dir, x_matches_output_dir, x_
 def test_signalp_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "SIGNALP"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
+
     expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
 
     for sig_acc, match_data in result_dict.items():
@@ -778,7 +764,6 @@ def test_signalp_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_
 def test_smart_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "SMART"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
@@ -809,7 +794,6 @@ def test_smart_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_el
 def test_superfamily_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "SUPERFAMILY"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
