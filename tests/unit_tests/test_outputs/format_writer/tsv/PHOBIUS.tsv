@@ -1,0 +1,29 @@
+UPI0002E0D40B	f91cb3cf61f2d7c7f5aaf6ea04e07868	370	Phobius	SIGNAL_PEPTIDE	Signal peptide region	1	27	-	T	01-09-2024	None	None		
+UPI0002E0D40B	f91cb3cf61f2d7c7f5aaf6ea04e07868	370	Phobius	SIGNAL_PEPTIDE_N_REGION	N-terminal region of a signal peptide.	1	6	-	T	01-09-2024	None	None		
+UPI0002E0D40B	f91cb3cf61f2d7c7f5aaf6ea04e07868	370	Phobius	SIGNAL_PEPTIDE_H_REGION	Hydrophobic region of a signal peptide.	7	19	-	T	01-09-2024	None	None		
+UPI0002E0D40B	f91cb3cf61f2d7c7f5aaf6ea04e07868	370	Phobius	SIGNAL_PEPTIDE_C_REGION	C-terminal region of a signal peptide.	20	27	-	T	01-09-2024	None	None		
+UPI0002E0D40B	f91cb3cf61f2d7c7f5aaf6ea04e07868	370	Phobius	NON_CYTOPLASMIC_DOMAIN	Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region.	28	370	-	T	01-09-2024	None	None		
+P22298	493932c1f43289805b4c4e651ceb9249	129	Phobius	SIGNAL_PEPTIDE	Signal peptide region	1	22	-	T	01-09-2024	None	None		
+P22298	493932c1f43289805b4c4e651ceb9249	129	Phobius	SIGNAL_PEPTIDE_N_REGION	N-terminal region of a signal peptide.	1	2	-	T	01-09-2024	None	None		
+P22298	493932c1f43289805b4c4e651ceb9249	129	Phobius	SIGNAL_PEPTIDE_H_REGION	Hydrophobic region of a signal peptide.	3	14	-	T	01-09-2024	None	None		
+P22298	493932c1f43289805b4c4e651ceb9249	129	Phobius	SIGNAL_PEPTIDE_C_REGION	C-terminal region of a signal peptide.	15	22	-	T	01-09-2024	None	None		
+P22298	493932c1f43289805b4c4e651ceb9249	129	Phobius	NON_CYTOPLASMIC_DOMAIN	Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region.	23	129	-	T	01-09-2024	None	None		
+P26222	8394be2ab076e2920aff07d0c2fb0e06	441	Phobius	SIGNAL_PEPTIDE	Signal peptide region	1	31	-	T	01-09-2024	None	None		
+P26222	8394be2ab076e2920aff07d0c2fb0e06	441	Phobius	SIGNAL_PEPTIDE_N_REGION	N-terminal region of a signal peptide.	1	7	-	T	01-09-2024	None	None		
+P26222	8394be2ab076e2920aff07d0c2fb0e06	441	Phobius	SIGNAL_PEPTIDE_H_REGION	Hydrophobic region of a signal peptide.	8	23	-	T	01-09-2024	None	None		
+P26222	8394be2ab076e2920aff07d0c2fb0e06	441	Phobius	SIGNAL_PEPTIDE_C_REGION	C-terminal region of a signal peptide.	24	31	-	T	01-09-2024	None	None		
+P26222	8394be2ab076e2920aff07d0c2fb0e06	441	Phobius	NON_CYTOPLASMIC_DOMAIN	Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region.	32	441	-	T	01-09-2024	None	None		
+WP_338726824.1	3156952d6b1f52bf18e848ccc4e7e455	870	Phobius	SIGNAL_PEPTIDE	Signal peptide region	1	24	-	T	01-09-2024	None	None		
+WP_338726824.1	3156952d6b1f52bf18e848ccc4e7e455	870	Phobius	SIGNAL_PEPTIDE_N_REGION	N-terminal region of a signal peptide.	1	6	-	T	01-09-2024	None	None		
+WP_338726824.1	3156952d6b1f52bf18e848ccc4e7e455	870	Phobius	SIGNAL_PEPTIDE_H_REGION	Hydrophobic region of a signal peptide.	7	18	-	T	01-09-2024	None	None		
+WP_338726824.1	3156952d6b1f52bf18e848ccc4e7e455	870	Phobius	SIGNAL_PEPTIDE_C_REGION	C-terminal region of a signal peptide.	19	24	-	T	01-09-2024	None	None		
+WP_338726824.1	3156952d6b1f52bf18e848ccc4e7e455	870	Phobius	TRANSMEMBRANE	Region of a membrane-bound protein predicted to be embedded in the membrane.	849	865	-	T	01-09-2024	None	None		
+WP_338726824.1	3156952d6b1f52bf18e848ccc4e7e455	870	Phobius	NON_CYTOPLASMIC_DOMAIN	Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region.	25	848	-	T	01-09-2024	None	None		
+WP_338726824.1	3156952d6b1f52bf18e848ccc4e7e455	870	Phobius	CYTOPLASMIC_DOMAIN	Region of a membrane-bound protein predicted to be outside the membrane, in the cytoplasm.	866	870	-	T	01-09-2024	None	None		
+WP_249252303.1	4229019f6f6d6fbcd8988593755fe395	885	Phobius	SIGNAL_PEPTIDE	Signal peptide region	1	22	-	T	01-09-2024	None	None		
+WP_249252303.1	4229019f6f6d6fbcd8988593755fe395	885	Phobius	SIGNAL_PEPTIDE_N_REGION	N-terminal region of a signal peptide.	1	6	-	T	01-09-2024	None	None		
+WP_249252303.1	4229019f6f6d6fbcd8988593755fe395	885	Phobius	SIGNAL_PEPTIDE_H_REGION	Hydrophobic region of a signal peptide.	7	18	-	T	01-09-2024	None	None		
+WP_249252303.1	4229019f6f6d6fbcd8988593755fe395	885	Phobius	SIGNAL_PEPTIDE_C_REGION	C-terminal region of a signal peptide.	19	22	-	T	01-09-2024	None	None		
+WP_249252303.1	4229019f6f6d6fbcd8988593755fe395	885	Phobius	TRANSMEMBRANE	Region of a membrane-bound protein predicted to be embedded in the membrane.	865	881	-	T	01-09-2024	None	None		
+WP_249252303.1	4229019f6f6d6fbcd8988593755fe395	885	Phobius	NON_CYTOPLASMIC_DOMAIN	Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region.	23	864	-	T	01-09-2024	None	None		
+WP_249252303.1	4229019f6f6d6fbcd8988593755fe395	885	Phobius	CYTOPLASMIC_DOMAIN	Region of a membrane-bound protein predicted to be outside the membrane, in the cytoplasm.	882	885	-	T	01-09-2024	None	None		

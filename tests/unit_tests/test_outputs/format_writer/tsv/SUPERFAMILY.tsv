@@ -1,0 +1,20 @@
+sp|A2SLW2|1A1D_METPP	7bcb28d452c1f7ad86b5e0da7fa21fd3	338	superfamily	SSF53686	Tryptophan synthase beta chain-like, PALP domain superfamily	4	332	3.02e-100	T	01-09-2024	IPR036052	TrpB-like_PALP_sf		
+TESTESEMLOOKUP	5a40425be664fc947906456e8fc0e722	119	superfamily	SSF53686	Tryptophan synthase beta chain-like, PALP domain superfamily	12	116	9.94e-35	T	01-09-2024	IPR036052	TrpB-like_PALP_sf		
+OUTROSEMLOOKUP	b66e5ed56c0ea43a14a02b37b513ea8d	352	superfamily	SSF53686	Tryptophan synthase beta chain-like, PALP domain superfamily	5	348	3.57e-94	T	01-09-2024	IPR036052	TrpB-like_PALP_sf		
+UPI0002E0D40B	f91cb3cf61f2d7c7f5aaf6ea04e07868	370	superfamily	SSF53774	Asparaginase/glutaminase-like superfamily	49	369	1.96e-99	T	01-09-2024	IPR036152	Asp/glu_Ase-like_sf		
+P22298	493932c1f43289805b4c4e651ceb9249	129	superfamily	SSF57256	Elafin-like superfamily	75	127	6.8e-13	T	01-09-2024	IPR036645	Elafin-like_sf		
+P22298	493932c1f43289805b4c4e651ceb9249	129	superfamily	SSF57256	Elafin-like superfamily	26	73	1.7e-10	T	01-09-2024	IPR036645	Elafin-like_sf		
+A0B6J9	88d47cc807fe8e977130b0cc93e0bd61	265	superfamily	SSF51569	None	5	253	9.89e-82	T	01-09-2024	None	None		
+A0A0H3E4R3_BACA1	268e4659f70d6eb10e6545eccaa347cf	448	superfamily	SSF102114	None	118	416	8.44e-58	T	01-09-2024	None	None		
+P26222	8394be2ab076e2920aff07d0c2fb0e06	441	superfamily	SSF51989	1, 4-beta cellobiohydrolase superfamily	34	316	4.06e-92	T	01-09-2024	IPR036434	Beta_cellobiohydrolase_sf		
+P26222	8394be2ab076e2920aff07d0c2fb0e06	441	superfamily	SSF49384	CBM2/CBM3, carbohydrate-binding domain superfamily	342	438	3.28e-28	T	01-09-2024	IPR008965	CBM2/CBM3_carb-bd_dom_sf		
+WP_338726824.1	3156952d6b1f52bf18e848ccc4e7e455	870	superfamily	SSF56219	Endonuclease/exonuclease/phosphatase superfamily	462	830	1.44e-32	T	01-09-2024	IPR036691	Endo/exonu/phosph_ase_sf		
+WP_338726824.1	3156952d6b1f52bf18e848ccc4e7e455	870	superfamily	SSF74853	Lamin tail domain superfamily	22	118	1.96e-07	T	01-09-2024	IPR036415	Lamin_tail_dom_sf		
+WP_249252303.1	4229019f6f6d6fbcd8988593755fe395	885	superfamily	SSF56219	Endonuclease/exonuclease/phosphatase superfamily	465	846	2.45e-33	T	01-09-2024	IPR036691	Endo/exonu/phosph_ase_sf		
+WP_249252303.1	4229019f6f6d6fbcd8988593755fe395	885	superfamily	SSF74853	Lamin tail domain superfamily	21	119	6.41e-07	T	01-09-2024	IPR036415	Lamin_tail_dom_sf		
+WP_134973503.1	c3e71fe6439f734a5b28ef1fdd640db9	355	superfamily	SSF53187	None	5	352	1.16e-56	T	01-09-2024	None	None		
+WP_134973503.1	c3e71fe6439f734a5b28ef1fdd640db9	355	superfamily	SSF101821	None	71	182	8.55e-26	T	01-09-2024	None	None		
+Protein_with_panther_hits	7bcb28d452c1f7ad86b5e0da7fa21fd3	338	superfamily	SSF53686	Tryptophan synthase beta chain-like, PALP domain superfamily	4	332	3.02e-100	T	01-09-2024	IPR036052	TrpB-like_PALP_sf		
+Panther_hits	268e4659f70d6eb10e6545eccaa347cf	448	superfamily	SSF102114	None	118	416	8.44e-58	T	01-09-2024	None	None		
+Panther_again	493932c1f43289805b4c4e651ceb9249	129	superfamily	SSF57256	Elafin-like superfamily	75	127	6.8e-13	T	01-09-2024	IPR036645	Elafin-like_sf		
+Panther_again	493932c1f43289805b4c4e651ceb9249	129	superfamily	SSF57256	Elafin-like superfamily	26	73	1.7e-10	T	01-09-2024	IPR036645	Elafin-like_sf		
