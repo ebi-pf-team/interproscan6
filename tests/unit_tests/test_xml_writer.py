@@ -246,147 +246,97 @@ def compare_location_details(
             ))
 
 
-# def test_antifam_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
-#     member_db = "ANTIFAM"
-#     match_data = load_match_data(member_db, x_matches_input_dir)
+def compare_xml_matches(
+    member_db: str,
+    matches_input_dir: pytest.fixture,
+    matches_output_dir: pytest.fixture,
+    protein_elm: pytest.fixture,
+    location_keys: list[str],
+) -> None:
+    match_data = load_match_data(member_db, matches_input_dir)
+    result = xml_output.add_xml_output_matches(protein_elm[0], match_data)
+    result_dict = xml_to_dict(result)
+    result_dict = parse_matches_dict(result_dict['matches'][0])
+    expected_dict = load_expected_match_data(member_db, matches_output_dir)
+    for sig_acc, match_data in result_dict.items():
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
+        if sig_acc in expected_dict:
+            expected_data = expected_dict[sig_acc]
+            compare_signature_details(match_data, expected_data, sig_acc, member_db)
+            locations = match_data['locations']
+            expected_locations = expected_data['locations']
+            compare_location_details(
+                locations, expected_locations,
+                location_keys,
+                sig_acc, member_db
+            )
 
-#     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-#     # # result_dict = xml_to_dict(result)
-#     # result_dict = parse_matches_dict(result_dict['matches'][0])
-#     # expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
-#     # for sig_acc, match_data in result_dict.items():
-#     #     assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-#     #     if sig_acc in expected_dict:
-#     #         expected_data = expected_dict[sig_acc]
-#     #         compare_signature_details(match_data, expected_data, sig_acc, member_db)
-#     #         locations = match_data['locations']
-#     #         expected_locations = expected_data['locations']
-#     #         compare_location_details(
-#     #             locations, expected_locations,
-#     #             ['start', 'end', 'representative'],
-#     #             sig_acc, member_db
-#     #         )
 
-#     # for sig_acc, match_data in expected_dict.items():
-#     #     assert sig_acc in result_dict, \
-#     #         f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
-
-#     tree = ET.ElementTree(x_protein_elm[1])
-#     ET.indent(tree, space="\t", level=0)
-#     tree.write((x_matches_output_dir / f"{member_db}.matches.xml"), encoding='utf-8')
+def test_antifam_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
+    member_db = "ANTIFAM"
+    compare_xml_matches(
+        member_db,
+        x_matches_input_dir,
+        x_matches_output_dir,
+        x_protein_elm,
+        ['start', 'end', 'representative']
+    )
 
 
 def test_cdd_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "CDD"
-    match_data = load_match_data(member_db, x_matches_input_dir)
-    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-    result_dict = xml_to_dict(result)
-    result_dict = parse_matches_dict(result_dict['matches'][0])
-    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['representative', 'evalue', 'score'],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_xml_matches(
+        member_db,
+        x_matches_input_dir,
+        x_matches_output_dir,
+        x_protein_elm,
+        ['representative', 'evalue', 'score']
+    )
 
 
 def test_coils_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "COILS"
-    match_data = load_match_data(member_db, x_matches_input_dir)
-    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-    result_dict = xml_to_dict(result)
-    result_dict = parse_matches_dict(result_dict['matches'][0])
-    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['representative'],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_xml_matches(
+        member_db,
+        x_matches_input_dir,
+        x_matches_output_dir,
+        x_protein_elm,
+        ['representative']
+    )
 
 
 def test_funfam_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "FUNFAM"
-    match_data = load_match_data(member_db, x_matches_input_dir)
-    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-    result_dict = xml_to_dict(result)
-    result_dict = parse_matches_dict(result_dict['matches'][0])
-    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                [
-                    'representative', 'evalue', 'score',
-                    'hmm-start', 'hmm-end', 'hmm-length', 'hmm-bounds',
-                    'env-start', 'env-end', 'alignment', 'cigar-alignment'
-                ],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_xml_matches(
+        member_db,
+        x_matches_input_dir,
+        x_matches_output_dir,
+        x_protein_elm,
+        [
+            'representative', 'evalue', 'score',
+            'hmm-start', 'hmm-end', 'hmm-length', 'hmm-bounds',
+            'env-start', 'env-end', 'alignment', 'cigar-alignment'
+        ]
+    )
 
 
 def test_gene3d_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "GENE3D"
-    match_data = load_match_data(member_db, x_matches_input_dir)
-    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-    result_dict = xml_to_dict(result)
-    result_dict = parse_matches_dict(result_dict['matches'][0])
-    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                [
-                    'representative', 'evalue', 'score',
-                    'hmm-start', 'hmm-end', 'hmm-length', 'hmm-bounds',
-                    'env-start', 'env-end', 'alignment', 'cigar-alignment'
-                ],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_xml_matches(
+        member_db,
+        x_matches_input_dir,
+        x_matches_output_dir,
+        x_protein_elm,
+        [
+            'representative', 'evalue', 'score',
+            'hmm-start', 'hmm-end', 'hmm-length', 'hmm-bounds',
+            'env-start', 'env-end', 'alignment', 'cigar-alignment'
+        ]
+    )
 
 
 def test_hamap_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
@@ -416,176 +366,82 @@ def test_hamap_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_el
 
 def test_mobidb_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "MOBIDB"
-    match_data = load_match_data(member_db, x_matches_input_dir)
-    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-    result_dict = xml_to_dict(result)
-    result_dict = parse_matches_dict(result_dict['matches'][0])
-    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['start', 'end', 'representative'],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_xml_matches(
+        member_db,
+        x_matches_input_dir,
+        x_matches_output_dir,
+        x_protein_elm,
+        ['start', 'end', 'representative']
+    )
 
 
 def test_ncbifam_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "NCBIFAM"
-    match_data = load_match_data(member_db, x_matches_input_dir)
-    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-    result_dict = xml_to_dict(result)
-    result_dict = parse_matches_dict(result_dict['matches'][0])
-    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                [
-                    'start', 'end', 'representative',
-                    'env-start', 'env-end', 'score', 'evalue',
-                    'hmm-start', 'hmm-end', 'hmm-length',
-                    'hmm-bounds', 'alignment', 'cigar-alignment'
-                ],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_xml_matches(
+        member_db,
+        x_matches_input_dir,
+        x_matches_output_dir,
+        x_protein_elm,
+        [
+            'start', 'end', 'representative',
+            'env-start', 'env-end', 'score', 'evalue',
+            'hmm-start', 'hmm-end', 'hmm-length',
+            'hmm-bounds', 'alignment', 'cigar-alignment'
+        ]
+    )
 
 
 def test_panther_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "PANTHER"
-    match_data = load_match_data(member_db, x_matches_input_dir)
-    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-    result_dict = xml_to_dict(result)
-    result_dict = parse_matches_dict(result_dict['matches'][0])
-    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                [
-                    'start', 'end', 'representative',
-                    'env-start', 'env-end', 'score', 'evalue',
-                    'hmm-start', 'hmm-end', 'hmm-length',
-                    'hmm-bounds', 'alignment', 'cigar-alignment'
-                ],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
-
-    tree = ET.ElementTree(x_protein_elm[1])
-    ET.indent(tree, space="\t", level=0)
-    tree.write((x_matches_output_dir / f"{member_db}.matches.xml"), encoding='utf-8')
+    compare_xml_matches(
+        member_db,
+        x_matches_input_dir,
+        x_matches_output_dir,
+        x_protein_elm,
+        [
+            'start', 'end', 'representative',
+            'env-start', 'env-end', 'score', 'evalue',
+            'hmm-start', 'hmm-end', 'hmm-length',
+            'hmm-bounds', 'alignment', 'cigar-alignment'
+        ]
+    )
 
 
 def test_pfam_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "PFAM"
-    match_data = load_match_data(member_db, x_matches_input_dir)
-    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-    result_dict = xml_to_dict(result)
-    result_dict = parse_matches_dict(result_dict['matches'][0])
-    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['start', 'end', 'representative'],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_xml_matches(
+        member_db,
+        x_matches_input_dir,
+        x_matches_output_dir,
+        x_protein_elm,
+        ['start', 'end', 'representative']
+    )
 
 
 def test_phobius_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "PHOBIUS"
-    match_data = load_match_data(member_db, x_matches_input_dir)
-    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-    result_dict = xml_to_dict(result)
-    result_dict = parse_matches_dict(result_dict['matches'][0])
-    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['start', 'end', 'representative'],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_xml_matches(
+        member_db,
+        x_matches_input_dir,
+        x_matches_output_dir,
+        x_protein_elm,
+        ['start', 'end', 'representative']
+    )
 
 
 def test_pirsf_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "PIRSF"
-    match_data = load_match_data(member_db, x_matches_input_dir)
-    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-    result_dict = xml_to_dict(result)
-    result_dict = parse_matches_dict(result_dict['matches'][0])
-    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                [
-                    'start', 'end', 'representative',
-                    'env-end', 'env-start', 'evalue', 'score',
-                    'hmm-start', 'hmm-end', 'hmm-length', 'hmm-bounds'
-                ],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_xml_matches(
+        member_db,
+        x_matches_input_dir,
+        x_matches_output_dir,
+        x_protein_elm,
+        [
+            'start', 'end', 'representative',
+            'env-end', 'env-start', 'evalue', 'score',
+            'hmm-start', 'hmm-end', 'hmm-length', 'hmm-bounds'
+        ]
+    )
 
 
 # def test_pirsr_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
@@ -625,83 +481,38 @@ def test_pirsf_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_el
 
 def test_prints_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "PRINTS"
-    match_data = load_match_data(member_db, x_matches_input_dir)
-    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-    result_dict = xml_to_dict(result)
-    result_dict = parse_matches_dict(result_dict['matches'][0])
-    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                [
-                    'motifNumber', 'pvalue', 'score',
-                    'start', 'end', 'representative'
-                ],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_xml_matches(
+        member_db,
+        x_matches_input_dir,
+        x_matches_output_dir,
+        x_protein_elm,
+        [
+            'motifNumber', 'pvalue', 'score',
+            'start', 'end', 'representative'
+        ]
+    )
 
 
 def test_prosite_pattern_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "PROSITE_PATTERNS"
-    match_data = load_match_data(member_db, x_matches_input_dir)
-    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-    result_dict = xml_to_dict(result)
-    result_dict = parse_matches_dict(result_dict['matches'][0])
-    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['start', 'end', 'alignment', 'cigar-alignment'],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_xml_matches(
+        member_db,
+        x_matches_input_dir,
+        x_matches_output_dir,
+        x_protein_elm,
+        ['start', 'end', 'alignment', 'cigar-alignment']
+    )
 
 
 def test_prosite_profile_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "PROSITE_PROFILES"
-    match_data = load_match_data(member_db, x_matches_input_dir)
-    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-    result_dict = xml_to_dict(result)
-    result_dict = parse_matches_dict(result_dict['matches'][0])
-    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['alignment', 'score', 'start', 'end'],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_xml_matches(
+        member_db,
+        x_matches_input_dir,
+        x_matches_output_dir,
+        x_protein_elm,
+        ['alignment', 'score', 'start', 'end']
+    )
 
 
 # def test_sfld_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
@@ -733,85 +544,39 @@ def test_prosite_profile_xml_match(x_matches_input_dir, x_matches_output_dir, x_
 
 def test_signalp_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "SIGNALP"
-    match_data = load_match_data(member_db, x_matches_input_dir)
-    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-    result_dict = xml_to_dict(result)
-    result_dict = parse_matches_dict(result_dict['matches'][0])
-
-    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                [
-                    'end', 'start', 'pvalue', 'cleavage_start',
-                    'cleavage_end', 'representative'
-                ],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_xml_matches(
+        member_db,
+        x_matches_input_dir,
+        x_matches_output_dir,
+        x_protein_elm,
+        [
+            'end', 'start', 'pvalue', 'cleavage_start',
+            'cleavage_end', 'representative'
+        ]
+    )
 
 
 def test_smart_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "SMART"
-    match_data = load_match_data(member_db, x_matches_input_dir)
-    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-    result_dict = xml_to_dict(result)
-    result_dict = parse_matches_dict(result_dict['matches'][0])
-    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                [
-                    'score', 'evalue', 'hmm-start', 'hmm-end',
-                    'hmm-len', 'hmm-bounds',
-                    'start', 'end', 'representative'
-                ],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_xml_matches(
+        member_db,
+        x_matches_input_dir,
+        x_matches_output_dir,
+        x_protein_elm,
+        [
+            'score', 'evalue', 'hmm-start', 'hmm-end',
+            'hmm-len', 'hmm-bounds',
+            'start', 'end', 'representative'
+        ]
+    )
 
 
 def test_superfamily_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "SUPERFAMILY"
-    match_data = load_match_data(member_db, x_matches_input_dir)
-    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-    result_dict = xml_to_dict(result)
-    result_dict = parse_matches_dict(result_dict['matches'][0])
-    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['start', 'end', 'representative'],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_xml_matches(
+        member_db,
+        x_matches_input_dir,
+        x_matches_output_dir,
+        x_protein_elm,
+        ['start', 'end', 'representative']
+    )
