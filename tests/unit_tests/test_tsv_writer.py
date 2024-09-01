@@ -110,14 +110,10 @@ def load_seq_matches_dict(member_db, seq_match_dir):
     return seq_match_dict
 
 
-def test_tsv_antifam_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir):
-    member_db = "ANTIFAM"
-    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
-    tsv_output.tsv_output(seq_matches, tsvout_path)
-
-    test_tsv_out = load_tsv_results(tsvout_path)
-    expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
-
+def compare_tsv_output(
+    test_tsv_out: dict[str, [dict[str, dict]]],
+    expected_output:  dict[str, [dict[str, dict]]]
+) -> None:
     for seq_id, member_dbs in test_tsv_out.items():
         assert seq_id in expected_output, f"seq_id {seq_id} not in expected output, {member_db}"
         for member_db, sig_accs in member_dbs.items():
@@ -132,6 +128,16 @@ def test_tsv_antifam_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputd
                         for key in ['start',  'end', 'md5', 'len', 'desc', 'score']
                     ), f"Mismatch in match details for {seq_id}, {member_db}, {sig_acc}, {position}"
 
+
+def test_tsv_antifam_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir):
+    member_db = "ANTIFAM"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_output(seq_matches, tsvout_path)
+
+    test_tsv_out = load_tsv_results(tsvout_path)
+    expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
+
+    compare_tsv_output(test_tsv_out, expected_output)
     tsvout_path.unlink()
 
 
@@ -143,20 +149,7 @@ def test_tsv_cdd_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir):
     test_tsv_out = load_tsv_results(tsvout_path)
     expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
 
-    for seq_id, member_dbs in test_tsv_out.items():
-        assert seq_id in expected_output, f"seq_id {seq_id} not in expected output, {member_db}"
-        for member_db, sig_accs in member_dbs.items():
-            assert member_db in expected_output[seq_id], f"member_db {member_db} not in expected_output[{seq_id}]"
-            for sig_acc, positions in sig_accs.items():
-                assert sig_acc in expected_output[seq_id][member_db], f"sig_acc {sig_acc} not in expected_output[{seq_id}][{member_db}]"
-                for position, match in positions.items():
-                    expected_match = expected_output[seq_id][member_db][sig_acc][position]
-                    assert position in expected_output[seq_id][member_db][sig_acc], f"position {position} not in expected_output[{seq_id}][{member_db}][{sig_acc}]"
-                    assert all(
-                        match[key] == expected_match[key]
-                        for key in ['start',  'end', 'md5', 'len', 'desc', 'score']
-                    ), f"Mismatch in match details for {seq_id}, {member_db}, {sig_acc}, {position}"
-
+    compare_tsv_output(test_tsv_out, expected_output)
     tsvout_path.unlink()
 
 
@@ -168,20 +161,7 @@ def test_tsv_coils_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir
     test_tsv_out = load_tsv_results(tsvout_path)
     expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
 
-    for seq_id, member_dbs in test_tsv_out.items():
-        assert seq_id in expected_output, f"seq_id {seq_id} not in expected output, {member_db}"
-        for member_db, sig_accs in member_dbs.items():
-            assert member_db in expected_output[seq_id], f"member_db {member_db} not in expected_output[{seq_id}]"
-            for sig_acc, positions in sig_accs.items():
-                assert sig_acc in expected_output[seq_id][member_db], f"sig_acc {sig_acc} not in expected_output[{seq_id}][{member_db}]"
-                for position, match in positions.items():
-                    expected_match = expected_output[seq_id][member_db][sig_acc][position]
-                    assert position in expected_output[seq_id][member_db][sig_acc], f"position {position} not in expected_output[{seq_id}][{member_db}][{sig_acc}]"
-                    assert all(
-                        match[key] == expected_match[key]
-                        for key in ['start',  'end', 'md5', 'len', 'desc', 'score']
-                    ), f"Mismatch in match details for {seq_id}, {member_db}, {sig_acc}, {position}"
-
+    compare_tsv_output(test_tsv_out, expected_output)
     tsvout_path.unlink()
 
 
@@ -193,20 +173,7 @@ def test_tsv_funfam_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdi
     test_tsv_out = load_tsv_results(tsvout_path)
     expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
 
-    for seq_id, member_dbs in test_tsv_out.items():
-        assert seq_id in expected_output, f"seq_id {seq_id} not in expected output, {member_db}"
-        for member_db, sig_accs in member_dbs.items():
-            assert member_db in expected_output[seq_id], f"member_db {member_db} not in expected_output[{seq_id}]"
-            for sig_acc, positions in sig_accs.items():
-                assert sig_acc in expected_output[seq_id][member_db], f"sig_acc {sig_acc} not in expected_output[{seq_id}][{member_db}]"
-                for position, match in positions.items():
-                    expected_match = expected_output[seq_id][member_db][sig_acc][position]
-                    assert position in expected_output[seq_id][member_db][sig_acc], f"position {position} not in expected_output[{seq_id}][{member_db}][{sig_acc}]"
-                    assert all(
-                        match[key] == expected_match[key]
-                        for key in ['start',  'end', 'md5', 'len', 'desc', 'score']
-                    ), f"Mismatch in match details for {seq_id}, {member_db}, {sig_acc}, {position}"
-
+    compare_tsv_output(test_tsv_out, expected_output)
     tsvout_path.unlink()
 
 
@@ -218,20 +185,7 @@ def test_tsv_gene3d_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdi
     test_tsv_out = load_tsv_results(tsvout_path)
     expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
 
-    for seq_id, member_dbs in test_tsv_out.items():
-        assert seq_id in expected_output, f"seq_id {seq_id} not in expected output, {member_db}"
-        for member_db, sig_accs in member_dbs.items():
-            assert member_db in expected_output[seq_id], f"member_db {member_db} not in expected_output[{seq_id}]"
-            for sig_acc, positions in sig_accs.items():
-                assert sig_acc in expected_output[seq_id][member_db], f"sig_acc {sig_acc} not in expected_output[{seq_id}][{member_db}]"
-                for position, match in positions.items():
-                    expected_match = expected_output[seq_id][member_db][sig_acc][position]
-                    assert position in expected_output[seq_id][member_db][sig_acc], f"position {position} not in expected_output[{seq_id}][{member_db}][{sig_acc}]"
-                    assert all(
-                        match[key] == expected_match[key]
-                        for key in ['start',  'end', 'md5', 'len', 'desc', 'score']
-                    ), f"Mismatch in match details for {seq_id}, {member_db}, {sig_acc}, {position}"
-
+    compare_tsv_output(test_tsv_out, expected_output)
     tsvout_path.unlink()
 
 
@@ -243,20 +197,7 @@ def test_tsv_hamap_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir
     test_tsv_out = load_tsv_results(tsvout_path)
     expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
 
-    for seq_id, member_dbs in test_tsv_out.items():
-        assert seq_id in expected_output, f"seq_id {seq_id} not in expected output, {member_db}"
-        for member_db, sig_accs in member_dbs.items():
-            assert member_db in expected_output[seq_id], f"member_db {member_db} not in expected_output[{seq_id}]"
-            for sig_acc, positions in sig_accs.items():
-                assert sig_acc in expected_output[seq_id][member_db], f"sig_acc {sig_acc} not in expected_output[{seq_id}][{member_db}]"
-                for position, match in positions.items():
-                    expected_match = expected_output[seq_id][member_db][sig_acc][position]
-                    assert position in expected_output[seq_id][member_db][sig_acc], f"position {position} not in expected_output[{seq_id}][{member_db}][{sig_acc}]"
-                    assert all(
-                        match[key] == expected_match[key]
-                        for key in ['start',  'end', 'md5', 'len', 'desc', 'score']
-                    ), f"Mismatch in match details for {seq_id}, {member_db}, {sig_acc}, {position}"
-
+    compare_tsv_output(test_tsv_out, expected_output)
     tsvout_path.unlink()
 
 
@@ -268,53 +209,175 @@ def test_tsv_mobidb_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdi
     test_tsv_out = load_tsv_results(tsvout_path)
     expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
 
-    for seq_id, member_dbs in test_tsv_out.items():
-        assert seq_id in expected_output, f"seq_id {seq_id} not in expected output, {member_db}"
-        for member_db, sig_accs in member_dbs.items():
-            assert member_db in expected_output[seq_id], f"member_db {member_db} not in expected_output[{seq_id}]"
-            for sig_acc, positions in sig_accs.items():
-                assert sig_acc in expected_output[seq_id][member_db], f"sig_acc {sig_acc} not in expected_output[{seq_id}][{member_db}]"
-                for position, match in positions.items():
-                    expected_match = expected_output[seq_id][member_db][sig_acc][position]
-                    assert position in expected_output[seq_id][member_db][sig_acc], f"position {position} not in expected_output[{seq_id}][{member_db}][{sig_acc}]"
-                    assert all(
-                        match[key] == expected_match[key]
-                        for key in ['start',  'end', 'md5', 'len', 'desc', 'score']
-                    ), f"Mismatch in match details for {seq_id}, {member_db}, {sig_acc}, {position}"
-
+    compare_tsv_output(test_tsv_out, expected_output)
     tsvout_path.unlink()
 
 
-# panther
-# phobius
-# pirsf
-# pirsr
-# prints
-# prosite pattersn
-# prosite profiles
-# sfld
-# signalp 
-# smart
-# superfamily
+def test_tsv_panther_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir):
+    member_db = "PANTHER"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_output(seq_matches, tsvout_path)
+
+    test_tsv_out = load_tsv_results(tsvout_path)
+    expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
+
+    compare_tsv_output(test_tsv_out, expected_output)
+    tsvout_path.unlink()
 
 
-def test_tsvpro_output(tsvout_input, tsvout_path, expected_tsvpro_out):
-    tsv_output.tsv_pro_output(tsvout_input, tsvout_path)
+def test_tsv_phobius_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir):
+    member_db = "PHOBIUS"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_output(seq_matches, tsvout_path)
 
-    test_tsv_out = load_tsvpro_results(tsvout_path)
+    test_tsv_out = load_tsv_results(tsvout_path)
+    expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
 
+    compare_tsv_output(test_tsv_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsv_pirsf_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir):
+    member_db = "PIRSF"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_output(seq_matches, tsvout_path)
+
+    test_tsv_out = load_tsv_results(tsvout_path)
+    expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
+
+    compare_tsv_output(test_tsv_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsv_pirsr_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir):
+    member_db = "PIRSR"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_output(seq_matches, tsvout_path)
+
+    test_tsv_out = load_tsv_results(tsvout_path)
+    expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
+
+    compare_tsv_output(test_tsv_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsv_prints_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir):
+    member_db = "PRINTS"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_output(seq_matches, tsvout_path)
+
+    test_tsv_out = load_tsv_results(tsvout_path)
+    expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
+
+    compare_tsv_output(test_tsv_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsv_prosite_patterns_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir):
+    member_db = "PROSITE_PATTERNS"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_output(seq_matches, tsvout_path)
+
+    test_tsv_out = load_tsv_results(tsvout_path)
+    expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
+
+    compare_tsv_output(test_tsv_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsv_prosite_profiles_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir):
+    member_db = "PROSITE_PROFILES"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_output(seq_matches, tsvout_path)
+
+    test_tsv_out = load_tsv_results(tsvout_path)
+    expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
+
+    compare_tsv_output(test_tsv_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsv_sfld_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir):
+    member_db = "SFLD"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_output(seq_matches, tsvout_path)
+
+    test_tsv_out = load_tsv_results(tsvout_path)
+    expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
+
+    compare_tsv_output(test_tsv_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsv_signalp_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir):
+    member_db = "SIGNALP"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_output(seq_matches, tsvout_path)
+
+    test_tsv_out = load_tsv_results(tsvout_path)
+    expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
+
+    compare_tsv_output(test_tsv_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsv_smart_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir):
+    member_db = "SMART"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_output(seq_matches, tsvout_path)
+
+    test_tsv_out = load_tsv_results(tsvout_path)
+    expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
+
+    compare_tsv_output(test_tsv_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsv_superfamily_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir):
+    member_db = "SUPERFAMILY"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_output(seq_matches, tsvout_path)
+
+    test_tsv_out = load_tsv_results(tsvout_path)
+    expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsv"))
+
+    compare_tsv_output(test_tsv_out, expected_output)
+    tsvout_path.unlink()
+
+
+def compare_tsvpro_output(
+    test_tsv_out: dict[str, dict[str, dict[str, str]]],
+    expected_tsvpro_out:  dict[str, dict[str, dict[str, str]]],
+) -> None:
     for seq_id, member_dbs in test_tsv_out.items():
         assert seq_id in expected_tsvpro_out, f"seq_id {seq_id} not in expected_tsvpro_out"
         for member_db, sig_accs in member_dbs.items():
-            assert member_db in expected_tsvpro_out[seq_id], f"member_db {member_db} not in expected_tsvpro_out[{seq_id}]"
+            assert member_db in expected_tsvpro_out[seq_id], \
+                f"member_db {member_db} not in expected_tsvpro_out[{seq_id}]"
             for sig_acc, positions in sig_accs.items():
-                assert sig_acc in expected_tsvpro_out[seq_id][member_db], f"sig_acc {sig_acc} not in expected_tsvpro_out[{seq_id}][{member_db}]"
+                assert sig_acc in expected_tsvpro_out[seq_id][member_db], \
+                    f"sig_acc {sig_acc} not in expected_tsvpro_out[{seq_id}][{member_db}]"
                 for position, match in positions.items():
                     expected_match = expected_tsvpro_out[seq_id][member_db][sig_acc][position]
-                    assert position in expected_tsvpro_out[seq_id][member_db][sig_acc], f"position {position} not in expected_tsvpro_out[{seq_id}][{member_db}][{sig_acc}]"
+                    assert position in expected_tsvpro_out[seq_id][member_db][sig_acc], \
+                        f"position {position} not in expected_tsvpro_out[{seq_id}][{member_db}][{sig_acc}]"
                     assert all(
                         match[key] == expected_match[key]
-                        for key in ['release', 'fragments', 'score', 'hmm_start', 'hmm_end', 'hmm_len', 'location_score', 'location_evalue']
+                        for key in [
+                            'release', 'fragments', 'score', 'hmm_start', 'hmm_end',
+                            'hmm_len', 'location_score', 'location_evalue'
+                        ]
                     ), f"Mismatch in match details for {seq_id}, {member_db}, {sig_acc}, {position}"
 
+
+
+def test_tsvpro_antifam_output(tsvout_input, tsvout_path, expected_tsvpro_outdir):
+    member_db = "ANTIFAM"
+    tsv_output.tsv_pro_output(tsvout_input, (expected_tsv_outputdir / f"{member_db}.tsvpro.tsv"))
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsv_results((expected_tsv_outputdir / f"{member_db}.tsvpro.tsv"))
+
+
+    compare_tsvpro_output(test_tsvpro_out, )
     tsvout_path.unlink()
