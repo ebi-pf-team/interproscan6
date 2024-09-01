@@ -147,9 +147,10 @@ def test_build_xml_protein(x_prot_seq_matches, x_outpath, x_expected_build_prote
         result_tree = ET.parse(f)
     result_tree = result_tree.getroot()
 
-    assert xml_to_dict(result_tree) == x_expected_build_protein, "Mistmatch in overall XML when input is protein sequences"
+    assert xml_to_dict(result_tree) == x_expected_build_protein, \
+        "Mistmatch in overall XML when input is protein sequences"
 
-    x_outpath.unlink()
+    # x_outpath.unlink()
 
 
 def test_build_xml_nucleic(x_nucleic_seq_matches, x_outpath, x_expected_build_nucleic, monkeypatch):
@@ -445,37 +446,6 @@ def test_mobidb_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_e
             f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
-def test_mobidb_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
-    member_db = "MOBIDB"
-    match_data = load_match_data(member_db, x_matches_input_dir)
-
-    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-    result_dict = xml_to_dict(result)
-    result_dict = parse_matches_dict(result_dict['matches'][0])
-    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['start', 'end', 'representative'],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
-
-    tree = ET.ElementTree(x_protein_elm[1])
-    ET.indent(tree, space="\t", level=0)
-    tree.write((x_matches_output_dir / f"{member_db}.matches.xml"), encoding='utf-8')
-
-
 def test_ncbifam_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "NCBIFAM"
     match_data = load_match_data(member_db, x_matches_input_dir)
@@ -542,6 +512,33 @@ def test_panther_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_
     tree = ET.ElementTree(x_protein_elm[1])
     ET.indent(tree, space="\t", level=0)
     tree.write((x_matches_output_dir / f"{member_db}.matches.xml"), encoding='utf-8')
+
+
+def test_pfam_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
+    member_db = "PFAM"
+    match_data = load_match_data(member_db, x_matches_input_dir)
+
+    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
+    result_dict = xml_to_dict(result)
+    result_dict = parse_matches_dict(result_dict['matches'][0])
+    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
+
+    for sig_acc, match_data in result_dict.items():
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
+        if sig_acc in expected_dict:
+            expected_data = expected_dict[sig_acc]
+            compare_signature_details(match_data, expected_data, sig_acc, member_db)
+            locations = match_data['locations']
+            expected_locations = expected_data['locations']
+            compare_location_details(
+                locations, expected_locations,
+                ['start', 'end', 'representative'],
+                sig_acc, member_db
+            )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_phobius_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
