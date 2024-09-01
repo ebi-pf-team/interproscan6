@@ -1,10 +1,12 @@
 """Test the python script that coordinates writing the output.
 
-These test are intened to be run from the root of the repository using:
+These test are intended to be run from the root of the repository using:
 python -m pytest -v
 """
 
+
 import pytest
+
 
 from interproscan.scripts.output import write_results
 
