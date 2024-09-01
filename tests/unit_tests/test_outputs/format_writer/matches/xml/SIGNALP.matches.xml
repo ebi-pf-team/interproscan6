@@ -7,7 +7,7 @@
 				</signature>
 				<model-ac>signal_peptide</model-ac>
 				<locations>
-					<analysis-location end="22" start="1" pvalue="0.9990582" cleavage_start="22" cleavage_end="23" representative="false">
+					<analysis-location end="22" start="1" pvalue="0.9991004" cleavage_start="22" cleavage_end="23" representative="false">
 						<location-fragments />
 					</analysis-location>
 				</locations>
