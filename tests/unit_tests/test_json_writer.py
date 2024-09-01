@@ -64,13 +64,13 @@ def j_prot_seq_matches(test_input_dir):
 
 
 def load_expected_match_data(member_db, matches_output_dir):
-    with open((matches_output_dir / f"{member_db.upper()}.match.json"), "r") as fh:
+    with open((matches_output_dir / f"{member_db}.match.json"), "r") as fh:
         match_list = json.load(fh)
     return match_list
 
 
 def load_match_data(member_db, matches_input_dir):
-    with open((matches_input_dir / f"{member_db.upper()}.match-data.json"), "r") as fh:
+    with open((matches_input_dir / f"{member_db}.match-data.json"), "r") as fh:
         match_data = json.load(fh)
     return match_data
 
@@ -98,7 +98,7 @@ def test_build_json_protein(j_prot_seq_matches, j_out_path, j_expected_protein, 
     assert len(result['results']) == len(j_expected_protein['results']), "Number of items in 'results' between the current and expected output do not match"
     # there aren't any matches to check for matching at this point because of the mocking
 
-    j_out_path.unlink()
+    # j_out_path.unlink()
 
 
 def test_build_json_nucleic(j_nucleic_seq_matches, j_out_path, j_expected_nucleic, monkeypatch):
@@ -183,12 +183,41 @@ def compare_location_details(
             ))
 
 
+def test_antifam_json_match(j_matches_input_dir, j_matches_output_dir):
+    member_db = "CDD"
+    match_data = load_match_data(member_db, j_matches_input_dir)
+    result_list = json_output.get_matches(match_data)
+    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
+
+    # check the number of matches is the same
+    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
+
+    # check the match data matches
+    result_dict = parse_matches_into_dict(result_list)
+    expected_dict = parse_matches_into_dict(expected_list)
+
+    for sig_acc, match_data in result_dict.items():
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
+        if sig_acc in expected_dict:
+            expected_data = expected_dict[sig_acc]
+            compare_signature_details(match_data, expected_data, sig_acc, member_db)
+            locations = match_data['locations']
+            expected_locations = expected_data['locations']
+            compare_location_details(
+                locations, expected_locations,
+                ['representative', 'evalue', 'score'],
+                sig_acc, member_db
+            )
+    
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+
+
 def test_cdd_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "CDD"
     match_data = load_match_data(member_db, j_matches_input_dir)
-
     result_list = json_output.get_matches(match_data)
-
     expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
     # check the number of matches is the same
@@ -252,9 +281,7 @@ def test_coils_json_match(j_matches_input_dir, j_matches_output_dir):
 def test_funfam_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "FUNFAM"
     match_data = load_match_data(member_db, j_matches_input_dir)
-
     result_list = json_output.get_matches(match_data)
-
     expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
     # check the number of matches is the same
@@ -289,9 +316,7 @@ def test_funfam_json_match(j_matches_input_dir, j_matches_output_dir):
 def test_gene3d_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "GENE3D"
     match_data = load_match_data(member_db, j_matches_input_dir)
-
     result_list = json_output.get_matches(match_data)
-
     expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
     # check the number of matches is the same
@@ -326,9 +351,7 @@ def test_gene3d_json_match(j_matches_input_dir, j_matches_output_dir):
 def test_hamap_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "HAMAP"
     match_data = load_match_data(member_db, j_matches_input_dir)
-
     result_list = json_output.get_matches(match_data)
-
     expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
     # check the number of matches is the same
@@ -359,9 +382,40 @@ def test_hamap_json_match(j_matches_input_dir, j_matches_output_dir):
 def test_mobidb_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "MOBIDB"
     match_data = load_match_data(member_db, j_matches_input_dir)
+    result_list = json_output.get_matches(match_data)
+    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
+
+    # check the number of matches is the same
+    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
+
+    # check the match data matches
+    result_dict = parse_matches_into_dict(result_list)
+    expected_dict = parse_matches_into_dict(expected_list)
+
+    for sig_acc, match_data in result_dict. items():
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
+        if sig_acc in expected_dict:
+            # compare the signature details
+            expected_data = expected_dict[sig_acc]
+            compare_signature_details(match_data, expected_data, sig_acc, member_db)
+            locations = match_data['locations']
+            expected_locations = expected_data['locations']
+            compare_location_details(
+                locations, expected_locations,
+                ['representative'],
+                sig_acc, member_db
+            )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+
+
+def test_ncbifam_json_match(j_matches_input_dir, j_matches_output_dir):
+    member_db = "NCBIFAM"
+    match_data = load_match_data(member_db, j_matches_input_dir)
 
     result_list = json_output.get_matches(match_data)
-
     expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
     # check the number of matches is the same
@@ -393,9 +447,7 @@ def test_mobidb_json_match(j_matches_input_dir, j_matches_output_dir):
 def test_panther_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "PANTHER"
     match_data = load_match_data(member_db, j_matches_input_dir)
-
     result_list = json_output.get_matches(match_data)
-
     expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
     # check the number of matches is the same
@@ -428,12 +480,43 @@ def test_panther_json_match(j_matches_input_dir, j_matches_output_dir):
             f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
-def test_phobius_json_match(j_matches_input_dir, j_matches_output_dir):
-    member_db = "PHOBIUS"
+def test_pfam_json_match(j_matches_input_dir, j_matches_output_dir):
+    member_db = "PFAM"
     match_data = load_match_data(member_db, j_matches_input_dir)
 
     result_list = json_output.get_matches(match_data)
+    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
+    # check the number of matches is the same
+    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
+
+    # check the match data matches
+    result_dict = parse_matches_into_dict(result_list)
+    expected_dict = parse_matches_into_dict(expected_list)
+
+    for sig_acc, match_data in result_dict. items():
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
+        if sig_acc in expected_dict:
+            # compare the signature details
+            expected_data = expected_dict[sig_acc]
+            compare_signature_details(match_data, expected_data, sig_acc, member_db)
+            locations = match_data['locations']
+            expected_locations = expected_data['locations']
+            compare_location_details(
+                locations, expected_locations,
+                ['representative'],
+                sig_acc, member_db
+            )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+
+
+def test_phobius_json_match(j_matches_input_dir, j_matches_output_dir):
+    member_db = "PHOBIUS"
+    match_data = load_match_data(member_db, j_matches_input_dir)
+    result_list = json_output.get_matches(match_data)
     expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
     # check the number of matches is the same
@@ -465,9 +548,7 @@ def test_phobius_json_match(j_matches_input_dir, j_matches_output_dir):
 def test_pirsf_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "PIRSF"
     match_data = load_match_data(member_db, j_matches_input_dir)
-
     result_list = json_output.get_matches(match_data)
-
     expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
     # check the number of matches is the same
@@ -503,9 +584,7 @@ def test_pirsf_json_match(j_matches_input_dir, j_matches_output_dir):
 def test_pirsr_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "PIRSR"
     match_data = load_match_data(member_db, j_matches_input_dir)
-
     result_list = json_output.get_matches(match_data)
-
     expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
     # check the number of matches is the same
@@ -541,9 +620,7 @@ def test_pirsr_json_match(j_matches_input_dir, j_matches_output_dir):
 def test_prints_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "PRINTS"
     match_data = load_match_data(member_db, j_matches_input_dir)
-
     result_list = json_output.get_matches(match_data)
-
     expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
     # check the number of matches is the same
@@ -575,9 +652,7 @@ def test_prints_json_match(j_matches_input_dir, j_matches_output_dir):
 def test_prosite_pattern_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "PROSITE_PATTERNS"
     match_data = load_match_data(member_db, j_matches_input_dir)
-
     result_list = json_output.get_matches(match_data)
-
     expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
     # check the number of matches is the same
@@ -609,9 +684,7 @@ def test_prosite_pattern_json_match(j_matches_input_dir, j_matches_output_dir):
 def test_prosite_profile_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "PROSITE_PROFILES"
     match_data = load_match_data(member_db, j_matches_input_dir)
-
     result_list = json_output.get_matches(match_data)
-
     expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
     # check the number of matches is the same
@@ -643,9 +716,7 @@ def test_prosite_profile_json_match(j_matches_input_dir, j_matches_output_dir):
 def test_sfld_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "SFLD"
     match_data = load_match_data(member_db, j_matches_input_dir)
-
     result_list = json_output.get_matches(match_data)
-
     expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
     # check the number of matches is the same
@@ -681,9 +752,7 @@ def test_sfld_json_match(j_matches_input_dir, j_matches_output_dir):
 def test_signalp_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "SIGNALP"
     match_data = load_match_data(member_db, j_matches_input_dir)
-
     result_list = json_output.get_matches(match_data)
-
     expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
     # check the number of matches is the same
@@ -718,9 +787,7 @@ def test_signalp_json_match(j_matches_input_dir, j_matches_output_dir):
 def test_smart_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "SMART"
     match_data = load_match_data(member_db, j_matches_input_dir)
-
     result_list = json_output.get_matches(match_data)
-
     expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
     # check the number of matches is the same
@@ -755,9 +822,7 @@ def test_smart_json_match(j_matches_input_dir, j_matches_output_dir):
 def test_superfamily_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "SUPERFAMILY"
     match_data = load_match_data(member_db, j_matches_input_dir)
-
     result_list = json_output.get_matches(match_data)
-
     expected_list = load_expected_match_data(member_db, j_matches_output_dir)
 
     # check the number of matches is the same
