@@ -30,9 +30,9 @@ def load_tsvpro_results(tsv_path: Path) -> dict[str, dict[str, str]]:
             hmm_len = data[13]
             location_score = data[16]
             location_evalue = data[17]
-            if mem_db not in results:
-                results[mem_db] = {}
-            if seq_id not in results[mem_db]:
+            if seq_id not in results:
+                results[seq_id] = {}
+            if mem_db not in results[seq_id]:
                 results[seq_id][mem_db] = {}
             if mem_db not in results[seq_id][mem_db]:
                 results[seq_id][mem_db][sig_acc] = {}
@@ -52,16 +52,16 @@ def load_tsvpro_results(tsv_path: Path) -> dict[str, dict[str, str]]:
 
 
 @pytest.fixture
+def expected_tsvpro_outdir(test_output_dir):
+    return test_output_dir / "format_writer/tsv-pro"
+
+
+@pytest.fixture
 def tsvout_path(test_output_dir):
     dirpath = test_output_dir / "temp"
     filepath = dirpath / "tsv.unittest.ips6.tsv"
     dirpath.mkdir(parents=True, exist_ok=True)
     return filepath
-
-
-@pytest.fixture
-def expected_tsvpro_outdir(test_output_dir):
-    return test_output_dir / "format_writer/tsv-pro"
 
 
 @pytest.fixture
@@ -101,12 +101,241 @@ def compare_tsvpro_output(
 
 
 
-def test_tsvpro_antifam_output(tsvout_input, tsvout_path, expected_tsvpro_outdir):
+def test_tsvpro_antifam_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
     member_db = "ANTIFAM"
-    tsv_output.tsv_pro_output(tsvout_input, (expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
 
     test_tsvpro_out = load_tsvpro_results(tsvout_path)
     expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
 
-    compare_tsvpro_output(test_tsvpro_out, )
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_cdd_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "CDD"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_coils_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "COILS"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_funfam_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "FUNFAM"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_gene3d_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "GENE3D"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_hamap_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "HAMAP"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_mobidb_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "MOBIDB"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_ncbifam_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "NCBIFAM"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_panther_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "PANTHER"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_pfam_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "PFAM"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_phobius_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "PHOBIUS"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_pirsf_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "PIRSF"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_pirsr_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "PIRSR"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_prints_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "PRINTS"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_prosite_patterns_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "PROSITE_PATTERNS"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_prosite_profiles_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "PROSITE_PROFILES"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_sfld_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "SFLD"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_signalp_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "SIGNALP"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_smart_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "SMART"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
+    tsvout_path.unlink()
+
+
+def test_tsvpro_superfamily_output(tsv_seq_match_dir, tsvout_path, expected_tsvpro_outdir):
+    member_db = "SUPERFAMILY"
+    seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
+    tsv_output.tsv_pro_output(seq_matches, tsvout_path)
+
+    test_tsvpro_out = load_tsvpro_results(tsvout_path)
+    expected_output = load_tsvpro_results((expected_tsvpro_outdir / f"{member_db}.tsvpro.tsv"))
+
+    compare_tsvpro_output(test_tsvpro_out, expected_output)
     tsvout_path.unlink()
