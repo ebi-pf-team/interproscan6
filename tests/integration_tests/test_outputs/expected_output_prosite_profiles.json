@@ -61,10 +61,6 @@
           "databaseName" : "MetaCyc",
           "id" : "PWY-8151"
         }, {
-          "name" : "Glyoxylate metabolism and glycine degradation",
-          "databaseName" : "Reactome",
-          "id" : "R-DRE-389661"
-        }, {
           "name" : "coniferyl alcohol 9-methyl ether biosynthesis",
           "databaseName" : "MetaCyc",
           "id" : "PWY-7643"
@@ -128,10 +124,6 @@
           "name" : "plastoquinol-9 biosynthesis II",
           "databaseName" : "MetaCyc",
           "id" : "PWY-6978"
-        }, {
-          "name" : "Glyoxylate metabolism and glycine degradation",
-          "databaseName" : "Reactome",
-          "id" : "R-HSA-389661"
         }, {
           "name" : "polymethylated quercetin glucoside biosynthesis II - quercetagetin series (Chrysosplenium)",
           "databaseName" : "MetaCyc",
@@ -229,14 +221,6 @@
           "databaseName" : "Reactome",
           "id" : "R-HSA-3214847"
         }, {
-          "name" : "Glyoxylate metabolism and glycine degradation",
-          "databaseName" : "Reactome",
-          "id" : "R-BTA-389661"
-        }, {
-          "name" : "Glyoxylate metabolism and glycine degradation",
-          "databaseName" : "Reactome",
-          "id" : "R-MMU-389661"
-        }, {
           "name" : "nevadensin biosynthesis",
           "databaseName" : "MetaCyc",
           "id" : "PWY-7298"
@@ -268,6 +252,10 @@
           "name" : "kavain biosynthesis",
           "databaseName" : "MetaCyc",
           "id" : "PWY-8103"
+        }, {
+          "name" : "Protein lipoylation",
+          "databaseName" : "Reactome",
+          "id" : "R-DME-9857492"
         }, {
           "name" : "corallopyronin A biosynthesis",
           "databaseName" : "MetaCyc",
@@ -437,6 +425,10 @@
           "databaseName" : "MetaCyc",
           "id" : "PWY-8379"
         }, {
+          "name" : "Protein lipoylation",
+          "databaseName" : "Reactome",
+          "id" : "R-BTA-9857492"
+        }, {
           "name" : "autoinducer AI-2 biosynthesis I",
           "databaseName" : "MetaCyc",
           "id" : "PWY-6153"
@@ -493,10 +485,6 @@
           "databaseName" : "MetaCyc",
           "id" : "PWY-7673"
         }, {
-          "name" : "Glyoxylate metabolism and glycine degradation",
-          "databaseName" : "Reactome",
-          "id" : "R-SPO-389661"
-        }, {
           "name" : "6-gingerol biosynthesis",
           "databaseName" : "MetaCyc",
           "id" : "PWY-6835"
@@ -508,14 +496,6 @@
           "name" : "lipoate biosynthesis and incorporation III (Bacillus)",
           "databaseName" : "MetaCyc",
           "id" : "PWY-6987"
-        }, {
-          "name" : "Glyoxylate metabolism and glycine degradation",
-          "databaseName" : "Reactome",
-          "id" : "R-DME-389661"
-        }, {
-          "name" : "Glyoxylate metabolism and glycine degradation",
-          "databaseName" : "Reactome",
-          "id" : "R-SCE-389661"
         }, {
           "name" : "spheroidene and spheroidenone biosynthesis",
           "databaseName" : "MetaCyc",
@@ -580,6 +560,10 @@
           "name" : "mycofactocin biosynthesis",
           "databaseName" : "MetaCyc",
           "id" : "PWY-8122"
+        }, {
+          "name" : "Protein lipoylation",
+          "databaseName" : "Reactome",
+          "id" : "R-RNO-9857492"
         }, {
           "name" : "brassicicene C biosynthesis",
           "databaseName" : "MetaCyc",
@@ -673,10 +657,6 @@
           "databaseName" : "MetaCyc",
           "id" : "PWY-7439"
         }, {
-          "name" : "Glyoxylate metabolism and glycine degradation",
-          "databaseName" : "Reactome",
-          "id" : "R-RNO-389661"
-        }, {
           "name" : "factor 420 biosynthesis I (archaea)",
           "databaseName" : "MetaCyc",
           "id" : "PWY-8112"
@@ -688,6 +668,10 @@
           "name" : "5,6-dimethylbenzimidazole biosynthesis II (anaerobic)",
           "databaseName" : "MetaCyc",
           "id" : "PWY-7729"
+        }, {
+          "name" : "Protein lipoylation",
+          "databaseName" : "Reactome",
+          "id" : "R-HSA-9857492"
         }, {
           "name" : "eupatolitin 3-O-glucoside biosynthesis",
           "databaseName" : "MetaCyc",
@@ -773,6 +757,10 @@
           "databaseName" : "MetaCyc",
           "id" : "PWY-8327"
         }, {
+          "name" : "Protein lipoylation",
+          "databaseName" : "Reactome",
+          "id" : "R-DRE-9857492"
+        }, {
           "name" : "beta-alanine betaine biosynthesis",
           "databaseName" : "MetaCyc",
           "id" : "PWY-4021"
@@ -853,10 +841,6 @@
           "databaseName" : "MetaCyc",
           "id" : "PWY-6942"
         }, {
-          "name" : "Glyoxylate metabolism and glycine degradation",
-          "databaseName" : "Reactome",
-          "id" : "R-PFA-389661"
-        }, {
           "name" : "viridicatumtoxin biosynthesis",
           "databaseName" : "MetaCyc",
           "id" : "PWY-7659"
@@ -921,13 +905,13 @@
           "databaseName" : "MetaCyc",
           "id" : "PWY-5301"
         }, {
-          "name" : "Glyoxylate metabolism and glycine degradation",
-          "databaseName" : "Reactome",
-          "id" : "R-CEL-389661"
-        }, {
           "name" : "prodigiosin biosynthesis",
           "databaseName" : "MetaCyc",
           "id" : "PWY-7547"
+        }, {
+          "name" : "Protein lipoylation",
+          "databaseName" : "Reactome",
+          "id" : "R-MMU-9857492"
         }, {
           "name" : "homogalacturonan biosynthesis",
           "databaseName" : "MetaCyc",
@@ -1916,20 +1900,20 @@
         "description" : "Carbohydrate-binding type-2 domain",
         "type" : "DOMAIN",
         "goXRefs" : [ {
-          "name" : "carbohydrate metabolic process",
+          "name" : "carbohydrate binding",
           "databaseName" : "GO",
-          "category" : "BIOLOGICAL_PROCESS",
-          "id" : "GO:0005975"
+          "category" : "MOLECULAR_FUNCTION",
+          "id" : "GO:0030246"
         }, {
           "name" : "hydrolase activity, hydrolyzing O-glycosyl compounds",
           "databaseName" : "GO",
           "category" : "MOLECULAR_FUNCTION",
           "id" : "GO:0004553"
         }, {
-          "name" : "carbohydrate binding",
+          "name" : "carbohydrate metabolic process",
           "databaseName" : "GO",
-          "category" : "MOLECULAR_FUNCTION",
-          "id" : "GO:0030246"
+          "category" : "BIOLOGICAL_PROCESS",
+          "id" : "GO:0005975"
         } ],
         "pathwayXRefs" : [ {
           "name" : "tunicamycin biosynthesis",

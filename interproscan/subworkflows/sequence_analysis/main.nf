@@ -100,9 +100,7 @@ workflow SEQUENCE_ANALYSIS {
     // Divide members up into their respective analysis pipelines/methods
     Channel.from(applications.split(','))
     .branch { member ->
-        release = params.members."${member}".release
         runner = params.members."${member}".runner
-        log.info "Running $member version $release"
 
         /*
         Member databases that use HMMER:
@@ -114,7 +112,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
                 [] // no post-processing
             ]
 
@@ -128,7 +125,6 @@ workflow SEQUENCE_ANALYSIS {
                 "gene3d",
                 params.members."gene3d".hmm,
                 params.members."gene3d".switches,
-                params.members."gene3d".release,
                 [
                     params.members."gene3d".postprocess.cath_resolve_hits_switches,
                     params.members."gene3d".postprocess.model2sf_map,
@@ -136,7 +132,6 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."gene3d".postprocess.assign_cath_superfamilies,
                     params.members."funfam".hmm,
                     params.members."funfam".switches,
-                    params.members."funfam".release,
                 ]
             ]
 
@@ -145,7 +140,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
                 [
                     params.members."${member}".postprocess.models_dir,
                     params.members."${member}".postprocess.pfsearchv3_switches,
@@ -157,7 +151,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
                 [] // no post-processing
             ]
 
@@ -166,7 +159,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
                 [
                     params.members."${member}".postprocess.data_dir,
                     params.members."${member}".postprocess.evalue,
@@ -179,7 +171,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
                 [
                     params.members."${member}".postprocess.min_length,
                     params.members."${member}".postprocess.seed,
@@ -193,7 +184,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
                 [
                     params.members."${member}".postprocess.data
                 ]
@@ -204,7 +194,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
                 [
                     params.members."${member}".postprocess.rules
                 ]
@@ -215,7 +204,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
                 [
                     params.members."${member}".postprocess.sites_annotation,
                     params.members."${member}".postprocess.hierarchy,
@@ -227,7 +215,6 @@ workflow SEQUENCE_ANALYSIS {
             "${member}",
             params.members."${member}".hmm,
             params.members."${member}".switches,
-            params.members."${member}".release,
             [
                 params.members."${member}".postprocess.bin,
                 params.members."${member}".postprocess.self_hits,
@@ -244,7 +231,6 @@ workflow SEQUENCE_ANALYSIS {
                 "${member}",
                 params.members."${member}".hmm,
                 params.members."${member}".switches,
-                params.members."${member}".release,
             ]
 
         /*
@@ -253,7 +239,6 @@ workflow SEQUENCE_ANALYSIS {
         cdd: member == "cdd"
             return [
                 params.members."${member}".library,
-                params.members."${member}".release,
                 params.members."${member}".switches,
                 [
                     params.members."${member}".postprocess.switches,
@@ -262,26 +247,22 @@ workflow SEQUENCE_ANALYSIS {
             ]
         coils: member == "coils"
             return [
-            params.members."${member}".release,
-            params.members."${member}".switches
+                params.members."${member}".switches
             ]
 
         mobidb: member == "mobidb"
             return [
-                params.members."${member}".release,
-                params.members."${member}".switches
+                params.members."${member}".switches,
+                params.members."${member}".release
             ]
 
         phobius: member == "phobius"
-            return [
-                params.members."${member}".release
-            ]
+            return []
 
         prints: member == 'prints'
             return [
                 params.members.prints.data.hierarchy,
                 params.members.prints.data.pval,
-                params.members.prints.release,
                 params.members.prints.switches
             ]
 
@@ -289,14 +270,12 @@ workflow SEQUENCE_ANALYSIS {
             return [
                 params.members."${member}".data,
                 params.members."${member}".evaluator,
-                params.members."${member}".release,
                 params.members."${member}".switches
             ]
 
         prosite_profiles: member == "prosite_profiles"
             return [
                 params.members."${member}".data,
-                params.members."${member}".release,
                 params.members."${member}".switches,
                 params.members."${member}".skip_flagged_profiles
             ]
@@ -314,9 +293,7 @@ workflow SEQUENCE_ANALYSIS {
 
             return [
                 params.signalp_mode,
-                params.members.signalp_euk.data.model_dir,
                 params.members.signalp_euk.data.organism,
-                params.members.signalp_euk.switches,
                 params.members.signalp_euk.data.pvalue,
                 params.members.signalp_euk.release
             ]
@@ -333,14 +310,23 @@ workflow SEQUENCE_ANALYSIS {
     // AntiFam
     runner_antifam_params = fasta.combine(member_params.antifam)
     ANTIFAM_HMMER_RUNNER(runner_antifam_params)
-    ANTIFAM_HMMER_PARSER(ANTIFAM_HMMER_RUNNER.out[0])  // hmmer.out path
+    ANTIFAM_HMMER_PARSER(
+        ANTIFAM_HMMER_RUNNER.out[0],  // hmmer.out path
+        ANTIFAM_HMMER_RUNNER.out[2]   // member db
+    )
 
     // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
     // These also run for FunFam as Gene3D must be run before FunFam
     runner_gene3d_params = fasta.combine(member_params.gene3d_funfam)
     GENE3D_HMMER_RUNNER(runner_gene3d_params)
-    GENE3D_HMMER_PARSER(GENE3D_HMMER_RUNNER.out[0])  // hmmer.out path
-    GENE3D_CATH_RESOLVE_HITS(GENE3D_HMMER_RUNNER.out)
+    GENE3D_HMMER_PARSER(
+        GENE3D_HMMER_RUNNER.out[0],  // hmmer.out path
+        GENE3D_HMMER_RUNNER.out[2]   // member db
+    )
+    GENE3D_CATH_RESOLVE_HITS(
+        GENE3D_HMMER_RUNNER.out[0], // hmmer.out path
+        GENE3D_HMMER_RUNNER.out[1]  // post-processing-params
+    )
     GENE3D_ADD_CATH_SUPERFAMILIES(
         GENE3D_CATH_RESOLVE_HITS.out, // cath-resolve-hits out file
         GENE3D_HMMER_RUNNER.out[1]    // post-processing-params
@@ -360,8 +346,14 @@ workflow SEQUENCE_ANALYSIS {
         GENE3D_FILTER_MATCHES.out[1],      // cath_superfamilies txt file
         applications                       // str listing selected applications
     )
-    FUNFAM_HMMER_PARSER(FUNFAM_HMMER_RUNNER.out[0])  // hmmer.out pathS - one per cath gene3d superfam
-    FUNFAM_CATH_RESOLVE_HITS(FUNFAM_HMMER_RUNNER.out)
+    FUNFAM_HMMER_PARSER(
+        FUNFAM_HMMER_RUNNER.out[0],  // hmmer.out pathS - one per cath gene3d superfam
+        FUNFAM_HMMER_RUNNER.out[2]   // member db
+    )
+    FUNFAM_CATH_RESOLVE_HITS(
+        FUNFAM_HMMER_RUNNER.out[0], // hmmer.out path
+        FUNFAM_HMMER_RUNNER.out[1]  // post-processing-params
+    )
     FUNFAM_FILTER_MATCHES(
         FUNFAM_HMMER_PARSER.out,           // add-superfams out file
         FUNFAM_CATH_RESOLVE_HITS.out,      // ips6 json
@@ -373,11 +365,12 @@ workflow SEQUENCE_ANALYSIS {
     HAMAP_HMMER_RUNNER(runner_hamap_params)
     HAMAP_HMMER_PARSER(
         HAMAP_HMMER_RUNNER.out[0],  // hmmer.out path
+        HAMAP_HMMER_RUNNER.out[2]   // member db
     )
     HAMAP_POST_PROCESSER(
         HAMAP_HMMER_RUNNER.out[1],  // post-processing-params
-        HAMAP_HMMER_RUNNER.out[2],  // path to fasta file
-        HAMAP_HMMER_RUNNER.out[3],  // hmmer .tbl file path
+        HAMAP_HMMER_RUNNER.out[3],  // path to fasta file
+        HAMAP_HMMER_RUNNER.out[4],  // hmmer .tbl file path
     )
     HAMAP_FILTER_MATCHES(
         HAMAP_HMMER_PARSER.out,     // internal IPS6 JSON
@@ -387,12 +380,18 @@ workflow SEQUENCE_ANALYSIS {
     // NCBIfam
     runner_hmmer_ncbifam_params = fasta.combine(member_params.ncbifam)
     NCBIFAM_HMMER_RUNNER(runner_hmmer_ncbifam_params)
-    NCBIFAM_HMMER_PARSER(NCBIFAM_HMMER_RUNNER.out[0])  // hmmer.out path
+    NCBIFAM_HMMER_PARSER(
+        NCBIFAM_HMMER_RUNNER.out[0],  // hmmer.out path
+        NCBIFAM_HMMER_RUNNER.out[2]   // member db
+    )
 
     // Panther (+ treegrafter + epa-ng)
     runner_panther_params = fasta.combine(member_params.panther)
     PANTHER_HMMER_RUNNER(runner_panther_params)
-    PANTHER_HMMER_PARSER(PANTHER_HMMER_RUNNER.out[0])  // hmmer.out path
+    PANTHER_HMMER_PARSER(
+        PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
+        PANTHER_HMMER_RUNNER.out[2]   // member db
+    )
     PANTHER_POST_PROCESSER(
         PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
         PANTHER_HMMER_RUNNER.out[1],  // post-processing-params
@@ -406,7 +405,10 @@ workflow SEQUENCE_ANALYSIS {
     // Pfam
     runner_hmmer_pfam_params = fasta.combine(member_params.pfam)
     PFAM_HMMER_RUNNER(runner_hmmer_pfam_params)
-    PFAM_HMMER_PARSER(PFAM_HMMER_RUNNER.out[0])  // hmmer.out path
+    PFAM_HMMER_PARSER(
+        PFAM_HMMER_RUNNER.out[0],  // hmmer.out path
+        PFAM_HMMER_RUNNER.out[2]   // member db
+    )
     PFAM_FILTER_MATCHES(
         PFAM_HMMER_PARSER.out,     // ips6 json
         PFAM_HMMER_RUNNER.out[1]   // post-processing-params
@@ -415,18 +417,22 @@ workflow SEQUENCE_ANALYSIS {
     // PIRSF (+ filter_ips6_matches.py for post-processing)
     runner_pirsf_params = fasta.combine(member_params.pirsf)
     PIRSF_HMMER_RUNNER(runner_pirsf_params)
-    PIRSF_HMMER_PARSER(PIRSF_HMMER_RUNNER.out[0])  // hmmer.out path
+    PIRSF_HMMER_PARSER(
+        PIRSF_HMMER_RUNNER.out[0],  // hmmer.out path
+        PIRSF_HMMER_RUNNER.out[2]   // member db
+    )
     PIRSF_FILTER_MATCHES(
         PIRSF_HMMER_PARSER.out,     // ips6 json
-        PIRSF_HMMER_RUNNER.out[1],  // hmmer dtbl file -- needed to get tlen value
-        PIRSF_HMMER_RUNNER.out[2]   // post-processing-params
+        PIRSF_HMMER_RUNNER.out[3],  // hmmer dtbl file -- needed to get tlen value
+        PIRSF_HMMER_RUNNER.out[1]   // post-processing-params
     )
 
     // PIRSR
     runner_pirsr_params = fasta.combine(member_params.pirsr)
     PIRSR_HMMER_RUNNER(runner_pirsr_params)
     PIRSR_HMMER_PARSER(
-        PIRSR_HMMER_RUNNER.out[0]  // out file
+        PIRSR_HMMER_RUNNER.out[0],  // out file
+        PIRSR_HMMER_RUNNER.out[2]   // member db
     )
     PIRSR_FILTER_MATCHES(
         PIRSR_HMMER_PARSER.out,  // ips6 json
@@ -436,14 +442,21 @@ workflow SEQUENCE_ANALYSIS {
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
     SFLD_HMMER_RUNNER(runner_sfld_params)
-    SFLD_HMMER_PARSER(SFLD_HMMER_RUNNER.out[0])
-    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out)   // hmmer.out, post-process params, alignment, dtbl file
+    SFLD_HMMER_PARSER(
+        SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
+        SFLD_HMMER_RUNNER.out[2]   // member db
+    )
+    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out)   // hmmer.out, post-process params, member db, alignment, dtbl file
     SFLD_FILTER_MATCHES(SFLD_HMMER_PARSER.out, SFLD_POST_PROCESSER.out)
 
     // SMART (HMMER2:hmmpfam + kinase filter)
     runner_smart_params = fasta.combine(member_params.smart)
     SMART_HMMER2_RUNNER(runner_smart_params)
-    HMMER2_PARSER(SMART_HMMER2_RUNNER.out)
+    HMMER2_PARSER(
+        SMART_HMMER2_RUNNER.out[0],  // hmmer.out path
+        SMART_HMMER2_RUNNER.out[1],  // fasta path
+        SMART_HMMER2_RUNNER.out[2]   // member db
+    )
     SMART_FILTER_MATCHES(
         HMMER2_PARSER.out,
         SMART_HMMER2_RUNNER.out[1],
@@ -455,11 +468,12 @@ workflow SEQUENCE_ANALYSIS {
     SUPERFAMILY_POST_PROCESSER(
         SUPERFAMILY_HMMER_RUNNER.out[0],  // hmmer.out path
         SUPERFAMILY_HMMER_RUNNER.out[1],  // post-processing-params
-        SUPERFAMILY_HMMER_RUNNER.out[2],  // fasta path
+        SUPERFAMILY_HMMER_RUNNER.out[3],  // fasta path
     )
     SUPERFAMILY_FILTER_MATCHES(
         SUPERFAMILY_POST_PROCESSER.out,
-        SUPERFAMILY_HMMER_RUNNER.out[3],  // hmm path
+        SUPERFAMILY_HMMER_RUNNER.out[4],  // hmm path
+        SUPERFAMILY_HMMER_RUNNER.out[2]   // member db
     )
 
     /*

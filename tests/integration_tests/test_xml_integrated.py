@@ -70,7 +70,7 @@ def test_xml_output(input_path, expected_output_path, current_output_path, appli
     expected = xml2dict(expected_output)
     current = xml2dict(current_output)
 
-    ignore_elements = ['representative', "sites"]
+    ignore_elements = []
     compare(expected, current, ignore_elements, "missing")
     compare(current, expected, ignore_elements, "extra")
 

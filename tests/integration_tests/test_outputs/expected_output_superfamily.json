@@ -183,6 +183,10 @@
           "databaseName" : "Reactome",
           "id" : "R-RNO-8849175"
         }, {
+          "name" : "UDP-N-acetylmuramoyl-pentapeptide biosynthesis II (lysine-containing)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6386"
+        }, {
           "name" : "seleno-amino acid biosynthesis (plants)",
           "databaseName" : "MetaCyc",
           "id" : "PWY-6936"
@@ -354,6 +358,10 @@
           "name" : "all trans undecaprenyl diphosphate biosynthesis",
           "databaseName" : "MetaCyc",
           "id" : "PWY-5816"
+        }, {
+          "name" : "UDP-N-acetylmuramoyl-pentapeptide biosynthesis I (meso-diaminopimelate containing)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6387"
         }, {
           "name" : "phosphinothricin tripeptide biosynthesis",
           "databaseName" : "MetaCyc",
@@ -1137,13 +1145,13 @@
           "databaseName" : "Reactome",
           "id" : "R-HSA-6804115"
         }, {
-          "name" : "Golgi Associated Vesicle Biogenesis",
-          "databaseName" : "Reactome",
-          "id" : "R-MMU-432722"
-        }, {
           "name" : "Resolution of Abasic Sites (AP sites)",
           "databaseName" : "Reactome",
           "id" : "R-DRE-73933"
+        }, {
+          "name" : "Golgi Associated Vesicle Biogenesis",
+          "databaseName" : "Reactome",
+          "id" : "R-MMU-432722"
         }, {
           "name" : "phytate degradation I",
           "databaseName" : "MetaCyc",
@@ -2534,13 +2542,13 @@
           "databaseName" : "Reactome",
           "id" : "R-HSA-6804115"
         }, {
-          "name" : "Golgi Associated Vesicle Biogenesis",
-          "databaseName" : "Reactome",
-          "id" : "R-MMU-432722"
-        }, {
           "name" : "Resolution of Abasic Sites (AP sites)",
           "databaseName" : "Reactome",
           "id" : "R-DRE-73933"
+        }, {
+          "name" : "Golgi Associated Vesicle Biogenesis",
+          "databaseName" : "Reactome",
+          "id" : "R-MMU-432722"
         }, {
           "name" : "phytate degradation I",
           "databaseName" : "MetaCyc",
@@ -3284,6 +3292,10 @@
           "databaseName" : "Reactome",
           "id" : "R-RNO-8849175"
         }, {
+          "name" : "UDP-N-acetylmuramoyl-pentapeptide biosynthesis II (lysine-containing)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6386"
+        }, {
           "name" : "seleno-amino acid biosynthesis (plants)",
           "databaseName" : "MetaCyc",
           "id" : "PWY-6936"
@@ -3455,6 +3467,10 @@
           "name" : "all trans undecaprenyl diphosphate biosynthesis",
           "databaseName" : "MetaCyc",
           "id" : "PWY-5816"
+        }, {
+          "name" : "UDP-N-acetylmuramoyl-pentapeptide biosynthesis I (meso-diaminopimelate containing)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6387"
         }, {
           "name" : "phosphinothricin tripeptide biosynthesis",
           "databaseName" : "MetaCyc",
@@ -3903,6 +3919,10 @@
           "databaseName" : "Reactome",
           "id" : "R-RNO-8849175"
         }, {
+          "name" : "UDP-N-acetylmuramoyl-pentapeptide biosynthesis II (lysine-containing)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6386"
+        }, {
           "name" : "seleno-amino acid biosynthesis (plants)",
           "databaseName" : "MetaCyc",
           "id" : "PWY-6936"
@@ -4074,6 +4094,10 @@
           "name" : "all trans undecaprenyl diphosphate biosynthesis",
           "databaseName" : "MetaCyc",
           "id" : "PWY-5816"
+        }, {
+          "name" : "UDP-N-acetylmuramoyl-pentapeptide biosynthesis I (meso-diaminopimelate containing)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6387"
         }, {
           "name" : "phosphinothricin tripeptide biosynthesis",
           "databaseName" : "MetaCyc",

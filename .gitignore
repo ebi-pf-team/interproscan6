@@ -1,10 +1,9 @@
 *.DS_Store
 .idea/
-.nextflow.log*
 .nextflow/
-data/
-docker_files/.nextflow.log
 *__pycache__*
-work/
-results/
-*signalp-6-package/
+data/
+tests/integration_tests/test_outputs/current_output.json
+tests/integration_tests/test_outputs/current_output.tsv-pro
+tests/integration_tests/temp_expected.json
+tests/integration_tests/temp_current.json

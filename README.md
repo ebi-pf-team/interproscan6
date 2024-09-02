@@ -63,27 +63,16 @@ update the paths for:
 
 Please provide absolute paths. You can use the `$projectDir` short cut to represent the path to the root directory of `InterProScan6`.
 
-2. Download InterPro data files (xref (entries, goterms and pathways)):
-
-    mkdir i6data
-    python interproscan6/data_xrefs/get_data_to_i6.py  # for devs
-
-This stores the InterPro data in the `data_xrefs/` directory.
-
-If you store these data in an alternative directory, please update the paths under the `xrefs` heading in the Nextflow configuration file (`./nextflow.config`).
-
-Please provide absolute paths. You can use the `$projectDir` short cut to represent the path to the root directory of `InterProScan6`.
-
-3. Build a docker `InterProScan6` base image (this includes all non-licensed dependencies including `HMMER`, `BLAST`, `BioPython`, `easel`, etc.)
+2. Build a docker `InterProScan6` base image (this includes all non-licensed dependencies including `HMMER`, `BLAST`, `BioPython`, `easel`, etc.)
 
     docker build -t interproscan6 .
 
-4. Build a docker `MobiDB` image (this includes the `idrpred` tool for MobiDB predictions). From the root of this repository:
+3. Build a docker `MobiDB` image (this includes the `idrpred` tool for MobiDB predictions). From the root of this repository:
 
     cd docker_files/mobidb
     docker build -t idrpred .
 
-5. [Optional] install licensed software
+4. [Optional] install licensed software
 
 By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
 because they contain licensed components. In order to activate these analyses please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
@@ -257,6 +246,9 @@ are automatially named after the input FASTA file.
 * `--pathways` - Optional, switch on lookup of corresponding Pathway annotation (IMPLIES - `lookup_file` is defined) [Boolean]
 * `--lookup_file` - Lookup of corresponding InterPro annotation in the TSV and GFF3 output formats.
 
+> [!TIP]
+> InterproScan6 parameters are prefixed with a double dash, `--` (e.g. `--input`), Nextflow parameters are prefixed with a single dash, `-` (e.g. `-resume`)
+
 ### Nextflow configuration
 
 Configure the `InterProScan6` utility operations by updating `./nextflow.config`:
@@ -414,14 +406,6 @@ cp docker_files/phobius/Dockerfile <PHOBIUS-DIR>/Dockerfile
 # with the terminal pointed at your local phobius dir
 docker image build -t phobius .
 ```
-5. Check the `subworkflows/sequence_analysis/members.config` file to make sure the `Phobius` version is correct.
-```
-    phobius {
-            release = "1.01" <---- update if necessary
-            runner = "phobius"
-        }
-```        
-
 
 # Citation
 
