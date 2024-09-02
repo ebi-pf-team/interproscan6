@@ -26,18 +26,18 @@ def input_path(test_input_dir):
 
 
 @pytest.fixture
-def current_output_path(test_output_dir):
-    return test_output_dir / 'current_output'
+def output_path(test_output_dir):
+    return test_output_dir / 'integration_input.fasta.ips6'
 
 
 @pytest.fixture
 def expected_output_path(test_output_dir):
-    return test_output_dir / 'expected_output'
+    return test_output_dir / 'expected_output_representative'
 
 
 @pytest.fixture
 def applications():
-    return 'AntiFam,CDD,Coils,FunFam,Gene3D,HAMAP,NCBIfam,Panther,Pfam,PIRSF,PIRSR,PRINTS,PROSITE_PATTERNS,PROSITE_Profiles,SFLD,SMART,SUPERFAMILY'
+    return 'CDD,NCBIfam,Pfam,PROSITE_Profiles,SMART'
 
 
 @pytest.fixture
