@@ -98,7 +98,7 @@ def test_build_json_protein(j_prot_seq_matches, j_out_path, j_expected_protein, 
     assert len(result['results']) == len(j_expected_protein['results']), "Number of items in 'results' between the current and expected output do not match"
     # there aren't any matches to check for matching at this point because of the mocking
 
-    # j_out_path.unlink()
+    j_out_path.unlink()
 
 
 def test_build_json_nucleic(j_nucleic_seq_matches, j_out_path, j_expected_nucleic, monkeypatch):
