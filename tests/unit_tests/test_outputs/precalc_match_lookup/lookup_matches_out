@@ -14,7 +14,6 @@
         {
           "start": 2,
           "end": 337,
-          "representative": "",
           "hmmStart": 1,
           "hmmEnd": 336,
           "hmmLength": 337,
@@ -33,7 +32,6 @@
         {
           "start": 2,
           "end": 337,
-          "representative": "",
           "hmmStart": 1,
           "hmmEnd": 336,
           "hmmLength": 337,
@@ -67,7 +65,6 @@
         {
           "start": 34,
           "end": 370,
-          "representative": "",
           "hmmStart": 9,
           "hmmEnd": 352,
           "hmmLength": 352,
@@ -101,7 +98,6 @@
         {
           "start": 4,
           "end": 260,
-          "representative": "",
           "hmmStart": 1,
           "hmmEnd": 253,
           "hmmLength": 255,
@@ -135,7 +131,6 @@
         {
           "start": 344,
           "end": 429,
-          "representative": "",
           "hmmStart": 1,
           "hmmEnd": 86,
           "hmmLength": 93,
@@ -154,7 +149,6 @@
         {
           "start": 344,
           "end": 429,
-          "representative": "",
           "hmmStart": 1,
           "hmmEnd": 86,
           "hmmLength": 93,
@@ -186,7 +180,6 @@
         {
           "start": 7,
           "end": 448,
-          "representative": "",
           "hmmStart": 1,
           "hmmEnd": 442,
           "hmmLength": 442,
@@ -205,7 +198,6 @@
         {
           "start": 7,
           "end": 448,
-          "representative": "",
           "hmmStart": 1,
           "hmmEnd": 442,
           "hmmLength": 442,
@@ -239,7 +231,6 @@
         {
           "start": 865,
           "end": 885,
-          "representative": "",
           "hmmStart": 2,
           "hmmEnd": 22,
           "hmmLength": 22,
@@ -271,7 +262,6 @@
         {
           "start": 224,
           "end": 847,
-          "representative": "",
           "hmmStart": 1,
           "hmmEnd": 545,
           "hmmLength": 546,
@@ -303,7 +293,6 @@
         {
           "start": 1,
           "end": 885,
-          "representative": "",
           "hmmStart": 1,
           "hmmEnd": 884,
           "hmmLength": 884,
@@ -337,7 +326,6 @@
         {
           "start": 5,
           "end": 353,
-          "representative": "",
           "hmmStart": 1,
           "hmmEnd": 350,
           "hmmLength": 350,
