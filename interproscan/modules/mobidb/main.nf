@@ -6,7 +6,7 @@ process MOBIDB_RUNNER {
     no switches needed for idrpred for now
     */
     input:
-    tuple path(fasta), val(release), val(switches)
+    tuple path(fasta), val(switches), val(release)
 
     output:
     path "mobidb_out.tsv"

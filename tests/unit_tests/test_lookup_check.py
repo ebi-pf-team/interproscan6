@@ -33,14 +33,17 @@ def test_lookup_check_main(parsed_seqs_path, lookup_check_out_dir, capsys, monke
     def mock_check_precalc(*args, **kwards):
         return (["MD5_1", "MD5_2"], None)
 
-    monkeypatch.setattr("sys.argv", ["lookup_check", str(parsed_seqs_path), "fake_url", 3])
+    output_file_path = str(lookup_check_out_dir / "check_lookup_current_output.json")
+    monkeypatch.setattr("sys.argv", ["lookup_check", str(parsed_seqs_path), "fake_url", 3, output_file_path])
     monkeypatch.setattr(lookup_check, "check_precalc", mock_check_precalc)
 
     with open((lookup_check_out_dir / "lookup_check_out_script.json"), "r") as fh:
         expected_output = json.load(fh)
 
     lookup_check.main()
-    captured_output = json.loads(capsys.readouterr().out)
+
+    with open(output_file_path, "r") as fh:
+        captured_output = json.load(fh)
 
     assert expected_output['matches'] == captured_output['matches']
     # the no_matches keys can store seqs in different orders so only check length

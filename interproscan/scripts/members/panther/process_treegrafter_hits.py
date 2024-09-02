@@ -93,7 +93,6 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]]) -> None:
 
         else:
             for signature_acc in ips6_data[_protein_id]:
-
                 if signature_acc not in hits[protein_id].signatures:
                     # signature hit did not parse TreeGrafter post-processing
                     continue
@@ -106,16 +105,16 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]]) -> None:
                         if signature_acc not in processed_ips6_data[_protein_id]:
                             processed_ips6_data[_protein_id][signature_acc] = copy(ips6_data[_protein_id][signature_acc])
                             processed_ips6_data[_protein_id][signature_acc]["locations"] = []
-                        
+
                         # Panther/Treegrafter only has one (the best) match per protein
                         for location in ips6_data[_protein_id][signature_acc]["locations"]:
-                            if panther_hit["ali_start"] == location["start"] and \
-                                panther_hit["ali_end"] == location["end"] and \
-                                panther_hit["hmm_start"] == location["hmmStart"] and \
-                                panther_hit["hmm_end"] == location["hmmEnd"] and \
+                            if int(panther_hit["ali_start"]) == location["start"] and \
+                                int(panther_hit["ali_end"]) == location["end"] and \
+                                int(panther_hit["hmm_start"]) == location["hmmStart"] and \
+                                int(panther_hit["hmm_end"]) == location["hmmEnd"] and \
                                 panther_hit["env_start"] == location["envelopeStart"] and \
                                 panther_hit["env_end"] == location["envelopeEnd"]:
-                                
+
                                 processed_ips6_data[_protein_id][signature_acc]["locations"] = [{
                                     "start": panther_hit["ali_start"],
                                     "end": panther_hit["ali_end"],
@@ -129,7 +128,6 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]]) -> None:
                                     "score": panther_hit["score"],
                                     "envelopeStart": panther_hit["env_start"],
                                     "envelopeEnd": panther_hit["env_end"],
-                                    "postProcessed": location["postProcessed"],
                                     "alignment": location["alignment"],
                                     "cigar_alignment": location["cigar_alignment"]
                                 }]

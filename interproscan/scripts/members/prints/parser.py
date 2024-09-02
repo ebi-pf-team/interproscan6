@@ -2,7 +2,6 @@ import json
 import re
 import sys
 
-
 SUMMARYPATTERN = re.compile(r"^(\w+)\s+(\w+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+([A-Za-z0-9\s\-\/\(\)\,\'\.\|\+\_\:\;]+?)\s+(\w+)\s*$")
 PRINTPATTERN = re.compile(r"^(\w+)\s+(\w+)\s+(\d+)\s+(of\s+\d+)\s+([\d\.]+)\s+([\d\.]+)\s+(\d+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+([\d\.]*\d+e[+-]?\d+|[\d\.]+)\s+([Ii.]+)\s*$")
 MOTIFPATTERN = re.compile(r"^(\w+)\s+(\w+)\s+(\d+)\s+(of\s+\d+)\s+([\d\.]+)\s+(\d+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+(#*[a-zA-Z]+#*)\s+(\d+)\s+(\d+)\s+([-]?\d+)\s*(\d)\s*$")
@@ -61,7 +60,6 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
     '''
     matches = {}
     protein_id = ""
-    version = prints_out.split("._.")[0]
     with open(prints_out) as f:
         for line in f:
             if line.startswith("Sn; "):
@@ -89,7 +87,6 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
                         match = {"accession": model_acc,
                                  "name": fingerprint,
                                  "member_db": "PRINTS",
-                                 "version": version,
                                  "evalue": evalue,
                                  "graphscan": graphscan,
                                  "model-ac": model_acc,
