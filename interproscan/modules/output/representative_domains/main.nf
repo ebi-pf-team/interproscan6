@@ -9,6 +9,8 @@ process REPRESENTATIVE_DOMAINS {
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/output/representative_domains.py ${matches} > repr_domains_${matches}
+    python3 $projectDir/interproscan/scripts/output/representative_domains.py \\
+    ${matches} \\
+    repr_domains_${matches}
     """
 }

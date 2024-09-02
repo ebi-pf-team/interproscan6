@@ -214,10 +214,14 @@ def _get_fragments(pos_start: int, pos_end: int, fragments: str) -> list[dict]:
 
 
 def main():
+    """CL input:
+    0. Str repr of a list of paths to internal IPS6 JSON files
+    1. Str repr of the path for the output file"""
     args = sys.argv[1:]
     matches_path = args[0]
     matches_with_repr = add_representative_domains(matches_path)
-    print(json.dumps(matches_with_repr, indent=2))
+    with open(args[1], "w") as fh:
+        json.dump(matches_with_repr, fh)
 
 
 if __name__ == '__main__':
