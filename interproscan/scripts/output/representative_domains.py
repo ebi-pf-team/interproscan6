@@ -25,9 +25,10 @@ def add_representative_domains(matches_path: str) -> list[dict]:
         domains = []
         for acc, info in matches_info.items():
             member_db = info["member_db"]
+            match_type, rank = info["entry"]["representative"].values()
             for location in info["locations"]:
                 location["representative"] = False
-                if member_db not in REPR_DOM_DATABASES:
+                if member_db not in REPR_DOM_DATABASES or not match_type:
                     continue
 
                 pos_start = location["start"]
@@ -47,17 +48,17 @@ def add_representative_domains(matches_path: str) -> list[dict]:
                     "end": pos_end,
                     "frag": frags_str,
                     "fragments": _get_fragments(pos_start, pos_end, frags_str),
-                    "rank": REPR_DOM_DATABASES.index(member_db)
+                    "rank": int(rank)
                 })
 
-            if domains:
-                repr_domains = _select_repr_domains(domains)
-                for representative in repr_domains:
-                    repr_acc = representative["signature"]
-                    for location in matches_info[repr_acc]["locations"]:
-                        if location["start"] == representative["start"] and location["end"] == representative["end"]:
-                            location["representative"] = True
-                            break
+        if domains:
+            repr_domains = _select_repr_domains(domains)
+            for representative in repr_domains:
+                repr_acc = representative["signature"]
+                for location in matches_info[repr_acc]["locations"]:
+                    if location["start"] == representative["start"] and location["end"] == representative["end"]:
+                        location["representative"] = True
+                        break
     return matches
 
 
