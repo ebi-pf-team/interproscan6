@@ -15,11 +15,8 @@ process WRITE_RESULTS {
 
     script:
     """
-    python3 -c "import json, sys; d = {}; [d.update(json.load(open(f))) for f in sys.argv[1:]]; print(json.dumps(d))" \\
-     ${sequences.join(" ")} > sequences_hash.json
-
     python3 $projectDir/interproscan/scripts/output/write_results.py \\
-        sequences_hash.json \\
+        ${sequences} \\
         ${matches} \\
         ${format} \\
         ${file_name} \\
