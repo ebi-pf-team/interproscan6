@@ -8,11 +8,19 @@ python -m pytest -v
 """
 
 import json
+import re
+
 import xml.etree.ElementTree as ET
 
 import pytest
 
 from interproscan.scripts.output.format_writer import xml_output
+
+
+PIRSR_SITE_LOCATION = re.compile(r"'end':\s(\d+),\s'residue':\s'(\D|\[\D+\])',\s'start':\s(\d+)")
+PIRSR_SITES_REGEX = re.compile(r"'description':\s'(.*?)',\s'group':\s(\d+),\s'hmmEnd':\s(\d+),\s'hmmStart':\s(\d+),\s'label':\s(.*?),\s'numLocations':\s(\d+),\s'siteLocations':\s(\[\{.*?\}\])")
+SFLD_SITE_LOCATION = re.compile(r"\{'start':\s(\d+),\s'end':\s(\d+),\s'residue':\s'(\D)'\}")
+SFLD_SITES_REGEX = re.compile(r"'description':\s'(.*?)',\s'group':\s(\d+),\s'hmmEnd':\s(\d+),\s'hmmStart':\s(\d+),\s'label':\s(.*?),\s'numLocations':\s(\d+),\s'siteLocations':\s(\[\{.*?'\}\])")
 
 
 @pytest.fixture
@@ -111,8 +119,9 @@ def parse_matches_dict(matches: list[dict[str, dict]]) -> dict[str, dict[str, di
             }
             for location in signature['locations']:
                 new_location = {}
-                for key in location['analysis-location'][0]['attributes']:
-                    new_location[key] = location['analysis-location'][0]['attributes'][key]
+                if 'analysis-location' in location:
+                    for key in location['analysis-location'][0]['attributes']:
+                        new_location[key] = location['analysis-location'][0]['attributes'][key]
                 match_dict[sig_acc]['locations'].append(new_location)
 
     return match_dict
@@ -150,7 +159,7 @@ def test_build_xml_protein(x_prot_seq_matches, x_outpath, x_expected_build_prote
     assert xml_to_dict(result_tree) == x_expected_build_protein, \
         "Mistmatch in overall XML when input is protein sequences"
 
-    # x_outpath.unlink()
+    x_outpath.unlink()
 
 
 def test_build_xml_nucleic(x_nucleic_seq_matches, x_outpath, x_expected_build_nucleic, monkeypatch):
@@ -444,39 +453,97 @@ def test_pirsf_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_el
     )
 
 
-# def test_pirsr_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
-#     member_db = "PIRSR"
-#     match_data = load_match_data(member_db, x_matches_input_dir)
+def test_pirsr_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
+    member_db = "PIRSR"
+    match_data = load_match_data(member_db, x_matches_input_dir)
 
-#     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-#     result_dict = xml_to_dict(result)
-#     result_dict = parse_matches_dict(result_dict['matches'][0])
-#     expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
+    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
+    result_dict = xml_to_dict(result)
+    result_dict = parse_matches_dict(result_dict['matches'][0])
+    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
 
-#     for sig_acc, match_data in result_dict.items():
-#         assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-#         if sig_acc in expected_dict:
-#             expected_data = expected_dict[sig_acc]
-#             compare_signature_details(match_data, expected_data, sig_acc, member_db)
-#             locations = match_data['locations']
-#             expected_locations = expected_data['locations']
-#             compare_location_details(
-#                 locations, expected_locations,
-#                 [
-#                     'start', 'end', 'representative',
-#                     'env-end', 'env-start', 'evalue', 'score',
-#                     'hmm-start', 'hmm-end', 'hmm-length', 'hmm-bounds'
-#                 ],
-#                 sig_acc, member_db
-#             )
+    for sig_acc, match_data in result_dict.items():
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
+        if sig_acc in expected_dict:
+            expected_data = expected_dict[sig_acc]
+            compare_signature_details(match_data, expected_data, sig_acc, member_db)
+            locations = match_data['locations']
+            expected_locations = expected_data['locations']
 
-#     for sig_acc, match_data in expected_dict.items():
-#         assert sig_acc in result_dict, \
-#             f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+            for location in locations:
+                if 'sites' not in location:
+                    continue
+                for rsult_site in location['sites']:
+                    site_found = False
+                    # rsult_site is a dict {'description':.., 'group':.., 'hmmEnd':....}
+                    
+                    for xpctd_location in expected_locations:
+                        # xpcted_location is a str rerpr of the rsult_site dict
+                        expected_sites = PIRSR_SITES_REGEX.findall(xpctd_location['sites'])
+                        for expected_site in expected_sites:
+                            # expected_site is a tuple
+                            if int(rsult_site['hmmStart']) == int(expected_site[3]) and \
+                                int(rsult_site['hmmEnd']) == int(expected_site[2]) and \
+                                rsult_site['description'].strip() == expected_site[0].strip():
+                                site_found = True
+                                assert str(rsult_site['group']) == expected_site[1], \
+                                    (
+                                        "Mismatch site 'group' value for site hmmStart:"
+                                        f"{rsult_site['hmmStart']}, hmmEnd:{rsult_site['hmmEnd']},"
+                                        f"{sig_acc}, {member_db}"
+                                    )
+                                assert str(rsult_site['label']) == expected_site[4].strip("'"), \
+                                    (
+                                        "Mismatch site 'label' value for site hmmStart:"
+                                        f"{rsult_site['hmmStart']}, hmmEnd:{rsult_site['hmmEnd']},"
+                                        f"{sig_acc}, {member_db}"
+                                    )
+                                assert rsult_site['numLocations'] == int(expected_site[5]), \
+                                    (
+                                        "Mismatch site number of locations for site hmmStart:"
+                                        f"{rsult_site['hmmStart']}, hmmEnd:{rsult_site['hmmEnd']},"
+                                        f"{sig_acc}, {member_db}"
+                                    )
 
-#     tree = ET.ElementTree(x_protein_elm[1])
-#     ET.indent(tree, space="\t", level=0)
-#     tree.write((x_matches_output_dir / f"{member_db}.matches.xml"), encoding='utf-8')
+                                # check the site locations
+                                expected_site_locations = PIRSR_SITE_LOCATION.findall(expected_site[-1])
+                                for r_sloc in rsult_site['siteLocations']:
+                                    site_loc_found = False
+                                    for ex_sloc in expected_site_locations:
+                                        if str(r_sloc['start']) == str(ex_sloc[2]) and \
+                                            str(r_sloc['end']) == str(ex_sloc[0]) and \
+                                            r_sloc['residue'] == ex_sloc[1]:
+                                            site_loc_found = True
+                                    if not site_loc_found:
+                                        pytest.fail(
+                                            "Could not find site location in current results ("
+                                            f"'{r_sloc['start']}', '{r_sloc['end']}', "
+                                            f"'{r_sloc['residue']}') in expected results"
+                                        )
+                                for ex_sloc in expected_site_locations:
+                                    site_loc_found = False
+                                    for r_sloc in rsult_site['siteLocations']:
+                                        if str(r_sloc['start']) == str(ex_sloc[2]) and \
+                                            str(r_sloc['end']) == str(ex_sloc[0]) and \
+                                            r_sloc['residue'] == ex_sloc[1]:
+                                            site_loc_found = True
+                                    if not site_loc_found:
+                                        pytest.fail(
+                                            "Could not find site location in current results ("
+                                            f"'{r_sloc['start']}', '{r_sloc['end']}', "
+                                            f"'{r_sloc['residue']}') in expected results"
+                                        )
+                    if not site_found:
+                        pytest.fail(
+                            f"Result site '{rsult_site['description']}' with "
+                            f"hmmStart {rsult_site['hmmStart']} and hmmEnd "
+                            f"{rsult_site['hmmEnd']} for {sig_acc}, {member_db}, "
+                            "not found in expected results"
+                        )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_prints_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
@@ -515,31 +582,94 @@ def test_prosite_profile_xml_match(x_matches_input_dir, x_matches_output_dir, x_
     )
 
 
-# def test_sfld_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
-#     member_db = "SFLD"
-#     match_data = load_match_data(member_db, x_matches_input_dir)
+def test_sfld_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
+    member_db = "SFLD"
+    match_data = load_match_data(member_db, x_matches_input_dir)
 
-#     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
-#     result_dict = xml_to_dict(result)
-#     result_dict = parse_matches_dict(result_dict['matches'][0])
-#     expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
+    result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
+    result_dict = xml_to_dict(result)
+    result_dict = parse_matches_dict(result_dict['matches'][0])
+    expected_dict = load_expected_match_data(member_db, x_matches_output_dir)
 
-#     for sig_acc, match_data in result_dict.items():
-#         assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-#         if sig_acc in expected_dict:
-#             expected_data = expected_dict[sig_acc]
-#             compare_signature_details(match_data, expected_data, sig_acc, member_db)
-#             locations = match_data['locations']
-#             expected_locations = expected_data['locations']
-#             compare_location_details(
-#                 locations, expected_locations,
-#                 ['alignment', 'score', 'start', 'end'],
-#                 sig_acc, member_db
-#             )
+    for sig_acc, match_data in result_dict.items():
+        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
+        if sig_acc in expected_dict:
+            expected_data = expected_dict[sig_acc]
+            compare_signature_details(match_data, expected_data, sig_acc, member_db)
+            locations = match_data['locations']
+            expected_locations = expected_data['locations']
 
-#     for sig_acc, match_data in expected_dict.items():
-#         assert sig_acc in result_dict, \
-#             f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+            for location in locations:
+                for rsult_site in location['sites']:
+                    site_found = False
+                    # rsult_site is a dict {'description':.., 'group':.., 'hmmEnd':....}
+                    
+                    for xpctd_location in expected_locations:
+                        # xpcted_location is a str rerpr of the rsult_site dict
+                        expected_sites = SFLD_SITES_REGEX.findall(xpctd_location['sites'])
+                        for expected_site in expected_sites:
+                            # expected_site is a tuple
+                            if int(rsult_site['hmmStart']) == int(expected_site[3]) and \
+                                int(rsult_site['hmmEnd']) == int(expected_site[2]) and \
+                                rsult_site['description'] == expected_site[0]:
+                                site_found = True
+                                assert str(rsult_site['group']) == expected_site[1], \
+                                    (
+                                        "Mismatch site 'group' value for site hmmStart:"
+                                        f"{rsult_site['hmmStart']}, hmmEnd:{rsult_site['hmmEnd']},"
+                                        f"{sig_acc}, {member_db}"
+                                    )
+                                assert str(rsult_site['label']) == expected_site[4], \
+                                    (
+                                        "Mismatch site 'label' value for site hmmStart:"
+                                        f"{rsult_site['hmmStart']}, hmmEnd:{rsult_site['hmmEnd']},"
+                                        f"{sig_acc}, {member_db}"
+                                    )
+                                assert rsult_site['numLocations'] == int(expected_site[5]), \
+                                    (
+                                        "Mismatch site number of locations for site hmmStart:"
+                                        f"{rsult_site['hmmStart']}, hmmEnd:{rsult_site['hmmEnd']},"
+                                        f"{sig_acc}, {member_db}"
+                                    )
+                                
+                                # check the site locations
+                                expected_site_locations = SFLD_SITE_LOCATION.findall(expected_site[-1])
+                                for r_sloc in rsult_site['siteLocations']:
+                                    site_loc_found = False
+                                    for ex_sloc in expected_site_locations:
+                                        if r_sloc['start'] == int(ex_sloc[0]) and \
+                                            r_sloc['end'] == int(ex_sloc[1]) and \
+                                            r_sloc['residue'] == ex_sloc[2]:
+                                            site_loc_found = True
+                                    if not site_loc_found:
+                                        pytest.fail(
+                                            "Could not find site location in current results ("
+                                            f"'{r_sloc['start']}', '{r_sloc['end']}', "
+                                            f"'{r_sloc['residue']}') in expected results"
+                                        )
+                                for ex_sloc in expected_site_locations:
+                                    site_loc_found = False
+                                    for r_sloc in rsult_site['siteLocations']:
+                                        if r_sloc['start'] == int(ex_sloc[0]) and \
+                                            r_sloc['end'] == int(ex_sloc[1]) and \
+                                            r_sloc['residue'] == ex_sloc[2]:
+                                            site_loc_found = True
+                                    if not site_loc_found:
+                                        pytest.fail(
+                                            "Could not find site location in current results ("
+                                            f"'{r_sloc['start']}', '{r_sloc['end']}', "
+                                            f"'{r_sloc['residue']}') in expected results"
+                                        )
+                    if not site_found:
+                        pytest.fail(
+                            f"Result site with hmmStart {rsult_site['hmmStart']} and hmmEnd "
+                            f"{rsult_site['hmmEnd']} for {sig_acc}, {member_db}, "
+                            "not found in expected results"
+                        )
+
+    for sig_acc, match_data in expected_dict.items():
+        assert sig_acc in result_dict, \
+            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
 
 
 def test_signalp_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
