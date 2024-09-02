@@ -2,7 +2,7 @@ import json
 import sys
 
 
-def parse(input_file: str) -> dict:
+def parse(input_file: str, release: str) -> dict:
     matches = {}
     with open(input_file, 'r') as reader:
         for line in reader:
@@ -21,6 +21,7 @@ def parse(input_file: str) -> dict:
                 matches[sequence_id] = {
                     "mobidb": {
                         "member_db": "mobidb",
+                        "version": release,
                         "accession": "mobidb",
                         "name": "disorder_prediction",
                         "description": "consensus disorder prediction",
@@ -40,7 +41,7 @@ def main():
     1. release number
     2. Str repr of path to output file"""
     args = sys.argv[1:]
-    matches = parse(args[0])
+    matches = parse(args[0], args[1])
 
     with open(args[2], "w") as fh:
         json.dump(matches, fh)

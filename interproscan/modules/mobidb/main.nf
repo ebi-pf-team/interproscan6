@@ -10,6 +10,7 @@ process MOBIDB_RUNNER {
 
     output:
     path "mobidb_out.tsv"
+    val release
 
     script:
     """
@@ -23,6 +24,7 @@ process MOBIDB_PARSER {
 
     input:
     path mobidb_out
+    val release
 
     output:
     path "mobidb_parsed.json"
