@@ -18,6 +18,7 @@ def ar_input_paths(test_input_dir):
     hamap = input_dir / "hamap_matches.json"
     return [cdd, hamap]
 
+
 @pytest.fixture
 def ar_expected_output(test_output_dir):
     _path =  test_output_dir / "aggregate_results/aggregated_results.json"
