@@ -14,11 +14,10 @@ SITE_LINE_PATTERN = re.compile(r"^(\d+)\s+(\S+)\s+(\S+)\s+(.+?)\s+(\S+)\s+(\d+)\
 MOTIF_LINE_PATTERN = re.compile(r"^\d+\s+\w+\_\d+\s+\w+\s+\w+\s+\w+\s+\d+$")
 
 
-def parse_cdd(rpsblast_processed: Path, release: str):
+def parse_cdd(rpsblast_processed: Path):
     """Parse rpsblast_processed file
 
     :param rpsblast_processed: Path to rpsblast_processed file
-    :param release: release version of CDD
     """
     matches = {}  # prot seq id: [{domain data, 'sites': {[sites]}}]
     protein_identifier = ""
@@ -66,7 +65,6 @@ def parse_cdd(rpsblast_processed: Path, release: str):
                             "accession": signature_accession,
                             "name": _line.group(10),
                             "member_db": "CDD",
-                            "version": release,
                             "model-ac": signature_accession,
                         }
 
@@ -120,12 +118,11 @@ def parse_cdd(rpsblast_processed: Path, release: str):
 def main():
     """CL input:
     0. Str repr of path to the rpsblast processed file
-    1. release
-    2. Str repr of path for the output file
+    1. Str repr of path for the output file
     """
     args = sys.argv[1:]
-    matches = parse_cdd(args[0], args[1])
-    with open(args[2], "w") as fh:
+    matches = parse_cdd(args[0])
+    with open(args[1], "w") as fh:
         json.dump(matches, fh)
 
 

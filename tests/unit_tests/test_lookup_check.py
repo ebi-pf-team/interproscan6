@@ -38,18 +38,14 @@ def test_lookup_check_main(
     def mock_check_precalc(*args, **kwards):
         return (["MD5_1", "MD5_2"], None)
 
-    test_args = [
-        "lookup_check",
-        str(parsed_seqs_path),
-        "fake_url",
-        3,
-        lookup_outfile_path
-    ]
-
-    monkeypatch.setattr("sys.argv", test_args)
+    output_file_path = str(lookup_check_out_dir / "check_lookup_current_output.json")
+    monkeypatch.setattr("sys.argv", ["lookup_check", str(parsed_seqs_path), "fake_url", 3, output_file_path])
     monkeypatch.setattr(lookup_check, "check_precalc", mock_check_precalc)
 
     lookup_check.main()
+
+    with open(output_file_path, "r") as fh:
+        captured_output = json.load(fh)
 
     lookup_outfile_path.unlink()
 

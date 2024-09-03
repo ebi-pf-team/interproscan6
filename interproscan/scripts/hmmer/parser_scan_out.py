@@ -113,13 +113,12 @@ def add_match(
     matches: dict,
     protein_with_hit: QueryProtein,
     member_db: str,
-    version: str,
 ) -> dict:
     """Store data for protein with hits against SMART HMM profiles.
 
     Keyed by query protein ID, into dict:
     Keyed by signature accession, into dict:
-        accession, name, descriptiion, etc. locations: [],"""
+        accession, evalue, score, etc. locations: [],"""
     if protein_with_hit.sequence_id not in matches:
         matches[protein_with_hit.sequence_id] = {}
 
@@ -127,13 +126,10 @@ def add_match(
         if model_id not in matches[protein_with_hit.sequence_id]:
             matches[protein_with_hit.sequence_id][model_id] = {
                 "accession": model_id,
-                "name": "",
-                "description": "",
                 "qlen": int(protein_with_hit.qlen),
                 "evalue": model_obj.evalue,
                 "score": model_obj.score,
                 "member_db": member_db,
-                "version": version,
                 "model-ac": model_id,
                 "locations": []
             }
@@ -167,14 +163,13 @@ def add_match(
     return matches
 
 
-def parse(hmmer_out_path: str):
+def parse(hmmer_out_path: str, member_db: str):
     """Parse the output from HMMER3 hmmscan into a dict
 
     :param hmmer_out_path: str repr of path to hmmscan out file
+    :param member_db: str repr of member database
     """
     matches = {}
-    version = hmmer_out_path.split("/")[-1].split("._.")[0]
-    member_db = hmmer_out_path.split("._.")[1]
     query_protein = QueryProtein()
     current_model = None
     stage = "GET_QUERY_PROTEIN"
@@ -184,7 +179,7 @@ def parse(hmmer_out_path: str):
 
             if line.startswith("//"):
                 if query_protein.signatures:
-                    matches = add_match(matches, query_protein, member_db, version)
+                    matches = add_match(matches, query_protein, member_db)
                 # start a new protein instance
                 query_protein = QueryProtein()
                 stage = 'LOOKING_FOR_METHOD_ACCESSION'
@@ -219,9 +214,14 @@ def parse(hmmer_out_path: str):
 
 
 def main():
+    """
+    :args 0: str repr of path to hmmer file to be parsed
+    :args 1: str repr of member database
+    :args 2: str repr of path to output file
+    """
     args = sys.argv[1:]
-    parse_result = parse(args[0])
-    with open(args[1], "w") as fh:
+    parse_result = parse(args[0], args[1])
+    with open(args[2], "w") as fh:
         json.dump(parse_result, fh)
 
 

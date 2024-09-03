@@ -1,5 +1,5 @@
-import argparse
 import json
+import sys
 
 from pathlib import Path
 
@@ -45,47 +45,6 @@ class DomainHit:
         self.aligned_regions = None
 
 
-def build_parser() -> argparse.ArgumentParser:
-    """Build cmd-line argument parser"""
-    parser = argparse.ArgumentParser(
-        prog="gene3d_and_funfam_match_parser",
-        description="Parse the output from the add_cath_superfamilies.py into the interal IPS6 JSON structure",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-
-    parser.add_argument(
-        "ips6",
-        type=Path,
-        help="Path to an internal IPS6 JSON file"
-    )
-
-    parser.add_argument(
-        "cath_out",
-        type=Path,
-        help="Path to cath_out file"
-    )
-
-    parser.add_argument(
-        "out_json",
-        type=Path,
-        help="Path to write the output JSON file"
-    )
-
-    parser.add_argument(
-        "out_superfamilies",
-        type=Path,
-        help="Path to write out a plain text file listing the CATH superfamilies"
-    )
-
-    parser.add_argument(
-        "funfam",
-        type=Path,
-        help="Path to FunFam models dir, e.g. data/funfam/4.3.0/models"
-    )
-
-    return parser
-
-
 def parse_cath(cath_out: Path) -> dict[str, Gene3dHit]:
     """Parse cath_out file into a dictionary
 
@@ -116,7 +75,7 @@ def filter_matches(
     those that passed the Gene3D post-processing.
 
     :param ips6: path to internal IPS6 JSON file containing parsed hits from HMMER.out file
-    :param gene3d_matches: dict of Gene3dHits, representing hits in the 
+    :param gene3d_matches: dict of Gene3dHits, representing hits in the
         add_cath_superfamilies.py output file
     :param funfam_dir: path to funfam data dir where all hmms are stored -
         so it can check if the hmm exists
@@ -177,7 +136,7 @@ def filter_matches(
 
                     processed_ips6[protein_id][gene3d_sig_acc] = sig_info
                     processed_ips6[protein_id][gene3d_sig_acc]["locations"] = []
-                    # start locations as empty as not all hits/locations in ips6 
+                    # start locations as empty as not all hits/locations in ips6
                     # may have parsed the post-processing
 
                 # add the location fragments (the 'aligned-regions') to the domain location data
@@ -221,15 +180,26 @@ def filter_matches(
 
 
 def main():
-    parser = build_parser()
-    args = parser.parse_args()
+    """CL input:
+    0. Path to an internal IPS6 JSON file
+    1. Path to cath_out file
+    2. Path to write the output JSON file
+    3. Path to write out a plain text file listing the CATH superfamilies
+    4. Path to FunFam models dir, e.g. data/funfam/models
+    """
+    args = sys.argv[1:]
+    ips6 = Path(args[0])
+    cath_out = Path(args[1])
+    out_json = Path(args[2])
+    out_superfamilies = Path(args[3])
+    funfam = Path(args[4])
 
-    matches = parse_cath(args.cath_out)
-    processed_ips6, superfamilies = filter_matches(args.ips6, matches, args.funfam)
+    matches = parse_cath(cath_out)
+    processed_ips6, superfamilies = filter_matches(ips6, matches, funfam)
 
-    with open(args.out_json, "w") as fh:
+    with open(out_json, "w") as fh:
         json.dump(processed_ips6, fh)
-    with open(args.out_superfamilies, "w") as fh:
+    with open(out_superfamilies, "w") as fh:
         for superfam in superfamilies:
             fh.write(f"{superfam}\n")
 

@@ -45,15 +45,14 @@ def _get_blacklist(blacklist_path: str) -> list[str]:
     return blacklist
 
 
-def parse_and_filter(pfsearch_out: str, blacklist: list[str], release: str) -> dict:
+def parse_and_filter(pfsearch_out: str, blacklist: list[str]) -> dict:
     """Parse and filter the pfsearchV3 hits into the internal IPS6 JSON
 
     :param pfsearch_out: str repr of path to the output file from run_pfsearch.py
     :param blacklist: list of blacklisted profiles
-    :param release: str of PROSITE Patterns release
 
     ips6_matches is keyed by the query protein sequence ID, and valued by
-        a dict storing all hits for that seq. This dict is keyed by 
+        a dict storing all hits for that seq. This dict is keyed by
         signature accessions, and stores all matches against the signature/
         profile as "locations".
     """
@@ -77,7 +76,6 @@ def parse_and_filter(pfsearch_out: str, blacklist: list[str], release: str) -> d
                         "name": hit.profile_name,
                         "description": "",
                         "member_db": "PROSITE_PROFILES",
-                        "version": release,
                         "model-ac": hit.profile,
                         "locations": []
                     }
@@ -104,11 +102,10 @@ def main():
     pfsearch_out = sys.argv[1]  # output file from PFSEARCH_RUNNER module
     output_file = sys.argv[2]  # str rep of path for internal IPS6 JSON
     blacklist_path = sys.argv[3]  # str rep of path to file listing blacklisted models
-    release = pfsearch_out.split("/")[-1].split("._.")[0].strip()
 
     blacklist = _get_blacklist(blacklist_path)
 
-    ips6_matches = parse_and_filter(pfsearch_out, blacklist, release)
+    ips6_matches = parse_and_filter(pfsearch_out, blacklist)
 
     with open(output_file, "w") as fh:
         json.dump(ips6_matches, fh, indent=2)

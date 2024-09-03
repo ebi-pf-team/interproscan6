@@ -12,12 +12,11 @@ def tsv_output(seq_matches: dict, output_path: str):
             seq_len = sequence_data['length']
 
             for match_acc, match in matches.items():
-                entry_acc, entry_name, entry_desc = "-", "-", "-"
                 goterms, pathways = [], []
                 if match["entry"]:
-                    entry_acc = match["entry"]["accession"]
-                    entry_name = match["entry"]["short_name"]
-                    entry_desc = match["entry"]["name"]
+                    entry_acc = match['entry'].get('accession', "-")
+                    sig_desc = match['entry'].get('description') or match['entry'].get('name', "-")
+                    entry_desc = match['entry'].get('ipr_description') or match['entry'].get('ipr_name', "-")
                     for go_info in match["entry"]["goXRefs"]:
                         goterms.append(go_info["id"])
                     for pwy_info in match["entry"]["pathwayXRefs"]:
@@ -86,11 +85,13 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
 
             for match_acc, match in matches.items():
                 member_db = match["member_db"]
+                version = match['entry']['version']
                 try:
-                    version_major, version_minor = match['version'].split('.')
+                    version_major, version_minor = version.split('.')
                 except ValueError:
-                    version_major = match['version']
+                    version_major = version
                     version_minor = "0"
+
                 try:  # cdd does not have evalue and score on this level
                     evalue = match["evalue"]
                     score = match["score"]

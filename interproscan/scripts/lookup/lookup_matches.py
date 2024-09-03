@@ -104,7 +104,7 @@ def main():
     url = args[2]
     retries = int(args[3])
 
-    applications = list(map(lambda x: x.upper(), applications))
+    applications = list(map(lambda x: x.upper().replace('MOBIDB', 'MOBIDB_LITE'), applications))
 
     with open(checked_lookup, 'r') as md5_data:
         checked_data = json.load(md5_data)

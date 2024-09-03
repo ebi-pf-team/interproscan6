@@ -93,7 +93,6 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]]) -> None:
 
         else:
             for signature_acc in ips6_data[_protein_id]:
-
                 if signature_acc not in hits[protein_id].signatures:
                     # signature hit did not parse TreeGrafter post-processing
                     continue
@@ -106,7 +105,7 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]]) -> None:
                         if signature_acc not in processed_ips6_data[_protein_id]:
                             processed_ips6_data[_protein_id][signature_acc] = copy(ips6_data[_protein_id][signature_acc])
                             processed_ips6_data[_protein_id][signature_acc]["locations"] = []
-                        
+
                         # Panther/Treegrafter only has one (the best) match per protein
                         for location in ips6_data[_protein_id][signature_acc]["locations"]:
                             if int(panther_hit["ali_start"]) == location["start"] and \
@@ -115,7 +114,7 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]]) -> None:
                                 int(panther_hit["hmm_end"]) == location["hmmEnd"] and \
                                 panther_hit["env_start"] == location["envelopeStart"] and \
                                 panther_hit["env_end"] == location["envelopeEnd"]:
-                                
+
                                 processed_ips6_data[_protein_id][signature_acc]["locations"] = [{
                                     "start": panther_hit["ali_start"],
                                     "end": panther_hit["ali_end"],
