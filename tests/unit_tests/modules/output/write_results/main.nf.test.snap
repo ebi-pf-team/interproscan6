@@ -1,0 +1,16 @@
+{
+    "Should pass": {
+        "content": [
+            {
+                "0": [
+                    "filename.ips6.tsv:md5,f81c7f6efefc325bbe1e2a132d476b58"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.04.2"
+        },
+        "timestamp": "2024-09-03T08:34:57.65559"
+    }
+}
