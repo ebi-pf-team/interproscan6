@@ -73,7 +73,7 @@ def tsv_output(seq_matches: dict, output_path: str):
                     tsv_file.write((
                         f"{seq_id}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t"
                         f"{entry_desc}\t{ali_from}\t{ali_to}\t{evalue}\t{status}\t"
-                        f"{current_date}\t{entry_acc}\t{entry_name}\t{xrefs}\n"
+                        f"{current_date}\t{entry_acc}\t{entry_desc}\t{xrefs}\n"
                     ))
 
 
