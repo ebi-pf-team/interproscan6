@@ -25,7 +25,10 @@ def add_representative_domains(matches_path: str) -> list[dict]:
         domains = []
         for acc, info in matches_info.items():
             member_db = info["member_db"]
-            match_type, rank = info["entry"]["representative"].values()
+            try:
+                match_type, rank = info["entry"]["representative"].values()
+            except KeyError:
+                match_type, rank = None, None
             for location in info["locations"]:
                 location["representative"] = False
                 if member_db not in REPR_DOM_DATABASES or not match_type:
