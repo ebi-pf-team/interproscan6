@@ -22,8 +22,8 @@ def lookup_check_out_dir(test_output_dir):
 
 
 @pytest.fixture
-def lookup_outfile_path(test_output_dir):
-    return test_output_dir / "temp/lookup.out.json"
+def lookup_outfile_path(lookup_check_out_dir):
+    return lookup_check_out_dir / "check_lookup_current_output.json"
 
 
 @pytest.fixture
@@ -33,21 +33,23 @@ def parsed_seqs_path(lookup_check_input_dir):
 
 def test_lookup_check_main(
     parsed_seqs_path, lookup_check_out_dir,
-    lookup_outfile_path, capsys, monkeypatch
+    lookup_outfile_path, monkeypatch
 ):
     def mock_check_precalc(*args, **kwards):
         return (["MD5_1", "MD5_2"], None)
 
-    output_file_path = str(lookup_check_out_dir / "check_lookup_current_output.json")
-    monkeypatch.setattr("sys.argv", ["lookup_check", str(parsed_seqs_path), "fake_url", 3, output_file_path])
+    monkeypatch.setattr("sys.argv", ["lookup_check", str(parsed_seqs_path), "fake_url", 3, lookup_outfile_path])
     monkeypatch.setattr(lookup_check, "check_precalc", mock_check_precalc)
 
     lookup_check.main()
 
-    with open(output_file_path, "r") as fh:
+    with open((lookup_check_out_dir / "lookup_check_out_script.json"), "r") as fh:
+        expected_output = json.load(fh)
+
+    with open(lookup_outfile_path, "r") as fh:
         captured_output = json.load(fh)
 
-    lookup_outfile_path.unlink()
+    assert expected_output['matches'] == captured_output['matches']
 
 
 def test_check_precalc(monkeypatch):
