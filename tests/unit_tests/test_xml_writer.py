@@ -456,7 +456,6 @@ def test_pirsf_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_el
 def test_pirsr_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "PIRSR"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
@@ -585,7 +584,6 @@ def test_prosite_profile_xml_match(x_matches_input_dir, x_matches_output_dir, x_
 def test_sfld_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
     member_db = "SFLD"
     match_data = load_match_data(member_db, x_matches_input_dir)
-
     result = xml_output.add_xml_output_matches(x_protein_elm[0], match_data)
     result_dict = xml_to_dict(result)
     result_dict = parse_matches_dict(result_dict['matches'][0])
