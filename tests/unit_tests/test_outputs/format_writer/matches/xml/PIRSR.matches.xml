@@ -1,8 +1,9 @@
 <protein-matches xmlns="" interproscan-version="unit.test">
 	<protein>
 		<matches>
-			<hmmer3-match evalue="4E-123" score="400.3">
-				<signature ac="PIRSR001123-1" desc="PIRSR001123-1" name="PIRSR001123-1">
+			<hmmer3-match evalue="4.3E-123" score="400.3">
+				<signature ac="PIRSR001123-1" desc="" name="">
+					<entry ac="-" desc="-" name="-" type="" />
 					<signature-library-release library="PIRSR" version="2023_05" />
 				</signature>
 				<model-ac>PIRSR001123-1</model-ac>
@@ -14,8 +15,9 @@
 					</analysis-location>
 				</locations>
 			</hmmer3-match>
-			<hmmer3-match evalue="4E-123" score="400.3">
-				<signature ac="PIRSR001123-2" desc="PIRSR001123-2" name="PIRSR001123-2">
+			<hmmer3-match evalue="4.3E-123" score="400.3">
+				<signature ac="PIRSR001123-2" desc="" name="">
+					<entry ac="-" desc="-" name="-" type="" />
 					<signature-library-release library="PIRSR" version="2023_05" />
 				</signature>
 				<model-ac>PIRSR001123-2</model-ac>
@@ -32,8 +34,9 @@
 					</analysis-location>
 				</locations>
 			</hmmer3-match>
-			<hmmer3-match evalue="8.7E-05" score="11.0">
-				<signature ac="PIRSR001235-1" desc="PIRSR001235-1" name="PIRSR001235-1">
+			<hmmer3-match evalue="9.3E-05" score="11.0">
+				<signature ac="PIRSR001235-1" desc="" name="">
+					<entry ac="-" desc="-" name="-" type="" />
 					<signature-library-release library="PIRSR" version="2023_05" />
 				</signature>
 				<model-ac>PIRSR001235-1</model-ac>
@@ -51,22 +54,25 @@
 					</analysis-location>
 				</locations>
 			</hmmer3-match>
-			<hmmer3-match evalue="8.7E-05" score="11.0">
-				<signature ac="PIRSR001235-2" desc="PIRSR001235-2" name="PIRSR001235-2">
+			<hmmer3-match evalue="9.3E-05" score="11.0">
+				<signature ac="PIRSR001235-2" desc="" name="">
+					<entry ac="-" desc="-" name="-" type="" />
 					<signature-library-release library="PIRSR" version="2023_05" />
 				</signature>
 				<model-ac>PIRSR001235-2</model-ac>
 				<locations />
 			</hmmer3-match>
-			<hmmer3-match evalue="4.8E-05" score="11.9">
-				<signature ac="PIRSR037215-1" desc="PIRSR037215-1" name="PIRSR037215-1">
+			<hmmer3-match evalue="5.2E-05" score="11.9">
+				<signature ac="PIRSR037215-1" desc="" name="">
+					<entry ac="-" desc="-" name="-" type="" />
 					<signature-library-release library="PIRSR" version="2023_05" />
 				</signature>
 				<model-ac>PIRSR037215-1</model-ac>
 				<locations />
 			</hmmer3-match>
-			<hmmer3-match evalue="4.8E-05" score="11.9">
-				<signature ac="PIRSR037215-2" desc="PIRSR037215-2" name="PIRSR037215-2">
+			<hmmer3-match evalue="5.2E-05" score="11.9">
+				<signature ac="PIRSR037215-2" desc="" name="">
+					<entry ac="-" desc="-" name="-" type="" />
 					<signature-library-release library="PIRSR" version="2023_05" />
 				</signature>
 				<model-ac>PIRSR037215-2</model-ac>
@@ -91,8 +97,9 @@
 					</analysis-location>
 				</locations>
 			</hmmer3-match>
-			<hmmer3-match evalue="0.0025" score="6.5">
-				<signature ac="PIRSR037238-1" desc="PIRSR037238-1" name="PIRSR037238-1">
+			<hmmer3-match evalue="0.0027" score="6.5">
+				<signature ac="PIRSR037238-1" desc="" name="">
+					<entry ac="-" desc="-" name="-" type="" />
 					<signature-library-release library="PIRSR" version="2023_05" />
 				</signature>
 				<model-ac>PIRSR037238-1</model-ac>

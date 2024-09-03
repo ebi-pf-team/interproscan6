@@ -2,7 +2,7 @@
 	<protein>
 		<matches>
 			<hmmer3-match evalue="5.2E-24" score="80.0">
-				<signature ac="SFLDS00029" desc="Radical SAM" name="rSAM">
+				<signature ac="SFLDS00029" desc="Radical SAM" name="Radical_SAM">
 					<entry ac="IPR007197" desc="Radical SAM" name="rSAM" type="Family" />
 					<signature-library-release library="SFLD" version="4" />
 				</signature>
@@ -18,8 +18,8 @@
 				</locations>
 			</hmmer3-match>
 			<hmmer3-match evalue="6E-62" score="204.3">
-				<signature ac="SFLDG01067" desc="SPASM/twitch domain containing" name="">
-					<entry ac="-" desc="SPASM/twitch domain containing" name="" type="Family" />
+				<signature ac="SFLDG01067" desc="SPASM/twitch domain containing" name="SPASM/twitch_domain_containing">
+					<entry ac="-" desc="-" name="-" type="Family" />
 					<signature-library-release library="SFLD" version="4" />
 				</signature>
 				<model-ac>SFLDG01067</model-ac>
@@ -34,8 +34,8 @@
 				</locations>
 			</hmmer3-match>
 			<hmmer3-match evalue="9E-200" score="658.6">
-				<signature ac="SFLDG01216" desc="thioether bond formation requiring one auxiliary iron-sulfur cluster" name="">
-					<entry ac="-" desc="thioether bond formation requiring one auxiliary iron-sulfur cluster" name="" type="Family" />
+				<signature ac="SFLDG01216" desc="thioether bond formation requiring one auxiliary iron-sulfur cluster" name="thioether_bond_formation_requi">
+					<entry ac="-" desc="-" name="-" type="Family" />
 					<signature-library-release library="SFLD" version="4" />
 				</signature>
 				<model-ac>SFLDG01216</model-ac>
@@ -53,8 +53,8 @@
 				</locations>
 			</hmmer3-match>
 			<hmmer3-match evalue="1.7E-57" score="189.7">
-				<signature ac="SFLDG01386" desc="main SPASM domain-containing" name="">
-					<entry ac="-" desc="main SPASM domain-containing" name="" type="Family" />
+				<signature ac="SFLDG01386" desc="main SPASM domain-containing" name="main_SPASM_domain-containing">
+					<entry ac="-" desc="-" name="-" type="Family" />
 					<signature-library-release library="SFLD" version="4" />
 				</signature>
 				<model-ac>SFLDG01386</model-ac>
@@ -69,8 +69,8 @@
 				</locations>
 			</hmmer3-match>
 			<hmmer3-match evalue="4.4E-185" score="609.7">
-				<signature ac="SFLDF00315" desc="antilisterial bacteriocin subtilosin biosynthesis protein (AlbA-like)" name="">
-					<entry ac="-" desc="antilisterial bacteriocin subtilosin biosynthesis protein (AlbA-like)" name="" type="Family" />
+				<signature ac="SFLDF00315" desc="antilisterial bacteriocin subtilosin biosynthesis protein (AlbA-like)" name="antilisterial_bacteriocin_subt">
+					<entry ac="-" desc="-" name="-" type="Family" />
 					<signature-library-release library="SFLD" version="4" />
 				</signature>
 				<model-ac>SFLDF00315</model-ac>

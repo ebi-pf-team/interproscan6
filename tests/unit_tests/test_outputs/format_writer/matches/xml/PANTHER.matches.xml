@@ -2,8 +2,8 @@
 	<protein>
 		<matches>
 			<hmmer3-match evalue="1.7E-24" score="98.4" protein-class="PC00088" graft-point="BRADU|EnsemblGenome=BAC45506|UniProtKB=Q89XR6">
-				<signature ac="PTHR43780:SF2" desc="1-AMINOCYCLOPROPANE-1-CARBOXYLATE DEAMINASE-RELATED" name="ACCD_DCysDesulf">
-					<entry ac="IPR027278" desc="1-AMINOCYCLOPROPANE-1-CARBOXYLATE DEAMINASE-RELATED" name="ACCD_DCysDesulf" type="Family" />
+				<signature ac="PTHR43780:SF2" desc="1-AMINOCYCLOPROPANE-1-CARBOXYLATE DEAMINASE-RELATED" name="">
+					<entry ac="IPR027278" desc="1-aminocyclopropane-1-carboxylate deaminase/D-cysteine desulfhydrase" name="ACCD_DCysDesulf" type="Family" />
 					<signature-library-release library="PANTHER" version="18.0" />
 				</signature>
 				<model-ac>PTHR43780</model-ac>

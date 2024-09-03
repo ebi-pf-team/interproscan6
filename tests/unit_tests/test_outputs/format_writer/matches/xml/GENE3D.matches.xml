@@ -2,8 +2,8 @@
 	<protein>
 		<matches>
 			<hmmer3-match evalue="6E-29" score="103.5">
-				<signature ac="G3DSA:3.60.10.10" desc="Endonuclease/exonuclease/phosphatase" name="Endo/exonu/phosph_ase_sf">
-					<entry ac="IPR036691" desc="Endonuclease/exonuclease/phosphatase" name="Endo/exonu/phosph_ase_sf" type="Homologous_superfamily" />
+				<signature ac="G3DSA:3.60.10.10" desc="Endonuclease/exonuclease/phosphatase" name="">
+					<entry ac="IPR036691" desc="Endonuclease/exonuclease/phosphatase superfamily" name="Endo/exonu/phosph_ase_sf" type="Homologous_superfamily" />
 					<signature-library-release library="GENE3D" version="4.3.0" />
 				</signature>
 				<model-ac>G3DSA:3.60.10.10</model-ac>
@@ -16,8 +16,8 @@
 				</locations>
 			</hmmer3-match>
 			<hmmer3-match evalue="1.8E-05" score="27.0">
-				<signature ac="G3DSA:2.60.40.1260" desc="Lamin Tail domain" name="Lamin_tail_dom_sf">
-					<entry ac="IPR036415" desc="Lamin Tail domain" name="Lamin_tail_dom_sf" type="Homologous_superfamily" />
+				<signature ac="G3DSA:2.60.40.1260" desc="Lamin Tail domain" name="">
+					<entry ac="IPR036415" desc="Lamin tail domain superfamily" name="Lamin_tail_dom_sf" type="Homologous_superfamily" />
 					<signature-library-release library="GENE3D" version="4.3.0" />
 				</signature>
 				<model-ac>G3DSA:2.60.40.1260</model-ac>

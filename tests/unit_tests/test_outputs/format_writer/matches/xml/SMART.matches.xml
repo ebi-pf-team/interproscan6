@@ -2,8 +2,8 @@
 	<protein>
 		<matches>
 			<hmmer2-match evalue="4.7E-32" score="122.5">
-				<signature ac="SM00217" desc="Four-disulfide core domains" name="WAP_dom">
-					<entry ac="IPR008197" desc="Four-disulfide core domains" name="WAP_dom" type="Domain" />
+				<signature ac="SM00217" desc="Four-disulfide core domains" name="WAP">
+					<entry ac="IPR008197" desc="WAP-type 'four-disulfide core' domain" name="WAP_dom" type="Domain" />
 					<signature-library-release library="SMART" version="9.0" />
 				</signature>
 				<model-ac>SM00217</model-ac>

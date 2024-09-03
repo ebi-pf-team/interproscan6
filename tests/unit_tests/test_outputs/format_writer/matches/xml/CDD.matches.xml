@@ -2,8 +2,8 @@
 	<protein>
 		<matches>
 			<cdd-domain>
-				<signature ac="cd21125" desc="Iron-sulfur cluster-binding SPASM domain of antilisterial bacteriocin subtilosin biosynthesis protein AlbA and similar proteins" name="">
-					<entry ac="-" desc="Iron-sulfur cluster-binding SPASM domain of antilisterial bacteriocin subtilosin biosynthesis protein AlbA and similar proteins" name="" type="Domain" />
+				<signature ac="cd21125" desc="Iron-sulfur cluster-binding SPASM domain of antilisterial bacteriocin subtilosin biosynthesis protein AlbA and similar proteins" name="SPASM_AlbA-like">
+					<entry ac="-" desc="-" name="-" type="Domain" />
 					<signature-library-release library="CDD" version="3.20" />
 				</signature>
 				<model-ac>cd21125</model-ac>
@@ -14,8 +14,8 @@
 				</locations>
 			</cdd-domain>
 			<cdd-domain>
-				<signature ac="cd01335" desc="" name="">
-					<entry ac="-" desc="" name="" type="Domain" />
+				<signature ac="cd01335" desc="" name="Radical_SAM">
+					<entry ac="-" desc="-" name="-" type="Domain" />
 					<signature-library-release library="CDD" version="3.20" />
 				</signature>
 				<model-ac>cd01335</model-ac>

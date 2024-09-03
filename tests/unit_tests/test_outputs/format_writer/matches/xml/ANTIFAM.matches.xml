@@ -2,8 +2,8 @@
 	<protein>
 		<matches>
 			<hmmer3-match evalue="4.2E-51" score="160.8">
-				<signature ac="ANF00006" desc="Translation of CRISPR region" name="Spurious_ORF_06">
-					<entry ac="-" desc="Translation of CRISPR region" name="Spurious_ORF_06" type="Region" />
+				<signature ac="ANF00006" desc="Spurious_ORF_06" name="Spurious_ORF_06">
+					<entry ac="-" desc="-" name="-" type="Region" />
 					<signature-library-release library="ANTIFAM" version="7.0" />
 				</signature>
 				<model-ac>ANF00006</model-ac>
@@ -23,8 +23,8 @@
 				</locations>
 			</hmmer3-match>
 			<hmmer3-match evalue="5.2E-106" score="338.3">
-				<signature ac="ANF00057" desc="Translation of E. coli type CRISPR repeat" name="Spurious_ORF_57">
-					<entry ac="-" desc="Translation of E. coli type CRISPR repeat" name="Spurious_ORF_57" type="Region" />
+				<signature ac="ANF00057" desc="Spurious_ORF_57" name="Spurious_ORF_57">
+					<entry ac="-" desc="-" name="-" type="Region" />
 					<signature-library-release library="ANTIFAM" version="7.0" />
 				</signature>
 				<model-ac>ANF00057</model-ac>

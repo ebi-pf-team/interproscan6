@@ -2,8 +2,8 @@
 	<protein>
 		<matches>
 			<hmmer3-match evalue="1.3E-61" score="219.1">
-				<signature ac="PF00710" desc="Asparaginase, N-terminal" name="L-asparaginase_N">
-					<entry ac="IPR027474" desc="Asparaginase, N-terminal" name="L-asparaginase_N" type="Domain" />
+				<signature ac="PF00710" desc="Asparaginase, N-terminal" name="Asparaginase">
+					<entry ac="IPR027474" desc="L-asparaginase, N-terminal" name="L-asparaginase_N" type="Domain" />
 					<signature-library-release library="PFAM" version="37.0" />
 				</signature>
 				<model-ac>PF00710</model-ac>
@@ -15,7 +15,7 @@
 			</hmmer3-match>
 			<hmmer3-match evalue="7.5E-26" score="101.7">
 				<signature ac="PF17763" desc="Glutaminase/Asparaginase C-terminal domain" name="Asparaginase_C">
-					<entry ac="IPR040919" desc="Glutaminase/Asparaginase C-terminal domain" name="Asparaginase_C" type="Domain" />
+					<entry ac="IPR040919" desc="Asparaginase/glutaminase, C-terminal" name="Asparaginase_C" type="Domain" />
 					<signature-library-release library="PFAM" version="37.0" />
 				</signature>
 				<model-ac>PF17763</model-ac>

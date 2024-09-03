@@ -2,8 +2,8 @@
 	<protein>
 		<matches>
 			<hmmer3-match evalue="4.4E-89" score="296.5">
-				<signature ac="PIRSF001220" desc="L-asparaginase/Glutamyl-tRNA(Gln) amidotransferase subunit D" name="Asparaginase/glutaminase-like">
-					<entry ac="IPR006034" desc="L-asparaginase/Glutamyl-tRNA(Gln) amidotransferase subunit D" name="Asparaginase/glutaminase-like" type="Family" />
+				<signature ac="PIRSF001220" desc="L-asparaginase/Glutamyl-tRNA(Gln) amidotransferase subunit D" name="L-ASNase_gatD">
+					<entry ac="IPR006034" desc="Asparaginase/glutaminase-like" name="Asparaginase/glutaminase-like" type="Family" />
 					<signature-library-release library="PIRSF" version="3.10" />
 				</signature>
 				<model-ac>PIRSF001220</model-ac>
@@ -16,8 +16,8 @@
 				</locations>
 			</hmmer3-match>
 			<hmmer3-match evalue="6.9E-76" score="253.3">
-				<signature ac="PIRSF500176" desc="L-asparaginase/L-glutaminase" name="">
-					<entry ac="-" desc="L-asparaginase/L-glutaminase" name="" type="Family" />
+				<signature ac="PIRSF500176" desc="L-asparaginase/L-glutaminase" name="L_ASNase">
+					<entry ac="-" desc="-" name="-" type="Family" />
 					<signature-library-release library="PIRSF" version="3.10" />
 				</signature>
 				<model-ac>PIRSF500176</model-ac>

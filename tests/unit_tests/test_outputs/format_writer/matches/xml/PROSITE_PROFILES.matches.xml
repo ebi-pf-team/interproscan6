@@ -2,8 +2,8 @@
 	<protein>
 		<matches>
 			<profilesearch-match>
-				<signature ac="PS51173" desc="CBM2 (Carbohydrate-binding type-2) domain profile" name="CBD2">
-					<entry ac="IPR001919" desc="CBM2 (Carbohydrate-binding type-2) domain profile" name="CBD2" type="Domain" />
+				<signature ac="PS51173" desc="CBM2 (Carbohydrate-binding type-2) domain profile" name="CBM2">
+					<entry ac="IPR001919" desc="Carbohydrate-binding type-2 domain" name="CBD2" type="Domain" />
 					<signature-library-release library="PROSITE_PROFILES" version="2023_05" />
 				</signature>
 				<model-ac>PS51173</model-ac>
@@ -16,8 +16,8 @@
 				</locations>
 			</profilesearch-match>
 			<profilesearch-match>
-				<signature ac="PS51318" desc="Twin arginine translocation (Tat) signal profile" name="TAT_signal">
-					<entry ac="IPR006311" desc="Twin arginine translocation (Tat) signal profile" name="TAT_signal" type="Domain" />
+				<signature ac="PS51318" desc="Twin arginine translocation (Tat) signal profile" name="TAT">
+					<entry ac="IPR006311" desc="Twin-arginine translocation pathway, signal sequence" name="TAT_signal" type="Domain" />
 					<signature-library-release library="PROSITE_PROFILES" version="2023_05" />
 				</signature>
 				<model-ac>PS51318</model-ac>

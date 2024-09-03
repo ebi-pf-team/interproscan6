@@ -2,8 +2,8 @@
 	<protein>
 		<matches>
 			<profilescan-match>
-				<signature ac="PS00561" desc="CBM2a (carbohydrate-binding type-2) domain signature" name="CBM2_CS">
-					<entry ac="IPR018366" desc="CBM2a (carbohydrate-binding type-2) domain signature" name="CBM2_CS" type="Conserved_site" />
+				<signature ac="PS00561" desc="CBM2a (carbohydrate-binding type-2) domain signature" name="CBM2_A">
+					<entry ac="IPR018366" desc="Carbohydrate-binding type-2, conserved site" name="CBM2_CS" type="Conserved_site" />
 					<signature-library-release library="PROSITE_PATTERNS" version="2023_05" />
 				</signature>
 				<model-ac>PS00561</model-ac>
@@ -14,8 +14,8 @@
 				</locations>
 			</profilescan-match>
 			<profilescan-match>
-				<signature ac="PS00655" desc="Glycosyl hydrolases family 6 signature 1" name="Glyco_hydro_6_CS">
-					<entry ac="IPR001524" desc="Glycosyl hydrolases family 6 signature 1" name="Glyco_hydro_6_CS" type="Conserved_site" />
+				<signature ac="PS00655" desc="Glycosyl hydrolases family 6 signature 1" name="GLYCOSYL_HYDROL_F6_1">
+					<entry ac="IPR001524" desc="Glycoside hydrolase, family 6, conserved site" name="Glyco_hydro_6_CS" type="Conserved_site" />
 					<signature-library-release library="PROSITE_PATTERNS" version="2023_05" />
 				</signature>
 				<model-ac>PS00655</model-ac>
@@ -26,8 +26,8 @@
 				</locations>
 			</profilescan-match>
 			<profilescan-match>
-				<signature ac="PS00656" desc="Glycosyl hydrolases family 6 signature 2" name="Glyco_hydro_6_CS">
-					<entry ac="IPR001524" desc="Glycosyl hydrolases family 6 signature 2" name="Glyco_hydro_6_CS" type="Conserved_site" />
+				<signature ac="PS00656" desc="Glycosyl hydrolases family 6 signature 2" name="GLYCOSYL_HYDROL_F6_2">
+					<entry ac="IPR001524" desc="Glycoside hydrolase, family 6, conserved site" name="Glyco_hydro_6_CS" type="Conserved_site" />
 					<signature-library-release library="PROSITE_PATTERNS" version="2023_05" />
 				</signature>
 				<model-ac>PS00656</model-ac>

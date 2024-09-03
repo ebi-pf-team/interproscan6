@@ -2,8 +2,8 @@
 	<protein>
 		<matches>
 			<coils>
-				<signature ac="Coil" desc="Coil" name="">
-					<entry ac="-" desc="Coil" name="" type="Region" />
+				<signature ac="Coil" desc="" name="">
+					<entry ac="-" desc="-" name="-" type="Region" />
 					<signature-library-release library="COILS" version="2.2.1" />
 				</signature>
 				<model-ac>Coil</model-ac>

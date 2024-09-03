@@ -2,8 +2,9 @@
 	<protein>
 		<matches>
 			<mobidb-match>
-				<signature ac="mobidb" desc="disorder_prediction" name="disorder_prediction">
-					<signature-library-release library="MOBIDB" version="2.0" />
+				<signature ac="mobidb" desc="" name="">
+					<entry ac="-" desc="-" name="-" type="" />
+					<signature-library-release library="MOBIDB" version="2" />
 				</signature>
 				<model-ac>mobidb</model-ac>
 				<locations>

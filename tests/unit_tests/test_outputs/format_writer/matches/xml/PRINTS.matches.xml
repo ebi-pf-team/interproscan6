@@ -2,8 +2,8 @@
 	<protein>
 		<matches>
 			<fingerprints-match evalue="3.4E-46">
-				<signature ac="PR00733" desc="" name="Beta_cellobiohydrolase">
-					<entry ac="IPR016288" desc="" name="Beta_cellobiohydrolase" type="Family" />
+				<signature ac="PR00733" desc="" name="GLHYDRLASE6">
+					<entry ac="IPR016288" desc="1, 4-beta cellobiohydrolase" name="Beta_cellobiohydrolase" type="Family" />
 					<signature-library-release library="PRINTS" version="42.0" />
 				</signature>
 				<model-ac>PR00733</model-ac>

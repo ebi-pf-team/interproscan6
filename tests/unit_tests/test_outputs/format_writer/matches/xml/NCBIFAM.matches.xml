@@ -2,9 +2,9 @@
 	<protein>
 		<matches>
 			<hmmer3-match evalue="0.0" score="1609.3">
-				<signature ac="NF033680" desc="extracellular exonuclease ExeM" name="">
-					<entry ac="-" desc="extracellular exonuclease ExeM" name="" type="Family" />
-					<signature-library-release library="NCBIFAM" version="14.0" />
+				<signature ac="NF033680" desc="extracellular exonuclease ExeM" name="exonuc_ExeM-GG">
+					<entry ac="-" desc="-" name="-" type="Family" />
+					<signature-library-release library="NCBIFAM" version="15.0" />
 				</signature>
 				<model-ac>NF033680</model-ac>
 				<locations>
@@ -14,9 +14,9 @@
 				</locations>
 			</hmmer3-match>
 			<hmmer3-match evalue="4.5E-180" score="611.7">
-				<signature ac="NF033681" desc="ExeM/NucH family extracellular endonuclease" name="ExeM-like">
-					<entry ac="IPR047971" desc="ExeM/NucH family extracellular endonuclease" name="ExeM-like" type="Family" />
-					<signature-library-release library="NCBIFAM" version="14.0" />
+				<signature ac="NF033681" desc="ExeM/NucH family extracellular endonuclease" name="ExeM_NucH_DNase">
+					<entry ac="IPR047971" desc="Extracellular endonuclease ExeM-like" name="ExeM-like" type="Family" />
+					<signature-library-release library="NCBIFAM" version="15.0" />
 				</signature>
 				<model-ac>NF033681</model-ac>
 				<locations>
@@ -27,8 +27,8 @@
 			</hmmer3-match>
 			<hmmer3-match evalue="20.0" score="17.2">
 				<signature ac="TIGR03501" desc="GlyGly-CTERM protein-sorting domain" name="GlyGly_CTERM">
-					<entry ac="IPR020008" desc="GlyGly-CTERM protein-sorting domain" name="GlyGly_CTERM" type="Domain" />
-					<signature-library-release library="NCBIFAM" version="14.0" />
+					<entry ac="IPR020008" desc="GlyGly-CTERM domain" name="GlyGly_CTERM" type="Domain" />
+					<signature-library-release library="NCBIFAM" version="15.0" />
 				</signature>
 				<model-ac>TIGR03501</model-ac>
 				<locations>
