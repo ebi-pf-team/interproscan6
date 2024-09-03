@@ -9,6 +9,8 @@ python -m pytest -v
 
 import json
 
+from pathlib import Path
+
 import pytest
 
 from interproscan.scripts.output.format_writer import json_output
@@ -126,7 +128,7 @@ def compare_signature_details(match_data: dict, expected_data: dict, sig_acc: st
     assert all(
         match_data['signature'][key] == expected_data['signature'][key]
         for key in ['accession', 'name', 'description']
-    ), f"Mismatch in 'signature' details for {sig_acc}, {member_db}"
+    ), f"Mismatch in 'signature' details (acc, name and/or desc) for {sig_acc}, {member_db}"
     assert all(
         match_data['signature']['signatureLibraryRelease'][key] == expected_data['signature']['signatureLibraryRelease'][key]
         for key in ['library', 'version']
@@ -183,11 +185,15 @@ def compare_location_details(
             ))
 
 
-def test_antifam_json_match(j_matches_input_dir, j_matches_output_dir):
-    member_db = "CDD"
-    match_data = load_match_data(member_db, j_matches_input_dir)
+def compare_member_db_output(
+    member_db: str,
+    matches_input_dir: Path,
+    matches_output_dir: Path,
+    key_list: list[str],
+):
+    match_data = load_match_data(member_db, matches_input_dir)
     result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
+    expected_list = load_expected_match_data(member_db, matches_output_dir)
 
     # check the number of matches is the same
     assert len(result_list) == len(expected_list), "Different number of matches retrieved"
@@ -196,658 +202,249 @@ def test_antifam_json_match(j_matches_input_dir, j_matches_output_dir):
     result_dict = parse_matches_into_dict(result_list)
     expected_dict = parse_matches_into_dict(expected_list)
 
-    for sig_acc, match_data in result_dict.items():
+    for sig_acc, match_data in result_dict. items():
         assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
         if sig_acc in expected_dict:
+            # compare the signature details
             expected_data = expected_dict[sig_acc]
             compare_signature_details(match_data, expected_data, sig_acc, member_db)
             locations = match_data['locations']
             expected_locations = expected_data['locations']
             compare_location_details(
                 locations, expected_locations,
-                ['representative', 'evalue', 'score'],
+                key_list,
                 sig_acc, member_db
             )
-    
+
     for sig_acc, match_data in expected_dict.items():
         assert sig_acc in result_dict, \
             f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+
+
+
+def test_antifam_json_match(j_matches_input_dir, j_matches_output_dir):
+    member_db = "ANTIFAM"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        ['representative', 'evalue', 'score']
+    )
 
 
 def test_cdd_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "CDD"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict.items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['representative', 'evalue', 'score'],
-                sig_acc, member_db
-            )
-    
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
-
-
-def test_coils_json_match(j_matches_input_dir, j_matches_output_dir):
-    member_db = "COILS"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['representative'],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        ['representative']
+    )
 
 
 def test_funfam_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "FUNFAM"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                [
-                    'representative', 'evalue', 'score',
-                    'hmmStart', 'hmmEnd', 'hmmLength', 'hmmBounds',
-                    'envelopeStart', 'envelopeEnd'
-                ],
-                sig_acc, member_db)
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        [
+            'representative', 'evalue', 'score',
+            'hmmStart', 'hmmEnd', 'hmmLength', 'hmmBounds',
+            'envelopeStart', 'envelopeEnd'
+        ]
+    )
 
 
 def test_gene3d_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "GENE3D"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                [
-                    'representative', 'evalue', 'score',
-                    'hmmStart', 'hmmEnd', 'hmmLength', 'hmmBounds',
-                    'envelopeStart', 'envelopeEnd'
-                ],
-                sig_acc, member_db)
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        [
+            'representative', 'evalue', 'score',
+            'hmmStart', 'hmmEnd', 'hmmLength', 'hmmBounds',
+            'envelopeStart', 'envelopeEnd'
+        ]
+    )
 
 
 def test_hamap_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "HAMAP"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['representative', 'score', 'alignment'],
-                sig_acc, member_db)
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        [
+            'representative', 'score', 'alignment'
+        ]
+    )
 
 
 def test_mobidb_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "MOBIDB"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['representative'],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        ['representative']
+    )
 
 
 def test_ncbifam_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "NCBIFAM"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['representative'],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        ['representative']
+    )
 
 
 def test_panther_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "PANTHER"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                [
-                    'representative', 'hmmStart', 'hmmEnd',
-                    'hmmLength', 'hmmBounds',
-                    'envelopeStart', 'envelopeEnd'
-                ],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        [
+            'representative', 'hmmStart', 'hmmEnd',
+            'hmmLength', 'hmmBounds',
+            'envelopeStart', 'envelopeEnd'
+        ]
+    )
 
 
 def test_pfam_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "PFAM"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['representative'],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        ['representative']
+    )
 
 
 def test_phobius_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "PHOBIUS"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['representative'],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        ['representative']
+    )
 
 
 def test_pirsf_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "PIRSF"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                [
-                    'representative', 'evalue', 'score',
-                    'hmmStart', 'hmmEnd', 'hmmLength', 'hmmBounds',
-                    'envelopeStart', 'envelopeEnd'
-                ],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        [
+            'representative', 'evalue', 'score',
+            'hmmStart', 'hmmEnd', 'hmmLength', 'hmmBounds',
+            'envelopeStart', 'envelopeEnd'
+        ]
+    )
 
 
 def test_pirsr_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "PIRSR"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                [
-                    'representative', 'evalue', 'score',
-                    'hmmStart', 'hmmEnd', 'hmmLength',
-                    'envelopeStart', 'envelopeEnd'
-                ],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        [
+            'representative', 'evalue', 'score',
+            'hmmStart', 'hmmEnd', 'hmmLength',
+            'envelopeStart', 'envelopeEnd'
+        ]
+    )
 
 
 def test_prints_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "PRINTS"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['representative', 'pvalue', 'score', 'motifNumber'],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        [
+            'representative', 'pvalue', 'score', 'motifNumber'
+        ]
+    )
 
 
 def test_prosite_pattern_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "PROSITE_PATTERNS"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['representative', 'cigarAlignment', 'alignment', 'level'],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        [
+            'representative', 'cigarAlignment', 'alignment', 'level'
+        ]
+    )
 
 
 def test_prosite_profile_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "PROSITE_PROFILES"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                ['representative', 'score', 'alignment'],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        [
+            'representative', 'score', 'alignment'
+        ]
+    )
 
 
 def test_sfld_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "SFLD"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                [
-                    'representative', 'evalue', 'score',
-                    'hmmStart', 'hmmEnd', 'hmmLength',
-                    'envelopeStart', 'envelopeEnd'
-                ],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        [
+            'representative', 'evalue', 'score',
+            'hmmStart', 'hmmEnd', 'hmmLength',
+            'envelopeStart', 'envelopeEnd'
+        ]
+    )
 
 
 def test_signalp_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "SIGNALP"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                [
-                    'representative', 'pvalue',
-                    'cleavageStart', 'cleavageEnd'
-                ],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        [
+            'representative', 'pvalue',
+            'cleavageStart', 'cleavageEnd'
+        ]
+    )
 
 
 def test_smart_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "SMART"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                [
-                    'representative', 'evalue', 'score',
-                    'hmmStart', 'hmmEnd', 'hmmLength', 'hmmBounds',
-                ],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        [
+            'representative', 'evalue', 'score',
+            'hmmStart', 'hmmEnd', 'hmmLength', 'hmmBounds',
+        ]
+    )
 
 
 def test_superfamily_json_match(j_matches_input_dir, j_matches_output_dir):
     member_db = "SUPERFAMILY"
-    match_data = load_match_data(member_db, j_matches_input_dir)
-    result_list = json_output.get_matches(match_data)
-    expected_list = load_expected_match_data(member_db, j_matches_output_dir)
-
-    # check the number of matches is the same
-    assert len(result_list) == len(expected_list), "Different number of matches retrieved"
-
-    # check the match data matches
-    result_dict = parse_matches_into_dict(result_list)
-    expected_dict = parse_matches_into_dict(expected_list)
-
-    for sig_acc, match_data in result_dict. items():
-        assert sig_acc in expected_dict, f"Signature {sig_acc} not in expected results, {member_db}"
-        if sig_acc in expected_dict:
-            # compare the signature details
-            expected_data = expected_dict[sig_acc]
-            compare_signature_details(match_data, expected_data, sig_acc, member_db)
-            locations = match_data['locations']
-            expected_locations = expected_data['locations']
-            compare_location_details(
-                locations, expected_locations,
-                [
-                    'representative',
-                ],
-                sig_acc, member_db
-            )
-
-    for sig_acc, match_data in expected_dict.items():
-        assert sig_acc in result_dict, \
-            f"Signature {sig_acc} in the expected results but not actual results, {member_db}"
+    compare_member_db_output(
+        member_db,
+        j_matches_input_dir,
+        j_matches_output_dir,
+        ['representative']
+    )
