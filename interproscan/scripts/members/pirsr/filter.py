@@ -57,6 +57,24 @@ def matches2rules(matches_path: str, rules_hash: dict) -> dict:
                                 if pos['end'] == 'Cter':
                                     pos['end'] = seq_to
 
+                            residue_start, residue_end, residue = 0, 0, None
+                            sequence_alignment_position_map = get_position_map(seq_align, seq_from)
+                            sequence_alignment_reverse_position_map = {v: k for k, v in
+                                                                       sequence_alignment_position_map.items()}
+                            hmm_alignment_position_map = get_position_map(hmm_align, hmm_from)
+                            start_key = pos['hmmStart']
+                            end_key = pos['hmmEnd']
+                            if start_key in hmm_alignment_position_map:
+                                residue_start_on_seq_align_from_map = hmm_alignment_position_map[start_key]
+                                if end_key in hmm_alignment_position_map:
+                                    residue_end_on_seq_align = hmm_alignment_position_map[end_key]
+                                    residue = seq_align[residue_start_on_seq_align_from_map:residue_end_on_seq_align + 1]
+                                    if (residue_start_on_seq_align_from_map in sequence_alignment_reverse_position_map and
+                                            residue_end_on_seq_align in sequence_alignment_reverse_position_map):
+                                        residue_start = sequence_alignment_reverse_position_map[
+                                            residue_start_on_seq_align_from_map]
+                                        residue_end = sequence_alignment_reverse_position_map[residue_end_on_seq_align]
+
                             positions_parsed.append({
                                 'description': pos['desc'],
                                 "group": int(pos['group']),
@@ -66,9 +84,9 @@ def matches2rules(matches_path: str, rules_hash: dict) -> dict:
                                 "numLocations": 1,  # always 1 on i5 (change to len(positions)?)
                                 "siteLocations": [
                                     {
-                                        "end": pos['end'],
-                                        "residue": pos['condition'],
-                                        "start": pos['start']
+                                        "end": residue_end,
+                                        "residue": residue,
+                                        "start": residue_start
                                     }
                                 ]
                             })
@@ -97,6 +115,17 @@ def matches2rules(matches_path: str, rules_hash: dict) -> dict:
             domain["evalue"] = sorted_locations[0]["evalue"]
 
     return matches_info
+
+
+def get_position_map(alignment, ali_start):
+    position_map = {}
+    position_key = ali_start
+    for index, sequence_char in enumerate(alignment):
+        if sequence_char.isalpha():
+            position_map[position_key] = index
+            position_key += 1
+
+    return position_map
 
 
 def map_hmm_to_seq(hmm_pos, hmm, seq):

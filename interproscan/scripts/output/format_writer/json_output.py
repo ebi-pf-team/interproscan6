@@ -7,18 +7,31 @@ BOOLEAN_MAP = {"true": True, "false": False}
 
 
 def build_json_output_protein(seq_matches: dict, output_path: str, version: str):
-    results = []
-
+    md5_results = {}
     for seq_id, data in seq_matches.items():
-        results.append({
-            "sequence": data['sequences']['sequence'],
-            "md5": data['sequences']['md5'],
-            "matches": get_matches(data),
-            "xref": [{
-                "name": data['sequences']['seq_id'],
-                "id": seq_id
-            }]
+        md5 = data['sequences']['md5']
+        if md5 not in md5_results:
+            md5_results[md5] = {
+                "sequence": data['sequences']['sequence'],
+                "md5": md5,
+                "matches": [],
+                "xref": []
+            }
+        md5_results[md5]['xref'].append({
+            "name": data['sequences']['seq_id'],
+            "id": seq_id
         })
+        md5_results[md5]['matches'].extend(get_matches(data))
+
+    results = [
+        {
+            "sequence": info['sequence'],
+            "md5": info['md5'],
+            "matches": info['matches'],
+            "xref": info['xref']
+        }
+        for info in md5_results.values()
+    ]
 
     final_data = {"interproscan-version": version, 'results': results}
     with open(output_path, 'w') as json_file:
@@ -275,7 +288,7 @@ def get_matches(data: dict):
                     }
 
                     if member_db not in [
-                        "CDD", "COILS", "HAMAP", "PHOBIUS", "PIRSR",
+                        "CDD", "COILS", "HAMAP", "PHOBIUS",
                         "PROSITE_PROFILES", "PROSITE_PATTERNS",
                         "PRINTS", "SIGNALP", "SIGNALP_EUK"
                     ]:
