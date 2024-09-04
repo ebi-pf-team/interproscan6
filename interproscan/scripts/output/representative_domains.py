@@ -38,11 +38,11 @@ def add_representative_domains(matches_path: str) -> list[dict]:
                 pos_end = location["end"]
                 try:
                     fragments = location["location-fragments"]
-                    frags_str = ""
-                    for fragment in fragments:
-                        dc_status = dc_status_map.get(fragment['dc-status'], fragment['dc-status'])
-                        frags_str += f"{fragment['start']}-{fragment['end']}-{dc_status},"
-                    frags_str = frags_str[:-1]
+                    frags_str = ",".join(
+                        f"{fragment['start']}-{fragment['end']}-{dc_status_map.get(fragment['dc-status'], fragment['dc-status'])}"
+                        for fragment in fragments
+                    )
+
                 except KeyError:
                     frags_str = f"{pos_start}-{pos_end}-S"
                 domains.append({
