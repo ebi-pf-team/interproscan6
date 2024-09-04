@@ -1,4 +1,5 @@
 include { CHECK_NUCLEIC } from "$projectDir/interproscan/modules/pre_checks/main"
+include { CHECK_DATA } from "$projectDir/interproscan/subworkflows/sequence_analysis/check_data"
 
 def printHelp() {
     """
@@ -6,35 +7,40 @@ def printHelp() {
         nextflow run interproscan.nf --input <path to fasta file>
 
     Params options:
-        --applications <ANALYSES>          Optional, comma separated - without spaces - list of analysis methods (i.e. member databases/applications).
-                                            If this option is not set, ALL analyses will be run.
+        --applications <ANALYSES>          Optional, comma separated - without spaces - list of analysis methods
+                                            (i.e. member databases/applications).
+                                            If this option is not set, ALL Interpro consortium member analyses will be run.
+        --datadir                          Optional, path to the data dir. Default 'data' in the Interproscan 
+                                            project dir.
         --disable_precalc                  Optional. Disables use of the precalculated match lookup service.
                                             All match calculations will be run locally.
         --formats <FORMATS> Optional, comma separated - without spaces - list of output formats.
+                                            Accepted: tsv, json and xml
         --goterms Optional. Include GO terms in the output.
         --help                             Optional, display help information
         --input <INPUT-FILE-PATH>          [REQUIRED] Path to fasta file that should be loaded on Master startup.
-        --nucleic                          Optional. Input comprises nucleic acid sequences.
+        --nucleic                          Optional. Input comprises nucleic acid sequences. [Boolean]
         --outdir <OUTPUT-DIR-PATH>         Optional. Path to the output dir.
                                             Output files are automatically named after the input file, with the 
                                             suffix '.ips6.*'. Default: present working dir.
-        --pathways Optional. Include pathway information in the output.
-        --signalp_mode Optional. Set which SignalP/SignalP_EUK prediction models are used. Models may have to be installed. Accepted: 'fast', 'slow', 'slow-sequential'. Default: 'fast'.
+        --pathways Optional. Include pathway information in the output. [Boolean]
+        --signalp_mode Optional. Set which SignalP/SignalP_EUK prediction models are used. Models may have to be installed.
+                                            Accepted: 'fast', 'slow', 'slow-sequential'. Default: 'fast'.
         --version                          Print the version of InterProScan.
     """
 }
-
 
 workflow PRE_CHECKS {
     take:
     help_msg
     seq_input
+    data_dir
     using_nucleic
     all_params
     user_applications
     output_formats
     version_msg
-    ips6_version
+    ipscn_version
     signalp_mode
     signalp_gpu
 
@@ -50,7 +56,7 @@ workflow PRE_CHECKS {
     }
 
     if (version_msg) {
-        log.info "InterProScan version: ${ips6_version}"
+        log.info "InterProScan version: ${ipscn_version}"
         exit 0
     }
 
@@ -83,14 +89,14 @@ workflow PRE_CHECKS {
 
     // Check if the input parameters are valid
     def parameters_expected = [
-        'input', 'applications', 'disable_precalc', 'help',
+        'input', 'applications', 'disable_precalc', 'help', 'datadir',
         'batchsize', 'url_precalc', 'check_precalc', 'matches',
         'sites', 'bin', 'members', 'translate', 'nucleic',
         'formats', 'outdir', 'xrefs', 'goterms', 'pathways', 'signalp_mode',
-        'ipsc_version', 'version', 'lookup_retries', 'signalp_gpu'
+        'ipscn_version', 'version', 'lookup_retries', 'signalp_gpu'
     ]
     def parameter_diff = all_params - parameters_expected
-    if (parameter_diff.size() != 0){
+    if (parameter_diff.size() != 0) {
         log.info printHelp()
         exit 22, "Input not valid: $parameter_diff"
     }
@@ -110,7 +116,7 @@ workflow PRE_CHECKS {
     }
 
     if ("${signalp_mode}".toLowerCase() !in ['fast', 'slow', 'slow-sequential']) {
-        log.info "Unrecognised SignalP mode '${signalp_mode}'.\nAccepted modes: 'fast', 'slow', 'slow-sequential'"
+        log.error "Unrecognised SignalP mode '${signalp_mode}'.\nAccepted modes: 'fast', 'slow', 'slow-sequential'"
         exit 22
     }
 
@@ -128,5 +134,15 @@ workflow PRE_CHECKS {
         exit 5
     }
 
+    applications = user_applications.toLowerCase()
+    dataDir = CHECK_DATA(applications, data_dir)
+
     log.info "Number of sequences to analyse: ${seq_input.countFasta()}"
+
+    formats = output_formats.toLowerCase()
+
+    emit:
+    dataDir
+    formats
+    applications
 }
