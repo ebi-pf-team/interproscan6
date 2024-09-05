@@ -590,13 +590,13 @@
         "description" : "generic binding surface I",
         "numLocations" : 19,
         "siteLocations" : [ {
-          "start" : 225,
-          "end" : 225,
-          "residue" : "V"
-        }, {
           "start" : 245,
           "end" : 245,
           "residue" : "N"
+        }, {
+          "start" : 225,
+          "end" : 225,
+          "residue" : "V"
         }, {
           "start" : 238,
           "end" : 238,
@@ -614,13 +614,13 @@
           "end" : 285,
           "residue" : "Q"
         }, {
-          "start" : 235,
-          "end" : 235,
-          "residue" : "G"
-        }, {
           "start" : 240,
           "end" : 240,
           "residue" : "E"
+        }, {
+          "start" : 235,
+          "end" : 235,
+          "residue" : "G"
         }, {
           "start" : 227,
           "end" : 227,
@@ -634,13 +634,13 @@
           "end" : 249,
           "residue" : "T"
         }, {
-          "start" : 236,
-          "end" : 236,
-          "residue" : "F"
-        }, {
           "start" : 237,
           "end" : 237,
           "residue" : "Y"
+        }, {
+          "start" : 236,
+          "end" : 236,
+          "residue" : "F"
         }, {
           "start" : 287,
           "end" : 287,
@@ -654,13 +654,13 @@
           "end" : 269,
           "residue" : "V"
         }, {
-          "start" : 247,
-          "end" : 247,
-          "residue" : "P"
-        }, {
           "start" : 276,
           "end" : 276,
           "residue" : "K"
+        }, {
+          "start" : 247,
+          "end" : 247,
+          "residue" : "P"
         }, {
           "start" : 286,
           "end" : 286,
@@ -699,15 +699,15 @@
         "description" : "L-asparaginase, type II",
         "type" : "FAMILY",
         "goXRefs" : [ {
-          "name" : "asparagine metabolic process",
-          "databaseName" : "GO",
-          "category" : "BIOLOGICAL_PROCESS",
-          "id" : "GO:0006528"
-        }, {
           "name" : "asparaginase activity",
           "databaseName" : "GO",
           "category" : "MOLECULAR_FUNCTION",
           "id" : "GO:0004067"
+        }, {
+          "name" : "asparagine metabolic process",
+          "databaseName" : "GO",
+          "category" : "BIOLOGICAL_PROCESS",
+          "id" : "GO:0006528"
         } ],
         "pathwayXRefs" : [ {
           "name" : "N-(1-deoxy-D-fructos-1-yl)-L-asparagine degradation",

@@ -1,5 +1,6 @@
-import argparse
 import json
+import sys
+
 import stockholm_parser
 
 
@@ -111,10 +112,10 @@ def build_fragments(filtered_matches: dict, dat_parsed: dict, min_length: int) -
                             })
 
                 for raw_discontinuous_match in raw_discontinuous_matches:
-                    match_length = int(raw_discontinuous_match["locations"][0]['end']) - \
-                                   int(raw_discontinuous_match["locations"][0]['start']) + 1
-                    if match_length >= min_length:
-                        processed_matches.append((protein_id, domain_id, raw_discontinuous_match))
+                    for location in raw_discontinuous_match["locations"]:
+                        match_length = int(location['end']) - int(location['start']) + 1
+                        if match_length >= min_length:
+                            processed_matches.append((protein_id, domain_id, raw_discontinuous_match))
             else:
                 if len(pfam_match["locations"]) > 0:
                     match_length = int(pfam_match["locations"][0]['end']) - int(pfam_match["locations"][0]['start']) + 1
@@ -168,19 +169,21 @@ def build_result(filtered_matches):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Postprocess pfam matches')
-    parser.add_argument('--hmm_parsed', required=True, help='hmm parsed file')
-    parser.add_argument('--min_length', required=True, help='minimum length')
-    parser.add_argument('--seed', required=True, help='seed file')
-    parser.add_argument('--clans', required=True, help='clans file')
-    parser.add_argument('--dat', required=True, help='dat file')
-    args = parser.parse_args()
-
-    hmm_parsed = args.hmm_parsed
-    seed = args.seed.split("=")[1]
-    clans = args.clans.split("=")[1]
-    dat = args.dat.split("=")[1]
-    min_length = int(args.min_length)
+    """CL input:
+    0. Str repr of the path to the internal IPS6 JSON of raw PFAM results
+    1. The min length specified in post-processing params in the members.config file
+    2. Str repr of the path to the PFAM seed file
+    3. Str repr of the path to the PFAM clan file
+    4. Str repr of the path to the PFAM dat file
+    5. Str repr for the output file path
+    """
+    args = sys.argv[1:]
+    hmm_parsed = args[0]
+    min_length = int(args[1])
+    seed = args[2].split("=")[1]
+    clans = args[3].split("=")[1]
+    dat = args[4].split("=")[1]
+    outpath = args[5]
 
     # Need to return Pfam clans AND nesting relationships between models
     seed_nesting = stockholm_parser.parser_seed_nesting(seed)
@@ -190,7 +193,8 @@ def main():
     filtered_matches = post_process(hmm_parsed, clans_parsed)
     filtered_fragments = build_fragments(filtered_matches, dat_parsed, min_length)
     result = build_result(filtered_fragments)
-    print(json.dumps(result, indent=4))
+    with open(outpath, "w") as fh:
+        json.dump(result, fh)
 
 
 if __name__ == '__main__':

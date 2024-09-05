@@ -12,6 +12,9 @@ process PAINT_ANNOTATIONS {
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/xrefs/paint_annotations.py ${matches} ${paint_anno_dir} > paint_anno_${matches}
+    python3 $projectDir/interproscan/scripts/xrefs/paint_annotations.py \\
+        ${matches} \\
+        ${paint_anno_dir} \\
+        paint_anno_${matches}
     """
 }

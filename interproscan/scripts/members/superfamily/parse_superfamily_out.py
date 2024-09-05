@@ -10,11 +10,8 @@ ACCESSION_PATTERN = re.compile(r"^ACC\s+([A-Z0-9]+)\.?.*$")
 LENGTH_LINE = re.compile(r"^LENG\s+([0-9]+)$")
 
 
-def parse(ass3_out_path: str, hmmlib_info: dict) -> dict:
+def parse(ass3_out_path: str, hmmlib_info: dict, member_db: str) -> dict:
     data = {}
-    path_segments = ass3_out_path.split("/")[-1].split("._.")
-    version = path_segments[0]
-    member_db = path_segments[1]
 
     with open(ass3_out_path, 'r') as reader:
         for line in reader:
@@ -32,7 +29,6 @@ def parse(ass3_out_path: str, hmmlib_info: dict) -> dict:
                         'name': name,
                         'hmm_length': hmm_length,
                         'member_db': member_db,
-                        'version': version,
                         'evalue': match['evalue'],
                         'model-ac': match['model_id'],
                         'locations': []
@@ -138,11 +134,17 @@ def parse_hmmlib(hmmlib_path: str) -> dict:
 
 
 def main():
+    """CL input:
+    0. Str repr of path to the hmm lib
+    1. Str repr of path to the ass3 output file
+    2. member database
+    3. Str repr of path to write the output file
+    """
     args = sys.argv[1:]
     hmmlib_info = parse_hmmlib(args[0])
-    parsed_result = parse(args[1], hmmlib_info)
-
-    print(json.dumps(parsed_result, indent=4))
+    parsed_result = parse(args[1], hmmlib_info, args[2])
+    with open(args[3], "w") as fh:
+        json.dump(parsed_result, fh)
 
 
 if __name__ == "__main__":

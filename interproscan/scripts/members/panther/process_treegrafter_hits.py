@@ -1,5 +1,5 @@
-import argparse
 import json
+import sys
 
 from copy import copy
 
@@ -34,41 +34,20 @@ class PantherHit:
 
 
 def main():
-    parser = build_parser()
-    args = parser.parse_args()
+    """
+    CL input:
+    0. Output file from treegradter
+    1. Internal IPS6 JSON
+    2. Str repr of path for the output file
+    """
+    args = sys.argv[1:]
+    treegrafter_out = args[0]
+    ips6_json = args[1]
+    hits = parse_treegrafter(treegrafter_out)
+    updated_ips6_hits = update_ips6(ips6_json, hits)
 
-    hits = parse_treegrafter(args.treegrafter)
-    updated_ips6 = update_ips6(args.ips6, hits, args.paint_annnotations)
-    print(json.dumps(updated_ips6, indent=2))
-
-
-def build_parser() -> argparse.ArgumentParser:
-    """Build cmd-line argument parser"""
-    parser = argparse.ArgumentParser(
-        prog="process_post_processed_panther_hits",
-        description="Filter results of HMMER search on Pather HMMs by parsing the TreeGrafter output",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-
-    parser.add_argument(
-        "treegrafter",
-        type=Path,
-        help="Path to TreeGrafter output file"
-    )
-
-    parser.add_argument(
-        "ips6",
-        type=Path,
-        help="Path to IPS6 JSON file containing parsed content from HMMER.out file"
-    )
-
-    parser.add_argument(
-        "paint_annnotations",
-        type=Path,
-        help="Path to PAINT annotations file from the Panther release"
-    )
-
-    return parser
+    with open(args[2], "w") as fh:
+        json.dump(updated_ips6_hits, fh)
 
 
 def parse_treegrafter(treegrafter: Path) -> dict[str, list[str]]:
@@ -91,7 +70,7 @@ def parse_treegrafter(treegrafter: Path) -> dict[str, list[str]]:
     return hits
 
 
-def update_ips6(ips6: Path, hits: dict[str, list[str]], paint_anno_path: Path) -> None:
+def update_ips6(ips6: Path, hits: dict[str, list[str]]) -> None:
     """Parse ips6 json containing hits from the hmmer.out file,
     removing hits not in TreeGrafter output.
 
@@ -99,7 +78,6 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]], paint_anno_path: Path) -
     :param hits: dict of hits from panther post-processed output
         (i.e. TreeGrafter output)
         {protein_id: [(sig_acc, node_id)]}
-    :param paint_anno_path: path to Panther release Paint Annotation file
     """
     with open(ips6, "r") as fh:
         ips6_data = json.load(fh)
@@ -115,7 +93,6 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]], paint_anno_path: Path) -
 
         else:
             for signature_acc in ips6_data[_protein_id]:
-
                 if signature_acc not in hits[protein_id].signatures:
                     # signature hit did not parse TreeGrafter post-processing
                     continue
@@ -128,16 +105,16 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]], paint_anno_path: Path) -
                         if signature_acc not in processed_ips6_data[_protein_id]:
                             processed_ips6_data[_protein_id][signature_acc] = copy(ips6_data[_protein_id][signature_acc])
                             processed_ips6_data[_protein_id][signature_acc]["locations"] = []
-                        
+
                         # Panther/Treegrafter only has one (the best) match per protein
                         for location in ips6_data[_protein_id][signature_acc]["locations"]:
-                            if panther_hit["ali_start"] == location["start"] and \
-                                panther_hit["ali_end"] == location["end"] and \
-                                panther_hit["hmm_start"] == location["hmmStart"] and \
-                                panther_hit["hmm_end"] == location["hmmEnd"] and \
+                            if int(panther_hit["ali_start"]) == location["start"] and \
+                                int(panther_hit["ali_end"]) == location["end"] and \
+                                int(panther_hit["hmm_start"]) == location["hmmStart"] and \
+                                int(panther_hit["hmm_end"]) == location["hmmEnd"] and \
                                 panther_hit["env_start"] == location["envelopeStart"] and \
                                 panther_hit["env_end"] == location["envelopeEnd"]:
-                                
+
                                 processed_ips6_data[_protein_id][signature_acc]["locations"] = [{
                                     "start": panther_hit["ali_start"],
                                     "end": panther_hit["ali_end"],
@@ -151,7 +128,6 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]], paint_anno_path: Path) -
                                     "score": panther_hit["score"],
                                     "envelopeStart": panther_hit["env_start"],
                                     "envelopeEnd": panther_hit["env_end"],
-                                    "postProcessed": location["postProcessed"],
                                     "alignment": location["alignment"],
                                     "cigar_alignment": location["cigar_alignment"]
                                 }]

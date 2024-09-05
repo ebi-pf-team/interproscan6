@@ -1,11 +1,6 @@
 import json
-import sys
 import re
-
-# Parse PRINTS output to standardised JSON format
-# param prints_out: path to prints output file
-# param hierarchy: path to prints hierarchy db
-# param version: prints version number
+import sys
 
 SUMMARYPATTERN = re.compile(r"^(\w+)\s+(\w+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+([A-Za-z0-9\s\-\/\(\)\,\'\.\|\+\_\:\;]+?)\s+(\w+)\s*$")
 PRINTPATTERN = re.compile(r"^(\w+)\s+(\w+)\s+(\d+)\s+(of\s+\d+)\s+([\d\.]+)\s+([\d\.]+)\s+(\d+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+([\d\.]*\d+e[+-]?\d+|[\d\.]+)\s+([Ii.]+)\s*$")
@@ -13,10 +8,15 @@ MOTIFPATTERN = re.compile(r"^(\w+)\s+(\w+)\s+(\d+)\s+(of\s+\d+)\s+([\d\.]+)\s+(\
 
 
 def main():
+    """CL input:
+    0. Str repr of path to the print output file
+    1. Str repr of path to the PRINT hierarchy db file
+    2. Str repr of path for the output file"""
     args = sys.argv[1:]
     hierarchy_map = parse_hierarchy(args[1])
     results = parse_prints(args[0], hierarchy_map)
-    print(json.dumps(results, indent=2))
+    with open(args[2], "w") as fh:
+        json.dump(results, fh)
 
 
 def parse_hierarchy(hierarchy: str) -> dict:
@@ -60,7 +60,6 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
     '''
     matches = {}
     protein_id = ""
-    version = prints_out.split("._.")[0]
     with open(prints_out) as f:
         for line in f:
             if line.startswith("Sn; "):
@@ -88,7 +87,6 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
                         match = {"accession": model_acc,
                                  "name": fingerprint,
                                  "member_db": "PRINTS",
-                                 "version": version,
                                  "evalue": evalue,
                                  "graphscan": graphscan,
                                  "model-ac": model_acc,

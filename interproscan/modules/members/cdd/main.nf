@@ -2,11 +2,10 @@ process CDD_RUNNER {
     label 'cdd_runner'
 
     input:
-    tuple path(fasta), val(library), val(release), val(switches), val(postprocessing_params)
+    tuple path(fasta), val(library), val(switches), val(postprocessing_params)
 
     output:
     path "rpsblast_out"
-    val release
     val postprocessing_params
 
     script:
@@ -33,7 +32,6 @@ process CDD_POSTPROCESS {
 
     input:
     path "rpsblast_out"
-    val release
     val postprocessing_params
     /*
     [0] = switches
@@ -42,7 +40,6 @@ process CDD_POSTPROCESS {
 
     output:
     path "rpsblast_processed"
-    val release
     script:
     """
     /opt/rpsbproc/RpsbProc-x64-linux/rpsbproc --infile rpsblast_out --outfile rpsblast_processed ${postprocessing_params[0]} --data-path ${postprocessing_params[1]}
@@ -55,7 +52,6 @@ process CDD_PARSER {
 
     input:
     path rpsblast_processed
-    val release
 
     output:
     path "cdd_parsed.json"
@@ -64,6 +60,6 @@ process CDD_PARSER {
     """
     python3 $projectDir/interproscan/scripts/members/cdd/cdd_parser.py \\
         ${rpsblast_processed} \\
-        ${release} > cdd_parsed.json
+        cdd_parsed.json
     """
 }

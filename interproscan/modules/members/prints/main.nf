@@ -2,16 +2,16 @@ process PRINTS_RUNNER {
     label 'prints_runner'
 
     input:
-    tuple path(fasta), val(hierarchy), val(pval), val(release), val(switches)
+    tuple path(fasta), val(hierarchy), val(pval), val(switches)
 
     output:
-    path "*._.printsOutput.txt"
+    path "printsOutput.txt"
     val hierarchy
 
     script:
     """
     $projectDir/bin/prints/fingerPRINTScan \
-    ${pval} ${fasta} ${switches} > ${release}._.printsOutput.txt
+    ${pval} ${fasta} ${switches} > printsOutput.txt
     """
 
 }
@@ -30,10 +30,10 @@ process PRINTS_PARSER {
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/members/prints/parser.py\
-    ${prints_output} \
-    ${hierarchy} \
-    > prints_parsed.json
+    python3 $projectDir/interproscan/scripts/members/prints/parser.py \\
+    ${prints_output} \\
+    ${hierarchy} \\
+    prints_parsed.json
     """
 
 }

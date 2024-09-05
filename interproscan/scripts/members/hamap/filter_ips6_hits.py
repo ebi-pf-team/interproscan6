@@ -1,5 +1,5 @@
-import argparse
 import json
+import sys
 
 from pathlib import Path
 
@@ -46,38 +46,6 @@ class DomainHit:
         self.match_id = None
 
 
-def build_parser() -> argparse.ArgumentParser:
-    """Build cmd-line argument parser"""
-    parser = argparse.ArgumentParser(
-        prog="hamap_match_parser",
-        description=(
-            "Parse the output from the pfsearch_wrapper.py "
-            "into the interal IPS6 JSON structure"
-        ),
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-
-    parser.add_argument(
-        "ips6",
-        type=Path,
-        help="Path to an internal IPS6 JSON file"
-    )
-
-    parser.add_argument(
-        "pf_output",
-        type=Path,
-        help="Path to pfsearch_wrapper.y output file"
-    )
-
-    parser.add_argument(
-        "out_json",
-        type=Path,
-        help="Path to write the output JSON file"
-    )
-
-    return parser
-
-
 def parse_pf_out(pf_output: Path) -> dict[str, HamapHit]:
     """Parse pf_output file into a dictionary
 
@@ -104,7 +72,7 @@ def filter_matches(ips6: Path, hamap_matches: dict[str, HamapHit]) -> tuple[dict
     those that passed the Gene3D post-processing.
 
     :param ips6: path to internal IPS6 JSON file containing parsed hits from HMMER.out file
-    :param hamap_matches: dict of HamapHits, representing hits in the 
+    :param hamap_matches: dict of HamapHits, representing hits in the
         pfsearch_wrapper.py output file
 
     Return processed IPS6 dict and a list of all cath superfamilies where hits were generated
@@ -131,10 +99,7 @@ def filter_matches(ips6: Path, hamap_matches: dict[str, HamapHit]) -> tuple[dict
             if signature_acc not in processed_ips6[protein_id]:
                 processed_ips6[protein_id][signature_acc] = {}
                 processed_ips6[protein_id][signature_acc]["accession"] = hmmer_match["accession"]
-                processed_ips6[protein_id][signature_acc]["name"] = hmmer_match["name"]
-                processed_ips6[protein_id][signature_acc]["description"] = hmmer_match["description"]
                 processed_ips6[protein_id][signature_acc]["member_db"] = hmmer_match["member_db"]
-                processed_ips6[protein_id][signature_acc]["version"] = hmmer_match["version"]
                 processed_ips6[protein_id][signature_acc]["model-ac"] = hmmer_match["model-ac"]
                 processed_ips6[protein_id][signature_acc]["locations"] = []
 
@@ -157,13 +122,20 @@ def filter_matches(ips6: Path, hamap_matches: dict[str, HamapHit]) -> tuple[dict
 
 
 def main():
-    parser = build_parser()
-    args = parser.parse_args()
+    """CL input:
+    0. Internal IPS6 JSON
+    1. pfsearch_wrapper.py output file
+    2. Str repr of path for final output JSON
+    """
+    args = sys.argv[1:]
+    ips6_json = args[0]
+    pf_output = args[1]
+    output = args[2]
 
-    matches = parse_pf_out(args.pf_output)
-    processed_ips6 = filter_matches(args.ips6, matches)
+    matches = parse_pf_out(pf_output)
+    processed_ips6 = filter_matches(ips6_json, matches)
 
-    with open(args.out_json, "w") as fh:
+    with open(output, "w") as fh:
         json.dump(processed_ips6, fh)
 
 

@@ -12,7 +12,6 @@ process FUNFAM_FILTER_MATCHES {
         path ips6_jsons
         path cath_resolved_outs
         val postprocessing_params
-    // postprocessing_params[6] funfam release
 
     output:
         path "*.processed.json"
@@ -21,8 +20,7 @@ process FUNFAM_FILTER_MATCHES {
     """
     python3 $projectDir/interproscan/scripts/members/funfam/run_match_filtering.py \\
         ${ips6_jsons} \\
-        ${cath_resolved_outs} \\
-        ${postprocessing_params[6]} > debug
+        ${cath_resolved_outs}
     """
 }
 
@@ -77,17 +75,16 @@ process PANTHER_FILTER_MATCHES {
     input:
         path ips6_json
         path treegrafter_output
-        val postprocessing_params
 
     output:
         path "${ips6_json}.post.processed.json"
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/members/panther/process_treegrafter_hits.py \
-        ${treegrafter_output} \
-        ${ips6_json} \
-        ${postprocessing_params[2]} > ${ips6_json}.post.processed.json
+    python3 $projectDir/interproscan/scripts/members/panther/process_treegrafter_hits.py \\
+        ${treegrafter_output} \\
+        ${ips6_json} \\
+        ${ips6_json}.post.processed.json
     """
 }
 
@@ -102,15 +99,24 @@ process PFAM_FILTER_MATCHES {
     output:
         path "${ips6_json}.post.processed.json"
 
+    /*
+    CL input to postprocess.py:
+    0. Str repr of the path to the internal IPS6 JSON of raw PFAM results
+    1. The min length specified in post-processing params in the members.config file
+    2. Str repr of the path to the PFAM seed file
+    3. Str repr of the path to the PFAM clan file
+    4. Str repr of the path to the PFAM dat file
+    5. Str repr for the output file path
+    */
     script:
     """
-    python3 $projectDir/interproscan/scripts/members/pfam/postprocess.py \
-        --hmm_parsed ${ips6_json} \
-        --min_length '${postprocessing_params[0]}' \
-        --seed '${postprocessing_params[1]}' \
-        --clans '${postprocessing_params[2]}' \
-        --dat '${postprocessing_params[3]}' \
-        > '${ips6_json}.post.processed.json'
+    python3 $projectDir/interproscan/scripts/members/pfam/postprocess.py \\
+        ${ips6_json} \\
+        '${postprocessing_params[0]}' \\
+        '${postprocessing_params[1]}' \\
+        '${postprocessing_params[2]}' \\
+        '${postprocessing_params[3]}' \\
+        '${ips6_json}.post.processed.json'
     """
 }
 
@@ -151,8 +157,10 @@ process PIRSR_FILTER_MATCHES {
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/members/pirsr/filter.py \
-    ${ips6_json} ${postprocessing_params[0]} > ${ips6_json}.post.processed.json
+    python3 $projectDir/interproscan/scripts/members/pirsr/filter.py \\
+        ${ips6_json} \\
+        ${postprocessing_params[0]} \\
+        ${ips6_json}.post.processed.json
     """
 }
 
@@ -171,7 +179,8 @@ process SFLD_FILTER_MATCHES {
     """
     python3 $projectDir/interproscan/scripts/members/sfld/sfld_process_post_processed.py \\
         ${slfd_post_processed_output} \\
-        ${ips6_json} > ${ips6_json}.post.processed.json
+        ${ips6_json} \\
+        ${ips6_json}.post.processed.json
     """
 }
 
@@ -208,6 +217,7 @@ process SUPERFAMILY_FILTER_MATCHES {
     input:
     path ass3_out
     path hmm_lib
+    val member
 
     output:
     path "superfamily_parsed_*"
@@ -215,6 +225,9 @@ process SUPERFAMILY_FILTER_MATCHES {
     script:
     """
     python3 $projectDir/interproscan/scripts/members/superfamily/parse_superfamily_out.py \\
-        ${hmm_lib} ${ass3_out} > superfamily_parsed_${ass3_out}.json
+        ${hmm_lib} \\
+        ${ass3_out} \\
+        ${member} \\
+        superfamily_parsed_${ass3_out}.json
     """
 }

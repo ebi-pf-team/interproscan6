@@ -4,6 +4,7 @@ include {
     LOOKUP_NO_MATCHES;
 } from "$projectDir/interproscan/modules/lookup/main"
 
+
 workflow SEQUENCE_PRECALC {
     take:
     hash_sequence

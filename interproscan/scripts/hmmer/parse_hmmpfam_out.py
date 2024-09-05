@@ -36,7 +36,6 @@ class QueryProtein:
         self.has_hits = True
         model = ModelHit()
         model.model_id = model_pattern.group(1)
-        model.description = model_pattern.group(2)
         model.score = model_pattern.group(3)
         model.evalue = model_pattern.group(4)
         model.num_domains = int(model_pattern.group(5))
@@ -63,7 +62,6 @@ class ModelHit:
     """Represent a SMART signature"""
     def __init__(self):
         self.model_id = None
-        self.description = None
         self.score = None
         self.evalue = None
         self.num_domains = None
@@ -92,13 +90,12 @@ def add_match(
     matches: dict,
     protein_with_hit: QueryProtein,
     member_db: str,
-    version: str,
 ) -> dict:
     """Store data for protein with hits against SMART HMM profiles.
 
     Keyed by query protein ID, into dict:
     Keyed by signature accession, into dict:
-        accession, name, descriptiion, etc. locations: [],"""
+        accession, evalue, score, etc. locations: [],"""
     if protein_with_hit.sequence_id not in matches:
         matches[protein_with_hit.sequence_id] = {}
 
@@ -106,12 +103,9 @@ def add_match(
         if model_id not in matches[protein_with_hit.sequence_id]:
             matches[protein_with_hit.sequence_id][model_id] = {
                 "accession": model_id,
-                "name": "",
-                "description": "",
                 "evalue": model_obj.evalue,
                 "score": model_obj.score,
                 "member_db": member_db,
-                "version": version,
                 "model-ac": model_id,
                 "locations": []
             }
@@ -143,10 +137,8 @@ def add_match(
     return matches
 
 
-def parse_hmmpfam_out(out_file: str) -> dict:
+def parse_hmmpfam_out(out_file: str, member_db: str) -> dict:
     """Coordinate parsing the HMMER2 Hmmpfam output file"""
-    version = out_file.split("/")[-1].split("._.")[0]
-    member_db = out_file.split("._.")[1]
     matches = {}
     stage = 'LOOKING_FOR_METHOD_ACCESSION'
     protein_with_hit = QueryProtein()
@@ -156,7 +148,7 @@ def parse_hmmpfam_out(out_file: str) -> dict:
             if line.startswith("//"):
                 # add new domain to matches
                 if protein_with_hit.signatures:
-                    matches = add_match(matches, protein_with_hit, member_db, version)
+                    matches = add_match(matches, protein_with_hit, member_db)
 
                 # start a new protein instance
                 protein_with_hit = QueryProtein()
@@ -164,7 +156,7 @@ def parse_hmmpfam_out(out_file: str) -> dict:
 
             elif stage == 'LOOKING_FOR_METHOD_ACCESSION':
                 if line.startswith("Query sequence:"):
-                    protein_with_hit.get_seq_id(line) 
+                    protein_with_hit.get_seq_id(line)
                     # go onto next step: getting model matches
                     stage = 'LOOKING_FOR_SEQUENCE_MATCHES'
 
@@ -196,8 +188,15 @@ def parse_hmmpfam_out(out_file: str) -> dict:
 
 
 def main():
-    parse_result = parse_hmmpfam_out(sys.argv[1])
-    print(json.dumps(parse_result, indent=2))
+    """
+    :args 0: str repr of path to hmmer file to be parsed
+    :args 1: member database
+    :args 2: str repr of path to output file
+    """
+    args = sys.argv[1:]
+    parse_result = parse_hmmpfam_out(args[0], args[1])
+    with open(args[2], "w") as fh:
+        json.dump(parse_result, fh)
 
 
 if __name__ == "__main__":

@@ -56,7 +56,7 @@ FEATUREDICT = {
 class PhobiusHit:
     """Represent protein and associated hits in the Phobius output file.
 
-    We store like domain hits (signal peptide, transmembrane and 
+    We store like domain hits (signal peptide, transmembrane and
     (non-)cytoplasmic domain)) together as one hit with multiple locations.
     In the final output each domain hit is written as a separate
     'signature' hit - this approach ensures all locations are
@@ -73,13 +73,12 @@ class PhobiusHit:
 
     def add_domain(
         self, self_domains,
-        acc: str, name: str, desc: str, version: str,
+        acc: str, name: str, desc: str,
         start: str, end: str
     ):
         if acc not in self_domains:
             self_domains[acc] = {
                 "member_db": "Phobius",
-                "version": version,
                 "name": name,
                 "accession": acc,
                 "description": desc,
@@ -96,7 +95,7 @@ class PhobiusHit:
             }],
         })
 
-    def parse_domain(self, line: str, version: str):
+    def parse_domain(self, line: str):
         ftmatch = FT_PATTERN.match(line)
         if ftmatch:
             feature = ftmatch.group(4) if ftmatch.group(4) else ftmatch.group(1)
@@ -109,32 +108,37 @@ class PhobiusHit:
         if acc.startswith("SIGNAL_PEPTIDE"):
             self.add_domain(
                 self.signal_peptides,
-                acc, name, desc, version, start, end
+                acc, name, desc, start, end
             )
         elif acc == "TRANSMEMBRANE":
             self.add_domain(
                 self.transmembrane_domains,
-                acc, name, desc, version, start, end
+                acc, name, desc, start, end
             )
-        else: 
+        else:
             self.add_domain(
                 self.other_domains,
-                acc, name, desc, version, start, end
+                acc, name, desc, start, end
             )
 
 
 def main():
-    # args 0 = output form phobius
+    """CL input:
+    0. Str repr of path to the output from Phobius
+    1. Str repr of path for the output file
+    """
+    # args 
     args = sys.argv[1:]
     parsed_results = parse(args[0])
-    print(json.dumps(parsed_results, indent=2))
+    with open(args[1], "w") as fh:
+        json.dump(parsed_results, fh)
 
 
 def parse(phobius_out: str) -> dict:
     """Example Phobius hit from the output file. Data is grouped by the query protein seq ID:
     //
     ID   sp|O16846|1AK_HETMG
-    FT   SIGNAL        1     22       
+    FT   SIGNAL        1     22
     FT   DOMAIN        1      5       N-REGION.
     FT   DOMAIN        6     17       H-REGION.
     FT   DOMAIN       18     22       C-REGION.
@@ -142,14 +146,13 @@ def parse(phobius_out: str) -> dict:
     //
     """
     matches = {}
-    version = phobius_out.split("._.")[0]
     protein = PhobiusHit()
     with open(phobius_out) as ph_file:
         for line in ph_file:
 
             if line.startswith("ID"):
                 if protein.seq_id:
-                    # Only store details of proteins with at least one signal peptide or 
+                    # Only store details of proteins with at least one signal peptide or
                     # transmembrane domain region.
                     # Proteins with only "CYTOPLASMIC" or "NON-CYTOPLASMIC" domains
                     # are junk according to the Phobius domcumentation
@@ -170,7 +173,7 @@ def parse(phobius_out: str) -> dict:
                 protein.get_protein_id(line)
 
             elif line.startswith("FT"):
-                protein.parse_domain(line.strip(), version)
+                protein.parse_domain(line.strip())
 
     return matches
 

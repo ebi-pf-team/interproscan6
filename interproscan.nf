@@ -3,6 +3,7 @@ nextflow.enable.dsl=2
 include { PARSE_SEQUENCE } from "$projectDir/interproscan/modules/parse_sequence/main"
 include { GET_ORFS } from "$projectDir/interproscan/modules/get_orfs/main"
 include { AGGREGATE_RESULTS } from "$projectDir/interproscan/modules/output/aggregate_results/main"
+include { AGGREGATE_PARSED_SEQS } from "$projectDir/interproscan/modules/output/aggregate_parsed_seqs/main"
 include { WRITE_RESULTS } from "$projectDir/interproscan/modules/output/write_results/main"
 
 include { PRE_CHECKS } from "$projectDir/interproscan/subworkflows/pre_checks/main"
@@ -77,7 +78,7 @@ workflow {
             // cases in which the lookup check ran successfully but lookup matches not
             disable_precalc = true
             log.info "ERROR: unable to connect to match lookup service. Max retries reached. Running analysis locally..."
-        }
+    }
 
     analysis_result = Channel.empty()
     if (disable_precalc || sequences_to_analyse) {
@@ -99,6 +100,7 @@ workflow {
     all_results = parsed_matches.concat(parsed_analysis)
 
     AGGREGATE_RESULTS(all_results.collect())
+    AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
 
     /* XREFS:
     Add signature and entry desc and names
@@ -113,7 +115,7 @@ workflow {
 
     WRITE_RESULTS(
         input_file.getName(),
-        PARSE_SEQUENCE.out.collect(),
+        AGGREGATE_PARSED_SEQS.out,
         XREFS.out.collect(),
         ch_format,
         params.outdir,

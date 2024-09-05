@@ -6,10 +6,8 @@ import sys
 output file, and then runs filter_ips6_hits.py for each pair
 of matches output files"""
 
-
-CATH_PATTERN = re.compile(r"^.*\._\.(\d+\.\d+\.\d+\.\d+)\.cath\.resolved\.out$")
-JSON_PATTERN = re.compile(r"^hmmer_parsed_.*\._\.(\d+\.\d+\.\d+\.\d+)\.json$")
-RELEASE_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
+CATH_PATTERN = re.compile(r"^.*_(\d+\.\d+\.\d+\.\d+)\.cath\.resolved\.out$")
+JSON_PATTERN = re.compile(r"^hmmer_parsed_.*_(\d+\.\d+\.\d+\.\d+)\.json$")
 
 
 def main():
@@ -17,9 +15,7 @@ def main():
     Args include:
     All hmmer.out files from HMMER_PARSER
     All output files from cath-resolve hits
-    Ending with the release number of FunFam from members.config
     """
-    release = None
     files = {}  # keyed by cath superfamily
     for input_arg in sys.argv[1:]:
         _file = CATH_PATTERN.match(input_arg)
@@ -36,21 +32,12 @@ def main():
             if cath_superfam not in files:
                 files[cath_superfam] = {}
             files[cath_superfam]["ips6.json"] = input_arg
-            continue
-
-        if RELEASE_PATTERN.match(input_arg):
-            release = input_arg
-            continue
-
-        print(f"Did not recognise this input arg {input_arg}")
-        sys.exit(1)
 
     for cath_superfam, file_info in files.items():
         cath_out = parse_cath(file_info["cath.resolve"])
         processed_ips6 = filter_matches(
             file_info["ips6.json"],
-            cath_out,
-            release
+            cath_out
         )
 
         with open(f"{file_info['ips6.json']}.processed.json", "w") as fh:
@@ -115,16 +102,14 @@ def parse_cath(cath_out: str) -> dict[str, FunfamHit]:
 
 def filter_matches(
     ips6: str,
-    funfam_matches: dict[str, FunfamHit],
-    release: str
+    funfam_matches: dict[str, FunfamHit]
 ) -> tuple[dict, set]:
     """Parse the IPS6 JSON file, filtering hits to only retains
     those that passed the Gene3D post-processing.
 
     :param ips6: str repr of path to internal IPS6 JSON file containing parsed hits from HMMER.out file
-    :param funfam_matches: dict of FunfamHits, representing hits in the 
+    :param funfam_matches: dict of FunfamHits, representing hits in the
         add_cath_superfamilies.py output file
-    :param release: FunFam release version
 
     Return processed IPS6 dict and a list of all cath superfamilies where hits were generated
     """
@@ -163,7 +148,6 @@ def filter_matches(
                 if funfam_sig_acc not in processed_ips6[protein_id]:
                     sig_info = ips6_data[protein_id][signature_acc]
                     sig_info["member_db"] = "funfam"
-                    sig_info["version"] = release
                     sig_info["accession"] = funfam_sig_acc
 
                     # model ac is the domain id (minus the -... suffix)
@@ -171,7 +155,7 @@ def filter_matches(
 
                     processed_ips6[protein_id][funfam_sig_acc] = sig_info
                     processed_ips6[protein_id][funfam_sig_acc]["locations"] = []
-                    # start locations as empty as not all hits/locations in ips6 
+                    # start locations as empty as not all hits/locations in ips6
                     # may have parsed the post-processing
 
                 # add the location fragments (the 'aligned-regions') to the domain location data

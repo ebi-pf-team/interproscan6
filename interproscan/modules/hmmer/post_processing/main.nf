@@ -28,8 +28,8 @@ process CATH_RESOLVE_HITS {
 
 process FUNFAM_CATH_RESOLVE_HITS {
     /* Funfam has one hmmer.out file per cath superfamily
-    Runs cath_resolve hits for each hmmer.out file as a 
-    single job. 
+    Runs cath_resolve hits for each hmmer.out file as a
+    single job.
     Generates an output file per hmmer.out file.
     */
     label 'analysis_parser'
@@ -93,7 +93,7 @@ process HAMAP_POST_PROCESSER {
     /*
     post-processing params:
     0. models dir
-    1. flags for pfserach
+    1. flags for pfsearch
     */
 
     output:
@@ -143,14 +143,14 @@ process PANTHER_POST_PROCESSER {
     script:
     """
     mkdir data
-    python3 $projectDir/interproscan/scripts/members/panther/treegrafter.py \
-        run \
-        ${fasta} \
-        ${out_file} \
-        ${postprocessing_params[0]} \
-        -e ${postprocessing_params[1]} \
-        -o treegrafter_processed_panther_hits \
-        --epa-ng /opt/epa-ng/bin/epa-ng \
+    python3 $projectDir/interproscan/scripts/members/panther/treegrafter.py \\
+        run \\
+        ${fasta} \\
+        ${out_file} \\
+        ${postprocessing_params[0]} \\
+        -e ${postprocessing_params[1]} \\
+        -o treegrafter_processed_panther_hits \\
+        --epa-ng /opt/epa-ng/bin/epa-ng \\
         --keep
     """
 }
@@ -168,6 +168,7 @@ process SFLD_POST_PROCESSER {
     input:
         path out_file
         val postprocessing_params // contains [0] bin and [1] site_annotations file path
+        val member
         path alignment
         path out_dtbl
 

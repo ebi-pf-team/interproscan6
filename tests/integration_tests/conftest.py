@@ -32,12 +32,12 @@ def current_output_path(test_output_dir):
 
 @pytest.fixture
 def expected_output_path(test_output_dir):
-    return test_output_dir / 'expected_output_gene3d_funfam'
+    return test_output_dir / 'expected_output'
 
 
 @pytest.fixture
 def applications():
-    return 'gene3d,funfam'
+    return 'AntiFam,CDD,Coils,FunFam,Gene3D,HAMAP,NCBIfam,Panther,Pfam,PIRSF,PIRSR,PRINTS,PROSITE_PATTERNS,PROSITE_Profiles,SFLD,SMART,SUPERFAMILY'
 
 
 @pytest.fixture

@@ -16,7 +16,11 @@ process LOOKUP_CHECK {
         """
     else
         """
-        python3 $projectDir/interproscan/scripts/lookup/lookup_check.py ${hash_seq} ${params.url_precalc}${params.check_precalc} > checked_md5
+        python3 $projectDir/interproscan/scripts/lookup/lookup_check.py \\
+            ${hash_seq} \\
+            ${params.url_precalc}${params.check_precalc} \\
+            ${params.lookup_retries} \\
+            checked_md5
         """
 }
 
@@ -36,8 +40,13 @@ process LOOKUP_MATCHES {
     val is_test
 
     output:
-    path "parsed_match_lookup"
+    path("parsed_match_lookup"), optional: true
 
+    /*
+    'parsed_match_lookup' will only be generated if any matches are returned from
+    the MLS. If no matches are retrieved from the MLS, 'parsed_match_lookup'
+    will not be created.
+    */
     script:
     if ( is_test )
         """
@@ -45,7 +54,12 @@ process LOOKUP_MATCHES {
         """
     else
         """
-        python3 $projectDir/interproscan/scripts/lookup/lookup_matches.py ${checked_lookup} '${appl}' ${params.url_precalc}${params.matches} > parsed_match_lookup
+        python3 $projectDir/interproscan/scripts/lookup/lookup_matches.py \\
+            ${checked_lookup} \\
+            '${appl}' \\
+            ${params.url_precalc}${params.matches} \\
+            ${params.lookup_retries} \\
+            parsed_match_lookup
         """
 }
 
@@ -61,7 +75,7 @@ process LOOKUP_NO_MATCHES {
 
     script:
     """
-    output=\$(python3 $projectDir/interproscan/scripts/lookup/lookup_no_matches.py "${checked_lookup}")
+    output=\$(python3 $projectDir/interproscan/scripts/lookup/lookup_no_matches.py "${checked_md5}")
     
     if [ -n "\$output" ]; then
         echo "\$output" > no_match_lookup_fasta.fasta

@@ -9,7 +9,7 @@ process PFSCAN_RUNNER {
     label 'prosite_pfscan_runner'
 
     input:
-        tuple path(fasta), path(data), path(evaluator), val(release), val(switches)
+        tuple path(fasta), path(data), path(evaluator), val(switches)
     /*
     ps_scan_params params:
     0. patterns data file dir
@@ -18,7 +18,7 @@ process PFSCAN_RUNNER {
     */
 
     output:
-        path "${release}._.ps_scan.out"
+        path "ps_scan.out"
 
     script:
     """
@@ -27,7 +27,7 @@ process PFSCAN_RUNNER {
         -d ${data} \
         --pfscan /opt/pftools/pfscanV3 \
         -b ${evaluator} \
-        ${switches} > ${release}._.ps_scan.out
+        ${switches} > ps_scan.out
     """
 }
 

@@ -1,6 +1,6 @@
-import argparse
 import json
 import re
+import sys
 
 from pathlib import Path
 
@@ -14,34 +14,10 @@ SITE_LINE_PATTERN = re.compile(r"^(\d+)\s+(\S+)\s+(\S+)\s+(.+?)\s+(\S+)\s+(\d+)\
 MOTIF_LINE_PATTERN = re.compile(r"^\d+\s+\w+\_\d+\s+\w+\s+\w+\s+\w+\s+\d+$")
 
 
-def build_parser() -> argparse.ArgumentParser:
-    """Build cmd-line argument parser"""
-    parser = argparse.ArgumentParser(
-        prog="cdd_match_parser",
-        description="Parse the output from the CDD application, extracing matches and sites information",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-
-    parser.add_argument(
-        "rpsblast_processed",
-        type=Path,
-        help="Path to rpsblast_processed file"
-    )
-
-    parser.add_argument(
-        "release",
-        type=str,
-        help="Release version of CDD"
-    )
-
-    return parser
-
-
-def parse_cdd(rpsblast_processed: Path, release: str):
+def parse_cdd(rpsblast_processed: Path):
     """Parse rpsblast_processed file
 
     :param rpsblast_processed: Path to rpsblast_processed file
-    :param release: release version of CDD
     """
     matches = {}  # prot seq id: [{domain data, 'sites': {[sites]}}]
     protein_identifier = ""
@@ -89,7 +65,6 @@ def parse_cdd(rpsblast_processed: Path, release: str):
                             "accession": signature_accession,
                             "name": _line.group(10),
                             "member_db": "CDD",
-                            "version": release,
                             "model-ac": signature_accession,
                         }
 
@@ -141,11 +116,14 @@ def parse_cdd(rpsblast_processed: Path, release: str):
 
 
 def main():
-    parser = build_parser()
-    args = parser.parse_args()
-
-    matches = parse_cdd(args.rpsblast_processed, args.release)
-    print(json.dumps(matches, indent=2))
+    """CL input:
+    0. Str repr of path to the rpsblast processed file
+    1. Str repr of path for the output file
+    """
+    args = sys.argv[1:]
+    matches = parse_cdd(args[0])
+    with open(args[1], "w") as fh:
+        json.dump(matches, fh)
 
 
 if __name__ == "__main__":

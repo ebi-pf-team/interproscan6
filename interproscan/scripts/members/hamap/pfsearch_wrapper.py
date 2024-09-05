@@ -1,6 +1,6 @@
 """Script to parse the hmmer3 tbl file and run the pfsearch binary
 
-It does not filter the matches (reports only normal (0) amd strong (1) matches) 
+It does not filter the matches (reports only normal (0) amd strong (1) matches)
 We capture the flag but do not need to check it.
 But there are some PROSITE profiles that are considered are ambiguous,
 generating too many FPs, these profiles are black listed and all
@@ -60,14 +60,10 @@ def get_sequences(fasta_file: str) -> dict:
                 continue
             if line.startswith('>'):
                 seq_id = line.lstrip('>').split(" ")[0]
-                # seq_id = re.sub('\..*', '', seq_id)
                 fasta_dict[seq_id] = ''
             else:
                 fasta_dict[seq_id] += line + '\n'
-                if len(line) > 80:
-                    raise ValueError(
-                        'Input fasta file format problem for pfsearch, line length greater than 80'
-                    )
+
     return fasta_dict
 
 

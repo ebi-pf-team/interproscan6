@@ -1,14 +1,14 @@
 process PHOBIUS_RUNNER {
     label 'phobius_runner'
 
-    input: tuple path(fasta), val(release)
+    input: path fasta
 
     output:
-    path "*._.phobius_out.txt"
+    path "phobius_out.txt"
 
     script:
     """
-    phobius ${fasta} > ${release}._.phobius_out.txt
+    phobius ${fasta} > phobius_out.txt
     """
 }
 
@@ -24,8 +24,8 @@ process PHOBIUS_PARSER {
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/members/phobius/parser.py \
-        ${phobius_out} \
-        > phobius_parsed.json
+    python3 $projectDir/interproscan/scripts/members/phobius/parser.py \\
+        ${phobius_out} \\
+        phobius_parsed.json
     """
 }

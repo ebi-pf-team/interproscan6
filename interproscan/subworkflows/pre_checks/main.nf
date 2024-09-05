@@ -19,7 +19,7 @@ def printHelp() {
                                             Output files are automatically named after the input file, with the 
                                             suffix '.ips6.*'. Default: present working dir.
         --pathways Optional. Include pathway information in the output.
-        --signalp_mode Optional. Set which SignalP/SignalP_EUK prediction models are used. Models may have to be installed. Accepted: 'fast', 'slow', 'sequential'. Default: 'fast'.
+        --signalp_mode Optional. Set which SignalP/SignalP_EUK prediction models are used. Models may have to be installed. Accepted: 'fast', 'slow', 'slow-sequential'. Default: 'fast'.
         --version                          Print the version of InterProScan.
     """
 }
@@ -97,7 +97,7 @@ workflow PRE_CHECKS {
 
     // Check if the applications are valid
     def applications_expected = [
-        'antifam', 'cdd', 'coils','funfam', 'gene3d', 'hamap',
+        'antifam', 'cdd', 'coils', 'funfam', 'gene3d', 'hamap',
         'mobidb', 'ncbifam', 'panther', 'pfam', 'phobius','pirsf', 'pirsr',
         'prints', 'prosite_patterns', 'prosite_profiles',
         'sfld', 'signalp', 'signalp_euk', 'smart', 'superfamily'

@@ -1,0 +1,566 @@
+{
+ "interproscan-version": "6.0.0",
+"results": [ {
+  "sequence" : "MSKIGKSIRLERIIDRKTRKTVIVPMDHGLTVGPIPGLIDLAAAVDKVAEGGANAVLGHMGLPLYGHRGYGKDVGLIIHLSASTSLGPDANHKVLVTRVEDAIRVGADGVSIHVNVGAEDEAEMLRDLGMVARRCDLWGMPLLAMMYPRGAKVRSEHSVEYVKHAARVGAELGVDIVKTNYTGSPETFREVVRGCPAPVVIAGGPKMDTEADLLQMVYDAMQAGAAGISIGRNIFQAENPTLLTRKLSKIVHEGYTPEEAARLKL",
+  "md5" : "88d47cc807fe8e977130b0cc93e0bd61",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "A0B6J9",
+    "id" : "A0B6J9"
+  } ]
+},{
+  "sequence" : "MNLQRFPRHPLTFGPTPIQPLKRLSAHLGGQVELYAKREDCNSGLAFGGNKTRKLEYLIPEALAQGCDTLVSIGGIQSNQTRQVAAVAAHLGMKCVLVQENWVNYSDAVYDRVGNIEMSRILGADVRLDAAGFDIGIRPSWEQAMADVRAAGGKPFPIPAGCSEHRLGGLGFVGFAEEVRAQEAELGFKFDYIVVCSVTGSTQAGMVVGFAADGRAERVIGIDASAKPEQTHAQILRIAQNTAELVGLGREITAQDVVLDTRYGGPEYGLPSEGTLEAIRLCARQEGMLTDPVYEGKSMHGMIDKVKRGEFPAGSRVLYAHLGGVPALNAYSFLFRNG",
+  "md5" : "7bcb28d452c1f7ad86b5e0da7fa21fd3",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "sp|A2SLW2|1A1D_METPP 1-aminocyclopropane-1-carboxylate deaminase OS=Methylibium petroleiphilum (strain ATCC BAA-1232 / LMG 22953 / PM1) OX=420662 GN=acdS PE=3 SV=1",
+    "id" : "sp|A2SLW2|1A1D_METPP"
+  } ]
+},{
+  "sequence" : "MLIERMFPFISESVRVHQLPEGGVLEIDYMRDNVSISDFEYLDLNKTAYELCMLMDGQKTAEQILEYQCAAYNESPEDHKDWYYEMLDMLLNKQVIRLTDQPEYRRIATSGSSDFPMPLHATFELTHRCNLKCAHCYLESSPEALGTVSLEQFKKTADMLYEKGVLTCEITGGEIFVHPNANELLEYVLKKFKKVAVLTNGTLMRKESLEILRAYKQKIIVGISLDSVHSEVHDSFRGRKGSFAQTCKTIKLLSDHGIFVRVAMSVFEKNMWEIHDMAQKVRDLGAKAFSYNWVDDFGRGKDMIHPTKDAEQHRKFMEYEQNVIDEFKDLIPIIPYERKRAANCGAGWKSIVISPFGEVRPCALFPKEFSLGNIFHDSYESIFDSALVHKLWKAQAPRFSEHCKKDKCPFSGYCGGCYLKGLNSNKYHRKNICSWAKNEQLEDVVQLI",
+  "md5" : "268e4659f70d6eb10e6545eccaa347cf",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "A0A0H3E4R3_BACA1 1-448",
+    "id" : "A0A0H3E4R3_BACA1"
+  } ]
+},{
+  "sequence" : "MGIRYDNTVYGLSPLARGTRGNGNRPRGRGRFIPAGAGNTMSGTMPRLSGPVYPRWRGEHNERNNAQAFWSGLSPLARGTPNGSDVRRLRYRFIPAGAGNTATRCSNEPFDPVYPRWRGEHAQNDRRSEDSGGLSPLARGTRRPDQVMVLPLRFIPAGAGNTDIPPDPRPKSAVYPRWRGEHNGTDSTNQNFRGLSPLARGTLYDCRRYEKPRRFIPAGAGNTCYGVGALNIGAVYPRWRGEH",
+  "md5" : "f1f6c0f82668b5315244caa65040cad9",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "UPI0010EB9177",
+    "id" : "UPI0010EB9177"
+  } ]
+},{
+  "sequence" : "MDNVNKLTAISLAVAAALPMMASADVMITEYVEGSSNNKAIELYNSGDTAIDLAGYKLVRYKDGATVASDMVALDGQSIAPKTTKVILNSSAVITLDQGVDSYSGSLSFNGGDAVALVKDDAVVDIIGDVPTPTGWGFDVTLKRKLDALVANTVFNAAQWEQLPKDTFSGLGSLETPAEPEVPLFSCSGAKIVPIYQVQGAGESSPYVPEGAFESEAEVTVRGIVTARGESLFKGFYLQEVKGDNSPYTSDGVFVFLGEAVPEAIQPGVEVCVQGKVKEYFGLTQIDIKADKKFEVGAKGEVPVAAPFYVADGETLAQALERYEGMNVALDAGSDLKISRTFSYDYAGRRNNMLVSYKEPLMKSTQLYPALSAEATALVKSNLENQLFIESDYKPADGVIPYFPDFNVETGYIRVGDQLTNLQGVIGYSYGAYRLVATNTITAGDFIRGDDRTDAPSVATKGDLRVASFNVLNFFNDVDGGDTNPSGSNRGALTLEEMVLQRTKIVSAITAMNADIVGLMEIANNGFGEKSAIKNLVDALNEKQTPENAYSFVEITDADKYDGKYFGTDAITVGMLYRGGKVTLAGAAQAIDTPEQHASAGSVTRTKDGKTETNPGNDAYQRHSLAQTFKIHDESLTVVVNHLKSKGSGCLEDWANFEESVDPADQQGKCNAFRVSAAKVLGETLKDVKGDLLIIGDMNAYGMEDPIRVLTDFDASKSDRDIMTASWTTLDGKVFERQGSKIEKGYGLINLNTKAHGAGTYSYSYNGELGNLDHALANASLAKRLVDIEDWHINSVESNLFEYGKKFSGDLAKSENAFSASDHDPVIVALSYPAPVVPPKPEPTPKDDGGALGYLGLALMSLFGLQRRRR",
+  "md5" : "3156952d6b1f52bf18e848ccc4e7e455",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "WP_338726824.1 extracellular exonuclease ExeM [Shewanella baltica]",
+    "id" : "WP_338726824.1"
+  } ]
+},{
+  "sequence" : "MKKNFYLYVALFVAAIVAISAIASSFSAKANNENVTVNNENNNEQKEELPNVVILATGGTIAGTGSSSTQTTGYKSGDLGIETLIEAVPEMKELANITGEQIVKVDSTDITNEILLKLGKRVNELLASDDVDGIVITHGTDTLEETAYFLNLVVKSDKPVVLTAAMRPATAMSADGPFNLYNAVLLASHESSKGKGVLVTLNDRIASARNITKTNTTATDAFKSFENGYLGAIVAGKPYYYNNVERLHTTETPFDISKIKKLPQVDIIYGYQNSPTYMYKAAVQNGAKGIIVAAPGDGTLSAKSVEGVKYAMNKGVKVVLSSRVGTGTVSPKEGYITSDSLNPQKARILLMLALTVTNDPQEIQSFFDKY",
+  "md5" : "f91cb3cf61f2d7c7f5aaf6ea04e07868",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "PR00139",
+      "name" : "ASNGLNASE",
+      "description" : "Asparaginase/glutaminase family signature",
+      "signatureLibraryRelease" : {
+        "library" : "PRINTS",
+        "version" : "42.0"
+      },
+      "entry" : {
+        "accession" : "IPR006034",
+        "name" : "Asparaginase/glutaminase-like",
+        "description" : "Asparaginase/glutaminase-like",
+        "type" : "FAMILY",
+        "goXRefs" : [ ],
+        "pathwayXRefs" : [ {
+          "name" : "UDP-3-acetamido-2,3-dideoxy-2-(seryl)amino-alpha-D-glucuronamide biosynthesis",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-8229"
+        }, {
+          "name" : "N-(1-deoxy-D-fructos-1-yl)-L-asparagine degradation",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-8402"
+        }, {
+          "name" : "Aspartate and asparagine metabolism",
+          "databaseName" : "Reactome",
+          "id" : "R-MMU-8963693"
+        }, {
+          "name" : "6-methylpretetramide biosynthesis",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-7811"
+        }, {
+          "name" : "phospholipid remodeling (phosphatidylethanolamine, yeast)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-7409"
+        }, {
+          "name" : "Aspartate and asparagine metabolism",
+          "databaseName" : "Reactome",
+          "id" : "R-HSA-8963693"
+        }, {
+          "name" : "Aspartate and asparagine metabolism",
+          "databaseName" : "Reactome",
+          "id" : "R-RNO-8963693"
+        }, {
+          "name" : "siroheme amide biosynthesis",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-5297"
+        } ]
+      }
+    },
+    "locations" : [ {
+      "start" : 52,
+      "end" : 63,
+      "representative" : false,
+      "pvalue" : 1.32E-8,
+      "score" : 71.03,
+      "motifNumber" : 1,
+      "location-fragments" : [ {
+        "start" : 52,
+        "end" : 63,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    }, {
+      "start" : 132,
+      "end" : 150,
+      "representative" : false,
+      "pvalue" : 1.57E-13,
+      "score" : 73.93,
+      "motifNumber" : 2,
+      "location-fragments" : [ {
+        "start" : 132,
+        "end" : 150,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    }, {
+      "start" : 311,
+      "end" : 329,
+      "representative" : false,
+      "pvalue" : 2.69E-8,
+      "score" : 37.84,
+      "motifNumber" : 3,
+      "location-fragments" : [ {
+        "start" : 311,
+        "end" : 329,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 9.4E-23,
+    "graphscan" : "III",
+    "model-ac" : "PR00139"
+  } ],
+  "xref" : [ {
+    "name" : "UPI0002E0D40B status=active",
+    "id" : "UPI0002E0D40B"
+  } ]
+},{
+  "sequence" : "MSPRPLRALLGAAAAALVSAAALAFPSQAAANDSPFYVNPNMSSAEWVRNNPNDPRTPVIRDRIASVPQGTWFAHHNPGQITGQVDALMSAAQAAGKIPILVVYNAPGRDCGNHSSGGAPSHSAYRSWIDEFAAGLKNRPAYIIVEPDLISLMSSCMQHVQQEVLETMAYAGKALKAGSSQARIYFDAGHSAWHSPAQMASWLQQADISNSAHGIATNTSNYRWTADEVAYAKAVLSAIGNPSLRAVIDTSRNGNGPAGNEWCDPSGRAIGTPSTTNTGDPMIDAFLWIKLPGEADGCIAGAGQFVPQAAYEMAIAAGGTNPNPNPNPTPTPTPTPTPPPGSSGACTATYTIANEWNDGFQATVTVTANQNITGWTVTWTFTDGQTITNAWNADVSTSGSSVTARNVGHNGTLSQGASTEFGFVGSKGNSNSVPTLTCAAS",
+  "md5" : "8394be2ab076e2920aff07d0c2fb0e06",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "PR00733",
+      "name" : "GLHYDRLASE6",
+      "description" : "Glycosyl hydrolase family 6 signature",
+      "signatureLibraryRelease" : {
+        "library" : "PRINTS",
+        "version" : "42.0"
+      },
+      "entry" : {
+        "accession" : "IPR016288",
+        "name" : "Beta_cellobiohydrolase",
+        "description" : "1, 4-beta cellobiohydrolase",
+        "type" : "FAMILY",
+        "goXRefs" : [ {
+          "name" : "cellulose catabolic process",
+          "databaseName" : "GO",
+          "category" : "BIOLOGICAL_PROCESS",
+          "id" : "GO:0030245"
+        }, {
+          "name" : "hydrolase activity, hydrolyzing O-glycosyl compounds",
+          "databaseName" : "GO",
+          "category" : "MOLECULAR_FUNCTION",
+          "id" : "GO:0004553"
+        } ],
+        "pathwayXRefs" : [ {
+          "name" : "dhurrin degradation",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-5976"
+        }, {
+          "name" : "cyanidin diglucoside biosynthesis (acyl-glucose dependent)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-7256"
+        }, {
+          "name" : "indole-3-acetate activation II",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-1921"
+        }, {
+          "name" : "rutin degradation (plants)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-7134"
+        }, {
+          "name" : "quercetin glucoside degradation (Allium)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-7133"
+        }, {
+          "name" : "stachyose degradation",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6527"
+        }, {
+          "name" : "linustatin bioactivation",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-7091"
+        }, {
+          "name" : "yeast mannan degradation",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-8435"
+        }, {
+          "name" : "septacidin biosynthesis",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-8366"
+        }, {
+          "name" : "rutin degradation",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6848"
+        }, {
+          "name" : "CMP-legionaminate biosynthesis I",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6749"
+        }, {
+          "name" : "kappa-carrageenan degradation",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6821"
+        }, {
+          "name" : "podophyllotoxin glucosides metabolism",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-7491"
+        }, {
+          "name" : "mammalian high-mannose N-glycan degradation",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-8436"
+        }, {
+          "name" : "starch degradation V",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6737"
+        }, {
+          "name" : "daphnin interconversion",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-7056"
+        }, {
+          "name" : "ulvan degradation",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-7647"
+        }, {
+          "name" : "oleandomycin activation/inactivation",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6972"
+        }, {
+          "name" : "luteolin triglucuronide degradation",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-7445"
+        }, {
+          "name" : "cichoriin interconversion",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-7057"
+        }, {
+          "name" : "(1,4)-beta-D-xylan degradation",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6717"
+        }, {
+          "name" : "CMP-N-acetyl-7-O-acetylneuraminate biosynthesis",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-7529"
+        }, {
+          "name" : "starch degradation IV",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6735"
+        }, {
+          "name" : "cellulose degradation II (fungi)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6788"
+        }, {
+          "name" : "dalcochinin biosynthesis",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-5821"
+        }, {
+          "name" : "chitin derivatives degradation",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6906"
+        }, {
+          "name" : "phenylethanol glycoconjugate biosynthesis",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-7074"
+        }, {
+          "name" : "starch degradation I",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-842"
+        }, {
+          "name" : "cellulose and hemicellulose degradation (cellulolosome)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6784"
+        }, {
+          "name" : "fructan degradation",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-862"
+        }, {
+          "name" : "chitin degradation I (archaea)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6855"
+        } ]
+      }
+    },
+    "locations" : [ {
+      "start" : 54,
+      "end" : 73,
+      "representative" : false,
+      "pvalue" : 2.34E-5,
+      "score" : 34.44,
+      "motifNumber" : 1,
+      "location-fragments" : [ {
+        "start" : 54,
+        "end" : 73,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    }, {
+      "start" : 97,
+      "end" : 110,
+      "representative" : false,
+      "pvalue" : 2.89E-7,
+      "score" : 53.17,
+      "motifNumber" : 2,
+      "location-fragments" : [ {
+        "start" : 97,
+        "end" : 110,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    }, {
+      "start" : 125,
+      "end" : 140,
+      "representative" : false,
+      "pvalue" : 7.68E-8,
+      "score" : 40.28,
+      "motifNumber" : 3,
+      "location-fragments" : [ {
+        "start" : 125,
+        "end" : 140,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    }, {
+      "start" : 181,
+      "end" : 194,
+      "representative" : false,
+      "pvalue" : 1.38E-5,
+      "score" : 50.0,
+      "motifNumber" : 4,
+      "location-fragments" : [ {
+        "start" : 181,
+        "end" : 194,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    }, {
+      "start" : 212,
+      "end" : 222,
+      "representative" : false,
+      "pvalue" : 5.29E-6,
+      "score" : 58.59,
+      "motifNumber" : 5,
+      "location-fragments" : [ {
+        "start" : 212,
+        "end" : 222,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    }, {
+      "start" : 244,
+      "end" : 257,
+      "representative" : false,
+      "pvalue" : 5.44E-8,
+      "score" : 57.14,
+      "motifNumber" : 6,
+      "location-fragments" : [ {
+        "start" : 244,
+        "end" : 257,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    }, {
+      "start" : 259,
+      "end" : 279,
+      "representative" : false,
+      "pvalue" : 1.19E-8,
+      "score" : 44.18,
+      "motifNumber" : 7,
+      "location-fragments" : [ {
+        "start" : 259,
+        "end" : 279,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    }, {
+      "start" : 283,
+      "end" : 297,
+      "representative" : false,
+      "pvalue" : 2.06E-8,
+      "score" : 68.52,
+      "motifNumber" : 8,
+      "location-fragments" : [ {
+        "start" : 283,
+        "end" : 297,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 3.4E-46,
+    "graphscan" : "IIIIIIII",
+    "model-ac" : "PR00733"
+  } ],
+  "xref" : [ {
+    "name" : "P26222",
+    "id" : "P26222"
+  } ]
+},{
+  "sequence" : "GRGLLPFVLLALGIXAPWAVEGAENALKGGACPPRKIVQCLRYEKPKCTSDWQCPDKKKCCRDTCAIKCLNPVAITNPVKVKPGKCPVVYGQCMMLNPPNHCKTDSQCLGDLKCCKSMCGKVCLTPVKA",
+  "md5" : "493932c1f43289805b4c4e651ceb9249",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "PR00003",
+      "name" : "4DISULPHCORE",
+      "description" : "4-disulphide core signature",
+      "signatureLibraryRelease" : {
+        "library" : "PRINTS",
+        "version" : "42.0"
+      },
+      "entry" : {
+        "accession" : "IPR008197",
+        "name" : "WAP_dom",
+        "description" : "WAP-type 'four-disulfide core' domain",
+        "type" : "DOMAIN",
+        "goXRefs" : [ {
+          "name" : "extracellular region",
+          "databaseName" : "GO",
+          "category" : "CELLULAR_COMPONENT",
+          "id" : "GO:0005576"
+        }, {
+          "name" : "peptidase inhibitor activity",
+          "databaseName" : "GO",
+          "category" : "MOLECULAR_FUNCTION",
+          "id" : "GO:0030414"
+        } ],
+        "pathwayXRefs" : [ {
+          "name" : "Antimicrobial peptides",
+          "databaseName" : "Reactome",
+          "id" : "R-SSC-6803157"
+        }, {
+          "name" : "Antimicrobial peptides",
+          "databaseName" : "Reactome",
+          "id" : "R-MMU-6803157"
+        }, {
+          "name" : "Neutrophil degranulation",
+          "databaseName" : "Reactome",
+          "id" : "R-MMU-6798695"
+        }, {
+          "name" : "Negative regulation of FGFR1 signaling",
+          "databaseName" : "Reactome",
+          "id" : "R-HSA-5654726"
+        }, {
+          "name" : "Antimicrobial peptides",
+          "databaseName" : "Reactome",
+          "id" : "R-RNO-6803157"
+        }, {
+          "name" : "Antimicrobial peptides",
+          "databaseName" : "Reactome",
+          "id" : "R-HSA-6803157"
+        }, {
+          "name" : "Formation of the cornified envelope",
+          "databaseName" : "Reactome",
+          "id" : "R-HSA-6809371"
+        }, {
+          "name" : "FGFR1c ligand binding and activation",
+          "databaseName" : "Reactome",
+          "id" : "R-HSA-190373"
+        }, {
+          "name" : "Neutrophil degranulation",
+          "databaseName" : "Reactome",
+          "id" : "R-HSA-6798695"
+        }, {
+          "name" : "Formation of the cornified envelope",
+          "databaseName" : "Reactome",
+          "id" : "R-SSC-6809371"
+        }, {
+          "name" : "Formation of the nephric duct",
+          "databaseName" : "Reactome",
+          "id" : "R-HSA-9830364"
+        } ]
+      }
+    },
+    "locations" : [ {
+      "start" : 79,
+      "end" : 88,
+      "representative" : false,
+      "pvalue" : 2.32E-4,
+      "score" : 49.17,
+      "motifNumber" : 1,
+      "location-fragments" : [ {
+        "start" : 79,
+        "end" : 88,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    }, {
+      "start" : 101,
+      "end" : 108,
+      "representative" : false,
+      "pvalue" : 0.00296,
+      "score" : 47.92,
+      "motifNumber" : 2,
+      "location-fragments" : [ {
+        "start" : 101,
+        "end" : 108,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    }, {
+      "start" : 108,
+      "end" : 117,
+      "representative" : false,
+      "pvalue" : 2.09E-4,
+      "score" : 52.92,
+      "motifNumber" : 3,
+      "location-fragments" : [ {
+        "start" : 108,
+        "end" : 117,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    }, {
+      "start" : 118,
+      "end" : 126,
+      "representative" : false,
+      "pvalue" : 4.37E-4,
+      "score" : 50.0,
+      "motifNumber" : 4,
+      "location-fragments" : [ {
+        "start" : 118,
+        "end" : 126,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 1.4E-7,
+    "graphscan" : "IIII",
+    "model-ac" : "PR00003"
+  } ],
+  "xref" : [ {
+    "name" : "P22298",
+    "id" : "P22298"
+  } ]
+},{
+  "sequence" : "MDNVKKLSVLALSIAAALPVSAKADLLISEYVEGNSNNKAIELYNSGDAALDLTGYKLVRYKDGATNALDMVALDGLTIDAKKLKVIVHPSAEIALGSDVDSSTGNLYFNGGDAVALVKDGAVVDIIGAVPTPSGWGMNTTMQRNTDALSASNVFVESQWKVLPVDTFSGLGNLDGSSAPTEPEAPAFTCTGAKITPIYSVQGAGKSSPLIADGEYASKEEVTIRGVVTARGDSLFKGFYLQEVQGDGSPYTSDGIFVYLGEAAGEEIQPGVEVCVQGLVKEYYGLTQLDIKADKKMEVGENLGAPAATPFYVADGENLGDALERFEGMNVVLDAGSDMKVSRTFSYDYAARRNNMMLSHKAPLMKPTQLYPAMTDEAIALEKKNRANQLFVESDFKAKNGEVPYFPTFNAETGYIRVGDQLTNLEGVISYSYNEYRLVATNEIVAGDFIREDDRVDAPEVATKGDIRVASFNVLNLFTSDSDVGGALNASCKDQADADASRGCGRGAHTLEDYLLQRTKIVSALTEMNADIIGLMEIENNGFGEDSSIQYLVNDLNANLPAADAYKFIEVADADKYKGEYVGGDAITVGMLYRPSKVEPTGDAFVIETPEQHAMEGVVTRGEGDKLELSPAFDKYQRHSLGQAFSVNGEKLTVVVNHLKSKGSGCIEDWANFEDSSDPADLQGKCNEFRVSAAKVIGDALQDVEGDLLVIGDMNAYGLEDPIRVLTDYDAANSDRDIMTASWTTLGGKVYEREGSKIEKGYGMVNLNTQVHGTATYSYSYNGELGNLDHALANTSLAARVVDIQDWHINSVESNLFEYSSKYTGELEKSENAFSASDHDPVIVALSYPAPKPEPKPEPKEKDDGGSLGYLGLMLLGLAGLRRRN",
+  "md5" : "4229019f6f6d6fbcd8988593755fe395",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "WP_249252303.1 extracellular exonuclease ExeM [Shewanella aquimarina]",
+    "id" : "WP_249252303.1"
+  } ]
+},{
+  "sequence" : "MLARGGIQSNQSRLSAHLGGKVDLYAKREDCNSGLAFGGNKLRKLEYIVPDAIASGADTLVSIGGVQSNHTRMVAAVAAKIGMKCRLVQEAWVPHEDAVYDRVGNIMLSRIMGADVGKE",
+  "md5" : "5a40425be664fc947906456e8fc0e722",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "TESTESEMLOOKUP",
+    "id" : "TESTESEMLOOKUP"
+  } ]
+},{
+  "sequence" : "MNLNRFERYPLTFGPSPITPLKRLSQHLGGKVELYAKREDCNSGLAFGGNKTRKLEYLIPEAIEQGCDTLVSIGGIQSNQTRQVAAVAAHLGMKCVLVQENWVNYSDAVYDRVGNIEMSRIMGADVRLDAAGFDIGIRPSWEKAMSDVVEQGGKPFPIPAGCSEHPYGGLGFVGFAEEVRQQEKELGFKFDYIVVCSVTGSTQAGMVVGFAADGRSKNVIGIDASAKPEQTKAQILRIARHTAELVELGREITEEDVVLDTRFAYPEYGLPNEGTLEAIRLCGSLEGVLTDPVYEGKSMHGMIEMVRRGEFPEGSMIDLVRKGFFPAGAKVLYAHLGGAPALNGYAYAFRNG",
+  "md5" : "b66e5ed56c0ea43a14a02b37b513ea8d",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "OUTROSEMLOOKUP",
+    "id" : "OUTROSEMLOOKUP"
+  } ]
+},{
+  "sequence" : "MTTLFNKIKEVTELKAAAGFETPVRDYLRKTITPLVDEVQTDGLGGIFGIKHSQTENAPKVLVAAHMDEVGFMIKEIKADGTFRVVELGGWNPLVVSSQRFTLHTRDGRIYPVISGSVPPHFLRGSSGTSSLPGVSDIVFDAGFANQEEANTYGVFPGDVIIPESETILTANQKNVISKAWDNRYGVLMIRELLENVKDQELNNTLITGANVQEEVGLRGAHVSTTKFDPEVFFAVDCSPAGDIYGNQGKVGDGTLIRFFDPGHIMLPNMKDFLLTTAEEAGIKYQYYCAAGGTDAGAAHLQNSGVPSTTIGVCARYIHSHQTLYAMDDFLEAQAFLQAIVKKLDRSTVDLIKNY",
+  "md5" : "c3e71fe6439f734a5b28ef1fdd640db9",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "WP_134973503.1 glutamyl aminopeptidase [Streptococcus thermophilus]",
+    "id" : "WP_134973503.1"
+  } ]
+} ]
+}
