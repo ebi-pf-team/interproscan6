@@ -56,8 +56,8 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
                     "name": entry["name"],
                     "description": entry["description"],
                     "type": entry["type"],
-                    "version": entry["database"]["version"],
-                    "member_db": entry["database"]["name"],
+                    "version": databases_versions[entry["database"]],
+                    "member_db": entry["database"],
                     "goXRefs": [],
                     "pathwayXRefs": []
                 }
