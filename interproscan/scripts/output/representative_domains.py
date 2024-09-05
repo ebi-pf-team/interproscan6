@@ -18,7 +18,6 @@ def add_representative_domains(matches_path: str) -> list[dict]:
     :param domains: list of domains
     :return: domains with representative domains field added
     """
-
     with open(matches_path, "r") as f:
         matches = json.load(f)
     for sequence, matches_info in matches.items():
