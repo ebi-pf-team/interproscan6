@@ -444,15 +444,8 @@ workflow SEQUENCE_ANALYSIS {
     // SMART (HMMER2:hmmpfam + kinase filter)
     runner_smart_params = fasta.combine(member_params.smart)
     SMART_HMMER2_RUNNER(runner_smart_params)
-    HMMER2_PARSER(
-        SMART_HMMER2_RUNNER.out[0],  // hmmer.out path
-        SMART_HMMER2_RUNNER.out[1],  // fasta path
-        SMART_HMMER2_RUNNER.out[2]   // member db
-    )
-    SMART_FILTER_MATCHES(
-        HMMER2_PARSER.out,
-        SMART_HMMER2_RUNNER.out[1],
-    )
+    HMMER2_PARSER(SMART_HMMER2_RUNNER.out)
+    SMART_FILTER_MATCHES(HMMER2_PARSER.out)
 
     // Superfamily
     runner_hmmer_superfamily_params = fasta.combine(member_params.superfamily)
