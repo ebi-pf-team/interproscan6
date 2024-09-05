@@ -46,10 +46,11 @@ workflow {
 
     applications = (params.applications.toLowerCase().split(',') as Set).join(',')
 
-    Channel.fromPath( input_file , checkIfExists: true)
-    .unique()
-    .splitFasta( by: params.batchsize, file: true )
-    .set { ch_fasta }
+    Channel.fromPath(params.input, checkIfExists: true)
+        .splitFasta(by: 1, file: true)
+        .distinct()
+        .splitFasta(by: params.batchsize, file: true)
+        .set { ch_fasta }
 
     // if nucleic acid seqs provided, predict ORFs
     // either way, then break up input FASTA into batches
@@ -128,7 +129,7 @@ workflow {
     XREFS(AGGREGATE_RESULTS.out, applications, dataDirPath)
 
     REPRESENTATIVE_DOMAINS(XREFS.out.collect())
-    
+
     Channel.from(params.formats.toLowerCase().split(','))
     .set { ch_format }
 
