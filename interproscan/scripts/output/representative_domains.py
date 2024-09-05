@@ -4,7 +4,7 @@ import sys
 MAX_DOM_BY_GROUP = 20
 DOM_OVERLAP_THRESHOLD = 0.3
 REPR_DOM_DATABASES = ["PFAM", "CDD", "PROSITE_PROFILES", "SMART", "NCBIFAM"]
-dc_status_map = {
+DC_STATUS_MAP = {
     "CONTINUOUS": "S",
     "N_TERMINAL_DISC": "N",
     "C_TERMINAL_DISC": "C",
@@ -38,7 +38,7 @@ def add_representative_domains(matches_path: str) -> list[dict]:
                 try:
                     fragments = location["location-fragments"]
                     frags_str = ",".join(
-                        f"{fragment['start']}-{fragment['end']}-{dc_status_map.get(fragment['dc-status'], fragment['dc-status'])}"
+                        f"{fragment['start']}-{fragment['end']}-{DC_STATUS_MAP.get(fragment['dc-status'], fragment['dc-status'])}"
                         for fragment in fragments
                     )
                 except KeyError:
@@ -49,12 +49,12 @@ def add_representative_domains(matches_path: str) -> list[dict]:
                     "start": pos_start,
                     "end": pos_end,
                     "frag": frags_str,
-                    "fragments": _get_fragments(pos_start, pos_end, frags_str),
+                    "fragments": get_fragments(pos_start, pos_end, frags_str),
                     "rank": int(rank)
                 })
 
         if domains:
-            repr_domains = _select_repr_domains(domains)
+            repr_domains = select_repr_domains(domains)
             for representative in repr_domains:
                 repr_acc = representative["signature"]
                 for location in matches_info[repr_acc]["locations"]:
@@ -64,7 +64,7 @@ def add_representative_domains(matches_path: str) -> list[dict]:
     return matches
 
 
-def _select_repr_domains(domains: list[dict]):
+def select_repr_domains(domains: list[dict]):
     repr_domains = []
 
     # Sort by boundaries
@@ -73,13 +73,13 @@ def _select_repr_domains(domains: list[dict]):
 
     # Group overlapping domains together
     domain = domains[0]
-    domain["residues"] = _calc_coverage(domain)
+    domain["residues"] = calc_coverage(domain)
     stop = domain["fragments"][-1]["end"]
     group = [domain]
     groups = []
 
     for domain in domains[1:]:
-        domain["residues"] = _calc_coverage(domain)
+        domain["residues"] = calc_coverage(domain)
         start = domain["fragments"][0]["start"]
 
         if start <= stop:
@@ -109,12 +109,12 @@ def _select_repr_domains(domains: list[dict]):
         for i, dom_a in enumerate(group):
             for j in range(i + 1, len(group)):
                 dom_b = group[j]
-                if _eval_overlap(dom_a, dom_b, DOM_OVERLAP_THRESHOLD):
+                if eval_overlap(dom_a, dom_b, DOM_OVERLAP_THRESHOLD):
                     graph[i].remove(j)
                     graph[j].remove(i)
 
         # Find possible domains combinations
-        subgroups = _resolve_domains(graph)
+        subgroups = resolve_domains(graph)
 
         # Find the best combination
         max_coverage = 0
@@ -147,7 +147,7 @@ def _select_repr_domains(domains: list[dict]):
     return repr_domains
 
 
-def _calc_coverage(domain: dict) -> set[int]:
+def calc_coverage(domain: dict) -> set[int]:
     residues = set()
     for f in domain["fragments"]:
         residues |= set(range(f["start"], f["end"] + 1))
@@ -155,7 +155,7 @@ def _calc_coverage(domain: dict) -> set[int]:
     return residues
 
 
-def _resolve_domains(graph: dict[int, set[int]]) -> list[set[int]]:
+def resolve_domains(graph: dict[int, set[int]]) -> list[set[int]]:
     def is_valid(candidate: list[int]) -> bool:
         for node_a in candidate:
             for node_b in candidate:
@@ -186,13 +186,13 @@ def _resolve_domains(graph: dict[int, set[int]]) -> list[set[int]]:
     return all_sets
 
 
-def _eval_overlap(dom_a: dict, dom_b: dict, threshold: float) -> bool:
+def eval_overlap(dom_a: dict, dom_b: dict, threshold: float) -> bool:
     overlap = len(dom_a["residues"] & dom_b["residues"])
     return overlap and overlap / min(len(dom_a["residues"]),
                                      len(dom_b["residues"])) >= threshold
 
 
-def _get_fragments(pos_start: int, pos_end: int, fragments: str) -> list[dict]:
+def get_fragments(pos_start: int, pos_end: int, fragments: str) -> list[dict]:
     if fragments:
         result = []
         for frag in fragments.split(','):
