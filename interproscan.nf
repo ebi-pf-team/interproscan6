@@ -41,6 +41,8 @@ workflow {
     dataDirPath = PRE_CHECKS.out.dataDir.val
     log.info "Using data files located in ${dataDirPath}"
 
+    applications = params.applications.toLowerCase()
+
     Channel.fromPath( input_file , checkIfExists: true)
     .unique()
     .splitFasta( by: params.batchsize, file: true )
@@ -63,10 +65,10 @@ workflow {
         /* Provide the translated ORFs and the original nts seqs
         So that the ORFs can be associated with the source nucleic seq
         in the final output */
-        PARSE_SEQUENCE(orfs_fasta, ch_fasta, params.nucleic, params.applications)
+        PARSE_SEQUENCE(orfs_fasta, ch_fasta, params.nucleic, applications)
     }
     else {
-        PARSE_SEQUENCE(ch_fasta, ch_fasta, params.nucleic, params.applications)
+        PARSE_SEQUENCE(ch_fasta, ch_fasta, params.nucleic, applications)
     }
 
     disable_precalc = params.disable_precalc
@@ -74,7 +76,7 @@ workflow {
     parsed_matches = Channel.empty()
     if (!disable_precalc) {
         log.info "Using precalculated match lookup service"
-        SEQUENCE_PRECALC(PARSE_SEQUENCE.out, params.applications, false)  // final: bool to indicate not a unit test
+        SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications, false)  // final: bool to indicate not a unit test
         sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
         parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
     }
@@ -101,9 +103,9 @@ workflow {
         }
         parsed_analysis = SEQUENCE_ANALYSIS(
             fasta_to_runner,
-            params.applications,
+            applications,
             dataDirPath,
-            params.signalp_mode
+            signalp_mode
         )
     }
 
@@ -112,7 +114,7 @@ workflow {
     AGGREGATE_RESULTS(all_results.collect())
     AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
 
-    XREFS(AGGREGATE_RESULTS.out, params.applications)
+    XREFS(AGGREGATE_RESULTS.out, applications)
 
     Channel.from(params.formats.split(','))
     .set { ch_format }
