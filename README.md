@@ -102,7 +102,7 @@ An example command to run `InterProScan6`, only using the `AntiFam` member datab
 
 ```bash
 nextflow run interproscan.nf \
---input files_test/best_to_test.fasta \
+--input utilities/test_files/best_to_test.fasta \
 --applications signalp,antifam \
 --disable_precalc
 ```
