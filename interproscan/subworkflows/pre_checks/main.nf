@@ -140,10 +140,6 @@ workflow PRE_CHECKS {
 
     log.info "Number of sequences to analyse: ${seq_input.countFasta()}"
 
-    formats = output_formats.toLowerCase()
-
-    log.info "PRECHECKS ${dataDir}"
-
     emit:
     dataDir
 }

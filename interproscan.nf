@@ -39,7 +39,7 @@ workflow {
         params.signalp_gpu
     )
     dataDirPath = PRE_CHECKS.out.dataDir.val
-    log.info "Using the datafiles located in ${dataDirPath}"
+    log.info "Using data files located in ${dataDirPath}"
 
     Channel.fromPath( input_file , checkIfExists: true)
     .unique()
