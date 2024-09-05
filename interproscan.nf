@@ -105,7 +105,7 @@ workflow {
             fasta_to_runner,
             applications,
             dataDirPath,
-            signalp_mode
+            params.signalp_mode
         )
     }
 
