@@ -24,7 +24,8 @@ workflow {
     to SEQUENCE_ANALYSIS to ensure PRE_CHECKS is completed before
     the other subworkflow starts.
     */
-    (dataDirPath, output_formats, user_applications) = PRE_CHECKS(
+    dataDirPath = Channel.empty()
+    PRE_CHECKS(
         params.help,
         input_file,
         params.datadir,
@@ -37,92 +38,94 @@ workflow {
         params.signalp_mode,
         params.signalp_gpu
     )
+    dataDirPath = PRE_CHECKS.out.dataDir.val
+    log.info "Using the datafiles located in ${dataDirPath}"
 
-    // Channel.fromPath( params.input , checkIfExists: true)
-    // .unique()
-    // .splitFasta( by: params.batchsize, file: true )
-    // .set { ch_fasta }
+    Channel.fromPath( input_file , checkIfExists: true)
+    .unique()
+    .splitFasta( by: params.batchsize, file: true )
+    .set { ch_fasta }
 
-    // if (params.nucleic) {
-    //     if (params.translate.strand.toLowerCase() !in ['both','plus','minus']) {
-    //         log.info "Strand option '${params.translate.strand.toLowerCase()}' in nextflow.config not recognised. Accepted: 'both', 'plus', 'minus'"
-    //         exit 1
-    //     }
-    //     GET_ORFS(
-    //         ch_fasta,
-    //         params.translate.strand,
-    //         params.translate.methionine,
-    //         params.translate.min_len,
-    //         params.translate.genetic_code
-    //     )
-    //     GET_ORFS.out.splitFasta( by: params.batchsize, file: true )
-    //     .set { orfs_fasta }
-    //     /* Provide the translated ORFs and the original nts seqs
-    //     So that the ORFs can be associated with the source nucleic seq
-    //     in the final output */
-    //     PARSE_SEQUENCE(orfs_fasta, ch_fasta, params.nucleic, user_applications)
-    // }
-    // else {
-    //     PARSE_SEQUENCE(ch_fasta, ch_fasta, params.nucleic, user_applications)
-    // }
+    if (params.nucleic) {
+        if (params.translate.strand.toLowerCase() !in ['both','plus','minus']) {
+            log.info "Strand option '${params.translate.strand.toLowerCase()}' in nextflow.config not recognised. Accepted: 'both', 'plus', 'minus'"
+            exit 1
+        }
+        GET_ORFS(
+            ch_fasta,
+            params.translate.strand,
+            params.translate.methionine,
+            params.translate.min_len,
+            params.translate.genetic_code
+        )
+        GET_ORFS.out.splitFasta( by: params.batchsize, file: true )
+        .set { orfs_fasta }
+        /* Provide the translated ORFs and the original nts seqs
+        So that the ORFs can be associated with the source nucleic seq
+        in the final output */
+        PARSE_SEQUENCE(orfs_fasta, ch_fasta, params.nucleic, params.applications)
+    }
+    else {
+        PARSE_SEQUENCE(ch_fasta, ch_fasta, params.nucleic, params.applications)
+    }
 
-    // disable_precalc = params.disable_precalc
-    // sequences_to_analyse = null
-    // parsed_matches = Channel.empty()
-    // if (!disable_precalc) {
-    //     log.info "Using precalculated match lookup service"
-    //     SEQUENCE_PRECALC(PARSE_SEQUENCE.out, user_applications, false)  // final: bool to indicate not a unit test
-    //     sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
-    //     parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
-    // }
+    disable_precalc = params.disable_precalc
+    sequences_to_analyse = null
+    parsed_matches = Channel.empty()
+    if (!disable_precalc) {
+        log.info "Using precalculated match lookup service"
+        SEQUENCE_PRECALC(PARSE_SEQUENCE.out, params.applications, false)  // final: bool to indicate not a unit test
+        sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
+        parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
+    }
 
-    // if (parsed_matches.collect() == null) {
-    //         // cases in which the lookup check ran successfully but lookup matches not
-    //         disable_precalc = true
-    //         log.info "ERROR: unable to connect to match lookup service. Max retries reached. Running analysis locally..."
-    // }
+    if (parsed_matches.collect() == null) {
+            // cases in which the lookup check ran successfully but lookup matches not
+            disable_precalc = true
+            log.info "ERROR: unable to connect to match lookup service. Max retries reached. Running analysis locally..."
+    }
 
-    // analysis_result = Channel.empty()
-    // if (disable_precalc || sequences_to_analyse) {
-    //     log.info "Running sequence analysis"
-    //     if (sequences_to_analyse && !disable_precalc) {
-    //         fasta_to_runner = sequences_to_analyse
-    //     }
-    //     else {
-    //         if (params.nucleic) {
-    //             fasta_to_runner = orfs_fasta
-    //         }
-    //         else {
-    //             fasta_to_runner = ch_fasta
-    //         }
-    //     }
-    //     parsed_analysis = SEQUENCE_ANALYSIS(
-    //         fasta_to_runner,
-    //         user_applications,
-    //         dataDirPath,
-    //         params.signalp_mode
-    //     )
-    // }
+    analysis_result = Channel.empty()
+    if (disable_precalc || sequences_to_analyse) {
+        log.info "Running sequence analysis"
+        if (sequences_to_analyse && !disable_precalc) {
+            fasta_to_runner = sequences_to_analyse
+        }
+        else {
+            if (params.nucleic) {
+                fasta_to_runner = orfs_fasta
+            }
+            else {
+                fasta_to_runner = ch_fasta
+            }
+        }
+        parsed_analysis = SEQUENCE_ANALYSIS(
+            fasta_to_runner,
+            params.applications,
+            dataDirPath,
+            params.signalp_mode
+        )
+    }
 
-    // all_results = parsed_matches.concat(parsed_analysis)
+    all_results = parsed_matches.concat(parsed_analysis)
 
-    // AGGREGATE_RESULTS(all_results.collect())
-    // AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
+    AGGREGATE_RESULTS(all_results.collect())
+    AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
 
-    // XREFS(AGGREGATE_RESULTS.out, user_applications)
+    XREFS(AGGREGATE_RESULTS.out, params.applications)
 
-    // Channel.from(output_formats.split(','))
-    // .set { ch_format }
+    Channel.from(params.formats.split(','))
+    .set { ch_format }
 
-    // WRITE_RESULTS(
-    //     input_file.getName(),
-    //     AGGREGATE_PARSED_SEQS.out,
-    //     XREFS.out.collect(),
-    //     ch_format,
-    //     params.outdir,
-    //     params.ipsc_version,
-    //     params.nucleic
-    // )
+    WRITE_RESULTS(
+        input_file.getName(),
+        AGGREGATE_PARSED_SEQS.out,
+        XREFS.out.collect(),
+        ch_format,
+        params.outdir,
+        params.ipscn_version,
+        params.nucleic
+    )
 }
 
 workflow.onComplete = {

@@ -135,14 +135,15 @@ workflow PRE_CHECKS {
     }
 
     applications = user_applications.toLowerCase()
-    dataDir = CHECK_DATA(applications, data_dir)
+    CHECK_DATA(applications, data_dir)
+    dataDir = CHECK_DATA.out.dataDir.val
 
     log.info "Number of sequences to analyse: ${seq_input.countFasta()}"
 
     formats = output_formats.toLowerCase()
 
+    log.info "PRECHECKS ${dataDir}"
+
     emit:
     dataDir
-    formats
-    applications
 }
