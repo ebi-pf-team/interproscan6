@@ -41,9 +41,9 @@ def add_representative_domains(matches_path: str) -> list[dict]:
                         f"{fragment['start']}-{fragment['end']}-{dc_status_map.get(fragment['dc-status'], fragment['dc-status'])}"
                         for fragment in fragments
                     )
-
                 except KeyError:
                     frags_str = f"{pos_start}-{pos_end}-S"
+
                 domains.append({
                     "signature": acc,
                     "start": pos_start,
