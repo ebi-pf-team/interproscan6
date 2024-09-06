@@ -24,9 +24,10 @@ workflow CHECK_XREF_DATA {
         checkFilePath("${dataDir}/${params.xrefs.pathways}.json")
         checkFilePath("${dataDir}/${params.xrefs.pathways}.ipr.json")
     }
+    
     xrefDataDir = params.xrefs.entries.substring(0, params.xrefs.entries.lastIndexOf('/'))
-    if (missingXrefsFiles) {
-        log.error "Could not find all XREF data files in '${dataDir}/${xrefDataDir}/'\nMissing XREF files:\n${missingXrefsFiles.join('\n')}"
-        exit 5
-    }
+
+    emit:
+        missingXrefs = missingXrefsFiles.join('\n')
+        xrefDataDir
 }

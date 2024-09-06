@@ -15,13 +15,13 @@ workflow CHECK_DATA {
         exit 5
     }
 
-    def missingFiles = []
+    def missingDataFiles = []
     boolean gene3d_funfam_processed = false
 
-    // Helper function to check file existence and add to missingFiles list
+    // Helper function to check file existence and add to missingDataFiles list
     def checkFilePath = { path ->
         if (!file(path).exists()) {
-            missingFiles << path
+            missingDataFiles << path
         }
     }
 
@@ -73,11 +73,7 @@ workflow CHECK_DATA {
         }
     }
 
-    if (missingFiles) {
-        log.error "Could not find all necessary data files in '${dataDir}/'\nMissing files:\n${missingFiles.join('\n')}"
-        exit 5
-    }
-
     emit:
-    dataDir
+        missingData = missingDataFiles.join('\n')
+        dataDir
 }

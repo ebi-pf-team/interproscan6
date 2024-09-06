@@ -138,11 +138,44 @@ workflow PRE_CHECKS {
     }
 
     applications = user_applications.toLowerCase()
+
     CHECK_DATA(applications, data_dir)
+    missingData = CHECK_DATA.out.missingData.val
     dataDir = CHECK_DATA.out.dataDir.val
+
     CHECK_XREF_DATA(dataDir, goterms, pathways)
+    missingXrefs = CHECK_XREF_DATA.out.missingXrefs.val
+    xrefDataDir = CHECK_XREF_DATA.out.xrefDataDir.val
+    // if the triple quoted text has 0 indents the indents are included
+    // in the output
+    if (missingData && missingXrefs) {
+        log.error """
+Could not find all necessary data files in '${dataDir}/' and xref files in '${dataDir}/${xrefDataDir}/'
+Missing files:
+${missingData}
+${missingXrefs}
+        """
+        exit 5
+    } else if (missingData && !missingXrefs)
+    if (missingData) {
+        log.error """
+Could not find all necessary data files in '${dataDir}/'
+Missing files:
+${missingData}
+        """
+        exit 5
+    } else if (missingXrefs) {
+        log.error """
+Could not find all necessary XREF files in '${dataDir}/${xrefDataDir}/'
+Missing files:
+${missingXrefs}
+        """
+        exit 5
+    }
 
     log.info "Number of sequences to analyse: ${seq_input.countFasta()}"
+
+    exit 1
 
     emit:
     dataDir
