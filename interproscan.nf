@@ -116,7 +116,7 @@ workflow {
     AGGREGATE_RESULTS(all_results.collect())
     AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
 
-    XREFS(AGGREGATE_RESULTS.out, applications)
+    XREFS(AGGREGATE_RESULTS.out, applications, dataDirPath)
 
     Channel.from(params.formats.split(','))
     .set { ch_format }
