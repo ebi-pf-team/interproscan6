@@ -1,5 +1,6 @@
 include { CHECK_NUCLEIC } from "$projectDir/interproscan/modules/pre_checks/main"
 include { CHECK_DATA } from "$projectDir/interproscan/subworkflows/sequence_analysis/check_data"
+include { CHECK_XREF_DATA } from "$projectDir/interproscan/subworkflows/xrefs/check_xref_data"
 
 def printHelp() {
     """
@@ -137,6 +138,7 @@ workflow PRE_CHECKS {
     applications = user_applications.toLowerCase()
     CHECK_DATA(applications, data_dir)
     dataDir = CHECK_DATA.out.dataDir.val
+    CHECK_XREF_DATA(dataDir)
 
     log.info "Number of sequences to analyse: ${seq_input.countFasta()}"
 
