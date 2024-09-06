@@ -44,11 +44,8 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
 
             match_info[match_key]['member_db'] = member_db
             match_info[match_key]['library'] = map_databases[member_db]
-            if 'version' in match_info[match_key]:  # mobidb, signalp and tmhmm get version from members.config
-                version = match_info[match_key]['version']
-            else:
-                version = databases_versions[map_databases[member_db]]
-                match_info[match_key]['version'] = version
+            if 'version' not in match_info[match_key]:  # mobidb, signalp and tmhmm get version from members.config
+                match_info[match_key]['version'] = databases_versions[map_databases[member_db]]
 
             entry = entries_info.get(acc_id) or entries_info.get(match_key)
             if entry:
@@ -58,7 +55,6 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
                     "name": entry["name"],
                     "description": entry["description"],
                     "type": entry["type"],
-                    "version": version,
                     "member_db": member_db,
                     "goXRefs": [],
                     "pathwayXRefs": []
