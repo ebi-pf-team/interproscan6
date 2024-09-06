@@ -156,15 +156,14 @@ ${missingData}
 ${missingXrefs}
         """
         exit 5
-    } else if (missingData && !missingXrefs)
-    if (missingData) {
+    } else if (missingData && !missingXrefs) {
         log.error """
 Could not find all necessary data files in '${dataDir}/'
 Missing files:
 ${missingData}
         """
         exit 5
-    } else if (missingXrefs) {
+    } else if (missingXrefs && !missingData) {
         log.error """
 Could not find all necessary XREF files in '${dataDir}/${xrefDataDir}/'
 Missing files:
