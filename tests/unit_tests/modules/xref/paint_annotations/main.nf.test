@@ -1,0 +1,33 @@
+nextflow_process {
+
+    name "Test Process PAINT_ANNOTATIONS"
+    script "interproscan/modules/xrefs/paint_annotations/main.nf"
+    process "PAINT_ANNOTATIONS"
+
+    stage {
+        copy "data/panther/PAINT_Annotations"
+        copy "interproscan/scripts/xrefs/paint_annotations.py"
+        copy "tests/unit_tests/test_inputs/xrefs/entries/entries_matches.json"
+    }
+
+    test("Should run without failures") {
+
+        when {
+            params {
+            }
+            process {
+                """
+                input[0] = file("meta/tests/unit_tests/test_inputs/xrefs/entries/entries_matches.json")
+                input[1] = file("../../../meta/data/panther/PAINT_Annotations")
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

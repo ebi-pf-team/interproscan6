@@ -1,0 +1,16 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    "pathways_entries_matches.json:md5,d84ff9f7f6d49c5aec34b6dd97bd3cdf"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.04.2"
+        },
+        "timestamp": "2024-09-06T15:15:29.097698"
+    }
+}

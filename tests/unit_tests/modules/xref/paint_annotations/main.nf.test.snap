@@ -1,0 +1,16 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    "paint_anno_entries_matches.json:md5,a4cea84f276e1121f1d905e4623d9d84"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.04.2"
+        },
+        "timestamp": "2024-09-06T15:13:39.928457"
+    }
+}
