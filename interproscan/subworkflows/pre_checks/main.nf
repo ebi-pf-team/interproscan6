@@ -175,8 +175,6 @@ ${missingXrefs}
 
     log.info "Number of sequences to analyse: ${seq_input.countFasta()}"
 
-    exit 1
-
     emit:
     dataDir
 }
