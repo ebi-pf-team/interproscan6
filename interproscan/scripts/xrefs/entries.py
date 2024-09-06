@@ -45,8 +45,7 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
             match_info[match_key]['member_db'] = member_db
             match_info[match_key]['library'] = map_databases[member_db]
             if 'version' not in match_info[match_key]:  # mobidb, signalp and tmhmm get version from members.config
-                version = databases_versions[map_databases[member_db]]
-                match_info[match_key]['version'] = version
+                match_info[match_key]['version'] = databases_versions[map_databases[member_db]]
 
             entry = entries_info.get(acc_id) or entries_info.get(match_key)
             if entry:
@@ -56,9 +55,8 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
                     "name": entry["name"],
                     "description": entry["description"],
                     "type": entry["type"],
-                    "version": entry["database"]["version"],
-                    "member_db": entry["database"]["name"],
                     "representative": entry["representative"],
+                    "member_db": member_db,
                     "goXRefs": [],
                     "pathwayXRefs": []
                 }
@@ -68,7 +66,7 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
                     match_info[match_key]["entry"]["ipr_description"] = ipr_info["description"]
                     match_info[match_key]["entry"]["ipr_type"] = ipr_info["type"]
 
-            else:  # members with no match in entries
+            else:  # members with no match in entries. e.g. PIRSR
                 match_info[match_key]["entry"] = {
                     "accession": None,
                     "name": None,
@@ -76,8 +74,7 @@ def add_entries(matches_path: str, entries_path: str) -> dict:
                     "type": None,
                     "database": member_db,
                     "goXRefs": [],
-                    "pathwayXRefs": [],
-                    "version": match_info[match_key]['version']
+                    "pathwayXRefs": []
                 }
 
             if member_db == "PANTHER":
