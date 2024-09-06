@@ -3,6 +3,8 @@ import groovy.json.JsonOutput
 workflow CHECK_XREF_DATA {
     take:
     dataDir
+    goterms
+    pathways
 
     main:
     def missingXrefsFiles = []
@@ -14,13 +16,17 @@ workflow CHECK_XREF_DATA {
     }
 
     checkFilePath("${dataDir}/${params.xrefs.entries}")
-    checkFilePath("${dataDir}/${params.xrefs.goterms}.json")
-    checkFilePath("${dataDir}/${params.xrefs.goterms}.ipr.json")
-    checkFilePath("${dataDir}/${params.xrefs.pathways}.json")
-    checkFilePath("${dataDir}/${params.xrefs.pathways}.ipr.json")
-
+    if (goterms) {
+        checkFilePath("${dataDir}/${params.xrefs.goterms}.json")
+        checkFilePath("${dataDir}/${params.xrefs.goterms}.ipr.json")
+    }
+    if (pathways) {
+        checkFilePath("${dataDir}/${params.xrefs.pathways}.json")
+        checkFilePath("${dataDir}/${params.xrefs.pathways}.ipr.json")
+    }
+    xrefDataDir = params.xrefs.entries.substring(0, params.xrefs.entries.lastIndexOf('/'))
     if (missingXrefsFiles) {
-        log.error "Could not find all necessary XREF data files in '${dataDir}/'\nMissing XREF files:\n${missingXrefsFiles.join('\n')}"
+        log.error "Could not find all XREF data files in '${dataDir}/${xrefDataDir}/'\nMissing XREF files:\n${missingXrefsFiles.join('\n')}"
         exit 5
     }
 }

@@ -36,7 +36,9 @@ workflow {
         params.version,
         params.ipscn_version,
         params.signalp_mode,
-        params.signalp_gpu
+        params.signalp_gpu,
+        params.goterms,
+        params.pathways
     )
     dataDirPath = PRE_CHECKS.out.dataDir.val
     log.info "Using data files located in ${dataDirPath}"

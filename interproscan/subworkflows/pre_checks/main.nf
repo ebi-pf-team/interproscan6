@@ -44,6 +44,8 @@ workflow PRE_CHECKS {
     ipscn_version
     signalp_mode
     signalp_gpu
+    goterms
+    pathways
 
     main:
     if ( !nextflow.version.matches('>=23.10') ) {
@@ -138,7 +140,7 @@ workflow PRE_CHECKS {
     applications = user_applications.toLowerCase()
     CHECK_DATA(applications, data_dir)
     dataDir = CHECK_DATA.out.dataDir.val
-    CHECK_XREF_DATA(dataDir)
+    CHECK_XREF_DATA(dataDir, goterms, pathways)
 
     log.info "Number of sequences to analyse: ${seq_input.countFasta()}"
 

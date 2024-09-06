@@ -11,7 +11,7 @@ workflow CHECK_DATA {
     if (dDir.exists() && dDir.isDirectory()) {
         dataDir = data_dir.endsWith('/') ? data_dir[0..-2] : data_dir
     } else {
-        log.error "Could not find data directory at '${data_dir}'.\nPlease check the value of --datadir"
+        log.error "Could not find a directory at '${data_dir}'.\nPlease check the value of --datadir"
         exit 5
     }
 
