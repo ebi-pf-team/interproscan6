@@ -1,0 +1,44 @@
+nextflow_workflow {
+
+    name "Test Workflow XREFS"
+    script "interproscan/subworkflows/xrefs/main.nf"
+    workflow "XREFS"
+
+    stage {
+        symlink "interproscan/modules/xrefs/entries/main.nf"
+        symlink "interproscan/modules/xrefs/goterms/main.nf"
+        symlink "interproscan/modules/xrefs/paint_annotations/main.nf"
+        symlink "interproscan/modules/xrefs/pathways/main.nf"
+        copy "data/xrefs/entries.json"
+        copy "data/xrefs/goterms.json"
+        copy "data/xrefs/goterms.ipr.json"
+        copy "data/xrefs/pathways.json"
+        copy "data/xrefs/pathways.ipr.json"
+        copy "interproscan/scripts/xrefs/entries.py"
+        copy "interproscan/scripts/xrefs/goterms.py"
+        copy "interproscan/scripts/xrefs/paint_annotations.py"
+        copy "interproscan/scripts/xrefs/pathways.py"
+        copy "tests/unit_tests/test_inputs/xrefs/subworkflow/xref_matches_input.json"
+    }
+
+    test("Should run") {
+
+        when {
+            params {
+            }
+            workflow {
+                """
+                input[0] = file("meta/tests/unit_tests/test_inputs/xrefs/subworkflow/xref_matches_input.json")
+                input[1] = "ncbifam,sfld"
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert snapshot(workflow.out).match()
+        }
+
+    }
+
+}
