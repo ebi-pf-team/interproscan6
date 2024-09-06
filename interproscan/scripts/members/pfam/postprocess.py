@@ -177,9 +177,9 @@ def main():
     args = sys.argv[1:]
     hmm_parsed = args[0]
     min_length = int(args[1])
-    seed = args[2].split("=")[1]
-    clans = args[3].split("=")[1]
-    dat = args[4].split("=")[1]
+    seed = args[2]
+    clans = args[3]
+    dat = args[4]
     outpath = args[5]
 
     # Need to return Pfam clans AND nesting relationships between models
