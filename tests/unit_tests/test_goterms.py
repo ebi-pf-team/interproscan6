@@ -56,7 +56,7 @@ def test_goterms_main(goterms_path, matches_json_path, temp_output, monkeypatch)
     temp_output.unlink()
 
 
-def test_add_entries(goterms_path, expected_output, matches_json_path):
+def test_add_goterms(goterms_path, expected_output, matches_json_path):
     def parse_goterms(goterm_list):
         goterms = {}
         for goterm_dict in goterm_list:
