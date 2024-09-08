@@ -8,7 +8,7 @@ nextflow_process {
         copy "data/xrefs/goterms.json"
         copy "data/xrefs/goterms.ipr.json"
         copy "interproscan/scripts/xrefs/goterms.py"
-        copy "tests/unit_tests/test_inputs/xrefs/entries/entries_matches.json"
+        copy "tests/unit_tests/test_inputs/xrefs/match_entries.json"
     }
 
     test("Should run without failures") {
@@ -18,7 +18,7 @@ nextflow_process {
             }
             process {
                 """
-                input[0] = file("meta/tests/unit_tests/test_inputs/xrefs/entries/entries_matches.json")
+                input[0] = file("meta/tests/unit_tests/test_inputs/xrefs/match_entries.json")
                 input[1] = "../../../meta/data/xrefs/goterms"
                 """
             }

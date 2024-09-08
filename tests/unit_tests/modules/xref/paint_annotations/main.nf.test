@@ -5,9 +5,11 @@ nextflow_process {
     process "PAINT_ANNOTATIONS"
 
     stage {
-        copy "data/panther/PAINT_Annotations"
+        copy "tests/unit_tests/test_inputs/xrefs/paint_annotations/PAINT_Annotations"
+        copy "tests/unit_tests/test_inputs/xrefs/paint_annotations/PTHR11228.json"
+        copy "tests/unit_tests/test_inputs/xrefs/paint_annotations/PTHR43780.json"
         copy "interproscan/scripts/xrefs/paint_annotations.py"
-        copy "tests/unit_tests/test_inputs/xrefs/entries/entries_matches.json"
+        copy "tests/unit_tests/test_inputs/xrefs/paint_annotations/entries_matches.json"
     }
 
     test("Should run without failures") {
@@ -17,8 +19,8 @@ nextflow_process {
             }
             process {
                 """
-                input[0] = file("meta/tests/unit_tests/test_inputs/xrefs/entries/entries_matches.json")
-                input[1] = file("../../../meta/data/panther/PAINT_Annotations")
+                input[0] = file("meta/tests/unit_tests/test_inputs/xrefs/paint_annotations/entries_matches.json")
+                input[1] = Channel.fromPath("../../../meta/tests/unit_tests/test_inputs/xrefs/paint_annotations/*")
                 """
             }
         }
