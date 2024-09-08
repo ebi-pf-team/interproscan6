@@ -18,7 +18,7 @@ def pathways_path(test_input_dir):
 
 @pytest.fixture
 def matches_json_path(test_input_dir):
-    return test_input_dir / "xrefs/goterms_pathways/match_entries.json"
+    return test_input_dir / "xrefs/match_entries.json"
 
 
 @pytest.fixture

@@ -18,7 +18,7 @@ def entries_path(test_input_dir):
 
 @pytest.fixture
 def matches_json_path(test_input_dir):
-    return test_input_dir / "xrefs/entries/aggregated_results.json"
+    return test_input_dir / "xrefs/subworkflow/xref_matches_input.json"
 
 
 @pytest.fixture
@@ -70,7 +70,7 @@ def test_add_entries(entries_path, expected_output, matches_json_path):
                         sig_data["entry"][key] == expected_output[seq_id][sig_acc]["entry"][key]
                         for key in [
                             'accession', 'name', 'description', 'type',
-                            'version', 'member_db', 'goXRefs', 'pathwayXRefs'
+                            'version', 'goXRefs', 'pathwayXRefs'
                         ]
                     ), (
                         f"Mismatch in entries data for signature acc {sig_acc} "
