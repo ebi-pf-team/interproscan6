@@ -128,7 +128,7 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."gene3d".postprocess.cath_resolve_hits_switches,
                     "${dataDir}/${params.members."gene3d".postprocess.model2sf_map}",
                     "${dataDir}/${params.members."gene3d".postprocess.discontinuous_regs}",
-                    params.members."gene3d".postprocess.assign_cath_superfamilies,
+                    "${params.members."gene3d".postprocess.assign_cath_superfamilies}",
                     "${dataDir}/${params.members."funfam".hmm}",
                     params.members."funfam".switches,
                 ]
@@ -215,11 +215,11 @@ workflow SEQUENCE_ANALYSIS {
             "${dataDir}/${params.members."${member}".hmm}",
             params.members."${member}".switches,
             [
-                "${dataDir}/${params.members."${member}".bin}",
-                "${dataDir}/${params.members."${member}".self_hits}",
-                "${dataDir}/${params.members."${member}".cla}",
-                "${dataDir}/${params.members."${member}".model}",
-                "${dataDir}/${params.members."${member}".pdbj95d}",
+                "${params.members."${member}".postprocess.bin}",
+                "${dataDir}/${params.members."${member}".postprocess.self_hits}",
+                "${dataDir}/${params.members."${member}".postprocess.cla}",
+                "${dataDir}/${params.members."${member}".postprocess.model}",
+                "${dataDir}/${params.members."${member}".postprocess.pdbj95d}",
                 params.members."${member}".postprocess.ass3_switches,
             ]
         ]
@@ -262,7 +262,7 @@ workflow SEQUENCE_ANALYSIS {
             return [
                 "${dataDir}/${params.members."${member}".data.hierarchy}",
                 "${dataDir}/${params.members."${member}".data.pval}",
-                params.members."${member}".switches
+                params.members.prints.switches
             ]
 
         prosite_patterns: member == "prosite_patterns"
@@ -300,10 +300,6 @@ workflow SEQUENCE_ANALYSIS {
 
     /*
     Member databases that use HMMER
-    */
-
-    /*
-    Using generic HMMER
     */
 
     // AntiFam
