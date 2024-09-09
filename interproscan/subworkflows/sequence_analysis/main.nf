@@ -87,6 +87,7 @@ workflow SEQUENCE_ANALYSIS {
     take:
     fasta
     applications
+    dataDir
     signalp_mode
 
     main:
@@ -96,8 +97,6 @@ workflow SEQUENCE_ANALYSIS {
     // Divide members up into their respective analysis pipelines/methods
     Channel.from(applications.split(','))
     .branch { member ->
-        runner = params.members."${member}".runner
-
         /*
         Member databases that use HMMER:
         The post processing of some applications (e.g. SFLD) hits requires additional files
@@ -106,7 +105,7 @@ workflow SEQUENCE_ANALYSIS {
         antifam: member == 'antifam'
             return [
                 "${member}",
-                params.members."${member}".hmm,
+                "${dataDir}/${params.members."${member}".hmm}",
                 params.members."${member}".switches,
                 [] // no post-processing
             ]
@@ -119,14 +118,14 @@ workflow SEQUENCE_ANALYSIS {
             gene3d_funfam_processed = true
             return [
                 "gene3d",
-                params.members."gene3d".hmm,
+                "${dataDir}/${params.members."gene3d".hmm}",
                 params.members."gene3d".switches,
                 [
                     params.members."gene3d".postprocess.cath_resolve_hits_switches,
-                    params.members."gene3d".postprocess.model2sf_map,
-                    params.members."gene3d".postprocess.discontinuous_regs,
-                    params.members."gene3d".postprocess.assign_cath_superfamilies,
-                    params.members."funfam".hmm,
+                    "${dataDir}/${params.members."gene3d".postprocess.model2sf_map}",
+                    "${dataDir}/${params.members."gene3d".postprocess.discontinuous_regs}",
+                    "${dataDir}/${params.members."gene3d".postprocess.assign_cath_superfamilies}",
+                    "${dataDir}/${params.members."funfam".hmm}",
                     params.members."funfam".switches,
                 ]
             ]
@@ -134,10 +133,10 @@ workflow SEQUENCE_ANALYSIS {
         hamap: member == 'hamap'
             return [
                 "${member}",
-                params.members."${member}".hmm,
+                "${dataDir}/${params.members."${member}".hmm}",
                 params.members."${member}".switches,
                 [
-                    params.members."${member}".postprocess.models_dir,
+                    "${dataDir}/${params.members."${member}".postprocess.models_dir}",
                     params.members."${member}".postprocess.pfsearchv3_switches,
                 ]
             ]
@@ -145,7 +144,7 @@ workflow SEQUENCE_ANALYSIS {
         ncbifam: member == 'ncbifam'
             return [
                 "${member}",
-                params.members."${member}".hmm,
+                "${dataDir}/${params.members."${member}".hmm}",
                 params.members."${member}".switches,
                 [] // no post-processing
             ]
@@ -153,70 +152,70 @@ workflow SEQUENCE_ANALYSIS {
         panther: member == 'panther'
             return [
                 "${member}",
-                params.members."${member}".hmm,
+                "${dataDir}/${params.members."${member}".hmm}",
                 params.members."${member}".switches,
                 [
-                    params.members."${member}".postprocess.data_dir,
+                    "${dataDir}/${params.members."${member}".postprocess.data_dir}",
                     params.members."${member}".postprocess.evalue,
-                    params.members."${member}".postprocess.paint_annotations,
+                    "${dataDir}/${params.members."${member}".postprocess.paint_annotations}",
                 ]
             ]
 
         pfam: member == 'pfam'
             return [
                 "${member}",
-                params.members."${member}".hmm,
+                "${dataDir}/${params.members."${member}".hmm}",
                 params.members."${member}".switches,
                 [
                     params.members."${member}".postprocess.min_length,
-                    params.members."${member}".postprocess.seed,
-                    params.members."${member}".postprocess.clan,
-                    params.members."${member}".postprocess.data,
+                    "${dataDir}/${params.members."${member}".postprocess.seed}",
+                    "${dataDir}/${params.members."${member}".postprocess.clan}",
+                    "${dataDir}/${params.members."${member}".postprocess.data}",
                 ]
             ]
 
         pirsf: member == 'pirsf'
             return [
                 "${member}",
-                params.members."${member}".hmm,
+                "${dataDir}/${params.members."${member}".hmm}",
                 params.members."${member}".switches,
                 [
-                    params.members."${member}".postprocess.data
+                    "${dataDir}/${params.members."${member}".postprocess.data}"
                 ]
             ]
 
        pirsr: member == 'pirsr'
             return [
                 "${member}",
-                params.members."${member}".hmm,
+                "${dataDir}/${params.members."${member}".hmm}",
                 params.members."${member}".switches,
                 [
-                    params.members."${member}".postprocess.rules
+                    "${dataDir}/${params.members."${member}".postprocess.rules}"
                 ]
             ]
 
        sfld: member == 'sfld'
             return [
                 "${member}",
-                params.members."${member}".hmm,
+                "${dataDir}/${params.members."${member}".hmm}",
                 params.members."${member}".switches,
                 [
-                    params.members."${member}".postprocess.sites_annotation,
-                    params.members."${member}".postprocess.hierarchy,
+                    "${dataDir}/${params.members."${member}".postprocess.sites_annotation}",
+                    "${dataDir}/${params.members."${member}".postprocess.hierarchy}",
                 ]
             ]
 
         superfamily: member == 'superfamily'
         return [
             "${member}",
-            params.members."${member}".hmm,
+            "${dataDir}/${params.members."${member}".hmm}",
             params.members."${member}".switches,
             [
-                params.members."${member}".postprocess.bin,
-                params.members."${member}".postprocess.self_hits,
-                params.members."${member}".postprocess.cla,
-                params.members."${member}".postprocess.model,
-                params.members."${member}".postprocess.pdbj95d,
+                "${dataDir}/${params.members."${member}".bin}",
+                "${dataDir}/${params.members."${member}".self_hits}",
+                "${dataDir}/${params.members."${member}".cla}",
+                "${dataDir}/${params.members."${member}".model}",
+                "${dataDir}/${params.members."${member}".pdbj95d}",
                 params.members."${member}".postprocess.ass3_switches,
             ]
         ]
@@ -225,7 +224,7 @@ workflow SEQUENCE_ANALYSIS {
         smart: member == 'smart'
             return [
                 "${member}",
-                params.members."${member}".hmm,
+                "${dataDir}/${params.members."${member}".hmm}",
                 params.members."${member}".switches,
             ]
 
@@ -234,11 +233,11 @@ workflow SEQUENCE_ANALYSIS {
         */
         cdd: member == "cdd"
             return [
-                params.members."${member}".library,
+                "${dataDir}/${params.members."${member}".library}",
                 params.members."${member}".switches,
                 [
                     params.members."${member}".postprocess.switches,
-                    params.members."${member}".postprocess.data,
+                    "${dataDir}/${params.members."${member}".postprocess.data}",
                 ]
             ]
         coils: member == "coils"
@@ -257,23 +256,23 @@ workflow SEQUENCE_ANALYSIS {
 
         prints: member == 'prints'
             return [
-                params.members.prints.data.hierarchy,
+                "${dataDir}/${params.members."${member}".hierarchy}",
                 params.members.prints.data.pval,
                 params.members.prints.switches
             ]
 
         prosite_patterns: member == "prosite_patterns"
             return [
-                params.members."${member}".data,
-                params.members."${member}".evaluator,
+                "${dataDir}/${params.members."${member}".data}",
+                "${dataDir}/${params.members."${member}".evaluator}",
                 params.members."${member}".switches
             ]
 
         prosite_profiles: member == "prosite_profiles"
             return [
-                params.members."${member}".data,
+                "${dataDir}/${params.members."${member}".data}",
                 params.members."${member}".switches,
-                params.members."${member}".skip_flagged_profiles
+                "${dataDir}/${params.members."${member}".skip_flagged_profiles}"
             ]
 
         signalp: member == 'signalp'

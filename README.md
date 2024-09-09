@@ -67,12 +67,16 @@ Please provide absolute paths. You can use the `$projectDir` short cut to repres
 
 2. Build a docker `InterProScan6` base image (this includes all non-licensed dependencies including `HMMER`, `BLAST`, `BioPython`, `easel`, etc.)
 
-    docker build -t interproscan6 .
+```bash
+docker build -t interproscan6 .
+```
 
 3. Build a docker `MobiDB` image (this includes the `idrpred` tool for MobiDB predictions). From the root of this repository:
 
-    cd docker_files/mobidb
-    docker build -t idrpred .
+```bash
+cd docker_files/mobidb
+docker build -t idrpred .
+```
 
 4. [Optional] install licensed software
 
@@ -161,9 +165,11 @@ The order the profiles are listed after `-profiles` does **not** matter.
 
 How to run:
 
-    nextflow run interproscan.nf \
-        --input <path to fasta file> \
-        -profile <container runtime, and executor>
+```bash
+nextflow run interproscan.nf \
+    --input <path to fasta file> \
+    -profile <container runtime, and executor>
+```
 
 If running `InterProScan6` locally, you need only provide the corresponding container runtime 
 profile. Currently, Docker (profile: `docker`), Singularity (profile: `singularity`), and Apptainer 
@@ -206,9 +212,11 @@ The `easel` application itself and all of its dependencies are integrated in Int
 
 Run `InterProScan6` with the `--nucleic` flag
 
-    nextflow run interproscan.nf \
-        --input <path to fasta file> \
-        --nucleic
+```bash
+nextflow run interproscan.nf \
+--input <path to fasta file> \
+--nucleic
+```
 
 By default `InterProScan6` will assume the input FASTA file contains protein sequences. The `--nucleic` flag instructs `InterProScan6` to retrieve all possible ORFs using the `easel` tool suite.
 
@@ -309,15 +317,9 @@ You can configure the prediction of ORFs by updating the relevant `translate` pa
       <td>23</td>
       <td>Thraustochytrium mitochondrial</td>
     </tr>
-    <tr>
-      <td>24</td>
-      <td>Pterobranchia mitochondrial</td>
-    </tr>
-    <tr>
-      <td>25</td>
-      <td>Candidate Division SR1 and Gracilibacteria</td>
-    </tr>
-  </tbody>
+    <tr>nextflow run interproscan.nf \
+    --input <path to fasta file> \
+    -profile <container runtime, and executor>
 </table>
 
 ## Inputs, parameters and configuration
@@ -475,20 +477,25 @@ params {
 
 Include `signalp` and `signalp_euk` in the list of applications defined using the `--applications` flag.
 
-    nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp --disable_precalc
-    nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp_euk --disable_precalc
+```bash
+nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp --disable_precalc
+nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp_euk --disable_precalc
+```
 
 ### Changing mode of `Signalp6` in `InterProScan6`
 
 `SignalP6` supports 3 modes: `fast`, `slow` and `slow-sequential`. The mode can be set using the `--signalp_mode` flag. The default mode is `fast`.
 
 For example, to run `InterProScan` with input file `best_to_test.fasta`, using SignalP with all models in slow mode, use the command:
+
+```bash
+nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp --disable_precalc --signalp_mode slow
 ```
-    nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp --disable_precalc --signalp_mode slow
-```
+
 To run in slow-sequential mode and with only Eukaryotic models, use the command:
-```
-    nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp_euk --disable_precalc --signalp_mode slow-sequential
+
+```bash
+nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp_euk --disable_precalc --signalp_mode slow-sequential
 ```
 
 **Note:** _`InterProScan6` only supports the implementation of one `SignalP` mode at a time. A separate `InterProScan6` but be completed for each mode of interest, in order to apply multiple modes to the same dataset_.
@@ -499,45 +506,60 @@ By default, `SignalP` runs on your CPU. If you have a GPU available, you can con
 You will need to install `SignalP` in order to convert to GPU models.
 
 1. (Optional) Remove any previously built SignalP images if you no longer want to run `SignalP` with CPU
+
 ```bash
 docker image rm signalp6:latest
 ```
+
 2. Install `SignalP` 
+
 ```bash
 cd <SIGNALP_DIR>
 pip install .
 ```
+
 3. Convert the models to GPU
+
 ```bash
 signalp6_convert_models gpu /path/to/models
 ```
+
 4. Build a docker image for `SignalP` with GPU
+
 ```bash
 # with the terminal pointed at your local signalp dir
 docker image build -t signalp6_gpu .
 ```
+
 5. To run `SignalP` with GPU with `InterProScan6` use the flag `--signalp_gpu`
+
 ```bash
 nextflow run interproscan.nf --input <fasta file> --applications signalp --signalp_gpu
 ```
+
 Alternatively, if you do not always want to use the flag to run `SignalP`, you can update the `nextflow.config` file from "signalp_gpu = false" to "signalp_gpu = true".
 
 ## `Phobius`
+
 ### Adding `Phobius` (version 1.01) to `InterProScan6`
 
 1. Download Phobius from the Phobius  [server](https://software.sbc.su.se/phobius.html)
 
 2. Unpack the `tar` file in your desired directory
+
 ```
 tar -xzf phobius101_linux.tgz -C <PHOBIUS-DIR>
 ```
+
 3. Copy the docker file available in the `./docker_files/phobius/` directory to your local `Phobius` directory
+
 ```bash
 # with the terminal pointed at the root of this repo
 cp docker_files/phobius/Dockerfile <PHOBIUS-DIR>/Dockerfile
 ```
 
 4. Build a docker image - _the Nextflow pipeline needs all third party tools to be stored within linux containers_.
+
 ```bash
 # with the terminal pointed at your local phobius dir
 docker image build -t phobius .
@@ -564,6 +586,7 @@ You can find more information about the InterPro consortium (including the membe
 On some systems, Nextflow requires root privileges to be able to create the output directories. 
 
 If you receive an error message such as:
+
 ```bash
 ERROR ~ Error executing process > 'PARSE_SEQUENCE (1)'
 
@@ -572,7 +595,8 @@ Caused by:
 ```
 
 Try running Nextflow with root privileges:
-```
+
+```bash
 sudo nextflow run interproscan.nf --input <path to fasta file> 
 ```
 
@@ -589,6 +613,7 @@ Also try providing root privileges to docker within Nextflow, by changing the th
 ## File not found
 
 If you recieve a file not found error:
+
 ```bash
 FileNotFoundError: [Errno 2] No such file or directory
 ```
@@ -597,22 +622,27 @@ This may be due to the docker image not being built correctly. This can happen d
 
 Try running docker with root privileges:
 
-    sudo docker build -t interproscan6 .
-
+```bash
+sudo docker build -t interproscan6 .
+```
 
 Check the docker installtion is configured correctly, with all necessary privileges. [StackOverflow](https://stackoverflow.com/questions/48957195/how-to-fix-docker-got-permission-denied-issue)
 
 For example, check root privileges have been provided to the docker socket
 
-    sudo chmod 666 /var/run/docker.sock
+```bash
+sudo chmod 666 /var/run/docker.sock
+```
 
 ## Segmentation fault
 
 If you a recieve an error such as the following:
+
 ```bash
 Command error:
   .command.sh: line 2:     7 Segmentation fault      (core dumped) /opt/hmmer3/bin/hmmsearch --cut_ga --cpu 1 -o 7.0._.antifam._.out AntiFam.hmm mini_test.1.fasta
 ```
+
 This is generally due to HMMER being unable to find a necessary data file.
 Make sure the data directory is correctly structured and populated and `InterProScan` is 
 pointed to the correct data directory using the `--data` flag if not using the default data

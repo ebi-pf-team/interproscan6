@@ -5,7 +5,7 @@ process CHECK_NUCLEIC {
     path fasta_file
 
     output:
-    val ""  // need so the linter do not complain
+    val ""  // needed so the linter do not complain
 
     script:
     """
