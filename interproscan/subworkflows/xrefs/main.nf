@@ -15,7 +15,7 @@ workflow XREFS {
     final_result = ENTRIES.out
 
     if ("${applications}".contains('panther')) {
-        PAINT_ANNOTATIONS(final_result, "${dataDir}/${params.members."${member}".postprocess.paint_annotations}")
+        PAINT_ANNOTATIONS(final_result, "${dataDir}/${params.members."panther".postprocess.paint_annotations}")
         final_result = PAINT_ANNOTATIONS.out
     }
 
