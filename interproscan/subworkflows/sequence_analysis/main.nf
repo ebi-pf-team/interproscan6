@@ -216,7 +216,6 @@ workflow SEQUENCE_ANALYSIS {
             params.members."${member}".switches,
             [
                 "${params.members."${member}".postprocess.bin}",
-                "${dataDir}/${params.members."${member}".self_hits}",
                 "${dataDir}/${params.members."${member}".postprocess.self_hits}",
                 "${dataDir}/${params.members."${member}".postprocess.cla}",
                 "${dataDir}/${params.members."${member}".postprocess.model}",
