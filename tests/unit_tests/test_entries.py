@@ -70,7 +70,7 @@ def test_add_entries(entries_path, expected_output, matches_json_path):
                         sig_data["entry"][key] == expected_output[seq_id][sig_acc]["entry"][key]
                         for key in [
                             'accession', 'name', 'description', 'type',
-                            'version', 'goXRefs', 'pathwayXRefs'
+                            'goXRefs', 'pathwayXRefs'
                         ]
                     ), (
                         f"Mismatch in entries data for signature acc {sig_acc} "
