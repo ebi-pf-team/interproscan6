@@ -13,7 +13,7 @@ from interproscan.scripts.xrefs import pathways
 
 @pytest.fixture
 def pathways_path(test_input_dir):
-    return test_input_dir / "xrefs/goterms_pathways/pathways"
+    return test_input_dir / "xrefs/pathways"
 
 
 @pytest.fixture

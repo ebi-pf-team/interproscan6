@@ -14,7 +14,7 @@ from interproscan.scripts.xrefs import goterms
 
 @pytest.fixture
 def goterms_path(test_input_dir):
-    return test_input_dir / "xrefs/goterms_pathways/goterms"
+    return test_input_dir / "xrefs/goterms"
 
 
 @pytest.fixture

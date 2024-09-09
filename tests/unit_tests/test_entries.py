@@ -13,7 +13,7 @@ from interproscan.scripts.xrefs import entries
 
 @pytest.fixture
 def entries_path(test_input_dir):
-    return test_input_dir / "xrefs/entries/entries.json"
+    return test_input_dir / "xrefs/entries.json"
 
 
 @pytest.fixture
