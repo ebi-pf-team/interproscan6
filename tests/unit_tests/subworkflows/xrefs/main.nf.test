@@ -30,6 +30,7 @@ nextflow_workflow {
                 """
                 input[0] = file("meta/tests/unit_tests/test_inputs/xrefs/subworkflow/xref_matches_input.json")
                 input[1] = "ncbifam,sfld"
+                input[2] = "../../../meta/data"
                 """
             }
         }
