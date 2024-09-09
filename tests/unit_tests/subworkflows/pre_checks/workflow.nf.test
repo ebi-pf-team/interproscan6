@@ -4,12 +4,16 @@ nextflow_workflow {
     script "interproscan/subworkflows/pre_checks/main.nf"
     workflow "PRE_CHECKS"
 
-
     stage {
         symlink "interproscan/scripts/pre_checks/check_nucleic_seq.py"
         symlink "interproscan/modules/pre_checks/main.nf"
+        symlink "interproscan/subworkflows/sequence_analysis/check_data.nf"
+        symlink "interproscan/subworkflows/xrefs/check_xref_data.nf"
+        copy "tests/unit_tests/mock_data/antifam/AntiFam.hmm"
+        copy "tests/unit_tests/mock_data/cdd/db/Cdd_NCBI.pal"
+        copy "tests/unit_tests/mock_data/cdd/data"
+        copy "tests/unit_tests/mock_data/xrefs/entries.json"
     }
-
 
     test("Run pre-analysis checks successfully") {
 
@@ -21,13 +25,19 @@ nextflow_workflow {
             }
             workflow {
                 """
+                input[0] = false
                 input[1] = file("${params.input}")
-                input[3] = ['input', 'applications', 'disable_precalc', ]
-                input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
-                input[7] = "6.0.0"
-                input[8] = "fast"
-                input[9] = ""
+                input[2] = "meta/tests/unit_tests/mock_data" 
+                input[3] = false
+                input[4] = ['input', 'applications', 'disable_precalc', ]
+                input[5] = "${params.applications}"
+                input[6] = "${params.formats}"
+                input[7] = false
+                input[8] = "6.0.0"
+                input[9] = "fast"
+                input[10] = false
+                input[11] = false
+                input[12] = false
                 """
             }
         }
@@ -52,12 +62,17 @@ nextflow_workflow {
                 """
                 input[0] = "true"
                 input[1] = file("${params.input}")
-                input[3] = ['input', 'applications', 'disable_precalc', ]
-                input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
-                input[7] = "6.0.0"
-                input[8] = "fast"
-                input[9] = ""
+                input[2] = "meta/tests/unit_tests/mock_data" 
+                input[3] = false
+                input[4] = ['input', 'applications', 'disable_precalc', ]
+                input[5] = "${params.applications}"
+                input[6] = "${params.formats}"
+                input[7] = false
+                input[8] = "6.0.0"
+                input[9] = "fast"
+                input[10] = false
+                input[11] = false
+                input[12] = false
                 """
             }
         }
@@ -80,12 +95,19 @@ nextflow_workflow {
             }
             workflow {
                 """
-                input[3] = ['input', 'applications', 'disable_precalc', 'help']
-                input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
-                input[7] = "6.0.0"
-                input[8] = "fast"
-                input[9] = ""
+                input[0] = false
+                input[1] = null
+                input[2] = "meta/tests/unit_tests/mock_data" 
+                input[3] = false
+                input[4] = ['input', 'applications', 'disable_precalc', ]
+                input[5] = "${params.applications}"
+                input[6] = "${params.formats}"
+                input[7] = false
+                input[8] = "6.0.0"
+                input[9] = "fast"
+                input[10] = false
+                input[11] = false
+                input[12] = false
                 """
             }
         }
@@ -109,14 +131,19 @@ nextflow_workflow {
             }
             workflow {
                 """
+                input[0] = false
                 input[1] = file("${params.input}")
-                input[2] = "true"
-                input[3] = ['input', 'applications', 'disable_precalc', 'help']
-                input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
-                input[7] = "6.0.0"
-                input[8] = "fast"
-                input[9] = ""
+                input[2] = "meta/tests/unit_tests/mock_data" 
+                input[3] = true
+                input[4] = ['input', 'applications', 'disable_precalc', ]
+                input[5] = "${params.applications}"
+                input[6] = "${params.formats}"
+                input[7] = false
+                input[8] = "6.0.0"
+                input[9] = "fast"
+                input[10] = false
+                input[11] = false
+                input[12] = false
                 """
             }
         }
@@ -140,14 +167,19 @@ nextflow_workflow {
             }
             workflow {
                 """
+                input[0] = false
                 input[1] = file("${params.input}")
-                input[2] = "true"
-                input[3] = ['input', 'applications', 'disable_precalc', 'help']
-                input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
-                input[7] = "6.0.0"
-                input[8] = "fast"
-                input[9] = ""
+                input[2] = "meta/tests/unit_tests/mock_data" 
+                input[3] = true
+                input[4] = ['input', 'applications', 'disable_precalc', ]
+                input[5] = "${params.applications}"
+                input[6] = "${params.formats}"
+                input[7] = false
+                input[8] = "6.0.0"
+                input[9] = "fast"
+                input[10] = false
+                input[11] = false
+                input[12] = false
                 """
             }
         }
@@ -170,13 +202,19 @@ nextflow_workflow {
             }
             workflow {
                 """
+                input[0] = false
                 input[1] = file("${params.input}")
-                input[3] = ['input', 'Bilbo']
-                input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
-                input[7] = "6.0.0"
-                input[8] = "fast"
-                input[9] = ""
+                input[2] = "meta/tests/unit_tests/mock_data" 
+                input[3] = false
+                input[4] = ['input', 'applications', 'disable_precalc', 'Bilbo']
+                input[5] = "${params.applications}"
+                input[6] = "${params.formats}"
+                input[7] = false
+                input[8] = "6.0.0"
+                input[9] = "fast"
+                input[10] = false
+                input[11] = false
+                input[12] = false
                 """
             }
         }
@@ -199,13 +237,19 @@ nextflow_workflow {
             }
             workflow {
                 """
+                input[0] = false
                 input[1] = file("${params.input}")
-                input[3] = ['input', 'help']
-                input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
-                input[7] = "6.0.0"
-                input[8] = "fast"
-                input[9] = ""
+                input[2] = "meta/tests/unit_tests/mock_data" 
+                input[3] = false
+                input[4] = ['input', 'applications', 'disable_precalc', ]
+                input[5] = "${params.applications}"
+                input[6] = "${params.formats}"
+                input[7] = false
+                input[8] = "6.0.0"
+                input[9] = "fast"
+                input[10] = false
+                input[11] = false
+                input[12] = false
                 """
             }
         }
@@ -227,13 +271,19 @@ nextflow_workflow {
             }
             workflow {
                 """
+                input[0] = false
                 input[1] = file("${params.input}")
-                input[3] = ['input', 'help']
-                input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
-                input[7] = "6.0.0"
-                input[8] = "fast"
-                input[9] = ""
+                input[2] = "meta/tests/unit_tests/mock_data" 
+                input[3] = false
+                input[4] = ['input', 'applications', 'disable_precalc', ]
+                input[5] = "${params.applications}"
+                input[6] = "${params.formats}"
+                input[7] = false
+                input[8] = "6.0.0"
+                input[9] = "fast"
+                input[10] = false
+                input[11] = false
+                input[12] = false
                 """
             }
         }
@@ -256,13 +306,19 @@ nextflow_workflow {
             }
             workflow {
                 """
+                input[0] = false
                 input[1] = file("${params.input}")
-                input[3] = ['input', 'help']
-                input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
-                input[7] = "6.0.0"
-                input[8] = "fast"
-                input[9] = ""
+                input[2] = "meta/tests/unit_tests/mock_data" 
+                input[3] = false
+                input[4] = ['input', 'applications', 'disable_precalc', ]
+                input[5] = "${params.applications}"
+                input[6] = "${params.formats}"
+                input[7] = false
+                input[8] = "6.0.0"
+                input[9] = "fast"
+                input[10] = false
+                input[11] = false
+                input[12] = false
                 """
             }
         }
@@ -284,14 +340,19 @@ nextflow_workflow {
             }
             workflow {
                 """
+                input[0] = false
                 input[1] = file("${params.input}")
-                input[3] = ['input', 'help', 'version']
-                input[4] = "${params.applications}"
-                input[5] = "${params.formats}"
-                input[6] = "true"
-                input[7] = "6.0.0"
-                input[8] = "fast"
-                input[9] = ""
+                input[2] = "meta/tests/unit_tests/mock_data" 
+                input[3] = false
+                input[4] = ['input', 'applications', 'disable_precalc', ]
+                input[5] = "${params.applications}"
+                input[6] = "${params.formats}"
+                input[7] = true
+                input[8] = "6.0.0"
+                input[9] = "fast"
+                input[10] = false
+                input[11] = false
+                input[12] = false
                 """
             }
         }
@@ -299,6 +360,74 @@ nextflow_workflow {
         then {
             assert workflow.success
             assert workflow.exitStatus == 0
+        }
+
+    }
+
+    test("Incorrect SignalP mode") {
+
+        when {
+            params {
+                input="$projectDir/tests/unit_tests/test_inputs/pre_analysis_checks/empty.fasta"
+                applications="antifam,CDD"
+                formats="tsv-pro,tsv"
+            }
+            workflow {
+                """
+                input[0] = false
+                input[1] = file("${params.input}")
+                input[2] = "meta/tests/unit_tests/mock_data" 
+                input[3] = false
+                input[4] = ['input', 'applications', 'disable_precalc', ]
+                input[5] = "${params.applications}"
+                input[6] = "${params.formats}"
+                input[7] = false
+                input[8] = "6.0.0"
+                input[9] = "fake-signalp-mode"
+                input[10] = false
+                input[11] = false
+                input[12] = false
+                """
+            }
+        }
+
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 22
+        }
+
+    }
+
+    test("Crash when no data dir") {
+
+        when {
+            params {
+                input="$projectDir/tests/unit_tests/test_inputs/pre_analysis_checks/empty.fasta"
+                applications="antifam,CDD"
+                formats="tsv-pro,tsv"
+            }
+            workflow {
+                """
+                input[0] = false
+                input[1] = file("${params.input}")
+                input[2] = "fake_data_dir" 
+                input[3] = false
+                input[4] = ['input', 'applications', 'disable_precalc', ]
+                input[5] = "${params.applications}"
+                input[6] = "${params.formats}"
+                input[7] = false
+                input[8] = "6.0.0"
+                input[9] = "fast"
+                input[10] = false
+                input[11] = false
+                input[12] = false
+                """
+            }
+        }
+
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 5
         }
 
     }
