@@ -9,11 +9,11 @@ nextflow_workflow {
         symlink "interproscan/modules/xrefs/goterms/main.nf"
         symlink "interproscan/modules/xrefs/paint_annotations/main.nf"
         symlink "interproscan/modules/xrefs/pathways/main.nf"
-        copy "data/xrefs/entries.json"
-        copy "data/xrefs/goterms.json"
-        copy "data/xrefs/goterms.ipr.json"
-        copy "data/xrefs/pathways.json"
-        copy "data/xrefs/pathways.ipr.json"
+        copy "tests/unit_tests/test_inputs/xrefs/entries.json"
+        copy "tests/unit_tests/test_inputs/xrefs/goterms.json"
+        copy "tests/unit_tests/test_inputs/xrefs/goterms.ipr.json"
+        copy "tests/unit_tests/test_inputs/xrefs/pathways.json"
+        copy "tests/unit_tests/test_inputs/xrefs/pathways.ipr.json"
         copy "interproscan/scripts/xrefs/entries.py"
         copy "interproscan/scripts/xrefs/goterms.py"
         copy "interproscan/scripts/xrefs/paint_annotations.py"
@@ -30,7 +30,7 @@ nextflow_workflow {
                 """
                 input[0] = file("meta/tests/unit_tests/test_inputs/xrefs/subworkflow/xref_matches_input.json")
                 input[1] = "ncbifam,sfld"
-                input[2] = "../../../meta/data"
+                input[2] = "../../../meta/tests/unit_tests/test_inputs"
                 """
             }
         }
