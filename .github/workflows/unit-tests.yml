@@ -95,13 +95,13 @@ jobs:
         export PATH=$PATH:$GITHUB_WORKSPACE/nf-test
         which nf-test
         ./nf-test test tests/unit_tests/modules/pre_checks/
-        ./nf-test test tests/unit_tests/modules/output/aggregate_parse_seqs
-        ./nf-test test tests/unit_tests/modules/output/aggregate_results
-        ./nf-test test tests/unit_tests/modules/output/write_results
-        ./nf-test test tests/unit_tests/modules/xrefs/entries
-        ./nf-test test tests/unit_tests/modules/xrefs/goterms
-        ./nf-test test tests/unit_tests/modules/xrefs/pathways
-        ./nf-test test tests/unit_tests/modules/xrefs/paint_annotations
+        ./nf-test test tests/unit_tests/modules/output/aggregate_parse_seqs/
+        ./nf-test test tests/unit_tests/modules/output/aggregate_results/
+        ./nf-test test tests/unit_tests/modules/output/write_results/
+        ./nf-test test tests/unit_tests/modules/xrefs/entries/
+        ./nf-test test tests/unit_tests/modules/xrefs/goterms/
+        ./nf-test test tests/unit_tests/modules/xrefs/pathways/
+        ./nf-test test tests/unit_tests/modules/xrefs/paint_annotations/
 
     - name: PY-Test scripts tests
       shell: bash -l {0}
