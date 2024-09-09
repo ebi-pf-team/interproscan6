@@ -98,10 +98,10 @@ jobs:
         ./nf-test test tests/unit_tests/modules/output/aggregate_parse_seqs/
         ./nf-test test tests/unit_tests/modules/output/aggregate_results/
         ./nf-test test tests/unit_tests/modules/output/write_results/
-        ./nf-test test tests/unit_tests/modules/xrefs/entries/
-        ./nf-test test tests/unit_tests/modules/xrefs/goterms/
-        ./nf-test test tests/unit_tests/modules/xrefs/pathways/
-        ./nf-test test tests/unit_tests/modules/xrefs/paint_annotations/
+        ./nf-test test tests/unit_tests/modules/xref/entries/
+        ./nf-test test tests/unit_tests/modules/xref/goterms/
+        ./nf-test test tests/unit_tests/modules/xref/pathways/
+        ./nf-test test tests/unit_tests/modules/xref/paint_annotations/
 
     - name: PY-Test scripts tests
       shell: bash -l {0}
