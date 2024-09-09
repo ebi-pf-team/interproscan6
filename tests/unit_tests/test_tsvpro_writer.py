@@ -13,7 +13,6 @@ import pytest
 from interproscan.scripts.output.format_writer import tsv_output
 
 
-
 def load_tsvpro_results(tsv_path: Path) -> dict[str, dict[str, str]]:
     results = {}
     with open(tsv_path, "r") as fh:
