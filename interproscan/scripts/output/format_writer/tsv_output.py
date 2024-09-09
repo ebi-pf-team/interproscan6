@@ -22,6 +22,8 @@ def tsv_output(seq_matches: dict, output_path: str):
                     for pwy_info in match["entry"]["pathwayXRefs"]:
                         pathways.append(pwy_info["id"])
                 member_db = match["member_db"]
+                if member_db == "PIRSR":
+                    continue
                 xrefs = f"{'|'.join(goterms)}\t{'|'.join(pathways)}"
 
                 for location in match["locations"]:
