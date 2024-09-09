@@ -261,8 +261,8 @@ workflow SEQUENCE_ANALYSIS {
 
         prints: member == 'prints'
             return [
-                "${dataDir}/${params.members."${member}".hierarchy}",
-                params.members.prints.data.pval,
+                "${dataDir}/${params.members."${member}".data.hierarchy}",
+                "${dataDir}/${params.members."${member}".data.pval}",
                 params.members.prints.switches
             ]
 
