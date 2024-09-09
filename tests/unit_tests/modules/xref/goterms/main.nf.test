@@ -5,8 +5,8 @@ nextflow_process {
     process "GOTERMS"
 
     stage {
-        copy "data/xrefs/goterms.json"
-        copy "data/xrefs/goterms.ipr.json"
+        copy "tests/unit_tests/test_inputs/xrefs/goterms.json"
+        copy "tests/unit_tests/test_inputs/xrefs/goterms.ipr.json"
         copy "interproscan/scripts/xrefs/goterms.py"
         copy "tests/unit_tests/test_inputs/xrefs/match_entries.json"
     }
@@ -19,7 +19,7 @@ nextflow_process {
             process {
                 """
                 input[0] = file("meta/tests/unit_tests/test_inputs/xrefs/match_entries.json")
-                input[1] = "../../../meta/data/xrefs/goterms"
+                input[1] = "../../../meta/tests/unit_tests/test_inputs/xrefs/goterms"
                 """
             }
         }

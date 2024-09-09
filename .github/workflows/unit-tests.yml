@@ -84,7 +84,6 @@ jobs:
       shell: bash -l {0}
       run: |
         export PATH=$PATH:$GITHUB_WORKSPACE/nf-test
-        which nf-test
         ./nf-test test tests/unit_tests/subworkflows/pre_checks/
         ./nf-test test tests/unit_tests/subworkflows/sequence_precalc/
         ./nf-test test tests/unit_tests/subworkflows/xrefs/
@@ -93,7 +92,6 @@ jobs:
       shell: bash -l {0}
       run: |
         export PATH=$PATH:$GITHUB_WORKSPACE/nf-test
-        which nf-test
         ./nf-test test tests/unit_tests/modules/pre_checks/
         ./nf-test test tests/unit_tests/modules/output/aggregate_parse_seqs/
         ./nf-test test tests/unit_tests/modules/output/aggregate_results/

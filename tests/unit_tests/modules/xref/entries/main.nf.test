@@ -5,7 +5,7 @@ nextflow_process {
     process "ENTRIES"
 
     stage {
-        copy "data/xrefs/entries.json"
+        copy "tests/unit_tests/test_inputs/xrefs/entries.json"
         copy "interproscan/scripts/xrefs/entries.py"
         copy "tests/unit_tests/test_inputs/xrefs/subworkflow/xref_matches_input.json"
     }
@@ -18,7 +18,7 @@ nextflow_process {
             process {
                 """
                 input[0] = file("meta/tests/unit_tests/test_inputs/xrefs/subworkflow/xref_matches_input.json")
-                input[1] = file("meta/data/xrefs/entries.json")
+                input[1] = file("meta/tests/unit_tests/test_inputs/xrefs/entries.json")
                 """
             }
         }
