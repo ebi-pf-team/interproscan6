@@ -128,7 +128,7 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."gene3d".postprocess.cath_resolve_hits_switches,
                     "${dataDir}/${params.members."gene3d".postprocess.model2sf_map}",
                     "${dataDir}/${params.members."gene3d".postprocess.discontinuous_regs}",
-                    "${dataDir}/${params.members."gene3d".postprocess.assign_cath_superfamilies}",
+                    params.members."gene3d".postprocess.assign_cath_superfamilies,
                     "${dataDir}/${params.members."funfam".hmm}",
                     params.members."funfam".switches,
                 ]
@@ -260,9 +260,9 @@ workflow SEQUENCE_ANALYSIS {
 
         prints: member == 'prints'
             return [
-                "${dataDir}/${params.members."${member}".hierarchy}",
-                params.members.prints.data.pval,
-                params.members.prints.switches
+                "${dataDir}/${params.members."${member}".data.hierarchy}",
+                "${dataDir}/${params.members."${member}".data.pval}",
+                params.members."${member}".switches
             ]
 
         prosite_patterns: member == "prosite_patterns"
