@@ -43,7 +43,7 @@ workflow {
     dataDirPath = PRE_CHECKS.out.dataDir.val
     log.info "Using data files located in ${dataDirPath}"
 
-    applications = params.applications.toLowerCase()
+    applications = (params.applications.toLowerCase().split(',') as Set).join(',')
 
     Channel.fromPath( input_file , checkIfExists: true)
     .unique()
