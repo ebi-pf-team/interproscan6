@@ -27,7 +27,7 @@ process LOOKUP_CHECK {
 
 process LOOKUP_MATCHES {
     /*
-    Retrieves precalculated matches from the Match Lookuo Service (MLS).
+    Retrieves precalculated matches from the Match Lookup Service (MLS).
     A protein sequence can be in the MLS but have no matches associated with it,
     this situation is not detected by LOOKUP_CHECK which only detects that 
     protein sequence has been analysed during an InterPro release.
