@@ -332,12 +332,17 @@ You can configure the prediction of ORFs by updating the relevant `translate` pa
 
 * `--applications` - a list of member databases/applications to be employed in the analysis. By default, `InterProScan6` employs all member databases and applications, use this flag to run only a subset of applications. For example:
 
-    nextflow run interproscan.nf --input <fasta file> --applications NCBIfam,Panther,Pfam
-
-```yaml
-applications: AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,Pfam,Phobius,PIRSF,PIRSR,PRINTS,PrositePatterns,PrositeProfiles,SFLD,SignalP_EUK,SignalP_GRAM_NEGATIVE,SignalP_GRAM_POSITIVE,SMART,SuperFamily,TMHMM
+```bash
+nextflow run interproscan.nf \
+  --input <fasta file> \
+  --applications NCBIfam,Panther,Pfam
 ```
 
+> [!NOTE]
+> Accepted applications: AntiFam, CDD, Coils, DeepTMHMM, FunFam, HAMAP, MobiDB, NCBIfam, Panther, Pfam, Phobiusm PIRSF, PIRSR, PRINTS, Prosite Patterns, Prosite Profiles, SFLD, SignalP, Signalp_EUK, SMART, SuperFamily
+
+
+* `--datadir` - Path to the data directory. Default: `./data`.
 * `--disable_precalc` - Do not run comparison against an InterPro release to retrive precalculated matches, instead run `interproscan` for all input sequences. [Boolean]
 * `--formats` - List output file formats. Supported: JSON,TSV,GFF,XML
 * `--goterms` - Whether to retrieve and include Gene Ontology terms from InterPro in the output files. [Boolean]
