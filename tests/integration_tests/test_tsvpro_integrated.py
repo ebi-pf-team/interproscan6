@@ -1,4 +1,4 @@
-"""Test the the final TSV output from IPS6 matches the expected output.
+"""Test the the final TSV-PRO output from IPS6 matches the expected output.
 
 When testing against i5, all member databases were enabled except:
 * TMHMM because IPS6 migrated from TMHMM to DeepTMHMM
@@ -25,44 +25,50 @@ def run_nextflow(
     disable_precalc = "--disable_precalc" if disable_precalc else ""
     command = f"nextflow run interproscan.nf " \
               f"--input {input_path} --applications {applications} {disable_precalc} " \
-              f"--formats tsv " \
+              f"--formats tsv-pro " \
               "--goterms --pathways " \
               f"--outdir {str(outdir)}"
     with open("nextflow-run", "w") as fh:
         subprocess.run(command, shell=True, stdout=fh)
 
 
-def load_tsv_results(tsv_path: Path) -> dict[str, dict[str, dict[str, dict[str, str]]]]:
-    """Return dict {seqid: {member: {sig-acc: {position: {match data}}}}}"""
+def load_tsvpro_results(tsv_path: Path) -> dict[str, dict[str, str]]:
     results = {}
     with open(tsv_path, "r") as fh:
         for line in fh:
-            data = line.split("\t")
-            seq_id = data[0]
-            mem_db = data[3].upper()
+            data = line.split()
+            seq_id = data[3]
+            mem_db = data[0]
             if mem_db == "PROSITEPATTERNS":
                 mem_db = "PROSITE_PATTERNS"
             if mem_db == "PROSITEPROFILES":
                 mem_db = "PROSITE_PROFILES"
             sig_acc = data[4]
+            start, end = data[6], data[7]
+            release = data[1]
+            fragments = data[8]
+            score = data[10]
+            hmm_start, hmm_end = data[11], data[12]
+            hmm_len = data[13]
+            location_score = data[16]
+            location_evalue = data[17]
             if seq_id not in results:
                 results[seq_id] = {}
             if mem_db not in results[seq_id]:
                 results[seq_id][mem_db] = {}
-            if mem_db not in results[seq_id]:
-                results[seq_id][mem_db] = {}
             if mem_db not in results[seq_id][mem_db]:
                 results[seq_id][mem_db][sig_acc] = {}
-            start, end = data[6], data[7]
-            position = f"{start}-{end}"
+            position = f"{start}-{end}--{fragments}"
             if position not in results[seq_id][mem_db][sig_acc]:
                 results[seq_id][mem_db][sig_acc][position] = {
-                    'start': start,
-                    'end': end,
-                    'md5': data[1],
-                    'len': data[2],
-                    'desc': data[4],
-                    'score': data[8]
+                    'release': release,
+                    'fragments': fragments,
+                    'score': score,
+                    'hmm_start': hmm_start,
+                    'hmm_end': hmm_end,
+                    'hmm_len': hmm_len,
+                    'location_score': location_score,
+                    'location_evalue': location_evalue
                 }
     return results
 
@@ -70,7 +76,7 @@ def load_tsv_results(tsv_path: Path) -> dict[str, dict[str, dict[str, dict[str, 
 def compare(
     expected:  dict[str, [dict[str, dict]]],
     current:  dict[str, [dict[str, dict]]],
-    elements=['start',  'end', 'md5', 'len', 'desc']
+    elements=['release', 'fragments', 'hmm_start', 'hmm_end', 'hmm_len']
 ):
     mismatch = False
     for seq_id, member_dbs in current.items():
@@ -93,6 +99,7 @@ def compare(
                     )
                     mismatch = True
                     continue
+
                 for position, match in positions.items():
                     if position in expected[seq_id][member_db][sig_acc]:
                         expected_match = expected[seq_id][member_db][sig_acc][position]
@@ -108,6 +115,18 @@ def compare(
                         if match['score'] != expected_match['score']:
                             print(
                                 f"Score differs between current and expected output "
+                                f"for {seq_id}, {member_db}, {sig_acc} (position: {position}): "
+                                f"expected: {expected_match['score']}, current: {match['score']}"
+                            )
+                        if match['location_score'] != expected_match['location_score']:
+                            print(
+                                f"Location score differs between current and expected output "
+                                f"for {seq_id}, {member_db}, {sig_acc} (position: {position}): "
+                                f"expected: {expected_match['score']}, current: {match['score']}"
+                            )
+                        if match['location_evalue'] != expected_match['location_evalue']:
+                            print(
+                                f"Location E-value differs between current and expected output "
                                 f"for {seq_id}, {member_db}, {sig_acc} (position: {position}): "
                                 f"expected: {expected_match['score']}, current: {match['score']}"
                             )
@@ -155,6 +174,7 @@ def compare(
 
     return mismatch
 
+
 def test_tsv_output(
     input_path,
     expected_output_path,
@@ -163,7 +183,7 @@ def test_tsv_output(
     disable_precalc
 ):
     """Input parameters are defined in conf.py"""
-    expected_output = load_tsv_results(Path(f"{expected_output_path}.tsv"))
+    expected_output = load_tsvpro_results(Path(f"{expected_output_path}.tsvpro.tsv"))
     
     outdir = current_output_path.parent
     run_nextflow(
@@ -172,9 +192,9 @@ def test_tsv_output(
         applications,
         disable_precalc
     )
-    output_path = outdir / f"{input_path.name}.ips6.tsv"
+    output_path = outdir / f"{input_path.name}.ips6.tsv-pro.tsv"
 
-    current_output = load_tsv_results(output_path)
+    current_output = load_tsvpro_results(output_path)
 
     mismatch = compare(expected_output, current_output)
     if mismatch:
