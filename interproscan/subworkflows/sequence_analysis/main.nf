@@ -128,7 +128,7 @@ workflow SEQUENCE_ANALYSIS {
                     params.members."gene3d".postprocess.cath_resolve_hits_switches,
                     "${dataDir}/${params.members."gene3d".postprocess.model2sf_map}",
                     "${params.members."gene3d".postprocess.discontinuous_regs}",
-                    "${dataDir}/${params.members."gene3d".postprocess.assign_cath_superfamilies}",
+                    "$${params.members."gene3d".postprocess.assign_cath_superfamilies}",
                     "${dataDir}/${params.members."funfam".hmm}",
                     params.members."funfam".switches,
                 ]
@@ -300,10 +300,6 @@ workflow SEQUENCE_ANALYSIS {
 
     /*
     Member databases that use HMMER
-    */
-
-    /*
-    Using generic HMMER
     */
 
     // AntiFam
