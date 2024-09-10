@@ -1,3 +1,8 @@
+"""
+Match lookup service only includes domain hits, no site hits
+Will not return PIRSR matches
+CDD and SFLD matches will be incomplete (missing site data)
+"""
 import json
 import logging
 import sys
@@ -20,14 +25,15 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
     matches = {}
     hmm_bound_pattern = {"[]": "COMPLETE", "[.": "N_TERMINAL_COMPLETE", ".]": "C_TERMINAL_COMPLETE", "..": "INCOMPLETE"}
     """
-    Structure of hit data:
+    Main structure of hit data:
     1. Member db version
     2. Hit Accession
     3. Model accession
     4. Location start
     5. Location end
     6. Location fragment
-    ...17
+    ...18 
+    7-18 hit data may vary between member dbs
     """
 
     for match in tree.findall(".//match"):
@@ -65,9 +71,6 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                 if signature["member_db"].upper() == "PANTHER":
                     signature["node_id"] = hit_data[17]
 
-                if signature["member_db"].upper() == "MOBIDBLITE":
-                    signature["sequence-feature"] = hit_data[17]
-
                 location = {
                     "start": int(hit_data[4]),
                     "end": int(hit_data[5]),
@@ -82,7 +85,7 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     "envelopeEnd": int(hit_data[14]),
                     "postProcessed": post_processed,
                     "locationFragment": hit_data[6],
-                    # misc either , 0 or HmmBounds raw
+                    # misc either ',', 0 or HmmBounds raw
                     "misc": hit_data[9],
                     "alignment": "",
                     "cigar_alignment": hit_data[17]
@@ -97,6 +100,21 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     location["hmmLength"] = int(0)
                     location["motifNumber"] = hit_data[12]
                     signature["graphscan"] = hit_data[17]
+                    location["score"] = hit_data[7]
+
+                #if hit_appl in ["CDD", "SFLD"]:
+                #if hit_appl in ["CDD"]:
+                #    location["sites"] = []
+                # panther and cdd do not have location specific evalues and score
+                # super family does not have location specific score
+                # prints, prosite_profiles, have location scores instead of scores
+                if hit_appl in ["PROSITE_PROFILES"]:
+                    location["score"] = hit_data[7]
+                # prosite profiles may be missing location evalue? and evalue
+
+                if hit_appl in ["MOBIDB_LITE"]:
+                    signature["member_db"] = "MOBIDB"
+                    location["sequence-feature"] = hit_data[17]
 
                 if target_key not in matches:
                     matches[target_key] = {}
