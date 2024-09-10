@@ -102,6 +102,12 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     signature["graphscan"] = hit_data[17]
                     location["score"] = hit_data[7]
 
+                if hit_appl in ["SIGNALP", "SIGNALP_EUK"]:
+                    location["pvalue"] = float(hit_data[16])
+                    location["cleavage_start"] = ""
+                    location["cleavage_end"] = ""
+                    signature["orgType"] = "Other" if hit_appl == "SIGNALP" else "Eukarya"
+
                 #if hit_appl in ["CDD", "SFLD"]:
                 #if hit_appl in ["CDD"]:
                 #    location["sites"] = []
