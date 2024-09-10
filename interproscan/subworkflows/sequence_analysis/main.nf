@@ -262,7 +262,7 @@ workflow SEQUENCE_ANALYSIS {
             return [
                 "${dataDir}/${params.members."${member}".data.hierarchy}",
                 "${dataDir}/${params.members."${member}".data.pval}",
-                params.members.prints.switches
+                params.members."${member}".switches
             ]
 
         prosite_patterns: member == "prosite_patterns"
