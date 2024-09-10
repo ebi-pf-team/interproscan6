@@ -3,7 +3,6 @@ import os
 
 from .regex import NT_SEQ_ID_PATTERN
 
-
 BOOLEAN_MAP = {"true": True, "false": False}
 
 
@@ -121,12 +120,12 @@ def get_matches(data: dict):
             if member_db in ["MOBIDB", "PHOBIUS", "SUPERFAMILY"]:
                 for location in match_data['locations']:
                     location_info = {
-                        "start": int(location["start"]),
-                        "end": int(location["end"]),
-                        "representative": BOOLEAN_MAP.get(location["representative"].lower(), False),
+                        "start": location["start"],
+                        "end": location["end"],
+                        "representative": location["representative"],
                         "location-fragments": [{
-                            "start": int(location["start"]),
-                            "end": int(location["end"]),
+                            "start": location["start"],
+                            "end": location["end"],
                             "dc-status": "CONTINUOUS"
                         }]
                     }
@@ -170,14 +169,11 @@ def get_matches(data: dict):
                             }
                         else:
                             info = {
-                                "start": int(location["start"]),
-                                "end": int(location["end"])
+                                "start": location["start"],
+                                "end": location["end"]
                             }
 
-                        info["representative"] = BOOLEAN_MAP.get(
-                            location["representative"].lower(),
-                            False
-                        )
+                        info["representative"] = location["representative"]
 
                         if member_db == "CDD":
                             info["evalue"] = float(location["evalue"])
@@ -264,8 +260,8 @@ def get_matches(data: dict):
                             info["location-fragments"] = location["location-fragments"]
                         except KeyError:
                             single_location = {
-                                "start": int(location["start"]),
-                                "end": int(location["end"]),
+                                "start": location["start"],
+                                "end": location["end"],
                                 "dc-status": "CONTINUOUS"
                             }
                             try:

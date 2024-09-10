@@ -29,7 +29,6 @@ def parse(pfscan_out: str):
                     location = {
                         "start": int(match_info[3]),
                         "end": int(match_info[4]),
-                        "representative": "false",
                         "level": "STRONG",
                         "cigarAlignment": encode(cigar_alignment),
                         "alignment": alignment

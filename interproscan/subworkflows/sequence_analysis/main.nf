@@ -302,10 +302,6 @@ workflow SEQUENCE_ANALYSIS {
     Member databases that use HMMER
     */
 
-    /*
-    Using generic HMMER
-    */
-
     // AntiFam
     runner_antifam_params = fasta.combine(member_params.antifam)
     ANTIFAM_HMMER_RUNNER(runner_antifam_params)

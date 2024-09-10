@@ -54,7 +54,6 @@ def parse_cdd(rpsblast_processed: Path):
                         domain_info = {
                             "start": int(_line.group(5)),
                             "end": int(_line.group(6)),
-                            "representative": "",
                             "evalue": float(_line.group(7)),
                             "score": float(_line.group(8)),
                             "postProcessed": "",

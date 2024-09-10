@@ -2,9 +2,9 @@ import subprocess
 import xml.etree.ElementTree as ET
 
 
-def get_current_output(current_output_path: str, input_path: str, applications: str, disable_precalc: bool) -> ET.Element:
+def get_current_output(test_output_dir: str, current_output_path: str, input_path: str, applications: str, disable_precalc: bool) -> ET.Element:
     disable_precalc = "--disable_precalc" if disable_precalc else ""
-    command = f"nextflow run interproscan.nf --input {input_path} --applications {applications} {disable_precalc} --formats xml --output {current_output_path} --goterms --pathways"
+    command = f"nextflow run interproscan.nf --input {input_path} --applications {applications} {disable_precalc} --formats xml --output {test_output_dir} --goterms --pathways"
     subprocess.run(command, shell=True)
     with open(str(current_output_path) + ".xml", 'r') as f:
         tree = ET.parse(f)
@@ -61,9 +61,9 @@ def remove_namespace(element):
         elem.attrib = {k.split('}', 1)[-1].lower(): v for k, v in elem.attrib.items()}
 
 
-def test_xml_output(input_path, expected_output_path, current_output_path, applications, disable_precalc):
+def test_xml_output(test_output_dir, input_path, expected_output_path, output_path, applications, disable_precalc):
     expected_output = get_expected_output(expected_output_path)
-    current_output = get_current_output(current_output_path, input_path, applications, disable_precalc)
+    current_output = get_current_output(test_output_dir, output_path, input_path, applications, disable_precalc)
     remove_namespace(expected_output)
     remove_namespace(current_output)
 
