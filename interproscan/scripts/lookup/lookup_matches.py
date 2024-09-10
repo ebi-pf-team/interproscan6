@@ -19,7 +19,6 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
     tree = ET.fromstring(match_data)
     matches = {}
     hmm_bound_pattern = {"[]": "COMPLETE", "[.": "N_TERMINAL_COMPLETE", ".]": "C_TERMINAL_COMPLETE", "..": "INCOMPLETE"}
-
     """
     Structure of hit data:
     1. Member db version
@@ -65,6 +64,9 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
 
                 if signature["member_db"].upper() == "PANTHER":
                     signature["node_id"] = hit_data[17]
+
+                if signature["member_db"].upper() == "MOBIDBLITE":
+                    signature["sequence-feature"] = hit_data[17]
 
                 location = {
                     "start": int(hit_data[4]),
