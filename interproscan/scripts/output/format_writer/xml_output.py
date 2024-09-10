@@ -1,6 +1,4 @@
-import os
 import xml.etree.ElementTree as ET
-
 
 from .regex import NT_KEY_PATTERN, NT_SEQ_ID_PATTERN
 
@@ -21,7 +19,7 @@ MATCH_ELEMENT = {
     'PIRSR': 'hmmer3-match',
     'PRINTS': 'fingerprints-match',
     'PROSITE_PATTERNS': 'profilescan-match',
-    'PROSITE_PROFILES': 'profilesearch-match',  # changed from i5 which is also profilescan-match
+    'PROSITE_PROFILES': 'profilesearch-match',
     'SFLD': 'hmmer3-match',
     'SIGNALP': 'signalp-match',
     'SIGNALP_EUK': 'signalp-euk-match',
@@ -121,8 +119,8 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                     match_elem = ET.SubElement(matches_elem, MATCH_ELEMENT[match_data['member_db'].upper()])
                     signature_elem = ET.SubElement(match_elem, "signature")
                     signature_elem.set("ac", match_data['accession'])
-                    signature_elem.set("desc", match_data['entry']['description'])
-                    signature_elem.set("name", match_data['entry']['name'])
+                    signature_elem.set("desc", _check_null(match_data['entry']['description']))
+                    signature_elem.set("name", _check_null(match_data['entry']['name']))
                     signature_library_elem = ET.SubElement(signature_elem, "signature-library-release")
                     signature_library_elem.set("library", match_data['member_db'].upper())
                     signature_library_elem.set("version", match_data['entry']['version'])

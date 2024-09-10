@@ -3,10 +3,16 @@ import os
 import re
 import sys
 
-from format_writer.tsv_output import tsv_pro_output
-from format_writer.tsv_output import tsv_output
-from format_writer.json_output import build_json_output_nucleic, build_json_output_protein
-from format_writer.xml_output import build_xml_output_nucleic, build_xml_output_protein
+try:   # Nextflow uses the relative imports
+    from format_writer.tsv_output import tsv_pro_output
+    from format_writer.tsv_output import tsv_output
+    from format_writer.json_output import build_json_output_nucleic, build_json_output_protein
+    from format_writer.xml_output import build_xml_output_nucleic, build_xml_output_protein
+except ModuleNotFoundError:  # but pytest needs the imports from interproscan
+    from interproscan.scripts.output.format_writer.tsv_output import tsv_pro_output
+    from interproscan.scripts.output.format_writer.tsv_output import tsv_output
+    from interproscan.scripts.output.format_writer.json_output import build_json_output_nucleic, build_json_output_protein
+    from interproscan.scripts.output.format_writer.xml_output import build_xml_output_nucleic, build_xml_output_protein
 
 
 NT_PATTERN = re.compile(r"^orf\d+\s+source=(.*)\s+coords=.*$")

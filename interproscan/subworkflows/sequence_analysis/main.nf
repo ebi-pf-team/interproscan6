@@ -116,7 +116,7 @@ workflow SEQUENCE_ANALYSIS {
 
         /*
         Place FunFam inside the Gene3D post-processing
-        because it must run after the Gene3D path
+        because it must run after Gene3D
         */
         gene3d_funfam: (member == 'gene3d' || member == 'funfam') && !gene3d_funfam_processed
             gene3d_funfam_processed = true
@@ -262,7 +262,7 @@ workflow SEQUENCE_ANALYSIS {
             return [
                 "${dataDir}/${params.members."${member}".data.hierarchy}",
                 "${dataDir}/${params.members."${member}".data.pval}",
-                params.members.prints.switches
+                params.members."${member}".switches
             ]
 
         prosite_patterns: member == "prosite_patterns"
