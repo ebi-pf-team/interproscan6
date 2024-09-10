@@ -33,7 +33,6 @@ def parse(coils_out: str) -> dict:
                                           "dc-status": "CONTINUOUS"}
                     location = {"start": location_start,
                                 "end": location_end,
-                                "representative": "false",
                                 "location-fragments": [location_fragments]}
                     matches[seq_id]["Coil"]["locations"].append(location)
     return matches

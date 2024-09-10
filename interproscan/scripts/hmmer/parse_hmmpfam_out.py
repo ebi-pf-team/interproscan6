@@ -115,7 +115,6 @@ def add_match(
                 {
                     "start": int(domain_obj.seq_from),
                     "end": int(domain_obj.seq_to),
-                    "representative": "",
                     "hmmStart": int(domain_obj.hmm_from),
                     "hmmEnd": int(domain_obj.hmm_to),
                     "hmmLength": int(domain_obj.hmm_to) + 1 - int(domain_obj.hmm_from),

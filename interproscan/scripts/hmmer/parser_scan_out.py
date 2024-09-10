@@ -140,7 +140,6 @@ def add_match(
                 {
                     "start": int(domain_obj.ali_from),
                     "end": int(domain_obj.ali_to),
-                    "representative": "",
                     "hmmStart": int(domain_obj.hmm_from),
                     "hmmEnd": int(domain_obj.hmm_to),
                     "hmmLength": int(protein_with_hit.qlen),

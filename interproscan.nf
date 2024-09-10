@@ -3,6 +3,7 @@ nextflow.enable.dsl=2
 include { PARSE_SEQUENCE } from "$projectDir/interproscan/modules/parse_sequence/main"
 include { GET_ORFS } from "$projectDir/interproscan/modules/get_orfs/main"
 include { AGGREGATE_RESULTS } from "$projectDir/interproscan/modules/output/aggregate_results/main"
+include { REPRESENTATIVE_DOMAINS } from "$projectDir/interproscan/modules/output/representative_domains/main"
 include { AGGREGATE_PARSED_SEQS } from "$projectDir/interproscan/modules/output/aggregate_parsed_seqs/main"
 include { WRITE_RESULTS } from "$projectDir/interproscan/modules/output/write_results/main"
 
@@ -118,13 +119,15 @@ workflow {
 
     XREFS(AGGREGATE_RESULTS.out, applications, dataDirPath)
 
+    REPRESENTATIVE_DOMAINS(XREFS.out.collect())
+
     Channel.from(params.formats.split(','))
     .set { ch_format }
 
     WRITE_RESULTS(
         input_file.getName(),
         AGGREGATE_PARSED_SEQS.out,
-        XREFS.out.collect(),
+        REPRESENTATIVE_DOMAINS.out.collect(),
         ch_format,
         params.outdir,
         params.ipscn_version,
