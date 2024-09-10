@@ -1,6 +1,14 @@
 from pathlib import Path
 
+import sys
+
 import pytest
+
+
+sys.path.insert(
+    0,
+    Path(__file__).resolve().parent.parent.parent / 'interproscan' / 'scripts'
+)
 
 
 @pytest.fixture

@@ -1,18 +1,7 @@
-import os
 from datetime import datetime
 
 
 def tsv_output(seq_matches: dict, output_path: str):
-    def write_to_tsv(
-            seq_id, md5, seq_len, member_db, sig_acc,
-            sig_desc, ali_from, ali_to, evalue, status,
-            current_date, interpro_acc, interpro_name, xrefs):
-        tsv_file.write((
-            f"{seq_id}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t"
-            f"{sig_desc}\t{ali_from}\t{ali_to}\t{evalue}\t{status}\t"
-            f"{current_date}\t{interpro_acc}\t{interpro_name}\t{xrefs}\n"
-        ))
-
     with open(output_path, 'w') as tsv_file:
         current_date = datetime.now().strftime('%d-%m-%Y')
         for seq_target, info in seq_matches.items():
@@ -32,7 +21,7 @@ def tsv_output(seq_matches: dict, output_path: str):
                         goterms.append(go_info["id"])
                     for pwy_info in match["entry"]["pathwayXRefs"]:
                         pathways.append(pwy_info["id"])
-                match_db = match["member_db"]
+                member_db = match["member_db"]
                 xrefs = f"{'|'.join(goterms)}\t{'|'.join(pathways)}"
 
                 for location in match["locations"]:
@@ -41,25 +30,25 @@ def tsv_output(seq_matches: dict, output_path: str):
                         ali_from = match["locations"][0]["start"]
                         ali_to = match["locations"][0]["end"]
                         evalue = match["locations"][0]["pvalue"]
-                    elif match_db.upper() in ["CDD", "HAMAP", "PROSITE_PROFILES"]:
+                    elif member_db.upper() in ["CDD", "HAMAP", "PROSITE_PROFILES"]:
                         sig_acc = match["accession"]
                         status = "T"
                         evalue = location["score"]
                         ali_from = location["start"]
                         ali_to = location["end"]
-                    elif match_db.upper() in ["PROSITE_PATTERNS", "COILS", "MOBIDB"]:
+                    elif member_db.upper() in ["COILS", "MOBIDB", "PROSITE_PATTERNS"]:
                         sig_acc = match["accession"]
                         status = "T"
                         evalue = "-"
                         ali_from = location["start"]
                         ali_to = location["end"]
-                    elif match_db.upper() == "PIRSF":
+                    elif member_db.upper() == "PIRSF":
                         sig_acc = match["accession"]
                         status = "T"
                         evalue = location["evalue"]
                         ali_from = location["envelopeStart"]
                         ali_to = location["envelopeEnd"]
-                    elif match_db.upper() == "PHOBIUS":
+                    elif member_db.upper() == "PHOBIUS":
                         sig_acc = match["accession"]
                         status = "T"
                         evalue = "-"
@@ -68,7 +57,7 @@ def tsv_output(seq_matches: dict, output_path: str):
                         entry_desc = match["description"]
                         if seq_len == ali_from + ali_to - 1:
                             break
-                    elif match_db.upper() == "PRINTS":
+                    elif member_db.upper() == "PRINTS":
                         sig_acc = match["accession"]
                         status = "T"
                         evalue = match["evalue"]
@@ -81,28 +70,14 @@ def tsv_output(seq_matches: dict, output_path: str):
                         ali_from = location["start"]
                         ali_to = location["end"]
 
-                    write_to_tsv(
-                        seq_id, md5, seq_len, match_db,
-                        sig_acc, sig_desc, ali_from, ali_to,
-                        evalue, status, current_date, entry_acc,
-                        entry_desc, xrefs)
+                    tsv_file.write((
+                        f"{seq_id}\t{md5}\t{seq_len}\t{member_db}\t{sig_acc}\t"
+                        f"{entry_desc}\t{ali_from}\t{ali_to}\t{evalue}\t{status}\t"
+                        f"{current_date}\t{entry_acc}\t{entry_desc}\t{xrefs}\n"
+                    ))
 
 
 def tsv_pro_output(seq_matches: dict, output_path: str):
-    def write_to_tsv(
-            member_db, version_major, version_minor, seq_id,
-            sig_acc, model_ac, ali_from, ali_to, fragment,
-            score, evalue, raw_hmm_bound, hmm_start, hmm_end,
-            hmm_length, env_start, env_end, location_score,
-            location_evalue, cigar_alignment):
-        tsv_file.write((
-            f"{member_db}\t{version_major}\t{version_minor}\t{seq_id}\t"
-            f"{sig_acc}\t{model_ac}\t{ali_from}\t{ali_to}\t{fragment}\t"
-            f"{score}\t{evalue}\t{raw_hmm_bound}\t{hmm_start}\t{hmm_end}\t"
-            f"{hmm_length}\t{env_start}\t{env_end}\t{location_score}\t"
-            f"{location_evalue}\t{cigar_alignment}\n"
-        ))
-
     with open(output_path, 'w') as tsv_file:
         for seq_target, info in seq_matches.items():
             matches = info["matches"]
@@ -173,7 +148,7 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                     except KeyError:
                         raw_hmm_bound = ""  # lookup match does not have rawHmmBounds
 
-                    if match_acc == "signal_peptide":
+                    if member_db.upper() in ["SIGNALP", "SIGNALP_EUK"]:
                         sig_acc, status = "Signal Peptide", ""
                         ali_from = match["locations"][0]["start"]
                         ali_to = match["locations"][0]["end"]
@@ -208,9 +183,10 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                     except KeyError:
                         pass  # some members may not have cigar alignment
 
-                    write_to_tsv(
-                        member_db, version_major, version_minor, seq_id,
-                        sig_acc, model_ac, ali_from, ali_to, fragment,
-                        score, evalue, raw_hmm_bound, hmm_start, hmm_end,
-                        hmm_length, env_start, env_end, location_score,
-                        location_evalue, cigar_alignment)
+                    tsv_file.write((
+                        f"{member_db}\t{version_major}\t{version_minor}\t{seq_id}\t"
+                        f"{sig_acc}\t{model_ac}\t{ali_from}\t{ali_to}\t{fragment}\t"
+                        f"{score}\t{evalue}\t{raw_hmm_bound}\t{hmm_start}\t{hmm_end}\t"
+                        f"{hmm_length}\t{env_start}\t{env_end}\t{location_score}\t"
+                        f"{location_evalue}\t{cigar_alignment}\n"
+                    ))

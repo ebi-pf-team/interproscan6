@@ -1,7 +1,7 @@
 """Test the python script that tests if a FASTA file contains any non-nucleic sequences
 
 These test are intened to be run from the root of the repository using:
-pytest -v
+python -m pytest -v
 """
 
 import pytest
