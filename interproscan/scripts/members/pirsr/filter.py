@@ -153,6 +153,12 @@ def map_hmm_to_seq(hmm_pos, hmm, seq):
 
 
 if __name__ == '__main__':
+    """
+    CL input:
+    0. Str repr of path to the matches file
+    1. Str repr of path to the rules file (sr_uru.json)
+    2. Str repr of path for the output file
+    """
     args = sys.argv[1:]
 
     matches = args[0]
