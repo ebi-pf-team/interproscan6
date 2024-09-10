@@ -108,7 +108,8 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     location["cleavage_end"] = ""
                     signature["orgType"] = "Other" if hit_appl == "SIGNALP" else "Eukarya"
 
-                #if hit_appl in ["CDD", "SFLD"]:
+                if hit_appl in ["SFLD"]:
+                    location["location-fragments"] = [{"start": location["start"], "end": location["end"], "dc-status": "CONTINUOUS"}]
                 #if hit_appl in ["CDD"]:
                 #    location["sites"] = []
                 # panther and cdd do not have location specific evalues and score
