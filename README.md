@@ -12,122 +12,222 @@
 
 Users who have novel nucleotide or protein sequences that they wish to functionally characterise can use the software package `InterProScan` to run the scanning algorithms from the InterPro database in an integrated way. Sequences are submitted in FASTA format. Matches are then calculated against all of the required member database’s signatures and the results are then output in a variety of formats.
 
-## Table of Contents
+# Documentation
+
+You can find our full documentation at [ReadToDocs](URL-URL-URL).
+
+# Table of Contents
 <!-- TOC -->
 - [`InterProScan`](#interproscan6)
+- [Documentation](#documentation)
 - [Setup and Requirements](#set-up-and-requirements)
-  - [Requirements](#requirements)
-  - [Set up](#set-up)
+- [Requirements](#requirements)
+- [Set up](#set-up)
 - [Using `InterProScan6`](#using-interproscan6)
   - [Quick start](#quick-start)
   - [Using DNA sequences](#using-dna-sequences)
   - [Inputs and configuration](#inputs-parameters-and-configuration)
   - [Outputs and results](#outputs)
-- [Installing licensed applications (`Phobius`, `SignalP`, `TMHMM`)](#installing-licensed-applications-phobius-signalp-tmhmm)
+- [Installing licensed applications (`MobiDB`, `Phobius`, `SignalP`, `TMHMM`)](#installing-licensed-applications-mobidb-phobius-signalp-tmhmm)
 - [Citing `InterProScan`](#citation)
 - [Trouble shooting](#trouble-shooting)
 <!-- /TOC -->
 
-# Set up and requirements
-
-## Requirements
+# Requirements
 
 * `Java` (version >= 11)
 * `Nextflow` (version >=23.04.02)
-* `Docker` (version >= 24.0.5)
+* A container run time
+  * `InterProScan` includes built in support for:
+    * `Docker` (version >= 24.0.5)
+    * `SingularityCE` (version >= 4.2.0)
+    * `Apptainer` (version >= 1.3.4)
+  * Nextflow also supports using Charliecloud, Podman, Sarus, and Shifter. However you will need to build your own [Nextflow profiles](https://nextflow.io/docs/latest/config.html#config-profiles) to support these container runtimes
 
-## Set up
+# Set up
 
-1. Download member data files:
+The instructions below rely on an internet connection to pull the necessary images from Docker Hub. For instructions on installing from source please see 
+our [ReadTheDocs](URL-URL-URL) documentation.
 
-```bash
-curl ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.67-99.0/alt/interproscan-data-5.67-99.0.tar.gz \
-    --output interproscan-data-5.67-99.0.tar.gz
-tar -pxzf interproscan-data-5.67-99.0.tar.gz
-mv interproscan-5.67-99.0/data .
-rm interproscan-5.67-99.0 -rf
-rm interproscan-data-5.67-99.0.tar.gz
-```
-
-These commands download and store all member database data in the `data/` directory.
-
-If you do not store these data in another directory you will need to update the members config file: 
-`subworkflows/sequence_analysis/members.config`. Specifically, you will need to 
-update the paths for:
-* `hmm`
-* Under `postprocess`: [_where applicable_]
-  * `data`
-  * `models`
-  * `modesl_dir`
-  * `rules`
-
-Please provide absolute paths. You can use the `$projectDir` short cut to represent the path to the root directory of `InterProScan6`.
-
-2. Build a docker `InterProScan6` base image (this includes all non-licensed dependencies including `HMMER`, `BLAST`, `BioPython`, `easel`, etc.)
+1. **Download InterPro data files**
 
 ```bash
-docker build -t interproscan6 .
+# replace interpro-version with the appropriate version number
+INTERPRO_VERSION="102.0"
+curl "https://ftp.ebi.ac.uk/pub/databases/interpro/iprscan/6/$INTERPRO_VERSION/interproscan-data-$INTERPRO_VERSION.tar.gz" \
+    --output interproscan-data-<interpro-version>.tar.gz
+tar -pxzf interproscan-data-<interpro-version>.tar.gz
+mv interproscan-data-<interpro-version>/data .
+rm interproscan-data-<interpro-version> -rf
+rm interproscan-data-<interpro-version>.tar.gz
 ```
 
-3. Build a docker `MobiDB` image (this includes the `idrpred` tool for MobiDB predictions). From the root of this repository:
+Running these commands within the `InterProScan` project directory should download and store all 
+InterPro entry (XREF) and member database data in the `data` directory.
 
+If you store these data in an alternative directory you will need to use the `--datadir` flag and 
+provide the relative or absolute path to the directory when running `InterProScan`.
+
+2. **Pull the `InterProScan6` base image from DockerHub using your container runtime of choice**
+
+The base image includes all non-licensed dependencies including
+`HMMER`, `BLAST`, `BioPython`, `easel`, etc.
+
+Using `Docker`:
 ```bash
-cd docker_files/mobidb
-docker build -t idrpred .
+docker pull interproscan6:latest
 ```
 
-4. [Optional] install licensed software
+Using `Singularity`:
+```bash
+singularity pull interproscan6.sif docker://interpro/interproscan6:latest
+```
 
-By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
-because they contain licensed components. In order to activate these analyses please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
+Using `Apptainer`:
+```bash
+apptainer pull interproscan6.sif docker://interpro/interproscan6:latest
+```
+
+> [!IMPORTANT]
+> If you are using Singularity or Apptainer, `InterProScan6` expects to find the image files 
+> within the current working directory. Otherwise the respective paths to the image files
+> will need to be updated  in the respective `utilities/profiles/` config files.
+
+3. **(Optional) install licensed software**
+
+By default `MobiDB`, `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
+because they contain licensed components. In order to activate these analyses 
+please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
 
 # Using `InterProScan6`
 
 ## Quick start
 
-How to run:
-
-```bash
-nextflow run interproscan.nf --input <path to fasta file> [resume]
-```
-
-The results will apear in `result/` folder.  
-For debugging, you an find all working files generated by the pipeline in the `work/` dir.
-
-Batchsize parameter in `nextflow.config` defines the number maximum number of sequences submitted within each batch, and thus the quantity of threads of parallelism.
-
-**IMPORTANT:** Change the input params in the `input.yaml` file if you want to test different flows (see in `main.nf`)
-
-An example command to run `InterProScan6`, only using the `AntiFam` member database and `SignalP`, without checking for pre-calculated matches in InterPro (using an example input file):
+`InterProScan6` is configured via the command-line. The only mandatory arguments are the runtime profiles (`-profiles`) and input FASTA file (`--input`).
 
 ```bash
 nextflow run interproscan.nf \
---input utilities/test_files/best_to_test.fasta \
---applications signalp,antifam \
---disable_precalc
+  -profile <container runtime, and executor> \
+  --input <path to fasta file>
 ```
+
+**`-profile` must** be included, and is used to define the executor and the container runtime used.
+
+**`--input` must** be included, and is used to define the path to the input file containing the query sequences to be analysed in FASTA format.
+
+> [!NOTE]  
+> Note that `-profile` has a single dash because this is a Nextflow argument, but `--input` has two dashes because this is a `InterProScan6` argument.
+
+## Profiles
+
+A [Nextflow profile](https://nextflow.io/docs/latest/config.html#config-profiles) is a configuration file that defines runtime configuration attributes.
+
+For `InterProScan6` to run, a profile for the container runtime and a profile for a executor must also be defined. `InterProScan6` includes the following profiles:
+
+* Executor profiles:
+  * local
+  * slurm
+* Container runtime profiles:
+  * docker
+  * singularity
+  * apptainer
+
+For example, to run `InterProScan` a cluster with the SLURM scheduler and Singularity:
+
+```bash
+nextflow run interproscan.nf \
+  -profile slurm,singularity \
+  --input <path to fasta file> 
+```
+
+Nextflow also supports using Charliecloud, Podman, Sarus, and Shifter. However you will need to build your own [Nextflow profiles](https://nextflow.io/docs/latest/config.html#config-profiles) to support these container runtimes.
+
+## Optional arguments
+
+**`--applications`** - Applications/member databases to run. By default `InterProScan` runs all member databases in the consortium ([except Mobidb-Lite due to licensing reasons](#mobidb)). Use the `--applications` to define a comma separate list of applications names (case insensitive).
+
+**`--disable_precalc`** - `InterProScan6` will check against a remote database of precalculated matches. The downstream analyses will then only be run against query sequences for whom no precalcualted match is available. You can disable this operation and run the analyses against all sequences in the input FASTA file by including the `--disable_precalc` flag in the `InterProScan6` command.
+
+**`--formats`** - List output file formats as a comma separated list. Supported: JSON, TSV, XML. Default: TSV, JSON and XML
+
+**`--goterms`** - Include Gene Ontology (GO) annotations in the final results.
+
+**`--help`** - Display the help message.
+
+**`--outdir`** - Output directory. By default the output files are written to the current working directory. Use `--outdir` to define the relative or abosolute path to the output directory. `InterProScan` will build all necessary directories.
+
+**`--pathways`** - Include corresponding Pathway annotations in the final results. 
+
+> [!WARNING]
+> When using `--datadir` and `--outdir`, `InterProScan6` does not tolerate spaces in file paths.
+
+For example, to run `InterProScan6` using only AntiFam and SFLD, without checking for pre-calculated matches in InterPro (using an example input file), with writing the results to the directory `results`, writing the results to a JSON and XML file and including GO term and Pathway annotation data in the final results, while using Docker on a local system:
+
+```bash
+nextflow run interproscan.nf \
+  -profile docker,local \
+  --input files_test/best_to_test.fasta \
+  --applications signalp,antifam \
+  --disable_precalc \
+  --formats json,xml \
+  --outdir results \
+  --goterms \
+  --pathways
+```
+
+> [!TIP]
+> `InterproScan6` parameters are prefixed with a double dash, `--` (e.g. `--input`), Nextflow parameters are prefixed with a single dash, `-` (e.g. `-resume`)
+
+## Applications
+
+Below is a list of the applications (built in and those that require additional installation steps) that are available in `InterProScan6`:
+
+* InterPro Consortium:
+  * [Cath-Gene3D]( https://www.cathdb.info/) (use as 'Gene3D' to run Cath-Gene3D in `InterProScan`)
+  * [CDD](https://www.ncbi.nlm.nih.gov/cdd)
+  * [HAMAP](https://hamap.expasy.org/)
+  * [MobiDB Lite](http://old.protein.bio.unipd.it/mobidblite/)
+  * [NCBIfam](https://www.ncbi.nlm.nih.gov/genome/annotation_prok/evidence/)
+  * [PANTHER](http://www.pantherdb.org/)
+  * [Pfam](https://pfam.xfam.org/)
+  * [PIRSF](https://proteininformationresource.org/pirsf/)
+  * [PRINTS](https://interpro-documentation.readthedocs.io/en/latest/prints.html)
+  * [PROSITE profiles](https://prosite.expasy.org/)
+  * [SFLD](http://sfld.rbvi.ucsf.edu/archive/django/index.html)
+  * [SMART](http://smart.embl-heidelberg.de/)
+  * [SUPERFAMILY](https://supfam.mrc-lmb.cam.ac.uk/)
+* Applications not in the consortium:
+  * Antifam
+  * [COILS](http://www.ch.embnet.org/software/COILS_form.html)
+  * [DeepTMHMM](https://www.biorxiv.org/content/10.1101/2022.04.08.487609v1) (*not yet available*)
+  * [FunFam](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-2988-x)
+  * [Phobius](http://phobius.sbc.su.se/)
+  * [PIRSR](https://www.uniprot.org/help/pir_rules)
+  * [PROSITE patterns](http://prosite.expasy.org/)
+  * [SignalP](http://www.cbs.dtu.dk/services/SignalP/) (sets the organism argument for SignalP6 to `other`)
+  * SignalP_EUK (sets the organism argument for SignalP6 to `eukaryote`)
+
+> [!NOTE]
+> Quoting the SignalP documentation:  
+> Specifying the eukarya method of `SignalP6` (`SignalP_EUK`) triggers post-processing of the SP predictions by `SignalP6` to prevent spurious results (it will only predicts type Sec/SPI).
 
 ## Using DNA sequences
 
-`InterProScan6` takes advantage of the Open Reading Frame (ORF) prediction tool `esl-translate` within the [`easel` tool suite](https://github.com/EddyRivasLab/easel).
+`InterProScan6` takes advantage of the Open Reading Frame (ORF) prediction tool `esl-translate` within the [`easel` tool suite](https://github.com/EddyRivasLab/easel) in order to analyse nucleic acid sequences.
 
 The `easel` application itself and all of its dependencies are integrated in InterProScan via a docker image (see [set-up](#set-up)).
 
-### Quick start
+**To run anlyses with nucleic acid sequences, run `InterProScan6` with the `--nucleic` flag**
 
-Run `InterProScan6` with the `--nucleic` flag
-
-```bash
-nextflow run interproscan.nf \
---input <path to fasta file> \
---nucleic
-```
+    nextflow run interproscan.nf \
+        --input <path to fasta file> \
+        -profile <executor,container runtime> \
+        --nucleic
 
 By default `InterProScan6` will assume the input FASTA file contains protein sequences. The `--nucleic` flag instructs `InterProScan6` to retrieve all possible ORFs using the `easel` tool suite.
 
-**Note:** The input FASTA file must contain sequences of the same type, i.e. _all_ protein sequences or _all_ nucleic acid sequences.
-
-### Configure
+> [!WARNING]  
+> The input FASTA file must contain sequences of the same type, i.e. _all_ protein sequences or _all_ nucleic acid sequences.
 
 You can configure the prediction of ORFs by updating the relevant `translate` parameters in `nextflow.config`:
 
@@ -233,73 +333,295 @@ You can configure the prediction of ORFs by updating the relevant `translate` pa
   </tbody>
 </table>
 
-## Inputs, parameters and configuration
+## Input sequences
 
-`InterProScan6` is configured via the command-line. The only mandatory parameter is `--input`.
+* The input file must be in FASTA format
+* The sequences in the input file must be _all_ protein or _all_ nucleic acid sequences
+* The table below lists the illegal characters for each member db with illegal characters:
 
-**IMPORTANT:** For parameters that have more than one value, separate values using a comma (not spaces) (e.g. `--applications antifam,ncbifam,pfam)`)
-
-**Configuration parameters:**
-
-* `--applications` - a list of member databases/applications to be employed in the analysis. By default, `InterProScan6` employs all member databases and applications, use this flag to run only a subset of applications. For example:
-
-    nextflow run interproscan.nf --input <fasta file> --applications NCBIfam,Panther,Pfam
-
-```yaml
-applications: AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,Pfam,Phobius,PIRSF,PIRSR,PRINTS,PrositePatterns,PrositeProfiles,SFLD,SignalP_EUK,SignalP_GRAM_NEGATIVE,SignalP_GRAM_POSITIVE,SMART,SuperFamily,TMHMM
-```
-
-* `--disable_precalc` - Do not run comparison against an InterPro release to retrive precalculated matches, instead run `interproscan` for all input sequences. [Boolean]
-* `--formats` - List output file formats. Supported: JSON,TSV,GFF,XML
-* `--goterms` - Whether to retrieve and include Gene Ontology terms from InterPro in the output files. [Boolean]
-* `--help` - Whether to disble the help message - `InterProScan6` will not run any analysis when `help` is set to true. [Boolean]
-* `--input` - Path to input FASTA file
-* `--outdir` - Path to output dir. Default: present working dir. Output files 
-are automatially named after the input FASTA file.
-* `--pathways` - Optional, switch on lookup of corresponding Pathway annotation (IMPLIES - `lookup_file` is defined) [Boolean]
-* `--lookup_file` - Lookup of corresponding InterPro annotation in the TSV and GFF3 output formats.
-
-> [!TIP]
-> InterproScan6 parameters are prefixed with a double dash, `--` (e.g. `--input`), Nextflow parameters are prefixed with a single dash, `-` (e.g. `-resume`)
-
-### Nextflow configuration
-
-Configure the `InterProScan6` utility operations by updating `./nextflow.config`:
-
-* Define the batch size (number of sequences included in each batch job)
-* Change the accepted member databases (important if including `SignalP`, `TMHMM` and `Phobius`)
-* Update the paths to the InterPro release files
-
-### Sequences
-
-The input sequences to be analysed by `InterProScan6`must be provided in FASTA format. All input sequences must be provided in a multi-sequence FASTA file.
-
-At the moment only protein (amino acid) sequences are supported.
+<table>
+  <thead>
+  <tr>
+    <th>Member DB</th>
+    <th>Illegal characters</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td>AntiFam</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>FunFam</td>
+    <td>- _ .</td>
+  </tr>
+  <tr>
+    <td>Gene3D</td>
+    <td>- _ .</td>
+  </tr>
+  <tr>
+    <td>HAMAP</td>
+    <td>- _ .</td>
+  </tr>
+  <tr>
+    <td>NCBIFAM</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>Panther</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>Pfam</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>Phobius</td>
+    <td>- _ . * o x u z j</td>
+  </tr>
+  <tr>
+    <td>PIRSR</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>PIRSF</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>PROSITE Profiles</td>
+    <td>- _ .</td>
+  </tr>
+  <tr>
+    <td>SFLD</td>
+    <td>- _ .</td>
+  </tr>
+  <tr>
+    <td>SUPERFAMILY</td>
+    <td>-</td>
+  </tr>
+  </tbody>
+</table>
 
 ## Outputs
 
-:TODO:
+The output can be retrieved in TSV, XML or JSON format.
 
-# Installing licensed applications (`Phobius`, `SignalP`, `TMHMM`)
+### TSV
 
-By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
-because they contain licensed components. In order to activate these analyses please 
-obtain the relevant license and files from the provider (ensuring the software version 
-numbers are the same as those supported by your current `InterProScan6` installation).
+The TSV format provides a summary of **only** the matches found. Each row represents a unique match between a signature and a query sequence.
+
+1.  Protein accession
+2.  Sequence MD5 digest
+3.  Sequence length
+4.  Source Member database for the signature
+5.  Signature accession
+6.  Signature description
+7.  Match start location in the query sequence
+8.  Match end location in the query sequence
+9.  Score of the match
+    * E-value for AntiFam, Cath-Gene3D, FunFam, NCBIFam, PANTHER, Pfam, PIRSF, PRINTS, SFLD, SMART, SUPERFAMILY, CDD
+    * Score for HAMAP, PROSITE ProSiteProfiles
+    * '-' for Coils, MobiDB-lite, Phobius, PROSITE Patterns, SignalP, TMHMM
+10. Status of the match (T: true)
+11. Date of the run (format `DD-MM-YYYY`)
+12. Accession of the associataed InterPro entry
+13. Description from the Associated InterPro entry
+14. Pipe-separated list of GO annotations with their source(s). Only displayed if the `--goterms` option is switched on
+15. Pipe-separated list of pathways annotations. Only displayed if the `--pathways` option is switched on
+
+### JSON
+
+The JSON file contains more data than the TSV, and lists information for _all_ proteins in the input FASTA file, not only those for whom matches were found.
+
+For each input/query sequence:
+
+1. `sequence`: The submitted protein or nucleotie sequence
+2. `md5`: MD5 hash of the submitted sequence
+3. `matches`: List of matches (JSON objects). For each match:
+    * `evalue`: Overall, full sequence evalue
+    * `score`: Overall, full sequence bit-score
+    * `model-ac`: Accession of the member database model
+    * `signature`: A JSON object summarising the InterPro signature
+        * `accession`: Signature accession
+        * `name`: Name from the InterPro entry
+        * `description`: Description from the InterPro entry
+        * `entry`: The accession of the InterPro entry that the signature is associated with
+            * entry will be null if a singature is not associated with an InterPro entry
+            * `accession`: The InterPro entry accession
+            * `name`: The InterPro entry name
+            * `description`: The InterPro entry description
+            * `type`: The type of InterPro entry (e.g. family, domain, etc.)
+            * `goXRefs`: Geneontology (GO) terms associated with the InterPro entry - only retrieved if the `--goterms` flag is used
+            * `pathwayXRefs`: Pathway information associated with the InterPro entry - only retrieved if the `--pathways` flag is used
+        * `signatureLibraryRelease`: JSON object containing:
+            * `library`: Application/member database name
+            * `version`: Release version number
+    * `locations` : List of locations where the signature matched the protein sequence. Specifically, this is a list of JSON objects, one JSON object per location where a match between the protein sequence and signature was found. For each location:
+        * `start` Start point of the alignment location with respect to the query sequence
+        * `end` End point of the alignment location with respect to the query sequence
+        * `hmmStart` Start point of the local alignment with respect to the HMM profile
+        * `hmmEnd` End point of the local alignment with respect to the HMM profile
+        * `evalue`: Independent E-value
+        * `score`: Bit score
+        * `envelopesStart`: Start of the envelop
+        * `envelopeEnd`: End of the envelop
+        * `location-fragments`: List of JSON objects, one JSON object per fragment:
+            * `start`: Start location of the fragment in the query sequence
+            * `end`: End location of the fragment in the query sequence
+            * `dc-status`: Continuous/discontinuous status.
+        * `sites`: List of JSON objects, one JSON object per site (a domain signature in some member databases can have multiple sites). Per site:
+            * `description`: Site description (from InterPro)
+            * `numLocations`: The number of locations
+            * `siteLocations`: List, one JSON object per location:
+                * `start`: Start location of the site in the query sequence
+                * `end`: End location of the site in the query sequence
+                * `residue`: The amino acid residue of the site
+    * `xref`: The protein sequence ID and description listed in the input FASTA file
+
+### XML
+
+The richest form of the data is the XML representtaion, and includes data for all sequences 
+listed in the input FASTA File.
+
+The XML Schema Definition (XSD) is available [here](http://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/schemas/). `InterProScan6` uses the latest XSD.
+
+For each query sequence:
+
+1. `sequence`: The submitted protein or nucleotie sequence
+2. `xref`: The sequence ID and name/description from the input FASTA file
+3. `md5`: MD5 hash of the submitted sequence
+4. `matches`: List of matches:
+    * `<>-match`: The type/source of the signature match:
+      * `hmmer3-match`: AntiFam, NCBIFam, FunFam, Gene3D, HAMAP, Panther, PFAM, PIRSF, PIRSR, SFLD, SMART, SUPERFAMILY
+      * `<member-name>-match`: Match from a member database that does not use HMMER, e.g. CDD
+    * The information for both these keys is very similar and is summarised here:
+        * `signature`: Represents the member database signature. Includes accession, name and description
+            * `entry`: Associated InterPro entry. Includes entry accession, description, name and type (e.g. family, domain, etc.), as well as any associated pathway information (if the `--pathway` flag is used) and Geneontology (GO) terms (of the `--goterms` flag is used)
+            * `library release`: Release version of the member datbase. Includes name and version/release number
+        * `models`: Information about the model, including the name, and accession
+        * `locations`: Represents domain hits in the query sequence. Includes:
+            * E-value
+            * Score: The bitscore or other member database relevant score
+            * The envelop start and end: Start and end point of the envelop
+            * Hmm-start and hmm-end: Start and end point of the local alignemnt with respect to the HMM profile
+            * Hmm-length: Length of the alignemnt along the query sequence
+            * Hmm-bounds: Description of the HMMER Hmm bound pattern
+            * start and end: Start and end point of the alignment location with respect to the query sequence
+            * alignemnt: The query sequence alignment to the model
+            * cigar-alignemnt: The [cigar alignment](https://replicongenetics.com/cigar-strings-explained/)
+            * `site-loctaions`: information about sites (for those member databases that contain site data):
+                * Each site is represented by a `site-location`, which has a start, stop and residue.
+
+### Continuous and discontinuous status
+
+The `dc-status` refers to continuous nature of a domain 
+hit in some member databases. If a domain is not  continuous, i.e. 
+is broken up into fragments, each of the fragments are represented under the
+`location-fragments` key and are labelled as:
+* "C_TERMINAL_DISC" - the most c-terminal fragment
+* "N_TERMINAL_DISC" - the most n-terminal fragment
+* "NC_TERMINAL_DISC" - all other fragments
+
+> [!NOTE]  
+> Not all member database analyses can detect discontinious domains. At the present only Gene3D and 
+> FunFam are able to detect discontinious domains.
+
+### The envelop
+
+The envelope represents the region of a protein sequence where the domain may be located. Often it is wider than what HMMER chooses as a reasonably confident alignment.
+
+**Panther exception:** The output from HMMER3 against the HMM models of Panther is post-processed to select only the best homologous family. Therefore, there is a maximum of one domain hit for each Panther signature in a protein sequence. Owing to this the E-value and Score and listed under the `signature` key, not the `locations` key.
+
+# Installing licensed applications (`MobiDB`, `Phobius`, `SignalP`, `TMHMM`)
+
+By default `MobiDB`, `Phobius`, `SignalP`, and `DeepTMHMM` member database analyses are deactivated in `InterProScan6` because they contain licensed components. In order to activate these analyses please obtain the relevant licenses and files from the provider (ensuring the software version numbers are the same as those supported by your current `InterProScan6` installation).
 
 Files can be placed in any location.
 
+> [!NOTE]  
+> The instructions below presume `InterProScan6` is being run with the Docker. If an alterantive 
+> container runtime is used the methods below will need to be adapated accordingly.
+> As above, if using Singularity and Apptainer, the images should be kept in the root of the 
+> `InterProScan6` directory. Otherwise please update the container paths in the respective `utilities/profiles/` config files.
+
+## DeepTMHMM
+
+Coming soon...
+
+## MobiDB
+
+Some of the compoments within `MobiDBLite` are GPL-licensed, meaning all software and data, and thus 
+work that uses this software, also needs to be GPL-licensed. This may not be ideal or suitable
+for all users. Therefore, we provide a version of the `MobiDBLite` analytical software that 
+is not GPL-licensed, called [`idrpred`](https://github.com/matthiasblum/idrpred).
+
+To setup `MobiDB`/`idrpred` for `InterProScan6` pull the `idrpred` Docker image from Docker hub using your container runtime of choice.
+
+Using docker:
+```bash
+docker pull idrpred:latest
+```
+
+Using `Singularity`:
+```bash
+singularity pull idrpred.sif docker://matblum/idrpred/idrpred:latest
+```
+
+Using `Apptainer`:
+```bash
+apptainer pull idrpred.sif docker://matblum/idrpred/idrpred:latest
+```
+
+## `Phobius`
+
+1. Download Phobius from the [Phobius server](https://software.sbc.su.se/phobius.html)
+
+2. Unpack the `tar` file
+```bash
+tar -xzf phobius101_linux.tgz -C <PHOBIUS-DIR>
+```
+
+3. Copy the docker file available in the `./docker_files/phobius/` directory to your local `Phobius` directory
+```bash
+# with the terminal pointed at the root of this repo
+cp docker_files/phobius/Dockerfile <PHOBIUS-DIR>/Dockerfile
+```
+
+4. Build a docker image -
+```bash
+# with the terminal pointed at your local phobius dir
+docker image build -t phobius .
+```
+
+5. Check the `subworkflows/sequence_analysis/members.config` file to make sure the `Phobius` version is correct.
+```groovy
+    phobius {
+            release = "1.01" <---- update if necessary
+            runner = "phobius"
+        }
+```
+
+6. (Optional) Convert the Docker image to an image of your container runtime.
+
+For example, to build a singularity image:
+```bash
+docker save phobius > phobius.tar
+singularity build phobius.sif docker-archive://phobius.tar
+```
+
 ## `SignalP`
 
-### Adding `SignalP` (version 6) to `InterProScan6`
+### Set up
 
-1. Obtain a license and download `SignalP6` (`SignalP` version 6) from the `SignalP6` [server](https://services.healthtech.dtu.dk/services/SignalP-6.0/) (under 'Downloads').
+1. Obtain a license and download `SignalP6` (`SignalP` version 6) from the [SignalP6 server](https://services.healthtech.dtu.dk/services/SignalP-6.0/) (under 'Downloads').
     * Either fast or slow models can be implemented
     * To change the implemented mode please see the [Changing mode](#changing-mode) documentation
 
 2. Unpackage the `SignalP6` `tar` file
 
-    tar -xzf signalp-6.0h.fast.tar.gz -C <SIGNALP-DIR>
+```bash
+tar -xzf signalp-6.0h.fast.tar.gz -C <SIGNALP-DIR>
+```
 
 3. Copy the docker file available in the `./docker_files/signalp/` directory to your local `SignalP6` directory
 
@@ -315,129 +637,108 @@ cp docker_files/signalp/Dockerfile <SIGNALP-DIR>/Dockerfile
 docker build -t signalp6 .
 ```
 
-3. Update the `InterProScan6` configuration: specifically, update `subworkflows/sequence_analysis/members.config`:
-```
+5. Check the version number in `subworkflows/sequence_analysis/members.config` is correct:
+
+```groovy
 signalp {
     release = "6.0h"  <--- make sure the release is correct
     runner = "signalp"
-    data {
-        model_dir = "$projectDir/bin/signalp/models"  <--- UPDATE PATH TO models DIR
-        organism = "other"
-    }
+    ...
 }
-```
-Repeat this step for `SignalP_EUK`.
-```
+...
 signalp_euk {
     release = "6.0h"  <--- make sure the release is correct
     runner = "signalp_euk"
-    data {
-        model_dir = "$projectDir/bin/signalp/models"  <--- UPDATE PATH TO models DIR
-        organism = "euk"
-    }
+    ...
 }
 ```
-> Specifying the eukarya method of `SignalP6` (`SignalP_EUK`) triggers post-processing of the SP predictions by `SignalP6` to prevent spurious results (only predicts type Sec/SPI).
 
-4. [Optional] If you want `SignalP` and `SignalP_EUK` to be included in the default applications that are run when running `InterProScan` without the `--applications` flag, add `SignalP` and `SignalP_EUK` to the application list in `nextflow.config`:
-```
-params {
-    batchsize = 100
-    help = false
-    applications = 'AntiFam,CDD,Coils,FunFam,Gene3d,HAMAP,MobiDBLite,NCBIfam,Panther,Pfam,PIRSF,PIRSR,PRINTS,PrositePatterns,PrositeProfiles,SFLD,SMART,SuperFamily,SignalP,SignalP_EUK' <--- ADD NEW APPLICATION
-    disable_precalc = false
-}
-```
-### Running `InterProScan6` with `SignalP6` enabled
+6. (Optional) Convert the Docker image to an image of your container runtime.
 
-Include `signalp` and `signalp_euk` in the list of applications defined using the `--applications` flag.
+For example, to build a singularity image:
+```bash
+docker save signalp6 > signalp6.tar
+singularity build signalp6.sif docker-archive://signalp6.tar
+```
+
+### Running `InterProScan6` with `SignalP6`
+
+Include `signalp` or `signalp_euk` in the list of applications defined using the `--applications` flag.
 
 ```bash
-nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp --disable_precalc
-nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp_euk --disable_precalc
+nextflow run interproscan.nf \
+    --input utilities/test_files/best_to_test.fasta \
+    --applications signalp \
+    -profile local,docker
 ```
 
-### Changing mode of `Signalp6` in `InterProScan6`
+```bash
+nextflow run interproscan.nf \
+    --input utilities/test_files/best_to_test.fasta \
+    --applications signalp_euk \
+    -profile local,docker
+```
+
+> [!NOTE]
+> Quoting the SignalP documentation:  
+> Specifying the eukarya method of `SignalP6` (`SignalP_EUK`) triggers post-processing of the SP predictions by `SignalP6` to prevent spurious results (it will only predicts type Sec/SPI).
+
+### Changing the mode of `Signalp6` in `InterProScan6`
 
 `SignalP6` supports 3 modes: `fast`, `slow` and `slow-sequential`. The mode can be set using the `--signalp_mode` flag. The default mode is `fast`.
 
-For example, to run `InterProScan` with input file `best_to_test.fasta`, using SignalP with all models in slow mode, use the command:
+> [!WARNING]
+> The slow mode can take 6x longer to compute. Use when accurate region borders are needed.
+
+You may need to install the other models mannually, please see the [SignalP documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#installing-additional-modes).
+
+For example, to run `InterProScan` with the input file `best_to_test.fasta`, using SignalP with only eukaryotic models in slow mode, and with retrieving precalculated matches disabled on a local machine using docker:
 
 ```bash
-nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp --disable_precalc --signalp_mode slow
+nextflow run interproscan.nf \
+  --input utilities/test_files/best_to_test.fasta \
+  --applications signalp_euk \
+  --disable_precalc \
+  --signalp_mode slow \
+  -profile docker,local
 ```
 
-To run in slow-sequential mode and with only Eukaryotic models, use the command:
-
-```bash
-nextflow run interproscan.nf --input utilities/test_files/best_to_test.fasta --applications signalp_euk --disable_precalc --signalp_mode slow-sequential
-```
-
-**Note:** _`InterProScan6` only supports the implementation of one `SignalP` mode at a time. A separate `InterProScan6` but be completed for each mode of interest, in order to apply multiple modes to the same dataset_.
+> [!NOTE]  
+> `InterProScan6` only supports implementing one `SignalP` mode at a time.
 
 ### Converting from CPU to GPU, and back again
 
-By default, `SignalP` runs on your CPU. If you have a GPU available, you can convert the `SignalP` model weights so that your installation will use GPU instead.
+By default, `SignalP` runs on your CPU. If you have a GPU available, you can convert the `SignalP` models so that your installation can use GPU-acceleration.
+
 You will need to install `SignalP` in order to convert to GPU models.
 
-1. (Optional) Remove any previously built SignalP images if you no longer want to run `SignalP` with CPU
+1. Convert the ``SignalP`` installation to GPU by following the [SignalP documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#converting-to-gpu)
 
-```bash
-docker image rm signalp6:latest
-```
-
-2. Install `SignalP` 
-
-```bash
-cd <SIGNALP_DIR>
-pip install .
-```
-
-3. Convert the models to GPU
-
-```bash
-signalp6_convert_models gpu /path/to/models
-```
-
-4. Build a docker image for `SignalP` with GPU
+2. Build a docker image for `SignalP` with GPU
 
 ```bash
 # with the terminal pointed at your local signalp dir
 docker image build -t signalp6_gpu .
 ```
 
-5. To run `SignalP` with GPU with `InterProScan6` use the flag `--signalp_gpu`
+3. (Optional) Convert the image to your container runtime of choice
+
+For example, to build a singularity image:
+```bash
+docker save signalp6_gpuu > signalp6_gpu.tar
+singularity build signalp6_gpu.sif docker-archive://signalp6_gpu.tar
+```
+
+To run `SignalP` with GPU acceleration with `InterProScan6` use the flag `--signalp_gpu`.
+
+For example, to run ``InterProScan`` with only ``SignalP`` enabled, using GPU acceleration on a SLURM cluster with Singularity support:
 
 ```bash
-nextflow run interproscan.nf --input <fasta file> --applications signalp --signalp_gpu
-```
-
-Alternatively, if you do not always want to use the flag to run `SignalP`, you can update the `nextflow.config` file from "signalp_gpu = false" to "signalp_gpu = true".
-
-## `Phobius`
-
-### Adding `Phobius` (version 1.01) to `InterProScan6`
-
-1. Download Phobius from the Phobius  [server](https://software.sbc.su.se/phobius.html)
-
-2. Unpack the `tar` file in your desired directory
-
-```
-tar -xzf phobius101_linux.tgz -C <PHOBIUS-DIR>
-```
-
-3. Copy the docker file available in the `./docker_files/phobius/` directory to your local `Phobius` directory
-
-```bash
-# with the terminal pointed at the root of this repo
-cp docker_files/phobius/Dockerfile <PHOBIUS-DIR>/Dockerfile
-```
-
-4. Build a docker image - _the Nextflow pipeline needs all third party tools to be stored within linux containers_.
-
-```bash
-# with the terminal pointed at your local phobius dir
-docker image build -t phobius .
+nextflow run interproscan.nf \\
+  --input <fasta file> \\
+  --applications signalp \\
+  --signalp_gpu \\
+  -profile singularity,slurm
 ```
 
 # Citation
@@ -518,6 +819,18 @@ Command error:
   .command.sh: line 2:     7 Segmentation fault      (core dumped) /opt/hmmer3/bin/hmmsearch --cut_ga --cpu 1 -o 7.0._.antifam._.out AntiFam.hmm mini_test.1.fasta
 ```
 
+This is generally due to HMMER being unable to find a necessary data file.
+Make sure the data directory is correctly structured and populated and `InterProScan` is 
+pointed to the correct data directory using the `--data` flag if not using the default data
+directory location in the project dir.
+
+## Segmentation fault
+
+If you a recieve an error such as the following:
+```bash
+Command error:
+  .command.sh: line 2:     7 Segmentation fault      (core dumped) /opt/hmmer3/bin/hmmsearch --cut_ga --cpu 1 -o 7.0._.antifam._.out AntiFam.hmm mini_test.1.fasta
+```
 This is generally due to HMMER being unable to find a necessary data file.
 Make sure the data directory is correctly structured and populated and `InterProScan` is 
 pointed to the correct data directory using the `--data` flag if not using the default data
