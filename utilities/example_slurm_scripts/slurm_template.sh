@@ -11,7 +11,7 @@ cd $SLURM_SUBMIT_DIR
 
 nextflow run interproscan.nf \
     -profile slurm,singularity \
+    -work-dir /lscratch \
     --input utilities/test_files/best_to_test.fasta \
     --disable_precalc \
-    -work-dir /lscratch \
     --applications antifam,ncbifam,pfam
