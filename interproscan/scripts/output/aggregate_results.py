@@ -13,11 +13,11 @@ class FileFormatError(Exception):
 
 
 def aggregate_results(aggreated_results_path: str, results_file: Path) -> dict:
-    """Parsers an internal IPS6 JSON, adding the results to the growing file 
+    """Parsers an internal IPS6 JSON, adding the results to the growing file
     of all aggregated IPS6 hits.
 
     Each  internal IPS6 JSON file is keyed by the protein sequence ID, and valued by
-    a dict, keyed by the signature accession and valued by information on the 
+    a dict, keyed by the signature accession and valued by information on the
     hit (name, evalue, member_db, locations, etc.)
 
     :param aggreated_results_path: str repr of path to the growing IPS6 JSON object of all hits
@@ -31,10 +31,14 @@ def aggregate_results(aggreated_results_path: str, results_file: Path) -> dict:
                 continue
         return True if lines > 1 else False
 
-    data = {}
-
     with open(aggreated_results_path, "r") as fh:
-        all_results = json.load(fh)
+        try:
+            all_results = json.load(fh)
+        except json.JSONDecodeError as exc:
+            raise FileFormatError(
+                (f"Aggregated results file '{results_file}' is incorrectly formatted "
+                    "or corrupted")
+            ) from exc
 
     with open(results_file, 'r') as file:
         try:
