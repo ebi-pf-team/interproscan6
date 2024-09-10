@@ -19,24 +19,34 @@ workflow {
     } else {
         input_file = null
     }
+
+    /*
+    The data dir path is reconfigured and passed from PRE_CHECKS
+    to SEQUENCE_ANALYSIS to ensure PRE_CHECKS is completed before
+    the other subworkflow starts.
+    */
+    dataDirPath = Channel.empty()
     PRE_CHECKS(
         params.help,
         input_file,
+        params.datadir,
         params.nucleic,
         params.keySet(),
         params.applications,
         params.formats,
         params.version,
-        params.ipsc_version,
+        params.ipscn_version,
         params.signalp_mode,
-        params.signalp_gpu
+        params.signalp_gpu,
+        params.goterms,
+        params.pathways
     )
+    dataDirPath = PRE_CHECKS.out.dataDir.val
+    log.info "Using data files located in ${dataDirPath}"
 
-    formats = params.formats.toLowerCase()
+    applications = (params.applications.toLowerCase().split(',') as Set).join(',')
 
-    applications = params.applications.toLowerCase()
-
-    Channel.fromPath( params.input , checkIfExists: true)
+    Channel.fromPath( input_file , checkIfExists: true)
     .unique()
     .splitFasta( by: params.batchsize, file: true )
     .set { ch_fasta }
@@ -94,7 +104,12 @@ workflow {
                 fasta_to_runner = ch_fasta
             }
         }
-        parsed_analysis = SEQUENCE_ANALYSIS(fasta_to_runner, applications, params.signalp_mode)
+        parsed_analysis = SEQUENCE_ANALYSIS(
+            fasta_to_runner,
+            applications,
+            dataDirPath,
+            params.signalp_mode
+        )
     }
 
     all_results = parsed_matches.concat(parsed_analysis)
@@ -102,11 +117,11 @@ workflow {
     AGGREGATE_RESULTS(all_results.collect())
     AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
 
-    XREFS(AGGREGATE_RESULTS.out, applications)
+    XREFS(AGGREGATE_RESULTS.out, applications, dataDirPath)
 
     REPRESENTATIVE_DOMAINS(XREFS.out.collect())
 
-    Channel.from(formats.split(','))
+    Channel.from(params.formats.split(','))
     .set { ch_format }
 
     WRITE_RESULTS(
@@ -115,7 +130,7 @@ workflow {
         REPRESENTATIVE_DOMAINS.out.collect(),
         ch_format,
         params.outdir,
-        params.ipsc_version,
+        params.ipscn_version,
         params.nucleic
     )
 }

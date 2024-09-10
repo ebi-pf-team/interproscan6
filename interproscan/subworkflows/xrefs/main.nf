@@ -7,24 +7,25 @@ workflow XREFS {
     take:
     matches
     applications
+    dataDir
 
     main:
-    ENTRIES(matches, params.xrefs.entries)
+    ENTRIES(matches, "${dataDir}/${params.xrefs.entries}")
 
     final_result = ENTRIES.out
 
     if ("${applications}".contains('panther')) {
-        PAINT_ANNOTATIONS(final_result, params.members.panther.postprocess.paint_annotations)
+        PAINT_ANNOTATIONS(final_result, "${dataDir}/${params.members."panther".postprocess.paint_annotations}")
         final_result = PAINT_ANNOTATIONS.out
     }
 
     if (params.goterms) {
-        GOTERMS(final_result, params.xrefs.goterms)
+        GOTERMS(final_result, "${dataDir}/${params.xrefs.goterms}")
         final_result = GOTERMS.out
     }
 
     if (params.pathways) {
-        PATHWAYS(final_result, params.xrefs.pathways)
+        PATHWAYS(final_result, "${dataDir}/${params.xrefs.pathways}")
         final_result = PATHWAYS.out
     }
 
