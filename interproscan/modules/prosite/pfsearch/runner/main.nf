@@ -17,6 +17,7 @@ process PFSEARCH_RUNNER {
     // when we move over to the single docker file
     script:
     """
+    touch prosite_profiles.out
     python3 $projectDir/interproscan/scripts/members/prosite/run_pfsearchv3.py \
         ${models_dir} \
         ${fasta} \
