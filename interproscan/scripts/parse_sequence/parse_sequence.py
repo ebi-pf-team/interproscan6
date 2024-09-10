@@ -26,6 +26,7 @@ ILLEGAL_CHARS = {
     "smart": "",
     "superfamily": "-",
     "signalp": "",
+    "signalp_euk": "",
     "phobius": "-*._oxuzj",
 }
 
