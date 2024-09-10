@@ -108,7 +108,6 @@ def filter_matches(ips6: Path, hamap_matches: dict[str, HamapHit]) -> tuple[dict
                 processed_ips6[protein_id][signature_acc]["locations"].append({
                     "start": domain.start,
                     "end": domain.end,
-                    "representative": "false",
                     "score": domain.norm_score,
                     "alignment": domain.seq,
                     "location-fragments": [{

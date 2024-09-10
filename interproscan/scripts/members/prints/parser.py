@@ -110,7 +110,6 @@ def parse_prints(prints_out: str, hierarchy_map: dict) -> dict:
                         "score": idscore,
                         "start": pos,
                         "end": end,
-                        "representative": "false",
                         "location-fragments": [{
                             "start": pos,
                             "end": end,

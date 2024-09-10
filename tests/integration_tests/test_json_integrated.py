@@ -3,10 +3,10 @@ import json
 import subprocess
 
 
-def get_current_output(current_output_path: str, input_path: str, applications: str, disable_precalc: bool) -> dict:
+def get_current_output(test_output_dir: str, current_output_path: str, input_path: str, applications: str, disable_precalc: bool) -> dict:
     disable_precalc = "--disable_precalc" if disable_precalc else ""
     command = f"nextflow run interproscan.nf --input {input_path} --applications {applications} {disable_precalc} " \
-              f"--formats json,tsv-pro --output {current_output_path} --goterms --pathways"
+              f"--formats json,tsv-pro --outdir {test_output_dir} --goterms --pathways"
     if os.path.exists(str(current_output_path) + ".json"):
         os.remove(str(current_output_path) + ".json")
     subprocess.run(command, shell=True)
@@ -72,9 +72,9 @@ def compare(expected, current, ignore_elements: list, print_md5: bool, print_acc
                 print_acc = True
 
 
-def test_json_output(input_path, expected_output_path, current_output_path, applications, disable_precalc):
+def test_json_output(test_output_dir, input_path, expected_output_path, output_path, applications, disable_precalc):
     expected_output = get_expected_output(expected_output_path)
-    current_output = get_current_output(current_output_path, input_path, applications, disable_precalc)
+    current_output = get_current_output(test_output_dir, output_path, input_path, applications, disable_precalc)
 
     expected = json2dict(expected_output)
     current = json2dict(current_output)

@@ -87,7 +87,6 @@ def matches2rules(matches_path: str, rules_hash: dict) -> dict:
                         'end': seq_to,
                         'alignment': seq_align,
                         'sites': rule_sites,
-                        "representative": '',
                         "hmmLength": location["hmmLength"],
                         "envelopeStart": location["envelopeStart"],
                         "envelopeEnd": location["envelopeEnd"]

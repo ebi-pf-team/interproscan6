@@ -118,7 +118,6 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]]) -> None:
                                 processed_ips6_data[_protein_id][signature_acc]["locations"] = [{
                                     "start": panther_hit["ali_start"],
                                     "end": panther_hit["ali_end"],
-                                    "representative": location["representative"],
                                     "hmmStart": panther_hit["hmm_start"],
                                     "hmmEnd": panther_hit["hmm_end"],
                                     "hmmLength": location["hmmLength"],
