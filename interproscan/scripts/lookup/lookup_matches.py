@@ -11,6 +11,7 @@ from retry_conn_decorator import lookup_retry_decorator
 def match_lookup(matches_checked: list, url: str, **kwargs) -> str:
     url_input = ','.join(matches_checked)
     matches = urllib.request.urlopen(f"{url}?md5={url_input}")
+    print(f"{url}?md5={url_input}")
     return matches.read().decode('utf-8')
 
 
@@ -18,6 +19,17 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
     tree = ET.fromstring(match_data)
     matches = {}
     hmm_bound_pattern = {"[]": "COMPLETE", "[.": "N_TERMINAL_COMPLETE", ".]": "C_TERMINAL_COMPLETE", "..": "INCOMPLETE"}
+
+    """
+    Structure of hit data:
+    1. Member db version
+    2. Hit Accession
+    3. Model accession
+    4. Location start
+    5. Location end
+    6. Location fragment
+    ...17
+    """
 
     for match in tree.findall(".//match"):
         for hit in match.findall("hit"):
@@ -68,6 +80,7 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     "envelopeEnd": int(hit_data[14]),
                     "postProcessed": post_processed,
                     "locationFragment": hit_data[6],
+                    # misc either , 0 or HmmBounds raw
                     "misc": hit_data[9],
                     "alignment": "",
                     "cigar_alignment": hit_data[17]
@@ -77,6 +90,11 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     location["evalue"] = float(hit_data[16])
                 else:
                     location["pvalue"] = float(hit_data[16])
+                    # prints mls stores motif number at same index as hmm length
+                    # set hmm length to 0
+                    location["hmmLength"] = int(0)
+                    location["motifNumber"] = hit_data[12]
+                    signature["graphscan"] = hit_data[17]
 
                 if target_key not in matches:
                     matches[target_key] = {}
