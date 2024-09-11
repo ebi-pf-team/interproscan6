@@ -13,10 +13,10 @@ Standard structure of hit data:
 7. Location fragment
 8. Score
 9. Evalue
-10. Hmm bounds
-11. Hmm start
-12. Hmm end
-13. Hmm length
+10. HMM bounds
+11. HMM start
+12. HMM end
+13. HMM length
 14. Envelope start
 15. Envelope end
 16. Location score
@@ -24,7 +24,7 @@ Standard structure of hit data:
 18. '' or other data type in Panther, PRINTS, PROSITE_PATTERNS, PROSITE_PROFILES, MobiDB
 
 8-17 hit data is non-standard in member dbs: CDD, Panther, PIRSF, PRINTS, SFLD, SUPERFAMILY, SignalP
-Some or all 8-17 hit data will be 0 or '' in member dbs:  Coils, HAMAP, PROSITE_PROFILES, PROSITE_PATTERNS, SMART, Phobius, SignalP, MobiDB
+Otherwise standard, some or all 8-17 hit data will be 0 or '' in member dbs:  Coils, HAMAP, PROSITE_PROFILES, PROSITE_PATTERNS, SMART, Phobius, MobiDB
 """
 import json
 import logging
@@ -116,21 +116,19 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
 
                 if hit_appl in ["SIGNALP", "SIGNALP_EUK"]:
                     location["pvalue"] = float(hit_data[16])
+                    # mls signalp missing cleavage start and end
                     location["cleavage_start"] = ""
                     location["cleavage_end"] = ""
                     signature["orgType"] = "Other" if hit_appl == "SIGNALP" else "Eukarya"
 
                 if hit_appl in ["SFLD"]:
                     location["location-fragments"] = [{"start": location["start"], "end": location["end"], "dc-status": "CONTINUOUS"}]
-                #if hit_appl in ["CDD"]:
-                #    location["sites"] = []
-                # panther and cdd do not have location specific evalues and score
-                # super family does not have location specific score
+
+                # superfamily does not have location specific score
                 # prints, prosite_profiles, have location scores instead of scores
                 if hit_appl in ["PROSITE_PROFILES"]:
                     location["score"] = hit_data[7]
-                # prosite profiles may be missing location evalue? and evalue
-
+                    
                 if hit_appl in ["MOBIDB_LITE"]:
                     signature["member_db"] = "MOBIDB"
                     location["sequence-feature"] = hit_data[17]
