@@ -1,6 +1,4 @@
-import os
 import xml.etree.ElementTree as ET
-
 
 from .regex import NT_KEY_PATTERN, NT_SEQ_ID_PATTERN
 
@@ -21,7 +19,7 @@ MATCH_ELEMENT = {
     'PIRSR': 'hmmer3-match',
     'PRINTS': 'fingerprints-match',
     'PROSITE_PATTERNS': 'profilescan-match',
-    'PROSITE_PROFILES': 'profilesearch-match',  # changed from i5 which is also profilescan-match
+    'PROSITE_PROFILES': 'profilesearch-match',
     'SFLD': 'hmmer3-match',
     'SIGNALP': 'signalp-match',
     'SIGNALP_EUK': 'signalp-euk-match',

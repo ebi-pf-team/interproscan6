@@ -11,12 +11,20 @@ def get_profile_paths(directory):
 
 
 def main():
-
-    models_dir = sys.argv[1]
-    fasta_file = sys.argv[2]
-    output_file = sys.argv[3]
-    bin_cmd = sys.argv[4]  # path to the pfsearch binary or executable command
-    binary_switches = sys.argv[5:]
+    """
+    CL input:
+    0. Str repr of path to PROSITE profiles model directory
+    1. Str repr of path for fasta file
+    2. Str repr of path for the output file
+    3. Path to the pfsearch binary or executable command
+    4. Str repr of path to the IPS6 binary switches
+    """
+    args = sys.argv[1:]
+    models_dir = args[0]
+    fasta_file = args[1]
+    output_file = args[2]
+    bin_cmd = args[3]
+    binary_switches = args[4:]
 
     profiles = get_profile_paths(models_dir)
 

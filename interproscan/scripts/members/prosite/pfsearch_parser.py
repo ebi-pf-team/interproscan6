@@ -101,7 +101,6 @@ def parse_and_filter(pfsearch_out: str, blacklist: list[str]) -> dict:
                     {
                         "start": hit.start,
                         "end": hit.end,
-                        "representative": "",
                         "score": hit.norm_score,
                         "alignment": hit.alignment,
                         "location-fragments": [{

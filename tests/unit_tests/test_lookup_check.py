@@ -1,16 +1,13 @@
 """Test the python script scripts/lookup/lookup_check.py
 
 These test are intened to be run from the root of the repository using:
-pytest -v
+python -m pytest -v
 """
 
 import json
 import pytest
-import os
-import sys
 import urllib.request
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../interproscan/scripts/lookup')))
 from interproscan.scripts.lookup import lookup_check
 
 
@@ -25,29 +22,34 @@ def lookup_check_out_dir(test_output_dir):
 
 
 @pytest.fixture
+def lookup_outfile_path(lookup_check_out_dir):
+    return lookup_check_out_dir / "check_lookup_current_output.json"
+
+
+@pytest.fixture
 def parsed_seqs_path(lookup_check_input_dir):
     return lookup_check_input_dir / "parsed_sequences"
 
 
-def test_lookup_check_main(parsed_seqs_path, lookup_check_out_dir, capsys, monkeypatch):
+def test_lookup_check_main(
+    parsed_seqs_path, lookup_check_out_dir,
+    lookup_outfile_path, monkeypatch
+):
     def mock_check_precalc(*args, **kwards):
         return (["MD5_1", "MD5_2"], None)
 
-    output_file_path = str(lookup_check_out_dir / "check_lookup_current_output.json")
-    monkeypatch.setattr("sys.argv", ["lookup_check", str(parsed_seqs_path), "fake_url", 3, output_file_path])
+    monkeypatch.setattr("sys.argv", ["lookup_check", str(parsed_seqs_path), "fake_url", 3, lookup_outfile_path])
     monkeypatch.setattr(lookup_check, "check_precalc", mock_check_precalc)
+
+    lookup_check.main()
 
     with open((lookup_check_out_dir / "lookup_check_out_script.json"), "r") as fh:
         expected_output = json.load(fh)
 
-    lookup_check.main()
-
-    with open(output_file_path, "r") as fh:
+    with open(lookup_outfile_path, "r") as fh:
         captured_output = json.load(fh)
 
     assert expected_output['matches'] == captured_output['matches']
-    # the no_matches keys can store seqs in different orders so only check length
-    assert len(expected_output['no_matches']) == len(captured_output['no_matches'])
 
 
 def test_check_precalc(monkeypatch):

@@ -15,8 +15,7 @@ def parse(input_file: str, release: str) -> dict:
                 matches[sequence_id]["mobidb"]["locations"].append({
                     "start": start,
                     "end": end,
-                    "sequence-feature": feature,
-                    "representative": "false"
+                    "sequence-feature": feature
                 })
             except KeyError:
                 matches[sequence_id] = {
@@ -29,8 +28,7 @@ def parse(input_file: str, release: str) -> dict:
                         "locations": [{
                             "start": start,
                             "end": end,
-                            "sequence-feature": feature,
-                            "representative": "false"
+                            "sequence-feature": feature
                         }]
                     }
                 }

@@ -180,7 +180,6 @@ def get_domain_match(match: re.Match, member_db: str, qlen: str) -> dict:
     }
     domain_match["start"] = int(match.group(9)) if member_db.upper() != "GENE3D" else int(match.group(11))  # ali coord from
     domain_match["end"] = int(match.group(10)) if member_db.upper() != "GENE3D" else int(match.group(12))  # ali coord to
-    domain_match["representative"] = ""
     domain_match["hmmStart"] = int(match.group(6))  # hmm coord from
     domain_match["hmmEnd"] = int(match.group(7))   # hmm coord to
     domain_match["hmmLength"] = int(qlen)  # qlen
