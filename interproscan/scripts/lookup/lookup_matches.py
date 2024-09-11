@@ -1,7 +1,30 @@
 """
 Match lookup service only includes domain hits, no site hits
-Will not return PIRSR matches
+Match lookup service will not return PIRSR matches
 CDD and SFLD matches will be incomplete (missing site data)
+
+Standard structure of hit data:
+1. Member db
+2. Member db version
+3. Hit Accession
+4. Model accession
+5. Location start
+6. Location end
+7. Location fragment
+8. Score
+9. Evalue
+10. Hmm bounds
+11. Hmm start
+12. Hmm end
+13. Hmm length
+14. Envelope start
+15. Envelope end
+16. Location score
+17. Location evalue
+18. '' or other data type in Panther, PRINTS, PROSITE_PATTERNS, PROSITE_PROFILES, MobiDB
+
+8-17 hit data is non-standard in member dbs: CDD, Panther, PIRSF, PRINTS, SFLD, SUPERFAMILY, SignalP
+Some or all 8-17 hit data will be 0 or '' in member dbs:  Coils, HAMAP, PROSITE_PROFILES, PROSITE_PATTERNS, SMART, Phobius, SignalP, MobiDB
 """
 import json
 import logging
@@ -24,17 +47,6 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
     tree = ET.fromstring(match_data)
     matches = {}
     hmm_bound_pattern = {"[]": "COMPLETE", "[.": "N_TERMINAL_COMPLETE", ".]": "C_TERMINAL_COMPLETE", "..": "INCOMPLETE"}
-    """
-    Main structure of hit data:
-    1. Member db version
-    2. Hit Accession
-    3. Model accession
-    4. Location start
-    5. Location end
-    6. Location fragment
-    ...18 
-    7-18 hit data may vary between member dbs
-    """
 
     for match in tree.findall(".//match"):
         for hit in match.findall("hit"):
