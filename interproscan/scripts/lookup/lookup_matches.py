@@ -142,6 +142,8 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     if accession not in matches[target_key]:
                         matches[target_key][accession] = signature
                         matches[target_key][accession]["locations"] = [location]
+                    elif location in matches[target_key][accession]["locations"]:
+                        continue
                     else:
                         matches[target_key][accession]["locations"].append(location)
 
