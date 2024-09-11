@@ -62,7 +62,7 @@ def printHelp() {
         SUPERFAMILY: SUPERFAMILY is a database of structural and functional annotations for all proteins and genomes.
         SMART: SMART allows the identification and analysis of domain architectures based on hidden Markov models (HMMs).
 
-    Licsensed analyses (require additional installation steps):
+    Licensed analyses (require additional installation steps):
         DeepTMHMM: Coming Soon!
         MobiDB: Prediction of intrinsically disordered regions in proteins. 
                 Runs idrpred to check for hits against a MobiDB-Lite database.
