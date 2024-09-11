@@ -39,7 +39,6 @@ from retry_conn_decorator import lookup_retry_decorator
 def match_lookup(matches_checked: list, url: str, **kwargs) -> str:
     url_input = ','.join(matches_checked)
     matches = urllib.request.urlopen(f"{url}?md5={url_input}")
-    print(f"{url}?md5={url_input}")
     return matches.read().decode('utf-8')
 
 
@@ -55,9 +54,9 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
             if hit_appl in applications:
                 protein_md5 = match.find("proteinMD5").text
                 if protein_md5.lower() in md52seq_id:
-                    target_key = md52seq_id[protein_md5.lower()]
+                    target_key_list = md52seq_id[protein_md5.lower()]
                 else:
-                    target_key = protein_md5
+                    target_key_list = [protein_md5]
 
                 accession = hit_data[2]
                 post_processed = "false"
@@ -136,14 +135,15 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     signature["member_db"] = "MOBIDB"
                     location["sequence-feature"] = hit_data[17]
 
-                if target_key not in matches:
-                    matches[target_key] = {}
+                for target_key in target_key_list:
+                    if target_key not in matches:
+                        matches[target_key] = {}
 
-                if accession not in matches[target_key]:
-                    matches[target_key][accession] = signature
-                    matches[target_key][accession]["locations"] = [location]
-                else:
-                    matches[target_key][accession]["locations"].append(location)
+                    if accession not in matches[target_key]:
+                        matches[target_key][accession] = signature
+                        matches[target_key][accession]["locations"] = [location]
+                    else:
+                        matches[target_key][accession]["locations"].append(location)
 
     return matches
 
@@ -171,7 +171,11 @@ def main():
 
     md52seq_id = {}
     for seq_id, match in seq_info.items():
-        md52seq_id[match['md5']] = seq_id
+        # handles cases where multiple seq have same md5
+        if match['md5'] in md52seq_id.keys():
+            md52seq_id[match['md5']].append(seq_id)
+        else:
+            md52seq_id[match['md5']] = [seq_id]
 
     match_results, err = match_lookup(matches, url, retries=retries)
 

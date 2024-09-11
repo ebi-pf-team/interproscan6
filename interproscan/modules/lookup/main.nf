@@ -53,7 +53,7 @@ process LOOKUP_MATCHES {
             '${appl}' \\
             ${params.url_precalc}${params.matches} \\
             ${params.lookup_retries} \\
-            parsed_match_lookup > test
+            parsed_match_lookup
         """
 }
 
