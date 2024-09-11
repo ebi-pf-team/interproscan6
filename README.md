@@ -5,8 +5,6 @@
 ![Unit tests](https://github.com/ebi-pf-team/interproscan6/actions/workflows/unit-tests.yml/badge.svg)
 [![codecov](https://codecov.io/gh/ebi-pf-team/interproscan6/graph/badge.svg?token=7MP9WCJHAQ)](https://codecov.io/gh/ebi-pf-team/interproscan6)  
 [![Check Docker Files](https://github.com/ebi-pf-team/interproscan6/actions/workflows/docker-check.yml/badge.svg)](https://github.com/ebi-pf-team/interproscan6/actions/workflows/docker-check.yml)
-[![Nextflow linting](https://github.com/ebi-pf-team/interproscan6/actions/workflows/nf-lint.yml/badge.svg)](https://github.com/ebi-pf-team/interproscan6/actions/workflows/nf-lint.yml)
-[![Python linting](https://github.com/ebi-pf-team/interproscan6/actions/workflows/pylint.yml/badge.svg)](https://github.com/ebi-pf-team/interproscan6/actions/workflows/pylint.yml)
 [![Citation](https://github.com/ebi-pf-team/interproscan6/actions/workflows/citation.yml/badge.svg)](#citation)
 
 > [!CAUTION]
@@ -18,7 +16,7 @@ Users who have novel nucleotide or protein sequences that they wish to functiona
 
 # Documentation
 
-Out full documentation is still under construction.
+Our full documentation is still under construction.
 
 # Table of Contents
 <!-- TOC -->
