@@ -126,8 +126,10 @@ workflow {
     Add pathways (if enabled)
     */
     XREFS(AGGREGATE_RESULTS.out, applications, dataDirPath)
+
+    REPRESENTATIVE_DOMAINS(XREFS.out.collect())
     
-    Channel.from(params.formats..toLowerCase().split(','))
+    Channel.from(params.formats.toLowerCase().split(','))
     .set { ch_format }
 
     WRITE_RESULTS(
