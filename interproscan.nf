@@ -51,6 +51,8 @@ workflow {
     .splitFasta( by: params.batchsize, file: true )
     .set { ch_fasta }
 
+    // if nucleic acid seqs provided, predict ORFs
+    // either way, then break up input FASTA into batches
     if (params.nucleic) {
         if (params.translate.strand.toLowerCase() !in ['both','plus','minus']) {
             log.info "Strand option '${params.translate.strand.toLowerCase()}' in nextflow.config not recognised. Accepted: 'both', 'plus', 'minus'"
@@ -117,11 +119,15 @@ workflow {
     AGGREGATE_RESULTS(all_results.collect())
     AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
 
+    /* XREFS:
+    Add signature and entry desc and names
+    Add PAINT annotations (if panther is enabled)
+    Add go terms (if enabled)
+    Add pathways (if enabled)
+    */
     XREFS(AGGREGATE_RESULTS.out, applications, dataDirPath)
-
-    REPRESENTATIVE_DOMAINS(XREFS.out.collect())
-
-    Channel.from(params.formats.split(','))
+    
+    Channel.from(params.formats..toLowerCase().split(','))
     .set { ch_format }
 
     WRITE_RESULTS(

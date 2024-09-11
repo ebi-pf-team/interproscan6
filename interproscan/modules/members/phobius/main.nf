@@ -1,5 +1,4 @@
 process PHOBIUS_RUNNER {
-    container 'docker.io/library/phobius'
     label 'phobius_runner'
 
     input: path fasta
@@ -9,7 +8,7 @@ process PHOBIUS_RUNNER {
 
     script:
     """
-    phobius ${fasta} > phobius_out.txt
+    /opt/phobius/phobius.pl ${fasta} > phobius_out.txt
     """
 }
 

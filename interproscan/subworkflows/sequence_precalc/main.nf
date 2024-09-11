@@ -1,7 +1,7 @@
-include { 
+include {
     LOOKUP_CHECK;
     LOOKUP_MATCHES;
-    LOOKUP_NO_MATCHES
+    LOOKUP_NO_MATCHES;
 } from "$projectDir/interproscan/modules/lookup/main"
 
 

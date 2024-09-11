@@ -1,7 +1,7 @@
 process PAINT_ANNOTATIONS {
     // Retrieve PAINT annotations for Panther hits
     // calculated and pre-calc becuase they are not retrieved from the Match Lookup
-    label 'io'
+    label 'xref'
 
     input:
     path matches

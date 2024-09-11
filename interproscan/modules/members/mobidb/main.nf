@@ -1,5 +1,4 @@
 process MOBIDB_RUNNER {
-    container 'docker.io/library/idrpred'
     label 'mobidb_runner'
 
     /*

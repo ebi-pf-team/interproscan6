@@ -1,5 +1,5 @@
 process GOTERMS {
-    label 'io'
+    label 'xref'
 
     input:
     path matches
