@@ -14,7 +14,7 @@ nextflow_process {
         copy "tests/unit_tests/test_inputs/write_results/protein/parsed_seqs.json"
     }
 
-    test("Should pass") {
+    test("Should run successfully") {
 
         when {
             params {
