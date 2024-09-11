@@ -100,7 +100,7 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     # misc either ',', 0 or HmmBounds raw
                     "misc": hit_data[9],
                     "alignment": "",
-                    "cigar_alignment": hit_data[17]
+                    "cigarAlignment": hit_data[17]
                 }
 
                 if hit_appl != "PRINTS":
@@ -128,6 +128,9 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                 # prints, prosite_profiles, have location scores instead of scores
                 if hit_appl in ["PROSITE_PROFILES"]:
                     location["score"] = hit_data[7]
+                if hit_appl in ["PROSITE_PATTERNS"]:
+                    # missing level
+                    location["level"] = ""
                     
                 if hit_appl in ["MOBIDB_LITE"]:
                     signature["member_db"] = "MOBIDB"
