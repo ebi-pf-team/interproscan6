@@ -1,8 +1,12 @@
 # InterProScan6
 
 [![nf-test](https://img.shields.io/badge/tested_with-nf--test-337ab7.svg)](https://github.com/askimed/nf-test)
+[![pytest](https://img.shields.io/badge/tested_with-pytest-337ab7.svg)]([https://github.com/askimed/nf-test](https://docs.pytest.org/en/stable/))
 ![Unit tests](https://github.com/ebi-pf-team/interproscan6/actions/workflows/unit-tests.yml/badge.svg)
-[![codecov](https://codecov.io/gh/ebi-pf-team/interproscan6/graph/badge.svg?token=7MP9WCJHAQ)](https://codecov.io/gh/ebi-pf-team/interproscan6)
+[![codecov](https://codecov.io/gh/ebi-pf-team/interproscan6/graph/badge.svg?token=7MP9WCJHAQ)](https://codecov.io/gh/ebi-pf-team/interproscan6)  
+[![Check Docker Files](https://github.com/ebi-pf-team/interproscan6/actions/workflows/docker-check.yml/badge.svg)](https://github.com/ebi-pf-team/interproscan6/actions/workflows/docker-check.yml)
+[![Nextflow linting](https://github.com/ebi-pf-team/interproscan6/actions/workflows/nf-lint.yml/badge.svg)](https://github.com/ebi-pf-team/interproscan6/actions/workflows/nf-lint.yml)
+[![Python linting](https://github.com/ebi-pf-team/interproscan6/actions/workflows/pylint.yml/badge.svg)](https://github.com/ebi-pf-team/interproscan6/actions/workflows/pylint.yml)
 [![Citation](https://github.com/ebi-pf-team/interproscan6/actions/workflows/citation.yml/badge.svg)](#citation)
 
 > [!CAUTION]
