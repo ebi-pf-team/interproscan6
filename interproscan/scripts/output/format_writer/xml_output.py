@@ -142,11 +142,13 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
 
             match_elem = ET.SubElement(matches_elem, MATCH_ELEMENT[match_data['member_db'].upper()])
 
-            try:
-                match_elem.set("evalue", str(match_data['evalue']).upper())
-                match_elem.set("score", str(match_data["score"]))
-            except KeyError:
-                pass  # some members may not have evalue or score on this level (e.g. cdd)
+            # prevent evalue and score from MLS appearing in xml format for CDD matches
+            if match_data['member_db'].upper() != "CDD":
+                try:
+                    match_elem.set("evalue", str(match_data['evalue']).upper())
+                    match_elem.set("score", str(match_data["score"]))
+                except KeyError:
+                    pass  # some members may not have evalue or score on this level (e.g. cdd)
 
             if match_data['member_db'].upper() == "PANTHER":
                 match_elem.set("protein-class", _check_null(match_data['proteinClass']))
