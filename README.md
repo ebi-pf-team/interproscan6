@@ -14,7 +14,7 @@ Users who have novel nucleotide or protein sequences that they wish to functiona
 
 # Documentation
 
-You can find our full documentation at [ReadToDocs](URL-URL-URL).
+Out full documentation is still under construction.
 
 # Table of Contents
 <!-- TOC -->
@@ -46,8 +46,9 @@ You can find our full documentation at [ReadToDocs](URL-URL-URL).
 
 # Set up
 
-The instructions below rely on an internet connection to pull the necessary images from Docker Hub. For instructions on installing from source please see 
-our [ReadTheDocs](URL-URL-URL) documentation.
+The instructions below rely on an internet connection to pull the necessary images from Docker Hub.
+
+## Quick
 
 1. **Download InterPro data files**
 
@@ -93,11 +94,54 @@ apptainer pull interproscan6.sif docker://interpro/interproscan6:latest
 > within the current working directory. Otherwise the respective paths to the image files
 > will need to be updated  in the respective `utilities/profiles/` config files.
 
-3. **(Optional) install licensed software**
+3. **(Optional) Install licensed software**
 
 By default `MobiDB`, `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
 because they contain licensed components. In order to activate these analyses 
 please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
+
+## Installing from source
+
+1. **Download InterPro data file.**
+
+```bash
+# replace interpro-version with the appropriate version number
+INTERPRO_VERSION="102.0"
+curl "https://ftp.ebi.ac.uk/pub/databases/interpro/iprscan/6/$INTERPRO_VERSION/interproscan-data-$INTERPRO_VERSION.tar.gz" \
+    --output interproscan-data-<interpro-version>.tar.gz
+tar -pxzf interproscan-data-<interpro-version>.tar.gz
+mv interproscan-data-<interpro-version>/data .
+rm interproscan-data-<interpro-version> -rf
+rm interproscan-data-<interpro-version>.tar.gz
+```
+
+2. **Build the Docker image.** (This includes the idrpred tool for MobiDB predictions). Run this command from the root of this repository.
+
+```bash
+docker build -t interproscan6 .
+```
+
+3. **(Optional) Install licensed software**
+
+By default `MobiDB`, `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
+because they contain licensed components. In order to activate these analyses 
+please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
+
+4. **(Optional) Convert the Docker images to alternative container runtime images**
+
+For example, to convert the ``interproscan6`` image to a Apptainer image, save the Docker image to a ``tar`` archive file then build an Apptainer image from the ``tar`` archive.
+
+```bash
+docker save interproscan6 > interproscan6.tar
+apptainer build interproscan6.sif docker-daemon://interproscan6:latest
+```
+
+The same applies for Singularity:
+
+```bash
+docker save interproscan6 > interproscan6.tar
+singularity build interproscan6.sif docker-daemon://interproscan6:latest
+```
 
 # Using `InterProScan6`
 
@@ -127,6 +171,7 @@ For `InterProScan6` to run, a profile for the container runtime and a profile fo
 * Executor profiles:
   * local
   * slurm
+  * lsf
 * Container runtime profiles:
   * docker
   * singularity
