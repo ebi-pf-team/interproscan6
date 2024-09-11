@@ -69,8 +69,8 @@ def aggregate_results(aggreated_results_path: str, results_file: Path) -> dict:
 def main():
     """
     args:
-    0. str representation of list of internal IPS6 JSON files
-    1. str repr of path to results_aggregated.json output file
+    0. str repr of path to results_aggregated.json output file
+    1. str repr of path to an internal IPS6 JSON file
     """
     args = sys.argv[1:]
     aggreated_results_path = Path(args[0])

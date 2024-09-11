@@ -3,7 +3,10 @@ import logging
 import sys
 import urllib.request
 
-from .retry_conn_decorator import lookup_retry_decorator
+try:  # needed for nextflow
+    from retry_conn_decorator import lookup_retry_decorator
+except ModuleNotFoundError:   # needed for pytest unit tests
+    from .retry_conn_decorator import lookup_retry_decorator
 
 """
 Checks for pre-calculated matches from any of the member dbs/applications.

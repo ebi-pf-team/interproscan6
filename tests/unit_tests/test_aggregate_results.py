@@ -12,30 +12,33 @@ from interproscan.scripts.output import aggregate_results
 
 
 @pytest.fixture
-def ar_input_paths(test_input_dir):
-    input_dir = test_input_dir / "aggregate_results"
-    cdd = input_dir / "cdd_matches.json"
-    hamap = input_dir / "hamap_matches.json"
-    return [cdd, hamap]
+def ar_input_path(test_input_dir):
+    return test_input_dir / "aggregate_results/cdd_matches.json"
 
 
 @pytest.fixture
-def ar_expected_output(test_output_dir):
-    _path =  test_output_dir / "aggregate_results/aggregated_results.json"
-    with open(_path, "r") as fh:
-        expected = json.load(fh)
-    return expected
+def ar_expected_output_path(test_output_dir):
+    return test_output_dir / "aggregate_results/aggregated_results.json"
 
 
-def test_aggregate_main(ar_input_paths, monkeypatch):
+@pytest.fixture
+def temp_path(test_output_dir):
+    dirpath = test_output_dir / "temp"
+    filepath = dirpath / "temp.aggregated.results.json"
+    dirpath.mkdir(parents=True, exist_ok=True)
+    with open(filepath, "w") as fh:
+        json.dump({}, fh)
+    return filepath
+
+
+def test_aggregate_main(ar_input_path, temp_path, monkeypatch):
     def mock_aggregate_results(*args, **kwards):
         return
 
-    input_paths = str([str(ar_input_paths[0]), str(ar_input_paths[1])])
     test_args = [
         "aggregate_results.py",
-        input_paths,
-        "output path"
+        str(temp_path),
+        str(ar_input_path),
     ]
 
     monkeypatch.setattr("sys.argv", test_args)
@@ -43,6 +46,14 @@ def test_aggregate_main(ar_input_paths, monkeypatch):
 
     assert aggregate_results.main() is None
 
+    temp_path.unlink()
 
-def test_aggregating_results(ar_input_paths, ar_expected_output):
-    assert ar_expected_output == aggregate_results.aggregate_results(ar_input_paths)
+
+def test_aggregating_results(ar_input_path, ar_expected_output_path):
+    with open(ar_expected_output_path, "r") as fh:
+        expected = json.load(fh)
+
+    assert expected == aggregate_results.aggregate_results(
+        str(ar_expected_output_path),
+        str(ar_input_path)
+    )
