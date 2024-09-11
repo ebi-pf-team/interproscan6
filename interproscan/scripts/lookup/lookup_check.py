@@ -34,9 +34,12 @@ def main():
     seq_md5 = []
     with open(sequences, 'r') as seq_data:
         sequences_data = json.load(seq_data)
+    # search for unique md5 to avoid duplicates later
     for seq_id, seq_info in sequences_data.items():
-        seq_md5.append(seq_info['md5'].upper())
-
+        if seq_info['md5'].upper() not in seq_md5:
+            seq_md5.append(seq_info['md5'].upper())
+        else:
+            continue
     md5_checked_matches, err = check_precalc(seq_md5, url, retries=retries)
 
     if err:
