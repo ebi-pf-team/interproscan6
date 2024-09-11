@@ -5,29 +5,36 @@ include { CHECK_XREF_DATA } from "$projectDir/interproscan/subworkflows/xrefs/ch
 def printHelp() {
     """
     Usage example:
-        nextflow run interproscan.nf --input <path to fasta file>
+        nextflow run interproscan.nf -profile <executor, container runtime> --input <path to fasta file>
 
     Params options:
-        --applications <ANALYSES>          Optional, comma separated - without spaces - list of analysis methods
-                                            (i.e. member databases/applications).
-                                            If this option is not set, ALL Interpro consortium member analyses will be run.
-        --datadir <DATA-DIR-PATH>           Optional, path to the data dir. Default 'data' in the Interproscan 
-                                            project dir.
-        --disable_precalc                  Optional. Disables use of the precalculated match lookup service.
-                                            All match calculations will be run locally.
-        --formats <FORMATS> Optional, comma separated - without spaces - list of output formats.
-                                            Accepted: tsv, json and xml
-        --goterms Optional. Include GO terms in the output.
-        --help                             Optional, display help information
-        --input <INPUT-FILE-PATH>          [REQUIRED] Path to fasta file that should be loaded on Master startup.
-        --nucleic                          Optional. Input comprises nucleic acid sequences. [Boolean]
-        --outdir <OUTPUT-DIR-PATH>         Optional. Path to the output dir.
-                                            Output files are automatically named after the input file, with the 
-                                            suffix '.ips6.*'. Default: present working dir.
-        --pathways Optional. Include pathway information in the output. [Boolean]
-        --signalp_mode Optional. Set which SignalP/SignalP_EUK prediction models are used. Models may have to be installed.
-                                            Accepted: 'fast', 'slow', 'slow-sequential'. Default: 'fast'.
-        --version                          Print the version of InterProScan.
+        [Required]
+        -profile                    Define the runtime profiles to use. Note the signal dash!
+                                    Define an executor (built-in: 'local', 'slurm' and 'lsf') 
+                                    and container runtime (built-in: 'docker', 'singularity', and 'apptainer')
+        --input <INPUT-FILE-PATH>   Path to fasta file of sequences to be analysed.
+
+
+        [Optional]
+        --applications <ANALYSES>   Comma separated (without spaces) listing applications/member DBs to run.
+                                      Default: All Interpro consortium members (except MobiDB-Lite) will run.
+        --datadir <DATA-DIR>        Path to the data dir. Default 'data' dir in the Interproscan project dir.
+                                      Nextflow does not tolerate spaces in paths.
+        --disable_precalc           Disables use of the precalculated match lookup service. [Boolean]
+                                      All match calculations will be run locally.
+        --formats <FORMATS>         Comma separated (without spaces) list output file formats.
+                                      Accepted: tsv, json and xml. Default: tsv,json,xml
+        --goterms                   Include GO terms in the output. [Boolean]
+        --help                      Display help information. [Boolean]
+        --nucleic                   Input comprises nucleic acid sequences. [Boolean]
+        --outdir <OUTPUT-DIR>       Path to the output dir.
+                                      Output files are automatically named after the input file, with the 
+                                      suffix '.ips6.*'. Default: present working dir.
+                                      Nextflow does not tolerate spaces in paths.
+        --pathways                  Include pathway information in the output. [Boolean]
+        --signalp_mode <MODE        SignalP/SignalP_EUK prediction models to use. Models may have to be installed.
+                                       Accepted: 'fast', 'slow', 'slow-sequential'. Default: 'fast'.
+        --version                   Print the version of InterProScan.[Boolean]
 
     Copyright © EMBL European Bioinformatics Institute, Hinxton, Cambridge, UK. (http://www.ebi.ac.uk) The InterProScan
     software itself is provided under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0.html).
