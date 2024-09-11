@@ -23,12 +23,24 @@ Out full documentation is still under construction.
 - [Setup and Requirements](#set-up-and-requirements)
 - [Requirements](#requirements)
 - [Set up](#set-up)
+  - [Quick installation](#quick)
+  - [Install from source](#installing-from-source)
 - [Using `InterProScan6`](#using-interproscan6)
   - [Quick start](#quick-start)
+  - [Profiles](#profiles)
+  - [Optional arguments](#optional-arguments)
+  - [Applications](#applications)
   - [Using DNA sequences](#using-dna-sequences)
-  - [Inputs and configuration](#inputs-parameters-and-configuration)
+  - [Input sequences](#input-sequences)
   - [Outputs and results](#outputs)
 - [Installing licensed applications (`MobiDB`, `Phobius`, `SignalP`, `TMHMM`)](#installing-licensed-applications-mobidb-phobius-signalp-tmhmm)
+  - [DeepTMHMM](#deeptmhmm)
+  - [MobiDB-Lite](#mobidb-lite)
+  - [SignalP (version 6)](#signalp)
+    - [Setting up SignalP](#set-up-1)
+    - [Running SignalP](#running-interproscan6-with-signalp6)
+    - [Changing mode](#changing-the-mode-of-signalp6-in-interproscan6)
+    - [Converting from CPU to GPU](#converting-from-cpu-to-gpu-and-back-again)
 - [Citing `InterProScan`](#citation)
 - [Trouble shooting](#trouble-shooting)
 <!-- /TOC -->
@@ -593,7 +605,7 @@ Files can be placed in any location.
 
 Coming soon...
 
-## MobiDB
+## MobiDB-Lite
 
 Some of the compoments within `MobiDBLite` are GPL-licensed, meaning all software and data, and thus 
 work that uses this software, also needs to be GPL-licensed. This may not be ideal or suitable
