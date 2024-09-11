@@ -11,7 +11,7 @@ def printHelp() {
         --applications <ANALYSES>          Optional, comma separated - without spaces - list of analysis methods
                                             (i.e. member databases/applications).
                                             If this option is not set, ALL Interpro consortium member analyses will be run.
-        --datadir                          Optional, path to the data dir. Default 'data' in the Interproscan 
+        --datadir <DATA-DIR-PATH>           Optional, path to the data dir. Default 'data' in the Interproscan 
                                             project dir.
         --disable_precalc                  Optional. Disables use of the precalculated match lookup service.
                                             All match calculations will be run locally.
@@ -28,6 +28,48 @@ def printHelp() {
         --signalp_mode Optional. Set which SignalP/SignalP_EUK prediction models are used. Models may have to be installed.
                                             Accepted: 'fast', 'slow', 'slow-sequential'. Default: 'fast'.
         --version                          Print the version of InterProScan.
+
+    Copyright © EMBL European Bioinformatics Institute, Hinxton, Cambridge, UK. (http://www.ebi.ac.uk) The InterProScan
+    software itself is provided under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0.html).
+    Third party components (e.g. member database binaries and models) are subject to separate licensing - please see the
+    individual member database websites for details.
+
+    Built-in analyses:
+        AntiFam: Profile-HMMs designed to identify spurious protein predictions.
+        CDD: Predict protein domains and families based on well-annotated multiple sequence alignment models.
+        Coils: Prediction of coiled coil regions in proteins.
+        Hamap: High-quality Automated and Manual Annotation of Microbial Proteomes.
+        Gene3D: Structural assignment for whole genes and genomes using the CATH domain structure database.
+        FunFam: Protein function annotations for protein families and superfamilies, based upon evolutionary relationships
+        NCBIfam: NCBIFams (including the original TIGRFAMs) are protein families based on hidden Markov models (HMMs).
+        PANTHER: The PANTHER (Protein ANalysis THrough Evolutionary Relationships) Classification System 
+                classifies genes by their functions, using published scientific experimental evidence 
+                and evolutionary relationships to predict function.
+        Pfam: A large collection of protein families, each represented by multiple sequence alignments and 
+                hidden Markov models (HMMs).
+        PIRSF: The PIRSF concept is used as a guiding principle to provide comprehensive and 
+                non-overlapping clustering of UniProtKB sequences into a hierarchical order to reflect 
+                their evolutionary relationships.
+        PIRSR: PIRSR is a database of protein families based on hidden Markov models (HMMs) and Site Rules.
+        PRINTS: A compendium of protein fingerprints - a fingerprint is a group of conserved motifs 
+                used to characterise a protein family.
+        ProSite_Patterns: Documentation entries describing protein domains, families and functional sites.
+                PROSITE patterns are simple, descriptive motifs representing conserved sequences.
+        ProSite_Profiles: Documentation entries describing protein domains, families and functional sites.
+                PROSITE profiles are detailed, position-specific scoring matrices that offer a more sensitive 
+                and comprehensive means of identifying and classifying protein domains and families.
+        SFLD: SFLD is a database of protein families based on hidden Markov models (HMMs).
+        SUPERFAMILY: SUPERFAMILY is a database of structural and functional annotations for all proteins and genomes.
+        SMART: SMART allows the identification and analysis of domain architectures based on hidden Markov models (HMMs).
+
+    Licsensed analyses (require additional installation steps):
+        DeepTMHMM: Coming Soon!
+        MobiDB: Prediction of intrinsically disordered regions in proteins. 
+                Runs idrpred to check for hits against a MobiDB-Lite database.
+        Phobius:  A combined transmembrane topology and signal peptide predictor.
+        SignalP: Signal peptide prediction using all SignalP models.
+        SignalP_EUK : Signal peptide prediction using SignalP, and triggers post-processing of the SP 
+                predictions by SignalP6 to prevent spurious results (only predicts type Sec/SPI).
     """
 }
 
