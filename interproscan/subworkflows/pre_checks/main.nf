@@ -48,8 +48,8 @@ workflow PRE_CHECKS {
     pathways
 
     main:
-    if ( !nextflow.version.matches('>=23.10') ) {
-        println "InterProScan requires Nextflow version 23.10 or greater -- You are running version $nextflow.version"
+    if ( !nextflow.version.matches('>=23.04') ) {
+        println "InterProScan requires Nextflow version 23.04 or greater -- You are running version $nextflow.version"
         exit 1
     }
 

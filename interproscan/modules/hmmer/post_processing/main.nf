@@ -121,7 +121,7 @@ process HAMAP_POST_PROCESSER {
 
 
 process PANTHER_POST_PROCESSER {
-    label 'analysis_parser'
+    label 'treegrafter_analysis'
 
     input:
         path out_file

@@ -2,25 +2,24 @@ include {
     CDD_RUNNER;
     CDD_PARSER;
     CDD_POSTPROCESS;
-} from "$projectDir/interproscan/modules/cdd/main"
+} from "$projectDir/interproscan/modules/members/cdd/main"
 include {
     COILS_RUNNER;
     COILS_PARSER;
-} from "$projectDir/interproscan/modules/coils/main"
+} from "$projectDir/interproscan/modules/members/coils/main"
 include {
     HMMER_RUNNER as ANTIFAM_HMMER_RUNNER;
     HMMER_RUNNER as NCBIFAM_HMMER_RUNNER;
-    HMMER_RUNNER as GENE3D_HMMER_RUNNER;
     HMMER_RUNNER as PANTHER_HMMER_RUNNER;
     HMMER_RUNNER as PFAM_HMMER_RUNNER;
     HMMER_RUNNER as PIRSR_HMMER_RUNNER;
     HMMER_RUNNER_WITH_ALIGNMENTS as SFLD_HMMER_RUNNER;
     HMMER_SCAN_RUNNER as SUPERFAMILY_HMMER_RUNNER;
+    GENE3D_HMMER_RUNNER;
     FUNFAM_HMMER_RUNNER;
     HAMAP_HMMER_RUNNER;
     PIRSF_HMMER_RUNNER;
     SMART_HMMER2_RUNNER;
-    HMMER_SCAN_RUNNER;
 } from "$projectDir/interproscan/modules/hmmer/runner/main"
 include {
     HMMER_PARSER as ANTIFAM_HMMER_PARSER;
@@ -59,33 +58,30 @@ include {
 include {
     MOBIDB_RUNNER;
     MOBIDB_PARSER;
-} from "$projectDir/interproscan/modules/mobidb/main"
-include {
-    PRINTS_RUNNER;
-    PRINTS_PARSER;
-} from "$projectDir/interproscan/modules/prints/main"
+} from "$projectDir/interproscan/modules/members/mobidb/main"
 include {
     PHOBIUS_RUNNER;
     PHOBIUS_PARSER;
-} from "$projectDir/interproscan/modules/phobius/main"
+} from "$projectDir/interproscan/modules/members/phobius/main"
 include {
-    PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER
-} from "$projectDir/interproscan/modules/prosite/pfsearch/runner/main"
-include {
-    PFSEARCH_PARSER as PROSITE_PROFILES_PARSER
-} from "$projectDir/interproscan/modules/prosite/pfsearch/parser/main"
-include {
-    PFSCAN_RUNNER as PROSITE_PATTERNS_RUNNER
-} from "$projectDir/interproscan/modules/prosite/pfscan/runner/main"
-include {
+    PFSCAN_RUNNER as PROSITE_PATTERNS_RUNNER;
     PFSCAN_PARSER as PROSITE_PATTERNS_PARSER
-} from "$projectDir/interproscan/modules/prosite/pfscan/parser/main"
+} from "$projectDir/interproscan/modules/members/prosite/pfscan/main"
+include {
+    PFSEARCH_RUNNER as PROSITE_PROFILES_RUNNER;
+    PFSEARCH_PARSER as PROSITE_PROFILES_PARSER
+} from "$projectDir/interproscan/modules/members/prosite/pfsearch/main"
+include {
+    PRINTS_RUNNER;
+    PRINTS_PARSER;
+} from "$projectDir/interproscan/modules/members/prints/main"
 include {
     SIGNALP_RUNNER;
     SIGNALP_PARSER;
     SIGNALP_RUNNER as SIGNALP_EUK_RUNNER;
     SIGNALP_PARSER as SIGNALP_EUK_PARSER;
-} from "$projectDir/interproscan/modules/signalp/main"
+} from "$projectDir/interproscan/modules/members/signalp/main"
+
 
 workflow SEQUENCE_ANALYSIS {
     take:
@@ -447,15 +443,8 @@ workflow SEQUENCE_ANALYSIS {
     // SMART (HMMER2:hmmpfam + kinase filter)
     runner_smart_params = fasta.combine(member_params.smart)
     SMART_HMMER2_RUNNER(runner_smart_params)
-    HMMER2_PARSER(
-        SMART_HMMER2_RUNNER.out[0],  // hmmer.out path
-        SMART_HMMER2_RUNNER.out[1],  // fasta path
-        SMART_HMMER2_RUNNER.out[2]   // member db
-    )
-    SMART_FILTER_MATCHES(
-        HMMER2_PARSER.out,
-        SMART_HMMER2_RUNNER.out[1],
-    )
+    HMMER2_PARSER(SMART_HMMER2_RUNNER.out)
+    SMART_FILTER_MATCHES(HMMER2_PARSER.out)
 
     // Superfamily
     runner_hmmer_superfamily_params = fasta.combine(member_params.superfamily)

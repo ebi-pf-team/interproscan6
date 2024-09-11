@@ -101,6 +101,12 @@ jobs:
         ./nf-test test tests/unit_tests/modules/xref/pathways/
         ./nf-test test tests/unit_tests/modules/xref/paint_annotations/
 
+    - name: NF-Test modules tests
+      shell: bash -l {0}
+      run: |
+        export PATH=$PATH:$GITHUB_WORKSPACE/nf-test
+        ./nf-test test tests/unit_tests/modules/pre_checks/nt-seqs.nf
+
     - name: PY-Test scripts tests
       shell: bash -l {0}
       run: |

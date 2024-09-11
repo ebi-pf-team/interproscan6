@@ -1,5 +1,4 @@
 process SIGNALP_RUNNER {
-    container 'docker.io/library/signalp6'
     label 'signalp_runner'
 
     input:

@@ -41,6 +41,24 @@ process HMMER_RUNNER_WITH_ALIGNMENTS {
 }
 
 
+process GENE3D_HMMER_RUNNER {
+    label 'hmmer_gene3d_runner'
+
+    input:
+        tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
+
+    output:
+        path "${member}_out"
+        val postprocessing_params
+        val member
+
+    script:
+    """
+    /opt/hmmer3/bin/hmmsearch ${switches} -o ${member}_out ${hmm} ${fasta}
+    """
+}
+
+
 process FUNFAM_HMMER_RUNNER {
     /*
     FunFam requires its own runner in order to only use those FunFam families
@@ -53,7 +71,7 @@ process FUNFAM_HMMER_RUNNER {
 
     This process will only run in at least one Cath superfamily is specified.
     */
-    label 'hmmer_runner'
+    label 'hmmer_funfam_runner'
 
     when:
         cath_superfamilies.size() > 0 && "${applications}".contains('funfam')

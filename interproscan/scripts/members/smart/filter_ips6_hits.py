@@ -21,7 +21,7 @@ def load_protein_seqs(fasta: str) -> dict:
     with open(fasta, "r") as fh:
         for line in fh:
             if line.startswith(">"):
-                current_id = line.strip()[1:]
+                current_id = line.strip(">").split(maxsplit=1)[0]
                 protein_seqs[current_id] = ""
             else:
                 protein_seqs[current_id] += line.strip()
@@ -62,6 +62,8 @@ def main():
         matches = json.load(fh)
 
     protein_seqs = load_protein_seqs(sys.argv[2])
+    with open("seqs.dict.json", "w") as fh:
+        json.dump(protein_seqs, fh, indent=2)
 
     parsed_matches = filter_matches(matches, protein_seqs)
 
