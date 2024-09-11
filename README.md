@@ -80,8 +80,10 @@ rm interproscan-data-<interpro-version>.tar.gz
 Running these commands within the `InterProScan` project directory should download and store all 
 InterPro entry (XREF) and member database data in the `data` directory.
 
-If you store these data in an alternative directory you will need to use the `--datadir` flag and 
-provide the relative or absolute path to the directory when running `InterProScan`.
+> [!IMPORTANT]
+> By default `InterProScan` will look for a `data` directory in the `InterProScan` project dir. 
+> If you store these data in an alternative directory use the `--datadir` flag to 
+> provide the relative or absolute path to the directory when running `InterProScan`.
 
 2. **Pull the `InterProScan6` base image from DockerHub using your container runtime of choice**
 
@@ -204,6 +206,9 @@ Nextflow also supports using Charliecloud, Podman, Sarus, and Shifter. However y
 ## Optional arguments
 
 **`--applications`** - Applications/member databases to run. By default `InterProScan` runs all member databases in the consortium ([except Mobidb-Lite due to licensing reasons](#mobidb)). Use the `--applications` to define a comma separate list of applications names (case insensitive).
+
+**`--datadir`** - Path to the data directory. By default `InterProScan` looks for a `data` directory 
+in the `InterProScan` project directory.
 
 **`--disable_precalc`** - `InterProScan6` will check against a remote database of precalculated matches. The downstream analyses will then only be run against query sequences for whom no precalcualted match is available. You can disable this operation and run the analyses against all sequences in the input FASTA file by including the `--disable_precalc` flag in the `InterProScan6` command.
 
