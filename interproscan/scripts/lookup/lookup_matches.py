@@ -1,3 +1,9 @@
+import json
+import logging
+import sys
+import urllib.request
+import xml.etree.ElementTree as ET
+
 """
 Match lookup service only includes domain hits, no site hits
 Match lookup service will not return PIRSR matches
@@ -24,14 +30,8 @@ Standard structure of hit data:
 18. "" or other data type in Panther, PRINTS, PROSITE_PATTERNS, PROSITE_PROFILES, MobiDB
 
 8-17 hit data is non-standard in member dbs: CDD, Panther, PIRSF, PRINTS, SFLD, SUPERFAMILY, SignalP
-Otherwise standard, some or all 8-17 hit data will be 0 or "" in member dbs:  Coils, HAMAP, PROSITE_PROFILES, PROSITE_PATTERNS, SMART, Phobius, MobiDB
+Other member dbs hti data is standard, some or all 8-17 hit data will be 0 or "" in member dbs:  Coils, HAMAP, PROSITE_PROFILES, PROSITE_PATTERNS, SMART, Phobius, MobiDB
 """
-import json
-import logging
-import sys
-import urllib.request
-import xml.etree.ElementTree as ET
-
 
 try:  # needed for nextflow
     from retry_conn_decorator import lookup_retry_decorator
@@ -109,7 +109,7 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     location["evalue"] = float(hit_data[16])
                 else:
                     location["pvalue"] = float(hit_data[16])
-                    # prints mls stores motif number at same index as hmm length
+                    # PRINTS mls stores motif number at same index as hmm length
                     # set hmm length to 0
                     location["hmmLength"] = int(0)
                     location["motifNumber"] = hit_data[12]
@@ -123,7 +123,7 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     location["cleavage_end"] = ""
                     signature["orgType"] = "Other" if hit_appl == "SIGNALP" else "Eukarya"
 
-                if hit_appl in ["SFLD"]:
+                if hit_appl in ["SFLD", "PHOBIUS"]:
                     location["location-fragments"] = [{"start": location["start"], "end": location["end"], "dc-status": "CONTINUOUS"}]
 
                 # superfamily does not have location specific score
