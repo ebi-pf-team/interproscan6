@@ -21,10 +21,10 @@ Standard structure of hit data:
 15. Envelope end
 16. Location score
 17. Location evalue
-18. '' or other data type in Panther, PRINTS, PROSITE_PATTERNS, PROSITE_PROFILES, MobiDB
+18. "" or other data type in Panther, PRINTS, PROSITE_PATTERNS, PROSITE_PROFILES, MobiDB
 
 8-17 hit data is non-standard in member dbs: CDD, Panther, PIRSF, PRINTS, SFLD, SUPERFAMILY, SignalP
-Otherwise standard, some or all 8-17 hit data will be 0 or '' in member dbs:  Coils, HAMAP, PROSITE_PROFILES, PROSITE_PATTERNS, SMART, Phobius, MobiDB
+Otherwise standard, some or all 8-17 hit data will be 0 or "" in member dbs:  Coils, HAMAP, PROSITE_PROFILES, PROSITE_PATTERNS, SMART, Phobius, MobiDB
 """
 import json
 import logging
@@ -37,9 +37,9 @@ from retry_conn_decorator import lookup_retry_decorator
 
 @lookup_retry_decorator
 def match_lookup(matches_checked: list, url: str, **kwargs) -> str:
-    url_input = ','.join(matches_checked)
+    url_input = ",".join(matches_checked)
     matches = urllib.request.urlopen(f"{url}?md5={url_input}")
-    return matches.read().decode('utf-8')
+    return matches.read().decode("utf-8")
 
 
 def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
@@ -49,7 +49,7 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
 
     for match in tree.findall(".//match"):
         for hit in match.findall("hit"):
-            hit_data = hit.text.split(',')
+            hit_data = hit.text.split(",")
             hit_appl = hit_data[0]
             if hit_appl in applications:
                 protein_md5 = match.find("proteinMD5").text
@@ -96,7 +96,7 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     "envelopeEnd": int(hit_data[14]),
                     "postProcessed": post_processed,
                     "locationFragment": hit_data[6],
-                    # misc either ',', 0 or HmmBounds raw
+                    # misc either "", 0 or HmmBounds raw
                     "misc": hit_data[9],
                     "alignment": "",
                     "cigarAlignment": hit_data[17]
@@ -142,10 +142,10 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     if accession not in matches[target_key]:
                         matches[target_key][accession] = signature
                         matches[target_key][accession]["locations"] = [location]
-                    elif location in matches[target_key][accession]["locations"]:
-                        continue
-                    else:
+                    elif location not in matches[target_key][accession]["locations"]:
                         matches[target_key][accession]["locations"].append(location)
+                    else:
+                        continue
 
     return matches
 
@@ -160,13 +160,13 @@ def main():
     """
     args = sys.argv[1:]
     checked_lookup = args[0]
-    applications = args[1].split(',')
+    applications = args[1].split(",")
     url = args[2]
     retries = int(args[3])
 
-    applications = list(map(lambda x: x.upper().replace('MOBIDB', 'MOBIDB_LITE'), applications))
+    applications = list(map(lambda x: x.upper().replace("MOBIDB", "MOBIDB_LITE"), applications))
 
-    with open(checked_lookup, 'r') as md5_data:
+    with open(checked_lookup, "r") as md5_data:
         checked_data = json.load(md5_data)
     matches = checked_data["matches"]
     seq_info = checked_data["sequences_info"]
@@ -174,10 +174,10 @@ def main():
     md52seq_id = {}
     for seq_id, match in seq_info.items():
         # handles cases where multiple seq have same md5
-        if match['md5'] in md52seq_id.keys():
-            md52seq_id[match['md5']].append(seq_id)
+        if match["md5"] in md52seq_id.keys():
+            md52seq_id[match["md5"]].append(seq_id)
         else:
-            md52seq_id[match['md5']] = [seq_id]
+            md52seq_id[match["md5"]] = [seq_id]
 
     match_results, err = match_lookup(matches, url, retries=retries)
 
