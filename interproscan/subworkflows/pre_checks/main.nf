@@ -4,30 +4,83 @@ include { CHECK_XREF_DATA } from "$projectDir/interproscan/subworkflows/xrefs/ch
 
 def printHelp() {
     """
-    Usage example:
-        nextflow run interproscan.nf --input <path to fasta file>
+Usage example:
+    nextflow run interproscan.nf -profile <executor, container runtime> --input <path to fasta file>
 
-    Params options:
-        --applications <ANALYSES>          Optional, comma separated - without spaces - list of analysis methods
-                                            (i.e. member databases/applications).
-                                            If this option is not set, ALL Interpro consortium member analyses will be run.
-        --datadir                          Optional, path to the data dir. Default 'data' in the Interproscan 
-                                            project dir.
-        --disable_precalc                  Optional. Disables use of the precalculated match lookup service.
-                                            All match calculations will be run locally.
-        --formats <FORMATS> Optional, comma separated - without spaces - list of output formats.
-                                            Accepted: tsv, json and xml
-        --goterms Optional. Include GO terms in the output.
-        --help                             Optional, display help information
-        --input <INPUT-FILE-PATH>          [REQUIRED] Path to fasta file that should be loaded on Master startup.
-        --nucleic                          Optional. Input comprises nucleic acid sequences. [Boolean]
-        --outdir <OUTPUT-DIR-PATH>         Optional. Path to the output dir.
-                                            Output files are automatically named after the input file, with the 
-                                            suffix '.ips6.*'. Default: present working dir.
-        --pathways Optional. Include pathway information in the output. [Boolean]
-        --signalp_mode Optional. Set which SignalP/SignalP_EUK prediction models are used. Models may have to be installed.
-                                            Accepted: 'fast', 'slow', 'slow-sequential'. Default: 'fast'.
-        --version                          Print the version of InterProScan.
+Arguments:
+    [Required]
+    -profile                    Define the runtime profiles to use. Note the signal dash!
+                                    Define an executor (built-in: 'local', 'slurm' and 'lsf') 
+                                    and container runtime (built-in: 'docker', 'singularity', and 'apptainer')
+    --input <INPUT-FILE-PATH>   Path to fasta file of sequences to be analysed.
+
+
+    [Optional]
+    --applications <ANALYSES>   Comma separated (without spaces) listing applications/member DBs to run.
+                                    Default: All Interpro consortium members (except MobiDB-Lite) will run.
+    --datadir <DATA-DIR>        Path to the data dir. Default 'data' dir in the Interproscan project dir.
+                                    Nextflow does not tolerate spaces in paths.
+    --disable_precalc           Disables use of the precalculated match lookup service. [Boolean]
+                                    All match calculations will be run locally.
+    --formats <FORMATS>         Comma separated (without spaces) list output file formats.
+                                    Accepted: tsv, json and xml. Default: tsv,json,xml
+    --goterms                   Include GO terms in the output. [Boolean]
+    --help                      Display help information. [Boolean]
+    --nucleic                   Input comprises nucleic acid sequences. [Boolean]
+    --outdir <OUTPUT-DIR>       Path to the output dir.
+                                    Output files are automatically named after the input file, with the 
+                                    suffix '.ips6.*'. Default: present working dir.
+                                    Nextflow does not tolerate spaces in paths.
+    --pathways                  Include pathway information in the output. [Boolean]
+    --signalp_mode <MODE>       SignalP/SignalP_EUK prediction models to use. Models may have to be installed.
+                                    Accepted: 'fast', 'slow', 'slow-sequential'. Default: 'fast'.
+    --version                   Print the version of InterProScan.[Boolean]
+
+Please give us your feedback by sending an email to
+
+interhelp@ebi.ac.uk
+
+Copyright © EMBL European Bioinformatics Institute, Hinxton, Cambridge, UK. (http://www.ebi.ac.uk) The InterProScan
+software itself is provided under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0.html).
+Third party components (e.g. member database binaries and models) are subject to separate licensing - please see the
+individual member database websites for details.
+
+Built-in analyses:
+    AntiFam: Profile-HMMs designed to identify spurious protein predictions.
+    CDD: Predict protein domains and families based on well-annotated multiple sequence alignment models.
+    Coils: Prediction of coiled coil regions in proteins.
+    Hamap: High-quality Automated and Manual Annotation of Microbial Proteomes.
+    Gene3D: Structural assignment for whole genes and genomes using the CATH domain structure database.
+    FunFam: Protein function annotations for protein families and superfamilies, based upon evolutionary relationships
+    NCBIfam: NCBIFams (including the original TIGRFAMs) are protein families based on hidden Markov models (HMMs).
+    PANTHER: The PANTHER (Protein ANalysis THrough Evolutionary Relationships) Classification System 
+            classifies genes by their functions, using published scientific experimental evidence 
+            and evolutionary relationships to predict function.
+    Pfam: A large collection of protein families, each represented by multiple sequence alignments and 
+            hidden Markov models (HMMs).
+    PIRSF: The PIRSF concept is used as a guiding principle to provide comprehensive and 
+            non-overlapping clustering of UniProtKB sequences into a hierarchical order to reflect 
+            their evolutionary relationships.
+    PIRSR: PIRSR is a database of protein families based on hidden Markov models (HMMs) and Site Rules.
+    PRINTS: A compendium of protein fingerprints - a fingerprint is a group of conserved motifs 
+            used to characterise a protein family.
+    ProSite_Patterns: Documentation entries describing protein domains, families and functional sites.
+            PROSITE patterns are simple, descriptive motifs representing conserved sequences.
+    ProSite_Profiles: Documentation entries describing protein domains, families and functional sites.
+            PROSITE profiles are detailed, position-specific scoring matrices that offer a more sensitive 
+            and comprehensive means of identifying and classifying protein domains and families.
+    SFLD: SFLD is a database of protein families based on hidden Markov models (HMMs).
+    SUPERFAMILY: SUPERFAMILY is a database of structural and functional annotations for all proteins and genomes.
+    SMART: SMART allows the identification and analysis of domain architectures based on hidden Markov models (HMMs).
+
+Licensed analyses (require additional installation steps):
+    DeepTMHMM: Coming Soon!
+    MobiDB: Prediction of intrinsically disordered regions in proteins. 
+            Runs idrpred to check for hits against a MobiDB-Lite database.
+    Phobius:  A combined transmembrane topology and signal peptide predictor.
+    SignalP: Signal peptide prediction using all SignalP models.
+    SignalP_EUK : Signal peptide prediction using SignalP, and triggers post-processing of the SP 
+            predictions by SignalP6 to prevent spurious results (only predicts type Sec/SPI).
     """
 }
 
@@ -48,8 +101,8 @@ workflow PRE_CHECKS {
     pathways
 
     main:
-    if ( !nextflow.version.matches('>=23.10') ) {
-        println "InterProScan requires Nextflow version 23.10 or greater -- You are running version $nextflow.version"
+    if ( !nextflow.version.matches('>=23.04') ) {
+        println "InterProScan requires Nextflow version 23.04 or greater -- You are running version $nextflow.version"
         exit 1
     }
 

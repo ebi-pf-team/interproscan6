@@ -1,12 +1,13 @@
 process LOOKUP_CHECK {
-    label 'io'
-
+    // Checks if protein sequence is included in InterPro
+    label 'mls'
+    
     input:
     val hash_seq
     val is_test
 
     output:
-    path checked_md5
+    path "checked_md5"
 
     script:
     if ( is_test )
@@ -24,12 +25,17 @@ process LOOKUP_CHECK {
 }
 
 
-
 process LOOKUP_MATCHES {
-    label 'io'
-
+    /*
+    Retrieves precalculated matches from the Match Lookup Service (MLS).
+    A protein sequence can be in the MLS but have no matches associated with it,
+    this situation is not detected by LOOKUP_CHECK which only detects that 
+    protein sequence has been analysed during an InterPro release.
+    */
+    label 'mls'
+    
     input:
-    val checked_lookup
+    val checked_md5
     val appl
     val is_test
 
@@ -49,7 +55,7 @@ process LOOKUP_MATCHES {
     else
         """
         python3 $projectDir/interproscan/scripts/lookup/lookup_matches.py \\
-            ${checked_lookup} \\
+            ${checked_md5} \\
             '${appl}' \\
             ${params.url_precalc}${params.matches} \\
             ${params.lookup_retries} \\
@@ -59,7 +65,7 @@ process LOOKUP_MATCHES {
 
 
 process LOOKUP_NO_MATCHES {
-    label 'io'
+    label 'mls'
 
     input:
     val checked_md5

@@ -1,0 +1,30 @@
+{
+    "Should pass": {
+        "content": [
+            {
+                "0": [
+                    "results_aggregated.json:md5,fb58604aca6dba51bf4acbaa19edb238"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.04.2"
+        },
+        "timestamp": "2024-09-02T20:40:57.449253"
+    },
+    "Should run successfully": {
+        "content": [
+            {
+                "0": [
+                    "results_aggregated.json:md5,fb58604aca6dba51bf4acbaa19edb238"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.04.2"
+        },
+        "timestamp": "2024-09-11T13:50:20.084969"
+    }
+}

@@ -1,0 +1,42 @@
+nextflow_process {
+
+    name "Test Process WRITE_RESULTS"
+    script "interproscan/modules/output/write_results/main.nf"
+    process "WRITE_RESULTS"
+
+    stage {
+        copy "interproscan/scripts/output/write_results.py"
+        copy "interproscan/scripts/output/format_writer/regex.py"
+        copy "interproscan/scripts/output/format_writer/tsv_output.py"
+        copy "interproscan/scripts/output/format_writer/xml_output.py"
+        copy "interproscan/scripts/output/format_writer/json_output.py"
+        copy "tests/unit_tests/test_inputs/write_results/protein/matches.json"
+        copy "tests/unit_tests/test_inputs/write_results/protein/parsed_seqs.json"
+    }
+
+    test("Should run successfully") {
+
+        when {
+            params {
+            }
+            process {
+                """
+                input[0] = "filename"
+                input[1] = "../../../meta/tests/unit_tests/test_inputs/write_results/protein/parsed_seqs.json"
+                input[2] = file("meta/tests/unit_tests/test_inputs/write_results/protein/matches.json")
+                input[3] = "tsv"
+                input[4] = "outpath"
+                input[5] = "unittest.version"
+                input[6] = "false"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

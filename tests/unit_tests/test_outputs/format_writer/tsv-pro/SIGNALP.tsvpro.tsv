@@ -1,0 +1,5 @@
+SIGNALP	null	0	P22298	Signal Peptide	SignalP	1	22	1-22-S	-	-		1	22	21	-	-	0.9991004	0.9991004	
+SIGNALP	null	0	P26222	Signal Peptide	SignalP	1	31	1-31-S	-	-		1	31	30	-	-	0.99887174	0.99887174	
+SIGNALP	null	0	WP_338726824.1	Signal Peptide	SignalP	1	24	1-24-S	-	-		1	24	23	-	-	0.9991073	0.9991073	
+SIGNALP	null	0	WP_249252303.1	Signal Peptide	SignalP	1	24	1-24-S	-	-		1	24	23	-	-	0.9990625	0.9990625	
+SIGNALP	null	0	Panther_again	Signal Peptide	SignalP	1	22	1-22-S	-	-		1	22	21	-	-	0.9990949	0.9990949	

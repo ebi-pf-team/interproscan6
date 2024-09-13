@@ -3,6 +3,7 @@ nextflow.enable.dsl=2
 include { PARSE_SEQUENCE } from "$projectDir/interproscan/modules/parse_sequence/main"
 include { GET_ORFS } from "$projectDir/interproscan/modules/get_orfs/main"
 include { AGGREGATE_RESULTS } from "$projectDir/interproscan/modules/output/aggregate_results/main"
+include { REPRESENTATIVE_DOMAINS } from "$projectDir/interproscan/modules/output/representative_domains/main"
 include { AGGREGATE_PARSED_SEQS } from "$projectDir/interproscan/modules/output/aggregate_parsed_seqs/main"
 include { WRITE_RESULTS } from "$projectDir/interproscan/modules/output/write_results/main"
 
@@ -43,13 +44,15 @@ workflow {
     dataDirPath = PRE_CHECKS.out.dataDir.val
     log.info "Using data files located in ${dataDirPath}"
 
-    applications = params.applications.toLowerCase()
+    applications = (params.applications.toLowerCase().split(',') as Set).join(',')
 
     Channel.fromPath( input_file , checkIfExists: true)
     .unique()
     .splitFasta( by: params.batchsize, file: true )
     .set { ch_fasta }
 
+    // if nucleic acid seqs provided, predict ORFs
+    // either way, then break up input FASTA into batches
     if (params.nucleic) {
         if (params.translate.strand.toLowerCase() !in ['both','plus','minus']) {
             log.info "Strand option '${params.translate.strand.toLowerCase()}' in nextflow.config not recognised. Accepted: 'both', 'plus', 'minus'"
@@ -116,15 +119,23 @@ workflow {
     AGGREGATE_RESULTS(all_results.collect())
     AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
 
+    /* XREFS:
+    Add signature and entry desc and names
+    Add PAINT annotations (if panther is enabled)
+    Add go terms (if enabled)
+    Add pathways (if enabled)
+    */
     XREFS(AGGREGATE_RESULTS.out, applications, dataDirPath)
 
-    Channel.from(params.formats.split(','))
+    REPRESENTATIVE_DOMAINS(XREFS.out.collect())
+    
+    Channel.from(params.formats.toLowerCase().split(','))
     .set { ch_format }
 
     WRITE_RESULTS(
         input_file.getName(),
         AGGREGATE_PARSED_SEQS.out,
-        XREFS.out.collect(),
+        REPRESENTATIVE_DOMAINS.out.collect(),
         ch_format,
         params.outdir,
         params.ipscn_version,

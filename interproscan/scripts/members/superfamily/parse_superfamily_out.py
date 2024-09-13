@@ -50,7 +50,6 @@ def parse(ass3_out_path: str, hmmlib_info: dict, member_db: str) -> dict:
                         'start': fragments[0]['start'],
                         'end': fragments[-1]['end'],
                         'location-fragments': fragments,
-                        'representative': '',
                         'evalue': match['evalue'],
                         'alignment': match['alignment_to_model'],
                         'family_evalue': match['family_evalue'],
@@ -62,7 +61,6 @@ def parse(ass3_out_path: str, hmmlib_info: dict, member_db: str) -> dict:
                     location = {
                         'start': fragments[0]['start'],
                         'end': fragments[0]['end'],
-                        'representative': '',
                         'evalue': match['evalue'],
                         'alignment': match['alignment_to_model'],
                         'family_evalue': match['family_evalue'],

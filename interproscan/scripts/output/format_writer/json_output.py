@@ -3,7 +3,6 @@ import os
 
 from .regex import NT_SEQ_ID_PATTERN
 
-
 BOOLEAN_MAP = {"true": True, "false": False}
 
 
@@ -23,14 +22,11 @@ def build_json_output_protein(seq_matches: dict, output_path: str, version: str)
 
     final_data = {"interproscan-version": version, 'results': results}
     with open(output_path, 'w') as json_file:
-        json_file.write(json.dumps(final_data, indent=2))
-
-    return final_data
+        json_file.write(json.dumps(final_data))
 
 
 def build_json_output_nucleic(seq_matches: dict, output_path: str, version: str):
     """Iterate through the ORFs in seq_matches."""
-    json_output = os.path.join(output_path + '.json')
     results = {}  # nucleic seq id: {}
 
     # seq_id = <nucleic acid seq id>_orf<id>
@@ -70,9 +66,7 @@ def build_json_output_nucleic(seq_matches: dict, output_path: str, version: str)
 
     final_data = {"interproscan-version": version, 'results': list(results.values())}
     with open(output_path, 'w') as json_file:
-        json_file.write(json.dumps(final_data, indent=2))
-
-    return final_data
+        json_file.write(json.dumps(final_data))
 
 
 def get_matches(data: dict):
@@ -126,12 +120,12 @@ def get_matches(data: dict):
             if member_db in ["MOBIDB", "PHOBIUS", "SUPERFAMILY"]:
                 for location in match_data['locations']:
                     location_info = {
-                        "start": int(location["start"]),
-                        "end": int(location["end"]),
-                        "representative": BOOLEAN_MAP.get(location["representative"].lower(), False),
+                        "start": location["start"],
+                        "end": location["end"],
+                        "representative": location["representative"],
                         "location-fragments": [{
-                            "start": int(location["start"]),
-                            "end": int(location["end"]),
+                            "start": location["start"],
+                            "end": location["end"],
                             "dc-status": "CONTINUOUS"
                         }]
                     }
@@ -175,14 +169,11 @@ def get_matches(data: dict):
                             }
                         else:
                             info = {
-                                "start": int(location["start"]),
-                                "end": int(location["end"])
+                                "start": location["start"],
+                                "end": location["end"]
                             }
 
-                        info["representative"] = BOOLEAN_MAP.get(
-                            location["representative"].lower(),
-                            False
-                        )
+                        info["representative"] = location["representative"]
 
                         if member_db == "CDD":
                             info["evalue"] = float(location["evalue"])
@@ -269,8 +260,8 @@ def get_matches(data: dict):
                             info["location-fragments"] = location["location-fragments"]
                         except KeyError:
                             single_location = {
-                                "start": int(location["start"]),
-                                "end": int(location["end"]),
+                                "start": location["start"],
+                                "end": location["end"],
                                 "dc-status": "CONTINUOUS"
                             }
                             try:

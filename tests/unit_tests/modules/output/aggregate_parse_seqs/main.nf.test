@@ -1,0 +1,31 @@
+nextflow_process {
+
+    name "Test Process AGGREGATE_PARSED_SEQS"
+    script "interproscan/modules/output/aggregate_parsed_seqs/main.nf"
+    process "AGGREGATE_PARSED_SEQS"
+
+    stage {
+        copy "interproscan/scripts/output/aggregate_parsed_seqs.py"
+        copy "tests/unit_tests/test_inputs/write_results/protein/parsed_seqs.json"
+    }
+
+    test("Should run successfully") {
+
+        when {
+            params {
+            }
+            process {
+                """
+                input[0] = ["../../../meta/tests/unit_tests/test_inputs/write_results/protein/parsed_seqs.json"]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

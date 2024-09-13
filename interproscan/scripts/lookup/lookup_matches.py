@@ -32,7 +32,11 @@ import sys
 import urllib.request
 import xml.etree.ElementTree as ET
 
-from retry_conn_decorator import lookup_retry_decorator
+
+try:  # needed for nextflow
+    from retry_conn_decorator import lookup_retry_decorator
+except ModuleNotFoundError:   # needed for pytest unit tests
+    from .retry_conn_decorator import lookup_retry_decorator
 
 
 @lookup_retry_decorator
@@ -85,7 +89,6 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                 location = {
                     "start": int(hit_data[4]),
                     "end": int(hit_data[5]),
-                    "representative": "",
                     "hmmStart": int(hit_data[10]),
                     "hmmEnd": int(hit_data[11]),
                     "hmmLength": int(hit_data[12]),

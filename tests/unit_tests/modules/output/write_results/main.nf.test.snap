@@ -1,0 +1,30 @@
+{
+    "Should pass": {
+        "content": [
+            {
+                "0": [
+                    "filename.ips6.tsv:md5,72a92a507ba32cd16eb9886e5e10eb7d"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.04.2"
+        },
+        "timestamp": "2024-09-11T13:47:35.988277"
+    },
+    "Should run successfully": {
+        "content": [
+            {
+                "0": [
+                    "filename.ips6.tsv:md5,72a92a507ba32cd16eb9886e5e10eb7d"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.04.2"
+        },
+        "timestamp": "2024-09-11T13:48:49.605001"
+    }
+}

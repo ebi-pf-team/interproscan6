@@ -84,14 +84,33 @@ jobs:
       shell: bash -l {0}
       run: |
         export PATH=$PATH:$GITHUB_WORKSPACE/nf-test
-        which nf-test
         ./nf-test test tests/unit_tests/subworkflows/pre_checks/
         ./nf-test test tests/unit_tests/subworkflows/sequence_precalc/
+        ./nf-test test tests/unit_tests/subworkflows/xrefs/
+
+    - name: NF-Test process tests
+      shell: bash -l {0}
+      run: |
+        export PATH=$PATH:$GITHUB_WORKSPACE/nf-test
+        ./nf-test test tests/unit_tests/modules/pre_checks/
+        ./nf-test test tests/unit_tests/modules/output/aggregate_parse_seqs/
+        ./nf-test test tests/unit_tests/modules/output/aggregate_results/
+        ./nf-test test tests/unit_tests/modules/output/write_results/
+        ./nf-test test tests/unit_tests/modules/xref/entries/
+        ./nf-test test tests/unit_tests/modules/xref/goterms/
+        ./nf-test test tests/unit_tests/modules/xref/pathways/
+        ./nf-test test tests/unit_tests/modules/xref/paint_annotations/
+
+    - name: NF-Test modules tests
+      shell: bash -l {0}
+      run: |
+        export PATH=$PATH:$GITHUB_WORKSPACE/nf-test
+        ./nf-test test tests/unit_tests/modules/pre_checks/nt-seqs.nf
 
     - name: PY-Test scripts tests
       shell: bash -l {0}
       run: |
-        python -m pytest tests/unit_tests -v --cov=scripts --cov-report xml:.coverage.xml
+        python -m pytest tests/unit_tests -v --cov=interproscan/scripts --cov-report xml:.coverage.xml
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.0.1

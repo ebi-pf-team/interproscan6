@@ -70,8 +70,7 @@ def parse(signalp_out: str, signalp_cs: str, threshold: float,
                             "end": end,
                             "pvalue": pvalue,
                             "cleavage_start": "",
-                            "cleavage_end": "",
-                            "representative": "false"
+                            "cleavage_end": ""
                         }]
                     }
                 }

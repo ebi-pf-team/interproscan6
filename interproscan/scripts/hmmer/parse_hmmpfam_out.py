@@ -9,7 +9,7 @@ page 26."""
 
 
 ALN_DOMAIN_LINE = re.compile(r'\S+:\s+domain \d+ of \d+,')
-SIGNATURE_DATA_LINE = re.compile(r"^(\w+)\s+(\w*)\s+((\d+\.\d+|\d)+)\s+(\d[a-zA-Z0-9_\-.]+)\s+(\d+)")
+SIGNATURE_DATA_LINE = re.compile(r"^(\w+?)\s+([\w\s\-\|]+?)\s+(\d[e0-9\-\.]+?)\s+([e0-9_\-.]+?)\s+(\d+?)$")
 DOMAIN_DATA_LINE = re.compile(r"^(\w+)\s+(\d+/\d+)\s+(\d+)\s+(\d+)\s+([\.\[\]]{2})\s+(\d+)\s+(\d+)\s+([\.\[\]]{2})\s+(\d+|\d+\.\d+)\s+(.+)")
 HMM_BOUND_PATTERN = {
     "[]": "COMPLETE",
@@ -37,8 +37,8 @@ class QueryProtein:
         model = ModelHit()
         model.model_id = model_pattern.group(1)
         model.score = model_pattern.group(3)
-        model.evalue = model_pattern.group(5)
-        model.num_domains = int(model_pattern.group(6))
+        model.evalue = model_pattern.group(4)
+        model.num_domains = int(model_pattern.group(5))
         self.signatures[model.model_id] = model
 
     def get_domain_data(self, domain_pattern):
@@ -115,7 +115,6 @@ def add_match(
                 {
                     "start": int(domain_obj.seq_from),
                     "end": int(domain_obj.seq_to),
-                    "representative": "",
                     "hmmStart": int(domain_obj.hmm_from),
                     "hmmEnd": int(domain_obj.hmm_to),
                     "hmmLength": int(domain_obj.hmm_to) + 1 - int(domain_obj.hmm_from),
