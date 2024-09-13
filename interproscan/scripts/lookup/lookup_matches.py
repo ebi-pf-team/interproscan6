@@ -128,13 +128,13 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
 
                 # superfamily does not have location specific score
                 # prints, prosite_profiles, have location scores instead of scores
-                if hit_appl in ["PROSITE_PROFILES"]:
+                if hit_appl == "PROSITE_PROFILES":
                     location["score"] = hit_data[7]
-                if hit_appl in ["PROSITE_PATTERNS"]:
+                if hit_appl == "PROSITE_PATTERNS":
                     # missing level
                     location["level"] = ""
                     
-                if hit_appl in ["MOBIDB_LITE"]:
+                if hit_appl == "MOBIDB_LITE":
                     signature["member_db"] = "MOBIDB"
                     location["sequence-feature"] = hit_data[17]
 
