@@ -103,8 +103,8 @@ def add_match(
         if model_id not in matches[protein_with_hit.sequence_id]:
             matches[protein_with_hit.sequence_id][model_id] = {
                 "accession": model_id,
-                "evalue": model_obj.evalue,
-                "score": model_obj.score,
+                "evalue": float(model_obj.evalue),
+                "score": float(model_obj.score),
                 "member_db": member_db,
                 "model-ac": model_id,
                 "locations": []
@@ -120,8 +120,8 @@ def add_match(
                     "hmmLength": int(domain_obj.hmm_to) + 1 - int(domain_obj.hmm_from),
                     "rawHmmBounds": domain_obj.hmm_raw_bounds,
                     "hmmBounds": domain_obj.hmm_bounds,
-                    "evalue": domain_obj.evalue,  # keep as str because can be Xe-Y
-                    "score": domain_obj.score,  # keep as str because can be Xe-Y
+                    "evalue": float(domain_obj.evalue),  # keep as str because can be Xe-Y
+                    "score": float(domain_obj.score),  # keep as str because can be Xe-Y
                     "postProcessed": "false",
                     "location-fragments": [
                         {
