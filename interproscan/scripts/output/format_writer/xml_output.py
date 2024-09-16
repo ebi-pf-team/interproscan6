@@ -247,7 +247,7 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                     location_elem.set("cleavage_end", str(location["cleavage_end"]))
                     location_elem.set("representative", str(location["representative"]))
 
-                elif match_data['member_db'].upper() in ["PIRSR", "SFLD"]:
+                elif match_data['member_db'].upper() == "SFLD":
                     location_elem = ET.SubElement(locations_elem, "analysis-location")
                     location_elem.set("evalue", str(location["evalue"]).upper())
                     location_elem.set("score", str(location["score"]))
@@ -255,6 +255,13 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                     location_elem.set("hmm-end", str(location["hmmEnd"]))
                     location_elem.set("env-end", str(location["envelopeEnd"]))
                     location_elem.set("env-start", str(location["envelopeStart"]))
+                    try:
+                        location_elem.set("sites", location["sites"])
+                    except KeyError:
+                        location_elem.set("sites", [])
+
+                elif match_data['member_db'].upper() == "PIRSR":
+                    location_elem = ET.SubElement(locations_elem, "analysis-location")
                     try:
                         location_elem.set("sites", location["sites"])
                     except KeyError:
