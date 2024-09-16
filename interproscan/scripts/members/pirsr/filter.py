@@ -88,8 +88,8 @@ def matches2rules(matches_path: str, rules_hash: dict) -> dict:
                         'alignment': seq_align,
                         'sites': rule_sites,
                         "hmmLength": location["hmmLength"],
-                        "envelopeStart": location["envelopeStart"],
-                        "envelopeEnd": location["envelopeEnd"]
+                        "envelopeStart": int(location["envelopeStart"]),
+                        "envelopeEnd": int(location["envelopeEnd"])
                     }
                     domHits.append(domHit)
             domain["locations"] = domHits
