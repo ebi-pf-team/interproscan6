@@ -116,17 +116,17 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]]) -> None:
                                 panther_hit["env_end"] == location["envelopeEnd"]:
 
                                 processed_ips6_data[_protein_id][signature_acc]["locations"] = [{
-                                    "start": panther_hit["ali_start"],
-                                    "end": panther_hit["ali_end"],
-                                    "hmmStart": panther_hit["hmm_start"],
-                                    "hmmEnd": panther_hit["hmm_end"],
-                                    "hmmLength": location["hmmLength"],
+                                    "start": int(panther_hit["ali_start"]),
+                                    "end": int(panther_hit["ali_end"]),
+                                    "hmmStart": int(panther_hit["hmm_start"]),
+                                    "hmmEnd": int(panther_hit["hmm_end"]),
+                                    "hmmLength": int(location["hmmLength"]),
                                     "rawHmmBounds": location["rawHmmBounds"],
                                     "hmmBounds": location["hmmBounds"],
-                                    "evalue": panther_hit["evalue"],
-                                    "score": panther_hit["score"],
-                                    "envelopeStart": panther_hit["env_start"],
-                                    "envelopeEnd": panther_hit["env_end"],
+                                    "evalue": float(panther_hit["evalue"]),
+                                    "score": float(panther_hit["score"]),
+                                    "envelopeStart": int(panther_hit["env_start"]),
+                                    "envelopeEnd": int(panther_hit["env_end"]),
                                     "alignment": location["alignment"],
                                     "cigar_alignment": location["cigar_alignment"]
                                 }]
