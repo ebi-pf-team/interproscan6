@@ -1,0 +1,17 @@
+{
+    "500": [
+        "benchmarking/24.08.27.report.3.tsv",
+        "benchmarking/24.08.26.report.2.tsv",
+        "benchmarking/24.08.26.report.1.tsv"
+    ],
+    "1000": [
+        "benchmarking/24.08.27.report.3.tsv",
+        "benchmarking/24.08.26.report.2.tsv",
+        "benchmarking/24.08.26.report.1.tsv"
+    ],
+    "5000": [
+        "benchmarking/24.08.27.report.3.tsv",
+        "benchmarking/24.08.26.report.2.tsv",
+        "benchmarking/24.08.26.report.1.tsv"
+    ]
+}
