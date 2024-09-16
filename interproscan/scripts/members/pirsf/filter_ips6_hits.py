@@ -137,7 +137,7 @@ def get_location_data(match: dict) -> tuple[int, int, int, int, float]:
             seq_end = int(location["end"])
             hmm_end = int(location["hmmEnd"])
 
-    return seq_start, seq_end, hmm_start, hmm_end, score
+    return seq_start, seq_end, hmm_start, hmm_end, float(score)
 
 
 def get_best_match(filtered_models: dict[str, pirsfHit], sig_lengths: dict[str, int]) -> dict:
