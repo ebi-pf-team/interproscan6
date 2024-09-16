@@ -22,3 +22,5 @@ Run `IPS6` with the `-with-timeline [file name]` Nextflow parameter to generate 
 
 4. **Run the benchmarking**
 
+
+Optional flag
