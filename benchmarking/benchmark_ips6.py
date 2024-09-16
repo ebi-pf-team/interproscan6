@@ -129,18 +129,18 @@ def main(argv: Optional[List[str]] = None):
 
     # plot max mem per process
     plot_overall_summary(
-        df=all_data,
-        group=args.group_name,
-        outdir=args.outdir,
-        fig_formats=args.format,
-        fig_name="max_memory_per_process",
-        x='raw_process',
-        x_label='Process',
-        y='raw_max_memory_MB',
-        y_label='Max. memory (MB)',
-        title='Memory Usage',
-        hue_order='process',
-        group_order=group_order,
+        all_data,
+        args.group_name,
+        args.outdir,
+        args.format,
+        "max_memory_per_process",
+        'raw_process',
+        'Process',
+        'raw_max_memory_MB',
+        'Max. memory (MB)',
+        'Memory Usage',
+        'process',
+        group_order,
     )
 
 
