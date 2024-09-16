@@ -4,6 +4,34 @@ import sys
 import urllib.request
 import xml.etree.ElementTree as ET
 
+"""
+Match lookup service only includes domain hits, no site hits
+Match lookup service will not return PIRSR matches
+CDD and SFLD matches will be incomplete (missing site data)
+
+Standard structure of hit data:
+1. Member db
+2. Member db version
+3. Hit Accession
+4. Model accession
+5. Location start
+6. Location end
+7. Location fragment
+8. Score
+9. Evalue
+10. HMM bounds
+11. HMM start
+12. HMM end
+13. HMM length
+14. Envelope start
+15. Envelope end
+16. Location score
+17. Location evalue
+18. "" or other data type in Panther, PRINTS, PROSITE_PATTERNS, PROSITE_PROFILES, MobiDB
+
+8-17 hit data is non-standard in member dbs: CDD, Panther, PIRSF, PRINTS, SFLD, SUPERFAMILY, SignalP
+Other member dbs hit data is standard, some or all 8-17 hit data will be 0 or "" in member dbs:  Coils, HAMAP, PROSITE_PROFILES, PROSITE_PATTERNS, SMART, Phobius, MobiDB
+"""
 
 try:  # needed for nextflow
     from retry_conn_decorator import lookup_retry_decorator
@@ -13,9 +41,9 @@ except ModuleNotFoundError:   # needed for pytest unit tests
 
 @lookup_retry_decorator
 def match_lookup(matches_checked: list, url: str, **kwargs) -> str:
-    url_input = ','.join(matches_checked)
+    url_input = ",".join(matches_checked)
     matches = urllib.request.urlopen(f"{url}?md5={url_input}")
-    return matches.read().decode('utf-8')
+    return matches.read().decode("utf-8")
 
 
 def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
@@ -25,14 +53,14 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
 
     for match in tree.findall(".//match"):
         for hit in match.findall("hit"):
-            hit_data = hit.text.split(',')
+            hit_data = hit.text.split(",")
             hit_appl = hit_data[0]
             if hit_appl in applications:
                 protein_md5 = match.find("proteinMD5").text
                 if protein_md5.lower() in md52seq_id:
-                    target_key = md52seq_id[protein_md5.lower()]
+                    target_key_list = md52seq_id[protein_md5.lower()]
                 else:
-                    target_key = protein_md5
+                    target_key_list = [protein_md5]
 
                 accession = hit_data[2]
                 post_processed = "false"
@@ -70,25 +98,57 @@ def parse_match(match_data: str, applications: list, md52seq_id: dict) -> dict:
                     "envelopeStart": int(hit_data[13]),
                     "envelopeEnd": int(hit_data[14]),
                     "postProcessed": post_processed,
-                    "aliwS": hit_data[6],
-                    "..": hit_data[9],
+                    "locationFragment": hit_data[6],
+                    # misc either "", 0 or HmmBounds raw
+                    "misc": hit_data[9],
                     "alignment": "",
-                    "cigar_alignment": hit_data[17]
+                    "cigarAlignment": hit_data[17]
                 }
 
                 if hit_appl != "PRINTS":
                     location["evalue"] = float(hit_data[16])
                 else:
                     location["pvalue"] = float(hit_data[16])
+                    # PRINTS mls stores motif number at same index as hmm length
+                    # set hmm length to 0
+                    location["hmmLength"] = int(0)
+                    location["motifNumber"] = hit_data[12]
+                    signature["graphscan"] = hit_data[17]
+                    location["score"] = hit_data[7]
 
-                if target_key not in matches:
-                    matches[target_key] = {}
+                if hit_appl in ["SIGNALP", "SIGNALP_EUK"]:
+                    location["pvalue"] = float(hit_data[16])
+                    # mls signalp missing cleavage start and end
+                    location["cleavage_start"] = ""
+                    location["cleavage_end"] = ""
+                    signature["orgType"] = "Other" if hit_appl == "SIGNALP" else "Eukarya"
 
-                if accession not in matches[target_key]:
-                    matches[target_key][accession] = signature
-                    matches[target_key][accession]["locations"] = [location]
-                else:
-                    matches[target_key][accession]["locations"].append(location)
+                if hit_appl in ["SFLD", "PHOBIUS"]:
+                    location["location-fragments"] = [{"start": location["start"], "end": location["end"], "dc-status": "CONTINUOUS"}]
+
+                # superfamily does not have location specific score
+                # prints, prosite_profiles, have location scores instead of scores
+                if hit_appl == "PROSITE_PROFILES":
+                    location["score"] = hit_data[7]
+                if hit_appl == "PROSITE_PATTERNS":
+                    # missing level
+                    location["level"] = ""
+                    
+                if hit_appl == "MOBIDB_LITE":
+                    signature["member_db"] = "MOBIDB"
+                    location["sequence-feature"] = hit_data[17]
+
+                for target_key in target_key_list:
+                    if target_key not in matches:
+                        matches[target_key] = {}
+
+                    if accession not in matches[target_key]:
+                        matches[target_key][accession] = signature
+                        matches[target_key][accession]["locations"] = [location]
+                    elif location not in matches[target_key][accession]["locations"]:
+                        matches[target_key][accession]["locations"].append(location)
+                    else:
+                        continue
 
     return matches
 
@@ -103,20 +163,24 @@ def main():
     """
     args = sys.argv[1:]
     checked_lookup = args[0]
-    applications = args[1].split(',')
+    applications = args[1].split(",")
     url = args[2]
     retries = int(args[3])
 
-    applications = list(map(lambda x: x.upper().replace('MOBIDB', 'MOBIDB_LITE'), applications))
+    applications = list(map(lambda x: x.upper().replace("MOBIDB", "MOBIDB_LITE"), applications))
 
-    with open(checked_lookup, 'r') as md5_data:
+    with open(checked_lookup, "r") as md5_data:
         checked_data = json.load(md5_data)
     matches = checked_data["matches"]
     seq_info = checked_data["sequences_info"]
 
     md52seq_id = {}
     for seq_id, match in seq_info.items():
-        md52seq_id[match['md5']] = seq_id
+        # handles cases where multiple seq have same md5
+        if match["md5"] in md52seq_id.keys():
+            md52seq_id[match["md5"]].append(seq_id)
+        else:
+            md52seq_id[match["md5"]] = [seq_id]
 
     match_results, err = match_lookup(matches, url, retries=retries)
 

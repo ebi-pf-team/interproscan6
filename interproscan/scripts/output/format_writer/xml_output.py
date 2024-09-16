@@ -140,11 +140,13 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
 
             match_elem = ET.SubElement(matches_elem, MATCH_ELEMENT[match_data['member_db'].upper()])
 
-            try:
-                match_elem.set("evalue", str(match_data['evalue']).upper())
-                match_elem.set("score", str(match_data["score"]))
-            except KeyError:
-                pass  # some members may not have evalue or score on this level (e.g. cdd)
+            # prevent evalue and score from MLS appearing in xml format for CDD matches
+            if match_data['member_db'].upper() != "CDD":
+                try:
+                    match_elem.set("evalue", str(match_data['evalue']).upper())
+                    match_elem.set("score", str(match_data["score"]))
+                except KeyError:
+                    pass  # some members may not have evalue or score on this level (e.g. cdd)
 
             if match_data['member_db'].upper() == "PANTHER":
                 match_elem.set("protein-class", _check_null(match_data['proteinClass']))
@@ -245,7 +247,20 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                     location_elem.set("cleavage_end", str(location["cleavage_end"]))
                     location_elem.set("representative", str(location["representative"]))
 
-                elif match_data['member_db'].upper() in ["PIRSR", "SFLD"]:
+                elif match_data['member_db'].upper() == "SFLD":
+                    location_elem = ET.SubElement(locations_elem, "analysis-location")
+                    location_elem.set("evalue", str(location["evalue"]).upper())
+                    location_elem.set("score", str(location["score"]))
+                    location_elem.set("hmm-start", str(location["hmmStart"]))
+                    location_elem.set("hmm-end", str(location["hmmEnd"]))
+                    location_elem.set("env-end", str(location["envelopeEnd"]))
+                    location_elem.set("env-start", str(location["envelopeStart"]))
+                    try:
+                        location_elem.set("sites", location["sites"])
+                    except KeyError:
+                        location_elem.set("sites", [])
+
+                elif match_data['member_db'].upper() == "PIRSR":
                     location_elem = ET.SubElement(locations_elem, "analysis-location")
                     try:
                         location_elem.set("sites", location["sites"])

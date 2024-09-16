@@ -16,6 +16,7 @@ process PFSEARCH_RUNNER {
 
     script:
     """
+    touch prosite_profiles.out
     python3 $projectDir/interproscan/scripts/members/prosite/run_pfsearchv3.py \
         ${models_dir} \
         ${fasta} \
