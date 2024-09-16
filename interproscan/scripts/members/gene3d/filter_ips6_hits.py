@@ -143,8 +143,8 @@ def filter_matches(
                 ips6_location["location-fragments"] = []
                 if len(gene3d_domain.resolved.split(",")) == 1:
                     ips6_location["location-fragments"].append({
-                        "start": gene3d_domain.resolved.split("-")[0],
-                        "end": gene3d_domain.resolved.split("-")[1],
+                        "start": int(gene3d_domain.resolved.split("-")[0]),
+                        "end": int(gene3d_domain.resolved.split("-")[1]),
                         "dc-status": "CONTINUOUS"
                     })
                 else:
