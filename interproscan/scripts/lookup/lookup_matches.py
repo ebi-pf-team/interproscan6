@@ -30,7 +30,7 @@ Standard structure of hit data:
 18. "" or other data type in Panther, PRINTS, PROSITE_PATTERNS, PROSITE_PROFILES, MobiDB
 
 8-17 hit data is non-standard in member dbs: CDD, Panther, PIRSF, PRINTS, SFLD, SUPERFAMILY, SignalP
-Other member dbs hti data is standard, some or all 8-17 hit data will be 0 or "" in member dbs:  Coils, HAMAP, PROSITE_PROFILES, PROSITE_PATTERNS, SMART, Phobius, MobiDB
+Other member dbs hit data is standard, some or all 8-17 hit data will be 0 or "" in member dbs:  Coils, HAMAP, PROSITE_PROFILES, PROSITE_PATTERNS, SMART, Phobius, MobiDB
 """
 
 try:  # needed for nextflow
