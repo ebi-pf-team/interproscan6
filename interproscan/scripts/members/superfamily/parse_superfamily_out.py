@@ -27,7 +27,7 @@ def parse(ass3_out_path: str, hmmlib_info: dict, member_db: str) -> dict:
                     data[match['sequence_id']][acc_id] = {
                         'accession': acc_id,
                         'name': name,
-                        'hmm_length': hmm_length,
+                        'hmm_length': int(hmm_length),
                         'member_db': member_db,
                         'evalue': match['evalue'],
                         'model-ac': match['model_id'],
