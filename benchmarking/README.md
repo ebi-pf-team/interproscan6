@@ -93,3 +93,19 @@ values. If this is the case, include the `--raw` flag in the `benchmark_ips6.py`
 By default, the output figures will be written to the current working directory. To write the files 
 to a desired output directory use the `--outdir` flag and provide the path for the output dir. The 
 scripts will build all necessary parent directories for the output dir.
+
+If you wish to perform further analyses on the data, use the `--save_data` flag to configure 
+`benchmark_ips6.py` to write out the dataframe it generates to a CSV file in the output dir.
+
+## Output:
+
+Each run of `benchmark_ips6.py` will produce the following figures (note, references to 'group' refers to the keys in the input JSON file, each key represents a different 'group'):
+
+1. `total_runtime.*` - Shows the total run time of IPS6 per group in the input JSON file
+2. `process_runtime.*` - Shows the total run time per process in IPS6
+3. `process_runtime_piechart.*` - Shows the percentage of the total runtime contributed by each process
+4. `pie_chart_values.csv` - Contains the data used to build the `process_runtime_piechart.*` figure. If many processes are included the legends in the pie chart can often overlap. Use this CSV file to plot the pie chart (or alternative chart).
+5. `overall_memory_usage.*` - Plots the overall memory usage per group in the input JSON file
+6. `overall_max_memory_usage.*` - Plots the overall maximum memory used per group in the input JSON file
+7. `memory_per_process.*` - Plots the memory usage per process (and per group if multiple groups are defined in the input JSON file)
+8. `max_memory_per_process.*` - Plots the maximum memory usage per process (and per group if multiple groups are defined in the input JSON file)

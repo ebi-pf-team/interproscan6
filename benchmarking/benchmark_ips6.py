@@ -143,6 +143,9 @@ def main(argv: Optional[List[str]] = None):
         group_order,
     )
 
+    if args.save_data:
+        all_data.to_csv((args.outdir / "ips6_trace_data.csv"))
+
 
 if __name__ == "__main__":
     main()

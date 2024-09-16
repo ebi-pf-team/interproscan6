@@ -68,6 +68,13 @@ def build_parser(argv: Optional[List] = None) -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--outdir",
+        type=Path,
+        default=Path("ips6-benchmark-report"),
+        help="Output directory"
+    )
+
+    parser.add_argument(
         "--raw",
         dest="raw",
         action="store_true",
@@ -79,10 +86,11 @@ def build_parser(argv: Optional[List] = None) -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "--outdir",
-        type=Path,
-        default=Path("ips6-benchmark-report"),
-        help="Output directory"
+        "--save_data",
+        dest="save_data",
+        action="store_true",
+        default=False,
+        help="Save the internal dataframe to a CSV file."
     )
 
     if argv is None:
