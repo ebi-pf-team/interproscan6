@@ -211,11 +211,11 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                 elif match_data['member_db'].upper() == "HAMAP":
                     location_elem = ET.SubElement(locations_elem,"analysis-location")
                     location_elem.set("score", str(location["score"]))
-                    location_elem.set("alignment", str(location["alignment"]))
+                    location_elem.set("alignment", location["alignment"])
 
                 elif match_data['member_db'].upper() == "PRINTS":
                     location_elem = ET.SubElement(locations_elem, "analysis-location")
-                    location_elem.set("motifNumber", str(int(location["motifNumber"])))
+                    location_elem.set("motifNumber", str(location["motifNumber"]))
                     location_elem.set("pvalue", str(location["pvalue"]))
                     location_elem.set("score", str(location["score"]))
                     location_elem.set("end", str(location["end"]))
@@ -227,14 +227,14 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                     location_elem.set("score", str(location["score"]))
                     location_elem.set("start", str(location["start"]))
                     location_elem.set("end", str(location["end"]))
-                    location_elem.set("alignment", str(location["alignment"]))
+                    location_elem.set("alignment", location["alignment"])
 
                 elif match_data['member_db'].upper() == "PROSITE_PATTERNS":
                     location_elem = ET.SubElement(locations_elem, "analysis-location")
                     location_elem.set("start", str(location["start"]))
                     location_elem.set("end", str(location["end"]))
-                    location_elem.set("alignment", str(location["alignment"]))
-                    location_elem.set("cigar-alignment", str(location["cigarAlignment"]))
+                    location_elem.set("alignment", location["alignment"])
+                    location_elem.set("cigar-alignment", location["cigarAlignment"])
 
                 elif match_data['member_db'].upper() in ["SIGNALP", "SIGNALP_EUK"]:
                     location_elem = ET.SubElement(locations_elem,"analysis-location")
@@ -298,8 +298,8 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
 
                     location_elem.set("representative", str(location["representative"]))
                     try:
-                        location_elem.set("alignment", str(location["alignment"]))
-                        location_elem.set("cigar-alignment", str(location["cigar_alignment"]))
+                        location_elem.set("alignment", location["alignment"])
+                        location_elem.set("cigar-alignment", location["cigar_alignment"])
                     except KeyError:
                         pass
 
@@ -311,7 +311,7 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                                 location_frags_elem,
                                 "analysis-location-fragment"
                             )
-                            location_frag_elem.set("description", str(site['description']))
+                            location_frag_elem.set("description", site['description'])
                             location_frag_elem.set("numLocations", str(site['numLocations']))
                         else:
                             for sitelocation in site['siteLocations']:
@@ -321,12 +321,12 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                                 )
                                 location_frag_elem.set("start", str(sitelocation["start"]))
                                 location_frag_elem.set("end", str(sitelocation["end"]))
-                                location_frag_elem.set("residue", str(sitelocation["residue"]))
+                                location_frag_elem.set("residue", sitelocation["residue"])
                 if 'location-fragments' in location:
                     for location_fragment in location['location-fragments']:
                         location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
                         location_frag_elem.set("start", str(location_fragment["start"]))
                         location_frag_elem.set("end", str(location_fragment["end"]))
-                        location_frag_elem.set("dc-status", str(location_fragment["dc-status"]))
+                        location_frag_elem.set("dc-status", location_fragment["dc-status"])
 
     return protein_elem
