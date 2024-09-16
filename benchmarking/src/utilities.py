@@ -122,12 +122,12 @@ def load_data(data_files: dict[str, list[str]], args: argparse.ArgumentParser):
         all_data["raw_realtime"] = convert_realtime(all_data["realtime"])
         all_data["raw_process"] = convert_process_names(all_data["process"])
         all_data["raw_memory_MB"] = convert_memory(all_data["rss"])
-        all_data["raw_max_memory_MB"] = convert_memory(all_data["peak_rss"])
+        all_data["raw_max_memory"] = convert_memory(all_data["peak_rss"])
     else:
         all_data["raw_realtime"] = all_data["realtime"]
         all_data["raw_process"] = all_data["process"]
         all_data["raw_memory_MB"] = all_data["rss"]
-        all_data["raw_max_memory_MB"] = all_data["peak_rss"]
+        all_data["raw_max_memory"] = all_data["peak_rss"]
 
     return all_data
 
