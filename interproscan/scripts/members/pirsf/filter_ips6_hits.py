@@ -125,17 +125,17 @@ def get_location_data(match: dict) -> tuple[int, int, int, int, float]:
         # the seq start and end
         seq_start = int(location["start"])   # ali from
         seq_end = int(location["end"])   # ali to
-        hmm_start = location["hmmStart"]   # hmm from
-        hmm_end = location["hmmEnd"]   # hmm to
+        hmm_start = int(location["hmmStart"])   # hmm from
+        hmm_end = int(location["hmmEnd"])   # hmm to
         score += float(location["score"])
 
         # update to match georgetown 2017 script
-        if int(location["start"]) < seq_start and location["hmmStart"] < hmm_start:
-            seq_start = location["start"]
-            hmm_start = location["hmmStart"]
-        if int(location["end"]) < seq_end and location["hmmEnd"] < hmm_end:
-            seq_end = location["end"]
-            hmm_end = location["hmmEnd"]
+        if int(location["start"]) < seq_start and int(location["hmmStart"]) < hmm_start:
+            seq_start = int(location["start"])
+            hmm_start = int(location["hmmStart"])
+        if int(location["end"]) < seq_end and int(location["hmmEnd"]) < hmm_end:
+            seq_end = int(location["end"])
+            hmm_end = int(location["hmmEnd"])
 
     return seq_start, seq_end, hmm_start, hmm_end, score
 
