@@ -37,11 +37,15 @@ def main(argv: Optional[List[str]] = None):
     if not args.outdir.is_dir():
         args.outdir.mkdir(parents=True, exist_ok=True)
 
-    trace_file_paths = set()
     missing_files = set()
     group_order = []
     with open(args.data_files, "r") as fh:
-        trace_file_paths = json.load(fh)
+        trace_files = json.load(fh)
+    trace_file_paths = {}
+
+    for grp, file_list in trace_files.items():
+        trace_file_paths[str(grp)] = file_list
+
     for grp, paths in trace_file_paths.items():
         group_order.append(grp)
         for fp in paths:
