@@ -138,7 +138,7 @@ def get_matches(data: dict):
                     }
 
                 elif member_db == "SUPERFAMILY":
-                    location_info['evalue'] = float(location['evalue'])
+                    location_info['evalue'] = location['evalue']
                     try:
                         location_info["hmmLength"] = match_data['hmm_length']
                     except KeyError:
@@ -146,7 +146,7 @@ def get_matches(data: dict):
                     match = {
                         "signature": signature,
                         "locations": [location_info],
-                        "evalue": float(match_data["evalue"]),
+                        "evalue": match_data["evalue"],
                         "model-ac": match_data.get('model-ac', match_data['accession'])
                     }
                 else:
