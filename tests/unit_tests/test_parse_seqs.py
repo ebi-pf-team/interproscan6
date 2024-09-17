@@ -21,6 +21,16 @@ def temp_path(test_output_dir):
     return filepath
 
 
+@pytest.fixture
+def input_illegal_fasta_path(test_input_dir):
+    return test_input_dir / "parse_sequences/illegal.faa"
+
+
+@pytest.fixture
+def input_legal_fasta_path(test_input_dir):
+    return test_input_dir / "parse_sequences/allowed.faa"
+
+
 def test_parse_seq_main(temp_path, monkeypatch):
     def mock_parse_seqs(*args, **kwards):
         return
@@ -81,3 +91,47 @@ def test_store_protein_seq():
     assert expected == parse_sequence.store_seq(
         seq_obj, sequences, nucleic_seqs, passing_nucleic=passing_nucleic
     )
+
+
+def test_parse_no_illegal_chars(input_legal_fasta_path, monkeypatch):
+    def mock_store_seq(*args, **kwards):
+        seq_obj = parse_sequence.Sequence()
+        passing_nucleic = False
+        seq_obj.get_seq_key(">TestProteinId", passing_nucleic)
+        seq_obj.get_seq("MAMAMAMAMAMAMAMAMAMAMLAMA")
+        return {"TestProteinId": seq_obj}
+
+    seq_obj = parse_sequence.Sequence()
+    passing_nucleic = False
+    seq_obj.get_seq_key(">TestProteinId", passing_nucleic)
+    seq_obj.get_seq("MAMAMAMAMAMAMAMAMAMAMLAMA")
+    monkeypatch.setattr(parse_sequence, "store_seq", mock_store_seq)
+
+    parse_sequence.parse(
+        input_legal_fasta_path,
+        "antifam,sfld",
+    )
+
+
+def test_parse_illegal_chars(input_illegal_fasta_path, monkeypatch):
+    def mock_store_seq(*args, **kwargs):
+        seq_obj = parse_sequence.Sequence()
+        passing_nucleic = False
+        seq_obj.get_seq_key(">TestProteinId", passing_nucleic)
+        seq_obj.get_seq("MAMAMAMA*.__<>MAMAMAMAMAMAMLAMA")
+        return {"TestProteinId": seq_obj}
+
+    seq_obj = parse_sequence.Sequence()
+    passing_nucleic = False
+    seq_obj.get_seq_key(">TestProteinId", passing_nucleic)
+    seq_obj.get_seq("MAMAMAMA*.__<>MAMA$£%^AMAMAMAMLAMAA")
+    monkeypatch.setattr(parse_sequence, "store_seq", mock_store_seq)
+
+    with pytest.raises(parse_sequence.IllegalCharError) as pytest_wrapped_e:
+        parse_sequence.parse(
+            input_illegal_fasta_path,
+            "antifam,sfld",
+        )
+    assert pytest_wrapped_e.type == parse_sequence.IllegalCharError
+    assert "Illegal characters detected" in str(pytest_wrapped_e.value)
+    assert "Sequence TESTESEMLOOKUP contains illegal character(s)" in str(pytest_wrapped_e.value)
