@@ -2,15 +2,16 @@ nextflow.enable.dsl=2
 
 include { PARSE_SEQUENCE } from "$projectDir/interproscan/modules/parse_sequence/main"
 include { GET_ORFS } from "$projectDir/interproscan/modules/get_orfs/main"
-include { AGGREGATE_RESULTS } from "$projectDir/interproscan/modules/output/aggregate_results/main"
 include { REPRESENTATIVE_DOMAINS } from "$projectDir/interproscan/modules/output/representative_domains/main"
 include { AGGREGATE_PARSED_SEQS } from "$projectDir/interproscan/modules/output/aggregate_parsed_seqs/main"
+include { AGGREGATE_RESULTS } from "$projectDir/interproscan/subworkflows/output/aggregate_results"
 include { WRITE_RESULTS } from "$projectDir/interproscan/modules/output/write_results/main"
 
 include { PRE_CHECKS } from "$projectDir/interproscan/subworkflows/pre_checks/main"
 include { SEQUENCE_PRECALC } from "$projectDir/interproscan/subworkflows/sequence_precalc/main"
 include { SEQUENCE_ANALYSIS } from "$projectDir/interproscan/subworkflows/sequence_analysis/main"
 include { XREFS } from "$projectDir/interproscan/subworkflows/xrefs/main"
+
 
 workflow {
     // Perform preliminary validation checks before running the analysis
@@ -114,10 +115,19 @@ workflow {
         )
     }
 
-    all_results = parsed_matches.concat(parsed_analysis)
-
-    AGGREGATE_RESULTS(all_results.collect())
     AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
+
+    all_results = parsed_matches.concat(parsed_analysis)
+    AGGREGATE_RESULTS(all_results)
+
+//     jsonChunks = all_results.collate(1000)
+//     jsonChunks
+//     .set { chunks ->
+//         chunks
+//         .map { chunk ->
+//             AGGREGATE_RESULTS(chunk)
+//         }
+//     }
 
     /* XREFS:
     Add signature and entry desc and names
@@ -128,7 +138,7 @@ workflow {
     XREFS(AGGREGATE_RESULTS.out, applications, dataDirPath)
 
     REPRESENTATIVE_DOMAINS(XREFS.out.collect())
-    
+
     Channel.from(params.formats.toLowerCase().split(','))
     .set { ch_format }
 
