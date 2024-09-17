@@ -36,5 +36,48 @@ def test_parse_seq_main(temp_path, monkeypatch):
 
     monkeypatch.setattr("sys.argv", test_args)
     monkeypatch.setattr(parse_sequence, "parse", mock_parse_seqs)
-    
+
     assert parse_sequence.main() is None
+
+
+def test_store_nucleic_seq():
+    seq_obj = parse_sequence.Sequence()
+    passing_nucleic = True
+    seq_obj.get_seq_key(">Bob", passing_nucleic)
+    seq_obj.get_seq("atgaaatttccccaaaggggaaa")
+    sequences = {}
+    expected = {"Bob": seq_obj}
+    assert expected == parse_sequence.store_seq(
+        seq_obj, sequences, passing_nucleic=passing_nucleic
+    )
+
+
+def test_store_protein_seq():
+    passing_nucleic = True
+    nucleic_seq_obj = parse_sequence.Sequence()
+    nucleic_seq_obj.get_seq_key(">Bob", passing_nucleic)
+    nucleic_seq_obj.get_seq("atgaaatttccccaaaggggaaa")
+    seq_obj = parse_sequence.Sequence()
+    passing_nucleic = False
+    seq_obj.get_seq_key(">orf1 source=Bob coords=143..286 length=48 frame=2 desc=", passing_nucleic)
+    seq_obj.get_seq("MAMAMAMAMAMAMAMAMAMAMLAMA")
+    nucleic_seqs = {
+        "Bob": nucleic_seq_obj
+    }
+    sequences = {}
+    expected = {
+        'orf1': {
+            'seq_id': 'orf1 source=Bob coords=143..286 length=48 frame=2 desc=',
+            'name': None,
+            'sequence': 'MAMAMAMAMAMAMAMAMAMAMLAMA',
+            'md5': '95ccc5915e0f68f7f43cfebda07fb866',
+            'length': 25,
+            'nt_seq_id': 'Bob',
+            'nt_name': 'Bob',
+            'nt_sequence': 'atgaaatttccccaaaggggaaa',
+            'nt_md5': '29e4b52298105869362604ee4938bb92'
+        }
+    }
+    assert expected == parse_sequence.store_seq(
+        seq_obj, sequences, nucleic_seqs, passing_nucleic=passing_nucleic
+    )
