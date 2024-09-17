@@ -44,9 +44,9 @@ def filter_matches(matches: dict, protein_seqs: dict) -> dict:
     for protein_id in matches:
         if SMART_SER_THR_KINASE_METHOD in matches[protein_id] and SMART_TYR_KINASE_METHOD in matches[protein_id]:
             protein_seq = protein_seqs[protein_id]
-            if not protein_seq.match(SMART_SER_THR_REGEX):
+            if not SMART_SER_THR_REGEX.match(protein_seq):
                 del matches[protein_id][SMART_SER_THR_KINASE_METHOD]
-            if not protein_seq.match(SMART_TYR_REGEX):
+            if not SMART_TYR_REGEX.match(SMART_TYR_REGEX):
                 del matches[protein_id][SMART_TYR_KINASE_METHOD]
 
     return matches
