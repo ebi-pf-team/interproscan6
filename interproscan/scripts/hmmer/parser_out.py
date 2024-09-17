@@ -3,6 +3,7 @@ import re
 import sys
 
 
+QUERY_LEN_PATTERN = re.compile(r"^Query:\s+.*\s+\[M=(\d+)\]")
 DOMAIN_SECTION_START_PATTERN = re.compile(r"^>>\s+(\S+).*$")
 DOMAIN_ALIGNMENT_LINE_PATTERN = re.compile(r"^\s+==\s+domain\s+(\d+)\s+.*$")
 ALIGNMENT_SEQUENCE_PATTERN = re.compile(r"^\s+(\S+)\s+(\S+)\s+([-a-zA-Z]+)\s+(\S+)\s*$")  # replacing (\w+) with (\S+) and adding if to ignore current sequence
@@ -84,10 +85,11 @@ def parse(out_file: str, member_db: str) -> dict:
                                     model_ident_pattern.group(2).replace(".orig.30.pir", "")
 
                         if line.startswith("Query:"):
-                            try:
-                                qlen = line.split("[")[1].split("]")[0].replace("M=", "")
-                            except IndexError:  # e.g. line = "Query:       5xqwL01-i2]"
-                                qlen = ""
+                            qlen_pattern = QUERY_LEN_PATTERN.match(line)
+                            if qlen_pattern:
+                                qlen = qlen_pattern.group(1)
+                            else:
+                                qlen = None
 
                     elif stage == 'LOOKING_FOR_SEQUENCE_MATCHES':
                         if not line.strip():
@@ -182,7 +184,7 @@ def get_domain_match(match: re.Match, member_db: str, qlen: str) -> dict:
     domain_match["end"] = int(match.group(10)) if member_db.upper() != "GENE3D" else int(match.group(12))  # ali coord to
     domain_match["hmmStart"] = int(match.group(6))  # hmm coord from
     domain_match["hmmEnd"] = int(match.group(7))   # hmm coord to
-    domain_match["hmmLength"] = int(qlen)  # qlen
+    domain_match["hmmLength"] = int(qlen) if qlen else None # qlen
     domain_match["rawHmmBounds"] = match.group(8)
     domain_match["hmmBounds"] = hmm_bound_pattern[match.group(8)]
     domain_match["evalue"] = float(match.group(5))  # Independent e-value
@@ -210,7 +212,7 @@ def get_sequence_match(
             "accession": model_id,
             "evalue": float(match.group(1)),
             "score": float(match.group(2)),
-            "qlen": int(qlen),
+            "qlen": int(qlen) if qlen else None,
             "bias": match.group(3),
             "member_db": member_db,
             "model-ac": model_id.split(":")[0].split(".")[0],
