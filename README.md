@@ -66,19 +66,13 @@ The instructions below rely on an internet connection to pull the necessary imag
 
 1. **Download InterPro data files**
 
-```bash
-# replace interpro-version with the appropriate version number
-INTERPRO_VERSION="102.0"
-curl "https://ftp.ebi.ac.uk/pub/databases/interpro/iprscan/6/$INTERPRO_VERSION/interproscan-data-$INTERPRO_VERSION.tar.gz" \
-    --output interproscan-data-<interpro-version>.tar.gz
-tar -pxzf interproscan-data-<interpro-version>.tar.gz
-mv interproscan-data-<interpro-version>/data .
-rm interproscan-data-<interpro-version> -rf
-rm interproscan-data-<interpro-version>.tar.gz
-```
+Run the following commands within the `InterProScan` project directory to download and extract all the required data files:
 
-Running these commands within the `InterProScan` project directory should download and store all 
-InterPro entry (XREF) and member database data in the `data` directory.
+```bash
+curl -OJ https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/102.0/interproscan-data-102.0.tar.gz
+tar -pxzf interproscan-data-102.0.tar.gz
+mv interproscan-data-102.0 data
+```
 
 > [!IMPORTANT]
 > By default `InterProScan` will look for a `data` directory in the `InterProScan` project dir. 
@@ -92,7 +86,7 @@ The base image includes all non-licensed dependencies including
 
 Using `Docker`:
 ```bash
-docker pull interproscan6:latest
+docker pull interpro/interproscan6:latest
 ```
 
 Using `Singularity`:
@@ -121,14 +115,9 @@ please see the ['Installing licensed applications'](#installing-licensed-applica
 1. **Download InterPro data file.**
 
 ```bash
-# replace interpro-version with the appropriate version number
-INTERPRO_VERSION="102.0"
-curl "https://ftp.ebi.ac.uk/pub/databases/interpro/iprscan/6/$INTERPRO_VERSION/interproscan-data-$INTERPRO_VERSION.tar.gz" \
-    --output interproscan-data-<interpro-version>.tar.gz
-tar -pxzf interproscan-data-<interpro-version>.tar.gz
-mv interproscan-data-<interpro-version>/data .
-rm interproscan-data-<interpro-version> -rf
-rm interproscan-data-<interpro-version>.tar.gz
+curl -OJ https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/102.0/interproscan-data-102.0.tar.gz
+tar -pxzf interproscan-data-102.0.tar.gz
+mv interproscan-data-102.0 data
 ```
 
 2. **Build the Docker image.** (This includes the idrpred tool for MobiDB predictions). Run this command from the root of this repository.
