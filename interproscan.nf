@@ -12,7 +12,6 @@ include { SEQUENCE_PRECALC } from "$projectDir/interproscan/subworkflows/sequenc
 include { SEQUENCE_ANALYSIS } from "$projectDir/interproscan/subworkflows/sequence_analysis/main"
 include { XREFS } from "$projectDir/interproscan/subworkflows/xrefs/main"
 
-
 workflow {
     // Perform preliminary validation checks before running the analysis
     if (params.input != null) {
@@ -118,7 +117,6 @@ workflow {
     AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
 
     all_results = parsed_matches.concat(parsed_analysis)
-    all_results.view()
     AGGREGATE_RESULTS(all_results)
 
     /* XREFS:
