@@ -108,12 +108,12 @@ def main():
     args[1] = str repr of path to originally submitted FASTA file
         (may contain the original nucleic sequences)
     args[2] = str repr of bool, if nucleic seqs provided ('true') or not ('false')
-    args[4] = str repr of path to write output
+    args[3] = str repr of path to write output
     """
     args = sys.argv[1:]
     nt_seqs = parse(args[1], passing_nucleic=True) if args[2] == "true" else None
     parsed_seqs = parse(args[0], nucleic_seqs=nt_seqs)
-    with open(args[4], "w") as fh:
+    with open(args[3], "w") as fh:
         json.dump(parsed_seqs, fh)
 
 
