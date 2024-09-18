@@ -130,8 +130,6 @@ workflow PRE_CHECKS {
         exit 5
     }
 
-    log.info "PRECHECKS:: Input ${seq_input}"
-
     // is user specifies the input is nucleic acid seqs
     // check the input only contains nucleic acid seqs
     // and it always checks the input FASTA file for illegal characters
@@ -142,7 +140,6 @@ workflow PRE_CHECKS {
         is_nucleic = false
     }
     CHECK_SEQUENCES(seq_input, applications_lower, is_nucleic)
-    log.info "PRECHECKS:: nucleic ${is_nucleic}"
 
     // Check if the input parameters are valid
     def parameters_expected = [
