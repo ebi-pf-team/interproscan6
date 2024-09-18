@@ -80,10 +80,15 @@ process HMMER_SCAN_PARSER {
 
     input:
     path out
+    val post_processing
     val member
+    path dtbl
 
     output:
     path "hmmer_parsed_${out}.json"
+    path dtbl
+    val post_processing
+
 
     script:
     """

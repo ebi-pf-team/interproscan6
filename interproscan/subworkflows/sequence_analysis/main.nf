@@ -408,15 +408,8 @@ workflow SEQUENCE_ANALYSIS {
     // PIRSF (+ filter_ips6_matches.py for post-processing)
     runner_pirsf_params = fasta.combine(member_params.pirsf)
     PIRSF_HMMER_RUNNER(runner_pirsf_params)
-    PIRSF_HMMER_PARSER(
-        PIRSF_HMMER_RUNNER.out[0],  // hmmer.out path
-        PIRSF_HMMER_RUNNER.out[2]   // member db
-    )
-    PIRSF_FILTER_MATCHES(
-        PIRSF_HMMER_PARSER.out,     // ips6 json
-        PIRSF_HMMER_RUNNER.out[3],  // hmmer dtbl file -- needed to get tlen value
-        PIRSF_HMMER_RUNNER.out[1]   // post-processing-params
-    )
+    PIRSF_HMMER_PARSER(PIRSF_HMMER_RUNNER.out)
+    PIRSF_FILTER_MATCHES(PIRSF_HMMER_PARSER.out)
 
     // PIRSR
     runner_pirsr_params = fasta.combine(member_params.pirsr)
