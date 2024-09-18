@@ -475,8 +475,7 @@ workflow SEQUENCE_ANALYSIS {
     COILS_PARSER(COILS_RUNNER.out)
 
     // MOBIDB
-    runner_mobidb_params = fasta.combine(member_params.mobidb)
-    MOBIDB_RUNNER(runner_mobidb_params)
+    MOBIDB_RUNNER(fasta)
     MOBIDB_PARSER(MOBIDB_RUNNER.out)
 
     // PHOBIUS

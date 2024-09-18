@@ -35,9 +35,8 @@ Our full documentation is still under construction.
   - [Using DNA sequences](#using-dna-sequences)
   - [Input sequences](#input-sequences)
   - [Outputs and results](#outputs)
-- [Installing licensed applications (`MobiDB`, `Phobius`, `SignalP`, `TMHMM`)](#installing-licensed-applications-mobidb-phobius-signalp-tmhmm)
+- [Installing licensed applications (`Phobius`, `SignalP`, `TMHMM`)](#installing-licensed-applications-phobius-signalp-tmhmm)
   - [DeepTMHMM](#deeptmhmm)
-  - [MobiDB-Lite](#mobidb-lite)
   - [SignalP (version 6)](#signalp)
     - [Setting up SignalP](#set-up-1)
     - [Running SignalP](#running-interproscan6-with-signalp6)
@@ -106,7 +105,7 @@ apptainer pull interproscan6.sif docker://interpro/interproscan6:latest
 
 3. **(Optional) Install licensed software**
 
-By default `MobiDB`, `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
+By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
 because they contain licensed components. In order to activate these analyses 
 please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
 
@@ -120,7 +119,7 @@ tar -pxzf interproscan-data-102.0.tar.gz
 mv interproscan-data-102.0 data
 ```
 
-2. **Build the Docker image.** (This includes the idrpred tool for MobiDB predictions). Run this command from the root of this repository.
+2. **Build the Docker image.** Run this command from the root of this repository.
 
 ```bash
 docker build -t interproscan6 .
@@ -128,7 +127,7 @@ docker build -t interproscan6 .
 
 3. **(Optional) Install licensed software**
 
-By default `MobiDB`, `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
+By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
 because they contain licensed components. In order to activate these analyses 
 please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
 
@@ -194,7 +193,7 @@ Nextflow also supports using Charliecloud, Podman, Sarus, and Shifter. However y
 
 ## Optional arguments
 
-**`--applications`** - Applications/member databases to run. By default `InterProScan` runs all member databases in the consortium ([except Mobidb-Lite due to licensing reasons](#mobidb)). Use the `--applications` to define a comma separate list of applications names (case insensitive).
+**`--applications`** - Applications/member databases to run. By default `InterProScan` runs all member databases in the consortium. Use the `--applications` to define a comma separate list of applications names (case insensitive).
 
 **`--datadir`** - Path to the data directory. By default `InterProScan` looks for a `data` directory 
 in the `InterProScan` project directory.
@@ -239,7 +238,7 @@ Below is a list of the applications (built in and those that require additional 
   * [Cath-Gene3D]( https://www.cathdb.info/) (use as 'Gene3D' to run Cath-Gene3D in `InterProScan`)
   * [CDD](https://www.ncbi.nlm.nih.gov/cdd)
   * [HAMAP](https://hamap.expasy.org/)
-  * [MobiDB Lite](http://old.protein.bio.unipd.it/mobidblite/)
+  * [MobiDB-lite](http://old.protein.bio.unipd.it/mobidblite/)
   * [NCBIfam](https://www.ncbi.nlm.nih.gov/genome/annotation_prok/evidence/)
   * [PANTHER](http://www.pantherdb.org/)
   * [Pfam](https://pfam.xfam.org/)
@@ -585,9 +584,9 @@ The envelope represents the region of a protein sequence where the domain may be
 
 **Panther exception:** The output from HMMER3 against the HMM models of Panther is post-processed to select only the best homologous family. Therefore, there is a maximum of one domain hit for each Panther signature in a protein sequence. Owing to this the E-value and Score and listed under the `signature` key, not the `locations` key.
 
-# Installing licensed applications (`MobiDB`, `Phobius`, `SignalP`, `TMHMM`)
+# Installing licensed applications (`Phobius`, `SignalP`, `TMHMM`)
 
-By default `MobiDB`, `Phobius`, `SignalP`, and `DeepTMHMM` member database analyses are deactivated in `InterProScan6` because they contain licensed components. In order to activate these analyses please obtain the relevant licenses and files from the provider (ensuring the software version numbers are the same as those supported by your current `InterProScan6` installation).
+By default `Phobius`, `SignalP`, and `DeepTMHMM` member database analyses are deactivated in `InterProScan6` because they contain licensed components. In order to activate these analyses please obtain the relevant licenses and files from the provider (ensuring the software version numbers are the same as those supported by your current `InterProScan6` installation).
 
 Files can be placed in any location.
 
@@ -600,30 +599,6 @@ Files can be placed in any location.
 ## DeepTMHMM
 
 Coming soon...
-
-## MobiDB-Lite
-
-Some of the compoments within `MobiDBLite` are GPL-licensed, meaning all software and data, and thus 
-work that uses this software, also needs to be GPL-licensed. This may not be ideal or suitable
-for all users. Therefore, we provide a version of the `MobiDBLite` analytical software that 
-is not GPL-licensed, called [`idrpred`](https://github.com/matthiasblum/idrpred).
-
-To setup `MobiDB`/`idrpred` for `InterProScan6` pull the `idrpred` Docker image from Docker hub using your container runtime of choice.
-
-Using docker:
-```bash
-docker pull idrpred:latest
-```
-
-Using `Singularity`:
-```bash
-singularity pull idrpred.sif docker://matblum/idrpred/idrpred:latest
-```
-
-Using `Apptainer`:
-```bash
-apptainer pull idrpred.sif docker://matblum/idrpred/idrpred:latest
-```
 
 ## `Phobius`
 
