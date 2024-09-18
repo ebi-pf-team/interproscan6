@@ -1,4 +1,4 @@
-include { CHECK_SEQUENCES } from "$projectDir/interproscan/modules/pre_checks/main"
+include { CHECK_SEQUENCES } from "$projectDir/interproscan/subworkflows/pre_checks/check_sequences.nf"
 include { CHECK_DATA } from "$projectDir/interproscan/subworkflows/sequence_analysis/check_data"
 include { CHECK_XREF_DATA } from "$projectDir/interproscan/subworkflows/xrefs/check_xref_data"
 
@@ -99,9 +99,12 @@ workflow PRE_CHECKS {
     signalp_gpu
     goterms
     pathways
-    outdir
 
     main:
+    def applications_lower = user_applications.toLowerCase().split(',') as Set
+
+    log.info "PRECHECKS:: apps lower :: ${applications_lower}"
+
     if ( !nextflow.version.matches('>=23.04') ) {
         println "InterProScan requires Nextflow version 23.04 or greater -- You are running version $nextflow.version"
         exit 1
@@ -127,6 +130,8 @@ workflow PRE_CHECKS {
         exit 5
     }
 
+    log.info "PRECHECKS:: Input ${seq_input}"
+
     // is user specifies the input is nucleic acid seqs
     // check the input only contains nucleic acid seqs
     // and it always checks the input FASTA file for illegal characters
@@ -136,7 +141,8 @@ workflow PRE_CHECKS {
     } else {
         is_nucleic = false
     }
-    CHECK_SEQUENCES(seq_input, seq_input, is_nucleic, outdir)
+    CHECK_SEQUENCES(seq_input, applications_lower, is_nucleic)
+    log.info "PRECHECKS:: nucleic ${is_nucleic}"
 
     // Check if the input parameters are valid
     def parameters_expected = [
@@ -160,7 +166,7 @@ workflow PRE_CHECKS {
         'sfld', 'signalp', 'signalp_euk', 'smart', 'superfamily'
     ]
 
-    def applications_diff = user_applications.toLowerCase().split(',') - applications_expected
+    def applications_diff = applications_lower - applications_expected
     if (applications_diff.size() != 0){
         log.info printHelp()
         exit 22, "Applications not valid: $applications_diff. Valid applications are: $applications_expected"
@@ -185,9 +191,7 @@ workflow PRE_CHECKS {
         exit 5
     }
 
-    applications = user_applications.toLowerCase()
-
-    CHECK_DATA(applications, data_dir)
+    CHECK_DATA(applications_lower, data_dir)
     missingData = CHECK_DATA.out.missingData.val
     dataDir = CHECK_DATA.out.dataDir.val
 
