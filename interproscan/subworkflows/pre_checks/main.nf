@@ -1,4 +1,4 @@
-include { CHECK_NUCLEIC } from "$projectDir/interproscan/modules/pre_checks/main"
+include { CHECK_SEQUENCES } from "$projectDir/interproscan/modules/pre_checks/main"
 include { CHECK_DATA } from "$projectDir/interproscan/subworkflows/sequence_analysis/check_data"
 include { CHECK_XREF_DATA } from "$projectDir/interproscan/subworkflows/xrefs/check_xref_data"
 
@@ -99,6 +99,7 @@ workflow PRE_CHECKS {
     signalp_gpu
     goterms
     pathways
+    outdir
 
     main:
     if ( !nextflow.version.matches('>=23.04') ) {
@@ -128,20 +129,14 @@ workflow PRE_CHECKS {
 
     // is user specifies the input is nucleic acid seqs
     // check the input only contains nucleic acid seqs
+    // and it always checks the input FASTA file for illegal characters
+    // this includes member specific and general illegal characters
     if (using_nucleic) {
-        try {
-            CHECK_NUCLEIC(seq_input)
-        } catch (all) {
-            println """Error in input sequences"""
-            log.error """
-            The '--nucleic' flag was used, but the input FASTA file
-            appears to contain at least one sequence that contains a
-            non-nucleic acid residue ('A','G','C','T','*','-', case insensitive).
-            Please check your input is correct.
-            """
-            exit 1
-        }
+        is_nucleic = true
+    } else {
+        is_nucleic = false
     }
+    CHECK_SEQUENCES(seq_input, seq_input, is_nucleic, outdir)
 
     // Check if the input parameters are valid
     def parameters_expected = [
