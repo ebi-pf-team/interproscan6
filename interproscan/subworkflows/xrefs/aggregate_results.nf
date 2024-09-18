@@ -25,7 +25,6 @@ workflow AGGREGATE_RESULTS {
 }
 
 def mergeJsonFiles(List<String> jsonFiles) {
-    println(jsonFiles)
     def slurper = new JsonSlurper()
     def aggregatedResult = [:]
 

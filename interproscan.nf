@@ -4,7 +4,7 @@ include { PARSE_SEQUENCE } from "$projectDir/interproscan/modules/parse_sequence
 include { GET_ORFS } from "$projectDir/interproscan/modules/get_orfs/main"
 include { REPRESENTATIVE_DOMAINS } from "$projectDir/interproscan/modules/output/representative_domains/main"
 include { AGGREGATE_PARSED_SEQS } from "$projectDir/interproscan/modules/output/aggregate_parsed_seqs/main"
-include { AGGREGATE_RESULTS } from "$projectDir/interproscan/subworkflows/output/aggregate_results"
+include { AGGREGATE_RESULTS } from "$projectDir/interproscan/subworkflows/xrefs/aggregate_results"
 include { WRITE_RESULTS } from "$projectDir/interproscan/modules/output/write_results/main"
 
 include { PRE_CHECKS } from "$projectDir/interproscan/subworkflows/pre_checks/main"
@@ -118,16 +118,8 @@ workflow {
     AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
 
     all_results = parsed_matches.concat(parsed_analysis)
+    all_results.view()
     AGGREGATE_RESULTS(all_results)
-
-//     jsonChunks = all_results.collate(1000)
-//     jsonChunks
-//     .set { chunks ->
-//         chunks
-//         .map { chunk ->
-//             AGGREGATE_RESULTS(chunk)
-//         }
-//     }
 
     /* XREFS:
     Add signature and entry desc and names
