@@ -4,7 +4,7 @@ include { PARSE_SEQUENCE } from "$projectDir/interproscan/modules/parse_sequence
 include { GET_ORFS } from "$projectDir/interproscan/modules/get_orfs/main"
 include { REPRESENTATIVE_DOMAINS } from "$projectDir/interproscan/modules/output/representative_domains/main"
 include { AGGREGATE_PARSED_SEQS } from "$projectDir/interproscan/modules/output/aggregate_parsed_seqs/main"
-include { AGGREGATE_RESULTS } from "$projectDir/interproscan/subworkflows/xrefs/aggregate_results"
+include { AGGREGATE_RESULTS } from "$projectDir/interproscan/subworkflows/aggregate_results/main"
 include { WRITE_RESULTS } from "$projectDir/interproscan/modules/output/write_results/main"
 
 include { PRE_CHECKS } from "$projectDir/interproscan/subworkflows/pre_checks/main"
