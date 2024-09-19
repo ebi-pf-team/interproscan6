@@ -55,6 +55,14 @@ def build_parser(argv: Optional[List] = None) -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--fig_size",
+        nargs=2,
+        type=int,
+        default=None,
+        help="Size of the final plot, width then height (space separated), e.g. 10 5"
+    )
+
+    parser.add_argument(
         "--format",
         nargs="+",
         action=ValidateFormats,
@@ -163,13 +171,24 @@ def convert_process_names(processes: list[str]) -> list[str]:
     format with MEMBER_DB: RUNER/PARSER/POST_PROCESS/FILTER
     respectively."""
     shortened_processses = []
+    unrecognised_processes = False
     for process in processes:
-        if process.startswith(('PARSE_SEQUENCE', 'XREFS', 'WRITE_RESULTS', 'AGGREGATE_RESULTS')):
+        if process.startswith(
+            (
+                'PARSE_SEQUENCE', 'SEQUENCE_PRECALC',
+                'AGGREGATE_PARSED_SEQS', 'AGGREGATE_RESULTS',
+                'REPRESENTATIVE_DOMAINS', 'XREFS', 'WRITE_RESULTS'
+            )
+        ):
             shortened_processses.append(process)
         elif process.startswith('SEQUENCE_ANALYSIS:'):
-            shortened_processses.append(process.replace('SEQUENCE_ANALYSIS:',''))
+            shortened_processses.append(process.replace('SEQUENCE_ANALYSIS:', ''))
         else:
-            print('unrecognised process', process)
+            print('Unrecognised process', process)
+            unrecognised_processes = True
+
+    if unrecognised_processes:
+        sys.exit(1)
 
     return shortened_processses
 

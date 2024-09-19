@@ -11,6 +11,7 @@ import seaborn as sns
 PROCESSES = [
     'GET_ORFS',
     'PARSE_SEQUENCE',
+    'SEQUENCE_PRECALC:LOOKUP_CHECK', 'SEQUENCE_PRECALC:LOOKUP_NO_MATCHES', 'SEQUENCE_PRECALC:LOOKUP_MATCHES',
     'ANTIFAM_HMMER_RUNNER', 'ANTIFAM_HMMER_PARSER',
     'CDD_RUNNER', 'CDD_PARSER', 'CDD_POSTPROCESS',
     'COILS_RUNNER', 'COILS_PARSER',
@@ -32,6 +33,7 @@ PROCESSES = [
     'SMART_HMMER2_RUNNER', 'HMMER2_PARSER', 'SMART_FILTER_MATCHES',
     'SUPERFAMILY_HMMER_RUNNER',  'SUPERFAMILY_POST_PROCESSER', 'SUPERFAMILY_FILTER_MATCHES',
     'AGGREGATE_RESULTS', 'AGGREGATE_PARSED_SEQS',
+    'REPRESENTATIVE_DOMAINS',
     'XREFS:ENTRIES', 'XREFS:PAINT_ANNOTATIONS', 'XREFS:GOTERMS', 'XREFS:PATHWAYS',
     'WRITE_RESULTS',
 ]
@@ -226,7 +228,8 @@ def plot_overall_summary(
     y_label: str,
     title: str,
     hue_order: str,
-    group_order: list
+    group_order: list,
+    fix_size: tuple[int]|None
 ):
     """Plot all data across all processes grouped together,
     only separate by the user defined 'groups'."""
@@ -237,8 +240,6 @@ def plot_overall_summary(
     if hue_order == 'groups':  # do not break up the data by process
         hue_order = group_order
         x_axis_order = group_order
-        legend_title = grp_col
-        bbox_to_anchor = (.5, -0.5)
 
     else:  # break up the data by process, then sub-group by user defined group
         if len(group_order) > 1:
@@ -251,17 +252,18 @@ def plot_overall_summary(
             key=lambda column: column.map(lambda e: process_order.index(e)),
             inplace=True
         )
-        legend_title = "Process"
-        bbox_to_anchor = (.5, -1.5)
 
-    if len(x_axis_order) > 30:
-        if hue:
-            if len(df[hue]) > 1:
-                fig, ax = plt.subplots(figsize=(30, 5))
-        else:
-            fig, ax = plt.subplots(figsize=(12, 5))
+    if fix_size:
+        fig, ax = plt.subplots(figsize=fix_size)
     else:
-        fig, ax = plt.subplots()
+        if len(x_axis_order) > 10:
+            if hue:
+                if len(df[hue]) > 1:
+                    fig, ax = plt.subplots(figsize=(30, 5))
+            else:
+                fig, ax = plt.subplots(figsize=(12, 5))
+        else:
+            fig, ax = plt.subplots()
 
     df[x] = df[x].astype(str)
 

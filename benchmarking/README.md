@@ -84,23 +84,50 @@ You can print a help message to prin out the argument options:
 python3 benchmarking/benchmark_ips6.py --help
 ```
 
+### Group name
+
 By default, the benchmarking will label the groupings as 'Groups' on the resulting plot axes and 
 legends. You can name the groupings using the `--group_name` flag and providing the name you 
 wish to be assigned to the axes and legends, e.g. `--group_name "Batch Sizes"`, or `--group_name "Number of CPU"`.
+
+### Figure file formats
 
 By default, the resulting figures are only written out in `PDF` format. Use the `--format` flag to 
 list the desired file outputs. Accepted outputs: png, pdf, and svg. For example to generate svg and 
 png files use `--format png,svg`.
 
+### The trace file contains raw data
+
 By default the trace file writes the in human readable format, but can be configured to write the raw
 values. If this is the case, include the `--raw` flag in the `benchmark_ips6.py` command.
+
+### Output dir
 
 By default, the output figures will be written to the current working directory. To write the files 
 to a desired output directory use the `--outdir` flag and provide the path for the output dir. The 
 scripts will build all necessary parent directories for the output dir.
 
+### Save the data
+
 If you wish to perform further analyses on the data, use the `--save_data` flag to configure 
 `benchmark_ips6.py` to write out the dataframe it generates to a CSV file in the output dir.
+
+### Adjust the figure sizes
+
+`benchmark_ips6.py` does attempt to adjust the figure size automatically based on the amount of data, 
+but you can customise the plot size (when the memory and max memory usage) by using the 
+`--fig_size` flag and providing the width and height, defaults start at 10, 5 (before IPS6 adjusts for
+the data set size). Provide the numbers as a space separated list, e.g.
+
+```bash
+# width = 10, height = 5
+python3 benchmarking/benchmark_ips6.py \
+    benchmarking/tracefiles.json \
+    --group_name "Batch Size" \
+    --outdir testing-benchmarking_fig-size \
+    --fig_size 10 5 \
+    --save_data
+```
 
 ## Output:
 

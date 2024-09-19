@@ -83,6 +83,8 @@ def main(argv: Optional[List[str]] = None):
         args.format
     )
 
+    fig_size = (args.fig_size[0], args.fig_size[1]) if args.fig_size else None
+
     # plot overall memory usage
     plot_overall_summary(
         all_data,
@@ -97,6 +99,7 @@ def main(argv: Optional[List[str]] = None):
         'Memory Usuage',
         'groups',
         group_order,
+        fig_size
     )
 
     # plot overall maximum memory usage
@@ -113,6 +116,7 @@ def main(argv: Optional[List[str]] = None):
         'Maximum Memory Usage',
         'groups',
         group_order,
+        fig_size
     )
 
     # plot mem per process
@@ -129,6 +133,7 @@ def main(argv: Optional[List[str]] = None):
         'Memory Usage',
         'process',
         group_order,
+        fig_size
     )
 
     # plot max mem per process
@@ -145,6 +150,7 @@ def main(argv: Optional[List[str]] = None):
         'Memory Usage',
         'process',
         group_order,
+        fig_size
     )
 
     if args.save_data:
