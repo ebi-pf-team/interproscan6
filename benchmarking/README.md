@@ -114,3 +114,6 @@ Each run of `benchmark_ips6.py` will produce the following figures (note, refere
 6. `overall_max_memory_usage.*` - Plots the overall maximum memory used per group in the input JSON file
 7. `memory_per_process.*` - Plots the memory usage per process (and per group if multiple groups are defined in the input JSON file)
 8. `max_memory_per_process.*` - Plots the maximum memory usage per process (and per group if multiple groups are defined in the input JSON file)
+
+Each box and whisker plot is overlaid by a strip plot with each point of the strip plot representing the value
+from a single run.
