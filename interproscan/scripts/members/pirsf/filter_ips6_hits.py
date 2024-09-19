@@ -1,6 +1,6 @@
-import argparse
 import json
 import re
+import sys
 
 from pathlib import Path
 
@@ -214,22 +214,29 @@ def filter_matches(ips6_json: Path, sig_lengths: dict, pirsf_dat: dict, children
             if model_id in children:
                 # If a sub-family, process slightly differently. Only consider the score.
                 if ratio > 0.67 and score >= pirsf_dat[model_id].min_s:
-                    # subfamily passes the criteria
+
+                    parent_model_id = children[model_id]  # parent = parent model id
+
+                    # if we have a subfamily match we should consider the parent to also be a match
+                    # but check if there is a match for the parent
+                    # if the there is no match for the parent, drop the match for the subfam
+                    try:
+                        pirf_hit = pirsfHit()
+                        pirf_hit.add_model_data(parent_model_id, matches[protein_id][parent_model_id])
+                        pirf_hit.add_child(model_id)
+                        filtered_models[parent_model_id] = pirf_hit
+
+                    except KeyError:  # no match for parent so continue
+                        continue
+
                     pirf_hit = pirsfHit()
                     pirf_hit.add_model_data(model_id, matches[protein_id][model_id])
                     filtered_models[model_id] = pirf_hit
 
-                    # if we have a subfamily match we should consider the parent to also be a match
-                    parent_model_id = children[model_id]  # parent = parent model id
-                    pirf_hit = pirsfHit()
-                    pirf_hit.add_model_data(parent_model_id, matches[protein_id][parent_model_id])
-                    pirf_hit.add_child(model_id)
-                    filtered_models[parent_model_id] = pirf_hit
-
             elif ratio > 0.67 and \
                 ovl >= 0.8 and \
                     (score >= pirsf_dat[model_id].min_s) and \
-                    (ld < 3.5 * pirsf_dat[model_id].std_l or ld < 50):
+                    (ld < 3.5 * pirsf_dat[model_id].std_l or ld < 50):#
                 # everything passes the threshold of length, score and standard deviations of length
                 pirf_hit = pirsfHit()
                 pirf_hit.add_model_data(model_id, matches[protein_id][model_id])
@@ -242,50 +249,31 @@ def filter_matches(ips6_json: Path, sig_lengths: dict, pirsf_dat: dict, children
     return processed_matches
 
 
-def build_parser() -> argparse.ArgumentParser:
-    """Build cmd-line argument parser"""
-    parser = argparse.ArgumentParser(
-        prog="pirsf_post_processing",
-        description="Reimplementation of pl script and module from i5 to filter PIRSF hits",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-    parser.add_argument(
-        "ips6",
-        type=Path,
-        help="Path to internal IPS6 JSON containing HMMER matches"
-    )
-    parser.add_argument(
-        "dtbl",
-        type=Path,
-        help="Path to the HmmScan dtbl file"
-    )
-    parser.add_argument(
-        "dat",
-        type=Path,
-        help="Path to PIRSF.dat file"
-    )
-    parser.add_argument(
-        "out_json",
-        type=Path,
-        help="Path to write output JSON"
-    )
-    parser.add_argument('-verbose', action='store_true', help="Report No matches")
-    parser.add_argument('-outfmt', choices=['pirsf', 'ips6'], default='pirsf', help="Output format")
-    parser.add_argument('-cpus', type=int, default=1, help="Number of CPUs to use")
-    parser.add_argument('-tmpdir', default='tmp', help="Directory for HMMER to use")
-
-    return parser
-
-
 def main():
-    parser = build_parser()
-    args = parser.parse_args()
+    """CL arguments:
+    :args[0]: str repr of path to the internal IPS6 JSON container HMMER matches
+    :args[1]: str repr of path to the HmmScan dtbl file
+    :args[2]: str repr of path to the PIRSF.dat file
+    :args[3]: str repr of the output path
+    """
+    args = sys.argv[1:]
+    ips6 = args[0]
+    dtbl = args[1]
+    dat = args[2]
+    out_json = args[3]
 
-    sig_lenths = get_signature_lengths(args.dtbl)
-    pirsf_dat, children = load_dat(args.dat)
-    procossed_results = filter_matches(args.ips6, sig_lenths, pirsf_dat, children)
+    sig_lenths = get_signature_lengths(dtbl)
+    pirsf_dat, children = load_dat(dat)
+    # children {subfam: parent}
+    print(len(pirsf_dat), len(children))
+    with open("children", "w") as fh:
+        json.dump(children, fh)
+    with open("pirsf_dat", "w") as fh:
+        fh.write(str(pirsf_dat))
+    print(pirsf_dat['PIRSF001220'])
+    procossed_results = filter_matches(ips6, sig_lenths, pirsf_dat, children)
 
-    with open(args.out_json, "w") as fh:
+    with open(out_json, "w") as fh:
         json.dump(procossed_results, fh, indent=2)
 
 
