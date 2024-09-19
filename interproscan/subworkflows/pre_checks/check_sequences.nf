@@ -1,5 +1,5 @@
 def isNucleic(sequence) {
-    def LEGAL_NUCLEIC_CHARS = ['A', 'T', 'C', 'G', 'U', '*'] as Set
+    def LEGAL_NUCLEIC_CHARS = ['A', 'T', 'C', 'G', 'U', '*', '-'] as Set
     sequence.toUpperCase().every { LEGAL_NUCLEIC_CHARS.contains(it) }
 }
 
@@ -28,7 +28,7 @@ def checkIllegalChars(sequence, apps, nucleic) {
         "signalp_euk": ""
     ]
     def errors = [:]
-    def invalidCharPattern = nucleic ? ~/[^ATCGU]*/ : ~/[^A-Za-z_\-\*\.]*/
+    def invalidCharPattern = ~/[^A-Za-z_\-\*\.]*/
     def invalidChars = sequence.findAll(invalidCharPattern).flatten().unique().collect { "'${it}'" }.findAll { it != "''" }
     if (invalidChars) {
         errors['GENERAL'] = new TreeSet(invalidChars)
