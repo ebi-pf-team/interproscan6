@@ -67,8 +67,15 @@ def write_results(
 
 
 def main():
-    args = sys.argv[1:]
+    """CL input:
+    0. str repr of path to sequences json output file
+    1. str repr of path to matches json output file
+    2. str repr of output formats separated by commas
+    3. str repr of output file name
+    4. str repr of InterProScan version
+    5. str repr of nucleic acid sequences flag"""
 
+    args = sys.argv[1:]
     sequences = args[0]
     matches = args[1]
     formats_str = args[2]
