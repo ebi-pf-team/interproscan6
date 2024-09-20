@@ -171,7 +171,8 @@ process PIRSF_HMMER_RUNNER {
     label 'hmmer_runner'
 
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
+    tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
+    val is_test
     /*
     No -Z number was provided in i5, so migrating from hmmscan to hmmsearch
     results in a chnage in the E-values, so we have to keep with hmmscan
@@ -185,15 +186,21 @@ process PIRSF_HMMER_RUNNER {
         path "${member}_dtbl"
 
     script:
-    """
-    /opt/hmmer3/bin/hmmpress ${hmm}
-    /opt/hmmer3/bin/hmmscan \\
-        ${switches} -o \\
-        ${member}_out \\
-        --domtblout ${member}_dtbl \\
-        ${hmm} \\
-        ${fasta}
-    """
+    if ( is_test )
+        """
+        touch "${member}_out"
+        touch "${member}_dtbl"
+        """
+    else
+        """
+        /opt/hmmer3/bin/hmmpress ${hmm}
+        /opt/hmmer3/bin/hmmscan \\
+            ${switches} -o \\
+            ${member}_out \\
+            --domtblout ${member}_dtbl \\
+            ${hmm} \\
+            ${fasta}
+        """
 }
 
 
@@ -201,7 +208,8 @@ process SMART_HMMER2_RUNNER {
     label 'hmmer_2_runner'
 
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches)
+    tuple path(fasta), val(member), path(hmm), val(switches)
+    val is_test
 
     output:
         path "${member}_out"
@@ -209,9 +217,15 @@ process SMART_HMMER2_RUNNER {
         val member
 
     script:
-    """
-    /opt/hmmer2/bin/hmmpfam ${switches} ${hmm} ${fasta} > ${member}_out
-    """
+    if ( is_test )
+        """
+        touch "${member}_out"
+        touch "${fasta}"
+        """
+    else
+        """
+        /opt/hmmer2/bin/hmmpfam ${switches} ${hmm} ${fasta} > ${member}_out
+        """
 }
 
 
@@ -219,7 +233,8 @@ process HMMER_SCAN_RUNNER {
     label 'hmmer_runner'
 
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
+    tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
+    val is_test
     /*
     Superfamily uses a .pl script that create assignments from the output of HMMER3 hmmscan
     */
@@ -232,8 +247,15 @@ process HMMER_SCAN_RUNNER {
         path hmm
 
     script:
-    """
-    /opt/hmmer3/bin/hmmpress ${hmm}
-    /opt/hmmer3/bin/hmmscan ${switches} -o ${member}_out ${hmm} ${fasta}
-    """
+    if ( is_test )
+        """
+        touch "${member}_out"
+        touch "hmmer_runner_fasta.faa"
+        touch "mock_hmm.hmm"
+        """
+    else
+        """
+        /opt/hmmer3/bin/hmmpress ${hmm}
+        /opt/hmmer3/bin/hmmscan ${switches} -o ${member}_out ${hmm} ${fasta}
+        """
 }
