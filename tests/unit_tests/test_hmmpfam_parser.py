@@ -12,8 +12,13 @@ from interproscan.scripts.hmmer import parse_hmmpfam_out
 
 
 @pytest.fixture
-def expected_matches_output(test_input_dir):
-    _path = test_input_dir / "hmmer2_parser/expected_matches_output.json"
+def hmmpfam_out(test_input_dir):
+    return test_input_dir / "hmmer2_parser/hmmpfam.out"
+
+
+@pytest.fixture
+def expected_matches_output(test_output_dir):
+    _path = test_output_dir / "hmmer2_parser/expected_matches_output.json"
     with open(_path, "r") as fh:
         data = json.load(fh)
     return data
@@ -44,6 +49,19 @@ def test_hmmpfam_main(monkeypatch, temp_output):
     parse_hmmpfam_out.main()
 
     temp_output.unlink()
+
+
+def test_parsing_hmmer2(expected_matches_output, hmmpfam_out, monkeypatch):
+    def mock_add_match(*args, **kwards):
+        return expected_matches_output
+
+    monkeypatch.setattr(parse_hmmpfam_out, "add_match", mock_add_match)
+
+    member_db = "unit-test"
+    assert expected_matches_output == parse_hmmpfam_out.parse_hmmpfam_out(
+        hmmpfam_out,
+        member_db
+    )
 
 
 def test_add_hmmpfam_matches(expected_matches_output):
