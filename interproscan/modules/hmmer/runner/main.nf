@@ -101,6 +101,7 @@ process FUNFAM_HMMER_RUNNER {
         tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
         path cath_superfamilies
         val applications
+        val is_test
     /*
     post-processing params:
     4. FunFam HMM dir
@@ -113,17 +114,22 @@ process FUNFAM_HMMER_RUNNER {
         val member
 
     script:
-    """
-    while IFS= read -r cath_superfamily
-    do
-        hmm_file="\${cath_superfamily//./\\/}.hmm"
-        /opt/hmmer3/bin/hmmsearch \\
-            ${postprocessing_params[5]} \\
-            -o funfam_\${cath_superfamily}.out \\
-            "${postprocessing_params[4]}/\$hmm_file" \\
-            ${fasta}
-    done < ${cath_superfamilies}
-    """
+    if ( is_test )
+        """
+        touch "funfam_unittest.out"
+        """
+    else
+        """
+        while IFS= read -r cath_superfamily
+        do
+            hmm_file="\${cath_superfamily//./\\/}.hmm"
+            /opt/hmmer3/bin/hmmsearch \\
+                ${postprocessing_params[5]} \\
+                -o funfam_\${cath_superfamily}.out \\
+                "${postprocessing_params[4]}/\$hmm_file" \\
+                ${fasta}
+        done < ${cath_superfamilies}
+        """
 }
 
 
