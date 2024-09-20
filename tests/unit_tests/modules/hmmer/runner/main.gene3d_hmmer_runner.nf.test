@@ -5,8 +5,8 @@ nextflow_process {
     process "GENE3D_HMMER_RUNNER"
 
     stage {
-        copy "tests/unit_tests/test_inputs/hmmer_runner/hmmer_runner_fasta.faa"
-        copy "tests/unit_tests/test_inputs/hmmer_runner/mock_hmm.hmm"
+        copy "tests/unit_tests/test_inputs/hmmer_runners/hmmer_runner_fasta.faa"
+        copy "tests/unit_tests/test_inputs/hmmer_runners/mock_hmm.hmm"
     }
 
     test("Should run without failures") {
@@ -16,9 +16,9 @@ nextflow_process {
             process {
                 """
                 input[0] = [
-                    file("../../../meta/tests/unit_tests/test_inputs/hmmer_runner/hmmer_runner_fasta.faa"),
+                    file("meta/tests/unit_tests/test_inputs/hmmer_runners/hmmer_runner_fasta.faa"),
                     "unit-test",
-                    file("../../../meta/tests/unit_tests/test_inputs/hmmer_runner/mock_hmm.hmm"),
+                    file("meta/tests/unit_tests/test_inputs/hmmer_runners/mock_hmm.hmm"),
                     ["switch"],
                     []
                 ]

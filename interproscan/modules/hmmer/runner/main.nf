@@ -139,7 +139,8 @@ process HAMAP_HMMER_RUNNER {
     The post processing of HAMAP requires the tbl file
     */
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
+    tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
+    val is_test
 
     output:
         path "${member}_out"
@@ -149,13 +150,20 @@ process HAMAP_HMMER_RUNNER {
         path "${member}_table.tbl"
 
     script:
-    """
-    /opt/hmmer3/bin/hmmsearch \\
-        ${switches} -o ${member}_out \\
-        --tblout ${member}_table.tbl \\
-        ${hmm} \\
-        ${fasta}
-    """
+    if ( is_test )
+        """
+        touch "${member}_out"
+        touch "hmmer_runner_fasta.faa"
+        touch "${member}_table.tbl"
+        """
+    else
+        """
+        /opt/hmmer3/bin/hmmsearch \\
+            ${switches} -o ${member}_out \\
+            --tblout ${member}_table.tbl \\
+            ${hmm} \\
+            ${fasta}
+        """
 }
 
 
