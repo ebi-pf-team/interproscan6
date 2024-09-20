@@ -1,0 +1,64 @@
+nextflow_workflow {
+
+    name "Test Workflow AGGREGATE_RESULTS"
+    script "interproscan/subworkflows/aggregate_results/main.nf"
+    workflow "AGGREGATE_RESULTS"
+
+    stage {
+        copy "tests/unit_tests/test_inputs/aggregate_results/cdd_matches.json"
+        copy "tests/unit_tests/test_inputs/aggregate_results/hamap_matches.json"
+        copy "tests/unit_tests/test_inputs/aggregate_results/corrupted.json"
+    }
+
+    test("Should run successfully") {
+        when {
+            params {
+                 }
+            workflow {
+                """
+                input[0] = Channel.from(file("meta/tests/unit_tests/test_inputs/aggregate_results/cdd_matches.json"), file("meta/tests/unit_tests/test_inputs/aggregate_results/hamap_matches.json"))
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert snapshot(workflow.out).match()
+            assert workflow.exitStatus == 0
+        }
+
+    }
+
+    test("Should handle corrupted JSON file error") {
+        when {
+            params {
+            }
+            workflow {
+                """
+                input[0] = Channel.from(file("meta/tests/unit_tests/test_inputs/aggregate_results/corrupted.json"))
+                """
+            }
+        }
+
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 22
+        }
+    }
+
+    test("Should handle file not found error") {
+        when {
+            params {
+            }
+            workflow {
+                """
+                input[0] = Channel.from(file("meta/tests/unit_tests/test_inputs/aggregate_results/no_hay_banda.json"), file("meta/tests/unit_tests/test_inputs/aggregate_results/cdd_matches.json"))
+                """
+            }
+        }
+
+        then {
+            assert workflow.failed
+        }
+    }
+}
