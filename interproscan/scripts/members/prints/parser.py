@@ -2,7 +2,7 @@ import json
 import re
 import sys
 
-SUMMARYPATTERN = re.compile(r"^(\w+)\s+(\w+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+([A-Za-z0-9\s\-\/\(\)\,\'\.\|\+\_\:\;]+?)\s+(\w+)\s*$")
+SUMMARYPATTERN = re.compile(r"^(\w+)\s+(\w+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+(.+?)\s+(PR\d+)\s*$")
 PRINTPATTERN = re.compile(r"^(\w+)\s+(\w+)\s+(\d+)\s+(of\s+\d+)\s+([\d\.]+)\s+([\d\.]+)\s+(\d+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+([\d\.]*\d+e[+-]?\d+|[\d\.]+)\s+([Ii.]+)\s*$")
 MOTIFPATTERN = re.compile(r"^(\w+)\s+(\w+)\s+(\d+)\s+(of\s+\d+)\s+([\d\.]+)\s+(\d+)\s+([\d+\.]*\d+e[+-]?\d+|[\d\.]+)\s+(#*[a-zA-Z]+#*)\s+(\d+)\s+(\d+)\s+([-]?\d+)\s*(\d)\s*$")
 
