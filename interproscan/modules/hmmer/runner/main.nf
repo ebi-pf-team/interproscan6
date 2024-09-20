@@ -60,7 +60,8 @@ process GENE3D_HMMER_RUNNER {
     label 'hmmer_gene3d_runner'
 
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
+    tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
+    val is_test
 
     output:
         path "${member}_out"
@@ -68,9 +69,14 @@ process GENE3D_HMMER_RUNNER {
         val member
 
     script:
-    """
-    /opt/hmmer3/bin/hmmsearch ${switches} -o ${member}_out ${hmm} ${fasta}
-    """
+    if ( is_test )
+        """
+        touch "${member}_out"
+        """
+    else
+        """
+        /opt/hmmer3/bin/hmmsearch ${switches} -o ${member}_out ${hmm} ${fasta}
+        """
 }
 
 
