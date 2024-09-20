@@ -24,8 +24,10 @@ process HMMER_RUNNER {
 
 process HMMER_RUNNER_WITH_ALIGNMENTS {
     label 'hmmer_runner'
+
     input:
-        tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
+    tuple path(fasta), val(member), path(hmm), val(switches), val(postprocessing_params)
+    val is_test
 
     output:
         path "${member}_out"
@@ -35,15 +37,22 @@ process HMMER_RUNNER_WITH_ALIGNMENTS {
         path "${member}_dtbl"
 
     script:
-    """
-    /opt/hmmer3/bin/hmmsearch \\
-        ${switches} -o \\
-        ${member}_out \\
-        --domtblout ${member}_dtbl \\
-        -A ${member}_alignment \\
-        ${hmm} \\
-        ${fasta}
-    """
+    if ( is_test )
+        """
+        touch "${member}_out"
+        touch "${member}_dtbl"
+        touch "${member}_alignment"
+        """
+    else
+        """
+        /opt/hmmer3/bin/hmmsearch \\
+            ${switches} -o \\
+            ${member}_out \\
+            --domtblout ${member}_dtbl \\
+            -A ${member}_alignment \\
+            ${hmm} \\
+            ${fasta}
+        """
 }
 
 
