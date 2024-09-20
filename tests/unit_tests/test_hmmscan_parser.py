@@ -59,14 +59,15 @@ def test_hmmscan_main(monkeypatch, temp_output):
     temp_output.unlink()
 
 
-def test_parsing_hmmer2(expected_matches_output, hmmscan_out, monkeypatch):
+def test_parsing_hmmer2(expected_matches_output, expected_parser_output, hmmscan_out, monkeypatch):
     def mock_add_match(*args, **kwards):
         return expected_matches_output
 
     monkeypatch.setattr(parser_scan_out, "add_match", mock_add_match)
 
     member_db = "unit-test"
-    assert expected_matches_output == parser_scan_out.parse(
+
+    assert expected_parser_output == parser_scan_out.parse(
         hmmscan_out,
         member_db
     )
