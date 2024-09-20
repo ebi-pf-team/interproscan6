@@ -134,13 +134,15 @@ Domain annotation for each model (and alignments):
 
 Internal pipeline statistics summary:
 -------------------------------------
-Query sequence(s):                         1  (338 residues searched)
+Query sequence(s):                         1  (129 residues searched)
 Target model(s):                        3283  (1300715 nodes)
-Passed MSV filter:                        99  (0.0301553); expected 65.7 (0.02)
-Passed bias filter:                       92  (0.0280231); expected 65.7 (0.02)
-Passed Vit filter:                        11  (0.00335059); expected 3.3 (0.001)
-Passed Fwd filter:                         4  (0.0012184); expected 0.0 (1e-05)
+Passed MSV filter:                       100  (0.0304599); expected 65.7 (0.02)
+Passed bias filter:                       35  (0.010661); expected 65.7 (0.02)
+Passed Vit filter:                         4  (0.0012184); expected 3.3 (0.001)
+Passed Fwd filter:                         1  (0.000304599); expected 0.0 (1e-05)
 Initial search space (Z):               3283  [actual number of targets]
-Domain search space  (domZ):               4  [number of targets reported over threshold]
-# CPU time: 0.05u 0.03s 00:00:00.08 Elapsed: 00:00:00.05
-# Mc/sec: 7494.39
+Domain search space  (domZ):               0  [number of targets reported over threshold]
+# CPU time: 0.04u 0.03s 00:00:00.07 Elapsed: 00:00:00.04
+# Mc/sec: 4058.76
+//
+[ok]

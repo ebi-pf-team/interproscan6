@@ -93,6 +93,8 @@ workflow SEQUENCE_ANALYSIS {
     main:
     boolean gene3d_funfam_processed = false
     // To prevent duplication if Gene3D and Funfam are called
+    boolean is_test = false 
+    // used for unit testing until nf-test allows mocking
 
     // Divide members up into their respective analysis pipelines/methods
     Channel.from(applications.split(','))
@@ -300,7 +302,7 @@ workflow SEQUENCE_ANALYSIS {
 
     // AntiFam
     runner_antifam_params = fasta.combine(member_params.antifam)
-    ANTIFAM_HMMER_RUNNER(runner_antifam_params)
+    ANTIFAM_HMMER_RUNNER(runner_antifam_params, is_test)
     ANTIFAM_HMMER_PARSER(
         ANTIFAM_HMMER_RUNNER.out[0],  // hmmer.out path
         ANTIFAM_HMMER_RUNNER.out[2]   // member db
@@ -309,7 +311,7 @@ workflow SEQUENCE_ANALYSIS {
     // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
     // These also run for FunFam as Gene3D must be run before FunFam
     runner_gene3d_params = fasta.combine(member_params.gene3d_funfam)
-    GENE3D_HMMER_RUNNER(runner_gene3d_params)
+    GENE3D_HMMER_RUNNER(runner_gene3d_params, is_test)
     GENE3D_HMMER_PARSER(
         GENE3D_HMMER_RUNNER.out[0],  // hmmer.out path
         GENE3D_HMMER_RUNNER.out[2]   // member db
@@ -353,7 +355,7 @@ workflow SEQUENCE_ANALYSIS {
 
     // HAMAP (+ pfsearch_wrapper.py)
     runner_hamap_params = fasta.combine(member_params.hamap)
-    HAMAP_HMMER_RUNNER(runner_hamap_params)
+    HAMAP_HMMER_RUNNER(runner_hamap_params, is_test)
     HAMAP_HMMER_PARSER(
         HAMAP_HMMER_RUNNER.out[0],  // hmmer.out path
         HAMAP_HMMER_RUNNER.out[2]   // member db
@@ -370,7 +372,7 @@ workflow SEQUENCE_ANALYSIS {
 
     // NCBIfam
     runner_hmmer_ncbifam_params = fasta.combine(member_params.ncbifam)
-    NCBIFAM_HMMER_RUNNER(runner_hmmer_ncbifam_params)
+    NCBIFAM_HMMER_RUNNER(runner_hmmer_ncbifam_params, is_test)
     NCBIFAM_HMMER_PARSER(
         NCBIFAM_HMMER_RUNNER.out[0],  // hmmer.out path
         NCBIFAM_HMMER_RUNNER.out[2]   // member db
@@ -378,7 +380,7 @@ workflow SEQUENCE_ANALYSIS {
 
     // Panther (+ treegrafter + epa-ng)
     runner_panther_params = fasta.combine(member_params.panther)
-    PANTHER_HMMER_RUNNER(runner_panther_params)
+    PANTHER_HMMER_RUNNER(runner_panther_params, is_test)
     PANTHER_HMMER_PARSER(
         PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
         PANTHER_HMMER_RUNNER.out[2]   // member db
@@ -395,7 +397,7 @@ workflow SEQUENCE_ANALYSIS {
 
     // Pfam
     runner_hmmer_pfam_params = fasta.combine(member_params.pfam)
-    PFAM_HMMER_RUNNER(runner_hmmer_pfam_params)
+    PFAM_HMMER_RUNNER(runner_hmmer_pfam_params, is_test)
     PFAM_HMMER_PARSER(
         PFAM_HMMER_RUNNER.out[0],  // hmmer.out path
         PFAM_HMMER_RUNNER.out[2]   // member db
@@ -407,7 +409,7 @@ workflow SEQUENCE_ANALYSIS {
 
     // PIRSF (+ filter_ips6_matches.py for post-processing)
     runner_pirsf_params = fasta.combine(member_params.pirsf)
-    PIRSF_HMMER_RUNNER(runner_pirsf_params)
+    PIRSF_HMMER_RUNNER(runner_pirsf_params, is_test)
     PIRSF_HMMER_PARSER(
         PIRSF_HMMER_RUNNER.out[0],  // hmmer.out path
         PIRSF_HMMER_RUNNER.out[2]   // member db
@@ -420,7 +422,7 @@ workflow SEQUENCE_ANALYSIS {
 
     // PIRSR
     runner_pirsr_params = fasta.combine(member_params.pirsr)
-    PIRSR_HMMER_RUNNER(runner_pirsr_params)
+    PIRSR_HMMER_RUNNER(runner_pirsr_params, is_test)
     PIRSR_HMMER_PARSER(
         PIRSR_HMMER_RUNNER.out[0],  // out file
         PIRSR_HMMER_RUNNER.out[2]   // member db
@@ -432,7 +434,7 @@ workflow SEQUENCE_ANALYSIS {
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
-    SFLD_HMMER_RUNNER(runner_sfld_params)
+    SFLD_HMMER_RUNNER(runner_sfld_params, is_test)
     SFLD_HMMER_PARSER(
         SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
         SFLD_HMMER_RUNNER.out[2]   // member db
@@ -442,13 +444,13 @@ workflow SEQUENCE_ANALYSIS {
 
     // SMART (HMMER2:hmmpfam + kinase filter)
     runner_smart_params = fasta.combine(member_params.smart)
-    SMART_HMMER2_RUNNER(runner_smart_params)
+    SMART_HMMER2_RUNNER(runner_smart_params, is_test)
     HMMER2_PARSER(SMART_HMMER2_RUNNER.out)
     SMART_FILTER_MATCHES(HMMER2_PARSER.out)
 
     // Superfamily
     runner_hmmer_superfamily_params = fasta.combine(member_params.superfamily)
-    SUPERFAMILY_HMMER_RUNNER(runner_hmmer_superfamily_params)
+    SUPERFAMILY_HMMER_RUNNER(runner_hmmer_superfamily_params, is_test)
     SUPERFAMILY_POST_PROCESSER(
         SUPERFAMILY_HMMER_RUNNER.out[0],  // hmmer.out path
         SUPERFAMILY_HMMER_RUNNER.out[1],  // post-processing-params
@@ -465,28 +467,28 @@ workflow SEQUENCE_ANALYSIS {
     */
     // CDD
     runner_cdd_params = fasta.combine(member_params.cdd)
-    CDD_RUNNER(runner_cdd_params)
+    CDD_RUNNER(runner_cdd_params, is_test)
     CDD_POSTPROCESS(CDD_RUNNER.out)
     CDD_PARSER(CDD_POSTPROCESS.out)
 
     // COILS
     runner_coils_params = fasta.combine(member_params.coils)
-    COILS_RUNNER(runner_coils_params)
+    COILS_RUNNER(runner_coils_params, is_test)
     COILS_PARSER(COILS_RUNNER.out)
 
     // MOBIDB
     runner_mobidb_params = fasta.combine(member_params.mobidb)
-    MOBIDB_RUNNER(runner_mobidb_params)
+    MOBIDB_RUNNER(runner_mobidb_params, is_test)
     MOBIDB_PARSER(MOBIDB_RUNNER.out)
 
     // PHOBIUS
     runner_phobius_params = fasta.combine(member_params.phobius)
-    PHOBIUS_RUNNER(runner_phobius_params)
+    PHOBIUS_RUNNER(runner_phobius_params, is_test)
     PHOBIUS_PARSER(PHOBIUS_RUNNER.out)
 
     // PRINTS
     runner_prints_params = fasta.combine(member_params.prints)
-    PRINTS_RUNNER(runner_prints_params)
+    PRINTS_RUNNER(runner_prints_params, is_test)
     PRINTS_PARSER(PRINTS_RUNNER.out)
 
     // PROSITE Patterns (uses pfscanV3)
@@ -501,12 +503,12 @@ workflow SEQUENCE_ANALYSIS {
 
     // SignalP
     runner_signalp_params = fasta.combine(member_params.signalp)
-    SIGNALP_RUNNER(runner_signalp_params)
+    SIGNALP_RUNNER(runner_signalp_params, is_test)
     SIGNALP_PARSER(SIGNALP_RUNNER.out)
 
     // SignalP_euk
     runner_signalp_euk_params = fasta.combine(member_params.signalp_euk)
-    SIGNALP_EUK_RUNNER(runner_signalp_euk_params)
+    SIGNALP_EUK_RUNNER(runner_signalp_euk_params, is_test)
     SIGNALP_EUK_PARSER(SIGNALP_EUK_RUNNER.out)
 
     /*
