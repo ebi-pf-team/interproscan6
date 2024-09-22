@@ -59,6 +59,7 @@ nextflow_workflow {
 
         then {
             assert workflow.failed
+            assert workflow.exitStatus == 5
         }
     }
 }

@@ -11,13 +11,15 @@ workflow AGGREGATE_RESULTS {
         .map { jsonFiles ->
             def combined = [:]
             jsonFiles.each { jsonFile ->
-                try {
-                    def json = new groovy.json.JsonSlurper().parse(new File(jsonFile.toString()))
-                    combined += json
-                } catch (FileNotFoundException e) {
+                def file = new File(jsonFile.toString())
+                if (!file.exists()) {
                     println "File not found: ${jsonFile}"
-                    log.error ("File not found: ${jsonFile}", e)
+                    log.error ("File not found: ${jsonFile}")
                     exit 5
+                }
+                try {
+                    def json = new groovy.json.JsonSlurper().parse(file)
+                    combined += json
                 } catch (groovy.json.JsonException e) {
                     println "Corrupted or improperly formatted JSON file: ${jsonFile}"
                     log.error ("Corrupted or improperly formatted JSON file: ${jsonFile}", e)
