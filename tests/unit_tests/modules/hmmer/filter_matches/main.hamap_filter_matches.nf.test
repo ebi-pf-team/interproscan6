@@ -10,7 +10,6 @@ nextflow_process {
         symlink "tests/unit_tests/test_inputs/hmmer_filter_matches/hamap/hmmer_parsed_hamap_out.json"
     }
 
-
     test("Should run without failures") {
 
         when {
