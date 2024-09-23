@@ -1,0 +1,17 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    "hmmer_parsed_funfam_2.40.30.40.json.processed.json:md5,99914b932bd37a50b983c5e7c90ae93b",
+                    "hmmer_parsed_funfam_3.40.50.1170.json.processed.json:md5,99914b932bd37a50b983c5e7c90ae93b"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.04.2"
+        },
+        "timestamp": "2024-09-23T13:25:03.091241"
+    }
+}
