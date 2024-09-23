@@ -304,8 +304,8 @@ workflow SEQUENCE_ANALYSIS {
     runner_antifam_params = fasta.combine(member_params.antifam)
     ANTIFAM_HMMER_RUNNER(runner_antifam_params, is_test)
     ANTIFAM_HMMER_PARSER(
-        ANTIFAM_HMMER_RUNNER.out[0],  // hmmer.out path
-        ANTIFAM_HMMER_RUNNER.out[2]   // member db
+        ANTIFAM_HMMER_RUNNER.out[0],       // hmmer.out path
+        ANTIFAM_HMMER_RUNNER.out[2]        // member db
     )
 
     // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
@@ -313,21 +313,23 @@ workflow SEQUENCE_ANALYSIS {
     runner_gene3d_params = fasta.combine(member_params.gene3d_funfam)
     GENE3D_HMMER_RUNNER(runner_gene3d_params, is_test)
     GENE3D_HMMER_PARSER(
-        GENE3D_HMMER_RUNNER.out[0],  // hmmer.out path
-        GENE3D_HMMER_RUNNER.out[2]   // member db
+        GENE3D_HMMER_RUNNER.out[0],        // hmmer.out path
+        GENE3D_HMMER_RUNNER.out[2]         // member db
     )
     GENE3D_CATH_RESOLVE_HITS(
-        GENE3D_HMMER_RUNNER.out[0], // hmmer.out path
-        GENE3D_HMMER_RUNNER.out[1]  // post-processing-params
+        GENE3D_HMMER_RUNNER.out[0],        // hmmer.out path
+        GENE3D_HMMER_RUNNER.out[1],        // post-processing-params
+        is_test                            // bool to skip 3rd party script when unit testing
     )
     GENE3D_ADD_CATH_SUPERFAMILIES(
-        GENE3D_CATH_RESOLVE_HITS.out, // cath-resolve-hits out file
-        GENE3D_HMMER_RUNNER.out[1]    // post-processing-params
+        GENE3D_CATH_RESOLVE_HITS.out,      // cath-resolve-hits out file
+        GENE3D_HMMER_RUNNER.out[1],        // post-processing-params
+        is_test                            // bool to skip 3rd party script when unit testing
     )
     GENE3D_FILTER_MATCHES(
-        GENE3D_ADD_CATH_SUPERFAMILIES.out,  // add-superfams out file
-        GENE3D_HMMER_PARSER.out,            // ips6 json
-        GENE3D_HMMER_RUNNER.out[1]          // post-processing-params
+        GENE3D_ADD_CATH_SUPERFAMILIES.out, // add-superfams out file
+        GENE3D_HMMER_PARSER.out,           // ips6 json
+        GENE3D_HMMER_RUNNER.out[1]         // post-processing-params
     )
     // Gene3D filter matches out puts (0) ips6 json; (1) cath superfamilies txt file
 
@@ -341,12 +343,13 @@ workflow SEQUENCE_ANALYSIS {
         is_test                            // bool for if this workflow/process is running in a unit test
     )
     FUNFAM_HMMER_PARSER(
-        FUNFAM_HMMER_RUNNER.out[0],  // hmmer.out pathS - one per cath gene3d superfam
-        FUNFAM_HMMER_RUNNER.out[2]   // member db
+        FUNFAM_HMMER_RUNNER.out[0],        // hmmer.out pathS - one per cath gene3d superfam
+        FUNFAM_HMMER_RUNNER.out[2]         // member db
     )
     FUNFAM_CATH_RESOLVE_HITS(
-        FUNFAM_HMMER_RUNNER.out[0], // hmmer.out path
-        FUNFAM_HMMER_RUNNER.out[1]  // post-processing-params
+        FUNFAM_HMMER_RUNNER.out[0],        // hmmer.out path
+        FUNFAM_HMMER_RUNNER.out[1],        // post-processing-params
+        is_test                            // bool for if this workflow/process is running in a unit test
     )
     FUNFAM_FILTER_MATCHES(
         FUNFAM_HMMER_PARSER.out,           // add-superfams out file
@@ -365,6 +368,7 @@ workflow SEQUENCE_ANALYSIS {
         HAMAP_HMMER_RUNNER.out[1],  // post-processing-params
         HAMAP_HMMER_RUNNER.out[3],  // path to fasta file
         HAMAP_HMMER_RUNNER.out[4],  // hmmer .tbl file path
+        is_test                     // bool to skip 3rd script when unit testing
     )
     HAMAP_FILTER_MATCHES(
         HAMAP_HMMER_PARSER.out,     // internal IPS6 JSON
@@ -389,7 +393,8 @@ workflow SEQUENCE_ANALYSIS {
     PANTHER_POST_PROCESSER(
         PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
         PANTHER_HMMER_RUNNER.out[1],  // post-processing-params
-        fasta
+        fasta,                        // input seqs
+        is_test                       // bool, used to skip 3rd-party post-processing during unit test
     )
     PANTHER_FILTER_MATCHES(
         PANTHER_HMMER_PARSER.out,     // internal ips6 json
