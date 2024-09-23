@@ -11,7 +11,6 @@ process FUNFAM_FILTER_MATCHES {
     input:
         path ips6_jsons
         path cath_resolved_outs
-        val postprocessing_params
 
     output:
         path "*.processed.json"
