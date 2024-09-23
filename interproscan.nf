@@ -2,9 +2,9 @@ nextflow.enable.dsl=2
 
 include { PARSE_SEQUENCE } from "$projectDir/interproscan/modules/parse_sequence/main"
 include { GET_ORFS } from "$projectDir/interproscan/modules/get_orfs/main"
-include { AGGREGATE_RESULTS } from "$projectDir/interproscan/modules/output/aggregate_results/main"
 include { REPRESENTATIVE_DOMAINS } from "$projectDir/interproscan/modules/output/representative_domains/main"
 include { AGGREGATE_PARSED_SEQS } from "$projectDir/interproscan/modules/output/aggregate_parsed_seqs/main"
+include { AGGREGATE_RESULTS } from "$projectDir/interproscan/subworkflows/aggregate_results/main"
 include { WRITE_RESULTS } from "$projectDir/interproscan/modules/output/write_results/main"
 
 include { PRE_CHECKS } from "$projectDir/interproscan/subworkflows/pre_checks/main"
@@ -114,10 +114,10 @@ workflow {
         )
     }
 
-    all_results = parsed_matches.concat(parsed_analysis)
-
-    AGGREGATE_RESULTS(all_results.collect())
     AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
+
+    all_results = parsed_matches.concat(parsed_analysis)
+    AGGREGATE_RESULTS(all_results)
 
     /* XREFS:
     Add signature and entry desc and names
@@ -128,7 +128,7 @@ workflow {
     XREFS(AGGREGATE_RESULTS.out, applications, dataDirPath)
 
     REPRESENTATIVE_DOMAINS(XREFS.out.collect())
-    
+
     Channel.from(params.formats.toLowerCase().split(','))
     .set { ch_format }
 
