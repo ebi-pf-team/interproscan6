@@ -440,7 +440,10 @@ workflow SEQUENCE_ANALYSIS {
         SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
         SFLD_HMMER_RUNNER.out[2]   // member db
     )
-    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out)   // hmmer.out, post-process params, member db, alignment, dtbl file
+    SFLD_POST_PROCESSER(
+        SFLD_HMMER_RUNNER.out,     // hmmer.out, post-process params, member db, alignment, dtbl file
+        is_test                    // bool used to skip post-processing when unit test
+    )  // change to run the post-processing when no-longer written in C
     SFLD_FILTER_MATCHES(SFLD_HMMER_PARSER.out, SFLD_POST_PROCESSER.out)
 
     // SMART (HMMER2:hmmpfam + kinase filter)

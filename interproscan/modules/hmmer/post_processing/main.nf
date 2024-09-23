@@ -171,11 +171,17 @@ process SFLD_POST_PROCESSER {
         val member
         path alignment
         path out_dtbl
+        val is_test
 
     output:
         path "${out_file}.processed.out"
 
     script:
+    if ( is_test )
+        """
+        touch "${out_file}.processed.out"
+        """
+    else
         """
         $projectDir/interproscan/bin/sfld/sfld_postprocess \
             --alignments '${alignment}' \
