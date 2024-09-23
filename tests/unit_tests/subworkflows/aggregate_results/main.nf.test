@@ -5,9 +5,9 @@ nextflow_workflow {
     workflow "AGGREGATE_RESULTS"
 
     stage {
-        copy "tests/unit_tests/test_inputs/aggregate_results/cdd_matches.json"
-        copy "tests/unit_tests/test_inputs/aggregate_results/hamap_matches.json"
-        copy "tests/unit_tests/test_inputs/aggregate_results/corrupted.json"
+        symlink "tests/unit_tests/test_inputs/aggregate_results/cdd_matches.json"
+        symlink "tests/unit_tests/test_inputs/aggregate_results/hamap_matches.json"
+        symlink "tests/unit_tests/test_inputs/aggregate_results/corrupted.json"
     }
 
     test("Should run successfully") {
@@ -16,7 +16,8 @@ nextflow_workflow {
                  }
             workflow {
                 """
-                input[0] = Channel.from(file("meta/tests/unit_tests/test_inputs/aggregate_results/cdd_matches.json"), file("meta/tests/unit_tests/test_inputs/aggregate_results/hamap_matches.json"))
+                input[0] = Channel.from(file("meta/tests/unit_tests/test_inputs/aggregate_results/cdd_matches.json"), \
+                file("meta/tests/unit_tests/test_inputs/aggregate_results/hamap_matches.json"))
                 """
             }
         }

@@ -17,10 +17,10 @@
         "content": [
             {
                 "0": [
-                    "aggregated_result3112418286325002979.json:md5,05884bb9067709f64777012527442693"
+                    "aggregated_result.json:md5,cfb3dd4440fb052bececa882e40f6481"
                 ],
                 "ch_aggregated_results": [
-                    "aggregated_result3112418286325002979.json:md5,05884bb9067709f64777012527442693"
+                    "aggregated_result.json:md5,cfb3dd4440fb052bececa882e40f6481"
                 ]
             }
         ],
@@ -28,6 +28,6 @@
             "nf-test": "0.8.4",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2024-09-22T09:43:46.991051"
+        "timestamp": "2024-09-23T16:32:33.651976"
     }
 }
