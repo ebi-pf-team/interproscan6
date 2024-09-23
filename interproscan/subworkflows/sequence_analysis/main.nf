@@ -337,7 +337,8 @@ workflow SEQUENCE_ANALYSIS {
     FUNFAM_HMMER_RUNNER(
         runner_funfam_params,              // hmmer runner input tuple
         GENE3D_FILTER_MATCHES.out[1],      // cath_superfamilies txt file
-        applications                       // str listing selected applications
+        applications,                      // str listing selected applications
+        is_test                            // bool for if this workflow/process is running in a unit test
     )
     FUNFAM_HMMER_PARSER(
         FUNFAM_HMMER_RUNNER.out[0],  // hmmer.out pathS - one per cath gene3d superfam
@@ -467,28 +468,28 @@ workflow SEQUENCE_ANALYSIS {
     */
     // CDD
     runner_cdd_params = fasta.combine(member_params.cdd)
-    CDD_RUNNER(runner_cdd_params, is_test)
+    CDD_RUNNER(runner_cdd_params)
     CDD_POSTPROCESS(CDD_RUNNER.out)
     CDD_PARSER(CDD_POSTPROCESS.out)
 
     // COILS
     runner_coils_params = fasta.combine(member_params.coils)
-    COILS_RUNNER(runner_coils_params, is_test)
+    COILS_RUNNER(runner_coils_params)
     COILS_PARSER(COILS_RUNNER.out)
 
     // MOBIDB
     runner_mobidb_params = fasta.combine(member_params.mobidb)
-    MOBIDB_RUNNER(runner_mobidb_params, is_test)
+    MOBIDB_RUNNER(runner_mobidb_params)
     MOBIDB_PARSER(MOBIDB_RUNNER.out)
 
     // PHOBIUS
     runner_phobius_params = fasta.combine(member_params.phobius)
-    PHOBIUS_RUNNER(runner_phobius_params, is_test)
+    PHOBIUS_RUNNER(runner_phobius_params)
     PHOBIUS_PARSER(PHOBIUS_RUNNER.out)
 
     // PRINTS
     runner_prints_params = fasta.combine(member_params.prints)
-    PRINTS_RUNNER(runner_prints_params, is_test)
+    PRINTS_RUNNER(runner_prints_params)
     PRINTS_PARSER(PRINTS_RUNNER.out)
 
     // PROSITE Patterns (uses pfscanV3)
@@ -503,12 +504,12 @@ workflow SEQUENCE_ANALYSIS {
 
     // SignalP
     runner_signalp_params = fasta.combine(member_params.signalp)
-    SIGNALP_RUNNER(runner_signalp_params, is_test)
+    SIGNALP_RUNNER(runner_signalp_params)
     SIGNALP_PARSER(SIGNALP_RUNNER.out)
 
     // SignalP_euk
     runner_signalp_euk_params = fasta.combine(member_params.signalp_euk)
-    SIGNALP_EUK_RUNNER(runner_signalp_euk_params, is_test)
+    SIGNALP_EUK_RUNNER(runner_signalp_euk_params)
     SIGNALP_EUK_PARSER(SIGNALP_EUK_RUNNER.out)
 
     /*
