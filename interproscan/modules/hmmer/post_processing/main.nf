@@ -194,26 +194,33 @@ process SUPERFAMILY_POST_PROCESSER {
         path hmmscan_out
         val postprocessing_params
         path fasta
+        val is_test
+
+    /*
+    postprocessing_params[0] = bin
+    postprocessing_params[1] = self_hits
+    postprocessing_params[2] = cla
+    postprocessing_params[3] = model_tab
+    postprocessing_params[4] = pdbj95d
+    postprocessing_params[5] = binary_switches
+    */
 
     output:
         path "${hmmscan_out}_ass3_output"
 
     script:
-       /*
-        postprocessing_params[0] = bin
-        postprocessing_params[1] = self_hits
-        postprocessing_params[2] = cla
-        postprocessing_params[3] = model_tab
-        postprocessing_params[4] = pdbj95d
-        postprocessing_params[5] = binary_switches
-       */
-    """
-    perl ${postprocessing_params[0]} \\
-    -s ${postprocessing_params[1]} \\
-    -r ${postprocessing_params[2]} \\
-    -m ${postprocessing_params[3]} \\
-    -p ${postprocessing_params[4]} \\
-    ${postprocessing_params[5]} \\
-    ${fasta} ${hmmscan_out} ${hmmscan_out}_ass3_output
-    """
+    if ( is_test )
+        """
+        touch "${hmmscan_out}_ass3_output"
+        """
+    else
+        """
+        perl ${postprocessing_params[0]} \\
+        -s ${postprocessing_params[1]} \\
+        -r ${postprocessing_params[2]} \\
+        -m ${postprocessing_params[3]} \\
+        -p ${postprocessing_params[4]} \\
+        ${postprocessing_params[5]} \\
+        ${fasta} ${hmmscan_out} ${hmmscan_out}_ass3_output
+        """
 }

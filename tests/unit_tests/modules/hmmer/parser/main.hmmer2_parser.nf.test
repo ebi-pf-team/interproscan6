@@ -13,10 +13,7 @@ nextflow_process {
     test("Should run without failures") {
 
         when {
-            params {
-                // define parameters here. Example:
-                // outdir = "tests/results"
-            }
+            params {}
             process {
                 """
                 input[0] = file("meta/tests/unit_tests/test_inputs/hmmer2_parser/hmmpfam.out")

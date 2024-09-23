@@ -456,6 +456,7 @@ workflow SEQUENCE_ANALYSIS {
         SUPERFAMILY_HMMER_RUNNER.out[0],  // hmmer.out path
         SUPERFAMILY_HMMER_RUNNER.out[1],  // post-processing-params
         SUPERFAMILY_HMMER_RUNNER.out[3],  // fasta path
+        is_test                           // bool used to skip pl script when unit testing
     )
     SUPERFAMILY_FILTER_MATCHES(
         SUPERFAMILY_POST_PROCESSER.out,
