@@ -27,9 +27,9 @@ workflow AGGREGATE_RESULTS {
                 }
             }
             def aggregated_result = JsonOutput.toJson(combined)
-            def tempFile = File.createTempFile("aggregated_result", ".json")
-            tempFile.write(JsonOutput.prettyPrint(aggregated_result))
-            return tempFile.path
+            def outputFile = new File("${workDir}/aggregated_result.json")
+            outputFile.write(aggregated_result)
+            return outputFile.path
         }
 
     emit:
