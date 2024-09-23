@@ -11,6 +11,7 @@ process CATH_RESOLVE_HITS {
     input:
         path out_file
         val postprocessing_params  // [0] evalue [1] control factor
+        val is_test
 
     output:
         path "${out_file}.cath.resolved.out"
