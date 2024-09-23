@@ -27,6 +27,7 @@ def run_nextflow(
               f"--input {input_path} --applications {applications} {disable_precalc} " \
               f"--formats tsv " \
               "--goterms --pathways " \
+              "-profile docker " \
               f"--outdir {str(outdir)}"
     with open("nextflow-run", "w") as fh:
         subprocess.run(command, shell=True, stdout=fh)
@@ -164,7 +165,7 @@ def test_tsv_output(
 ):
     """Input parameters are defined in conf.py"""
     expected_output = load_tsv_results(Path(f"{expected_output_path}.tsv"))
-    
+
     outdir = current_output_path.parent
     run_nextflow(
         outdir,
