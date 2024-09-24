@@ -6,7 +6,7 @@ nextflow_process {
 
     stage {
         symlink "interproscan/scripts/parse_sequence/parse_sequence.py"
-        copy "tests/unit_tests/test_inputs/parse_sequences/allowed.faa"
+        symlink "tests/unit_tests/test_inputs/parse_sequences/allowed.faa"
     }
 
     test("Should run without failures") {
