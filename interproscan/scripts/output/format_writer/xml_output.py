@@ -343,5 +343,10 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                         location_frag_elem.set("start", str(location_fragment["start"]))
                         location_frag_elem.set("end", str(location_fragment["end"]))
                         location_frag_elem.set("dc-status", str(location_fragment["dc-status"]))
+                else:
+                    location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
+                    location_frag_elem.set("start", str(location["start"]))
+                    location_frag_elem.set("end", str(location["end"]))
+                    location_frag_elem.set("dc-status", "CONTINUOUS")
 
     return protein_elem
