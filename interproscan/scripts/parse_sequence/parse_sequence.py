@@ -5,7 +5,8 @@ import re
 import sys
 
 
-NT_SEQ_ID_PATTERN = re.compile(r"^orf\d+\s+source=(.*)\s+coords=(\d+\.+\d+)\s+.+frame=\d+\s+desc=.*$")
+NT_SEQ_ID_PATTERN = re.compile(r"^orf\d+\s+source=(.*)\s+coords=(\d+\.+\d+)\s+.*frame=\d+\s+desc=.*$")
+# e.g. orf1 source=Bob coords=143..286 length=48 frame=2 desc=
 ILLEGAL_CHARS = {
     "antifam": "-",
     "cdd": "",
@@ -69,12 +70,12 @@ class Sequence:
         self.sequence += line
 
     def get_error_msg(
-            self, 
-            errors: dict[str, dict[str, str]], 
-            line: str,
-            applications: list,
-            passing_nucleic: bool
-        ):
+        self,
+        errors: dict[str, dict[str, str]],
+        line: str,
+        applications: list,
+        passing_nucleic: bool
+    ):
         if self.seq_key not in errors:
             errors[self.seq_key] = {}
         invalid_chars = re.findall(r"[^A-Za-z_\-\*\.]*", line)
@@ -126,6 +127,7 @@ def store_seq(
             sequences[acc]['nt_sequence'] = nucleic_seqs[nt_acc].sequence
             sequences[acc]['nt_md5'] = hashlib.md5(
                 nucleic_seqs[nt_acc].sequence.encode()).hexdigest()
+
     return sequences
 
 
@@ -186,7 +188,6 @@ def parse(
         raise IllegalCharError(fasta_file, errors)
 
     return sequences
-    
 
 
 def main():

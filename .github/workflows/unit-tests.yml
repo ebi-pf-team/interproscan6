@@ -97,6 +97,7 @@ jobs:
         ./nf-test test tests/unit_tests/modules/hmmer/parser/
         ./nf-test test tests/unit_tests/modules/hmmer/post_processing/
         ./nf-test test tests/unit_tests/modules/hmmer/filter/
+        ./nf-test test tests/unit_tests/modules/parse_sequence/
         ./nf-test test tests/unit_tests/modules/output/aggregate_parse_seqs/
         ./nf-test test tests/unit_tests/modules/output/aggregate_results/
         ./nf-test test tests/unit_tests/modules/output/write_results/
