@@ -374,7 +374,7 @@ def test_hamap_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_el
 
 
 def test_mobidb_xml_match(x_matches_input_dir, x_matches_output_dir, x_protein_elm):
-    member_db = "MOBIDB"
+    member_db = "MOBIDB_LITE"
     compare_xml_matches(
         member_db,
         x_matches_input_dir,
