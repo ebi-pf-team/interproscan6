@@ -161,7 +161,7 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                 signature_elem.set("ac", match_data['accession'])
                 signature_elem.set("name", match_data['name'])
 
-            if match_data['entry']['accession']:
+            if match_data['entry']:
                 acc = _check_null(match_data['entry']['accession'], acc=True)
                 sig_type = _check_null(match_data['entry']['type'])
                 desc = _check_null(match_data["entry"]['description'])
