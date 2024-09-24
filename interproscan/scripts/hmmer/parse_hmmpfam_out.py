@@ -120,8 +120,8 @@ def add_match(
                     "hmmLength": int(domain_obj.hmm_to) + 1 - int(domain_obj.hmm_from),
                     "rawHmmBounds": domain_obj.hmm_raw_bounds,
                     "hmmBounds": domain_obj.hmm_bounds,
-                    "evalue": float(domain_obj.evalue),  # keep as str because can be Xe-Y
-                    "score": float(domain_obj.score),  # keep as str because can be Xe-Y
+                    "evalue": float(domain_obj.evalue),
+                    "score": float(domain_obj.score),
                     "postProcessed": "false",
                     "location-fragments": [
                         {

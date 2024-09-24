@@ -145,7 +145,7 @@ def add_match(
                     "hmmLength": int(protein_with_hit.qlen),
                     "rawHmmBounds": domain_obj.hmm_raw_bounds,
                     "hmmBounds": domain_obj.hmm_bounds,
-                    "evalue": float(domain_obj.i_evalue),  # keep as str because can be Xe-Y
+                    "evalue": float(domain_obj.i_evalue),
                     "score": float(domain_obj.score),
                     "envelopeStart": int(domain_obj.env_from),
                     "envelopeEnd": int(domain_obj.env_to),
