@@ -117,7 +117,7 @@ def get_matches(data: dict):
 
             # For these member dbs we write each domain location as a separate
             # 'signature' match in the final results
-            if member_db in ["MOBIDB", "PHOBIUS", "SUPERFAMILY"]:
+            if member_db in ["MOBIDB_LITE", "PHOBIUS", "SUPERFAMILY"]:
                 for location in match_data['locations']:
                     location_info = {
                         "start": location["start"],

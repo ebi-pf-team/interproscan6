@@ -10,7 +10,7 @@ MATCH_ELEMENT = {
     'FUNFAM': 'hmmer3-match',
     'GENE3D': 'hmmer3-match',
     'HAMAP': 'hmmer3-match',
-    'MOBIDB': 'mobidb-match',
+    'MOBIDB_LITE': 'mobidb-match',
     'NCBIFAM': 'hmmer3-match',
     'PANTHER': 'hmmer3-match',
     'PFAM': 'hmmer3-match',
@@ -279,7 +279,7 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                     location_elem.set("end", str(location["end"]))
                     location_elem.set("representative", str(location["representative"]))
 
-                elif match_data['member_db'].upper() in ["COILS", "MOBIDB", "SUPERFAMILY"]:
+                elif match_data['member_db'].upper() in ["COILS", "MOBIDB_LITE", "SUPERFAMILY"]:
                     location_elem = ET.SubElement(locations_elem, "analysis-location")
                     location_elem.set("start", str(location["start"]))
                     location_elem.set("end", str(location["end"]))

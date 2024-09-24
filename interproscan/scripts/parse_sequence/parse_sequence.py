@@ -13,7 +13,7 @@ ILLEGAL_CHARS = {
     "funfam": "-_.",
     "gene3d": "-_.",
     "hamap": "-_",
-    "mobidb": "",
+    "mobidb_lite": "",
     "ncbifam": "-",
     "panther": "-",
     "pfam": "-",

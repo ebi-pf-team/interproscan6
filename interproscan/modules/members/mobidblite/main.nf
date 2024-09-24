@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
-process MOBIDB_RUNNER {
-    label 'mobidb_runner'
+process MOBIDBLITE_RUNNER {
+    label 'mobidblite_runner'
 
     input:
     path "fasta"
@@ -16,7 +16,7 @@ process MOBIDB_RUNNER {
 }
 
 
-process MOBIDB_PARSER {
+process MOBIDBLITE_PARSER {
     label 'analysis_parser'
 
     input:
@@ -37,16 +37,16 @@ process MOBIDB_PARSER {
         def feature = lineData[3] ?: ""
 
         if (matches.containsKey(sequenceId)) {
-            matches[sequenceId]["mobidb"]["locations"].add([
+            matches[sequenceId]["mobidb_lite"]["locations"].add([
                 start: start,
                 end: end,
                 "sequence-feature": feature
             ])
         } else {
             matches[sequenceId] = [
-                mobidb: [
-                    member_db: "mobidb",
-                    accession: "mobidb",
+                "mobidb_lite": [
+                    member_db: "mobidb_lite",
+                    accession: "mobidb-lite",
                     name: "disorder_prediction",
                     description: "consensus disorder prediction",
                     locations: [[
