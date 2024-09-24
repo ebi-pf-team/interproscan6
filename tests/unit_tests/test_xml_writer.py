@@ -98,15 +98,12 @@ def parse_matches_dict(matches: list[dict[str, dict]]) -> dict[str, dict[str, di
     match_dict = {}
     for domain_type, signature_list in matches.items():
         for signature in signature_list:
-            sig_acc = signature['signature'][0]['attributes']['ac'] if \
-                'ac' in signature['signature'][0]['attributes'] else ''
+            sig_acc = signature['signature'][0]['attributes']['ac']
             match_dict[sig_acc] = {
                 'signature': {
                     'acc': sig_acc,
-                    'name': signature['signature'][0]['attributes']['name'],
-                    'description': \
-                        signature['signature'][0]['attributes']['desc'] if 'desc' in \
-                            signature['signature'][0]['attributes'] else '',
+                    'name': signature['signature'][0]['attributes'].get('name', ''),
+                    'desc': signature['signature'][0]['attributes'].get('desc', ''),
                 },
                 'signature-library-release': {
                     'library': signature['signature'][
@@ -196,7 +193,7 @@ def compare_signature_details(
         f"Mismatches model-ac for {sig_acc}, {member_db}"
     assert all(
         match_data['signature'][key] == expected_data['signature'][key]
-        for key in ['acc', 'name', 'description']
+        for key in ['acc', 'name', 'desc']
     ), f"Mismatch in 'signature' details for {sig_acc}, {member_db}"
     assert all(
         match_data['signature-library-release'][key] == expected_data['signature-library-release'][key]
