@@ -47,6 +47,7 @@ def store_seq(
             sequences[acc]['nt_sequence'] = nucleic_seqs[nt_acc].sequence
             sequences[acc]['nt_md5'] = hashlib.md5(
                 nucleic_seqs[nt_acc].sequence.encode()).hexdigest()
+
     return sequences
 
 
