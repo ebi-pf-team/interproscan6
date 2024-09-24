@@ -12,7 +12,6 @@ process PARSE_SEQUENCE {
     associated with the corresponding ORF in the
     final output.
     */
-    val applications
 
     output:
     path "parsed_sequences"
@@ -23,7 +22,6 @@ process PARSE_SEQUENCE {
         ${fasta_file} \\
         ${original_fasta_file} \\
         ${nucleic} \\
-        ${applications} \\
         "parsed_sequences"
     """
 }
