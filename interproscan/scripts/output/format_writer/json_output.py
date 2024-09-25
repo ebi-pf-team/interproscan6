@@ -282,9 +282,17 @@ def get_matches(data: dict):
                             except KeyError:
                                 info["location-fragments"] = [single_location]
                         locations.append(info)
+
+                    distinct_locations = []
+
+                    for loc in locations:
+                        loc_tuple = tuple(loc.items())
+                        if not any(tuple(existing_loc.items()) == loc_tuple for existing_loc in distinct_locations):
+                            distinct_locations.append(loc)
+
                     match = {
                         "signature": signature,
-                        "locations": locations
+                        "locations": distinct_locations
                     }
 
                     if member_db not in [
