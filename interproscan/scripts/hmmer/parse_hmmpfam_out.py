@@ -9,7 +9,7 @@ page 26."""
 
 
 ALN_DOMAIN_LINE = re.compile(r'\S+:\s+domain \d+ of \d+,')
-SIGNATURE_DATA_LINE = re.compile(r"^(\w+?)\s+([\w\s\-\|,\[\]\(\)\.]+?)\s+(\d[e0-9\-\.]+?)\s+([e0-9_\-.]+?)\s+(\d+?)$")
+SIGNATURE_DATA_LINE = re.compile(r"^(\w+?)\s+([\w\s\-\|,\[\]\(\)\.\/]+?)\s+(\d[e0-9\-\.]+?)\s+([e0-9_\-.]+?)\s+(\d+?)$")
 DOMAIN_DATA_LINE = re.compile(r"^(\w+)\s+(\d+/\d+)\s+(\d+)\s+(\d+)\s+([\.\[\]]{2})\s+(\d+)\s+(\d+)\s+([\.\[\]]{2})\s+(\d+|\d+\.\d+)\s+(.+)")
 HMM_BOUND_PATTERN = {
     "[]": "COMPLETE",
