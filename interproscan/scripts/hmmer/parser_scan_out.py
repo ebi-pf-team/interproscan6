@@ -10,7 +10,7 @@ respectively, instead of 'ali from' and 'ali to' like other member db."""
 ACC_LINE = re.compile(r"^Query:\s+(\S+)\s+\[[L|M]=(\d+)\]$")
 NO_HITS_LINE = "[No hits detected that satisfy reporting thresholds]"
 MODEL_HIT_LINE = re.compile(r"^([\w+\.\-]+)\s+(\d+|[\d\.]+)\s+(\d+|[\d\.]+)\s+([\w+\.\-]+)\s+(\d+|[\d\.]+)\s+(\d+|[\d\.]+)\s+(\d+|[\d\.]+)\s+(\d+)\s+(PIRSF\d+)$")
-DOMAIN_HIT_LINE = re.compile(r"^(\d+)\s+(!|\?)\s+([\d\.]+)\s+([\d\.]+)\s+([\d\w\.-]+)\s+([\d\w\.-]+)\s+(\d+)\s+(\d+)\s+([\.\[\]]{2})\s+(\d+)\s+(\d+)\s+([\.\[\]]{2})\s+(\d+)\s+(\d+)\s+([\.\[\]]{2})\s+([\d\.]+)$")
+DOMAIN_HIT_LINE = re.compile(r"^(\d+)\s+(!|\?)\s+(-?[\d\.]+)\s+([\d\.]+)\s+([\d\w\.\-\+]+)\s+([\d\w\.\-\+]+)\s+(\d+)\s+(\d+)\s+([\.\[\]]{2})\s+(\d+)\s+(\d+)\s+([\.\[\]]{2})\s+(\d+)\s+(\d+)\s+([\.\[\]]{2})\s+([\d\.]+)$")
 HMM_BOUND_PATTERN = {
     "[]": "COMPLETE",
     "[.": "N_TERMINAL_COMPLETE",
@@ -45,7 +45,7 @@ class QueryProtein:
         model.num_domains = re_match.group(8)
         self.signatures[model.model_id] = model
 
-    def get_domin_data(self, model_id, re_match):
+    def get_domain_data(self, model_id, re_match):
         """Get stats for a domain hit that matched.
         Where domain_pattern are the groups from the line matching DOMAIN_DATA_LINE"""
         domain = DomainHit()
@@ -207,7 +207,7 @@ def parse(hmmer_out_path: str, member_db: str):
 
                     domain_line_data = DOMAIN_HIT_LINE.match(line.strip())
                     if domain_line_data:
-                        query_protein.get_domin_data(current_model, domain_line_data)
+                        query_protein.get_domain_data(current_model, domain_line_data)
 
     return matches
 

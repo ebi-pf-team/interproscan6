@@ -11,7 +11,6 @@ process FUNFAM_FILTER_MATCHES {
     input:
         path ips6_jsons
         path cath_resolved_outs
-        val postprocessing_params
 
     output:
         path "*.processed.json"
@@ -217,7 +216,6 @@ process SUPERFAMILY_FILTER_MATCHES {
     input:
     path ass3_out
     path hmm_lib
-    val member
 
     output:
     path "superfamily_parsed_*"
@@ -227,7 +225,6 @@ process SUPERFAMILY_FILTER_MATCHES {
     python3 $projectDir/interproscan/scripts/members/superfamily/parse_superfamily_out.py \\
         ${hmm_lib} \\
         ${ass3_out} \\
-        ${member} \\
         superfamily_parsed_${ass3_out}.json
     """
 }

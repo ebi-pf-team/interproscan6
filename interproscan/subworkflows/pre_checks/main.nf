@@ -182,6 +182,11 @@ workflow PRE_CHECKS {
         exit 22, "Format not valid: $formats_diff. Valid formats are: $formats_expected"
     }
 
+    if (!seq_input.exists()) {
+        log.error "Could not find input fasta file at $seq_input"
+        exit 5
+    }
+
     // Check if the input file is a fasta file and if it contains sequences
     if (seq_input.countFasta() == 0) {
         log.error "No sequence found in the input file"
