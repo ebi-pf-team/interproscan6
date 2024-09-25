@@ -70,10 +70,10 @@ workflow {
         /* Provide the translated ORFs and the original nts seqs
         So that the ORFs can be associated with the source nucleic seq
         in the final output */
-        PARSE_SEQUENCE(orfs_fasta, ch_fasta, params.nucleic, applications)
+        PARSE_SEQUENCE(orfs_fasta, ch_fasta, params.nucleic)
     }
     else {
-        PARSE_SEQUENCE(ch_fasta, ch_fasta, params.nucleic, applications)
+        PARSE_SEQUENCE(ch_fasta, ch_fasta, params.nucleic)
     }
 
     disable_precalc = params.disable_precalc
