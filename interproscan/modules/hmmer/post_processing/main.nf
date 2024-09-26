@@ -11,18 +11,25 @@ process CATH_RESOLVE_HITS {
     input:
         path out_file
         val postprocessing_params  // [0] evalue [1] control factor
+        val is_test
 
     output:
         path "${out_file}.cath.resolved.out"
 
     // cath_resolve_hits is a third party tool used to minimise suprious hits
     script:
-    """
-    /opt/cath-tools/cath-resolve-hits \\
-        ${out_file} \\
-        --input-for hmmsearch_out \\
-        ${postprocessing_params[0]} > "${out_file}.cath.resolved.out"
-    """
+    if ( is_test )
+        """
+        echo ${postprocessing_params[0]}
+        touch "gene3d_out.cath.resolved.out"
+        """
+    else
+        """
+        /opt/cath-tools/cath-resolve-hits \\
+            ${out_file} \\
+            --input-for hmmsearch_out \\
+            ${postprocessing_params[0]} > "${out_file}.cath.resolved.out"
+        """
 }
 
 
@@ -37,22 +44,29 @@ process FUNFAM_CATH_RESOLVE_HITS {
     input:
         path hmmer_out_files
         val postprocessing_params  // [0] evalue [1] control factor
+        val is_test
 
     output:
         path "*.cath.resolved.out"
 
     // cath_resolve_hits is a third party tool used to minimise spurious hits
     script:
-    """
-    for hmmer_file in ${hmmer_out_files}
-    do
-        base_name=\$(basename \$hmmer_file .out)
-        /opt/cath-tools/cath-resolve-hits \\
-            \$hmmer_file \\
-            --input-for hmmsearch_out \\
-            ${postprocessing_params[0]} > "\${base_name}.cath.resolved.out"
-    done
-    """
+    if ( is_test )
+        """
+        echo ${postprocessing_params[0]}
+        touch "funfam.cath.resolved.out"
+        """
+    else
+        """
+        for hmmer_file in ${hmmer_out_files}
+        do
+            base_name=\$(basename \$hmmer_file .out)
+            /opt/cath-tools/cath-resolve-hits \\
+                \$hmmer_file \\
+                --input-for hmmsearch_out \\
+                ${postprocessing_params[0]} > "\${base_name}.cath.resolved.out"
+        done
+        """
 }
 
 
@@ -62,6 +76,7 @@ process ADD_CATH_SUPERFAMILIES {
     input:
         path cath_resolve_out
         val postprocessing_params
+        val is_test
     /*
     Post-processing params:
     1. cath_resolve_hits_switches
@@ -74,12 +89,20 @@ process ADD_CATH_SUPERFAMILIES {
         path "${cath_resolve_out}.cath_superfamilies"
 
     script:
-    """
-    python3 ${postprocessing_params[3]} \\
-        ${postprocessing_params[1]} \\
-        ${postprocessing_params[2]} \\
-        ${cath_resolve_out} "${cath_resolve_out}.cath_superfamilies"
-    """
+    if ( is_test )
+        """
+        echo ${postprocessing_params[1]}
+        echo ${postprocessing_params[2]}
+        echo ${postprocessing_params[3]}
+        touch "${cath_resolve_out}.cath_superfamilies"
+        """
+    else
+        """
+        python3 ${postprocessing_params[3]} \\
+            ${postprocessing_params[1]} \\
+            ${postprocessing_params[2]} \\
+            ${cath_resolve_out} "${cath_resolve_out}.cath_superfamilies"
+        """
 }
 
 
@@ -90,6 +113,7 @@ process HAMAP_POST_PROCESSER {
         val postprocessing_params
         path fasta
         path tlb
+        val is_test
     /*
     post-processing params:
     0. models dir
@@ -100,23 +124,33 @@ process HAMAP_POST_PROCESSER {
         path "hamap_pfsearch_output"
 
     /*
+    Args for pfsearch_wrapper.py
     hmmer_tbl_path -- hmmer tlb file
     fasta_file -- input fasta
     fasta_filtered_file -- output fasta file
     output_file -- another output file
     model_dir -- path to dir containing hamap profiles for pfsearch
+    path to pfsearchV3 bin
+    flags for pfsearch
     */
     script:
-    """
-    python3 $projectDir/interproscan/scripts/members/hamap/pfsearch_wrapper.py \
-        ${tlb} \
-        ${fasta} \
-        "seqs_with_hits.faa" \
-        "hamap_pfsearch_output" \
-        ${postprocessing_params[0]} \
-        "/opt/pftools/pfsearchV3" \
-        ${postprocessing_params[1]} > "print.statements.out"
-    """
+    if ( is_test )
+        """
+        echo ${postprocessing_params[0]}
+        echo ${postprocessing_params[1]}
+        touch "hamap_pfsearch_output"
+        """
+    else
+        """
+        python3 $projectDir/interproscan/scripts/members/hamap/pfsearch_wrapper.py \
+            ${tlb} \
+            ${fasta} \
+            "seqs_with_hits.faa" \
+            "hamap_pfsearch_output" \
+            ${postprocessing_params[0]} \
+            "/opt/pftools/pfsearchV3" \
+            ${postprocessing_params[1]} > "print.statements.out"
+        """
 }
 
 
@@ -127,6 +161,7 @@ process PANTHER_POST_PROCESSER {
         path out_file
         val postprocessing_params // contains [0] bin and [1] site_annotations file path
         path fasta
+        val is_test
 
     output:
         path "treegrafter_processed_panther_hits"
@@ -141,18 +176,25 @@ process PANTHER_POST_PROCESSER {
     6. --keep temp directory
     */
     script:
-    """
-    mkdir data
-    python3 $projectDir/interproscan/scripts/members/panther/treegrafter.py \\
-        run \\
-        ${fasta} \\
-        ${out_file} \\
-        ${postprocessing_params[0]} \\
-        -e ${postprocessing_params[1]} \\
-        -o treegrafter_processed_panther_hits \\
-        --epa-ng /opt/epa-ng/bin/epa-ng \\
-        --keep
-    """
+    if ( is_test )
+        """
+        echo ${postprocessing_params[0]}
+        echo ${postprocessing_params[1]}
+        touch treegrafter_processed_panther_hits
+        """
+    else
+        """
+        mkdir data
+        python3 $projectDir/interproscan/scripts/members/panther/treegrafter.py \\
+            run \\
+            ${fasta} \\
+            ${out_file} \\
+            ${postprocessing_params[0]} \\
+            -e ${postprocessing_params[1]} \\
+            -o treegrafter_processed_panther_hits \\
+            --epa-ng /opt/epa-ng/bin/epa-ng \\
+            --keep
+        """
 }
 
 
@@ -171,11 +213,18 @@ process SFLD_POST_PROCESSER {
         val member
         path alignment
         path out_dtbl
+        val is_test
 
     output:
         path "${out_file}.processed.out"
 
     script:
+    if ( is_test )
+        """
+        echo ${postprocessing_params[0]}
+        touch "${out_file}.processed.out"
+        """
+    else
         """
         $projectDir/interproscan/bin/sfld/sfld_postprocess \
             --alignments '${alignment}' \
@@ -194,26 +243,39 @@ process SUPERFAMILY_POST_PROCESSER {
         path hmmscan_out
         val postprocessing_params
         path fasta
+        val is_test
+
+    /*
+    postprocessing_params[0] = bin
+    postprocessing_params[1] = self_hits
+    postprocessing_params[2] = cla
+    postprocessing_params[3] = model_tab
+    postprocessing_params[4] = pdbj95d
+    postprocessing_params[5] = binary_switches
+    */
 
     output:
         path "${hmmscan_out}_ass3_output"
 
     script:
-       /*
-        postprocessing_params[0] = bin
-        postprocessing_params[1] = self_hits
-        postprocessing_params[2] = cla
-        postprocessing_params[3] = model_tab
-        postprocessing_params[4] = pdbj95d
-        postprocessing_params[5] = binary_switches
-       */
-    """
-    perl ${postprocessing_params[0]} \\
-    -s ${postprocessing_params[1]} \\
-    -r ${postprocessing_params[2]} \\
-    -m ${postprocessing_params[3]} \\
-    -p ${postprocessing_params[4]} \\
-    ${postprocessing_params[5]} \\
-    ${fasta} ${hmmscan_out} ${hmmscan_out}_ass3_output
-    """
+    if ( is_test )
+        """
+        echo ${postprocessing_params[0]}
+        echo ${postprocessing_params[1]}
+        echo ${postprocessing_params[2]}
+        echo ${postprocessing_params[3]}
+        echo ${postprocessing_params[4]}
+        echo ${postprocessing_params[5]}
+        touch "${hmmscan_out}_ass3_output"
+        """
+    else
+        """
+        perl ${postprocessing_params[0]} \\
+        -s ${postprocessing_params[1]} \\
+        -r ${postprocessing_params[2]} \\
+        -m ${postprocessing_params[3]} \\
+        -p ${postprocessing_params[4]} \\
+        ${postprocessing_params[5]} \\
+        ${fasta} ${hmmscan_out} ${hmmscan_out}_ass3_output
+        """
 }

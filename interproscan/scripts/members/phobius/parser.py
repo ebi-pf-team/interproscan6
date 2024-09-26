@@ -74,7 +74,7 @@ class PhobiusHit:
     def add_domain(
         self, self_domains,
         acc: str, name: str, desc: str,
-        start: str, end: str
+        start: int, end: int
     ):
         if acc not in self_domains:
             self_domains[acc] = {

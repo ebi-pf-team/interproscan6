@@ -1,0 +1,33 @@
+{
+    "Should pass": {
+        "content": [
+            {
+                "0": [
+                    "results_aggregated.json:md5,fb58604aca6dba51bf4acbaa19edb238"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.04.2"
+        },
+        "timestamp": "2024-09-02T20:40:57.449253"
+    },
+    "Should run successfully": {
+        "content": [
+            {
+                "0": [
+                    "aggregated_result.json:md5,cfb3dd4440fb052bececa882e40f6481"
+                ],
+                "ch_aggregated_results": [
+                    "aggregated_result.json:md5,cfb3dd4440fb052bececa882e40f6481"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2024-09-23T16:32:33.651976"
+    }
+}

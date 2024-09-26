@@ -5,9 +5,8 @@ nextflow_workflow {
     workflow "PRE_CHECKS"
 
     stage {
-        symlink "interproscan/scripts/pre_checks/check_nucleic_seq.py"
-        symlink "interproscan/modules/pre_checks/main.nf"
         symlink "interproscan/subworkflows/sequence_analysis/check_data.nf"
+        symlink "interproscan/subworkflows/sequence_analysis/check_sequences.nf"
         symlink "interproscan/subworkflows/xrefs/check_xref_data.nf"
         copy "tests/unit_tests/mock_data/antifam/AntiFam.hmm"
         copy "tests/unit_tests/mock_data/cdd/db/Cdd_NCBI.pal"

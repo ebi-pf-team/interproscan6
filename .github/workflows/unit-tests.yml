@@ -86,6 +86,7 @@ jobs:
         export PATH=$PATH:$GITHUB_WORKSPACE/nf-test
         ./nf-test test tests/unit_tests/subworkflows/pre_checks/
         ./nf-test test tests/unit_tests/subworkflows/sequence_precalc/
+        ./nf-test test tests/unit_tests/subworkflows/aggregate_results/
         ./nf-test test tests/unit_tests/subworkflows/xrefs/
 
     - name: NF-Test process tests
@@ -93,19 +94,17 @@ jobs:
       run: |
         export PATH=$PATH:$GITHUB_WORKSPACE/nf-test
         ./nf-test test tests/unit_tests/modules/pre_checks/
-        ./nf-test test tests/unit_tests/modules/output/aggregate_parse_seqs/
-        ./nf-test test tests/unit_tests/modules/output/aggregate_results/
-        ./nf-test test tests/unit_tests/modules/output/write_results/
+        ./nf-test test tests/unit_tests/modules/parse_sequence/
+        ./nf-test test tests/unit_tests/modules/hmmer/runner/
+        ./nf-test test tests/unit_tests/modules/hmmer/parser/
+        ./nf-test test tests/unit_tests/modules/hmmer/post_processing/
+        ./nf-test test tests/unit_tests/modules/hmmer/filter/
         ./nf-test test tests/unit_tests/modules/xref/entries/
         ./nf-test test tests/unit_tests/modules/xref/goterms/
         ./nf-test test tests/unit_tests/modules/xref/pathways/
         ./nf-test test tests/unit_tests/modules/xref/paint_annotations/
-
-    - name: NF-Test modules tests
-      shell: bash -l {0}
-      run: |
-        export PATH=$PATH:$GITHUB_WORKSPACE/nf-test
-        ./nf-test test tests/unit_tests/modules/pre_checks/nt-seqs.nf
+        ./nf-test test tests/unit_tests/modules/output/aggregate_parse_seqs/
+        ./nf-test test tests/unit_tests/modules/output/write_results/
 
     - name: PY-Test scripts tests
       shell: bash -l {0}
