@@ -85,9 +85,8 @@ def test_json_output(test_output_dir, input_path, expected_output_path, output_p
     with open('tests/integration_tests/temp_current.json', 'w') as file:
         json.dump(current, file, indent=2)
 
-    ignore_elements = ['envelopeStart', 'envelopeEnd', 'scope', 'name']
+    ignore_elements = []
     with open('tests/integration_tests/json_results.txt', 'w') as file:
         compare(expected, current, ignore_elements, False, False, file)
-    # compare(current, expected, ignore_elements, False, False)
 
     assert expected == current
