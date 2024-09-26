@@ -75,21 +75,24 @@ def matches2rules(matches_path: str, rules_hash: dict) -> dict:
                                             residue_start_on_seq_align_from_map]
                                         residue_end = sequence_alignment_reverse_position_map[residue_end_on_seq_align]
 
-                            positions_parsed.append({
-                                'description': pos['desc'],
-                                "group": int(pos['group']),
-                                "hmmEnd": pos['hmmEnd'],
-                                "hmmStart": pos['hmmStart'],
-                                "label": pos['label'],
-                                "numLocations": 1,  # always 1 on i5 (change to len(positions)?)
-                                "siteLocations": [
-                                    {
-                                        "end": residue_end,
-                                        "residue": residue,
-                                        "start": residue_start
-                                    }
-                                ]
-                            })
+                            if residue_start == 0 and residue_end == 0:
+                                pass
+                            else:
+                                positions_parsed.append({
+                                    'description': pos['desc'],
+                                    "group": int(pos['group']),
+                                    "hmmEnd": pos['hmmEnd'],
+                                    "hmmStart": pos['hmmStart'],
+                                    "label": pos['label'],
+                                    "numLocations": 1,  # always 1 on i5 (change to len(positions)?)
+                                    "siteLocations": [
+                                        {
+                                            "end": residue_end,
+                                            "residue": residue,
+                                            "start": residue_start
+                                        }
+                                    ]
+                                })
 
                         if pass_count == len(positions):
                             rule_sites.extend(positions_parsed)
