@@ -33,15 +33,33 @@ def build_xml_output_protein(seq_matches: dict, output_path: str, version: str):
     root = ET.Element("protein-matches", xmlns="https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/schemas")
     root.set("interproscan-version", version)
 
+    md52protein = {}
     for seq_id, data in seq_matches.items():
-        protein_elem = ET.SubElement(root, "protein")
-        sequence_elem = ET.SubElement(protein_elem, "sequence")
-        sequence_elem.text = data['sequences']['sequence']
-        sequence_elem.set("md5", data['sequences']['md5'])
-        xref_elem = ET.SubElement(protein_elem, "xref")
-        xref_elem.set("id", seq_id)
-        xref_elem.set("name", data['sequences']['seq_id'])
-        protein_elem = add_xml_output_matches(protein_elem, data)
+        if data['sequences']['md5'] not in md52protein:
+            protein_elem = ET.SubElement(root, "protein")
+            sequence_elem = ET.SubElement(protein_elem, "sequence")
+            sequence_elem.text = data['sequences']['sequence']
+            sequence_elem.set("md5", data['sequences']['md5'])
+
+            xrefs = []
+            xref_elem = ET.Element("xref")
+            xref_elem.set("id", seq_id)
+            xref_elem.set("name", data['sequences']['seq_id'])
+            xrefs.append(xref_elem)
+
+            protein_elem = add_xml_output_matches(protein_elem, data)
+            md52protein[data['sequences']['md5']] = (protein_elem, xrefs)
+        else:
+            _, current_xrefs = md52protein[data['sequences']['md5']]
+            xref_elem = ET.Element("xref")
+            xref_elem.set("id", seq_id)
+            xref_elem.set("name", data['sequences']['seq_id'])
+            current_xrefs.append(xref_elem)
+
+    for protein_elem, xrefs in md52protein.values():
+        matches_elem = protein_elem.find("matches")
+        for xref in xrefs:
+            protein_elem.insert(list(protein_elem).index(matches_elem), xref)
 
     tree = ET.ElementTree(root)
     ET.indent(tree, space="\t", level=0)
