@@ -162,8 +162,8 @@ def filter_matches(
                 ips6_location["location-fragments"] = []
                 if len(funfam_domain.resolved.split(",")) == 1:
                     ips6_location["location-fragments"].append({
-                        "start": funfam_domain.resolved.split("-")[0],
-                        "end": funfam_domain.resolved.split("-")[1],
+                        "start": int(funfam_domain.resolved.split("-")[0]),
+                        "end": int(funfam_domain.resolved.split("-")[1]),
                         "dc-status": "CONTINUOUS"
                     })
                 else:

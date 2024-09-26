@@ -138,7 +138,7 @@ def get_matches(data: dict):
                     }
 
                 elif member_db == "SUPERFAMILY":
-                    location_info['evalue'] = float(location['evalue'])
+                    location_info['evalue'] = location['evalue']
                     try:
                         location_info["hmmLength"] = match_data['hmm_length']
                     except KeyError:
@@ -146,7 +146,7 @@ def get_matches(data: dict):
                     match = {
                         "signature": signature,
                         "locations": [location_info],
-                        "evalue": float(match_data["evalue"]),
+                        "evalue": match_data["evalue"],
                         "model-ac": match_data.get('model-ac', match_data['accession'])
                     }
                 else:
@@ -164,8 +164,8 @@ def get_matches(data: dict):
                         # PIRSF usse the envelope start and stop
                         if member_db == "PIRSF":
                             info = {
-                                "start": int(location["envelopeStart"]),
-                                "end": int(location["envelopeEnd"])
+                                "start": location["envelopeStart"],
+                                "end": location["envelopeEnd"]
                             }
                         else:
                             info = {
@@ -176,45 +176,45 @@ def get_matches(data: dict):
                         info["representative"] = location["representative"]
 
                         if member_db == "CDD":
-                            info["evalue"] = float(location["evalue"])
-                            info["score"] = float(location["score"])
+                            info["evalue"] = location["evalue"]
+                            info["score"] = location["score"]
 
                         elif member_db in ["COILS", "PHOBIUS"]:
                             pass  # data alreadt listed in into
 
                         elif member_db == "HAMAP":
-                            info["score"] = float(location["score"])
+                            info["score"] = location["score"]
                             info["alignment"] = location["alignment"]
 
                         elif member_db == "PANTHER":
-                            info["hmmStart"] = int(location["hmmStart"])
-                            info["hmmEnd"] = int(location["hmmEnd"])
+                            info["hmmStart"] = location["hmmStart"]
+                            info["hmmEnd"] = location["hmmEnd"]
                             info["hmmLength"] = 0  # we have hmmLength but in i5 result its always 0
                             info["hmmBounds"] = location["hmmBounds"]
-                            info["envelopeStart"] = int(location["envelopeStart"])
-                            info["envelopeEnd"] = int(location["envelopeEnd"])
+                            info["envelopeStart"] = location["envelopeStart"]
+                            info["envelopeEnd"] = location["envelopeEnd"]
 
                         elif member_db == "PIRSF":
                             # PIRSF uses the ali from (start) and ali to (end)
                             # for the hmmStart and hmmEnd
                             # and env from/to for the start and end
-                            info["evalue"] = float(location["evalue"])
-                            info["score"] = float(location["score"])
-                            info["hmmStart"] = int(location["start"])
-                            info["hmmEnd"] = int(location["end"])
-                            info["hmmLength"] = int(location["hmmLength"])
+                            info["evalue"] = location["evalue"]
+                            info["score"] = location["score"]
+                            info["hmmStart"] = location["start"]
+                            info["hmmEnd"] = location["end"]
+                            info["hmmLength"] = location["hmmLength"]
                             info["hmmBounds"] = location["hmmBounds"]
-                            info["envelopeStart"] = int(location["envelopeStart"])
-                            info["envelopeEnd"] = int(location["envelopeEnd"])
+                            info["envelopeStart"] = location["envelopeStart"]
+                            info["envelopeEnd"] = location["envelopeEnd"]
 
                         elif member_db == "PRINTS":
-                            info["pvalue"] = float(location["pvalue"])
-                            info["score"] = float(location["score"])
-                            info["motifNumber"] = int(location["motifNumber"])
+                            info["pvalue"] = location["pvalue"]
+                            info["score"] = location["score"]
+                            info["motifNumber"] = location["motifNumber"]
 
                         elif member_db == "PROSITE_PROFILES":
-                            info["score"] = float(location["score"])
-                            info["alignment"] = str(location["alignment"])
+                            info["score"] = location["score"]
+                            info["alignment"] = location["alignment"]
 
                         elif member_db == "PROSITE_PATTERNS":
                             info["cigarAlignment"] = location["cigarAlignment"]
@@ -222,36 +222,36 @@ def get_matches(data: dict):
                             info["level"] = location["level"]
 
                         elif member_db in ["PIRSR", "SFLD"]:
-                            info["evalue"] = float(location["evalue"])
-                            info["score"] = float(location["score"])
-                            info["hmmStart"] = int(location["hmmStart"])
-                            info["hmmEnd"] = int(location["hmmEnd"])
-                            info["hmmLength"] = int(location["hmmLength"])
-                            info["envelopeStart"] = int(location["envelopeStart"])
-                            info["envelopeEnd"] = int(location["envelopeEnd"])
+                            info["evalue"] = location["evalue"]
+                            info["score"] = location["score"]
+                            info["hmmStart"] = location["hmmStart"]
+                            info["hmmEnd"] = location["hmmEnd"]
+                            info["hmmLength"] = location["hmmLength"]
+                            info["envelopeStart"] = location["envelopeStart"]
+                            info["envelopeEnd"] = location["envelopeEnd"]
 
                         elif member_db in ["SIGNALP", "SIGNALP_EUK"]:
-                            info["pvalue"] = float(location["pvalue"])
+                            info["pvalue"] = location["pvalue"]
                             info["cleavageStart"] = location["cleavage_start"]
                             info["cleavageEnd"] = location["cleavage_end"]
 
                         elif member_db == "SMART":
-                            info["evalue"] = float(location["evalue"])
-                            info["score"] = float(location["score"])
-                            info["hmmStart"] = int(location["hmmStart"])
-                            info["hmmEnd"] = int(location["hmmEnd"])
-                            info["hmmLength"] = int(location["hmmLength"])
+                            info["evalue"] = location["evalue"]
+                            info["score"] = location["score"]
+                            info["hmmStart"] = location["hmmStart"]
+                            info["hmmEnd"] = location["hmmEnd"]
+                            info["hmmLength"] = location["hmmLength"]
                             info["hmmBounds"] = location["hmmBounds"]
 
                         else:
-                            info["evalue"] = float(location["evalue"])
-                            info["score"] = float(location["score"])
-                            info["hmmStart"] = int(location["hmmStart"])
-                            info["hmmEnd"] = int(location["hmmEnd"])
-                            info["hmmLength"] = int(location["hmmLength"])
+                            info["evalue"] = location["evalue"]
+                            info["score"] = location["score"]
+                            info["hmmStart"] = location["hmmStart"]
+                            info["hmmEnd"] = location["hmmEnd"]
+                            info["hmmLength"] = location["hmmLength"]
                             info["hmmBounds"] = location["hmmBounds"]
-                            info["envelopeStart"] = int(location["envelopeStart"])
-                            info["envelopeEnd"] = int(location["envelopeEnd"])
+                            info["envelopeStart"] = location["envelopeStart"]
+                            info["envelopeEnd"] = location["envelopeEnd"]
 
                         if member_db in ["CDD", "PIRSR", "SFLD"]:
                             info["sites"] = location["sites"] if "sites" in location else []
@@ -279,8 +279,8 @@ def get_matches(data: dict):
                         "PROSITE_PROFILES", "PROSITE_PATTERNS",
                         "PRINTS", "SIGNALP", "SIGNALP_EUK"
                     ]:
-                        match["evalue"] = float(match_data['evalue'])
-                        match["score"] = float(match_data['score'])
+                        match["evalue"] = match_data['evalue']
+                        match["score"] = match_data['score']
 
                     if 'model-ac' in match_data:
                         match["model-ac"] = match_data['model-ac']
@@ -300,8 +300,8 @@ def get_matches(data: dict):
                         match['graftPoint'] = match_data['graftPoint']
 
                     elif member_db == "PRINTS":
-                        match["evalue"] = float(match_data['evalue'])
-                        match["graphscan"] = str(match_data["graphscan"])
+                        match["evalue"] = match_data['evalue']
+                        match["graphscan"] = match_data["graphscan"]
 
                     elif member_db in ["SIGNALP", "SIGNALP_EUK"]:
                         match["orgType"] = match_data["orgType"]

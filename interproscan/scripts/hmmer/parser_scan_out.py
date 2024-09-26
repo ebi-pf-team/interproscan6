@@ -127,8 +127,8 @@ def add_match(
             matches[protein_with_hit.sequence_id][model_id] = {
                 "accession": model_id,
                 "qlen": int(protein_with_hit.qlen),
-                "evalue": model_obj.evalue,
-                "score": model_obj.score,
+                "evalue": float(model_obj.evalue),
+                "score": float(model_obj.score),
                 "member_db": member_db,
                 "model-ac": model_id,
                 "locations": []
@@ -145,8 +145,8 @@ def add_match(
                     "hmmLength": int(protein_with_hit.qlen),
                     "rawHmmBounds": domain_obj.hmm_raw_bounds,
                     "hmmBounds": domain_obj.hmm_bounds,
-                    "evalue": domain_obj.i_evalue,  # keep as str because can be Xe-Y
-                    "score": domain_obj.score,
+                    "evalue": float(domain_obj.i_evalue),
+                    "score": float(domain_obj.score),
                     "envelopeStart": int(domain_obj.env_from),
                     "envelopeEnd": int(domain_obj.env_to),
                     "location-fragments": [
