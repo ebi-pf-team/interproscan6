@@ -129,6 +129,12 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
     matches_elem = ET.SubElement(protein_elem, "matches")
     if 'matches' in data and data['matches']:
         for match_key, match_data in data['matches'].items():
+            # Remove duplicate locations
+            distinct_locations = []
+            for loc in match_data["locations"]:
+                loc_tuple = tuple(loc.items())
+                if not any(tuple(existing_loc.items()) == loc_tuple for existing_loc in distinct_locations):
+                    distinct_locations.append(loc)
 
             # Write each signal peptide/transM domain/(non-)cytoplasmic location as
             # a separate phobius-match
@@ -219,7 +225,7 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
 
             locations_elem = ET.SubElement(match_elem, "locations")
 
-            for location in match_data['locations']:
+            for location in distinct_locations:
                 if match_data['member_db'].upper() == "CDD":
                     location_elem = ET.SubElement(locations_elem, "analysis-location")
                     location_elem.set("end", str(location["end"]))
@@ -231,11 +237,11 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                 elif match_data['member_db'].upper() == "HAMAP":
                     location_elem = ET.SubElement(locations_elem,"analysis-location")
                     location_elem.set("score", str(location["score"]))
-                    location_elem.set("alignment", location["alignment"])
+                    location_elem.set("alignment", str(location["alignment"]))
 
                 elif match_data['member_db'].upper() == "PRINTS":
                     location_elem = ET.SubElement(locations_elem, "analysis-location")
-                    location_elem.set("motifNumber", str(location["motifNumber"]))
+                    location_elem.set("motifNumber", str(int(location["motifNumber"])))
                     location_elem.set("pvalue", str(location["pvalue"]))
                     location_elem.set("score", str(location["score"]))
                     location_elem.set("end", str(location["end"]))
@@ -247,14 +253,14 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                     location_elem.set("score", str(location["score"]))
                     location_elem.set("start", str(location["start"]))
                     location_elem.set("end", str(location["end"]))
-                    location_elem.set("alignment", location["alignment"])
+                    location_elem.set("alignment", str(location["alignment"]))
 
                 elif match_data['member_db'].upper() == "PROSITE_PATTERNS":
                     location_elem = ET.SubElement(locations_elem, "analysis-location")
                     location_elem.set("start", str(location["start"]))
                     location_elem.set("end", str(location["end"]))
-                    location_elem.set("alignment", location["alignment"])
-                    location_elem.set("cigar-alignment", location["cigarAlignment"])
+                    location_elem.set("alignment", str(location["alignment"]))
+                    location_elem.set("cigar-alignment", str(location["cigarAlignment"]))
 
                 elif match_data['member_db'].upper() in ["SIGNALP", "SIGNALP_EUK"]:
                     location_elem = ET.SubElement(locations_elem,"analysis-location")
@@ -331,8 +337,8 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
 
                     location_elem.set("representative", str(location["representative"]))
                     try:
-                        location_elem.set("alignment", location["alignment"])
-                        location_elem.set("cigar-alignment", location["cigar_alignment"])
+                        location_elem.set("alignment", str(location["alignment"]))
+                        location_elem.set("cigar-alignment", str(location["cigar_alignment"]))
                     except KeyError:
                         pass
 
@@ -344,7 +350,7 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                                 location_frags_elem,
                                 "analysis-location-fragment"
                             )
-                            location_frag_elem.set("description", site['description'])
+                            location_frag_elem.set("description", str(site['description']))
                             location_frag_elem.set("numLocations", str(site['numLocations']))
                         else:
                             for sitelocation in site['siteLocations']:
@@ -354,12 +360,12 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                                 )
                                 location_frag_elem.set("start", str(sitelocation["start"]))
                                 location_frag_elem.set("end", str(sitelocation["end"]))
-                                location_frag_elem.set("residue", sitelocation["residue"])
+                                location_frag_elem.set("residue", str(sitelocation["residue"]))
                 if 'location-fragments' in location:
                     for location_fragment in location['location-fragments']:
                         location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
                         location_frag_elem.set("start", str(location_fragment["start"]))
                         location_frag_elem.set("end", str(location_fragment["end"]))
-                        location_frag_elem.set("dc-status", location_fragment["dc-status"])
+                        location_frag_elem.set("dc-status", str(location_fragment["dc-status"]))
 
     return protein_elem
