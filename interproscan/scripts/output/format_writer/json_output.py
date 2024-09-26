@@ -1,5 +1,4 @@
 import json
-import os
 
 from .regex import NT_SEQ_ID_PATTERN
 
@@ -17,11 +16,11 @@ def build_json_output_protein(seq_matches: dict, output_path: str, version: str)
                 "matches": [],
                 "xref": []
             }
+            md5_results[md5]['matches'].extend(get_matches(data))
         md5_results[md5]['xref'].append({
             "name": data['sequences']['seq_id'],
             "id": seq_id
         })
-        md5_results[md5]['matches'].extend(get_matches(data))
 
     results = [
         {
