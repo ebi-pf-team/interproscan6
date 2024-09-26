@@ -112,8 +112,8 @@ def update_ips6(ips6: Path, hits: dict[str, list[str]]) -> None:
                                 int(panther_hit["ali_end"]) == location["end"] and \
                                 int(panther_hit["hmm_start"]) == location["hmmStart"] and \
                                 int(panther_hit["hmm_end"]) == location["hmmEnd"] and \
-                                str(panther_hit["env_start"]) == str(location["envelopeStart"]) and \
-                                str(panther_hit["env_end"]) == str(location["envelopeEnd"]):
+                                int(panther_hit["env_start"]) == int(location["envelopeStart"]) and \
+                                int(panther_hit["env_end"]) == int(location["envelopeEnd"]):
 
                                 processed_ips6_data[_protein_id][signature_acc]["locations"] = [{
                                     "start": int(panther_hit["ali_start"]),
