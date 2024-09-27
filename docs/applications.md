@@ -177,7 +177,7 @@ This section discusses member databases where their tool is unqiue to them
 
 - `ncoils`
 
-## MobiDB
+## MobiDB-lite
 
 - `mobidb`
 

@@ -38,7 +38,7 @@ def tsv_output(seq_matches: dict, output_path: str):
                         evalue = location["score"]
                         ali_from = location["start"]
                         ali_to = location["end"]
-                    elif member_db.upper() in ["COILS", "MOBIDB", "PROSITE_PATTERNS"]:
+                    elif member_db.upper() in ["COILS", "MOBIDB_LITE", "PROSITE_PATTERNS"]:
                         sig_acc = match["accession"]
                         status = "T"
                         evalue = "-"
@@ -122,7 +122,7 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         location_score = location["score"]
                         env_end, env_start = "-", "-"
                     elif member_db.upper() in [
-                        "COILS", "MOBIDB", "PHOBIUS",
+                        "COILS", "MOBIDB_LITE", "PHOBIUS",
                         "PROSITE_PATTERNS", "SUPERFAMILY"
                     ]:
                         hmm_start = "-"
@@ -170,7 +170,7 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                         ali_from = location["start"]
                         ali_to = location["end"]
                         location_evalue = location["score"]
-                    elif member_db.upper() in ["COILS", "MOBIDB", "PHOBIUS", "PROSITE_PATTERNS", "SUPERFAMILY"]:
+                    elif member_db.upper() in ["COILS", "MOBIDB_LITE", "PHOBIUS", "PROSITE_PATTERNS", "SUPERFAMILY"]:
                         sig_acc = match["accession"]
                         evalue = "-"
                         ali_from = location["start"]
