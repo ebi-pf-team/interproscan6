@@ -129,7 +129,7 @@ def get_matches(data: dict):
 
             # For these member dbs we write each domain location as a separate
             # 'signature' match in the final results
-            if member_db in ["MOBIDB", "PHOBIUS", "SUPERFAMILY"]:
+            if member_db in ["PHOBIUS", "SUPERFAMILY"]:
                 for location in match_data['locations']:
                     location_info = {
                         "start": location["start"],
@@ -142,33 +142,33 @@ def get_matches(data: dict):
                         }]
                     }
 
-                if member_db == "PHOBIUS":
-                    match = {
-                        "signature": signature,
-                        "locations": [location_info],
-                        "model-ac": accession
+                    if member_db == "PHOBIUS":
+                        match = {
+                            "signature": signature,
+                            "locations": [location_info],
+                            "model-ac": accession
+                        }
+
+                    elif member_db == "SUPERFAMILY":
+                        location_info['evalue'] = location['evalue']
+                        try:
+                            location_info["hmmLength"] = match_data['hmm_length']
+                        except KeyError:
+                            location_info["hmmLength"] = location['hmmLength']
+                        match = {
+                            "signature": signature,
+                            "locations": [location_info],
+                            "evalue": match_data["evalue"],
+                            "model-ac": match_data.get('model-ac', match_data['accession'])
+                        }
+                    else:
+                        location_info["sequence-feature"] = location["sequence-feature"]
+                        match = {
+                            "signature": signature,
+                            "locations": [location_info]
                     }
 
-                elif member_db == "SUPERFAMILY":
-                    location_info['evalue'] = location['evalue']
-                    try:
-                        location_info["hmmLength"] = match_data['hmm_length']
-                    except KeyError:
-                        location_info["hmmLength"] = location['hmmLength']
-                    match = {
-                        "signature": signature,
-                        "locations": [location_info],
-                        "evalue": match_data["evalue"],
-                        "model-ac": match_data.get('model-ac', match_data['accession'])
-                    }
-                else:
-                    location_info["sequence-feature"] = location["sequence-feature"]
-                    match = {
-                        "signature": signature,
-                        "locations": [location_info]
-                    }
-
-                matches.append(match)
+                    matches.append(match)
             else:
                 if len(match_data['locations']) > 0:
                     locations = []
@@ -197,6 +197,9 @@ def get_matches(data: dict):
                         elif member_db == "HAMAP":
                             info["score"] = location["score"]
                             info["alignment"] = location["alignment"]
+
+                        elif member_db == "MOBIDB_LITE":
+                            info["sequence-feature"] = location["sequence-feature"]
 
                         elif member_db == "PANTHER":
                             info["hmmStart"] = location["hmmStart"]
@@ -295,7 +298,7 @@ def get_matches(data: dict):
                     }
 
                     if member_db not in [
-                        "CDD", "COILS", "HAMAP", "PHOBIUS",
+                        "CDD", "COILS", "HAMAP", "MOBIDB_LITE" ,"PHOBIUS"
                         "PROSITE_PROFILES", "PROSITE_PATTERNS",
                         "PRINTS", "SIGNALP", "SIGNALP_EUK"
                     ]:

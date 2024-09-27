@@ -56,9 +56,9 @@ include {
     SUPERFAMILY_FILTER_MATCHES;
 } from "$projectDir/interproscan/modules/hmmer/filter/main"
 include {
-    MOBIDB_RUNNER;
-    MOBIDB_PARSER;
-} from "$projectDir/interproscan/modules/members/mobidb/main"
+    MOBIDBLITE_RUNNER;
+    MOBIDBLITE_PARSER;
+} from "$projectDir/interproscan/modules/members/mobidblite/main"
 include {
     PHOBIUS_RUNNER;
     PHOBIUS_PARSER;
@@ -485,9 +485,8 @@ workflow SEQUENCE_ANALYSIS {
     COILS_PARSER(COILS_RUNNER.out)
 
     // MOBIDB
-    runner_mobidb_params = fasta.combine(member_params.mobidb)
-    MOBIDB_RUNNER(runner_mobidb_params)
-    MOBIDB_PARSER(MOBIDB_RUNNER.out)
+    MOBIDBLITE_RUNNER(fasta)
+    MOBIDBLITE_PARSER(MOBIDBLITE_RUNNER.out)
 
     // PHOBIUS
     runner_phobius_params = fasta.combine(member_params.phobius)
@@ -536,7 +535,7 @@ workflow SEQUENCE_ANALYSIS {
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
             COILS_PARSER.out,
-            MOBIDB_PARSER.out,
+            MOBIDBLITE_PARSER.out,
             PHOBIUS_PARSER.out,
             PRINTS_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
@@ -560,7 +559,7 @@ workflow SEQUENCE_ANALYSIS {
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
             COILS_PARSER.out,
-            MOBIDB_PARSER.out,
+            MOBIDBLITE_PARSER.out,
             PHOBIUS_PARSER.out,
             PRINTS_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,

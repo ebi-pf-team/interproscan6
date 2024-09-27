@@ -283,7 +283,7 @@ def test_hamap_json_match(j_matches_input_dir, j_matches_output_dir):
 
 
 def test_mobidb_json_match(j_matches_input_dir, j_matches_output_dir):
-    member_db = "MOBIDB"
+    member_db = "MOBIDB_LITE"
     compare_member_db_output(
         member_db,
         j_matches_input_dir,

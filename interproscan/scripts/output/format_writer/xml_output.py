@@ -10,7 +10,7 @@ MATCH_ELEMENT = {
     'FUNFAM': 'hmmer3-match',
     'GENE3D': 'hmmer3-match',
     'HAMAP': 'hmmer3-match',
-    'MOBIDB': 'mobidb-match',
+    'MOBIDB_LITE': 'mobidb-match',
     'NCBIFAM': 'hmmer3-match',
     'PANTHER': 'hmmer3-match',
     'PFAM': 'hmmer3-match',
@@ -303,7 +303,7 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                     location_elem.set("end", str(location["end"]))
                     location_elem.set("representative", str(location["representative"]))
 
-                elif match_data['member_db'].upper() in ["COILS", "MOBIDB", "SUPERFAMILY"]:
+                elif match_data['member_db'].upper() in ["COILS", "MOBIDB_LITE", "SUPERFAMILY"]:
                     location_elem = ET.SubElement(locations_elem, "analysis-location")
                     location_elem.set("start", str(location["start"]))
                     location_elem.set("end", str(location["end"]))
@@ -366,6 +366,11 @@ def add_xml_output_matches(protein_elem: ET.SubElement, data: dict):
                         location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
                         location_frag_elem.set("start", str(location_fragment["start"]))
                         location_frag_elem.set("end", str(location_fragment["end"]))
-                        location_frag_elem.set("dc-status", str(location_fragment["dc-status"]))
+                        location_frag_elem.set("dc-status", location_fragment["dc-status"])
+                else:
+                    location_frag_elem = ET.SubElement(location_frags_elem, "analysis-location-fragment")
+                    location_frag_elem.set("start", str(location["start"]))
+                    location_frag_elem.set("end", str(location["end"]))
+                    location_frag_elem.set("dc-status", "CONTINUOUS")
 
     return protein_elem
