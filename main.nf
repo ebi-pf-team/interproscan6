@@ -41,7 +41,7 @@ workflow {
         params.goterms,
         params.pathways
     )
-    dataDirPath = PRE_CHECKS.out.dataDir.val
+    dataDirPath = file(PRE_CHECKS.out.dataDir.val).toAbsolutePath().toString()
     log.info "Using data files located in ${dataDirPath}"
 
     applications = (params.applications.toLowerCase().split(',') as Set).join(',')
