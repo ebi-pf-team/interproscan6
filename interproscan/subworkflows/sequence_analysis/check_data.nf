@@ -36,7 +36,7 @@ workflow CHECK_DATA {
             checkFilePath("${dataDir}/${params.members."gene3d".hmm}")
             checkFilePath("${dataDir}/${params.members."gene3d".postprocess.model2sf_map}")
             checkFilePath("${dataDir}/${params.members."gene3d".postprocess.discontinuous_regs}")
-            if (user_selected_apps.contains('funfam')) {
+            if (applications.contains('funfam')) {
                 checkFilePath("${dataDir}/${params.members."funfam".hmm}")
             }
         } else if (member == 'hamap') {
