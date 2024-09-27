@@ -62,7 +62,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ hashFiles('docker_files/unit_tests/Dockerfile') }}
+        key: ${{ runner.os }}-buildx-${{ hashFiles('utilities/docker/unit_tests/Dockerfile') }}
         restore-keys: |
           ${{ runner.os }}-buildx-
 
@@ -70,7 +70,7 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         context: .
-        file: ./docker_files/unit_tests/Dockerfile
+        file: ./utilities/docker/unit_tests/Dockerfile
         load: true
         tags: interproscan6:latest
         cache-from: |
