@@ -247,11 +247,8 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".switches
             ]
 
-        mobidb: member == "mobidb"
-            return [
-                params.members."${member}".switches,
-                params.members."${member}".release
-            ]
+        mobidb_lite: member == "mobidb_lite"
+            return []
 
         phobius: member == "phobius"
             return []
@@ -484,8 +481,9 @@ workflow SEQUENCE_ANALYSIS {
     COILS_RUNNER(runner_coils_params)
     COILS_PARSER(COILS_RUNNER.out)
 
-    // MOBIDB
-    MOBIDBLITE_RUNNER(fasta)
+    // MobiDB-lite
+    runner_mobidblite_params = fasta.combine(member_params.mobidb_lite)
+    MOBIDBLITE_RUNNER(runner_mobidblite_params)
     MOBIDBLITE_PARSER(MOBIDBLITE_RUNNER.out)
 
     // PHOBIUS
