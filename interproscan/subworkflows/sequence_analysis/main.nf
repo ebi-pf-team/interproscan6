@@ -481,7 +481,7 @@ workflow SEQUENCE_ANALYSIS {
     COILS_RUNNER(runner_coils_params)
     COILS_PARSER(COILS_RUNNER.out)
 
-    // MOBIDB
+    // MobiDB-lite
     runner_mobidblite_params = fasta.combine(member_params.mobidb_lite)
     MOBIDBLITE_RUNNER(runner_mobidblite_params)
     MOBIDBLITE_PARSER(MOBIDBLITE_RUNNER.out)
