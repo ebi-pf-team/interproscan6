@@ -150,7 +150,7 @@ def process_3tb(line):
     rematch = MOTIFPATTERN.match(line)
     motifname = rematch.group(2)
     motifnum = int(rematch.group(3))
-    idscore = rematch.group(5)
+    idscore = float(rematch.group(5))
     pvalue = float(rematch.group(7))
     sequence = rematch.group(8)
     length = rematch.group(9)

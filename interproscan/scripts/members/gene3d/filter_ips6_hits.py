@@ -105,7 +105,7 @@ def filter_matches(
             for location in ips6_data[protein_id][match_id]["locations"]:
                 for domain in gene3d_matches[protein_id].domains[match_id]:
                     if str(domain.evalue) == str(location["evalue"]) \
-                        and str(domain.score) == str(location["score"]) \
+                        and float(domain.score) == float(location["score"]) \
                         and str(domain.boundaries_start) == str(location["start"]) \
                         and str(domain.boundaries_end) == str(location["end"]):
                         ips6_location = location
@@ -143,8 +143,8 @@ def filter_matches(
                 ips6_location["location-fragments"] = []
                 if len(gene3d_domain.resolved.split(",")) == 1:
                     ips6_location["location-fragments"].append({
-                        "start": gene3d_domain.resolved.split("-")[0],
-                        "end": gene3d_domain.resolved.split("-")[1],
+                        "start": int(gene3d_domain.resolved.split("-")[0]),
+                        "end": int(gene3d_domain.resolved.split("-")[1]),
                         "dc-status": "CONTINUOUS"
                     })
                 else:

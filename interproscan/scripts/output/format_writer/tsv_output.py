@@ -118,7 +118,7 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                     if member_db.upper() in ["CDD", "HAMAP", "PROSITE_PROFILES"]:
                         hmm_start = location["start"]
                         hmm_end = location["end"]
-                        hmm_length = int(hmm_end) - int(hmm_start)
+                        hmm_length = hmm_end - hmm_start
                         location_score = location["score"]
                         env_end, env_start = "-", "-"
                     elif member_db.upper() in [
@@ -133,7 +133,7 @@ def tsv_pro_output(seq_matches: dict, output_path: str):
                     elif member_db.upper() in ["PRINTS", "SIGNALP", "SIGNALP_EUK"]:
                         hmm_start = location["start"]
                         hmm_end = location["end"]
-                        hmm_length = int(hmm_end) - int(hmm_start)
+                        hmm_length = hmm_end - hmm_start
                         location_score = location["pvalue"]
                         env_end, env_start = "-", "-"
                     elif member_db.upper() == "SMART":

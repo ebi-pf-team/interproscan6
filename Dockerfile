@@ -107,6 +107,7 @@ COPY utilities/linter utilities/linter
 COPY utilities/install_nf-test.sh utilities/install_nf-test.sh
 COPY utilities/requirements-dev.txt utilities/requirements-dev.txt
 COPY tests/ tests/
+COPY benchmarking/ benchmarking/
 COPY interproscan.nf interproscan.nf
 COPY nextflow.config nextflow.config
 COPY README.md README.md
