@@ -18,7 +18,7 @@ map_databases = {
     "SUPERFAMILY": "SUPERFAMILY",
     "ANTIFAM": "AntiFam",
     "FUNFAM": "FunFam",
-    "MOBIDB": "MobiDB Lite",
+    "MOBIDB_LITE": "MobiDB Lite",
     "PHOBIUS": "Phobius",
     "SIGNALP": "SignalP",
     "SIGNALP_EUK": "SignalP_Euk",

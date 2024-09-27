@@ -1,6 +1,5 @@
 process PARSE_SEQUENCE {
     label 'io'
-    errorStrategy { task.exitStatus in [143,1] ? 'terminate' : 'ignore' }
 
     input:
     val fasta_file
@@ -13,7 +12,6 @@ process PARSE_SEQUENCE {
     associated with the corresponding ORF in the
     final output.
     */
-    val applications
 
     output:
     path "parsed_sequences"
@@ -24,7 +22,6 @@ process PARSE_SEQUENCE {
         ${fasta_file} \\
         ${original_fasta_file} \\
         ${nucleic} \\
-        ${applications} \\
         "parsed_sequences"
     """
 }

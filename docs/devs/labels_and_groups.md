@@ -23,7 +23,7 @@ A separate label for each analysis tool runner, including:
 * `coils_runner`
 * `hmmer_runner`
 * `hmmer_2_runner`
-* `mobidb_runner`
+* `mobidblite_runner`
 * `prosite_pfscan_runner`
 * `prosite_pfsearch_runner`
 * `signalp_runner`
@@ -40,7 +40,7 @@ Processes for parsing the output:
 * `HMMER_SCAN_PARSER`
 * `PFSCAN_PARSER`
 * `PFSEARCH_PARSER`
-* `MOBIDB_PARSER`
+* `MOBIDBLITE_PARSER`
 * `SIGNALP_PARSER`
 
 Process for post-processing:

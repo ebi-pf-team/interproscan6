@@ -1,4 +1,4 @@
-include { CHECK_NUCLEIC } from "$projectDir/interproscan/modules/pre_checks/main"
+include { CHECK_SEQUENCES } from "$projectDir/interproscan/subworkflows/pre_checks/check_sequences.nf"
 include { CHECK_DATA } from "$projectDir/interproscan/subworkflows/sequence_analysis/check_data"
 include { CHECK_XREF_DATA } from "$projectDir/interproscan/subworkflows/xrefs/check_xref_data"
 
@@ -101,6 +101,10 @@ workflow PRE_CHECKS {
     pathways
 
     main:
+    def applications_lower = user_applications.toLowerCase().split(',') as Set
+
+    log.info "PRECHECKS:: apps lower :: ${applications_lower}"
+
     if ( !nextflow.version.matches('>=23.04') ) {
         println "InterProScan requires Nextflow version 23.04 or greater -- You are running version $nextflow.version"
         exit 1
@@ -128,20 +132,14 @@ workflow PRE_CHECKS {
 
     // is user specifies the input is nucleic acid seqs
     // check the input only contains nucleic acid seqs
+    // and it always checks the input FASTA file for illegal characters
+    // this includes member specific and general illegal characters
     if (using_nucleic) {
-        try {
-            CHECK_NUCLEIC(seq_input)
-        } catch (all) {
-            println """Error in input sequences"""
-            log.error """
-            The '--nucleic' flag was used, but the input FASTA file
-            appears to contain at least one sequence that contains a
-            non-nucleic acid residue ('A','G','C','T','*','-', case insensitive).
-            Please check your input is correct.
-            """
-            exit 1
-        }
+        is_nucleic = true
+    } else {
+        is_nucleic = false
     }
+    CHECK_SEQUENCES(seq_input, applications_lower, is_nucleic)
 
     // Check if the input parameters are valid
     def parameters_expected = [
@@ -160,12 +158,12 @@ workflow PRE_CHECKS {
     // Check if the applications are valid
     def applications_expected = [
         'antifam', 'cdd', 'coils', 'funfam', 'gene3d', 'hamap',
-        'mobidb', 'ncbifam', 'panther', 'pfam', 'phobius','pirsf', 'pirsr',
+        'mobidb_lite', 'ncbifam', 'panther', 'pfam', 'phobius','pirsf', 'pirsr',
         'prints', 'prosite_patterns', 'prosite_profiles',
         'sfld', 'signalp', 'signalp_euk', 'smart', 'superfamily'
     ]
 
-    def applications_diff = user_applications.toLowerCase().split(',') - applications_expected
+    def applications_diff = applications_lower - applications_expected
     if (applications_diff.size() != 0){
         log.info printHelp()
         exit 22, "Applications not valid: $applications_diff. Valid applications are: $applications_expected"
@@ -184,15 +182,18 @@ workflow PRE_CHECKS {
         exit 22, "Format not valid: $formats_diff. Valid formats are: $formats_expected"
     }
 
+    if (!seq_input.exists()) {
+        log.error "Could not find input fasta file at $seq_input"
+        exit 5
+    }
+
     // Check if the input file is a fasta file and if it contains sequences
     if (seq_input.countFasta() == 0) {
         log.error "No sequence found in the input file"
         exit 5
     }
 
-    applications = user_applications.toLowerCase()
-
-    CHECK_DATA(applications, data_dir)
+    CHECK_DATA(applications_lower, data_dir)
     missingData = CHECK_DATA.out.missingData.val
     dataDir = CHECK_DATA.out.dataDir.val
 

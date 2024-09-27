@@ -66,9 +66,9 @@ def parse(signalp_out: str, signalp_cs: str, threshold: float,
                         "orgType": org,
                         "model-ac": "SignalP",
                         "locations": [{
-                            "start": start,
-                            "end": end,
-                            "pvalue": pvalue,
+                            "start": int(start),
+                            "end": int(end),
+                            "pvalue": float(pvalue),
                             "cleavage_start": "",
                             "cleavage_end": ""
                         }]

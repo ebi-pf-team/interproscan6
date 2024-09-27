@@ -160,7 +160,7 @@ def test_tsv_hamap_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir
 
 
 def test_tsv_mobidb_output(tsvout_path, tsv_seq_match_dir, expected_tsv_outputdir):
-    member_db = "MOBIDB"
+    member_db = "MOBIDB_LITE"
     seq_matches = load_seq_matches_dict(member_db, tsv_seq_match_dir)
     tsv_output.tsv_output(seq_matches, tsvout_path)
 

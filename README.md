@@ -35,9 +35,8 @@ Our full documentation is still under construction.
   - [Using DNA sequences](#using-dna-sequences)
   - [Input sequences](#input-sequences)
   - [Outputs and results](#outputs)
-- [Installing licensed applications (`MobiDB`, `Phobius`, `SignalP`, `TMHMM`)](#installing-licensed-applications-mobidb-phobius-signalp-tmhmm)
+- [Installing licensed applications (`Phobius`, `SignalP`, `TMHMM`)](#installing-licensed-applications-phobius-signalp-tmhmm)
   - [DeepTMHMM](#deeptmhmm)
-  - [MobiDB-Lite](#mobidb-lite)
   - [SignalP (version 6)](#signalp)
     - [Setting up SignalP](#set-up-1)
     - [Running SignalP](#running-interproscan6-with-signalp6)
@@ -106,7 +105,7 @@ apptainer pull interproscan6.sif docker://interpro/interproscan6:latest
 
 3. **(Optional) Install licensed software**
 
-By default `MobiDB`, `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
+By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
 because they contain licensed components. In order to activate these analyses 
 please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
 
@@ -120,7 +119,7 @@ tar -pxzf interproscan-data-102.0.tar.gz
 mv interproscan-data-102.0 data
 ```
 
-2. **Build the Docker image.** (This includes the idrpred tool for MobiDB predictions). Run this command from the root of this repository.
+2. **Build the Docker image.** Run this command from the root of this repository.
 
 ```bash
 docker build -t interproscan6 .
@@ -128,7 +127,7 @@ docker build -t interproscan6 .
 
 3. **(Optional) Install licensed software**
 
-By default `MobiDB`, `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
+By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
 because they contain licensed components. In order to activate these analyses 
 please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
 
@@ -194,7 +193,7 @@ Nextflow also supports using Charliecloud, Podman, Sarus, and Shifter. However y
 
 ## Optional arguments
 
-**`--applications`** - Applications/member databases to run. By default `InterProScan` runs all member databases in the consortium ([except Mobidb-Lite due to licensing reasons](#mobidb)). Use the `--applications` to define a comma separate list of applications names (case insensitive).
+**`--applications`** - Applications/member databases to run. By default `InterProScan` runs all member databases in the consortium. Use the `--applications` to define a comma separate list of applications names (case insensitive).
 
 **`--datadir`** - Path to the data directory. By default `InterProScan` looks for a `data` directory 
 in the `InterProScan` project directory.
@@ -239,7 +238,7 @@ Below is a list of the applications (built in and those that require additional 
   * [Cath-Gene3D]( https://www.cathdb.info/) (use as 'Gene3D' to run Cath-Gene3D in `InterProScan`)
   * [CDD](https://www.ncbi.nlm.nih.gov/cdd)
   * [HAMAP](https://hamap.expasy.org/)
-  * [MobiDB Lite](http://old.protein.bio.unipd.it/mobidblite/)
+  * [MobiDB-lite](http://old.protein.bio.unipd.it/mobidblite/)
   * [NCBIfam](https://www.ncbi.nlm.nih.gov/genome/annotation_prok/evidence/)
   * [PANTHER](http://www.pantherdb.org/)
   * [Pfam](https://pfam.xfam.org/)
@@ -585,9 +584,9 @@ The envelope represents the region of a protein sequence where the domain may be
 
 **Panther exception:** The output from HMMER3 against the HMM models of Panther is post-processed to select only the best homologous family. Therefore, there is a maximum of one domain hit for each Panther signature in a protein sequence. Owing to this the E-value and Score and listed under the `signature` key, not the `locations` key.
 
-# Installing licensed applications (`MobiDB`, `Phobius`, `SignalP`, `TMHMM`)
+# Installing licensed applications (`Phobius`, `SignalP`, `TMHMM`)
 
-By default `MobiDB`, `Phobius`, `SignalP`, and `DeepTMHMM` member database analyses are deactivated in `InterProScan6` because they contain licensed components. In order to activate these analyses please obtain the relevant licenses and files from the provider (ensuring the software version numbers are the same as those supported by your current `InterProScan6` installation).
+By default `Phobius`, `SignalP`, and `DeepTMHMM` member database analyses are deactivated in `InterProScan6` because they contain licensed components. In order to activate these analyses please obtain the relevant licenses and files from the provider (ensuring the software version numbers are the same as those supported by your current `InterProScan6` installation).
 
 Files can be placed in any location.
 
@@ -600,30 +599,6 @@ Files can be placed in any location.
 ## DeepTMHMM
 
 Coming soon...
-
-## MobiDB-Lite
-
-Some of the compoments within `MobiDBLite` are GPL-licensed, meaning all software and data, and thus 
-work that uses this software, also needs to be GPL-licensed. This may not be ideal or suitable
-for all users. Therefore, we provide a version of the `MobiDBLite` analytical software that 
-is not GPL-licensed, called [`idrpred`](https://github.com/matthiasblum/idrpred).
-
-To setup `MobiDB`/`idrpred` for `InterProScan6` pull the `idrpred` Docker image from Docker hub using your container runtime of choice.
-
-Using docker:
-```bash
-docker pull idrpred:latest
-```
-
-Using `Singularity`:
-```bash
-singularity pull idrpred.sif docker://matblum/idrpred/idrpred:latest
-```
-
-Using `Apptainer`:
-```bash
-apptainer pull idrpred.sif docker://matblum/idrpred/idrpred:latest
-```
 
 ## `Phobius`
 
@@ -793,6 +768,38 @@ nextflow run ebi-pf-team/interproscan6 \
   --signalp_gpu \
   -profile singularity,slurm
 ```
+
+# Benchmarking and trouble shooting the performance
+
+Nextflow provides some built in options for assessing the operation of `IPS6`, including generating a HTML report. However, these reports are limited to presenting the resource usage from only a single run, and can only be generated if a run is successful. Consequently, we have packaged a simple benchmarking script into IPS6 to enable assessing the task duration and resource usage across multiple runs, and customised grouping of the data. For example, you may wish to clearly see differences in performance with altering the batch size, the number of CPUs or amount of memory allocated. 
+
+You can find the complete details for benchmarking and assessing the performance of `IPS6` in `./benchmarking/README.md`.
+
+In brief:
+
+1. Install all necessary third party packages listed in `benchmarking/requirements.txt`.
+2. Build a trace file as part of your InterProScan runs.
+3. Update or create the benchmarking JSON config file
+4. Run the benchmarking
+
+```bash
+# running from the root of the IPS6 project dir
+# and using the benchmarking/tracefiles.json file
+python3 benchmarking/benchmark_ips6.py benchmarking/tracefiles.json
+```
+
+## Output:
+
+Each run of `benchmark_ips6.py` will produce the following figures (note, references to 'group' refers to the keys in the input JSON file, each key represents a different 'group'):
+
+1. `total_runtime.*` - Shows the total run time of IPS6 per group in the input JSON file
+2. `process_runtime.*` - Shows the total run time per process in IPS6
+3. `process_runtime_piechart.*` - Shows the percentage of the total runtime contributed by each process
+4. `pie_chart_values.csv` - Contains the data used to build the `process_runtime_piechart.*` figure. If many processes are included the legends in the pie chart can often overlap. Use this CSV file to plot the pie chart (or alternative chart).
+5. `overall_memory_usage.*` - Plots the overall memory usage per group in the input JSON file
+6. `overall_max_memory_usage.*` - Plots the overall maximum memory used per group in the input JSON file
+7. `memory_per_process.*` - Plots the memory usage per process (and per group if multiple groups are defined in the input JSON file)
+8. `max_memory_per_process.*` - Plots the maximum memory usage per process (and per group if multiple groups are defined in the input JSON file)
 
 # Citation
 
