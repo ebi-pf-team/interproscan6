@@ -208,19 +208,19 @@ workflow SEQUENCE_ANALYSIS {
             ]
 
         superfamily: member == 'superfamily'
-        return [
-            "${member}",
-            "${dataDir}/${params.members."${member}".hmm}",
-            params.members."${member}".switches,
-            [
-                "${params.members."${member}".postprocess.bin}",
-                "${dataDir}/${params.members."${member}".postprocess.self_hits}",
-                "${dataDir}/${params.members."${member}".postprocess.cla}",
-                "${dataDir}/${params.members."${member}".postprocess.model}",
-                "${dataDir}/${params.members."${member}".postprocess.pdbj95d}",
-                params.members."${member}".postprocess.ass3_switches,
+            return [
+                "${member}",
+                "${dataDir}/${params.members."${member}".hmm}",
+                params.members."${member}".switches,
+                [
+                    "${params.members."${member}".postprocess.bin}",
+                    "${dataDir}/${params.members."${member}".postprocess.self_hits}",
+                    "${dataDir}/${params.members."${member}".postprocess.cla}",
+                    "${dataDir}/${params.members."${member}".postprocess.model}",
+                    "${dataDir}/${params.members."${member}".postprocess.pdbj95d}",
+                    params.members."${member}".postprocess.ass3_switches,
+                ]
             ]
-        ]
 
         // uses HMMER2, has a slightly different set up
         smart: member == 'smart'
@@ -247,11 +247,8 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".switches
             ]
 
-        mobidb: member == "mobidb"
-            return [
-                params.members."${member}".switches,
-                params.members."${member}".release
-            ]
+        mobidb_lite: member == "mobidb_lite"
+            return []
 
         phobius: member == "phobius"
             return []
@@ -485,7 +482,8 @@ workflow SEQUENCE_ANALYSIS {
     COILS_PARSER(COILS_RUNNER.out)
 
     // MOBIDB
-    MOBIDBLITE_RUNNER(fasta)
+    runner_mobidblite_params = fasta.combine(member_params.mobidb_lite)
+    MOBIDBLITE_RUNNER(runner_mobidblite_params)
     MOBIDBLITE_PARSER(MOBIDBLITE_RUNNER.out)
 
     // PHOBIUS
