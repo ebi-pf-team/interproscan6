@@ -52,6 +52,7 @@ Built-in analyses:
     Hamap: High-quality Automated and Manual Annotation of Microbial Proteomes.
     Gene3D: Structural assignment for whole genes and genomes using the CATH domain structure database.
     FunFam: Protein function annotations for protein families and superfamilies, based upon evolutionary relationships
+    MobiDB-lite: Prediction of intrinsically disordered regions in proteins.
     NCBIfam: NCBIFams (including the original TIGRFAMs) are protein families based on hidden Markov models (HMMs).
     PANTHER: The PANTHER (Protein ANalysis THrough Evolutionary Relationships) Classification System 
             classifies genes by their functions, using published scientific experimental evidence 
@@ -75,8 +76,6 @@ Built-in analyses:
 
 Licensed analyses (require additional installation steps):
     DeepTMHMM: Coming Soon!
-    MobiDB: Prediction of intrinsically disordered regions in proteins. 
-            Runs idrpred to check for hits against a MobiDB-Lite database.
     Phobius:  A combined transmembrane topology and signal peptide predictor.
     SignalP: Signal peptide prediction using all SignalP models.
     SignalP_EUK : Signal peptide prediction using SignalP, and triggers post-processing of the SP 
