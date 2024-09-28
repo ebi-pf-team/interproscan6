@@ -15,7 +15,7 @@ def checkIllegalChars(sequence, apps, nucleic) {
         "ncbifam": "-",
         "panther": "-",
         "pfam": "-",
-        "phobius": "-*._oxuzj",
+        "phobius": "-*._oxuzjOXUZJ",
         "pirsf": "-",
         "pirsr": "-",
         "prints": "-._",
@@ -28,7 +28,7 @@ def checkIllegalChars(sequence, apps, nucleic) {
         "signalp_euk": ""
     ]
     def errors = [:]
-    def invalidCharPattern = nucleic ? ~/[^ATCGU\-\*\.]*/ : ~/[^A-Za-z\-\*\.]*/
+    def invalidCharPattern = nucleic ? ~/[^ATCGUatcgu\-\*\.]*/ : ~/[^A-Za-z\-\*\.]*/
     def invalidChars = sequence.findAll(invalidCharPattern).flatten().unique().collect { "'${it}'" }.findAll { it != "''" }
     if (invalidChars) {
         errors['GENERAL'] = new TreeSet(invalidChars)
