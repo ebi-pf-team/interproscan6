@@ -5,8 +5,8 @@ nextflow_workflow {
     workflow "PRE_CHECKS"
 
     stage {
+        symlink "interproscan/subworkflows/pre_checks/check_sequences.nf"
         symlink "interproscan/subworkflows/sequence_analysis/check_data.nf"
-        symlink "interproscan/subworkflows/sequence_analysis/check_sequences.nf"
         symlink "interproscan/subworkflows/xrefs/check_xref_data.nf"
         copy "tests/unit_tests/mock_data/antifam/AntiFam.hmm"
         copy "tests/unit_tests/mock_data/cdd/db/Cdd_NCBI.pal"
@@ -149,7 +149,7 @@ nextflow_workflow {
 
         then {
             assert workflow.failed
-            assert workflow.exitStatus == 1
+            assert workflow.exitStatus == 22
         }
 
     }
