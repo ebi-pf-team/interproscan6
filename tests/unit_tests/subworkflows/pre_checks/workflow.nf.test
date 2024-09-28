@@ -53,7 +53,7 @@ nextflow_workflow {
 
         when {
             params {
-                input="test_inputs/protein_seqs.fasta"
+                input="$projectDir/tests/unit_tests/test_inputs/pre_analysis_checks/protein_seqs.fasta"
                 applications="antifam,CDD"
                 formats="tsv-pro"
             }
@@ -195,7 +195,7 @@ nextflow_workflow {
 
         when {
             params {
-                input="test_inputs/protein_seqs.fasta"
+                input="$projectDir/tests/unit_tests/test_inputs/pre_analysis_checks/protein_seqs.fasta"
                 applications="antifam,CDD"
                 formats="json,xml"
             }
@@ -230,7 +230,7 @@ nextflow_workflow {
 
         when {
             params {
-                input="test_inputs/protein_seqs.fasta"
+                input="$projectDir/tests/unit_tests/test_inputs/pre_analysis_checks/protein_seqs.fasta"
                 applications="antifam,CDD,Frodo"
                 formats="json,xml"
             }
@@ -264,7 +264,7 @@ nextflow_workflow {
 
         when {
             params {
-                input="test_inputs/protein_seqs.fasta"
+                input="$projectDir/tests/unit_tests/test_inputs/pre_analysis_checks/protein_seqs.fasta"
                 applications="antifam,CDD"
                 formats="json,xml,Gollum"
             }
