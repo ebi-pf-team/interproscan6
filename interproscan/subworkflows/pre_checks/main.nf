@@ -129,17 +129,6 @@ workflow PRE_CHECKS {
         exit 5
     }
 
-    // is user specifies the input is nucleic acid seqs
-    // check the input only contains nucleic acid seqs
-    // and it always checks the input FASTA file for illegal characters
-    // this includes member specific and general illegal characters
-    if (using_nucleic) {
-        is_nucleic = true
-    } else {
-        is_nucleic = false
-    }
-    CHECK_SEQUENCES(seq_input, applications_lower, is_nucleic)
-
     // Check if the input parameters are valid
     def parameters_expected = [
         'input', 'applications', 'disable_precalc', 'help', 'datadir',
@@ -167,6 +156,18 @@ workflow PRE_CHECKS {
         log.info printHelp()
         exit 22, "Applications not valid: $applications_diff. Valid applications are: $applications_expected"
     }
+
+    // is user specifies the input is nucleic acid seqs
+    // check the input only contains nucleic acid seqs
+    // and it always checks the input FASTA file for illegal characters
+    // this includes member specific and general illegal characters
+    if (using_nucleic) {
+        is_nucleic = true
+    } else {
+        is_nucleic = false
+    }
+    CHECK_SEQUENCES(seq_input, applications_lower, is_nucleic)
+
 
     if ("${signalp_mode}".toLowerCase() !in ['fast', 'slow', 'slow-sequential']) {
         log.error "Unrecognised SignalP mode '${signalp_mode}'.\nAccepted modes: 'fast', 'slow', 'slow-sequential'"
