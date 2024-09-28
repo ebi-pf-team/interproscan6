@@ -54,7 +54,7 @@ class Match implements Serializable {
                  Integer envelopeEnd = null,
                  Double evalue = null,
                  Double score = null,
-                 Double bias = null;
+                 Double bias = null,
                  String alignment = null,
                  String sequenceFeature = null,
                  List<LocationFragment> fragments = null) {
