@@ -82,16 +82,18 @@ workflow CHECK_SEQUENCES {
         }
     }
 
-    // Process the last sequence
-    if (is_nucleic) {
-        if (!isNucleic(currentSeq.sequence)) {
-            errors['non-nucleic-chars'] << currentSeq.seqKey
+    if (currentSeq) {
+        // Process the last sequence
+        if (is_nucleic) {
+            if (!isNucleic(currentSeq.sequence)) {
+                errors['non-nucleic-chars'] << currentSeq.seqKey
+            }
         }
-    }
 
-    illegalCharsDetected = checkIllegalChars(currentSeq.sequence, applications_lower, is_nucleic)
-    if (illegalCharsDetected) {
-        errors['illegal-chars'][currentSeq.seqKey] = illegalCharsDetected
+        illegalCharsDetected = checkIllegalChars(currentSeq.sequence, applications_lower, is_nucleic)
+        if (illegalCharsDetected) {
+            errors['illegal-chars'][currentSeq.seqKey] = illegalCharsDetected
+        }
     }
 
     // If any issues were detected then raise and error and terminate
