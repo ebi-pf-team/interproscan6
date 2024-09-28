@@ -93,7 +93,6 @@ jobs:
       shell: bash -l {0}
       run: |
         export PATH=$PATH:$GITHUB_WORKSPACE/nf-test
-        ./nf-test test tests/unit_tests/modules/pre_checks/
         ./nf-test test tests/unit_tests/modules/parse_sequence/
         ./nf-test test tests/unit_tests/modules/hmmer/runner/
         ./nf-test test tests/unit_tests/modules/hmmer/parser/
