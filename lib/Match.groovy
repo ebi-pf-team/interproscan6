@@ -7,6 +7,19 @@ class Match implements Serializable {
     Signature signature = null
     List<Location> locations = []
 
+    // PANTHER
+    // String subfamilyAccession
+    // String subfamilyName
+    // String graftPoint
+    // String proteinClass
+    // String ancestralNodeID
+
+    // SignalP
+    // String orgType
+
+    // PRINTS
+    // String graphscan
+
     static class Signature implements Serializable {
         String accession
         String name
@@ -43,6 +56,12 @@ class Match implements Serializable {
         String sequenceFeature
         List<LocationFragment> fragments
         boolean representative = false
+
+        // pvalue
+        // level
+        // cigarAlignment
+        // sites
+        // motifNumber
 
         Location(int start, 
                  int end, 
@@ -102,6 +121,13 @@ class Match implements Serializable {
 
     Match(String modelAccession) {
         this.modelAccession = modelAccession
+    }
+
+    Match(String modelAccession, Double evalue, Double score, Double bias) {
+        this.modelAccession = modelAccession
+        this.evalue = evalue
+        this.score = score
+        this.bias = bias
     }
 
     void addMobiDBLiteLocation(int start, int end, String sequenceFeature) {
