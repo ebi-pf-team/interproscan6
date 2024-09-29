@@ -52,7 +52,8 @@ class Match implements Serializable {
         Double evalue
         Double score
         Double bias
-        String alignment
+        String querySequence
+        String targetSequence
         String sequenceFeature
         List<LocationFragment> fragments
         boolean representative = false
@@ -73,10 +74,7 @@ class Match implements Serializable {
                  Integer envelopeEnd = null,
                  Double evalue = null,
                  Double score = null,
-                 Double bias = null,
-                 String alignment = null,
-                 String sequenceFeature = null,
-                 List<LocationFragment> fragments = null) {
+                 Double bias = null) {
             this.start = start
             this.end = end
             this.hmmStart = hmmStart
@@ -88,14 +86,8 @@ class Match implements Serializable {
             this.evalue = evalue
             this.score = score
             this.bias = bias
-            this.alignment = alignment
-            this.sequenceFeature = sequenceFeature
-            if (fragments) {
-                this.fragments = fragments
-            } else {
-                LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
-                this.fragments = [fragment]
-            }
+            LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
+            this.fragments = [fragment]
         }
 
         Location(int start, int end, String sequenceFeature) {
@@ -130,8 +122,18 @@ class Match implements Serializable {
         this.bias = bias
     }
 
-    void addMobiDBLiteLocation(int start, int end, String sequenceFeature) {
-        Location location = new Location(start, end, sequenceFeature)
+    void addLocation(Location location) {
         this.locations.add(location)
     }
+
+    void setSequences(int locationIndex, String querySequence, String targetSequence) {
+        Location location = this.locations[locationIndex]
+        location.querySequence = querySequence
+        location.targetSequence = targetSequence
+    }
+
+    // void addMobiDBLiteLocation(int start, int end, String sequenceFeature) {
+    //     Location location = new Location(start, end, sequenceFeature)
+    //     this.locations.add(location)
+    // }
 }
