@@ -1,14 +1,7 @@
 import Match
 
 class HMMER3 {
-    static final String queryNamePattern = ~/^Query:\s*(.+)\s+\[\w=(\d+)\]$/
-    static final String queryAccPattern = ~/^Accession:\s*(.+)$/
-    static final String noHitsPattern = "[No hits detected that satisfy reporting thresholds]"
-    static final String noDomainsPattern = "[No individual domains that satisfy reporting thresholds"
-    static final String domainsTableHeaderPattern = " ---   ------ ----- --------- ---------"
-    static final String targetIdPattern = ~/>>\s(\S+)/
-
-    static void parseOutput(String filePath) {
+    static parseOutput(String filePath) {
         File file = new File(filePath)
         String line
         String queryName
@@ -25,7 +18,7 @@ class HMMER3 {
                     if (line == null) {
                         break
                     }
-                    def matcher = line =~ this.queryNamePattern
+                    def matcher = line =~ ~/^Query:\s*(.+)\s+\[\w=(\d+)\]$/
                     if (matcher.find()) {
                         queryName = matcher.group(1)
                         queryLength = matcher.group(2).toInteger()
@@ -40,7 +33,7 @@ class HMMER3 {
 
                 // Move to the sequence top hits list and skip the header
                 while (!line.startsWith("Scores for complete sequences")) {
-                    def matcher = line =~ this.queryAccPattern
+                    def matcher = line =~ ~/^Accession:\s*(.+)$/
                     if (matcher.find()) {
                         queryAccession = matcher.group(1)
                     }
@@ -51,16 +44,20 @@ class HMMER3 {
                 line = reader.readLine()
                 line = reader.readLine()
 
+                // Fallback to query name if HMM doesn't have an ACC field
+                queryAccession ?= queryName
+
                 // Parse the sequence top hits
                 while ((true)) {
                     line = reader.readLine().trim()
-                    if (line.isEmpty() || line.contains(this.noHitsPattern)) {
+                    if (line.isEmpty() || 
+                        line.contains("[No hits detected that satisfy reporting thresholds]")) {
                         break
                     }
 
-                    def fields =line.split(/\s+/)
+                    def fields = line.split(/\s+/)
                     Match match = new Match(
-                        queryAccession ?: queryName,
+                        queryAccession,
                         Double.parseDouble(fields[0]),
                         Double.parseDouble(fields[1]),
                         Double.parseDouble(fields[2]),
@@ -71,7 +68,7 @@ class HMMER3 {
                         hits[targetId] = [:]
                     } 
 
-                    hits[targetId][match.modelAccession] = match
+                    hits[targetId][queryAccession] = match
                 }
 
                 // Move to the hits section
@@ -79,100 +76,122 @@ class HMMER3 {
                     line = reader.readLine().trim()
                 }
 
+                // Parse hits
                 while (true) {
-                    line = reader.readLine().trim()
-                    if (line.isEmpty() || line.contains(this.noDomainsPattern)) {
+                    // Find next target
+                    targetId = null
+                    while (true) {
+                        if (line.startsWith(">>")) {
+                            def matcher = line =~ ~/>>\s(\S+)/
+                            assert matcher.find() == true
+                            targetId = matcher.group(1)
+                            break
+                        } else if (line == "//") {
+                            break
+                        }
+                        line = reader.readLine().trim()
+                    }
+
+                    if (targetId == null) {
+                        // Reached the end of the query block
                         break
                     }
-                }
 
-                // Move to the hits section
-                while (line.trim() != "//") {
-                    if (line.contains(this.noHitsPattern)) {
-                        // No hits found: move to next query
-                        while ((line = reader.readLine()) != "//") {
-                            continue
-                        }
-                    } else if (line.startsWith("Domain annotation for")) {
-                        // Beginning of the hits section
+                    // Skip table header
+                    line = reader.readLine()
+                    line = reader.readLine()
 
-                        // Find the target
-                        while (!(line = reader.readLine()).startsWith(">>")) {
-                            continue
-                        }
-
-                        def matcher = line =~ this.targetIdPattern
-                        assert matcher.find() == true
-                        targetId = matcher.group(1)
-
-                        // Move to the beginning of the domain table
-                        boolean hasDomains = true
-                        while (true) {
-                            line = reader.readLine()
-                            if (line.startsWith(this.noDomainsPattern)) {
-                                hasDomains = false
-                                break
-                            } else if (line.startsWith(this.domainsTableHeaderPattern)) {
-                                break
-                            }
-                        }
-
-                        if (! hasDomains) {
-                            continue
-                        }
-
-                        // Parse individual domains
-                        while (!(line = reader.readLine().trim()).isEmpty()) {
-                            def fields = line.split(/\s+/)
-                            assert fields.size() == 16
-                            // Match match = new Match(queryAccession ?: queryName)
-                            // match.addLocation(
-                            //     Integer.parseInt(fields[9]),
-                            //     Integer.parseInt(fields[10]),
-                            //     fields[6].toInteger(),
-                            //     fields[7].toInteger(),
-                            //     0,  // TODO: hmmLength
-                            //     fields[8],
-                            //     fields[12].toInteger(),
-                            //     fields[13].toInteger(),
-                            //     // evalue
-                            //     // score
-                            //     // bias
-                            //     // alignment
-                            //     // feature
-                            //     // fragment
-                            // )
-                        
-                        }
-                    } else {
-                        line = reader.readLine()
+                    // Parse domain hits
+                    while (!(line = reader.readLine().trim()).isEmpty()) {
+                        def fields = line.split(/\s+/)
+                        assert fields.size() == 16
+                        Match.Location location = new Match.Location(
+                            Integer.parseInt(fields[9]),
+                            Integer.parseInt(fields[10]),
+                            fields[6].toInteger(),
+                            fields[7].toInteger(),
+                            queryLength,
+                            fields[8],
+                            fields[12].toInteger(),
+                            fields[13].toInteger(),
+                            Double.parseDouble(fields[5]),
+                            Double.parseDouble(fields[2]),
+                            Double.parseDouble(fields[3])
+                        )
+                        hits[targetId][queryAccession].addLocation(location)
                     }
-                }
 
-                // We reached the end of the results for the current query
-                // println(queryName)
+                    // Move to domain alignments
+                    while (true) {
+                        line = reader.readLine().trim()
+                        if (line == "Alignments for each domain:") {
+                            break
+                        }
+                    }
+
+                    // Find the alignment for each domain
+                    int domainIndex = 0
+                    String querySequence = ""
+                    String targetSequence = ""
+                    while (true) {
+                        line = reader.readLine().trim()
+                        if (line.isEmpty()) {
+                            continue
+                        } else if (line =~ /==\s+domain\s\d+/) {
+                            // New domain
+                            if (domainIndex > 0) {
+                                assert querySequence.length() > 0
+                                assert targetSequence.length() > 0
+                                hits[targetId][queryAccession].setSequences(
+                                    domainIndex - 1,
+                                    querySequence,
+                                    targetSequence
+                                )
+                            }
+
+                            domainIndex++
+                            querySequence = ""
+                            targetSequence = ""
+                        } else if (line.startsWith(">>") || 
+                                   line == "Internal pipeline statistics summary:") {
+                            // Either new target or end of results for current query
+
+                            assert querySequence.length() > 0
+                            assert targetSequence.length() > 0
+                            hits[targetId][queryAccession].setSequences(
+                                domainIndex - 1,
+                                querySequence,
+                                targetSequence
+                            )
+
+                            break
+                        } else {
+                            // Read next block of alignments
+                            def blocks = []
+                            while (!line.isEmpty() || blocks.size() < 4) {
+                                blocks.add(line)
+                                line = reader.readLine().trim()
+                            }
+                            /* 
+                                Keep last four lines as the domain block may have five lines 
+                                if the profile has a consensus structure 
+                                or reference line annotation (reported first)
+                            */
+                            blocks = blocks[-4..-1]
+                            def fields = blocks[0].split(/\s+/)
+                            querySequence += fields[2]
+                            fields = blocks[2].split(/\s+/)
+                            targetSequence += fields[2]
+                        }
+                    }
+
+                }
 
                 queryName = null;
                 queryAccession = null
-            }
-            
-            // while ((line = reader.readLine()) != null) {
-            //     String query = null;
-                
-                    
-                
-            
-            // }
-                
+            }                
         }
-        
 
-        // file.eachLine { line ->
-        //     if (line.startsWith(">> ")) {
-        //         String targetName = line.substring(3)
-        //     } else if (line.startsWith("== domain")) {
-
-        //     }
-        // }
+        return hits
     }    
 }
