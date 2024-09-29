@@ -22,7 +22,7 @@ include {
     SMART_HMMER2_RUNNER;
 } from "$projectDir/interproscan/modules/hmmer/runner/main"
 include {
-    HMMER_PARSER as ANTIFAM_HMMER_PARSER;
+    ANTIFAM_HMMER_PARSER;
     HMMER_PARSER as GENE3D_HMMER_PARSER;
     HMMER_PARSER as HAMAP_HMMER_PARSER;
     HMMER_PARSER as NCBIFAM_HMMER_PARSER;

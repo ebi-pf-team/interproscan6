@@ -96,3 +96,17 @@ process HMMER_SCAN_PARSER {
         hmmer_parsed_${out}.json
     """
 }
+
+process ANTIFAM_HMMER_PARSER {
+    input:
+    path out
+    val member
+
+    output:
+    path "antifam_parsed.json"
+
+    exec
+    def outputFilePath = task.workDir.resolve("antifam_parsed.json")
+    println(out)
+    println(out.getClass())
+}
