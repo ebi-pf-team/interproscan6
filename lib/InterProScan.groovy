@@ -1,3 +1,5 @@
+import java.nio.file.*
+
 class InterProScan {
     static final def PARAMS = [
         [
@@ -65,12 +67,16 @@ class InterProScan {
             name: "signalp-gpu",
             description: null
         ],
-
+        [
+            name: "apps-config",
+            description: null
+        ],
     ]
 
     static void checkParams(params) {
         def allowedParams = this.PARAMS.collect { it.name.toLowerCase() }
 
+        // Check that all params are recognized
         for (e in params) {
             def paramName = e.key
             def paramValue = e.value
@@ -96,9 +102,84 @@ class InterProScan {
                 println "Try '--help' for more information."
                 System.exit(1)
             }
-
-            
         }
+
+        // Check that required params (--input, --datadir) are provided and valid paths
+        this.PARAMS.findAll{ it.required }.each { param ->
+            def paramName = kebabToCamel(param.name)
+            def paramValue = params[paramName]
+
+            if (paramValue == null) {
+                println "Error: '--${param.name} ${param.metavar}' is mandatory."
+                System.exit(1)
+            }
+
+            Path path = Paths.get(paramValue)
+            if (!Files.exists(path)) {
+                println "Error: No such file or directory: ${paramValue}"
+                System.exit(1)
+            }
+        }
+
+        // Check that the ouput dir is writable
+        Path path = Paths.get(params.outdir)
+        if (Files.exists(path)) {
+            if (!Files.isDirectory(path)) {
+                println "Error: Not a directory: ${params.outdir}."
+                System.exit(1)
+            } else if (!Files.isWritable(path)) {
+                println "Error: Directory not writable: ${params.outdir}."
+                System.exit(1)
+            }
+        } else {
+            Files.createDirectories(path)
+        }
+    }
+
+    static String checkApplications(params) {
+        if (!params.applications) {
+            // Run all applications
+            return params.appsConfig.findAll{ it -> 
+                !(it.value.disabled)
+            }.keySet().join(",")
+        }
+
+        // Make a collection of recognized application names
+        def allApps = [:]
+        params.appsConfig.each { label, appl -> 
+            allApps[label] = label
+            def stdName = appl.name.toLowerCase().replaceAll("[- ]", "")
+            allApps[stdName] = label
+            (appl.aliases ?: []).each { alias ->
+                def stdAlias = alias.toLowerCase().replaceAll("[- ]", "")
+                allApps[stdAlias] = label
+            }
+        }
+
+        def appsToRun = []
+        def appsParam = params.applications.replaceAll("[- ]", "").split(",").collect { it.trim() }.toSet()
+        appsParam.each { appName ->
+            def key = appName.toLowerCase()
+            if (allApps.containsKey(key)) {
+                appsToRun.add(key)
+            } else {
+                println "Error: unrecognized application: ${appName}"
+                println this.listApplications(params.appsConfig)
+                System.exit(1)
+            }
+        }
+
+        return appsToRun.toSet().join(",")
+    }
+
+    static String listApplications(appsConfig) {
+        def result = new StringBuilder()
+        result << "Available applications:\n"
+        appsConfig.each { label, appl -> 
+            result << "  ${appl.name.replace(' ', '-')}\n"
+        }
+
+        return result.toString()
     }
 
     static String kebabToCamel(String kebabName) {
@@ -111,7 +192,7 @@ class InterProScan {
         return camelName.replaceAll(/([a-z])([A-Z])/, '$1-$2').toLowerCase()
     }
 
-    public static void printHelp(manifest) {
+    static String getHelpMessage(appsConfig) {
         def result = new StringBuilder()
         result << "Usage: nextflow run ebi-pf-team/interproscan6 -profile <PROFILE> --input <FASTA> --datadir <DATADIR> \n\n"
         result << "Mandatory parameters:\n"
@@ -126,7 +207,8 @@ class InterProScan {
             result << this.formatOption(param) << "\n"
         }
 
-        print result.toString()
+        result << "\n" + this.listApplications(appsConfig)
+        return result.toString()
     }
 
     static String formatOption(option) {
