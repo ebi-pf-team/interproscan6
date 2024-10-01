@@ -13,15 +13,20 @@ include { SEQUENCE_ANALYSIS } from "$projectDir/interproscan/subworkflows/sequen
 include { XREFS } from "$projectDir/interproscan/subworkflows/xrefs/main"
 
 workflow {
+    println "# ${workflow.manifest.name} ${workflow.manifest.version}"
+    println "# ${workflow.manifest.description}\n"
+
+    // Help text
     if (params.keySet().any { it.equalsIgnoreCase("help") }) {
-        InterProScan.printHelp()
+        println InterProScan.getHelpMessage(params.appsConfig)
         exit 0
     }
 
-    applicationsConfig = params.remove("applicationsConfig")
-
+    // Params validation
     InterProScan.checkParams(params)
-    exit 0
+
+    // Applications validation
+    params.appsToRun = InterProScan.checkApplications(params)
 
     // Perform preliminary validation checks before running the analysis
     if (params.input != null) {
