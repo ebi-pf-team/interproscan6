@@ -124,11 +124,11 @@ workflow {
     Add go terms (if enabled)
     Add pathways (if enabled)
     */
-    XREFS(all_results, applications, dataDirPath)
+    XREFS(all_results, dataDirPath)
 
     AGGREGATE_RESULTS(XREFS.out)
 
-    REPRESENTATIVE_DOMAINS(XREFS.out.collect())
+    REPRESENTATIVE_DOMAINS(AGGREGATE_RESULTS.out)
 
     Channel.from(params.formats.toLowerCase().split(','))
     .set { ch_format }
