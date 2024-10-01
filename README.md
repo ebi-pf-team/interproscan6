@@ -154,7 +154,7 @@ singularity build interproscan6.sif docker-daemon://interproscan6:latest
 `InterProScan6` is configured via the command-line. The only mandatory arguments are the runtime profiles (`-profiles`) and input FASTA file (`--input`).
 
 ```bash
-nextflow run interproscan.nf \
+nextflow run ebi-pf-team/interproscan6 \
   -profile <container runtime, and executor> \
   --input <path to fasta file>
 ```
@@ -184,7 +184,7 @@ For `InterProScan6` to run, a profile for the container runtime and a profile fo
 For example, to run `InterProScan` a cluster with the SLURM scheduler and Singularity:
 
 ```bash
-nextflow run interproscan.nf \
+nextflow run ebi-pf-team/interproscan6 \
   -profile slurm,singularity \
   --input <path to fasta file> 
 ```
@@ -216,7 +216,7 @@ in the `InterProScan` project directory.
 For example, to run `InterProScan6` using only AntiFam and SFLD, without checking for pre-calculated matches in InterPro (using an example input file), with writing the results to the directory `results`, writing the results to a JSON and XML file and including GO term and Pathway annotation data in the final results, while using Docker on a local system:
 
 ```bash
-nextflow run interproscan.nf \
+nextflow run ebi-pf-team/interproscan6 \
   -profile docker,local \
   --input files_test/best_to_test.fasta \
   --applications signalp,antifam \
@@ -271,7 +271,7 @@ The `easel` application itself and all of its dependencies are integrated in Int
 
 **To run anlyses with nucleic acid sequences, run `InterProScan6` with the `--nucleic` flag**
 
-    nextflow run interproscan.nf \
+    nextflow run ebi-pf-team/interproscan6 \
         --input <path to fasta file> \
         -profile <executor,container runtime> \
         --nucleic
@@ -694,14 +694,14 @@ singularity build signalp6.sif docker-archive://signalp6.tar
 Include `signalp` or `signalp_euk` in the list of applications defined using the `--applications` flag.
 
 ```bash
-nextflow run interproscan.nf \
+nextflow run ebi-pf-team/interproscan6 \
     --input utilities/test_files/best_to_test.fasta \
     --applications signalp \
     -profile local,docker
 ```
 
 ```bash
-nextflow run interproscan.nf \
+nextflow run ebi-pf-team/interproscan6 \
     --input utilities/test_files/best_to_test.fasta \
     --applications signalp_euk \
     -profile local,docker
@@ -723,7 +723,7 @@ You may need to install the other models mannually, please see the [SignalP docu
 For example, to run `InterProScan` with the input file `best_to_test.fasta`, using SignalP with only eukaryotic models in slow mode, and with retrieving precalculated matches disabled on a local machine using docker:
 
 ```bash
-nextflow run interproscan.nf \
+nextflow run ebi-pf-team/interproscan6 \
   --input utilities/test_files/best_to_test.fasta \
   --applications signalp_euk \
   --disable_precalc \
@@ -762,10 +762,10 @@ To run `SignalP` with GPU acceleration with `InterProScan6` use the flag `--sign
 For example, to run ``InterProScan`` with only ``SignalP`` enabled, using GPU acceleration on a SLURM cluster with Singularity support:
 
 ```bash
-nextflow run interproscan.nf \\
-  --input <fasta file> \\
-  --applications signalp \\
-  --signalp_gpu \\
+nextflow run ebi-pf-team/interproscan6 \
+  --input <fasta file> \
+  --applications signalp \
+  --signalp_gpu \
   -profile singularity,slurm
 ```
 
@@ -833,7 +833,7 @@ Caused by:
 Try running Nextflow with root privileges:
 
 ```bash
-sudo nextflow run interproscan.nf --input <path to fasta file> 
+sudo nextflow run ebi-pf-team/interproscan6 --input <path to fasta file> 
 ```
 
 Also try providing root privileges to docker within Nextflow, by changing the the `runOptions` key in `nextflow.config`:

@@ -15,7 +15,7 @@ def checkIllegalChars(sequence, apps, nucleic) {
         "ncbifam": "-",
         "panther": "-",
         "pfam": "-",
-        "phobius": "-*._oxuzj",
+        "phobius": "-*._oxuzjOXUZJ",
         "pirsf": "-",
         "pirsr": "-",
         "prints": "-._",
@@ -28,7 +28,7 @@ def checkIllegalChars(sequence, apps, nucleic) {
         "signalp_euk": ""
     ]
     def errors = [:]
-    def invalidCharPattern = nucleic ? ~/[^ATCGU\-\*\.]*/ : ~/[^A-Za-z\-\*\.]*/
+    def invalidCharPattern = nucleic ? ~/[^ATCGUatcgu\-\*\.]*/ : ~/[^A-Za-z\-\*\.]*/
     def invalidChars = sequence.findAll(invalidCharPattern).flatten().unique().collect { "'${it}'" }.findAll { it != "''" }
     if (invalidChars) {
         errors['GENERAL'] = new TreeSet(invalidChars)
@@ -82,16 +82,18 @@ workflow CHECK_SEQUENCES {
         }
     }
 
-    // Process the last sequence
-    if (is_nucleic) {
-        if (!isNucleic(currentSeq.sequence)) {
-            errors['non-nucleic-chars'] << currentSeq.seqKey
+    if (currentSeq) {
+        // Process the last sequence
+        if (is_nucleic) {
+            if (!isNucleic(currentSeq.sequence)) {
+                errors['non-nucleic-chars'] << currentSeq.seqKey
+            }
         }
-    }
 
-    illegalCharsDetected = checkIllegalChars(currentSeq.sequence, applications_lower, is_nucleic)
-    if (illegalCharsDetected) {
-        errors['illegal-chars'][currentSeq.seqKey] = illegalCharsDetected
+        illegalCharsDetected = checkIllegalChars(currentSeq.sequence, applications_lower, is_nucleic)
+        if (illegalCharsDetected) {
+            errors['illegal-chars'][currentSeq.seqKey] = illegalCharsDetected
+        }
     }
 
     // If any issues were detected then raise and error and terminate

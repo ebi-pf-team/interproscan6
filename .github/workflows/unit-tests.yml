@@ -62,7 +62,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ hashFiles('docker_files/unit_tests/Dockerfile') }}
+        key: ${{ runner.os }}-buildx-${{ hashFiles('utilities/docker/unit_tests/Dockerfile') }}
         restore-keys: |
           ${{ runner.os }}-buildx-
 
@@ -70,7 +70,7 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         context: .
-        file: ./docker_files/unit_tests/Dockerfile
+        file: ./utilities/docker/unit_tests/Dockerfile
         load: true
         tags: interproscan6:latest
         cache-from: |
@@ -93,7 +93,6 @@ jobs:
       shell: bash -l {0}
       run: |
         export PATH=$PATH:$GITHUB_WORKSPACE/nf-test
-        ./nf-test test tests/unit_tests/modules/pre_checks/
         ./nf-test test tests/unit_tests/modules/parse_sequence/
         ./nf-test test tests/unit_tests/modules/hmmer/runner/
         ./nf-test test tests/unit_tests/modules/hmmer/parser/

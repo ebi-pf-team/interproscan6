@@ -58,7 +58,7 @@ WORKDIR /opt/interproscan6
 COPY interproscan/ interproscan/
 COPY utilities/ utilities/
 COPY tests/ tests/
-COPY interproscan.nf interproscan.nf
+COPY main.nf main.nf
 COPY nextflow.config nextflow.config
 COPY README.md README.md
 COPY LICENSE LICENSE

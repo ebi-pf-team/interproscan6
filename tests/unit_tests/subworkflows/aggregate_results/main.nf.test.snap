@@ -17,17 +17,17 @@
         "content": [
             {
                 "0": [
-                    "aggregated_result.json:md5,cfb3dd4440fb052bececa882e40f6481"
+                    "aggregated_result.json:md5,1ba631ba09bf9da413f242c296c09f89"
                 ],
                 "ch_aggregated_results": [
-                    "aggregated_result.json:md5,cfb3dd4440fb052bececa882e40f6481"
+                    "aggregated_result.json:md5,1ba631ba09bf9da413f242c296c09f89"
                 ]
             }
         ],
         "meta": {
             "nf-test": "0.8.4",
-            "nextflow": "23.10.1"
+            "nextflow": "24.04.4"
         },
-        "timestamp": "2024-09-23T16:32:33.651976"
+        "timestamp": "2024-09-28T12:47:17.465385"
     }
 }

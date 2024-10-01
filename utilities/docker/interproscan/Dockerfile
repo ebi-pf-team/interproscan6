@@ -102,16 +102,6 @@ RUN curl -L -o cath-resolve-hits https://github.com/UCLOrengoGroup/cath-tools/re
     chmod +x cath-resolve-hits
 
 WORKDIR /opt/interproscan6
-COPY interproscan/ interproscan/
-COPY utilities/linter utilities/linter
-COPY utilities/install_nf-test.sh utilities/install_nf-test.sh
-COPY utilities/requirements-dev.txt utilities/requirements-dev.txt
-COPY tests/ tests/
-COPY benchmarking/ benchmarking/
-COPY interproscan.nf interproscan.nf
-COPY nextflow.config nextflow.config
-COPY README.md README.md
-COPY LICENSE LICENSE
 
 # remove tools not needed for running IPS6 to reduce the final image size
 RUN apt-get remove -y autoconf automake autotools-dev bison build-essential flex git libcurl3-gnutls libdivsufsort3 liblmdb0 libdw1 libnghttp2-dev libssl-dev libtool nghttp2 zlib1g-dev && \
