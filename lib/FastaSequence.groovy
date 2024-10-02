@@ -2,7 +2,7 @@ import java.security.MessageDigest
 
 class FastaSequence implements Serializable {
     // DNA, RNA, gaps
-    static final String NUCLEIC_ALPHABET = ~/(?i)[ACGTUN\-\.\s]+/
+    static final String NUCLEIC_ALPHABET = /(?i)[ACGTUN\-\.\s]+/
     // 20 standard AAs, Sec, Pyl, any/unknown, Asx, Glx, Xle, gaps
     static final String PROTEIN_ALPHABET = /(?i)[ACDEFGHIKLMNPQRSTVWYUOXBZJ\-\.\s]+/
 
@@ -10,11 +10,19 @@ class FastaSequence implements Serializable {
     String description
     String sequence
     String md5 = null
+    FastaSequence translatedFrom = null
 
-    void setMD5() {
+    FastaSequence(String id, String description, String sequence) {
+        this.id = id
+        this.description = description
+        this.sequence = sequence
+        this.md5 = this.getMD5(sequence)
+    }
+
+    static String getMD5(String sequence) {
         MessageDigest md = MessageDigest.getInstance("MD5")
         byte[] digest = md.digest(sequence.toUpperCase().bytes)
-        this.md5 = digest.encodeHex().toString().toUpperCase()
+        return digest.encodeHex().toString().toUpperCase()
     }
 
     String validate(boolean isNucleic = false, String extraForbiddenChars = "") {
