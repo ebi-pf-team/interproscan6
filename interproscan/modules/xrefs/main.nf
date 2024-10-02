@@ -1,4 +1,3 @@
-
 process GOTERMS {
     label 'xref'
 
@@ -18,8 +17,7 @@ process GOTERMS {
         "F": "MOLECULAR_FUNCTION"
     ]
 
-    def match_goterms = []
-    matches2go = matches_info.each { seq_id, match_info ->
+    matches2go = matches_info.collectEntries { seq_id, match_info ->
         match_info.each { match_key, data ->
             if (data["entry"]) {
                 interpro_key = data["entry"]["accession"]
@@ -35,12 +33,12 @@ process GOTERMS {
                         match_info[match_key]["entry"]["goXRefs"] << go_dict
                     }
                 } catch (Exception e) {
-                    // pass
+                    // pass (no GO terms for this interpro_key)
                 }
             }
         }
+        return match_info
     }
-    return matches2go.path
     """
 }
 
@@ -64,7 +62,7 @@ process PATHWAYS {
     "r": "Reactome"
     ]
 
-    matches2pa = matches_info.each { seq_id, match_info ->
+    matches2pa = matches_info.collectEntries { seq_id, match_info ->
         match_info.each { match_key, data ->
             if (data["entry"]) {
                 interpro_key = data["entry"]["accession"]
@@ -79,11 +77,43 @@ process PATHWAYS {
                         match_info[match_key]["entry"]["pathwayXRefs"] << pa_dict
                     }
                 } catch (Exception e) {
-                    // pass
+                    // pass (no Pathways for this interpro_key)
                 }
             }
         }
+        return matches_info
     }
-    return matches2pa.path
+    """
+}
+
+process PANTHER_XREFS {
+    label 'xref'
+
+    input:
+    val paint_annotations
+    val matches2entries
+
+    output:
+    val matches2pthrxrefs
+
+    script:
+    """
+    matches2pthrxrefs = matches_info.collectEntries { seq_id, match_info ->
+        match_info.each { match_key, data ->
+            def acc_subfamily = data["accession"]
+            try {
+                match_info[match_key]["entry"]["subfamily_name"] = entries_info[acc_subfamily]["name"]
+                match_info[match_key]["entry"]["subfamily_description"] = entries_info[acc_subfamily]["description"]
+                match_info[match_key]["entry"]["subfamily_type"] = entries_info[acc_subfamily]["type"]
+            } catch (Exception e) {
+                log.info "No subfamily for ${acc_subfamily}"
+            }
+            node_data = paint_annotations[data["node_id"]]
+            match_info[seq_id][sig_acc]["proteinClass"] = node_data[2]
+            match_info[seq_id][sig_acc]["graftPoint"] = node_data[3]
+        }
+        return match_info
+    }
+
     """
 }

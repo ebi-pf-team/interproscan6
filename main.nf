@@ -10,7 +10,6 @@ include { PRE_CHECKS } from "$projectDir/interproscan/subworkflows/pre_checks/ma
 include { SEQUENCE_PRECALC } from "$projectDir/interproscan/subworkflows/sequence_precalc/main"
 include { SEQUENCE_ANALYSIS } from "$projectDir/interproscan/subworkflows/sequence_analysis/main"
 include { XREFS } from "$projectDir/interproscan/subworkflows/xrefs/main"
-include { AGGREGATE_RESULTS } from "$projectDir/interproscan/subworkflows/aggregate_results/main"
 
 workflow {
     // Perform preliminary validation checks before running the analysis
@@ -124,11 +123,10 @@ workflow {
     Add go terms (if enabled)
     Add pathways (if enabled)
     */
-    XREFS(all_results, dataDirPath)
+    XREFS(all_results, dataDirPath, applications)
+    XREFS.out.view()
 
-    AGGREGATE_RESULTS(XREFS.out)
-
-    REPRESENTATIVE_DOMAINS(AGGREGATE_RESULTS.out)
+    REPRESENTATIVE_DOMAINS(XREFS.out)
 
     Channel.from(params.formats.toLowerCase().split(','))
     .set { ch_format }
