@@ -73,7 +73,7 @@ class InterProScan {
         ],
     ]
 
-    static void checkParams(params) {
+    static void validateParams(params, log) {
         def allowedParams = this.PARAMS.collect { it.name.toLowerCase() }
 
         // Check that all params are recognized
@@ -98,45 +98,50 @@ class InterProScan {
             // Convert to kebab-case
             def kebabParamName = this.camelToKebab(paramName)
             if (!allowedParams.contains(kebabParamName.toLowerCase())) {
-                println "Unrecognized option: --${kebabParamName}."
-                println "Try '--help' for more information."
-                System.exit(1)
+                log.warn "Unrecognized option: --${kebabParamName}. Try '--help' for more information."
             }
         }
 
-        // Check that required params (--input, --datadir) are provided and valid paths
+        // Check that required params (--input, --datadir) are provided
         this.PARAMS.findAll{ it.required }.each { param ->
             def paramName = kebabToCamel(param.name)
             def paramValue = params[paramName]
 
             if (paramValue == null) {
-                println "Error: '--${param.name} ${param.metavar}' is mandatory."
+                log.error "'--${param.name} ${param.metavar}' is mandatory."
                 System.exit(1)
             }
-
-            Path path = Paths.get(paramValue)
-            if (!Files.exists(path)) {
-                println "Error: No such file or directory: ${paramValue}"
-                System.exit(1)
-            }
-        }
-
-        // Check that the ouput dir is writable
-        Path path = Paths.get(params.outdir)
-        if (Files.exists(path)) {
-            if (!Files.isDirectory(path)) {
-                println "Error: Not a directory: ${params.outdir}."
-                System.exit(1)
-            } else if (!Files.isWritable(path)) {
-                println "Error: Directory not writable: ${params.outdir}."
-                System.exit(1)
-            }
-        } else {
-            Files.createDirectories(path)
         }
     }
 
-    static List<String> checkApplications(String applications, Map appsConfig) {
+    static String resolveFile(String filePath) {
+        Path path = Paths.get(filePath)
+        return Files.isRegularFile(path) ? path.toRealPath() : null
+    }
+
+    static resolveDirectory(String dirPath, boolean mustExist = false, boolean mustBeWritable = false) {
+        Path path = Paths.get(dirPath)
+
+        if (Files.exists(path)) {
+            if (!Files.isDirectory(path)) {
+                return [null, "Not a directory: ${dirPath}."]
+            } else if (mustBeWritable && !Files.isWritable(path)) {
+                return [null, "Directory not writable: ${dirPath}."]
+            }
+            return [path.toRealPath(), null]
+        } else if (mustExist) {
+            return [null, "Not a directory: ${dirPath}."]
+        } else {
+            try {
+                Files.createDirectories(path)
+                return [path.toRealPath(), null]
+            } catch (IOException) {
+                return [null, "Cannot create directory: ${dirPath}."]
+            }
+        }
+    }
+
+    static validateApplications(String applications, Map appsConfig) {
         if (!applications) {
             // Run all applications
             return appsConfig.findAll{ it -> 
@@ -158,28 +163,17 @@ class InterProScan {
 
         def appsToRun = []
         def appsParam = applications.replaceAll("[- ]", "").split(",").collect { it.trim() }.toSet()
-        appsParam.each { appName ->
+        for (appName in appsParam) {
             def key = appName.toLowerCase()
             if (allApps.containsKey(key)) {
                 appsToRun.add(key)
             } else {
-                println "Error: unrecognized application: ${appName}"
-                println this.listApplications(appsConfig)
-                System.exit(1)
+                def error = "unrecognized application: '${appName}'. Try '--help' to list available applications."
+                return [null, error]
             }
         }
 
-        return appsToRun.toSet().toList()
-    }
-
-    static String listApplications(appsConfig) {
-        def result = new StringBuilder()
-        result << "Available applications:\n"
-        appsConfig.each { label, appl -> 
-            result << "  ${appl.name.replace(' ', '-')}\n"
-        }
-
-        return result.toString()
+        return [appsToRun.toSet().toList(), null]
     }
 
     static String kebabToCamel(String kebabName) {
@@ -192,7 +186,7 @@ class InterProScan {
         return camelName.replaceAll(/([a-z])([A-Z])/, '$1-$2').toLowerCase()
     }
 
-    static String getHelpMessage(appsConfig) {
+    static void printHelp(appsConfig) {
         def result = new StringBuilder()
         result << "Usage: nextflow run ebi-pf-team/interproscan6 -profile <PROFILE> --input <FASTA> --datadir <DATADIR> \n\n"
         result << "Mandatory parameters:\n"
@@ -207,8 +201,12 @@ class InterProScan {
             result << this.formatOption(param) << "\n"
         }
 
-        result << "\n" + this.listApplications(appsConfig)
-        return result.toString()
+        result << "\nAvailable applications:\n"
+        appsConfig.each { label, appl -> 
+            result << "  ${appl.name.replace(' ', '-')}\n"
+        }
+
+        print result.toString()
     }
 
     static String formatOption(option) {
