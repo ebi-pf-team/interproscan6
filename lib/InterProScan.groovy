@@ -136,17 +136,17 @@ class InterProScan {
         }
     }
 
-    static String checkApplications(params) {
-        if (!params.applications) {
+    static List<String> checkApplications(String applications, Map appsConfig) {
+        if (!applications) {
             // Run all applications
-            return params.appsConfig.findAll{ it -> 
+            return appsConfig.findAll{ it -> 
                 !(it.value.disabled)
-            }.keySet().join(",")
+            }.keySet().toList()
         }
 
         // Make a collection of recognized application names
         def allApps = [:]
-        params.appsConfig.each { label, appl -> 
+        appsConfig.each { label, appl -> 
             allApps[label] = label
             def stdName = appl.name.toLowerCase().replaceAll("[- ]", "")
             allApps[stdName] = label
@@ -157,19 +157,19 @@ class InterProScan {
         }
 
         def appsToRun = []
-        def appsParam = params.applications.replaceAll("[- ]", "").split(",").collect { it.trim() }.toSet()
+        def appsParam = applications.replaceAll("[- ]", "").split(",").collect { it.trim() }.toSet()
         appsParam.each { appName ->
             def key = appName.toLowerCase()
             if (allApps.containsKey(key)) {
                 appsToRun.add(key)
             } else {
                 println "Error: unrecognized application: ${appName}"
-                println this.listApplications(params.appsConfig)
+                println this.listApplications(appsConfig)
                 System.exit(1)
             }
         }
 
-        return appsToRun.toSet().join(",")
+        return appsToRun.toSet().toList()
     }
 
     static String listApplications(appsConfig) {

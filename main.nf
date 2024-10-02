@@ -26,7 +26,12 @@ workflow {
     InterProScan.checkParams(params)
 
     // Applications validation
-    params.appsToRun = InterProScan.checkApplications(params)
+    appsToRun = InterProScan.checkApplications(params.applications, params.appsConfig)
+
+    FastaSequence.checkFastaFile(params.input, params.nucleic, params.appsConfig, appsToRun)
+    
+
+    exit 0
 
     // Perform preliminary validation checks before running the analysis
     if (params.input != null) {
