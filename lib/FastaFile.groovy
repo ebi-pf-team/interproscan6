@@ -12,9 +12,9 @@ class FastaFile {
 
                 def header = line.substring(1).split(" ", 2).collect { it.trim() }
                 currentSequence = new FastaSequence(
-                    id: header[0], 
-                    description: header.size() > 1 ? header[1] : "", 
-                    sequence: ""
+                    header[0], 
+                    header.size() > 1 ? header[1] : "", 
+                    ""
                 )
             } else {
                 currentSequence.sequence += line.trim()
@@ -55,9 +55,9 @@ class FastaFile {
 
                 def header = line.substring(1).split(" ", 2).collect { it.trim() }
                 currentSequence = new FastaSequence(
-                    id: header[0], 
-                    description: header.size() > 1 ? header[1] : "", 
-                    sequence: ""
+                    header[0], 
+                    header.size() > 1 ? header[1] : "", 
+                    ""
                 )
             } else {
                 currentSequence.sequence += line.trim()
