@@ -1,7 +1,6 @@
-include { RUN_ANTIFAM           } from  "../../modules/antifam"
-include { PARSE_ANTIFAM         } from  "../../modules/antifam"
-include { RUN_MOBIDBLITE        } from  "../../modules/mobidblite"
-include { PARSE_MOBIDBLITE      } from  "../../modules/mobidblite"
+include { RUN_ANTIFAM; PARSE_ANTIFAM              } from  "../../modules/antifam"
+include { RUN_COILS; PARSE_COILS                  } from  "../../modules/coils"
+include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE        } from  "../../modules/mobidblite"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -27,6 +26,12 @@ workflow SCAN_SEQUENCES {
         ch_out = RUN_MOBIDBLITE(ch_fasta)
         PARSE_MOBIDBLITE(ch_out)
         results = results.mix(PARSE_MOBIDBLITE.out)
+    }
+
+    if (applications.contains("coils")) {
+        ch_out = RUN_COILS(ch_fasta)
+        PARSE_COILS(ch_out)
+        results = results.mix(PARSE_COILS.out)
     }
 
     results
