@@ -27,36 +27,23 @@ process PARSE_MOBIDBLITE {
 
     exec:
     def outputFilePath = task.workDir.resolve("mobidblite.json")
+    Match match = null
     def matches = [:]
-
     file(mobidblite_output.toString()).eachLine { line ->
         def lineData = line.split(/\s+/)
         def sequenceId = lineData[0]
         def start = lineData[1].toInteger()
         def end = lineData[2].toInteger()
-        def feature = lineData[3] ?: ""
+        def feature = lineData[3] != "-" ? lineData[3] : null
 
         if (matches.containsKey(sequenceId)) {
-            matches[sequenceId]["mobidb_lite"]["locations"].add([
-                start: start,
-                end: end,
-                "sequence-feature": feature
-            ])
+            match = matches[sequenceId]
         } else {
-            matches[sequenceId] = [
-                "mobidb_lite": [
-                    member_db: "mobidb_lite",
-                    accession: "mobidb-lite",
-                    name: "disorder_prediction",
-                    description: "consensus disorder prediction",
-                    locations: [[
-                        start: start,
-                        end: end,
-                        "sequence-feature": feature
-                    ]]
-                ]
-            ]
+            match = new Match("mobidb_lite")
+            matches[sequenceId] = match
         }
+
+        match.addLocation(new Location(start, end, feature))
     }
 
     def json = JsonOutput.toJson(matches)
