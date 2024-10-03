@@ -1,22 +1,26 @@
-process CDD_RUNNER {
+process RUN_RPSBLAST {
     label 'cdd_runner'
 
     input:
-    tuple path(fasta), val(library), val(switches), val(postprocessing_params)
+    tuple val(meta), path(fasta)
+    val library
 
     output:
-    path "rpsblast_out"
-    val postprocessing_params
+    tuple val(meta), path("rpsblast.out")
 
     script:
     """
     export LD_LIBRARY_PATH="/opt/blast/lib"
-    /opt/blast/rpsblast -query ${fasta} -db ${library} -out rpsblast_out ${switches}
+    /opt/blast/rpsblast \
+        -query ${fasta} \
+        -db ${library} \
+        -out rpsblast.out \
+        -evalue 0.01 -seg no -outfmt 11
     """
 }
 
 
-process CDD_POSTPROCESS {
+process RUN_RPSPROC {
     /*
     Process output from offline rpsblast to annotate sequence with conserved
     domain information
@@ -31,18 +35,19 @@ process CDD_POSTPROCESS {
     label 'analysis_parser'
 
     input:
-    path "rpsblast_out"
-    val postprocessing_params
-    /*
-    [0] = switches
-    [1] = data
-    */
+    tuple val(meta), val(rpsblast_out)
+    path library
 
     output:
-    path "rpsblast_processed"
+    tuple val(meta), path("rpsbproc.out")
+
     script:
     """
-    /opt/rpsbproc/RpsbProc-x64-linux/rpsbproc --infile rpsblast_out --outfile rpsblast_processed ${postprocessing_params[0]} --data-path ${postprocessing_params[1]}
+    /opt/rpsbproc/RpsbProc-x64-linux/rpsbproc \
+        --infile ${rpsblast_out} \
+        --outfile rpsbproc.out \
+        --data-path ${library} \
+        -m std
     """
 }
 
