@@ -32,7 +32,7 @@ class FastaFile {
         // Add application-specific forbidden characters
         String forbiddenChars = ""
         appsToRun.each{ app ->
-            forbiddenChars += appsConfig[app].invalidChars ?: ""
+            forbiddenChars += appsConfig[app].invalid_chars ?: ""
         }
 
         // Remove duplicate characters

@@ -166,7 +166,7 @@ class InterProScan {
         for (appName in appsParam) {
             def key = appName.toLowerCase()
             if (allApps.containsKey(key)) {
-                appsToRun.add(key)
+                appsToRun.add(allApps[key])
             } else {
                 def error = "unrecognized application: '${appName}'. Try '--help' to list available applications."
                 return [null, error]
