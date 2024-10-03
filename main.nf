@@ -1,7 +1,8 @@
 nextflow.enable.dsl=2
 
-include { INIT_PIPELINE                 } from  "./interproscan/subworkflows/init"
-include { ESL_TRANSLATE                 } from  "./interproscan/modules/esl_translate"
+include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
+include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
+include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
 include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 
@@ -29,8 +30,8 @@ workflow {
     INIT_PIPELINE()
 
     fasta_file      = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
-    data_dir        = Channel.fromPath(INIT_PIPELINE.out.datadir.val)
-    outut_dir       = Channel.fromPath(INIT_PIPELINE.out.outdir.val)
+    data_dir        = INIT_PIPELINE.out.datadir.val
+    outut_dir       = INIT_PIPELINE.out.outdir.val
     apps            = INIT_PIPELINE.out.apps.val
 
     // Chunk input file in smaller files
@@ -39,87 +40,36 @@ workflow {
         .set { ch_fasta }
 
     if (params.nucleic) {
+        // Translate DNA/RNA sequences to protein sequences
         ch_translated = ESL_TRANSLATE(ch_fasta)
+
+        // Split again
         ch_translated
             .splitFasta( by: params.batchSize, file: true )
             .map { split_pt_file, orig_nt_file -> tuple ( orig_nt_file, split_pt_file ) }
             .set { ch_translated_split }
 
-        ch_seq_json = PREPARE_NUCLEIC_SEQUENCES(ch_translated_split)
+        // Store sequences as JSON objects
+        ch_seqs = PREPARE_NUCLEIC_SEQUENCES(ch_translated_split)
     } else {
-        ch_seq_json = PREPARE_PROTEIN_SEQUENCES(ch_fasta)
+        // Store sequences as JSON objects
+        ch_seqs = PREPARE_PROTEIN_SEQUENCES(ch_fasta)
     }
+
+    ch_seqs
+        .map { index, fasta, json -> tuple( index, fasta ) }
+        .set { ch_fasta }
+
+    // TODO: add new match lookup
     
-    
+    SCAN_SEQUENCES(
+        ch_fasta,
+        apps,
+        params.appsConfig,
+        data_dir)
 
-    // exit 0
+    SCAN_SEQUENCES.out.view()
 
-    // ch_translated = ESL_TRANSLATE(ch_fasta)
-    // ch_translated.collect().view()
-
-    // exit 0
-
-    
-
-    // //println file(params.input).countFasta()
-    
-    // exit 0
-
-    // /*
-    // The data dir path is reconfigured and passed from PRE_CHECKS
-    // to SEQUENCE_ANALYSIS to ensure PRE_CHECKS is completed before
-    // the other subworkflow starts.
-    // */
-    // dataDirPath = Channel.empty()
-    // PRE_CHECKS(
-    //     params.help,
-    //     input_file,
-    //     params.datadir,
-    //     params.nucleic,
-    //     params.keySet(),
-    //     params.applications,
-    //     params.formats,
-    //     params.version,
-    //     params.ipscn_version,
-    //     params.signalp_mode,
-    //     params.signalp_gpu,
-    //     params.goterms,
-    //     params.pathways
-    // )
-    // dataDirPath = file(PRE_CHECKS.out.dataDir.val).toAbsolutePath().toString()
-    // log.info "Using data files located in ${dataDirPath}"
-
-    // applications = (params.applications.toLowerCase().split(',') as Set).join(',')
-
-    // Channel.fromPath( input_file , checkIfExists: true)
-    // .unique()
-    // .splitFasta( by: params.batchsize, file: true )
-    // .set { ch_fasta }
-
-    // // if nucleic acid seqs provided, predict ORFs
-    // // either way, then break up input FASTA into batches
-    // if (params.nucleic) {
-    //     if (params.translate.strand.toLowerCase() !in ['both','plus','minus']) {
-    //         log.info "Strand option '${params.translate.strand.toLowerCase()}' in nextflow.config not recognised. Accepted: 'both', 'plus', 'minus'"
-    //         exit 1
-    //     }
-    //     GET_ORFS(
-    //         ch_fasta,
-    //         params.translate.strand,
-    //         params.translate.methionine,
-    //         params.translate.min_len,
-    //         params.translate.genetic_code
-    //     )
-    //     GET_ORFS.out.splitFasta( by: params.batchsize, file: true )
-    //     .set { orfs_fasta }
-    //     /* Provide the translated ORFs and the original nts seqs
-    //     So that the ORFs can be associated with the source nucleic seq
-    //     in the final output */
-    //     PARSE_SEQUENCE(orfs_fasta, ch_fasta, params.nucleic)
-    // }
-    // else {
-    //     PARSE_SEQUENCE(ch_fasta, ch_fasta, params.nucleic)
-    // }
 
     // disable_precalc = params.disable_precalc
     // sequences_to_analyse = null
