@@ -1,5 +1,4 @@
 import groovy.json.JsonOutput
-import HMMER3
 
 process RUN_ANTIFAM {
     label 'hmmer_runner'
@@ -13,7 +12,10 @@ process RUN_ANTIFAM {
 
     script:
     """
-    /opt/hmmer3/bin/hmmsearch --cut_ga --cpu ${task.cpus} -o hmmsearch.out ${hmmdb} ${fasta}
+    /opt/hmmer3/bin/hmmsearch \
+        --cut_ga \
+        --cpu ${task.cpus} \
+        ${hmmdb} ${fasta} > hmmsearch.out
     """
 }
 
