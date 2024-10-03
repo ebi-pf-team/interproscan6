@@ -1,5 +1,3 @@
-import Match
-
 class HMMER3 {
     static parseOutput(String filePath) {
         File file = new File(filePath)
@@ -105,7 +103,7 @@ class HMMER3 {
                     while (!(line = reader.readLine().trim()).isEmpty()) {
                         def fields = line.split(/\s+/)
                         assert fields.size() == 16
-                        Match.Location location = new Match.Location(
+                        Location location = new Location(
                             Integer.parseInt(fields[9]),
                             Integer.parseInt(fields[10]),
                             fields[6].toInteger(),
