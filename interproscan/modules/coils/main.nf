@@ -23,7 +23,7 @@ process PARSE_COILS {
     tuple val(meta), val(coils_out)
 
     output:
-    tuple val(meta), path("coils.json")    
+    tuple val(meta), path("coils.json")
 
     exec:
     def outputFilePath = task.workDir.resolve("coils.json")

@@ -1,7 +1,7 @@
-include { RUN_ANTIFAM; PARSE_ANTIFAM              } from  "../../modules/antifam"
-include { RUN_RPSBLAST; RUN_RPSPROC              } from  "../../modules/cdd"
-include { RUN_COILS; PARSE_COILS                  } from  "../../modules/coils"
-include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE        } from  "../../modules/mobidblite"
+include { RUN_ANTIFAM; PARSE_ANTIFAM                  } from  "../../modules/antifam"
+include { RUN_RPSBLAST; RUN_RPSPROC; PARSE_RPSPROC    } from  "../../modules/cdd"
+include { RUN_COILS; PARSE_COILS                      } from  "../../modules/coils"
+include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE            } from  "../../modules/mobidblite"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -45,8 +45,8 @@ workflow SCAN_SEQUENCES {
             RUN_RPSBLAST.out,
             "${datadir}/${appsConfig.cdd.rpsproc_db}")
 
-        RUN_RPSPROC.out.view()
-        // results = results.mix(PARSE_COILS.out)
+        PARSE_RPSPROC(RUN_RPSPROC.out)
+        results = results.mix(PARSE_RPSPROC.out)
     }
 
     if (applications.contains("coils")) {
