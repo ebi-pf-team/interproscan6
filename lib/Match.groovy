@@ -20,15 +20,33 @@ class Match implements Serializable {
     // PRINTS
     // String graphscan
 
+    // Used for MobiDB-lite
     Match(String modelAccession) {
         this.modelAccession = modelAccession
     }
 
+    // Used for CDD
+    Match(String modelAccession, Double evalue, Double score) {
+        this.modelAccession = modelAccession
+        this.evalue = evalue
+        this.score = score
+    }    
+
+    // Used for Coils
     Match(String modelAccession, Double evalue, Double score, Double bias) {
         this.modelAccession = modelAccession
         this.evalue = evalue
         this.score = score
         this.bias = bias
+    }
+
+    void addSite(Site site) {
+        for (Location location: this.locations) {
+            if (site.isInRange(location.start, location.end)) {
+                location.addSite(site)
+                return
+            }
+        }
     }
 
     static Match fromMap(Map data) {
@@ -128,12 +146,12 @@ class Location implements Serializable {
     String targetSequence
     String sequenceFeature
     List<LocationFragment> fragments = []
+    List<Site> sites = []
     boolean representative = false
 
     // pvalue
     // level
     // cigarAlignment
-    // sites
     // motifNumber
 
     Location(int start, 
@@ -170,6 +188,10 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
+    void addSite(Site site) {
+        this.sites.add(site)
+    }
+
     static Location fromMap(data) {
         Location loc = new Location(
             data.start,
@@ -188,6 +210,7 @@ class Location implements Serializable {
         loc.targetSequence = data.targetSequence
         loc.fragments = data.fragments.collect { LocationFragment.fromMap(it) }
         loc.representative = data.representative
+        loc.sites = data.sites
         return loc
     }
 }
@@ -205,5 +228,70 @@ class LocationFragment implements Serializable {
 
     static LocationFragment fromMap(Map data) {
         return new LocationFragment(data.start, data.end, data.dcStatus)
+    }
+}
+
+class Site implements Serializable {
+    String description
+    int numLocations
+    List<SiteLocation> siteLocations = []
+    private int start = -1
+    private int end = -1
+
+    Site(String description, List<SiteLocation> siteLocations) {
+        this.description = description
+        this.siteLocations = siteLocations
+        this.numLocations = siteLocations.size()
+
+        for (SiteLocation loc: siteLocations) {
+            if (this.start == -1 || loc.start < this.start) {
+                this.start = loc.start
+            }
+
+            if (this.end == -1 || loc.end > this.end) {
+                this.end = loc.end
+            }
+        }
+    }
+
+    Site(String description, String residues) {
+        this(description, Site.getSiteLocationsFromString(residues))        
+    }
+
+    private static List<SiteLocation> getSiteLocationsFromString(String residues) {
+        def residueAnnotations = residues.split(",")
+        List<SiteLocation> siteLocations = []
+        for (String residueAnnotation: residueAnnotations) {
+            String residue = residueAnnotation.substring(0, 1);
+            int position = residueAnnotation.substring(1).toInteger()
+            siteLocations.add(new SiteLocation(residue, position, position))
+        }
+        return siteLocations
+    }
+
+    static Site fromMap(Map data) {
+        return new Site(
+            data.description,
+            data.siteLocations.collect { SiteLocation.fromMap(it) })
+    }
+
+    boolean isInRange(int start, int end) {
+        return start <= this.start && this.end <= end
+    }
+}
+
+class SiteLocation implements Serializable {
+    String residue
+    int start
+    int end
+
+    SiteLocation(String residue, int start, int end) {
+        this.start = start
+        this.end = end
+        this.residue = residue
+    }
+
+    static SiteLocation fromMap(Map data) {
+        return new SiteLocation(data.start, data.end, data.residue)
     }
 }
