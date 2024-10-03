@@ -8,9 +8,14 @@ class FastaSequence implements Serializable {
 
     String id
     String description
-    String sequence
+    String sequence = ""
     String md5 = null
     FastaSequence translatedFrom = null
+
+    FastaSequence(String id, String description) {
+        this.id = id
+        this.description = description
+    }
 
     FastaSequence(String id, String description, String sequence) {
         this.id = id
@@ -23,6 +28,10 @@ class FastaSequence implements Serializable {
         MessageDigest md = MessageDigest.getInstance("MD5")
         byte[] digest = md.digest(sequence.toUpperCase().bytes)
         return digest.encodeHex().toString().toUpperCase()
+    }
+
+    void updateMD5() {
+        this.md5 = this.getMD5(this.sequence)
     }
 
     String validate(boolean isNucleic = false, String extraForbiddenChars = "") {

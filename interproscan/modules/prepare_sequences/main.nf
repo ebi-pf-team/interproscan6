@@ -45,7 +45,7 @@ process PREPARE_PROTEIN_SEQUENCES {
     def output = [:]
     def sequences = FastaFile.parse(fasta.toString())
     sequences.each { seq ->
-        output[seq.md5] = seq
+        output[seq.id] = seq
     }
     def outputPath = task.workDir.resolve("sequences.json")
     def json = JsonOutput.toJson(output)
