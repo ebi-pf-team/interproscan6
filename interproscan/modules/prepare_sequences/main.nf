@@ -4,12 +4,10 @@ process PREPARE_NUCLEIC_SEQUENCES {
     label 'io'
 
     input:
-    // n_fasta:     original nucleic sequences file
-    // p_fasta:     translated protein sequences file
     tuple val(n_fasta), val(p_fasta)
 
     output:
-    val "sequences.json"
+    tuple val(task.index), val(p_fasta), path("sequences.json")
 
     exec:
     def sequences = FastaFile.parse(n_fasta.toString())
@@ -41,7 +39,7 @@ process PREPARE_PROTEIN_SEQUENCES {
     val fasta
 
     output:
-    val "sequences.json"
+    tuple val(task.index), val(fasta), path("sequences.json")
 
     exec:
     def output = [:]
