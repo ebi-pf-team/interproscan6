@@ -124,7 +124,7 @@ workflow XREFS {
             pathways_output = PATHWAYS(ipr2pa_path, pa_info_path, matches2entries)
         }
 
-        def go_pa_output = goterms_output.collect.mix(pathways_output.collect)
+        def go_pa_output = goterms_output.mix(pathways_output).collect()
         ch_matches2xrefs = matches2entries.map { entries_output ->
             def matches_info = entries_output[0]
             return matches_info.collectEntries { seq_id, match_data ->
@@ -133,12 +133,14 @@ workflow XREFS {
 
                 match_info_xrefs = go_pa_output.map { file ->
                     def xRefsMap = new File(file.toString()).text
-                    def xRefs_info = xRefsMap[match_key] ?: []
-                    println "xRefs_info: ${xRefs_info}"
-//                     goXRefs.each { goTerm ->
-//                         match_info["entry"]["goXRefs"] = goXRefs
-//                     }
-//                     return match_info
+                    if file.toString().contains("go") {
+                         def goXRefs_info = goRefsMap[match_key] ?: []
+                         match_info["entry"]["goXRefs"] = goXRefs_info
+                    } else {
+                         def paXRefs_info = paRefsMap[match_key] ?: []
+                         match_info["entry"]["pathwayXRefs"] = paXRefs_info
+                    }
+                    return match_info
                 }
                 return [(seq_id): [(match_key): match_info_xrefs]])
             }
@@ -150,9 +152,9 @@ workflow XREFS {
         }
     }
 
-    def outputFile = new File("${workDir}/aggregated_result.json")
-    outputFile.write(ch_matches2xrefs.collect())
+//     def outputFile = new File("${workDir}/aggregated_result.json")
+//     outputFile.write(ch_matches2xrefs.collect())
 
     emit:
-    outputFile.path
+    ch_matches2xrefs
 }
