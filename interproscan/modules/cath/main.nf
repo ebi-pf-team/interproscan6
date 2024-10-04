@@ -71,10 +71,10 @@ process PARSE_CATHGENE3D {
     tuple val(meta), path("cathgene3d.json")
 
     exec:
-    def gene3d_matches = HMMER3.parseOutput(hmmseach_out.toString())
+    def gene3dMatches = HMMER3.parseOutput(hmmseach_out.toString())
 
-    def gene3d_domains = [:]
-    gene3d_matches.each { sequence_id, matches ->
+    def gene3dDomains = [:]
+    gene3dMatches.each { sequenceId, matches ->
         matches.values().each { m1 ->
             m1.locations.each { loc ->
                 Match m2 = new Match(
@@ -85,22 +85,22 @@ process PARSE_CATHGENE3D {
                 m2.addLocation(loc)
                 String key = "${m2.modelAccession}-${loc.envelopeStart}-${loc.envelopeEnd}"
 
-                if (gene3d_domains.containsKey(sequence_id)) {
-                    assert !gene3d_domains.containsKey(key)
-                    gene3d_domains[sequence_id][key] = m2
+                if (gene3dDomains.containsKey(sequenceId)) {
+                    assert !gene3dDomains.containsKey(key)
+                    gene3dDomains[sequenceId][key] = m2
                 } else {
-                    gene3d_domains[sequence_id] = [key: m2]
+                    gene3dDomains[sequenceId] = [key: m2]
                 }
             }
         }
     }
 
-    def cath_domains = [:]
+    def cathDomains = [:]
     cath_tsv.eachLine { line ->
         if (line[0] != "#") {
             def fields = line.split("\t")
             assert fields.size() == 10
-            String sequence_id = fields[2]
+            String sequenceId = fields[2]
             def dom = new CathDomain(
                 fields[0],                                                  // Domain ID
                 fields[3],                                                  // Match ID
@@ -111,35 +111,28 @@ process PARSE_CATHGENE3D {
                 fields[6].split(",").collect { new SimpleLocation(it) },    // Resolved
             )
 
-            if (cath_domains.containsKey(sequence_id)) {
-                cath_domains[sequence_id].add(dom)
+            if (cathDomains.containsKey(sequenceId)) {
+                cathDomains[sequenceId].add(dom)
             } else {
-                cath_domains[sequence_id] = [dom]
+                cathDomains[sequenceId] = [dom]
             }
         }
     }
 
     def matches = [:]
-    cath_domains.each { sequence_id, domains ->
-        def hmmer_domains = gene3d_domains.get(sequence_id)
-        assert hmmer_domains != null
+    cathDomains.each { sequenceId, domains ->
+        def hmmerDomains = gene3dDomains.get(sequenceId)
+        assert hmmerDomains != null
 
-        domains.each { cath_domain ->
-            def key = cath_domain.getKey()
-            def hmmer_domain = hmmer_domains.get(key)
-            assert hmmer_domain != null
+        domains.each { cathDomain ->
+            def key = cathDomain.getKey()
+            def hmmerDomain = hmmerDomains.get(key)
+            assert hmmerDomain != null
 
-            def domain = new Match(
-                cath_domain.domainId, 
-                hmmer_domain.evalue,
-                hmmer_domain.score, 
-                hmmer_domain.bias
-            )
-
-            def boundaries = cath_domain.resolvedBoundaries
+            def boundaries = cathDomain.resolvedBoundaries
             def fragments = []
             if (boundaries.size() > 1) {
-                cath_domain.resolvedBoundaries.eachWithIndex { x, i ->
+                cathDomain.resolvedBoundaries.eachWithIndex { x, i ->
                     LocationFragment fragment
                     if (i == 0) {
                         fragment = new LocationFragment(x.start, x.end, "C_TERMINAL_DISC")
@@ -156,29 +149,42 @@ process PARSE_CATHGENE3D {
             }
 
             Location location = new Location(
-                cath_domain.getStart(),
-                cath_domain.getEnd(),
-                hmmer_domain.locations[0].hmmStart,
-                hmmer_domain.locations[0].hmmEnd,
-                hmmer_domain.locations[0].hmmLength,
-                hmmer_domain.locations[0].hmmBounds,
-                hmmer_domain.locations[0].envelopeStart,
-                hmmer_domain.locations[0].envelopeEnd,
-                cath_domain.evalue,
-                cath_domain.score,
+                cathDomain.getStart(),
+                cathDomain.getEnd(),
+                hmmerDomain.locations[0].hmmStart,
+                hmmerDomain.locations[0].hmmEnd,
+                hmmerDomain.locations[0].hmmLength,
+                hmmerDomain.locations[0].hmmBounds,
+                hmmerDomain.locations[0].envelopeStart,
+                hmmerDomain.locations[0].envelopeEnd,
+                cathDomain.evalue,
+                cathDomain.score,
                 null,
                 fragments
             )
 
-            domain.addLocation(location)
+            // domain.addLocation(location)
 
-            if (!matches.containsKey(sequence_id)) {
-                matches[sequence_id] = [:]
+            def sequenceDomains
+            if (matches.containsKey(sequenceId)) {
+                sequenceDomains = matches[sequenceId]
+            } else {
+                sequenceDomains = (matches[sequenceId] = [:]) 
             }
 
-            // TODO: fix
-            assert matches[sequence_id].containsKey(domain.modelAccession) == false
-            matches[sequence_id][domain.modelAccession] = domain
+            def domId = hmmerDomain.modelAccession
+            if (sequenceDomains.containsKey(domId)) {
+                sequenceDomains[domId].addLocation(location)
+            } else {
+                Match domain = new Match(
+                    cathDomain.domainId, 
+                    hmmerDomain.evalue,
+                    hmmerDomain.score, 
+                    hmmerDomain.bias
+                )
+                domain.addLocation(location)
+                sequenceDomains[domId] = domain
+            }
         }
     }
 
