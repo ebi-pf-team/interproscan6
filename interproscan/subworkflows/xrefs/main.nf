@@ -111,15 +111,11 @@ workflow XREFS {
             def go_info = new JsonSlurper().parseText(new File("${dataDir}/${params.xrefs.goterms}.json").text)
             goterms_output = GOTERMS(ipr2go, go_info, matches2entries)
         }
-
         if (params.pathways) {
             def ipr2pa = new JsonSlurper().parseText(new File("${dataDir}/${params.xrefs.pathways}.ipr.json").text)
             def pa_info = new JsonSlurper().parseText(new File("${dataDir}/${params.xrefs.pathways}.json").text)
             pathways_output = PATHWAYS(ipr2pa, pa_info, matches2entries)
         }
-
-        println "goterms_output: ${goterms_output}"
-        println "pathways_output: ${pathways_output}"
 
         ch_matches2xrefs = matches2entries
         .map { entries_output ->
@@ -127,16 +123,21 @@ workflow XREFS {
             return matches_info.collectEntries { seq_id, match_data ->
                 def match_key = match_data.keySet().first()
                 def match_info = match_data[match_key]
+                println "match_key: ${match_key}"
+                println "match_info: ${match_info}"
 
-                def goXRefs = goterms_output ? goterms_output[match_key] : null
+
+                def goXRefs = goterms_output
+                    .map { it[match_key] ?: [] }
+                    .first()
+                def pathwayXRefs = pathways_output
+                    .map { it[match_key] ?: [] }
+                    .first()
                 println "goXRefs: ${goXRefs}"
-                def pathwayXRefs = pathways_output ? pathways_output[match_key] : null
                 println "pathwayXRefs: ${pathwayXRefs}"
 
-                if (goXRefs || pathwayXRefs) {
-                    match_info["entry"]["goXRefs"] = goXRefs ?: []
-                    match_info["entry"]["pathwayXRefs"] = pathwayXRefs ?: []
-                }
+                match_info["entry"]["goXRefs"] = goXRefs
+                match_info["entry"]["pathwayXRefs"] = pathwayXRefs
 
                 return [(seq_id): [(match_key): match_info]]
             }
@@ -148,15 +149,16 @@ workflow XREFS {
         }
     }
 
+    if ("${applications}".contains('panther')) {
+        def paint_annotations = new JsonSlurper().parseText(new File("${dataDir}/${params.members."panther".postprocess.paint_annotations}").text)
+        matches2xrefs = ch_matches2xrefs.collectEntries { seq_id, match_info ->
+            node_data = paint_annotations[data["node_id"]]
+            match_info[seq_id][sig_acc]["proteinClass"] = node_data[2]
+            match_info[seq_id][sig_acc]["graftPoint"] = node_data[3]
+        }
+    }
+
     ch_aggregated_results = ch_matches2xrefs.collect().map { all_matches2xrefs ->
-//         if ("${applications}".contains('panther')) {
-//             def paint_annotations = new JsonSlurper().parseText(new File("${dataDir}/${params.members."panther".postprocess.paint_annotations}").text)
-//             all_matches2xrefs = matches_info.collectEntries { seq_id, match_info ->
-//                 node_data = paint_annotations[data["node_id"]]
-//                 match_info[seq_id][sig_acc]["proteinClass"] = node_data[2]
-//                 match_info[seq_id][sig_acc]["graftPoint"] = node_data[3]
-//             }
-//         }
         def aggregated_result = JsonOutput.toJson(all_matches2xrefs)
         def outputFile = new File("${workDir}/aggregated_result.json")
         outputFile.write(aggregated_result)
