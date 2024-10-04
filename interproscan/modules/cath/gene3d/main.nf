@@ -163,8 +163,6 @@ process PARSE_CATHGENE3D {
                 fragments
             )
 
-            // domain.addLocation(location)
-
             def sequenceDomains
             if (matches.containsKey(sequenceId)) {
                 sequenceDomains = matches[sequenceId]
