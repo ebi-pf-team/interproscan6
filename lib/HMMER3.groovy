@@ -176,8 +176,13 @@ class HMMER3 {
                                 or reference line annotation (reported first)
                             */
                             blocks = blocks[-4..-1]
+                            // Consensus of query profile
                             def fields = blocks[0].split(/\s+/)
                             querySequence += fields[2]
+                            /*
+                                Target sequence, with dashes (-) indicate deletions 
+                                in the target sequence with respect to the profile
+                            */
                             fields = blocks[2].split(/\s+/)
                             targetSequence += fields[2]
                         }
