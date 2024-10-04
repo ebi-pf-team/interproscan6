@@ -34,6 +34,13 @@ class FastaSequence implements Serializable {
         this.md5 = this.getMD5(this.sequence)
     }
 
+    static FastaSequence fromMap(Map data) {
+        FastaSequence seq = new FastaSequence(data.id, data.description)
+        seq.sequence = data.sequence
+        seq.md5 = data.md5
+        return seq
+    }
+
     String validate(boolean isNucleic = false, String extraForbiddenChars = "") {
         def alphabet = isNucleic ? this.NUCLEIC_ALPHABET : this.PROTEIN_ALPHABET
         def pattern = "[^${alphabet}]"
