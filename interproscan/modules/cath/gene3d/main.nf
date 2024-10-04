@@ -182,6 +182,7 @@ process PARSE_CATHGENE3D {
                     hmmerDomain.score, 
                     hmmerDomain.bias
                 )
+                domain.signature = new Signature(cathDomain.supfamId)
                 domain.addLocation(location)
                 sequenceDomains[domId] = domain
             }
