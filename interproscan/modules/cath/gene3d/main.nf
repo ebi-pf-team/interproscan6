@@ -172,12 +172,12 @@ process PARSE_CATHGENE3D {
                 sequenceDomains = (matches[sequenceId] = [:]) 
             }
 
-            def domId = hmmerDomain.modelAccession
+            def domId = cathDomain.domainId
             if (sequenceDomains.containsKey(domId)) {
                 sequenceDomains[domId].addLocation(location)
             } else {
                 Match domain = new Match(
-                    cathDomain.domainId, 
+                    domId, 
                     hmmerDomain.evalue,
                     hmmerDomain.score, 
                     hmmerDomain.bias
