@@ -88,6 +88,9 @@ class Signature implements Serializable {
     }
 
     static Signature fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
         return new Signature(
             data.accession,
             data.name,
@@ -108,6 +111,9 @@ class SignatureLibraryRelease implements Serializable {
     }
 
     static SignatureLibraryRelease fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
         return new SignatureLibraryRelease(data.library, data.version)
     }
 }
@@ -126,6 +132,9 @@ class Entry implements Serializable {
     }
 
     static Entry fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
         return new Entry(data.accession, data.name, data.description, data.type)
     }
 }
