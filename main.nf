@@ -56,14 +56,18 @@ workflow {
         ch_seqs = PREPARE_PROTEIN_SEQUENCES(ch_fasta)
     }
 
-    ch_seqs
-        .map { index, fasta, json -> tuple( index, fasta ) }
-        .set { ch_fasta }
+    // ch_seqs
+    //     .map { index, fasta, json -> tuple( index, fasta ) }
+    //     .set { ch_fasta }
+
+    // ch_seqs
+    //     .map { index, fasta, json -> json }
+    //     .set { ch_json }
 
     // TODO: add new match lookup
     
     SCAN_SEQUENCES(
-        ch_fasta,
+        ch_seqs,
         apps,
         params.appsConfig,
         data_dir)

@@ -1,17 +1,26 @@
-include { RUN_ANTIFAM; PARSE_ANTIFAM                  } from  "../../modules/antifam"
-include { RUN_RPSBLAST; RUN_RPSPROC; PARSE_RPSPROC    } from  "../../modules/cdd"
-include { RUN_COILS; PARSE_COILS                      } from  "../../modules/coils"
-include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE            } from  "../../modules/mobidblite"
+include { RUN_ANTIFAM; PARSE_ANTIFAM                               } from  "../../modules/antifam"
+include { RUN_RPSBLAST; RUN_RPSPROC; PARSE_RPSPROC                 } from  "../../modules/cdd"
+include { RUN_COILS; PARSE_COILS                                   } from  "../../modules/coils"
+include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP  } from  "../../modules/hamap"
+include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                         } from  "../../modules/mobidblite"
 
 workflow SCAN_SEQUENCES {
     take:
-    ch_fasta            // channel of tuples (index, fasta)
+    ch_seqs             // channel of tuples (index, fasta file, json file)
     applications        // list of applications to run
     appsConfig          // map of applications
     datadir             // path to data directory
 
     main:
     results = Channel.empty()
+
+    ch_seqs
+        .map { index, fasta, json -> tuple( index, fasta ) }
+        .set { ch_fasta }
+
+    ch_seqs
+        .map { index, fasta, json -> json }
+        .set { ch_json }    
 
     if (applications.contains("antifam")) {
         RUN_ANTIFAM(
@@ -21,12 +30,6 @@ workflow SCAN_SEQUENCES {
 
         PARSE_ANTIFAM(RUN_ANTIFAM.out)
         results = results.mix(PARSE_ANTIFAM.out)
-    }
-
-    if (applications.contains("mobidblite")) {
-        RUN_MOBIDBLITE(ch_fasta)
-        PARSE_MOBIDBLITE(RUN_MOBIDBLITE.out)
-        results = results.mix(PARSE_MOBIDBLITE.out)
     }
 
     if (applications.contains("cathgene3d") || applications.contains("cathfunfam")) {
@@ -56,8 +59,25 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("hamap")) {
-        // TODO
+        PREPROCESS_HAMAP(ch_fasta,
+            "${datadir}/${appsConfig.hamap.hmm}")
+
+        PREPARE_HAMAP(PREPROCESS_HAMAP.out,
+            ch_json,
+            "${datadir}/${appsConfig.hamap.dir}")
+
+        RUN_HAMAP(PREPARE_HAMAP.out,
+            "${datadir}/${appsConfig.hamap.dir}")
+
+        PARSE_HAMAP(RUN_HAMAP.out)
+        results = results.mix(PARSE_HAMAP.out)
     }
+
+    if (applications.contains("mobidblite")) {
+        RUN_MOBIDBLITE(ch_fasta)
+        PARSE_MOBIDBLITE(RUN_MOBIDBLITE.out)
+        results = results.mix(PARSE_MOBIDBLITE.out)
+    }    
 
     if (applications.contains("ncbifam")) {
         // TODO
@@ -88,10 +108,6 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("prositepatterns")) {
-        // TODO
-    }
-
-    if (applications.contains("prositeprofiles")) {
         // TODO
     }
 

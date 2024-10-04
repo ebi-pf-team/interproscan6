@@ -20,7 +20,7 @@ class Match implements Serializable {
     // PRINTS
     // String graphscan
 
-    // Used for MobiDB-lite
+    // Used for HAMAP, MobiDB-lite
     Match(String modelAccession) {
         this.modelAccession = modelAccession
     }
@@ -30,7 +30,7 @@ class Match implements Serializable {
         this.modelAccession = modelAccession
         this.evalue = evalue
         this.score = score
-    }    
+    }
 
     // Used for Coils
     Match(String modelAccession, Double evalue, Double score, Double bias) {
@@ -186,6 +186,15 @@ class Location implements Serializable {
         this.sequenceFeature = sequenceFeature
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
+    }
+
+    Location(int start, int end, Double score, String alignment) {
+        this.start = start
+        this.end = end
+        this.score = score
+        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
+        this.fragments = [fragment]
+        this.targetSequence = alignment
     }
 
     void addSite(Site site) {
