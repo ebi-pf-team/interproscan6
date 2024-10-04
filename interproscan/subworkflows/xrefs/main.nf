@@ -4,6 +4,7 @@ import groovy.json.JsonSlurper
 include {
     GOTERMS;
     PATHWAYS;
+//     PAINT_ANNOTATIONS;
 } from "$projectDir/interproscan/modules/xrefs/main"
 
 def MAP_DATABASES = [
@@ -45,6 +46,7 @@ workflow XREFS {
         def matches_info = new JsonSlurper().parse(matchFile)
         matches_info.each { seq_id, match_info ->
             match_info.each { match_key, data ->
+                println "match_key: ${match_key}"
                 def databases_versions = entries["databases"]
                 def entries_info = entries['entries']
                 def acc_id = match_key.split("\\.")[0]
@@ -103,71 +105,54 @@ workflow XREFS {
         return [matches_info, matches2interpro]
     }
 
+//     if ("${applications}".contains('panther')) {
+//         def paint_anno_dir = "${dataDir}/${params.members."panther".postprocess.paint_annotations}"
+//         matches_paint = PAINT_ANNOTATIONS(paint_anno_dir, ch_matches2xrefs)
+//     }
+
     if (params.goterms || params.pathways) {
         def goterms_output = Channel.empty()
         def pathways_output = Channel.empty()
         if (params.goterms) {
-            def ipr2go = new JsonSlurper().parseText(new File("${dataDir}/${params.xrefs.goterms}.ipr.json").text)
-            def go_info = new JsonSlurper().parseText(new File("${dataDir}/${params.xrefs.goterms}.json").text)
-            goterms_output = GOTERMS(ipr2go, go_info, matches2entries)
+            def ipr2go_path = "${dataDir}/${params.xrefs.goterms}.ipr.json"
+            def go_info_path = "${dataDir}/${params.xrefs.goterms}.json"
+            goterms_output = GOTERMS(ipr2go_path, go_info_path, matches2entries)
         }
         if (params.pathways) {
-            def ipr2pa = new JsonSlurper().parseText(new File("${dataDir}/${params.xrefs.pathways}.ipr.json").text)
-            def pa_info = new JsonSlurper().parseText(new File("${dataDir}/${params.xrefs.pathways}.json").text)
-            pathways_output = PATHWAYS(ipr2pa, pa_info, matches2entries)
+            def ipr2pa_path = "${dataDir}/${params.xrefs.pathways}.ipr.json"
+            def pa_info_path = "${dataDir}/${params.xrefs.pathways}.json"
+            pathways_output = PATHWAYS(ipr2pa_path, pa_info_path, matches2entries)
         }
 
-        ch_matches2xrefs = matches2entries
-        .map { entries_output ->
+        def go_pa_output = goterms_output.collect.mix(pathways_output.collect)
+        ch_matches2xrefs = matches2entries.map { entries_output ->
             def matches_info = entries_output[0]
             return matches_info.collectEntries { seq_id, match_data ->
                 def match_key = match_data.keySet().first()
                 def match_info = match_data[match_key]
 
-                def goXRefs = goterms_output.map { it[match_key] ?: [] }
-                def pathwayXRefs = pathways_output.map { it[match_key] ?: [] }
-
-                match_info["entry"]["goXRefs"] = goXRefs
-                match_info["entry"]["pathwayXRefs"] = pathwayXRefs
-
-                return [(seq_id): [(match_key): match_info]]
+                match_info_xrefs = go_pa_output.map { file ->
+                    def xRefsMap = new File(file.toString()).text
+                    def xRefs_info = xRefsMap[match_key] ?: []
+                    println "xRefs_info: ${xRefs_info}"
+//                     goXRefs.each { goTerm ->
+//                         match_info["entry"]["goXRefs"] = goXRefs
+//                     }
+//                     return match_info
+                }
+                return [(seq_id): [(match_key): match_info_xrefs]])
             }
         }
     } else {
-        ch_matches2xrefs = matches2entries.map { entries_output ->
+        ch_matches2xrefs = matches2entries.collect().map { entries_output ->
             def matches_info = entries_output[0]
             return matches_info
         }
     }
 
-    if ("${applications}".contains('panther')) {
-        def paint_annotations = new JsonSlurper().parse(new File("${dataDir}/${params.members."panther".postprocess.paint_annotations}"))
-        ch_matches2xrefs = ch_matches2xrefs.collectEntries { seq_id, match_info ->
-            match_info.each { sig_acc, data ->
-                if (data["member_db"].toUpperCase() == "PANTHER") {
-                    def anno_path = "${paint_anno_dir}/${sig_acc}.json"
-                    def paint_annotation_file = new File(anno_path)
-                    if (paint_annotation_file.exists()) {
-                        def paint_annotations_content = new JsonSlurper().parse(paint_annotation_file)
-                        def node_data = paint_annotations_content[data["node_id"]]
-                        data["proteinClass"] = node_data[2]
-                        data["graftPoint"] = node_data[3]
-                    } else {
-                        log.info "No Panther annotation to ${sig_acc}"
-                    }
-                }
-            }
-            return [(seq_id): match_info]
-        }
-    }
-
-    ch_aggregated_results = ch_matches2xrefs.collect().map { all_matches2xrefs ->
-        def aggregated_result = JsonOutput.toJson(all_matches2xrefs)
-        def outputFile = new File("${workDir}/aggregated_result.json")
-        outputFile.write(aggregated_result)
-        return outputFile.path
-    }
+    def outputFile = new File("${workDir}/aggregated_result.json")
+    outputFile.write(ch_matches2xrefs.collect())
 
     emit:
-    ch_aggregated_results
+    outputFile.path
 }

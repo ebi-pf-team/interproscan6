@@ -1,13 +1,16 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
 process GOTERMS {
     label 'xref'
 
     input:
-    val ipr2go
-    val go_info
+    val ipr2go_path
+    val go_info_path
     val matchesinterpro
 
     output:
-    val matches2go
+    path "match_key2go.txt"
 
     script:
     def GO_PATTERN = [
@@ -16,6 +19,8 @@ process GOTERMS {
         "F": "MOLECULAR_FUNCTION"
     ]
 
+    def ipr2go = new JsonSlurper().parseText(new File(ipr2go_path).text)
+    def go_info = new JsonSlurper().parseText(new File(go_info_path).text)
     def matches_info = matchesinterpro[1]
     def match_key2go = [:]
     matches_info.each { match_key, interpro_key ->
@@ -36,19 +41,21 @@ process GOTERMS {
             match_key2go[match_key] = []
         }
     }
-    return match_key2go
+    """
+    echo "${match_key2go}" > match_key2go.txt
+    """
 }
 
 process PATHWAYS {
     label 'xref'
 
     input:
-    val ipr2pa
-    val pa_info
+    val ipr2pa_path
+    val pa_info_path
     val matchesinterpro
 
     output:
-    val matches2pa
+    path "match_key2pa.txt"
 
     script:
     def PA_PATTERN = [
@@ -58,6 +65,8 @@ process PATHWAYS {
     "r": "Reactome"
     ]
 
+    def ipr2pa = new JsonSlurper().parseText(new File(ipr2pa_path).text)
+    def pa_info = new JsonSlurper().parseText(new File(pa_info_path).text)
     def matches_info = matchesinterpro[1]
     def match_key2pa = [:]
     matches_info.each { match_key, interpro_key ->
@@ -78,5 +87,34 @@ process PATHWAYS {
             match_key2pa[match_key] = []
         }
     }
-    return match_key2pa
+    """
+    echo "${match_key2pa}" > match_key2pa.txt
+    """
 }
+
+// process PAINT_ANNOTATIONS {
+//     label 'xref'
+//
+//     input:
+//     val paint_anno_dir
+//     val ch_matches2xrefs
+//
+//     output:
+//     val paint_annotations
+//
+//     script:
+//     ch_matches2xrefs = ch_matches2xrefs.collectEntries { seq_id, match_info ->
+//         match_info.each { sig_acc, data ->
+//             if (data["member_db"].toUpperCase() == "PANTHER") {
+//                 def anno_path = "${paint_anno_dir}/${sig_acc}.json"
+//                 def paint_annotation_file = new File(anno_path)
+//                 if (paint_annotation_file.exists()) {
+//                     def paint_annotations_content = new JsonSlurper().parse(paint_annotation_file)
+//                     def node_data = paint_annotations_content[data["node_id"]]
+//                     data["proteinClass"] = node_data[2]
+//                     data["graftPoint"] = node_data[3]
+//             }
+//         }
+//         return [(seq_id): match_info]
+//     }
+// }
