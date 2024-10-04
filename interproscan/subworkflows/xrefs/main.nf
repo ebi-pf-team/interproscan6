@@ -123,18 +123,9 @@ workflow XREFS {
             return matches_info.collectEntries { seq_id, match_data ->
                 def match_key = match_data.keySet().first()
                 def match_info = match_data[match_key]
-                println "match_key: ${match_key}"
-                println "match_info: ${match_info}"
 
-
-                def goXRefs = goterms_output
-                    .map { it[match_key] ?: [] }
-                    .first()
-                def pathwayXRefs = pathways_output
-                    .map { it[match_key] ?: [] }
-                    .first()
-                println "goXRefs: ${goXRefs}"
-                println "pathwayXRefs: ${pathwayXRefs}"
+                def goXRefs = goterms_output.map { it[match_key] ?: [] }
+                def pathwayXRefs = pathways_output.map { it[match_key] ?: [] }
 
                 match_info["entry"]["goXRefs"] = goXRefs
                 match_info["entry"]["pathwayXRefs"] = pathwayXRefs
@@ -150,11 +141,23 @@ workflow XREFS {
     }
 
     if ("${applications}".contains('panther')) {
-        def paint_annotations = new JsonSlurper().parseText(new File("${dataDir}/${params.members."panther".postprocess.paint_annotations}").text)
-        matches2xrefs = ch_matches2xrefs.collectEntries { seq_id, match_info ->
-            node_data = paint_annotations[data["node_id"]]
-            match_info[seq_id][sig_acc]["proteinClass"] = node_data[2]
-            match_info[seq_id][sig_acc]["graftPoint"] = node_data[3]
+        def paint_annotations = new JsonSlurper().parse(new File("${dataDir}/${params.members."panther".postprocess.paint_annotations}"))
+        ch_matches2xrefs = ch_matches2xrefs.collectEntries { seq_id, match_info ->
+            match_info.each { sig_acc, data ->
+                if (data["member_db"].toUpperCase() == "PANTHER") {
+                    def anno_path = "${paint_anno_dir}/${sig_acc}.json"
+                    def paint_annotation_file = new File(anno_path)
+                    if (paint_annotation_file.exists()) {
+                        def paint_annotations_content = new JsonSlurper().parse(paint_annotation_file)
+                        def node_data = paint_annotations_content[data["node_id"]]
+                        data["proteinClass"] = node_data[2]
+                        data["graftPoint"] = node_data[3]
+                    } else {
+                        log.info "No Panther annotation to ${sig_acc}"
+                    }
+                }
+            }
+            return [(seq_id): match_info]
         }
     }
 

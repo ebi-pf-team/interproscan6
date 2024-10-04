@@ -62,11 +62,11 @@ process PATHWAYS {
     def match_key2pa = [:]
     matches_info.each { match_key, interpro_key ->
         try {
-            def go_ids = ipr2pa[interpro_key]
-            for (String go_id : pa_ids) {
+            def pa_ids = ipr2pa[interpro_key]
+            for (String pa_id : pa_ids) {
                 def pa_dict = [
                     "name": pa_info[pa_id][1],
-                    "databaseName": GO_PATTERN[pa_info[pa_id][0]],
+                    "databaseName": PA_PATTERN[pa_info[pa_id][0]],
                     "id": pa_id
                 ]
                 if (!match_key2pa.containsKey(match_key)) {

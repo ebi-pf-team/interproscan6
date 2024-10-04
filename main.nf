@@ -124,7 +124,7 @@ workflow {
     Add pathways (if enabled)
     */
     XREFS(all_results, dataDirPath, applications)
-
+    XREFS.out.view()
     REPRESENTATIVE_DOMAINS(XREFS.out)
 
     Channel.from(params.formats.toLowerCase().split(','))
