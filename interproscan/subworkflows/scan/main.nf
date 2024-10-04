@@ -3,6 +3,7 @@ include { RUN_RPSBLAST; RUN_RPSPROC; PARSE_RPSPROC                 } from  "../.
 include { RUN_COILS; PARSE_COILS                                   } from  "../../modules/coils"
 include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP  } from  "../../modules/hamap"
 include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                         } from  "../../modules/mobidblite"
+include { RUN_NCBIFAM; PARSE_NCBIFAM                               } from  "../../modules/ncbifam"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -80,7 +81,13 @@ workflow SCAN_SEQUENCES {
     }    
 
     if (applications.contains("ncbifam")) {
-        // TODO
+        RUN_NCBIFAM(
+            ch_fasta,
+            "${datadir}/${appsConfig.ncbifam.hmm}"
+        )
+
+        PARSE_NCBIFAM(RUN_NCBIFAM.out)
+        results = results.mix(PARSE_NCBIFAM.out)
     }
 
     if (applications.contains("panther")) {
