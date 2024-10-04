@@ -18,7 +18,7 @@ class HMMER3 {
                     }
                     def matcher = line =~ ~/^Query:\s*(.+)\s+\[\w=(\d+)\]$/
                     if (matcher.find()) {
-                        queryName = matcher.group(1)
+                        queryName = matcher.group(1).trim()
                         queryLength = matcher.group(2).toInteger()
                         break
                     }
@@ -33,7 +33,7 @@ class HMMER3 {
                 while (!line.startsWith("Scores for complete sequences")) {
                     def matcher = line =~ ~/^Accession:\s*(.+)$/
                     if (matcher.find()) {
-                        queryAccession = matcher.group(1)
+                        queryAccession = matcher.group(1).trim()
                     }
 
                     line = reader.readLine()
@@ -60,7 +60,7 @@ class HMMER3 {
                         Double.parseDouble(fields[1]),
                         Double.parseDouble(fields[2]),
                     )
-                    targetId = fields[8]
+                    targetId = fields[8].trim()
 
                     if (!hits.containsKey(targetId)) {
                         hits[targetId] = [:]
