@@ -87,7 +87,7 @@ class Signature implements Serializable {
         this.accession = accession
         this.name = name
         this.description = description
-        this.library = library
+        this.signatureLibraryRelease = library
         this.entry = entry
     }
 
