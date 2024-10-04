@@ -180,6 +180,32 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
+    Location(int start, 
+             int end, 
+             Integer hmmStart,
+             Integer hmmEnd, 
+             Integer hmmLength,
+             String hmmBounds,
+             Integer envelopeStart,
+             Integer envelopeEnd,
+             Double evalue,
+             Double score,
+             Double bias,
+             List<LocationFragment> fragments) {
+        this.start = start
+        this.end = end
+        this.hmmStart = hmmStart
+        this.hmmEnd = hmmEnd
+        this.hmmLength = hmmLength
+        this.hmmBounds = hmmBounds
+        this.envelopeStart = envelopeStart
+        this.envelopeEnd = envelopeEnd
+        this.evalue = evalue
+        this.score = score
+        this.bias = bias
+        this.fragments = fragments
+    }
+
     Location(int start, int end, String sequenceFeature = null) {
         this.start = start
         this.end = end
@@ -302,5 +328,64 @@ class SiteLocation implements Serializable {
 
     static SiteLocation fromMap(Map data) {
         return new SiteLocation(data.start, data.end, data.residue)
+    }
+}
+
+class SimpleLocation {
+    int start
+    int end
+
+    SimpleLocation(int start, int end) {
+        this.start = start
+        this.end = end
+    }
+
+    SimpleLocation(String range) {
+        String[] fields = range.split("-")
+        assert fields.size() == 2
+        this.start = fields[0].toInteger()
+        this.end = fields[1].toInteger()
+    }
+}
+
+class CathDomain {
+    String domainId
+    String matchId
+    String supfamId
+    Double score
+    Double evalue
+    List<SimpleLocation> boundaries
+    List<SimpleLocation> resolvedBoundaries
+
+    CathDomain(String domainId, String matchId, String supfamId, 
+               Double score, Double evalue, List<SimpleLocation> boundaries,
+               List<SimpleLocation> resolvedBoundaries) {
+        this.domainId = domainId
+        this.matchId = matchId
+        this.supfamId = "G3DSA:${supfamId}"
+        this.score = score
+        this.evalue = evalue
+        this.boundaries = this.sortLocations(boundaries)
+        this.resolvedBoundaries = this.sortLocations(resolvedBoundaries)
+    }
+
+    String getKey() {
+        int leftMost = this.getStart()
+        int rightMost = this.getEnd()
+        return "${this.matchId}-${leftMost}-${rightMost}"
+    }
+
+    int getStart() {
+        return this.boundaries*.start.min()
+    }
+
+    int getEnd() {
+        return this.boundaries*.end.max()
+    }
+
+    static List<SimpleLocation> sortLocations(List<SimpleLocation> locations) {
+        return locations.sort { a, b ->
+            a.start <=> b.start ?: a.end <=> b.end
+        }
     }
 }

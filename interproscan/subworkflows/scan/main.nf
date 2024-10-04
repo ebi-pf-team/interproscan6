@@ -1,9 +1,10 @@
-include { RUN_ANTIFAM; PARSE_ANTIFAM                               } from  "../../modules/antifam"
-include { RUN_RPSBLAST; RUN_RPSPROC; PARSE_RPSPROC                 } from  "../../modules/cdd"
-include { RUN_COILS; PARSE_COILS                                   } from  "../../modules/coils"
-include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP  } from  "../../modules/hamap"
-include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                         } from  "../../modules/mobidblite"
-include { RUN_NCBIFAM; PARSE_NCBIFAM                               } from  "../../modules/ncbifam"
+include { RUN_ANTIFAM; PARSE_ANTIFAM                                              } from  "../../modules/antifam"
+include { SEARCH_GENE3D; RESOLVE_GENE3D; ASSIGN_CATH_SUPFAM; PARSE_CATHGENE3D     } from  "../../modules/cath"
+include { RUN_RPSBLAST; RUN_RPSPROC; PARSE_RPSPROC                                } from  "../../modules/cdd"
+include { RUN_COILS; PARSE_COILS                                                  } from  "../../modules/coils"
+include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP                 } from  "../../modules/hamap"
+include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                        } from  "../../modules/mobidblite"
+include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -34,7 +35,30 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("cathgene3d") || applications.contains("cathfunfam")) {
-        // TODO CATH-GENE3D
+        SEARCH_GENE3D(
+            ch_fasta,
+            "${datadir}/${appsConfig.cathgene3d.hmm}")
+
+        SEARCH_GENE3D.out.view()
+
+        RESOLVE_GENE3D(SEARCH_GENE3D.out)
+
+        ASSIGN_CATH_SUPFAM(
+            RESOLVE_GENE3D.out,
+            "${datadir}/${appsConfig.cathgene3d.model2sfs}",
+            "${datadir}/${appsConfig.cathgene3d.disc_regs}")
+
+        ch_cathgene3d = SEARCH_GENE3D.out.join(ASSIGN_CATH_SUPFAM.out)
+
+        // def dummy = channel.from(
+        //     [tuple("1", file("/home/mblum/Projects/i6/work/ca/8b391e8916b99f6597a72a729a2d28/hmmsearch.out"))],
+        // )
+        // RESOLVE_GENE3D(dummy)
+        // ch_cathgene3d = dummy.join(ASSIGN_CATH_SUPFAM.out)
+
+
+        PARSE_CATHGENE3D(ch_cathgene3d)
+        results = results.mix(PARSE_CATHGENE3D.out)
 
         if (applications.contains("cathfunfam")) {
             // TODO CATH-FunFam
