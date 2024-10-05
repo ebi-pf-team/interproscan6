@@ -95,8 +95,14 @@ class HMMER3 {
                         break
                     }
 
-                    // Skip table header
+                    // At this point we need to check whether we have individual domains
                     line = reader.readLine()
+                    if (line.trim().startsWith("[No individual domains")) {
+                        // We do not
+                        continue
+                    }
+
+                    // Move the first domain
                     line = reader.readLine()
 
                     // Parse domain hits
