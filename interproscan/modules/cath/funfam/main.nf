@@ -94,7 +94,7 @@ process PARSE_FUNFAM {
 
     exec:
     def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString())
-    def funfamDomains = CATH.parseResolvedFile(cath_tsv.toString())
+    def funfamDomains = CATH.parseResolvedFile(resolved_tsv.toString())
     def matches = CATH.mergeWithHmmerMatches(funfamDomains, hmmerMatches)
     def outputFilePath = task.workDir.resolve("cathfunfam.json")
     def json = JsonOutput.toJson(matches)
