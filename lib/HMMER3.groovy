@@ -196,5 +196,27 @@ class HMMER3 {
         }
 
         return hits
-    }    
+    }
+
+    static splitByLocation(hmmerMatches) {
+        // This methid is used by CATH-Gene3D and CATH-FunFam
+        def results = [:].withDefault { [:] }
+        hmmerMatches.each { sequenceId, matches ->
+            matches.values().each { m1 ->
+                m1.locations.each { loc ->
+                    Match m2 = new Match(
+                        m1.modelAccession, 
+                        m1.evalue,
+                        m1.score, 
+                        m1.bias)
+                    m2.addLocation(loc)
+                    String key = "${m2.modelAccession}-${loc.envelopeStart}-${loc.envelopeEnd}"
+
+                    assert !results[sequenceId].containsKey(key)
+                    results[sequenceId][key] = m2
+                }
+            }
+        }
+        return results
+    }
 }
