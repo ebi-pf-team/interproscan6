@@ -1,6 +1,6 @@
 include { RUN_ANTIFAM; PARSE_ANTIFAM                                              } from  "../../modules/antifam"
 include { SEARCH_GENE3D; RESOLVE_GENE3D; ASSIGN_CATH_SUPFAM; PARSE_CATHGENE3D     } from  "../../modules/cath/gene3d"
-include { PREPARE_FUNFAM     } from  "../../modules/cath/funfam"
+include { PREPARE_FUNFAM; SEARCH_FUNFAM     } from  "../../modules/cath/funfam"
 include { RUN_RPSBLAST; RUN_RPSPROC; PARSE_RPSPROC                                } from  "../../modules/cdd"
 include { RUN_COILS; PARSE_COILS                                                  } from  "../../modules/coils"
 include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP                 } from  "../../modules/hamap"
@@ -23,7 +23,7 @@ workflow SCAN_SEQUENCES {
 
     ch_seqs
         .map { index, fasta, json -> json }
-        .set { ch_json }    
+        .set { ch_json }
 
     if (applications.contains("antifam")) {
         RUN_ANTIFAM(
@@ -52,7 +52,7 @@ workflow SCAN_SEQUENCES {
         // ch_cathgene3d = SEARCH_GENE3D.out.join(ASSIGN_CATH_SUPFAM.out)
 
         def dummy = channel.from(
-            [tuple("1", file("/home/mblum/Projects/i6/work/a1/b38678716d6b10289423feeca79331/hmmsearch.out"))],
+            [tuple(1, file("/home/mblum/Projects/i6/work/a1/b38678716d6b10289423feeca79331/hmmsearch.out"))],
         )
         RESOLVE_GENE3D(dummy)
         ASSIGN_CATH_SUPFAM(
@@ -65,9 +65,27 @@ workflow SCAN_SEQUENCES {
         results = results.mix(PARSE_CATHGENE3D.out)
 
         if (applications.contains("cathfunfam")) {
-            // TODO CATH-FunFam
             PREPARE_FUNFAM(PARSE_CATHGENE3D.out,
                 "${datadir}/${appsConfig.cathfunfam.dir}")
+
+            ch_fasta
+                .join(PREPARE_FUNFAM.out)
+                .set { ch_funfams }
+
+            SEARCH_FUNFAM(ch_funfams,
+                "${datadir}/${appsConfig.cathfunfam.dir}")
+
+
+            // PREPARE_FUNFAM.out
+            //     .flatMap { meta, supfams -> 
+            //         // hard-coded to 10 FunFams/process for now
+            //         supfams
+            //             .collate(appsConfig.cathfunfam.chunkSize)
+            //             .collect { supfam -> [meta, supfam] } 
+            //     }
+            //     .set { ch_funfams }
+
+            // ch_funfams.view()
         }
     }
 
