@@ -1,6 +1,6 @@
 include { RUN_ANTIFAM; PARSE_ANTIFAM                                              } from  "../../modules/antifam"
-include { SEARCH_GENE3D; RESOLVE_GENE3D; ASSIGN_CATH_SUPFAM; PARSE_CATHGENE3D     } from  "../../modules/cath/gene3d"
-include { PREPARE_FUNFAM; SEARCH_FUNFAM     } from  "../../modules/cath/funfam"
+include { SEARCH_GENE3D; RESOLVE_GENE3D; ASSIGN_CATH; PARSE_CATHGENE3D            } from  "../../modules/cath/gene3d"
+include { PREPARE_FUNFAM; SEARCH_FUNFAM; RESOLVE_FUNFAM; PARSE_FUNFAM             } from  "../../modules/cath/funfam"
 include { RUN_RPSBLAST; RUN_RPSPROC; PARSE_RPSPROC                                } from  "../../modules/cdd"
 include { RUN_COILS; PARSE_COILS                                                  } from  "../../modules/coils"
 include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP                 } from  "../../modules/hamap"
@@ -36,56 +36,58 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("cathgene3d") || applications.contains("cathfunfam")) {
-        // SEARCH_GENE3D(
-        //     ch_fasta,
-        //     "${datadir}/${appsConfig.cathgene3d.hmm}")
+        // Search Gene3D profiles
+        SEARCH_GENE3D(
+            ch_fasta,
+            "${datadir}/${appsConfig.cathgene3d.hmm}")
+        ch_gene3d = SEARCH_GENE3D.out
 
-        // SEARCH_GENE3D.out.view()
+        // Select best domain matches
+        RESOLVE_GENE3D(ch_gene3d)
 
-        // RESOLVE_GENE3D(SEARCH_GENE3D.out)
-
-        // ASSIGN_CATH_SUPFAM(
-        //     RESOLVE_GENE3D.out,
-        //     "${datadir}/${appsConfig.cathgene3d.model2sfs}",
-        //     "${datadir}/${appsConfig.cathgene3d.disc_regs}")
-
-        // ch_cathgene3d = SEARCH_GENE3D.out.join(ASSIGN_CATH_SUPFAM.out)
-
-        def dummy = channel.from(
-            [tuple(1, file("/home/mblum/Projects/i6/work/a1/b38678716d6b10289423feeca79331/hmmsearch.out"))],
-        )
-        RESOLVE_GENE3D(dummy)
-        ASSIGN_CATH_SUPFAM(
+        // Assign CATH superfamily to matches
+        ASSIGN_CATH(
             RESOLVE_GENE3D.out,
             "${datadir}/${appsConfig.cathgene3d.model2sfs}",
             "${datadir}/${appsConfig.cathgene3d.disc_regs}")
-        ch_cathgene3d = dummy.join(ASSIGN_CATH_SUPFAM.out)
 
+        // Join results and parse them
+        ch_cathgene3d = ch_gene3d.join(ASSIGN_CATH.out)
         PARSE_CATHGENE3D(ch_cathgene3d)
-        results = results.mix(PARSE_CATHGENE3D.out)
+
+        if (applications.contains("cathgene3d")) {
+            results = results.mix(PARSE_CATHGENE3D.out)
+        }
 
         if (applications.contains("cathfunfam")) {
+            // Find unique CATH superfamilies with at least one hit
             PREPARE_FUNFAM(PARSE_CATHGENE3D.out,
                 "${datadir}/${appsConfig.cathfunfam.dir}")
 
+            /*
+                Join input fasta file with superfamilies.
+                We split in smaller chunks to parallelize searching FunFam profiles
+            */
             ch_fasta
                 .join(PREPARE_FUNFAM.out)
+                .flatMap { id, file, supfams ->
+                    supfams
+                        .collate(appsConfig.cathfunfam.chunkSize)
+                        .collect { chunk -> [id, file, chunk] }
+                }
                 .set { ch_funfams }
 
+            // Search FunFam profiles
             SEARCH_FUNFAM(ch_funfams,
                 "${datadir}/${appsConfig.cathfunfam.dir}")
 
+            // Select best domain matches
+            RESOLVE_FUNFAM(SEARCH_FUNFAM.out)
 
-            // PREPARE_FUNFAM.out
-            //     .flatMap { meta, supfams -> 
-            //         // hard-coded to 10 FunFams/process for now
-            //         supfams
-            //             .collate(appsConfig.cathfunfam.chunkSize)
-            //             .collect { supfam -> [meta, supfam] } 
-            //     }
-            //     .set { ch_funfams }
-
-            // ch_funfams.view()
+            // Join results and parse them
+            ch_cathfunfam = SEARCH_FUNFAM.out.join(RESOLVE_FUNFAM.out)
+            PARSE_FUNFAM(ch_cathfunfam)
+            results = results.mix(PARSE_FUNFAM.out)
         }
     }
 
