@@ -2,21 +2,52 @@ import HMMER3
 
 class CATH {
     static parseAssignedFile(String filePath) {
+        // For CATH-Gene3D
         def results = [:].withDefault { [] }
 
         new File(filePath).eachLine { line ->
             if (line[0] != "#") {
+                // #domain_id      cath-superfamily        query-id        match-id        score   boundaries      resolved        aligned-regions cond-evalue     indp-evalue
                 def fields = line.split("\t")
                 assert fields.size() == 10
                 String sequenceId = fields[2]
                 def dom = new CathDomain(
-                    fields[0],                                                  // Domain ID
-                    fields[3],                                                  // Match ID
-                    fields[1],                                                  // CATH ID
-                    Double.parseDouble(fields[4]),                              // Score
-                    Double.parseDouble(fields[9]),                              // i-evalue
-                    fields[5].split(",").collect { new SimpleLocation(it) },    // Boundaries
-                    fields[6].split(",").collect { new SimpleLocation(it) },    // Resolved
+                    fields[0],
+                    fields[3],
+                    "G3DSA:${fields[1]}",
+                    Double.parseDouble(fields[4]),
+                    Double.parseDouble(fields[9]),
+                    fields[5].split(",").collect { new SimpleLocation(it) },
+                    fields[6].split(",").collect { new SimpleLocation(it) },
+                )
+
+                results[sequenceId] << dom
+            }        
+        }
+
+        return results
+    }
+
+    static parseResolvedFile(String filePath) {
+        // For CATH-FunFam
+        def results = [:].withDefault { [] }
+
+        new File(filePath).eachLine { line ->
+            if (line[0] != "#") {
+                // #FIELDS query-id match-id score boundaries resolved aligned-regions cond-evalue indp-evalue
+                def fields = line.split(/\s+/)
+                assert fields.size() == 8
+                String sequenceId = fields[0]
+                String modelId = fields[1]
+                String accession = "G3DSA:${modelId.replaceAll('-', ':')}"
+                def dom = new CathDomain(
+                    modelId,
+                    modelId,
+                    accession,
+                    Double.parseDouble(fields[2]),
+                    Double.parseDouble(fields[7]),
+                    fields[3].split(",").collect { new SimpleLocation(it) },
+                    fields[4].split(",").collect { new SimpleLocation(it) },
                 )
 
                 results[sequenceId] << dom
@@ -83,7 +114,7 @@ class CATH {
                         hmmerDomain.score, 
                         hmmerDomain.bias
                     )
-                    domain.signature = new Signature(cathDomain.supfamId)
+                    domain.signature = new Signature(cathDomain.accession)
                     domain.addLocation(location)
                     sequenceDomains[domId] = domain
                 }
@@ -96,18 +127,18 @@ class CATH {
 class CathDomain {
     String domainId
     String matchId
-    String supfamId
+    String accession
     Double score
     Double evalue
     List<SimpleLocation> boundaries
     List<SimpleLocation> resolvedBoundaries
 
-    CathDomain(String domainId, String matchId, String supfamId, 
+    CathDomain(String domainId, String matchId, String accession, 
                Double score, Double evalue, List<SimpleLocation> boundaries,
                List<SimpleLocation> resolvedBoundaries) {
         this.domainId = domainId
         this.matchId = matchId
-        this.supfamId = "G3DSA:${supfamId}"
+        this.accession = accession
         this.score = score
         this.evalue = evalue       
         this.boundaries = this.sortLocations(boundaries)
