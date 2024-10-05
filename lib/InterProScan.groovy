@@ -144,9 +144,10 @@ class InterProScan {
     static validateApplications(String applications, Map appsConfig) {
         if (!applications) {
             // Run all applications
-            return appsConfig.findAll{ it -> 
+            def appsToRun = appsConfig.findAll{ it -> 
                 !(it.value.disabled)
             }.keySet().toList()
+            return [appsToRun, null]
         }
 
         // Make a collection of recognized application names
