@@ -4,7 +4,8 @@ import groovy.json.JsonSlurper
 include {
     GOTERMS;
     PATHWAYS;
-//     PAINT_ANNOTATIONS;
+    PAINT_ANNOTATIONS;
+    AGGREGATE_XREFS;
 } from "$projectDir/interproscan/modules/xrefs/main"
 
 def MAP_DATABASES = [
@@ -46,7 +47,6 @@ workflow XREFS {
         def matches_info = new JsonSlurper().parse(matchFile)
         matches_info.each { seq_id, match_info ->
             match_info.each { match_key, data ->
-                println "match_key: ${match_key}"
                 def databases_versions = entries["databases"]
                 def entries_info = entries['entries']
                 def acc_id = match_key.split("\\.")[0]
@@ -105,14 +105,16 @@ workflow XREFS {
         return [matches_info, matches2interpro]
     }
 
-//     if ("${applications}".contains('panther')) {
-//         def paint_anno_dir = "${dataDir}/${params.members."panther".postprocess.paint_annotations}"
-//         matches_paint = PAINT_ANNOTATIONS(paint_anno_dir, ch_matches2xrefs)
-//     }
+    matches_paint = Channel.empty()
+    goterms_output = Channel.empty()
+    pathways_output = Channel.empty()
+
+    if ("${applications}".contains('panther')) {
+        def paint_anno_dir = "${dataDir}/${params.members."panther".postprocess.paint_annotations}"
+        matches_paint = PAINT_ANNOTATIONS(paint_anno_dir, matches2entries)
+    }
 
     if (params.goterms || params.pathways) {
-        def goterms_output = Channel.empty()
-        def pathways_output = Channel.empty()
         if (params.goterms) {
             def ipr2go_path = "${dataDir}/${params.xrefs.goterms}.ipr.json"
             def go_info_path = "${dataDir}/${params.xrefs.goterms}.json"
@@ -123,38 +125,15 @@ workflow XREFS {
             def pa_info_path = "${dataDir}/${params.xrefs.pathways}.json"
             pathways_output = PATHWAYS(ipr2pa_path, pa_info_path, matches2entries)
         }
-
-        def go_pa_output = goterms_output.mix(pathways_output).collect()
-        ch_matches2xrefs = matches2entries.map { entries_output ->
-            def matches_info = entries_output[0]
-            return matches_info.collectEntries { seq_id, match_data ->
-                def match_key = match_data.keySet().first()
-                def match_info = match_data[match_key]
-
-                match_info_xrefs = go_pa_output.map { file ->
-                    def xRefsMap = new File(file.toString()).text
-                    if file.toString().contains("go") {
-                         def goXRefs_info = goRefsMap[match_key] ?: []
-                         match_info["entry"]["goXRefs"] = goXRefs_info
-                    } else {
-                         def paXRefs_info = paRefsMap[match_key] ?: []
-                         match_info["entry"]["pathwayXRefs"] = paXRefs_info
-                    }
-                    return match_info
-                }
-                return [(seq_id): [(match_key): match_info_xrefs]])
-            }
-        }
-    } else {
-        ch_matches2xrefs = matches2entries.collect().map { entries_output ->
-            def matches_info = entries_output[0]
-            return matches_info
-        }
     }
 
-//     def outputFile = new File("${workDir}/aggregated_result.json")
-//     outputFile.write(ch_matches2xrefs.collect())
+    AGGREGATE_XREFS(
+        goterms_output.collect(),
+        pathways_output.collect(),
+        matches2entries.collect(),
+        matches_paint.collect()
+    )
 
     emit:
-    ch_matches2xrefs
+    AGGREGATE_XREFS.out
 }
