@@ -6,7 +6,7 @@ class HMMER3 {
         Integer queryLength
         String queryAccession
         String targetId
-        def hits = [:]
+        def hits.withDefault { [:] } = [:]
 
         file.withReader { reader ->
             while (true) {
@@ -49,7 +49,9 @@ class HMMER3 {
                 while ((true)) {
                     line = reader.readLine().trim()
                     if (line.isEmpty() || 
-                        line.contains("[No hits detected that satisfy reporting thresholds]")) {
+                        line.contains("[No hits detected that satisfy reporting thresholds]") ||
+                        line.startsWith("------ inclusion threshold")) {
+                        // TODO: enable to capture matches below the inclusion threshold
                         break
                     }
 
@@ -61,11 +63,6 @@ class HMMER3 {
                         Double.parseDouble(fields[2]),
                     )
                     targetId = fields[8].trim()
-
-                    if (!hits.containsKey(targetId)) {
-                        hits[targetId] = [:]
-                    } 
-
                     hits[targetId][queryAccession] = match
                 }
 
@@ -128,7 +125,7 @@ class HMMER3 {
                             Double.parseDouble(fields[2]),
                             Double.parseDouble(fields[3])
                         )
-                            hits[targetId][queryAccession].addLocation(location)
+                            hits[targetId][queryAccession]?.addLocation(location)
                         }
                     }
 
