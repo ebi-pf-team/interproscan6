@@ -63,7 +63,7 @@ class HMMER3 {
                         Double.parseDouble(fields[1]),
                         Double.parseDouble(fields[2]),
                     )
-                    match.isIncluded = isIncluded
+                    match.included = isIncluded
                     targetId = fields[8].trim()
                     hits[targetId][queryAccession] = match
                 }
@@ -121,7 +121,7 @@ class HMMER3 {
                             Double.parseDouble(fields[2]),
                             Double.parseDouble(fields[3])
                         )
-                        location.isIncluded = fields[1] == "!"
+                        location.included = fields[1] == "!"
                         hits[targetId][queryAccession]?.addLocation(location)
                     }
 
@@ -224,14 +224,5 @@ class HMMER3 {
             }
         }
         return results
-    }
-
-    static filterMatchesWithLocations(sequences) {
-        sequences.collectEntries { seqId, matches ->
-            def filteredMatches = matches.findAll { matchId, match ->
-                match.locations.size() > 0 
-            }
-            filteredMatches ? [(seqId): filteredMatches] : [:]
-        }
     }
 }

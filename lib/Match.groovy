@@ -6,7 +6,7 @@ class Match implements Serializable {
     Double bias
     Signature signature = null
     List<Location> locations = []
-    boolean isIncluded = true  // for HMMER3 matches
+    boolean included = true  // for HMMER3 matches (inclusion threshold)
 
     // PANTHER
     // String subfamilyAccession
@@ -51,7 +51,7 @@ class Match implements Serializable {
         Match match = new Match(data.modelAccession, data.evalue, data.score, data.bias)
         match.sequenceLength = data.sequenceLength
         match.signature = Signature.fromMap(data.signature)
-        match.isIncluded = data.isIncluded
+        match.included = data.included
         match.locations = data.locations.collect { Location.fromMap(it) }
         return match
     }
@@ -160,7 +160,7 @@ class Location implements Serializable {
     List<LocationFragment> fragments = []
     List<Site> sites = []
     boolean representative = false
-    boolean isIncluded = true  // for HMMER3 matches
+    boolean included = true  // for HMMER3 matches (inclusion threshold)
 
     // pvalue
     // level
@@ -258,7 +258,7 @@ class Location implements Serializable {
         loc.targetSequence = data.targetSequence
         loc.fragments = data.fragments.collect { LocationFragment.fromMap(it) }
         loc.representative = data.representative
-        loc.isIncluded = data.isIncluded
+        loc.included = data.included
         loc.sites = data.sites
         return loc
     }
