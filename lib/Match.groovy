@@ -9,11 +9,7 @@ class Match implements Serializable {
     boolean included = true  // for HMMER3 matches (inclusion threshold)
 
     // PANTHER
-    // String subfamilyAccession
-    // String subfamilyName
-    // String graftPoint
-    // String proteinClass
-    // String ancestralNodeID
+    TreeGrafter treegrafter = null
 
     // SignalP
     // String orgType
@@ -53,6 +49,7 @@ class Match implements Serializable {
         match.signature = Signature.fromMap(data.signature)
         match.included = data.included
         match.locations = data.locations.collect { Location.fromMap(it) }
+        match.treegrafter = TreeGrafter.fromMap(data.treegrafter)
         return match
     }
 
@@ -342,5 +339,29 @@ class SiteLocation implements Serializable {
 
     static SiteLocation fromMap(Map data) {
         return new SiteLocation(data.start, data.end, data.residue)
+    }
+}
+
+class TreeGrafter implements Serializable {
+    String ancestralNodeID
+    String graftPoint
+    String subfamilyAccession
+    String subfamilyName
+    String proteinClass
+
+    TreeGrafter(String ancestralNodeID) {
+        this.ancestralNodeID = ancestralNodeID
+    }
+
+    static TreeGrafter fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
+        TreeGrafter tg = new TreeGrafter(data.ancestralNodeID)
+        tg.graftPoint = data.graftPoint
+        tg.subfamilyAccession = data.subfamilyAccession
+        tg.subfamilyName = data.subfamilyName
+        tg.proteinClass = data.proteinClass
+        return tg
     }
 }
