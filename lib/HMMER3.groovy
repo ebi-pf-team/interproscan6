@@ -6,7 +6,7 @@ class HMMER3 {
         Integer queryLength
         String queryAccession
         String targetId
-        def hits.withDefault { [:] } = [:]
+        def hits = [:].withDefault { [:] }
 
         file.withReader { reader ->
             while (true) {
