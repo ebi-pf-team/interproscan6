@@ -6,6 +6,7 @@ class Match implements Serializable {
     Double bias
     Signature signature = null
     List<Location> locations = []
+    boolean isIncluded = true  // for HMMER3 matches
 
     // PANTHER
     // String subfamilyAccession
@@ -20,19 +21,16 @@ class Match implements Serializable {
     // PRINTS
     // String graphscan
 
-    // Used for HAMAP, MobiDB-lite
     Match(String modelAccession) {
         this.modelAccession = modelAccession
     }
 
-    // Used for CDD
     Match(String modelAccession, Double evalue, Double score) {
         this.modelAccession = modelAccession
         this.evalue = evalue
         this.score = score
     }
 
-    // Used for Coils
     Match(String modelAccession, Double evalue, Double score, Double bias) {
         this.modelAccession = modelAccession
         this.evalue = evalue
@@ -53,6 +51,7 @@ class Match implements Serializable {
         Match match = new Match(data.modelAccession, data.evalue, data.score, data.bias)
         match.sequenceLength = data.sequenceLength
         match.signature = Signature.fromMap(data.signature)
+        match.isIncluded = data.isIncluded
         match.locations = data.locations.collect { Location.fromMap(it) }
         return match
     }
@@ -161,6 +160,7 @@ class Location implements Serializable {
     List<LocationFragment> fragments = []
     List<Site> sites = []
     boolean representative = false
+    boolean isIncluded = true  // for HMMER3 matches
 
     // pvalue
     // level
@@ -258,6 +258,7 @@ class Location implements Serializable {
         loc.targetSequence = data.targetSequence
         loc.fragments = data.fragments.collect { LocationFragment.fromMap(it) }
         loc.representative = data.representative
+        loc.isIncluded = data.isIncluded
         loc.sites = data.sites
         return loc
     }

@@ -46,13 +46,14 @@ class HMMER3 {
                 queryAccession ?= queryName
 
                 // Parse the sequence top hits
+                boolean isIncluded = true
                 while ((true)) {
                     line = reader.readLine().trim()
                     if (line.isEmpty() || 
-                        line.contains("[No hits detected that satisfy reporting thresholds]") ||
-                        line.startsWith("------ inclusion threshold")) {
-                        // TODO: enable to capture matches below the inclusion threshold
+                        line.contains("[No hits detected that satisfy reporting thresholds]")) {
                         break
+                    } else if (line.startsWith("------ inclusion threshold")) {
+                        isIncluded = false
                     }
 
                     def fields = line.split(/\s+/)
@@ -62,6 +63,7 @@ class HMMER3 {
                         Double.parseDouble(fields[1]),
                         Double.parseDouble(fields[2]),
                     )
+                    match.isIncluded = isIncluded
                     targetId = fields[8].trim()
                     hits[targetId][queryAccession] = match
                 }
@@ -106,13 +108,7 @@ class HMMER3 {
                     while (!(line = reader.readLine().trim()).isEmpty()) {
                         def fields = line.split(/\s+/)
                         assert fields.size() == 16
-                        /*
-                            Check whether the domain satisfies both per-sequence and per-domain
-                            inclusing thresholds
-                            TODO: allow to capture all domains
-                        */
-                        if (fields[1] == "!") {
-                            Location location = new Location(
+                        Location location = new Location(
                             Integer.parseInt(fields[9]),
                             Integer.parseInt(fields[10]),
                             fields[6].toInteger(),
@@ -125,8 +121,8 @@ class HMMER3 {
                             Double.parseDouble(fields[2]),
                             Double.parseDouble(fields[3])
                         )
-                            hits[targetId][queryAccession]?.addLocation(location)
-                        }
+                        location.isIncluded = fields[1] == "!"
+                        hits[targetId][queryAccession]?.addLocation(location)
                     }
 
                     // Move to domain alignments
