@@ -109,7 +109,13 @@ class HMMER3 {
                     while (!(line = reader.readLine().trim()).isEmpty()) {
                         def fields = line.split(/\s+/)
                         assert fields.size() == 16
-                        Location location = new Location(
+                        /*
+                            Check whether the domain satisfies both per-sequence and per-domain
+                            inclusing thresholds
+                            TODO: allow to capture all domains
+                        */
+                        if (fields[1] == "!") {
+                            Location location = new Location(
                             Integer.parseInt(fields[9]),
                             Integer.parseInt(fields[10]),
                             fields[6].toInteger(),
@@ -122,7 +128,8 @@ class HMMER3 {
                             Double.parseDouble(fields[2]),
                             Double.parseDouble(fields[3])
                         )
-                        hits[targetId][queryAccession].addLocation(location)
+                            hits[targetId][queryAccession].addLocation(location)
+                        }
                     }
 
                     // Move to domain alignments
