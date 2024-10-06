@@ -30,7 +30,7 @@ process PREPARE_HAMAP {
     val profile_dir
 
     output:
-    tuple val(meta), val(profiles), file(fasta_files)
+    tuple val(meta), val(profiles), path(fasta_files)
 
     exec:
     def jsonFile = new File(seq_json.toString())
@@ -85,7 +85,7 @@ process RUN_HAMAP {
     label 'analysis_parser'
     
     input:
-    tuple val(meta), val(profiles), file(fasta_files)
+    tuple val(meta), val(profiles), path(fasta_files)
     path profile_dir
 
     output:
