@@ -225,4 +225,13 @@ class HMMER3 {
         }
         return results
     }
+
+    static filterMatchesWithLocations(sequences) {
+        sequences.collectEntries { seqId, matches ->
+            def filteredMatches = matches.findAll { matchId, match ->
+                match.locations.size() > 0 
+            }
+            filteredMatches ? [(seqId): filteredMatches] : [:]
+        }
+    }
 }
