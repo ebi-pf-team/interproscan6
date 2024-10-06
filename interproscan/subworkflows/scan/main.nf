@@ -6,6 +6,7 @@ include { RUN_COILS; PARSE_COILS                                                
 include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP                 } from  "../../modules/hamap"
 include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                        } from  "../../modules/mobidblite"
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
+include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -141,7 +142,22 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("panther")) {
-        // TODO
+        SEARCH_PANTHER(
+            ch_fasta,
+            "${datadir}/${appsConfig.panther.hmm}")
+        ch_panther = SEARCH_PANTHER.out
+
+        PREPARE_TREEGRAFTER(ch_panther,
+            "${datadir}/${appsConfig.panther.msf}")
+
+        RUN_TREEGRAFTER(PREPARE_TREEGRAFTER.out.fasta,
+            "${datadir}/${appsConfig.panther.msf}")
+
+        PARSE_PANTHER(
+            PREPARE_TREEGRAFTER.out.json.join(RUN_TREEGRAFTER.out)
+        )
+
+        results = results.mix(PARSE_PANTHER.out)
     }
 
     if (applications.contains("phobius")) {
