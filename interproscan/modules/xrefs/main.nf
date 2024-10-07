@@ -129,8 +129,9 @@ process GOTERMS {
     def outputFilePath = task.workDir.resolve("match_key2go.json")
     def ipr2go = new JsonSlurper().parseText(new File(ipr2go_path).text)
     def go_info = new JsonSlurper().parseText(new File(go_info_path).text)
+    match2ipr = new JsonSlurper().parseText(new File(matches2interpro.toString()).text)
     def match_key2go = [:]
-    match_key2go = matches2interpro.collectEntries { match_key, interpro_key ->
+    match_key2go = match2ipr.collectEntries { match_key, interpro_key ->
         try {
             def go_ids = ipr2go[interpro_key]
             def go_terms = go_ids.collect { go_id ->
@@ -171,9 +172,10 @@ process PATHWAYS {
     def outputFilePath = task.workDir.resolve("match_key2pa.json")
     def ipr2pa = new JsonSlurper().parseText(new File(ipr2pa_path).text)
     def pa_info = new JsonSlurper().parseText(new File(pa_info_path).text)
+    match2ipr = new JsonSlurper().parseText(new File(matches2interpro.toString()).text)
 
     def match_key2pa = [:]
-    match_key2pa = matches2interpro.collectEntries { match_key, interpro_key ->
+    match_key2pa = match2ipr.collectEntries { match_key, interpro_key ->
         try {
             def pa_ids = ipr2pa[interpro_key]
             def pa_terms = pa_ids.collect { pa_id ->
@@ -237,6 +239,7 @@ process AGGREGATE_XREFS {
     path "aggregated_matches_xrefs.json"
 
     exec:
+    println "ON AGGREGATE_XREFS"
     def go_pa_output = goterms_output.mix(pathways_output)
     println "GO PA OUTPUT: ${go_pa_output}"
     def aggregated_matches_xrefs = [:]

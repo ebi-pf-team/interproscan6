@@ -31,6 +31,7 @@ workflow XREFS {
 
     if (params.goterms || params.pathways) {
         matches2interpro = ENTRIES.out.matchkey2interpro
+
         if (params.goterms) {
             def ipr2go_path = "${dataDir}/${params.xrefs.goterms}.ipr.json"
             def go_info_path = "${dataDir}/${params.xrefs.goterms}.json"
