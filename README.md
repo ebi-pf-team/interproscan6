@@ -78,32 +78,7 @@ mv interproscan-data-102.0 data
 > If you store these data in an alternative directory use the `--datadir` flag to 
 > provide the relative or absolute path to the directory when running `InterProScan`.
 
-2. **Pull the `InterProScan6` base image from DockerHub using your container runtime of choice**
-
-The base image includes all non-licensed dependencies including
-`HMMER`, `BLAST`, `BioPython`, `easel`, etc.
-
-Using `Docker`:
-```bash
-docker pull interpro/interproscan6:latest
-```
-
-Using `Singularity`:
-```bash
-singularity pull interproscan6.sif docker://interpro/interproscan6:latest
-```
-
-Using `Apptainer`:
-```bash
-apptainer pull interproscan6.sif docker://interpro/interproscan6:latest
-```
-
-> [!IMPORTANT]
-> If you are using Singularity or Apptainer, `InterProScan6` expects to find the image files 
-> within the current working directory. Otherwise the respective paths to the image files
-> will need to be updated  in the respective `utilities/profiles/` config files.
-
-3. **(Optional) Install licensed software**
+2. **(Optional) Install licensed software**
 
 By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
 because they contain licensed components. In order to activate these analyses 
