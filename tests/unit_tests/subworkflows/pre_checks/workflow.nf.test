@@ -5,8 +5,7 @@ nextflow_workflow {
     workflow "PRE_CHECKS"
 
     stage {
-        symlink "interproscan/scripts/pre_checks/check_nucleic_seq.py"
-        symlink "interproscan/modules/pre_checks/main.nf"
+        symlink "interproscan/subworkflows/pre_checks/check_sequences.nf"
         symlink "interproscan/subworkflows/sequence_analysis/check_data.nf"
         symlink "interproscan/subworkflows/xrefs/check_xref_data.nf"
         copy "tests/unit_tests/mock_data/antifam/AntiFam.hmm"
@@ -54,7 +53,7 @@ nextflow_workflow {
 
         when {
             params {
-                input="test_inputs/protein_seqs.fasta"
+                input="$projectDir/tests/unit_tests/test_inputs/pre_analysis_checks/protein_seqs.fasta"
                 applications="antifam,CDD"
                 formats="tsv-pro"
             }
@@ -150,7 +149,7 @@ nextflow_workflow {
 
         then {
             assert workflow.failed
-            assert workflow.exitStatus == 1
+            assert workflow.exitStatus == 22
         }
 
     }
@@ -196,7 +195,7 @@ nextflow_workflow {
 
         when {
             params {
-                input="test_inputs/protein_seqs.fasta"
+                input="$projectDir/tests/unit_tests/test_inputs/pre_analysis_checks/protein_seqs.fasta"
                 applications="antifam,CDD"
                 formats="json,xml"
             }
@@ -231,7 +230,7 @@ nextflow_workflow {
 
         when {
             params {
-                input="test_inputs/protein_seqs.fasta"
+                input="$projectDir/tests/unit_tests/test_inputs/pre_analysis_checks/protein_seqs.fasta"
                 applications="antifam,CDD,Frodo"
                 formats="json,xml"
             }
@@ -265,7 +264,7 @@ nextflow_workflow {
 
         when {
             params {
-                input="test_inputs/protein_seqs.fasta"
+                input="$projectDir/tests/unit_tests/test_inputs/pre_analysis_checks/protein_seqs.fasta"
                 applications="antifam,CDD"
                 formats="json,xml,Gollum"
             }

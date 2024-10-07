@@ -35,9 +35,8 @@ Our full documentation is still under construction.
   - [Using DNA sequences](#using-dna-sequences)
   - [Input sequences](#input-sequences)
   - [Outputs and results](#outputs)
-- [Installing licensed applications (`MobiDB`, `Phobius`, `SignalP`, `TMHMM`)](#installing-licensed-applications-mobidb-phobius-signalp-tmhmm)
+- [Installing licensed applications (`Phobius`, `SignalP`, `TMHMM`)](#installing-licensed-applications-phobius-signalp-tmhmm)
   - [DeepTMHMM](#deeptmhmm)
-  - [MobiDB-Lite](#mobidb-lite)
   - [SignalP (version 6)](#signalp)
     - [Setting up SignalP](#set-up-1)
     - [Running SignalP](#running-interproscan6-with-signalp6)
@@ -66,19 +65,13 @@ The instructions below rely on an internet connection to pull the necessary imag
 
 1. **Download InterPro data files**
 
-```bash
-# replace interpro-version with the appropriate version number
-INTERPRO_VERSION="102.0"
-curl "https://ftp.ebi.ac.uk/pub/databases/interpro/iprscan/6/$INTERPRO_VERSION/interproscan-data-$INTERPRO_VERSION.tar.gz" \
-    --output interproscan-data-<interpro-version>.tar.gz
-tar -pxzf interproscan-data-<interpro-version>.tar.gz
-mv interproscan-data-<interpro-version>/data .
-rm interproscan-data-<interpro-version> -rf
-rm interproscan-data-<interpro-version>.tar.gz
-```
+Run the following commands within the `InterProScan` project directory to download and extract all the required data files:
 
-Running these commands within the `InterProScan` project directory should download and store all 
-InterPro entry (XREF) and member database data in the `data` directory.
+```bash
+curl -OJ https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/102.0/interproscan-data-102.0.tar.gz
+tar -pxzf interproscan-data-102.0.tar.gz
+mv interproscan-data-102.0 data
+```
 
 > [!IMPORTANT]
 > By default `InterProScan` will look for a `data` directory in the `InterProScan` project dir. 
@@ -92,7 +85,7 @@ The base image includes all non-licensed dependencies including
 
 Using `Docker`:
 ```bash
-docker pull interproscan6:latest
+docker pull interpro/interproscan6:latest
 ```
 
 Using `Singularity`:
@@ -112,7 +105,7 @@ apptainer pull interproscan6.sif docker://interpro/interproscan6:latest
 
 3. **(Optional) Install licensed software**
 
-By default `MobiDB`, `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
+By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
 because they contain licensed components. In order to activate these analyses 
 please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
 
@@ -121,17 +114,12 @@ please see the ['Installing licensed applications'](#installing-licensed-applica
 1. **Download InterPro data file.**
 
 ```bash
-# replace interpro-version with the appropriate version number
-INTERPRO_VERSION="102.0"
-curl "https://ftp.ebi.ac.uk/pub/databases/interpro/iprscan/6/$INTERPRO_VERSION/interproscan-data-$INTERPRO_VERSION.tar.gz" \
-    --output interproscan-data-<interpro-version>.tar.gz
-tar -pxzf interproscan-data-<interpro-version>.tar.gz
-mv interproscan-data-<interpro-version>/data .
-rm interproscan-data-<interpro-version> -rf
-rm interproscan-data-<interpro-version>.tar.gz
+curl -OJ https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/102.0/interproscan-data-102.0.tar.gz
+tar -pxzf interproscan-data-102.0.tar.gz
+mv interproscan-data-102.0 data
 ```
 
-2. **Build the Docker image.** (This includes the idrpred tool for MobiDB predictions). Run this command from the root of this repository.
+2. **Build the Docker image.** Run this command from the root of this repository.
 
 ```bash
 docker build -t interproscan6 .
@@ -139,7 +127,7 @@ docker build -t interproscan6 .
 
 3. **(Optional) Install licensed software**
 
-By default `MobiDB`, `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
+By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
 because they contain licensed components. In order to activate these analyses 
 please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
 
@@ -166,7 +154,7 @@ singularity build interproscan6.sif docker-daemon://interproscan6:latest
 `InterProScan6` is configured via the command-line. The only mandatory arguments are the runtime profiles (`-profiles`) and input FASTA file (`--input`).
 
 ```bash
-nextflow run interproscan.nf \
+nextflow run ebi-pf-team/interproscan6 \
   -profile <container runtime, and executor> \
   --input <path to fasta file>
 ```
@@ -196,7 +184,7 @@ For `InterProScan6` to run, a profile for the container runtime and a profile fo
 For example, to run `InterProScan` a cluster with the SLURM scheduler and Singularity:
 
 ```bash
-nextflow run interproscan.nf \
+nextflow run ebi-pf-team/interproscan6 \
   -profile slurm,singularity \
   --input <path to fasta file> 
 ```
@@ -205,7 +193,7 @@ Nextflow also supports using Charliecloud, Podman, Sarus, and Shifter. However y
 
 ## Optional arguments
 
-**`--applications`** - Applications/member databases to run. By default `InterProScan` runs all member databases in the consortium ([except Mobidb-Lite due to licensing reasons](#mobidb)). Use the `--applications` to define a comma separate list of applications names (case insensitive).
+**`--applications`** - Applications/member databases to run. By default `InterProScan` runs all member databases in the consortium. Use the `--applications` to define a comma separate list of applications names (case insensitive).
 
 **`--datadir`** - Path to the data directory. By default `InterProScan` looks for a `data` directory 
 in the `InterProScan` project directory.
@@ -228,7 +216,7 @@ in the `InterProScan` project directory.
 For example, to run `InterProScan6` using only AntiFam and SFLD, without checking for pre-calculated matches in InterPro (using an example input file), with writing the results to the directory `results`, writing the results to a JSON and XML file and including GO term and Pathway annotation data in the final results, while using Docker on a local system:
 
 ```bash
-nextflow run interproscan.nf \
+nextflow run ebi-pf-team/interproscan6 \
   -profile docker,local \
   --input files_test/best_to_test.fasta \
   --applications signalp,antifam \
@@ -250,7 +238,7 @@ Below is a list of the applications (built in and those that require additional 
   * [Cath-Gene3D]( https://www.cathdb.info/) (use as 'Gene3D' to run Cath-Gene3D in `InterProScan`)
   * [CDD](https://www.ncbi.nlm.nih.gov/cdd)
   * [HAMAP](https://hamap.expasy.org/)
-  * [MobiDB Lite](http://old.protein.bio.unipd.it/mobidblite/)
+  * [MobiDB-lite](http://old.protein.bio.unipd.it/mobidblite/)
   * [NCBIfam](https://www.ncbi.nlm.nih.gov/genome/annotation_prok/evidence/)
   * [PANTHER](http://www.pantherdb.org/)
   * [Pfam](https://pfam.xfam.org/)
@@ -283,7 +271,7 @@ The `easel` application itself and all of its dependencies are integrated in Int
 
 **To run anlyses with nucleic acid sequences, run `InterProScan6` with the `--nucleic` flag**
 
-    nextflow run interproscan.nf \
+    nextflow run ebi-pf-team/interproscan6 \
         --input <path to fasta file> \
         -profile <executor,container runtime> \
         --nucleic
@@ -596,9 +584,9 @@ The envelope represents the region of a protein sequence where the domain may be
 
 **Panther exception:** The output from HMMER3 against the HMM models of Panther is post-processed to select only the best homologous family. Therefore, there is a maximum of one domain hit for each Panther signature in a protein sequence. Owing to this the E-value and Score and listed under the `signature` key, not the `locations` key.
 
-# Installing licensed applications (`MobiDB`, `Phobius`, `SignalP`, `TMHMM`)
+# Installing licensed applications (`Phobius`, `SignalP`, `TMHMM`)
 
-By default `MobiDB`, `Phobius`, `SignalP`, and `DeepTMHMM` member database analyses are deactivated in `InterProScan6` because they contain licensed components. In order to activate these analyses please obtain the relevant licenses and files from the provider (ensuring the software version numbers are the same as those supported by your current `InterProScan6` installation).
+By default `Phobius`, `SignalP`, and `DeepTMHMM` member database analyses are deactivated in `InterProScan6` because they contain licensed components. In order to activate these analyses please obtain the relevant licenses and files from the provider (ensuring the software version numbers are the same as those supported by your current `InterProScan6` installation).
 
 Files can be placed in any location.
 
@@ -611,30 +599,6 @@ Files can be placed in any location.
 ## DeepTMHMM
 
 Coming soon...
-
-## MobiDB-Lite
-
-Some of the compoments within `MobiDBLite` are GPL-licensed, meaning all software and data, and thus 
-work that uses this software, also needs to be GPL-licensed. This may not be ideal or suitable
-for all users. Therefore, we provide a version of the `MobiDBLite` analytical software that 
-is not GPL-licensed, called [`idrpred`](https://github.com/matthiasblum/idrpred).
-
-To setup `MobiDB`/`idrpred` for `InterProScan6` pull the `idrpred` Docker image from Docker hub using your container runtime of choice.
-
-Using docker:
-```bash
-docker pull idrpred:latest
-```
-
-Using `Singularity`:
-```bash
-singularity pull idrpred.sif docker://matblum/idrpred/idrpred:latest
-```
-
-Using `Apptainer`:
-```bash
-apptainer pull idrpred.sif docker://matblum/idrpred/idrpred:latest
-```
 
 ## `Phobius`
 
@@ -730,14 +694,14 @@ singularity build signalp6.sif docker-archive://signalp6.tar
 Include `signalp` or `signalp_euk` in the list of applications defined using the `--applications` flag.
 
 ```bash
-nextflow run interproscan.nf \
+nextflow run ebi-pf-team/interproscan6 \
     --input utilities/test_files/best_to_test.fasta \
     --applications signalp \
     -profile local,docker
 ```
 
 ```bash
-nextflow run interproscan.nf \
+nextflow run ebi-pf-team/interproscan6 \
     --input utilities/test_files/best_to_test.fasta \
     --applications signalp_euk \
     -profile local,docker
@@ -759,7 +723,7 @@ You may need to install the other models mannually, please see the [SignalP docu
 For example, to run `InterProScan` with the input file `best_to_test.fasta`, using SignalP with only eukaryotic models in slow mode, and with retrieving precalculated matches disabled on a local machine using docker:
 
 ```bash
-nextflow run interproscan.nf \
+nextflow run ebi-pf-team/interproscan6 \
   --input utilities/test_files/best_to_test.fasta \
   --applications signalp_euk \
   --disable_precalc \
@@ -798,12 +762,44 @@ To run `SignalP` with GPU acceleration with `InterProScan6` use the flag `--sign
 For example, to run ``InterProScan`` with only ``SignalP`` enabled, using GPU acceleration on a SLURM cluster with Singularity support:
 
 ```bash
-nextflow run interproscan.nf \\
-  --input <fasta file> \\
-  --applications signalp \\
-  --signalp_gpu \\
+nextflow run ebi-pf-team/interproscan6 \
+  --input <fasta file> \
+  --applications signalp \
+  --signalp_gpu \
   -profile singularity,slurm
 ```
+
+# Benchmarking and trouble shooting the performance
+
+Nextflow provides some built in options for assessing the operation of `IPS6`, including generating a HTML report. However, these reports are limited to presenting the resource usage from only a single run, and can only be generated if a run is successful. Consequently, we have packaged a simple benchmarking script into IPS6 to enable assessing the task duration and resource usage across multiple runs, and customised grouping of the data. For example, you may wish to clearly see differences in performance with altering the batch size, the number of CPUs or amount of memory allocated. 
+
+You can find the complete details for benchmarking and assessing the performance of `IPS6` in `./benchmarking/README.md`.
+
+In brief:
+
+1. Install all necessary third party packages listed in `benchmarking/requirements.txt`.
+2. Build a trace file as part of your InterProScan runs.
+3. Update or create the benchmarking JSON config file
+4. Run the benchmarking
+
+```bash
+# running from the root of the IPS6 project dir
+# and using the benchmarking/tracefiles.json file
+python3 benchmarking/benchmark_ips6.py benchmarking/tracefiles.json
+```
+
+## Output:
+
+Each run of `benchmark_ips6.py` will produce the following figures (note, references to 'group' refers to the keys in the input JSON file, each key represents a different 'group'):
+
+1. `total_runtime.*` - Shows the total run time of IPS6 per group in the input JSON file
+2. `process_runtime.*` - Shows the total run time per process in IPS6
+3. `process_runtime_piechart.*` - Shows the percentage of the total runtime contributed by each process
+4. `pie_chart_values.csv` - Contains the data used to build the `process_runtime_piechart.*` figure. If many processes are included the legends in the pie chart can often overlap. Use this CSV file to plot the pie chart (or alternative chart).
+5. `overall_memory_usage.*` - Plots the overall memory usage per group in the input JSON file
+6. `overall_max_memory_usage.*` - Plots the overall maximum memory used per group in the input JSON file
+7. `memory_per_process.*` - Plots the memory usage per process (and per group if multiple groups are defined in the input JSON file)
+8. `max_memory_per_process.*` - Plots the maximum memory usage per process (and per group if multiple groups are defined in the input JSON file)
 
 # Citation
 
@@ -837,7 +833,7 @@ Caused by:
 Try running Nextflow with root privileges:
 
 ```bash
-sudo nextflow run interproscan.nf --input <path to fasta file> 
+sudo nextflow run ebi-pf-team/interproscan6 --input <path to fasta file> 
 ```
 
 Also try providing root privileges to docker within Nextflow, by changing the the `runOptions` key in `nextflow.config`:

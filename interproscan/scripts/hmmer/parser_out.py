@@ -189,8 +189,8 @@ def get_domain_match(match: re.Match, member_db: str, qlen: str) -> dict:
     domain_match["hmmBounds"] = hmm_bound_pattern[match.group(8)]
     domain_match["evalue"] = float(match.group(5))  # Independent e-value
     domain_match["score"] = float(match.group(2))   # bit score
-    domain_match["envelopeStart"] = match.group(11)    # env coord from
-    domain_match["envelopeEnd"] = match.group(12)  # env coord to
+    domain_match["envelopeStart"] = int(match.group(11))
+    domain_match["envelopeEnd"] = int(match.group(12))
 
     return domain_match
 

@@ -56,9 +56,9 @@ include {
     SUPERFAMILY_FILTER_MATCHES;
 } from "$projectDir/interproscan/modules/hmmer/filter/main"
 include {
-    MOBIDB_RUNNER;
-    MOBIDB_PARSER;
-} from "$projectDir/interproscan/modules/members/mobidb/main"
+    MOBIDBLITE_RUNNER;
+    MOBIDBLITE_PARSER;
+} from "$projectDir/interproscan/modules/members/mobidblite/main"
 include {
     PHOBIUS_RUNNER;
     PHOBIUS_PARSER;
@@ -93,6 +93,8 @@ workflow SEQUENCE_ANALYSIS {
     main:
     boolean gene3d_funfam_processed = false
     // To prevent duplication if Gene3D and Funfam are called
+    boolean is_test = false 
+    // used for unit testing until nf-test allows mocking
 
     // Divide members up into their respective analysis pipelines/methods
     Channel.from(applications.split(','))
@@ -206,19 +208,19 @@ workflow SEQUENCE_ANALYSIS {
             ]
 
         superfamily: member == 'superfamily'
-        return [
-            "${member}",
-            "${dataDir}/${params.members."${member}".hmm}",
-            params.members."${member}".switches,
-            [
-                "${params.members."${member}".postprocess.bin}",
-                "${dataDir}/${params.members."${member}".postprocess.self_hits}",
-                "${dataDir}/${params.members."${member}".postprocess.cla}",
-                "${dataDir}/${params.members."${member}".postprocess.model}",
-                "${dataDir}/${params.members."${member}".postprocess.pdbj95d}",
-                params.members."${member}".postprocess.ass3_switches,
+            return [
+                "${member}",
+                "${dataDir}/${params.members."${member}".hmm}",
+                params.members."${member}".switches,
+                [
+                    "${params.members."${member}".postprocess.bin}",
+                    "${dataDir}/${params.members."${member}".postprocess.self_hits}",
+                    "${dataDir}/${params.members."${member}".postprocess.cla}",
+                    "${dataDir}/${params.members."${member}".postprocess.model}",
+                    "${dataDir}/${params.members."${member}".postprocess.pdbj95d}",
+                    params.members."${member}".postprocess.ass3_switches,
+                ]
             ]
-        ]
 
         // uses HMMER2, has a slightly different set up
         smart: member == 'smart'
@@ -245,11 +247,8 @@ workflow SEQUENCE_ANALYSIS {
                 params.members."${member}".switches
             ]
 
-        mobidb: member == "mobidb"
-            return [
-                params.members."${member}".switches,
-                params.members."${member}".release
-            ]
+        mobidb_lite: member == "mobidb_lite"
+            return []
 
         phobius: member == "phobius"
             return []
@@ -300,32 +299,34 @@ workflow SEQUENCE_ANALYSIS {
 
     // AntiFam
     runner_antifam_params = fasta.combine(member_params.antifam)
-    ANTIFAM_HMMER_RUNNER(runner_antifam_params)
+    ANTIFAM_HMMER_RUNNER(runner_antifam_params, is_test)
     ANTIFAM_HMMER_PARSER(
-        ANTIFAM_HMMER_RUNNER.out[0],  // hmmer.out path
-        ANTIFAM_HMMER_RUNNER.out[2]   // member db
+        ANTIFAM_HMMER_RUNNER.out[0],       // hmmer.out path
+        ANTIFAM_HMMER_RUNNER.out[2]        // member db
     )
 
     // Cath-Gene3D (+ cath-resolve-hits + assing-cath-superfamilies)
     // These also run for FunFam as Gene3D must be run before FunFam
     runner_gene3d_params = fasta.combine(member_params.gene3d_funfam)
-    GENE3D_HMMER_RUNNER(runner_gene3d_params)
+    GENE3D_HMMER_RUNNER(runner_gene3d_params, is_test)
     GENE3D_HMMER_PARSER(
-        GENE3D_HMMER_RUNNER.out[0],  // hmmer.out path
-        GENE3D_HMMER_RUNNER.out[2]   // member db
+        GENE3D_HMMER_RUNNER.out[0],        // hmmer.out path
+        GENE3D_HMMER_RUNNER.out[2]         // member db
     )
     GENE3D_CATH_RESOLVE_HITS(
-        GENE3D_HMMER_RUNNER.out[0], // hmmer.out path
-        GENE3D_HMMER_RUNNER.out[1]  // post-processing-params
+        GENE3D_HMMER_RUNNER.out[0],        // hmmer.out path
+        GENE3D_HMMER_RUNNER.out[1],        // post-processing-params
+        is_test                            // bool to skip 3rd party script when unit testing
     )
     GENE3D_ADD_CATH_SUPERFAMILIES(
-        GENE3D_CATH_RESOLVE_HITS.out, // cath-resolve-hits out file
-        GENE3D_HMMER_RUNNER.out[1]    // post-processing-params
+        GENE3D_CATH_RESOLVE_HITS.out,      // cath-resolve-hits out file
+        GENE3D_HMMER_RUNNER.out[1],        // post-processing-params
+        is_test                            // bool to skip 3rd party script when unit testing
     )
     GENE3D_FILTER_MATCHES(
-        GENE3D_ADD_CATH_SUPERFAMILIES.out,  // add-superfams out file
-        GENE3D_HMMER_PARSER.out,            // ips6 json
-        GENE3D_HMMER_RUNNER.out[1]          // post-processing-params
+        GENE3D_ADD_CATH_SUPERFAMILIES.out, // add-superfams out file
+        GENE3D_HMMER_PARSER.out,           // ips6 json
+        GENE3D_HMMER_RUNNER.out[1]         // post-processing-params
     )
     // Gene3D filter matches out puts (0) ips6 json; (1) cath superfamilies txt file
 
@@ -335,25 +336,26 @@ workflow SEQUENCE_ANALYSIS {
     FUNFAM_HMMER_RUNNER(
         runner_funfam_params,              // hmmer runner input tuple
         GENE3D_FILTER_MATCHES.out[1],      // cath_superfamilies txt file
-        applications                       // str listing selected applications
+        applications,                      // str listing selected applications
+        is_test                            // bool for if this workflow/process is running in a unit test
     )
     FUNFAM_HMMER_PARSER(
-        FUNFAM_HMMER_RUNNER.out[0],  // hmmer.out pathS - one per cath gene3d superfam
-        FUNFAM_HMMER_RUNNER.out[2]   // member db
+        FUNFAM_HMMER_RUNNER.out[0],        // hmmer.out pathS - one per cath gene3d superfam
+        FUNFAM_HMMER_RUNNER.out[2]         // member db
     )
     FUNFAM_CATH_RESOLVE_HITS(
-        FUNFAM_HMMER_RUNNER.out[0], // hmmer.out path
-        FUNFAM_HMMER_RUNNER.out[1]  // post-processing-params
+        FUNFAM_HMMER_RUNNER.out[0],        // hmmer.out path
+        FUNFAM_HMMER_RUNNER.out[1],        // post-processing-params
+        is_test                            // bool for if this workflow/process is running in a unit test
     )
     FUNFAM_FILTER_MATCHES(
         FUNFAM_HMMER_PARSER.out,           // add-superfams out file
-        FUNFAM_CATH_RESOLVE_HITS.out,      // ips6 json
-        FUNFAM_HMMER_RUNNER.out[1]         // post-processing-params
+        FUNFAM_CATH_RESOLVE_HITS.out       // ips6 json
     )
 
     // HAMAP (+ pfsearch_wrapper.py)
     runner_hamap_params = fasta.combine(member_params.hamap)
-    HAMAP_HMMER_RUNNER(runner_hamap_params)
+    HAMAP_HMMER_RUNNER(runner_hamap_params, is_test)
     HAMAP_HMMER_PARSER(
         HAMAP_HMMER_RUNNER.out[0],  // hmmer.out path
         HAMAP_HMMER_RUNNER.out[2]   // member db
@@ -362,6 +364,7 @@ workflow SEQUENCE_ANALYSIS {
         HAMAP_HMMER_RUNNER.out[1],  // post-processing-params
         HAMAP_HMMER_RUNNER.out[3],  // path to fasta file
         HAMAP_HMMER_RUNNER.out[4],  // hmmer .tbl file path
+        is_test                     // bool to skip 3rd script when unit testing
     )
     HAMAP_FILTER_MATCHES(
         HAMAP_HMMER_PARSER.out,     // internal IPS6 JSON
@@ -370,7 +373,7 @@ workflow SEQUENCE_ANALYSIS {
 
     // NCBIfam
     runner_hmmer_ncbifam_params = fasta.combine(member_params.ncbifam)
-    NCBIFAM_HMMER_RUNNER(runner_hmmer_ncbifam_params)
+    NCBIFAM_HMMER_RUNNER(runner_hmmer_ncbifam_params, is_test)
     NCBIFAM_HMMER_PARSER(
         NCBIFAM_HMMER_RUNNER.out[0],  // hmmer.out path
         NCBIFAM_HMMER_RUNNER.out[2]   // member db
@@ -378,7 +381,7 @@ workflow SEQUENCE_ANALYSIS {
 
     // Panther (+ treegrafter + epa-ng)
     runner_panther_params = fasta.combine(member_params.panther)
-    PANTHER_HMMER_RUNNER(runner_panther_params)
+    PANTHER_HMMER_RUNNER(runner_panther_params, is_test)
     PANTHER_HMMER_PARSER(
         PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
         PANTHER_HMMER_RUNNER.out[2]   // member db
@@ -386,7 +389,8 @@ workflow SEQUENCE_ANALYSIS {
     PANTHER_POST_PROCESSER(
         PANTHER_HMMER_RUNNER.out[0],  // hmmer.out path
         PANTHER_HMMER_RUNNER.out[1],  // post-processing-params
-        fasta
+        fasta,                        // input seqs
+        is_test                       // bool, used to skip 3rd-party post-processing during unit test
     )
     PANTHER_FILTER_MATCHES(
         PANTHER_HMMER_PARSER.out,     // internal ips6 json
@@ -395,7 +399,7 @@ workflow SEQUENCE_ANALYSIS {
 
     // Pfam
     runner_hmmer_pfam_params = fasta.combine(member_params.pfam)
-    PFAM_HMMER_RUNNER(runner_hmmer_pfam_params)
+    PFAM_HMMER_RUNNER(runner_hmmer_pfam_params, is_test)
     PFAM_HMMER_PARSER(
         PFAM_HMMER_RUNNER.out[0],  // hmmer.out path
         PFAM_HMMER_RUNNER.out[2]   // member db
@@ -413,7 +417,7 @@ workflow SEQUENCE_ANALYSIS {
 
     // PIRSR
     runner_pirsr_params = fasta.combine(member_params.pirsr)
-    PIRSR_HMMER_RUNNER(runner_pirsr_params)
+    PIRSR_HMMER_RUNNER(runner_pirsr_params, is_test)
     PIRSR_HMMER_PARSER(
         PIRSR_HMMER_RUNNER.out[0],  // out file
         PIRSR_HMMER_RUNNER.out[2]   // member db
@@ -425,32 +429,35 @@ workflow SEQUENCE_ANALYSIS {
 
     // SFLD (+ post-processing binary to add sites and filter hits)
     runner_sfld_params = fasta.combine(member_params.sfld)
-    SFLD_HMMER_RUNNER(runner_sfld_params)
+    SFLD_HMMER_RUNNER(runner_sfld_params, is_test)
     SFLD_HMMER_PARSER(
         SFLD_HMMER_RUNNER.out[0],  // hmmer.out path
         SFLD_HMMER_RUNNER.out[2]   // member db
     )
-    SFLD_POST_PROCESSER(SFLD_HMMER_RUNNER.out)   // hmmer.out, post-process params, member db, alignment, dtbl file
+    SFLD_POST_PROCESSER(
+        SFLD_HMMER_RUNNER.out,     // hmmer.out, post-process params, member db, alignment, dtbl file
+        is_test                    // bool used to skip post-processing when unit test
+    )  // change to run the post-processing when no-longer written in C
     SFLD_FILTER_MATCHES(SFLD_HMMER_PARSER.out, SFLD_POST_PROCESSER.out)
 
     // SMART (HMMER2:hmmpfam + kinase filter)
     runner_smart_params = fasta.combine(member_params.smart)
-    SMART_HMMER2_RUNNER(runner_smart_params)
+    SMART_HMMER2_RUNNER(runner_smart_params, is_test)
     HMMER2_PARSER(SMART_HMMER2_RUNNER.out)
     SMART_FILTER_MATCHES(HMMER2_PARSER.out)
 
     // Superfamily
     runner_hmmer_superfamily_params = fasta.combine(member_params.superfamily)
-    SUPERFAMILY_HMMER_RUNNER(runner_hmmer_superfamily_params)
+    SUPERFAMILY_HMMER_RUNNER(runner_hmmer_superfamily_params, is_test)
     SUPERFAMILY_POST_PROCESSER(
         SUPERFAMILY_HMMER_RUNNER.out[0],  // hmmer.out path
         SUPERFAMILY_HMMER_RUNNER.out[1],  // post-processing-params
         SUPERFAMILY_HMMER_RUNNER.out[3],  // fasta path
+        is_test                           // bool used to skip pl script when unit testing
     )
     SUPERFAMILY_FILTER_MATCHES(
         SUPERFAMILY_POST_PROCESSER.out,
         SUPERFAMILY_HMMER_RUNNER.out[4],  // hmm path
-        SUPERFAMILY_HMMER_RUNNER.out[2]   // member db
     )
 
     /*
@@ -467,10 +474,10 @@ workflow SEQUENCE_ANALYSIS {
     COILS_RUNNER(runner_coils_params)
     COILS_PARSER(COILS_RUNNER.out)
 
-    // MOBIDB
-    runner_mobidb_params = fasta.combine(member_params.mobidb)
-    MOBIDB_RUNNER(runner_mobidb_params)
-    MOBIDB_PARSER(MOBIDB_RUNNER.out)
+    // MobiDB-lite
+    runner_mobidblite_params = fasta.combine(member_params.mobidb_lite)
+    MOBIDBLITE_RUNNER(runner_mobidblite_params)
+    MOBIDBLITE_PARSER(MOBIDBLITE_RUNNER.out)
 
     // PHOBIUS
     runner_phobius_params = fasta.combine(member_params.phobius)
@@ -519,7 +526,7 @@ workflow SEQUENCE_ANALYSIS {
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
             COILS_PARSER.out,
-            MOBIDB_PARSER.out,
+            MOBIDBLITE_PARSER.out,
             PHOBIUS_PARSER.out,
             PRINTS_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,
@@ -543,7 +550,7 @@ workflow SEQUENCE_ANALYSIS {
             SMART_FILTER_MATCHES.out,
             CDD_PARSER.out,
             COILS_PARSER.out,
-            MOBIDB_PARSER.out,
+            MOBIDBLITE_PARSER.out,
             PHOBIUS_PARSER.out,
             PRINTS_PARSER.out,
             PROSITE_PATTERNS_PARSER.out,

@@ -5,8 +5,7 @@ nextflow_function {
     script "interproscan/subworkflows/pre_checks/main.nf"
 
     stage {
-        symlink "interproscan/scripts/pre_checks/check_nucleic_seq.py"
-        symlink "interproscan/modules/pre_checks/main.nf"
+        symlink "interproscan/subworkflows/pre_checks/check_sequences.nf"
         symlink "interproscan/subworkflows/sequence_analysis/check_data.nf"
         symlink "interproscan/subworkflows/xrefs/check_xref_data.nf"
     }

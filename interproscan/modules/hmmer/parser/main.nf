@@ -42,7 +42,10 @@ process FUNFAM_HMMER_PARSER {
     do
         base_name=\$(basename \$hmmer_file .out)
 
-        python3 $projectDir/interproscan/scripts/hmmer/parser_out.py \$hmmer_file ${member} hmmer_parsed_\${base_name}.json
+        python3 $projectDir/interproscan/scripts/hmmer/parser_out.py \\
+            \$hmmer_file \\
+            ${member} \\
+            hmmer_parsed_\${base_name}.json
     done
     """
 }

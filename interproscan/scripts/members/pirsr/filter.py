@@ -78,8 +78,8 @@ def matches2rules(matches_path: str, rules_hash: dict) -> dict:
 
                 if rule_sites:
                     domHit = {
-                        'score': location["score"],
-                        'evalue': location["evalue"],
+                        'score': float(location["score"]),
+                        'evalue': float(location["evalue"]),
                         'hmmStart': hmm_from,
                         'hmmEnd': hmm_to,
                         'hmmAlign': hmm_align,
@@ -88,13 +88,13 @@ def matches2rules(matches_path: str, rules_hash: dict) -> dict:
                         'alignment': seq_align,
                         'sites': rule_sites,
                         "hmmLength": location["hmmLength"],
-                        "envelopeStart": location["envelopeStart"],
-                        "envelopeEnd": location["envelopeEnd"]
+                        "envelopeStart": int(location["envelopeStart"]),
+                        "envelopeEnd": int(location["envelopeEnd"])
                     }
                     domHits.append(domHit)
             domain["locations"] = domHits
-            domain["score"] = sorted_locations[0]["score"]
-            domain["evalue"] = sorted_locations[0]["evalue"]
+            domain["score"] = float(sorted_locations[0]["score"])
+            domain["evalue"] = float(sorted_locations[0]["evalue"])
 
     return matches_info
 
