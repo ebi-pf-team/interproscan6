@@ -1,34 +1,49 @@
-include { ENTRIES } from "$projectDir/interproscan/modules/xrefs/entries/main"
-include { GOTERMS } from "$projectDir/interproscan/modules/xrefs/goterms/main"
-include { PAINT_ANNOTATIONS } from "$projectDir/interproscan/modules/xrefs/paint_annotations/main"
-include { PATHWAYS } from "$projectDir/interproscan/modules/xrefs/pathways/main"
+import groovy.json.JsonSlurper
+
+include { ENTRIES } from "../../modules/xrefs/entries"
+include { GOTERMS } from "../../modules/xrefs/goterms"
+include { PAINT_ANNOTATIONS } from "../../modules/xrefs/paint_annotations"
+include { PATHWAYS } from "../../modules/xrefs/pathways"
+include { AGGREGATE_RESULTS } from "../../modules/xrefs/aggregate_results"
 
 workflow XREFS {
     take:
     matches
-    applications
-    dataDir
+    apps
+    data_dir
 
     main:
-    ENTRIES(matches, "${dataDir}/${params.xrefs.entries}")
+    def entriesPath = "${data_dir}/${params.xrefs.entries}"
+    File entriesJson = new File(entriesPath.toString())
+    ENTRIES(matches, entriesJson)
 
-    final_result = ENTRIES.out
+    matches_paint = Channel.empty()
+    matchesGoObj = Channel.empty()
+    matchesPaObj = Channel.empty()
 
-    if ("${applications}".contains('panther')) {
-        PAINT_ANNOTATIONS(final_result, "${dataDir}/${params.members."panther".postprocess.paint_annotations}")
-        final_result = PAINT_ANNOTATIONS.out
+    if ("${apps}".contains('panther')) {
+        def paint_anno_dir = "${data_dir}/${params.members."panther".postprocess.paint_annotations}"
+        matches_paint = PAINT_ANNOTATIONS(paint_anno_dir, ENTRIES.out)
     }
 
     if (params.goterms) {
-        GOTERMS(final_result, "${dataDir}/${params.xrefs.goterms}")
-        final_result = GOTERMS.out
+        def ipr2goPath = "${data_dir}/${params.xrefs.goterms}.ipr.json"
+        def goInfoPath = "${data_dir}/${params.xrefs.goterms}.json"
+        File ipr2goJson = new File(ipr2goPath.toString())
+        File goInfoJson = new File(goInfoPath.toString())
+        matchesGoObj = GOTERMS(ipr2goJson, goInfoJson, ENTRIES.out)
     }
 
     if (params.pathways) {
-        PATHWAYS(final_result, "${dataDir}/${params.xrefs.pathways}")
-        final_result = PATHWAYS.out
+        def ipr2paPath = "${data_dir}/${params.xrefs.pathways}.ipr.json"
+        def paInfoPath = "${data_dir}/${params.xrefs.pathways}.json"
+        File ipr2paJson = new File(ipr2paPath.toString())
+        File paInfoJson = new File(paInfoPath.toString())
+        matchesPaObj = PATHWAYS(ipr2paJson, paInfoJson, ENTRIES.out)
     }
 
+    AGGREGATE_RESULTS(ENTRIES.out, matches_paint, matchesGoObj, matchesPaObj)
+
     emit:
-    final_result
+    AGGREGATE_RESULTS.out
 }

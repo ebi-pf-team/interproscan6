@@ -7,6 +7,7 @@ class Match implements Serializable {
     Signature signature = null
     List<Location> locations = []
     boolean included = true  // for HMMER3 matches (inclusion threshold)
+    Tuple representativeFlag = null
 
     // PANTHER
     TreeGrafter treegrafter = null
@@ -75,9 +76,9 @@ class Signature implements Serializable {
         this.accession = accession
     }
 
-    Signature(String accession, 
-              String name, 
-              String description, 
+    Signature(String accession,
+              String name,
+              String description,
               SignatureLibraryRelease library,
               Entry entry) {
         this.accession = accession
@@ -164,10 +165,10 @@ class Location implements Serializable {
     // cigarAlignment
     // motifNumber
 
-    Location(int start, 
-             int end, 
+    Location(int start,
+             int end,
              Integer hmmStart = null,
-             Integer hmmEnd = null, 
+             Integer hmmEnd = null,
              Integer hmmLength = null,
              String hmmBounds = null,
              Integer envelopeStart = null,
@@ -190,10 +191,10 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-    Location(int start, 
-             int end, 
+    Location(int start,
+             int end,
              Integer hmmStart,
-             Integer hmmEnd, 
+             Integer hmmEnd,
              Integer hmmLength,
              String hmmBounds,
              Integer envelopeStart,
@@ -301,7 +302,7 @@ class Site implements Serializable {
     }
 
     Site(String description, String residues) {
-        this(description, Site.getSiteLocationsFromString(residues))        
+        this(description, Site.getSiteLocationsFromString(residues))
     }
 
     private static List<SiteLocation> getSiteLocationsFromString(String residues) {
