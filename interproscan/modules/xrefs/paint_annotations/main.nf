@@ -7,30 +7,33 @@ process PAINT_ANNOTATIONS {
     // Retrieve PAINT annotations for Panther hits
     // calculated and pre-calc becuase they are not retrieved from the Match Lookup
     input:
-    val paint_anno_dir
-    val ch_matches2xrefs
+    val paintAnnoJson
+    tuple val(meta), val(membersMatches)
 
     output:
-    path matches_paintanno
+    tuple val(meta), path("paint_annotation.json")
 
     exec:
-    def outputFilePath = task.workDir.resolve("matches_paintanno.json")
-    def matches_annot = [:]
-    matches_annot = ch_matches2xrefs.collectEntries { seq_id, match_info ->
-        match_info.each { sig_acc, data ->
-            if (data["member_db"].toUpperCase() == "PANTHER") {
-                def anno_path = "${paint_anno_dir}/${sig_acc}.json"
-                def paint_annotation_file = new File(anno_path)
-                if (paint_annotation_file.exists()) {
-                    def paint_annotations_content = new JsonSlurper().parse(paint_annotation_file)
-                    def node_data = paint_annotations_content[data["node_id"]]
-                    data["proteinClass"] = node_data[2]
-                    data["graftPoint"] = node_data[3]
+    JsonSlurper jsonSlurper = new JsonSlurper()
+    def paintAnnDir = jsonSlurper.parse(paintAnnoJson)
+    def matches = jsonSlurper.parse(membersMatches).collectEntries { seqId, jsonMatches ->
+        [(seqId): jsonMatches.collectEntries { matchId, jsonMatch ->
+            def matchObject = Match.fromMap(jsonMatch)
+            if (data.signatureLibraryRelease.library == "panther") {
+                def sigAcc = data.signature.accession
+                def paintAnnPath = "${paintAnnDir}/${sigAcc}.json"
+                def paintAnnotationFile = new File(paintAnnPath)
+                if (paintAnnotationFile.exists()) {
+                    def paintAnnotationsContent = jsonSlurper.parse(paintAnnotationFile)
+                    nodeId = matchObject.treegrafter.ancestralNodeID
+                    def nodeData = paintAnnotationsContent[nodeId]
+                    proteinClass = nodeData[2]
+                    graftPoint = nodeData[3]
                 }
             }
         }
-        return [(seq_id): match_info]
     }
-    def json = JsonOutput.toJson(matches_annot)
+    def outputFilePath = task.workDir.resolve("paint_annotation.json")
+    def json = JsonOutput.toJson(matches)
     new File(outputFilePath.toString()).write(json)
 }

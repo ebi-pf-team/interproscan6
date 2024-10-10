@@ -3,6 +3,8 @@ import groovy.json.JsonSlurper
 import com.fasterxml.jackson.databind.ObjectMapper
 
 process ENTRIES {
+    label 'xref'
+
     input:
     tuple val(meta), val(membersMatches)
     val entriesJson

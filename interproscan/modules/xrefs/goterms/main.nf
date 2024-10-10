@@ -22,13 +22,11 @@ process GOTERMS {
     JsonSlurper jsonSlurper = new JsonSlurper()
     def ipr2go = jsonSlurper.parse(ipr2goJson)
     def goInfo = jsonSlurper.parse(goInfoJson)
-    matches = jsonSlurper.parse(membersMatches).collectEntries { seqId, jsonMatches ->
+    def matches = jsonSlurper.parse(membersMatches).collectEntries { seqId, jsonMatches ->
         [(seqId): jsonMatches.collectEntries { matchId, jsonMatch ->
             def matchObject = Match.fromMap(jsonMatch)
-            println "matchObject: ${matchObject.modelAccession}"
             if (matchObject.signature.entry) {
                 def interproKey = matchObject.signature.entry.accession
-                println "interproKey: ${interproKey}"
                 try {
                     def goIds = ipr2go[interproKey]
                     def goTerms = goIds.collect { goId ->

@@ -26,10 +26,8 @@ process PATHWAYS {
     def matches = jsonSlurper.parse(membersMatches).collectEntries { seqId, jsonMatches ->
         [(seqId): jsonMatches.collectEntries { matchId, jsonMatch ->
             def matchObject = Match.fromMap(jsonMatch)
-            println "matchObject: ${matchObject.modelAccession}"
             if (matchObject.signature.entry) {
                 def interproKey = matchObject.signature.entry.accession
-                println "interproKey: ${interproKey}"
                 try {
                     def paIds = ipr2pa[interproKey]
                     def paTerms = paIds.collect { paId ->

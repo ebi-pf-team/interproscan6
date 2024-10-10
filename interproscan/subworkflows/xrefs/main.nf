@@ -17,13 +17,14 @@ workflow XREFS {
     File entriesJson = new File(entriesPath.toString())
     ENTRIES(matches, entriesJson)
 
-    matches_paint = Channel.empty()
-    matchesGoObj = Channel.empty()
-    matchesPaObj = Channel.empty()
+    matchesPaintAnn = Channel.empty()
+    matchesGo = Channel.empty()
+    matchesPa = Channel.empty()
 
     if ("${apps}".contains('panther')) {
-        def paint_anno_dir = "${data_dir}/${params.members."panther".postprocess.paint_annotations}"
-        matches_paint = PAINT_ANNOTATIONS(paint_anno_dir, ENTRIES.out)
+        def paintAnnoPath = "${data_dir}/${params.members."panther".postprocess.paint_annotations}"
+        File paintAnnoJson = new File(paintAnnoPath.toString())
+        matchesPaintAnn = PAINT_ANNOTATIONS(paintAnnoJson, ENTRIES.out)
     }
 
     if (params.goterms) {
@@ -31,7 +32,7 @@ workflow XREFS {
         def goInfoPath = "${data_dir}/${params.xrefs.goterms}.json"
         File ipr2goJson = new File(ipr2goPath.toString())
         File goInfoJson = new File(goInfoPath.toString())
-        matchesGoObj = GOTERMS(ipr2goJson, goInfoJson, ENTRIES.out)
+        matchesGo = GOTERMS(ipr2goJson, goInfoJson, ENTRIES.out)
     }
 
     if (params.pathways) {
@@ -39,10 +40,15 @@ workflow XREFS {
         def paInfoPath = "${data_dir}/${params.xrefs.pathways}.json"
         File ipr2paJson = new File(ipr2paPath.toString())
         File paInfoJson = new File(paInfoPath.toString())
-        matchesPaObj = PATHWAYS(ipr2paJson, paInfoJson, ENTRIES.out)
+        matchesPa = PATHWAYS(ipr2paJson, paInfoJson, ENTRIES.out)
     }
 
-    AGGREGATE_RESULTS(ENTRIES.out, matches_paint, matchesGoObj, matchesPaObj)
+    AGGREGATE_RESULTS(
+        ENTRIES.out,
+        matchesPaintAnn,
+        matchesGo,
+        matchesPa
+    )
 
     emit:
     AGGREGATE_RESULTS.out
