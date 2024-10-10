@@ -29,7 +29,7 @@ process PARSE_SIGNALP {
     val threshold
 
     output:
-    path "signalp.json"
+    tuple val(meta), path("signalp.json")
 
     exec:
     def outputFilePath = task.workDir.resolve("signalp.json")

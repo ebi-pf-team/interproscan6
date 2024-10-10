@@ -210,6 +210,8 @@ workflow SCAN_SEQUENCES {
             RUN_SIGNALP.out,
             "${datadir}/${appsConfig.signalp.data.threshold}".split('/')[-1].toFloat()
         )
+
+        results = results.mix(PARSE_SIGNALP.out)
     }
 
     if (applications.contains("tmhmm")) {
