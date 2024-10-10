@@ -7,7 +7,7 @@ process PAINT_ANNOTATIONS {
     // Retrieve PAINT annotations for Panther hits
     // calculated and pre-calc becuase they are not retrieved from the Match Lookup
     input:
-    val paintAnnoJson
+    val paintAnnDir
     tuple val(meta), val(membersMatches)
 
     output:
@@ -15,14 +15,13 @@ process PAINT_ANNOTATIONS {
 
     exec:
     JsonSlurper jsonSlurper = new JsonSlurper()
-    def paintAnnDir = jsonSlurper.parse(paintAnnoJson)
     def matches = jsonSlurper.parse(membersMatches).collectEntries { seqId, jsonMatches ->
         [(seqId): jsonMatches.collectEntries { matchId, jsonMatch ->
             Match matchObject = Match.fromMap(jsonMatch)
-            if (data.signatureLibraryRelease.library == "panther") {
-                String sigAcc = data.signature.accession
+            if (matchObject.signature.signatureLibraryRelease.library == "panther") {
+                String sigAcc = matchObject.signature.accession
                 String paintAnnPath = "${paintAnnDir}/${sigAcc}.json"
-                File paintAnnotationFile = new File(paintAnnPath)
+                File paintAnnotationFile = new File(paintAnnPath.toString())
                 if (paintAnnotationFile.exists()) {
                     def paintAnnotationsContent = jsonSlurper.parse(paintAnnotationFile)
                     String nodeId = matchObject.treegrafter.ancestralNodeID

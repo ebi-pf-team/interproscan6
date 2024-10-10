@@ -1,5 +1,3 @@
-import groovy.json.JsonSlurper
-
 include { ENTRIES } from "../../modules/xrefs/entries"
 include { GOTERMS } from "../../modules/xrefs/goterms"
 include { PAINT_ANNOTATIONS } from "../../modules/xrefs/paint_annotations"
@@ -22,10 +20,10 @@ workflow XREFS {
     matchesPa = Channel.empty()
 
     if ("${apps}".contains('panther')) {
-        String paintAnnoPath = "${data_dir}/${params.xrefs.paint_annotations}"
-        File paintAnnoJson = new File(paintAnnoPath.toString())
-        matchesPaintAnn = PAINT_ANNOTATIONS(paintAnnoJson, ENTRIES.out)
+        String paintAnnoDir = "${data_dir}/${params.xrefs.paint_annotations}"
+        matchesPaintAnn = PAINT_ANNOTATIONS(paintAnnoDir, ENTRIES.out)
     }
+
 
     if (params.goterms) {
         String ipr2goPath = "${data_dir}/${params.xrefs.goterms}.ipr.json"
@@ -43,12 +41,14 @@ workflow XREFS {
         matchesPa = PATHWAYS(ipr2paJson, paInfoJson, ENTRIES.out)
     }
 
+    mixedXrefs = matchesPaintAnn.mix(matchesGo).mix(matchesPa)
+
     AGGREGATE_RESULTS(
-        ENTRIES.out,
-        matchesPaintAnn,
-        matchesGo,
-        matchesPa
+        ENTRIES.out.collect(),
+        mixedXrefs.collect()
     )
+
+    AGGREGATE_RESULTS.out.view()
 
     emit:
     AGGREGATE_RESULTS.out

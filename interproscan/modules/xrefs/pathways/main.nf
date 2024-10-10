@@ -31,13 +31,15 @@ process PATHWAYS {
                 try {
                     def paIds = ipr2pa[interproKey]
                     def paTerms = paIds.collect { paId ->
-                        [
-                            "name": paInfo[paId][1],
-                            "databaseName": PA_PATTERN[paInfo[paId][0]],
+                        paXref = [
+                            "name": paInfo[paId][0],
+                            "databaseName": PA_PATTERN[paInfo[paId][1]],
                             "id": paId
                         ]
+                        matchObject.signature.entry.addPathwayXRefs(new PathwayXrefs(paXref))
+                        println "matchObject.signature.entry.paXRefs: ${matchObject.signature.entry.pathwayXrefs}"
                     }
-                    matchObject.signature.entry.paTerms = paTerms
+                    matchObject.signature.entry.paTerms.add(paTerms)
                 } catch (Exception e) {
                     // pass
                 }

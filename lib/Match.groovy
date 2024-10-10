@@ -124,6 +124,8 @@ class Entry implements Serializable {
     String name
     String description
     String type
+    List<GoXrefs> goXRefs = []
+    List<PathwayXrefs> pathwayXRefs = []
 
     Entry(String accession, String name, String description, String type) {
         this.accession = accession
@@ -132,11 +134,22 @@ class Entry implements Serializable {
         this.type = type
     }
 
+    void addGoXRefs(GoXrefs goXRefs) {
+        this.goXRefs.add(goXRefs)
+    }
+
+    void addPathwayXRefs(PathwayXrefs pathwayXRefs) {
+        this.pathwayXRefs.add(pathwayXRefs)
+    }
+
     static Entry fromMap(Map data) {
         if (data == null) {
             return null
         }
-        return new Entry(data.accession, data.name, data.description, data.type)
+        Entry entry = new Entry(data.accession, data.name, data.description, data.type)
+        entry.goXRefs = data.goXRefs.collect { GoXRefs.fromMap(it) }
+        entry.pathwayXRefs = data.pathwayXRefs.collect { PathwayXrefs.fromMap(it) }
+        return entry
     }
 }
 
@@ -364,5 +377,39 @@ class TreeGrafter implements Serializable {
         tg.subfamilyName = data.subfamilyName
         tg.proteinClass = data.proteinClass
         return tg
+    }
+}
+
+class GoXrefs implements Serializable {
+    String name
+    String databaseName
+    String category
+    String id
+
+    GoXrefs(String name, String databaseName, String category, String id) {
+        this.name = name
+        this.databaseName = databaseName
+        this.category = category
+        this.id = id
+    }
+
+    static GoXrefs fromMap(Map data) {
+        return new GoXrefs(data.name, data.databaseName, data.category, data.id)
+    }
+}
+
+class PathwayXrefs implements Serializable {
+    String name
+    String databaseName
+    String id
+
+    PathwayXrefs(String name, String databaseName, String id) {
+        this.name = name
+        this.databaseName = databaseName
+        this.id = id
+    }
+
+    static PathwayXrefs fromMap(Map data) {
+        return new PathwayXRefs(data.name, data.databaseName, data.id)
     }
 }
