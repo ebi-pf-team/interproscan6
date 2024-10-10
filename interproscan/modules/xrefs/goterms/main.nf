@@ -36,8 +36,7 @@ process GOTERMS {
                             "category": GO_PATTERN[goInfo[goId][1]],
                             "id": goId
                         ]
-                        matchObject.signature.entry.addGoXRefs(new GoXrefs(goXref))
-                        println "matchObject.signature.entry.goXRefs: ${matchObject.signature.entry.goXrefs}"
+                        matchObject.signature.entry.goXrefs.add(goXref)
                     }
                 } catch (Exception e) {
                     // pass

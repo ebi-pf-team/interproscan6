@@ -124,8 +124,8 @@ class Entry implements Serializable {
     String name
     String description
     String type
-    List<GoXrefs> goXRefs = []
-    List<PathwayXrefs> pathwayXRefs = []
+    List<GoXrefs> goXrefs = []
+    List<PathwayXrefs> pathwayXrefs = []
 
     Entry(String accession, String name, String description, String type) {
         this.accession = accession
@@ -134,21 +134,13 @@ class Entry implements Serializable {
         this.type = type
     }
 
-    void addGoXRefs(GoXrefs goXRefs) {
-        this.goXRefs.add(goXRefs)
-    }
-
-    void addPathwayXRefs(PathwayXrefs pathwayXRefs) {
-        this.pathwayXRefs.add(pathwayXRefs)
-    }
-
     static Entry fromMap(Map data) {
         if (data == null) {
             return null
         }
         Entry entry = new Entry(data.accession, data.name, data.description, data.type)
-        entry.goXRefs = data.goXRefs.collect { GoXRefs.fromMap(it) }
-        entry.pathwayXRefs = data.pathwayXRefs.collect { PathwayXrefs.fromMap(it) }
+        entry.goXrefs = data.goXrefs.collect { GoXrefs.fromMap(it) }
+        entry.pathwayXrefs = data.pathwayXrefs.collect { PathwayXrefs.fromMap(it) }
         return entry
     }
 }
@@ -410,6 +402,6 @@ class PathwayXrefs implements Serializable {
     }
 
     static PathwayXrefs fromMap(Map data) {
-        return new PathwayXRefs(data.name, data.databaseName, data.id)
+        return new PathwayXrefs(data.name, data.databaseName, data.id)
     }
 }

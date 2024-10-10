@@ -32,14 +32,12 @@ process PATHWAYS {
                     def paIds = ipr2pa[interproKey]
                     def paTerms = paIds.collect { paId ->
                         paXref = [
-                            "name": paInfo[paId][0],
-                            "databaseName": PA_PATTERN[paInfo[paId][1]],
+                            "name": paInfo[paId][1],
+                            "databaseName": PA_PATTERN[paInfo[paId][0]],
                             "id": paId
                         ]
-                        matchObject.signature.entry.addPathwayXRefs(new PathwayXrefs(paXref))
-                        println "matchObject.signature.entry.paXRefs: ${matchObject.signature.entry.pathwayXrefs}"
+                        matchObject.signature.entry.pathwayXrefs.add(paXref)
                     }
-                    matchObject.signature.entry.paTerms.add(paTerms)
                 } catch (Exception e) {
                     // pass
                 }
