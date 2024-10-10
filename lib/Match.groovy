@@ -12,7 +12,7 @@ class Match implements Serializable {
     TreeGrafter treegrafter = null
 
     // SignalP
-    // String orgType
+    SignalP signalp = null
 
     // PRINTS
     // String graphscan
@@ -43,7 +43,7 @@ class Match implements Serializable {
         }
     }
 
-    static Match fromMap(Map data) {
+    static Match fromMap(Map data) { // Convert a JSON string to a Match obj
         Match match = new Match(data.modelAccession, data.evalue, data.score, data.bias)
         match.sequenceLength = data.sequenceLength
         match.signature = Signature.fromMap(data.signature)
@@ -55,6 +55,10 @@ class Match implements Serializable {
 
     void addLocation(Location location) {
         this.locations.add(location)
+    }
+
+    void addSignalPeptide(String orgType, int cleavageSiteStart, int cleavageSiteEnd) {
+        this.signalp = new SignalP(orgType, cleavageSiteStart, cleavageSiteEnd)
     }
 
     void setSequences(int locationIndex, String querySequence, String targetSequence) {
@@ -158,8 +162,8 @@ class Location implements Serializable {
     List<Site> sites = []
     boolean representative = false
     boolean included = true  // for HMMER3 matches (inclusion threshold)
+    Float pvalue = null // SignalP
 
-    // pvalue
     // level
     // cigarAlignment
     // motifNumber
@@ -231,6 +235,16 @@ class Location implements Serializable {
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
         this.targetSequence = alignment
+    }
+
+    // Used for SignalP
+    Location(int start, int end, float pvalue) {
+        this.start = start
+        this.end = end
+        this.pvalue = pvalue
+        // to avoid a potential NullPointerException
+        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
+        this.fragments = [fragment]
     }
 
     void addSite(Site site) {
@@ -363,5 +377,29 @@ class TreeGrafter implements Serializable {
         tg.subfamilyName = data.subfamilyName
         tg.proteinClass = data.proteinClass
         return tg
+    }
+}
+
+class SignalP implements Serializable {
+    String orgType
+    int cleavageSiteStart
+    int cleavageSiteEnd
+
+    SignalP(String orgType, int cleavageSiteStart, int cleavageSiteEnd) {
+        this.orgType = orgType
+        this.cleavageSiteStart = cleavageSiteStart
+        this.cleavageSiteEnd = cleavageSiteEnd
+    }
+
+    static SignalP fromMap(Map data) { // Primarily used to convert JSON strs to Groovy objs
+        if (data == null) {
+            return null
+        }
+        SignalP sp = new SignalP(
+            data.orgType,
+            data.cleavageSiteStart,
+            data.cleavageSiteEnd
+        )
+        return sp
     }
 }
