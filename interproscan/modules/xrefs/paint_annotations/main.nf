@@ -18,20 +18,20 @@ process PAINT_ANNOTATIONS {
     def paintAnnDir = jsonSlurper.parse(paintAnnoJson)
     def matches = jsonSlurper.parse(membersMatches).collectEntries { seqId, jsonMatches ->
         [(seqId): jsonMatches.collectEntries { matchId, jsonMatch ->
-            def matchObject = Match.fromMap(jsonMatch)
+            Match matchObject = Match.fromMap(jsonMatch)
             if (data.signatureLibraryRelease.library == "panther") {
-                def sigAcc = data.signature.accession
-                def paintAnnPath = "${paintAnnDir}/${sigAcc}.json"
-                def paintAnnotationFile = new File(paintAnnPath)
+                String sigAcc = data.signature.accession
+                String paintAnnPath = "${paintAnnDir}/${sigAcc}.json"
+                File paintAnnotationFile = new File(paintAnnPath)
                 if (paintAnnotationFile.exists()) {
                     def paintAnnotationsContent = jsonSlurper.parse(paintAnnotationFile)
-                    nodeId = matchObject.treegrafter.ancestralNodeID
+                    String nodeId = matchObject.treegrafter.ancestralNodeID
                     def nodeData = paintAnnotationsContent[nodeId]
-                    proteinClass = nodeData[2]
-                    graftPoint = nodeData[3]
+                    matchObject.treegrafter.proteinClass = nodeData[2]
+                    matchObject.treegrafter.graftPoint = nodeData[3]
                 }
             }
-        }
+        }]
     }
     def outputFilePath = task.workDir.resolve("paint_annotation.json")
     def json = JsonOutput.toJson(matches)

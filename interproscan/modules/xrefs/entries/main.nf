@@ -21,14 +21,13 @@ process ENTRIES {
         memberDB = matchesPath.toString().split("/").last().split("\\.")[0]
         def sigLibRelease = [
             "library": memberDB,
-            "version": ""
+            "version": entries['databases'][memberDB]
         ]
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, jsonMatches ->
             [(seqId): jsonMatches.collectEntries { matchId, jsonMatch ->
-                def matchObject = Match.fromMap(jsonMatch)
+                Match matchObject = Match.fromMap(jsonMatch)
                 def entriesInfo = entries['entries']
-//                 def acc_id = match_key.split("\\.")[0]
-                def accId = matchObject.modelAccession
+                String accId = matchObject.modelAccession
                 def entry = entriesInfo[accId] ?: entriesInfo[matchKey]
                 entryData = null
                 if (entry) {
@@ -59,12 +58,15 @@ process ENTRIES {
                 Signature signatureObject = Signature.fromMap(sigData)
                 matchObject.signature = signatureObject
 
-                // TODO: add panther subfamily info on match object
                 if (memberDB == "panther") {
-                    def accSubfamily = data["accession"]
-                    subfamilyName = entrieInfo[accSubfamily]["name"] ?: ""
-                    subfamilyDesc = entriesInfo[accSubfamily]["description"] ?: ""
-                    subfamilyType = entriesInfo[accSubfamily]["type"] ?: ""
+                    String accSubfamily = matchObject.treegrafter.subfamilyAccession
+                    matchObject.treegrafter.subfamilyAccession = accSubfamily
+                    if (entriesInfo[accSubfamily]) {
+                        matchObject.treegrafter.subfamilyName = entrieInfo[accSubfamily]["name"]
+//                         Just waiting finish output step to have sure we don't use this infos
+//                         matchObject.treegrafter.subfamilyDesc = entriesInfo[accSubfamily]["description"]
+//                         matchObject.treegrafter.subfamilyType = entriesInfo[accSubfamily]["type"]
+                    }
                 }
 
                 [(matchId): matchObject]

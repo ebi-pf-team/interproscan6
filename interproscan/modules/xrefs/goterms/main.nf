@@ -24,9 +24,9 @@ process GOTERMS {
     def goInfo = jsonSlurper.parse(goInfoJson)
     def matches = jsonSlurper.parse(membersMatches).collectEntries { seqId, jsonMatches ->
         [(seqId): jsonMatches.collectEntries { matchId, jsonMatch ->
-            def matchObject = Match.fromMap(jsonMatch)
+            Match matchObject = Match.fromMap(jsonMatch)
             if (matchObject.signature.entry) {
-                def interproKey = matchObject.signature.entry.accession
+                String interproKey = matchObject.signature.entry.accession
                 try {
                     def goIds = ipr2go[interproKey]
                     def goTerms = goIds.collect { goId ->
