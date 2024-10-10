@@ -1,3 +1,5 @@
+// Class and methods for validating the user inputs
+
 import java.nio.file.*
 
 class InterProScan {
@@ -98,7 +100,7 @@ class InterProScan {
             // Convert to kebab-case
             def kebabParamName = this.camelToKebab(paramName)
             if (!allowedParams.contains(kebabParamName.toLowerCase())) {
-                log.warn "Unrecognized option: --${kebabParamName}. Try '--help' for more information."
+                log.warn "Unrecognised option: --${kebabParamName}. Try '--help' for more information."
             }
         }
 
@@ -169,12 +171,22 @@ class InterProScan {
             if (allApps.containsKey(key)) {
                 appsToRun.add(allApps[key])
             } else {
-                def error = "unrecognized application: '${appName}'. Try '--help' to list available applications."
+                def error = "Unrecognised application: '${appName}'. Try '--help' to list available applications."
                 return [null, error]
             }
         }
 
         return [appsToRun.toSet().toList(), null]
+    }
+
+    static List<String> validateSignalpMode(String signalpMode) {
+        if (signalpMode.toLowerCase() !in ['fast', 'slow', 'slow-sequential']) {
+            def error = "Unrecognised SignalP mode: '${signalpMode}'. Accepted modes: 'fast', 'slow', 'slow-sequential'"
+            return [null, error]
+        }
+        else {
+            return [signalpMode.toLowerCase(), null]
+        }
     }
 
     static String kebabToCamel(String kebabName) {
