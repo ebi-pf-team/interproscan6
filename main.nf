@@ -5,6 +5,8 @@ include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan
 include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
 include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
+include { XREFS                         } from "./interproscan/modules/xrefs"
+
 
 // include { PARSE_SEQUENCE } from "$projectDir/interproscan/modules/parse_sequence/main"
 // include { GET_ORFS } from "$projectDir/interproscan/modules/get_orfs/main"
@@ -15,7 +17,6 @@ include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_s
 // include { PRE_CHECKS } from "$projectDir/interproscan/subworkflows/pre_checks/main"
 // include { SEQUENCE_PRECALC } from "$projectDir/interproscan/subworkflows/sequence_precalc/main"
 // include { SEQUENCE_ANALYSIS } from "$projectDir/interproscan/subworkflows/sequence_analysis/main"
-include { XREFS } from "$projectDir/interproscan/subworkflows/xrefs/main"
 
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
@@ -133,18 +134,18 @@ workflow {
 
     // REPRESENTATIVE_DOMAINS(XREFS.out.collect())
 
-    // Channel.from(params.formats.toLowerCase().split(','))
-    // .set { ch_format }
+    Channel.from(params.formats.toLowerCase().split(','))
+    .set { ch_format }
 
-    // WRITE_RESULTS(
-    //     input_file.getName(),
-    //     AGGREGATE_PARSED_SEQS.out,
-    //     REPRESENTATIVE_DOMAINS.out.collect(),
-    //     ch_format,
-    //     params.outdir,
-    //     params.ipscn_version,
-    //     params.nucleic
-    // )
+//     WRITE_RESULTS(
+//         input_file.getName(),
+//         AGGREGATE_PARSED_SEQS.out,
+//         XREFS.out,
+//         ch_format,
+//         params.outdir,
+//         params.ipscn_version,
+//         params.nucleic
+//     )
 }
 
 // workflow.onComplete = {

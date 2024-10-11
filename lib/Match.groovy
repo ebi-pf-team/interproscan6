@@ -7,7 +7,7 @@ class Match implements Serializable {
     Signature signature = null
     List<Location> locations = []
     boolean included = true  // for HMMER3 matches (inclusion threshold)
-    Tuple representativeFlag = null
+    RepresentativeInfo representativeInfo = null
 
     // PANTHER
     TreeGrafter treegrafter = null
@@ -369,6 +369,23 @@ class TreeGrafter implements Serializable {
         tg.subfamilyName = data.subfamilyName
         tg.proteinClass = data.proteinClass
         return tg
+    }
+}
+
+class RepresentativeInfo implements Serializable {
+    String type
+    String rank
+
+    RepresentativeInfo(String type, String rank) {
+        this.type = type
+        this.rank = rank
+    }
+
+    static RepresentativeInfo fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
+        return new RepresentativeInfo(data.type, data.rank)
     }
 }
 
