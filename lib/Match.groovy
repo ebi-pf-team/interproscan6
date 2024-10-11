@@ -15,10 +15,16 @@ class Match implements Serializable {
     // String orgType
 
     // PRINTS
-    // String graphscan
+    String graphScan = null
 
     Match(String modelAccession) {
         this.modelAccession = modelAccession
+    }
+
+    Match(String modelAccession, Double evalue, String graphScan) {
+        this.modelAccession = modelAccession
+        this.evalue = evalue
+        this.graphScan = graphScan
     }
 
     Match(String modelAccession, Double evalue, Double score) {
@@ -154,15 +160,17 @@ class Location implements Serializable {
     String querySequence
     String targetSequence
     String sequenceFeature
+    // for PRINTS
+    Double pvalue
+    Integer motifNumber
+
     List<LocationFragment> fragments = []
     List<Site> sites = []
     boolean representative = false
     boolean included = true  // for HMMER3 matches (inclusion threshold)
 
-    // pvalue
     // level
     // cigarAlignment
-    // motifNumber
 
     Location(int start, 
              int end, 
@@ -231,6 +239,16 @@ class Location implements Serializable {
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
         this.targetSequence = alignment
+    }
+
+    Location(int start, int end, Double pvalue, Double score, Integer motifNumber) {
+        this.start = start
+        this.end = end
+        this.pvalue = pvalue
+        this.score = score
+        this.motifNumber = motifNumber
+        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
+        this.fragments = [fragment]
     }
 
     void addSite(Site site) {
