@@ -28,7 +28,7 @@ process XREFS {
 
     exec:
     // Getting xrefs data files
-    String entriesPath = "${data_dir}/${params.xrefs.entries}"
+    String entriesPath = "${data_dir}/${params.xRefsConfig.entries}"
     File entriesJson = new File(entriesPath.toString())
     def objectMapper = new ObjectMapper()
     def entries = objectMapper.readValue(entriesJson, Map)
@@ -36,19 +36,19 @@ process XREFS {
     JsonSlurper jsonSlurper = new JsonSlurper()
 
     if ("${apps}".contains('panther')) {
-        String paintAnnoDir = "${data_dir}/${params.xrefs.paint_annotations}"
+        String paintAnnoDir = "${data_dir}/${params.appsConfig.paint}"
     }
 
     if (params.goterms) {
-        String ipr2goPath = "${data_dir}/${params.xrefs.goterms}.ipr.json"
-        String goInfoPath = "${data_dir}/${params.xrefs.goterms}.json"
-        def ipr2go = jsonSlurper.parse(new File(ipr2goPath.toString()).text)
-        def goInfo = jsonSlurper.parse(new File(goInfoPath.toString()).text)
+        String ipr2goPath = "${data_dir}/${params.xRefsConfig.goterms}.ipr.json"
+        String goInfoPath = "${data_dir}/${params.xRefsConfig.goterms}.json"
+        def ipr2go = jsonSlurper.parse(new File(ipr2goPath.toString()))
+        def goInfo = jsonSlurper.parse(new File(goInfoPath.toString()))
     }
 
     if (params.pathways) {
-        String ipr2paPath = "${data_dir}/${params.xrefs.pathways}.ipr.json"
-        String paInfoPath = "${data_dir}/${params.xrefs.pathways}.json"
+        String ipr2paPath = "${data_dir}/${params.xRefsConfig.pathways}.ipr.json"
+        String paInfoPath = "${data_dir}/${params.xRefsConfig.pathways}.json"
         def ipr2pa = jsonSlurper.parseText(new File(ipr2paPath.toString()).text)
         def paInfo = jsonSlurper.parseText(new File(paInfoPath.toString()).text)
     }
@@ -85,10 +85,10 @@ process XREFS {
                             "rank": entry['representative']["rank"]
                         ]
                         RepresentativeInfo representativeInfo = RepresentativeInfo.fromMap(representative)
+                        matchObject.representativeInfo = representativeInfo
                     }
-                    matchObject.representativeInfo = representativeInfo
 
-                    if (matchObject.signature.signatureLibraryRelease.library == "panther") {
+                    if (memberDB == "panther") {
                         String sigAcc = matchObject.signature.accession
                         String paintAnnPath = "${paintAnnDir}/${sigAcc}.json"
                         File paintAnnotationFile = new File(paintAnnPath.toString())
@@ -102,7 +102,7 @@ process XREFS {
                     }
 
                     if (params.goterms || params.pathways) {
-                        String interproKey = matchObject.signature.entry.accession
+                        interproKey = entry["accession"]
                         try {
                             if (params.goterms) {
                                 def goIds = ipr2go[interproKey]
@@ -155,8 +155,7 @@ process XREFS {
 //                         matchObject.treegrafter.subfamilyType = entriesInfo[accSubfamily]["type"]
                     }
                 }
-
-                [(matchId): matchObject]
+                return [(matchId): matchObject]
             }]
         }
         def outputFilePath = task.workDir.resolve("matches2xrefs.json")
