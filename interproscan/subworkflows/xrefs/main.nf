@@ -41,14 +41,11 @@ workflow XREFS {
         matchesPa = PATHWAYS(ipr2paJson, paInfoJson, ENTRIES.out)
     }
 
-    mixedXrefs = matchesPaintAnn.mix(matchesGo).mix(matchesPa)
+    resultFiles = ENTRIES.out.mix(matchesPaintAnn).mix(matchesGo).mix(matchesPa)
+    matches2xrefs = resultFiles.groupTuple()
+    matches2xrefs.view()
 
-    AGGREGATE_RESULTS(
-        ENTRIES.out.collect(),
-        mixedXrefs.collect()
-    )
-
-    AGGREGATE_RESULTS.out.view()
+    AGGREGATE_RESULTS(matches2xrefs)
 
     emit:
     AGGREGATE_RESULTS.out

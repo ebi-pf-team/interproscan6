@@ -36,12 +36,14 @@ process PATHWAYS {
                             "databaseName": PA_PATTERN[paInfo[paId][0]],
                             "id": paId
                         ]
-                        matchObject.signature.entry.pathwayXrefs.add(paXref)
+                        PathwayXrefs pathwayXrefsObj = PathwayXrefs.fromMap(paXref)
+                        matchObject.signature.entry.pathwayXrefs.add(pathwayXrefsObj)
                     }
                 } catch (Exception e) {
                     // pass
                 }
             }
+            return [(matchId): matchObject]
         }]
     }
     def outputFilePath = task.workDir.resolve("matches2pa.json")

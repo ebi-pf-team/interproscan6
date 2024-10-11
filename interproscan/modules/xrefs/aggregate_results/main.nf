@@ -5,26 +5,33 @@ process AGGREGATE_RESULTS {
     label 'xref'
 
     input:
-    tuple val(meta), val(matches2entries)
-    tuple val(meta), val(xrefsMix)
+    tuple val(meta), val(matches2xrefs)
 
     output:
     path "aggregated_matches2xrefs.json"
 
     exec:
-    def matchObjectAggregated = [:]
+    def aggregatedXrefs = [:]
     JsonSlurper jsonSlurper = new JsonSlurper()
-    matches = jsonSlurper.parse(xrefsMix).collectEntries { seqId, jsonMatches ->
-        [(seqId): jsonMatches.collectEntries { matchId, jsonMatch ->
-            Match matchObject = Match.fromMap(jsonMatch)
-            if (!matchObjectAggregated.containsKey(seqId)) {
-                matchObjectAggregated[seqId] = []
-            }
-            matchObjectAggregated[seqId].add(matchObject)
-            [(matchId): jsonMatch]
-        }]
+    matches2xrefs.each { filePath ->
+        def fileName = filePath.tokenize('/').last()
+        def matches = jsonSlurper.parse(new File(filePath)).collectEntries { seqId, jsonMatches ->
+            [(seqId): jsonMatches.collectEntries { matchId, jsonMatch ->
+                Match matchObject = Match.fromMap(jsonMatch)
+                if (fileName.contains("matches2entries")) {
+                    match = matchObject
+                } else if (fileName.contains("matches2go")) {
+                    goTerms = matchObject.signature.entry.goXrefs ?: []
+                    match.signature.entry.goXrefs = goTerms
+                } else if (fileName.contains("matches2pa")) {
+                    pathways = matchObject.signature.entry.pathwaysXrefs ?: []
+                    match.signature.entry.pathwaysXrefs = pathways
+                }
+                aggregatedXrefs[seqId] = match
+            }]
+        }
     }
     def outputFilePath = task.workDir.resolve("aggregated_matches2xrefs.json")
-    def json = JsonOutput.toJson(matchObjectAggregated)
+    def json = JsonOutput.toJson(aggregatedXrefs)
     new File(outputFilePath.toString()).write(json)
 }

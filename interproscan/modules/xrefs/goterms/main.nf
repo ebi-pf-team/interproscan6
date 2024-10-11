@@ -36,12 +36,14 @@ process GOTERMS {
                             "category": GO_PATTERN[goInfo[goId][1]],
                             "id": goId
                         ]
-                        matchObject.signature.entry.goXrefs.add(goXref)
+                        GoXrefs goXrefsObj = GoXrefs.fromMap(goXref)
+                        matchObject.signature.entry.goXrefs.add(goXrefsObj)
                     }
                 } catch (Exception e) {
                     // pass
                 }
             }
+            return [(matchId): matchObject]
         }]
     }
     def outputFilePath = task.workDir.resolve("matches2go.json")
