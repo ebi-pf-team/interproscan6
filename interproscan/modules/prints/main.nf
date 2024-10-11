@@ -24,7 +24,7 @@ process PARSE_PRINTS {
     label 'analysis_parser'
 
     input:
-    tuple val(meta), path(prints_output)
+    tuple val(meta), val(prints_output)
     val hierarchy
 
     output:
@@ -33,6 +33,8 @@ process PARSE_PRINTS {
     exec:
     def outputFilePath = task.workDir.resolve("prints.json")
     def matches = PRINTS.parseOutput(prints_output.toString(), hierarchy)
+    println "MATCHES!"
+    println "${matches}"
     def json = JsonOutput.toJson(matches)
     new File(outputFilePath.toString()).write(json)
 }

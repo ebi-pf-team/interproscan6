@@ -7,7 +7,7 @@ include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP               
 include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                        } from  "../../modules/mobidblite"
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
-include { RUN_PRINTS                                                              } from  "../../modules/prints"
+include { RUN_PRINTS; PARSE_PRINTS                                                } from  "../../modules/prints"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -182,6 +182,11 @@ workflow SCAN_SEQUENCES {
             ch_fasta,
             "${datadir}/${appsConfig.prints.data.pval}"
         )
+        PARSE_PRINTS(
+            RUN_PRINTS.out,
+            "${datadir}/${appsConfig.prints.data.hierarchy}"
+        )
+        results = results.mix(PARSE_PRINTS.out)
     }
 
     if (applications.contains("prositepatterns")) {
