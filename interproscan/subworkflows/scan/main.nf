@@ -115,8 +115,7 @@ workflow SCAN_SEQUENCES {
         PREPROCESS_HAMAP(ch_fasta,
             "${datadir}/${appsConfig.hamap.hmm}")
 
-        PREPARE_HAMAP(PREPROCESS_HAMAP.out,
-            ch_json,
+        PREPARE_HAMAP(PREPROCESS_HAMAP.out.join(ch_json),
             "${datadir}/${appsConfig.hamap.dir}")
 
         RUN_HAMAP(PREPARE_HAMAP.out,
