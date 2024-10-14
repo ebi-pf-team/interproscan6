@@ -166,6 +166,7 @@ process JSON_OUTPUT {
                     finalMatch["matches"] = match
                 }
             }
+            sequence["matches"] = finalMatch
         }
         jsonOutput["results"].add(sequence)
     }
