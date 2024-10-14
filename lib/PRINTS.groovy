@@ -9,19 +9,33 @@ class PRINTS {
         hierarchyFile.withReader { reader ->
             String line
             while ((line = reader.readLine()) != null) {
-                if (!line.startsWithAny("#", "/")) {
-                    def row = line.split("\\|")
+                if (!line.startsWith("#")) {
+                    def row = line.trim().split("\\|")
                     if (row.length >= 3) {
-                        String motifName = row[0]
-                        String motifAccession = row[1]
-                        Double evalueCutoff = Double.parseDouble(row[2])
-                        int minMotifCount = Integer.parseInt(row[3])
+                        // e.g. G6PDHDRGNASE|PR00079|1e-04|0|
+                        final String modelID = row[0].trim()
+                        final String modelAccession = row[1].trim()
+                        final Double evalueCutoff = Double.parseDouble(row[2].trim())
+                        final int minMotifCount = Integer.parseInt(row[3].trim())
+                        boolean isDomain = false
+                        String[] siblingsIDs = null
+                        if (row.length > 4) {
+                            // e.g. DHBDHDRGNASE|PR01397|1e-04|0|SDRFAMILY or TYROSINASE|PR00092|1e-04|0|*
+                            String siblingsOrDomain = row[4].trim()
+                            if (siblingsOrDomain == "*") {
+                                isDomain = true
+                            } else if (siblingsOrDomain.size() > 0) {
+                                siblingsIDs = siblingsOrDomain.split("\\,")
+                            }
+                        }
                         hierarchyMap.put(
-                                motifName,
+                                modelID,
                                 [
-                                        "motifAccession": motifAccession,
+                                        "modelAccession": modelAccession,
                                         "cutOff": evalueCutoff,
-                                        "minMotifCount": minMotifCount
+                                        "minMotifCount": minMotifCount,
+                                        "isDomain": isDomain,
+                                        "siblings": siblingsIDs
                                 ]
                         )
                     }
@@ -48,38 +62,38 @@ class PRINTS {
                 // Do not retrieve the motif Description from the 1TBH line - this is retrieved in the XREFS subworkflow
                 // And retrieve the motifAcc from the heirarchyDB instead of the 1TBH line
                 else if (line.startsWith("2TBH")) {  // Used to create Match instances
-                    // Line: 2TBH  MotifName  NumMotifs  SumId  AveId  ProfScore  Ppvalue  Evalue  GraphScan
+                    // Line: 2TBH  modelID  NumMotifs  SumId  AveId  ProfScore  Ppvalue  Evalue  GraphScan
                     def matcher = line =~ ~/^2TBH\s+(.+?)\s+(\d)\s+of\s+\d\s+\d+\.?\d*\s+\d+\.?\d*\s+\d+\s+.*?\s+(.*?)\s+([\.iI]+)\s+$/
                     if (matcher.find()) {
-                        String motifName = matcher.group(1).trim()
+                        String modelID = matcher.group(1).trim()
                         int numOfMotifs = Integer.parseInt(matcher.group(2).trim())
                         Double evalue = Double.parseDouble(matcher.group(3).trim())
                         String graphScan = matcher.group(4).trim()
 
-                        if (hierarchyMap.containsKey(motifName)) {
-                            String motifAccession = hierarchyMap[motifName]["motifAccession"]
-                            int minMotifCount = hierarchyMap[motifName]["minMotifCount"] as int
-                            Double cutoff = hierarchyMap[motifName]["cutOff"] as Double
+                        if (hierarchyMap.containsKey(modelID)) {
+                            String modelAccession = hierarchyMap[modelID]["modelAccession"]
+                            int minMotifCount = hierarchyMap[modelID]["minMotifCount"] as int
+                            Double cutoff = hierarchyMap[modelID]["cutOff"] as Double
 
                             if (evalue <= cutoff && numOfMotifs > minMotifCount) {
                                 if (!hits.containsKey(queryAccession)) {
                                     hits.put(queryAccession, new LinkedHashMap<>())
                                 }
-                                hits[queryAccession].put(motifAccession, new Match(motifAccession, evalue, graphScan))
-                                name2accession.put(motifName, motifAccession)
+                                hits[queryAccession].put(modelAccession, new Match(modelAccession, evalue, graphScan))
+                                name2accession.put(modelID, modelAccession)
                             }
                         }
                     }
                 }
                 else if (line.startsWith("3TBH")) {  // Used to create Location instances
-                    // Line: 3TBH MotifName NoOfMotifs IdScore PfScore Pvalue Sequence Len Low Pos High
+                    // Line: 3TBH modelID NoOfMotifs IdScore PfScore Pvalue Sequence Len Low Pos High
                     def matcher = line =~ ~/^3TBH\s+(.+?)\s+(\d+)\s+of\s+\d+\s+([\d\.]+)\s+\d+\s+(.+?)\s+([\w#]+)\s+(\d+)\s+\d+\s+(-?\d+)\s*\d\s*$/
                     if (matcher.find()) {
                         // Check motif passed the e-value cutoff when parsing line 2TBH - else SKIP!
-                        String motifName = matcher.group(1).trim()
-                        String motifAccession = name2accession[motifName]
+                        String modelID = matcher.group(1).trim()
+                        String modelAccession = name2accession[modelID]
                         if (hits.containsKey(queryAccession)) {
-                            if (hits[queryAccession].containsKey(motifAccession)) {
+                            if (hits[queryAccession].containsKey(modelAccession)) {
                                 int motifNumber = Integer.parseInt(matcher.group(2).trim())
                                 Float idScore = Float.parseFloat(matcher.group(3).trim())
                                 Double pvalue = Double.parseDouble(matcher.group(4).trim())
@@ -105,7 +119,7 @@ class PRINTS {
                                 end = end - (motifLength - indexCheck) + 1
 
                                 Location location = new Location(position, end, pvalue, idScore, motifNumber)
-                                hits[queryAccession][motifAccession].addLocation(location)
+                                hits[queryAccession][modelAccession].addLocation(location)
                             }
                         }
                     }
