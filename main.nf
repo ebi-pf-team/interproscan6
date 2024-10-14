@@ -98,12 +98,11 @@ workflow {
 
     // REPRESENTATIVE_DOMAINS(AGGREGATE_RESULTS.out)
 
-    AGGREGATE_RESULTS.out.view()
     def formats = params.formats.toUpperCase().split(',') as Set
-    def fileName = params.input.split('/').last().replaceAll('\\.[^.]+$', '')
+    def fileName = params.input.split('/').last()
     def outFileName = "${params.outdir}/${fileName}"
     if (formats.contains("JSON")) {
-        JSON_OUTPUT(AGGREGATE_RESULTS.out, "${outFileName}.ips6.json", workflow.manifest.version)
+        JSON_OUTPUT(AGGREGATE_RESULTS.out, "${outFileName}", workflow.manifest.version)
     }
 //     if (outputFormat.contains("TSV")) {
 //         TSV_OUTPUT(seqMatches, "${outFileName}.ips6.tsv")
