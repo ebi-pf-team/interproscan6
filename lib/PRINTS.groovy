@@ -17,14 +17,13 @@ class PRINTS {
                         final String modelAccession = row[1].trim()
                         final Double evalueCutoff = Double.parseDouble(row[2].trim())
                         final int minMotifCount = Integer.parseInt(row[3].trim())
-
                         HierarchyEntry hierarchyEntry = new HierarchyEntry(modelId, modelAccession, evalueCutoff, minMotifCount)
                         if (row.length > 4) {
                             // e.g. DHBDHDRGNASE|PR01397|1e-04|0|SDRFAMILY or TYROSINASE|PR00092|1e-04|0|*
                             String siblingsOrDomain = row[4].trim()
                             if (siblingsOrDomain == "*") {
                                 boolean isDomain = true
-                                HierarchyEntry.changeDomainStatus(isDomain)
+                                hierarchyEntry.changeDomainStatus(isDomain)
                             } else if (siblingsOrDomain.size() > 0) {
                                 String[] siblingsIds = siblingsOrDomain.split("\\,")
                                 hierarchyEntry.addSiblings(siblingsIds)
@@ -92,10 +91,10 @@ class PRINTS {
                         String modelId = matcher.group(1).trim()
                         String modelAccession = name2accession[modelId]
                         if (thisProteinsMatches.containsKey(modelAccession)) {
-                            int motifNumber = Integer.parseInt(matcher.group(2).trim())
-                            Float idScore = Float.parseFloat(matcher.group(3).trim())
-                            Double pvalue = Double.parseDouble(matcher.group(4).trim())
-                            String sequence = matcher.group(5).trim()
+                            final int motifNumber = Integer.parseInt(matcher.group(2).trim())
+                            final Float idScore = Float.parseFloat(matcher.group(3).trim())
+                            final Double pvalue = Double.parseDouble(matcher.group(4).trim())
+                            final String sequence = matcher.group(5).trim()
                             int motifLength = Integer.parseInt(matcher.group(6).trim())
                             int position = Integer.parseInt(matcher.group(7).trim())
 
@@ -149,8 +148,7 @@ class PRINTS {
                 if (!hits.containsKey(queryAccession)) {hits.put(queryAccession, new LinkedHashMap<>())}
                 hits[queryAccession].put(match.modelAccession, match)
                 // passed the filter and may have its own hierarchy so update the hierarchy limitation
-                HierarchtEntryIdLimitation.clear()
-                HierarchtEntryIdLimitation.addAll(hierarchyEntry.siblingsIds)
+                HierarchtEntryIdLimitation = hierarchyEntry.siblingsIds
             }
         }
 
