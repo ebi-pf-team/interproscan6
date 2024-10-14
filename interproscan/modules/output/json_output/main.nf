@@ -22,7 +22,7 @@ process JSON_OUTPUT {
         jsonOutput["results"].add(sequence)
     }
 
-    def outputFilePath = "${outputPath}.ips6.json"
+    def outputFilePath = "${outputPath}"
     def json = JsonOutput.toJson(jsonOutput)
     new File(outputFilePath.toString()).write(json)
 }
