@@ -33,6 +33,10 @@ class PRINTS {
         Map<String, Map<String, Match>> hits = new LinkedHashMap<>()
         Map<String, String> name2accession = new LinkedHashMap<>()
         File printsFile = new File(printsOutput)
+        if (!printsFile.exists()){
+            System.out.println("Could not find Hierarchy DB for PRINTS");
+            System.exit 1
+        }
         printsFile.withReader { reader ->
             String line
             String queryAccession = ""
@@ -88,6 +92,8 @@ class PRINTS {
                                     position = 1
                                 }
 
+                                // If the motif seq ends in #, it over hands the end of the query sequence
+                                // If that's the case, find out by how far and adjust the end appropriately
                                 int indexCheck = 0
                                 if (sequence.endsWith("#")) {
                                     motifLength = sequence.length()
