@@ -152,9 +152,6 @@ class PRINTS {
                 }
             }
         }
-
-        /// Continue implenting: https://github.com/ebi-pf-team/interproscan/blob/13c095e3c6b6784c98f9769c6a07d122cfa160d1/core/business/src/main/java/uk/ac/ebi/interpro/scan/business/postprocessing/prints/PrintsPostProcessing.java#L226
-
         return hits
     }
 
