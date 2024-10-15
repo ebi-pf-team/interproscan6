@@ -6,6 +6,10 @@ class PRINTS {
         // Build up a map of the fingerprint hierarchies
         Map<String, HierarchyEntry> hierarchyMap = new LinkedHashMap<>()
         File hierarchyFile = new File(hierarchyDb)
+        if (!hierarchyFile.exists()){
+            System.out.println("Could not find Hierarchy DB for PRINTS")
+            System.exit 1
+        }
         hierarchyFile.withReader { reader ->
             String line
             while ((line = reader.readLine()) != null) {
@@ -37,11 +41,6 @@ class PRINTS {
 
         // parse the Prints Output into Match instances
         File printsFile = new File(printsOutput)
-        if (!printsFile.exists()){
-            System.out.println("Could not find Hierarchy DB for PRINTS")
-            System.exit 1
-        }
-
         Map<String, Map<String, Match>> hits = new LinkedHashMap<>()  // <protein ID <Model Acc, Match>>
         Map<String, String> name2accession = new LinkedHashMap<>()  // <motifName, motifAccession>
         String queryAccession = null  // protein seq ID
@@ -144,13 +143,17 @@ class PRINTS {
             String modelId = name2accession.find{ it.value == match.modelAccession } ?.key
             HierarchyEntry hierarchyEntry = hierarchyMap[modelId]
             // check if match passes the filtering criteria
-            if (selectMatch(match, hierarchyEntry, HierarchtEntryIdLimitation)) {
+            if (selectMatch(match, modelId, hierarchyEntry, HierarchtEntryIdLimitation)) {
                 if (!hits.containsKey(queryAccession)) {hits.put(queryAccession, new LinkedHashMap<>())}
                 hits[queryAccession].put(match.modelAccession, match)
                 // passed the filter and may have its own hierarchy so update the hierarchy limitation
-                HierarchtEntryIdLimitation = hierarchyEntry.siblingsIds
+                if (hierarchyEntry.siblingsIds.length < HierarchtEntryIdLimitation.size()) {
+                    HierarchtEntryIdLimitation = hierarchyEntry.siblingsIds
+                }
             }
         }
+
+        /// Continue implenting: https://github.com/ebi-pf-team/interproscan/blob/13c095e3c6b6784c98f9769c6a07d122cfa160d1/core/business/src/main/java/uk/ac/ebi/interpro/scan/business/postprocessing/prints/PrintsPostProcessing.java#L226
 
         return hits
     }
@@ -162,7 +165,7 @@ class PRINTS {
 
             int modelAccessionComparison = matchA.modelAccession <=> matchB.modelAccession
             if (modelAccessionComparison != 0) return modelAccessionComparison
-            // NOTE: There is only one location per match
+
             int motifNumberComparison = matchA.locations[0].motifNumber <=> matchB.locations[0].motifNumber
             if (motifNumberComparison != 0) return motifNumberComparison
 
@@ -173,13 +176,13 @@ class PRINTS {
         }
     }
 
-    static selectMatch(Match match, HierarchyEntry hierarchy, Set<String> HierarchyEntryIdLimitation) {
+    static selectMatch(Match match, String motifId, HierarchyEntry hierarchy, Set<String> hierarchyEntryIdLimitation) {
         // if a domain: PASS - there is no hierarchy to deal with
         if (hierarchy.isDomain) {return true}
         // if the previous model limited the filtering to its siblings. If the first model, this is all models in HierarchyDB
-        if (HierarchyEntryIdLimitation.contains(match.modelAccession)) {return true}
+        if (hierarchyEntryIdLimitation.contains(motifId)) {return true}
+        return false
     }
-
 }
 
 class HierarchyEntry implements Serializable { // represents a row in the HierarchyDB
@@ -188,7 +191,7 @@ class HierarchyEntry implements Serializable { // represents a row in the Hierar
     Double evalueCutoff
     int minMotifCount
     boolean isDomain = false
-    String[] siblingsIds = null
+    String[] siblingsIds = []
     
     HierarchyEntry(String modelId, String modelAccession, Double evalueCutoff, int minMotifCount) {
         this.modelId = modelId
