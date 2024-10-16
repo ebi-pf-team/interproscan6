@@ -7,6 +7,7 @@ include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP               
 include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                        } from  "../../modules/mobidblite"
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
+include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                           } from  "../../modules/phobius"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
 
 workflow SCAN_SEQUENCES {
@@ -161,7 +162,12 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("phobius")) {
-        // TODO
+        SEARCH_PHOBIUS(
+            ch_fasta,
+            appsConfig.phobius.dir)
+
+        PARSE_PHOBIUS(SEARCH_PHOBIUS.out)
+        results = results.mix(PARSE_PHOBIUS.out)
     }
 
     if (applications.contains("pfam")) {
