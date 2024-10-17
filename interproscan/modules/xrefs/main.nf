@@ -29,8 +29,7 @@ process XREFS {
     exec:
     String entriesPath = "${data_dir}/${params.xRefsConfig.entries}"
     File entriesJson = new File(entriesPath.toString())
-    def objectMapper = new ObjectMapper()
-    def entries = objectMapper.readValue(entriesJson, Map)
+    def entries = new ObjectMapper().readValue(entriesJson, Map)
     JsonSlurper jsonSlurper = new JsonSlurper()
 
     matchesEntries = membersMatches.each { matchesPath  ->
