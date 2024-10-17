@@ -147,7 +147,7 @@ class Entry implements Serializable {
         this.name = name
         this.description = description
         this.type = type
-        this.GoXrefs = goXrefs
+        this.goXrefs = goXrefs
         this.pathwayXrefs = pathwayXrefs
     }
 
