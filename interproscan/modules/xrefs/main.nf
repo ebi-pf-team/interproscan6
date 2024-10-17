@@ -42,7 +42,6 @@ process XREFS {
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, jsonMatches ->
             [(seqId): jsonMatches.collectEntries { matchId, jsonMatch ->
                 Match matchObject = Match.fromMap(jsonMatch)
-
                 def entriesInfo = entries['entries']
                 String accId = matchObject.modelAccession.split("\\.")[0]
                 Signature signatureObject = new Signature(accId, "", "", sigLibRelease, null)
@@ -50,7 +49,7 @@ process XREFS {
 
                 if (memberDB == "panther") {
                     String sigAcc = matchObject.signature.accession
-                    String paintAnnPath = "${params.panther.paintAnnDir}/${sigAcc}.json"
+                    String paintAnnPath = "${params.appsConfig.panther.paintAnnDir}/${sigAcc}.json"
                     File paintAnnotationFile = new File(paintAnnPath.toString())
                     if (paintAnnotationFile.exists()) {
                         def paintAnnotationsContent = jsonSlurper.parse(paintAnnotationFile)
@@ -82,9 +81,7 @@ process XREFS {
                             interproKey,
                             entryInfo["name"],
                             entryInfo["description"],
-                            entryInfo["type"],
-                            [],
-                            []
+                            entryInfo["type"]
                         )
                         matchObject.signature.entry = entryDataObj
                     }
