@@ -374,7 +374,7 @@ class TreeGrafter implements Serializable {
 
 class RepresentativeInfo implements Serializable {
     String type
-    String rank
+    int rank
 
     RepresentativeInfo(String type, String rank) {
         this.type = type
@@ -403,6 +403,9 @@ class GoXrefs implements Serializable {
     }
 
     static GoXrefs fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
         return new GoXrefs(data.name, data.databaseName, data.category, data.id)
     }
 }
@@ -418,8 +421,10 @@ class PathwayXrefs implements Serializable {
         this.id = id
     }
 
-    if (data == null) {return null}
     static PathwayXrefs fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
         return new PathwayXrefs(data.name, data.databaseName, data.id)
     }
 }
