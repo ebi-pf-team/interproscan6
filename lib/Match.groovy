@@ -418,6 +418,7 @@ class PathwayXrefs implements Serializable {
         this.id = id
     }
 
+    if (data == null) {return null}
     static PathwayXrefs fromMap(Map data) {
         return new PathwayXrefs(data.name, data.databaseName, data.id)
     }
