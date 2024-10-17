@@ -65,7 +65,7 @@ process XREFS {
                 Match matchObject = Match.fromMap(jsonMatch)
                 def entriesInfo = entries['entries']
                 String accId = matchObject.modelAccession
-                def entry = entriesInfo[accId] ?: entriesInfo[matchKey]
+                def entry = entriesInfo[accId] ?: entriesInfo[matchId]
                 entryData = null
                 if (entry) {
                     def interproKey = entry['integrated']
@@ -134,11 +134,10 @@ process XREFS {
                         }
                     }
                 }
-
                 def sigData = [
-                    "accession": entry["accession"],
-                    "name": entry["name"],
-                    "description": entry["description"],
+                    "accession": matchObject.modelAccession,
+                    "name": entry ? entry["name"] : "",
+                    "description": entry ? entry["description"] : "",
                     "signatureLibraryRelease": sigLibRelease,
                     "entry": entryData
                 ]
