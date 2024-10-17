@@ -127,21 +127,40 @@ class Entry implements Serializable {
     List<GoXrefs> goXrefs = []
     List<PathwayXrefs> pathwayXrefs = []
 
-    Entry(String accession, String name, String description, String type) {
+    Entry(String accession,
+          String name,
+          String description,
+          String type,
+          List<GoXrefs> goXrefs,
+          List<PathwayXrefs> pathwayXrefs) {
         this.accession = accession
         this.name = name
         this.description = description
         this.type = type
+        this.goXrefs = goXrefs
+        this.pathwayXrefs = pathwayXrefs
     }
 
     static Entry fromMap(Map data) {
         if (data == null) {
             return null
         }
-        Entry entry = new Entry(data.accession, data.name, data.description, data.type)
-        entry.goXrefs = data.goXrefs.collect { GoXrefs.fromMap(it) }
-        entry.pathwayXrefs = data.pathwayXrefs.collect { PathwayXrefs.fromMap(it) }
-        return entry
+        return new Entry(
+            data.accession,
+            data.name,
+            data.description,
+            data.type,
+            data.goXrefs.collect { GoXrefs.fromMap(it) },
+            data.pathwayXrefs.collect { PathwayXrefs.fromMap(it) }
+        )
+    }
+
+    void addGoXrefs(GoXrefs go) {
+        this.goXrefs.add(go)
+    }
+
+    void addPathwayXrefs(PathwayXrefs pa) {
+        this.pathwayXrefs.add(pa)
     }
 }
 
@@ -376,7 +395,7 @@ class RepresentativeInfo implements Serializable {
     String type
     int rank
 
-    RepresentativeInfo(String type, String rank) {
+    RepresentativeInfo(String type, int rank) {
         this.type = type
         this.rank = rank
     }
