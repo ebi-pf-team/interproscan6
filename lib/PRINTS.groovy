@@ -3,41 +3,8 @@ class PRINTS {
             String printsOutput,
             String hierarchyDb
     ) {
-        // Build up a map of the fingerprint hierarchies
-        Map<String, HierarchyEntry> hierarchyMap = new LinkedHashMap<>()
-        File hierarchyFile = new File(hierarchyDb)
-        if (!hierarchyFile.exists()){
-            System.out.println("Could not find Hierarchy DB for PRINTS")
-            System.exit 1
-        }
-        hierarchyFile.withReader { reader ->
-            String line
-            while ((line = reader.readLine()) != null) {
-                if (!line.startsWith("#")) {
-                    def row = line.trim().split("\\|")
-                    if (row.length >= 3) {
-                        // e.g. G6PDHDRGNASE|PR00079|1e-04|0|
-                        final String modelId = row[0].trim()
-                        final String modelAccession = row[1].trim()
-                        final Double evalueCutoff = Double.parseDouble(row[2].trim())
-                        final int minMotifCount = Integer.parseInt(row[3].trim())
-                        HierarchyEntry hierarchyEntry = new HierarchyEntry(modelId, modelAccession, evalueCutoff, minMotifCount)
-                        if (row.length > 4) {
-                            // e.g. DHBDHDRGNASE|PR01397|1e-04|0|SDRFAMILY or TYROSINASE|PR00092|1e-04|0|*
-                            String siblingsOrDomain = row[4].trim()
-                            if (siblingsOrDomain == "*") {
-                                boolean isDomain = true
-                                hierarchyEntry.changeDomainStatus(isDomain)
-                            } else if (siblingsOrDomain.size() > 0) {
-                                String[] siblingsIds = siblingsOrDomain.split("\\,")
-                                hierarchyEntry.addSiblings(siblingsIds)
-                            }
-                        }
-                        hierarchyMap.put(modelId, hierarchyEntry)
-                    }
-                }
-            }
-        }
+        // Build up a map of the Model ID to fingerprint hierarchies
+        Map<String, HierarchyEntry> hierarchyMap = HierarchyEntry.parseHierarchyDbFile(hierarchyDb)
 
         // parse the Prints Output into Match instances
         File printsFile = new File(printsOutput)
@@ -198,6 +165,44 @@ class HierarchyEntry implements Serializable { // represents a row in the Hierar
         this.modelAccession = modelAccession
         this.evalueCutoff = evalueCutoff
         this.minMotifCount = minMotifCount
+    }
+
+    static parseHierarchyDbFile(String hierarchyDb) {  // parser the hierarchyDb in to a map of ModelID: hierarchy entry
+        Map<String, HierarchyEntry> hierarchyMap = new LinkedHashMap<>()
+        File hierarchyFile = new File(hierarchyDb)
+        if (!hierarchyFile.exists()){
+            System.out.println("Could not find Hierarchy DB for PRINTS")
+            System.exit 1
+        }
+        hierarchyFile.withReader { reader ->
+            String line
+            while ((line = reader.readLine()) != null) {
+                if (!line.startsWith("#")) {
+                    def row = line.trim().split("\\|")
+                    if (row.length >= 3) {
+                        // e.g. G6PDHDRGNASE|PR00079|1e-04|0|
+                        final String modelId = row[0].trim()
+                        final String modelAccession = row[1].trim()
+                        final Double evalueCutoff = Double.parseDouble(row[2].trim())
+                        final int minMotifCount = Integer.parseInt(row[3].trim())
+                        HierarchyEntry hierarchyEntry = new HierarchyEntry(modelId, modelAccession, evalueCutoff, minMotifCount)
+                        if (row.length > 4) {
+                            // e.g. DHBDHDRGNASE|PR01397|1e-04|0|SDRFAMILY or TYROSINASE|PR00092|1e-04|0|*
+                            String siblingsOrDomain = row[4].trim()
+                            if (siblingsOrDomain == "*") {
+                                boolean isDomain = true
+                                hierarchyEntry.changeDomainStatus(isDomain)
+                            } else if (siblingsOrDomain.size() > 0) {
+                                String[] siblingsIds = siblingsOrDomain.split("\\,")
+                                hierarchyEntry.addSiblings(siblingsIds)
+                            }
+                        }
+                        hierarchyMap.put(modelId, hierarchyEntry)
+                    }
+                }
+            }
+        }
+        return hierarchyMap
     }
 
     void changeDomainStatus(boolean isDomain) {
