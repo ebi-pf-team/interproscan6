@@ -130,15 +130,11 @@ class Entry implements Serializable {
     Entry(String accession,
           String name,
           String description,
-          String type,
-          List<GoXrefs> goXrefs,
-          List<PathwayXrefs> pathwayXrefs) {
+          String type) {
         this.accession = accession
         this.name = name
         this.description = description
         this.type = type
-        this.goXrefs = goXrefs
-        this.pathwayXrefs = pathwayXrefs
     }
 
     static Entry fromMap(Map data) {
