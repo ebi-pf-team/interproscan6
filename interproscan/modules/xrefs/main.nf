@@ -42,9 +42,6 @@ process XREFS {
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, jsonMatches ->
             [(seqId): jsonMatches.collectEntries { matchId, jsonMatch ->
                 Match matchObject = Match.fromMap(jsonMatch)
-//                 } catch (Exception e) {  // coils, hamap and mobidb have different json structure
-//                     Match matchObject = Match.fromMap(jsonMatches)
-//                 }
                 def entriesInfo = entries['entries']
                 String accId = matchObject.modelAccession.split("\\.")[0]
                 Signature signatureObject = new Signature(accId, "", "", sigLibRelease, null)
