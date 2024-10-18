@@ -42,6 +42,9 @@ process XREFS {
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, jsonMatches ->
             [(seqId): jsonMatches.collectEntries { matchId, jsonMatch ->
                 Match matchObject = Match.fromMap(jsonMatch)
+//                 } catch (Exception e) {  // coils, hamap and mobidb have different json structure
+//                     Match matchObject = Match.fromMap(jsonMatches)
+//                 }
                 def entriesInfo = entries['entries']
                 String accId = matchObject.modelAccession.split("\\.")[0]
                 Signature signatureObject = new Signature(accId, "", "", sigLibRelease, null)
@@ -49,12 +52,15 @@ process XREFS {
 
                 if (memberDB == "panther") {
                     String sigAcc = matchObject.signature.accession
-                    String paintAnnPath = "${params.appsConfig.panther.paintAnnDir}/${sigAcc}.json"
+                    String paintAnnPath = "${dataDir}/${params.appsConfig.panther.paint}/${sigAcc}.json"
+                    println "paintAnnPath: ${paintAnnPath}"
                     File paintAnnotationFile = new File(paintAnnPath.toString())
                     if (paintAnnotationFile.exists()) {
                         def paintAnnotationsContent = jsonSlurper.parse(paintAnnotationFile)
                         String nodeId = matchObject.treegrafter.ancestralNodeID
+                        println "nodeId: ${nodeId}"
                         def nodeData = paintAnnotationsContent[nodeId]
+                        println "nodeData: ${nodeData}"
                         matchObject.treegrafter.proteinClass = nodeData[2]
                         matchObject.treegrafter.graftPoint = nodeData[3]
                     }
@@ -123,10 +129,10 @@ process XREFS {
                 }
 
                 if (memberDB == "panther") {
-                    String accSubfamily = matchObject.treegrafter.subfamilyAccession
-                    matchObject.treegrafter.subfamilyAccession = accSubfamily
+                    accSubfamily = matchObject.signature.accession
                     if (entriesInfo[accSubfamily]) {
-                        matchObject.treegrafter.subfamilyName = entrieInfo[accSubfamily]["name"]
+                        matchObject.treegrafter.subfamilyName = entriesInfo[accSubfamily]["name"]
+                        matchObject.treegrafter.subfamilyDescription = entriesInfo[accSubfamily]["description"]
                     }
                 }
                 return [(matchId): matchObject]

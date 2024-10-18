@@ -382,6 +382,7 @@ class TreeGrafter implements Serializable {
     String graftPoint
     String subfamilyAccession
     String subfamilyName
+    String subfamilyDescription
     String proteinClass
 
     TreeGrafter(String ancestralNodeID) {
@@ -396,6 +397,7 @@ class TreeGrafter implements Serializable {
         tg.graftPoint = data.graftPoint
         tg.subfamilyAccession = data.subfamilyAccession
         tg.subfamilyName = data.subfamilyName
+        tg.subfamilyDescription = data.subfamilyDescription
         tg.proteinClass = data.proteinClass
         return tg
     }
