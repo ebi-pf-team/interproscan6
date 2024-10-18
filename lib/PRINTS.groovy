@@ -11,87 +11,79 @@ class PRINTS {
         Map<String, Map<String, Match>> hits = new LinkedHashMap<>()  // <protein ID <Model Acc, Match>>
         Map<String, String> name2accession = new LinkedHashMap<>()  // <motifName, motifAccession>
         String queryAccession = null  // protein seq ID
-        Map<String, Match> thisProteinsMatches = new LinkedHashMap<>()  // all Matches for the current working protein
+        Map<String, Match> thisProteinsMatchesMap = new LinkedHashMap<>()  // modelName: Match()
+        Map<String, Set<Match>> allThisProteinMatches = new LinkedHashMap<>()  // all matches for this protein
 
         printsFile.withReader { reader ->
             String line
             while ((line = reader.readLine()) != null) {
-                if (line.startsWith("Sn;")) {
-                    // Post-process/filter the hits from the last protein
-                    if (!thisProteinsMatches.isEmpty()) {
-                        hits = filterProteinMatches(queryAccession, thisProteinsMatches, hierarchyMap, name2accession, hits)
-                    }
-                    // Start the new protein: Get the query sequence id
+                if (line.startsWith("Sn;")) { // Start the new protein: Get the query sequence id
                     queryAccession = line.replaceFirst("Sn; ", "").trim()
                     name2accession = new LinkedHashMap<>()
-                    thisProteinsMatches = new LinkedHashMap<>()
+                    thisProteinsMatchesMap = new LinkedHashMap<>()
                 }
-                // Do not retrieve the motif Description from the 1TBH line as this is retrieved in the XREFS subworkflow
-                // And retrieve the motifAcc from the heirarchyDB instead of the 1TBH line
-                else if (line.startsWith("2TBH")) {  // Used to create Match instances
-                    // Line: 2TBH  modelId  NumMotifs  SumId  AveId  ProfScore  Ppvalue  Evalue  GraphScan
-                    def matcher = line =~ ~/^2TBH\s+(.+?)\s+(\d)\s+of\s+\d\s+\d+\.?\d*\s+\d+\.?\d*\s+\d+\s+.*?\s+(.*?)\s+([\.iI]+)\s+$/
-                    if (matcher.find()) {
-                        String modelId = matcher.group(1).trim()
-                        int numOfMotifs = Integer.parseInt(matcher.group(2).trim())
-                        Double evalue = Double.parseDouble(matcher.group(3).trim())
-                        String graphScan = matcher.group(4).trim()
-
-                        if (hierarchyMap.containsKey(modelId)) {
-                            String modelAccession = hierarchyMap[modelId]["modelAccession"]
-                            int minMotifCount = hierarchyMap[modelId]["minMotifCount"] as int
-                            Double cutoff = hierarchyMap[modelId]["evalueCutoff"] as Double
-
-                            if (evalue <= cutoff && numOfMotifs > minMotifCount) {
-                                thisProteinsMatches.put(modelAccession, new Match(modelAccession, evalue, graphScan))
-                                name2accession.put(modelId, modelAccession)
-                            }
+                else if (line.startsWith("1TBH")) {
+                    // Line: 1TBH 4DISULPHCORE    1.4e-07        4-disulphide core signature       PR00003
+                    def matcher1TBH = line =~ ~/^1TBH\s+(\S+)\s+(\S+)\s+.*?\s+(PR\d+)\s+$/
+                    if (matcher1TBH.find()) {
+                        String modelName = matcher1TBH.group(1).trim()
+                        final Double evalue = matcher1TBH.group(2).trim() as Double
+                        String modelId = matcher1TBH.group(3).trim()
+                        Match match = new Match(modelName)
+                        match.evalue = evalue
+                        if (!thisProteinsMatchesMap.containsKey(modelName)) {thisProteinsMatchesMap.put(modelName, match)}
+                        name2accession.put(modelName, modelId)
+                    }
+                }
+                else if (line.startsWithAny("2TBH", "2TBN")) {  // Retrieve the graphScan value
+                    // Line: 2TBH|N  modelId  NumMotifs  SumId  AveId  ProfScore  Ppvalue  Evalue  GraphScan
+                    def matcher2TB = line =~ ~/^2TB[H|N]\s+(\S+)\s+\d+\s+of\s+\d+\s+\d+\.?\d*\s+\d+\.?\d*\s+\d+\s+.*?\s+.*?\s+([\.iI]+)\s+$/
+                    if (matcher2TB.find()) {
+                        String modelName = matcher2TB.group(1).trim()
+                        final String graphScan = matcher2TB.group(2).trim()
+                        if (thisProteinsMatchesMap.containsKey(modelName) && hierarchyMap.containsKey(modelName)) {  // Has to be in the hierarchyDB
+                            thisProteinsMatchesMap[modelName].graphScan = graphScan
                         }
                     }
                 }
-                else if (line.startsWith("3TBH")) {  // Used to create Location instances
-                    // Line: 3TBH modelId NoOfMotifs IdScore PfScore Pvalue Sequence Len Low Pos High
-                    def matcher = line =~ ~/^3TBH\s+(.+?)\s+(\d+)\s+of\s+\d+\s+([\d\.]+)\s+\d+\s+(.+?)\s+([\w#]+)\s+(\d+)\s+\d+\s+(-?\d+)\s*\d\s*$/
-                    if (matcher.find()) {
-                        // Check motif passed the e-value cutoff when parsing line 2TBH - else SKIP!
-                        String modelId = matcher.group(1).trim()
-                        String modelAccession = name2accession[modelId]
-                        if (thisProteinsMatches.containsKey(modelAccession)) {
-                            final int motifNumber = Integer.parseInt(matcher.group(2).trim())
-                            final Float idScore = Float.parseFloat(matcher.group(3).trim())
-                            final Double pvalue = Double.parseDouble(matcher.group(4).trim())
-                            final String sequence = matcher.group(5).trim()
-                            int motifLength = Integer.parseInt(matcher.group(6).trim())
-                            int position = Integer.parseInt(matcher.group(7).trim())
+                else if (line.startsWithAny("3TBH", "3TBN")) {  // Used to identify match locations
+                    // For the post processing create one Match per location, so each Match obj has one Location obj
+                    // Line: 3TBH|N modelId NoOfMotifs IdScore PfScore Pvalue Sequence Len Low Pos High
+                    def matcher3TB = line =~ ~/^3TB[H|N]\s+(.+?)\s+(\d+)\s+of\s+(\d+)\s+([\d\.]+)\s+\d+\s+(.+?)\s+([\w#]+)\s+(\d+)\s+\d+\s+(-?\d+)\s*\d\s*$/
+                    if (matcher3TB.find()) {
+                        String modelName = matcher3TB.group(1).trim()
+                        int motifNumber = matcher3TB.group(2).trim() as int  // number of this motif 'X' of Y
+                        final Double score = matcher3TB.group(4).trim() as Double
+                        final Double pvalue = matcher3TB.group(5).trim() as Double
+                        final String motifSequence = matcher3TB.group(6).trim()
+                        final int motifLength = matcher3TB.group(7).trim() as int
 
-                            int end = position + motifLength - 1
-                            if (position < 1) {
-                                position = 1
-                            }
+                        int locationStart = matcher3TB.group(8).trim() as int
+                        if (locationStart < 1) {locationStart = 1}
 
-                            // If the motif seq ends in #, it over hands the end of the query sequence
-                            // If that's the case, find out by how far and adjust the end appropriately
-                            int indexCheck = 0
-                            if (sequence.endsWith("#")) {
-                                motifLength = sequence.length()
-                                indexCheck = motifLength - 1
-                                while (sequence[indexCheck] == "#") {
-                                    indexCheck -= 1
-                                }
-                            }
-                            end = end - (motifLength - indexCheck) + 1
-
-                            Location location = new Location(position, end, pvalue, idScore, motifNumber)
-                            thisProteinsMatches[modelAccession].addLocation(location)
-
+                        int locationEnd = locationStart + motifLength - 1
+                        if (motifSequence.endsWith("#")) { // it overhangs the protein seq so adjust locationEnd
+                            int motifSeqLength = motifSequence.length()
+                            int indexCheck = motifSeqLength - 1
+                            while (motifSequence[indexCheck] == "#") {indexCheck -= 1}
+                            locationEnd = locationEnd - (motifSeqLength - indexCheck) + 1
                         }
+
+                        Match newMatch = thisProteinsMatchesMap[modelName]
+                        Location location = new Location(locationStart, locationEnd, pvalue, score, motifNumber)
+                        newMatch.addLocation(location)
+
+                        if (!allThisProteinMatches.containsKey(modelName)) {
+                            allThisProteinMatches.put(modelName, new HashSet<Match>())
+                        }
+                        allThisProteinMatches[modelName].add(newMatch)
                     }
+
+                }
+                else if (line.startsWith("3TBF") && !allThisProteinMatches.isEmpty()) { // parse the matches for this protein
+                    hits = filterProteinMatches(queryAccession, thisProteinsMatches, hierarchyMap, name2accession, hits)
                 }
             }
-        }
-        // process the last protein
-        if (!thisProteinsMatches.isEmpty()) {
-            hits = filterProteinMatches(queryAccession, thisProteinsMatches, hierarchyMap, name2accession, hits)
         }
 
         return hits
