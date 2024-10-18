@@ -32,7 +32,7 @@ process JSON_OUTPUT {
                 "signature": matchObj.signature,
                 "locations": []
             ]
-            if (memberDB in ["PHOBIUS", "SUPERFAMILY"]) {
+            if (memberDB in ["phobius", "superfamily"]) {
                 match_data['locations'].each { location ->
                     def locationResult = [
                         "start"          : location.start,
@@ -41,9 +41,9 @@ process JSON_OUTPUT {
                         "location-fragments": location.locationFragments
                     ]
 
-                    if (memberDB == "PHOBIUS") {
+                    if (memberDB == "phobius") {
                         matchResult["model-ac"] = matchObj.modelAccession
-                    } else if (memberDB == "SUPERFAMILY") {
+                    } else if (memberDB == "superfamily") {
                         locationResult['evalue'] = location.evalue
                         locationResult["hmmLength"] = location.hmmLength
                         matchResult["locations"] = location_info
@@ -65,18 +65,18 @@ process JSON_OUTPUT {
                         ]
                         hmmBounds = HMM_BOUND_PATTERN[location.hmmBounds]
                         switch (memberDB) {
-                            case "CDD":
+                            case "cdd":
                                 locationResult["evalue"] = location.evalue
                                 locationResult["score"] = location.score
                                 break
-                            case "HAMAP":
+                            case "hamap":
                                 locationResult["score"] = location.score
-                                locationResult["alignment"] = location.alignment
+//                                 locationResult["alignment"] = location.alignment
                                 break
-                            case "MOBIDB_LITE":
+                            case "mobidb_lite":
                                 locationResult["sequence-feature"] = location.sequenceFeature
                                 break
-                            case "PANTHER":
+                            case "panther":
                                 locationResult["hmmStart"] = location.hmmStart
                                 locationResult["hmmEnd"] = location.hmmEnd
                                 locationResult["hmmLength"] = 0
@@ -84,7 +84,7 @@ process JSON_OUTPUT {
                                 locationResult["envelopeStart"] = location.envelopeStart
                                 locationResult["envelopeEnd"] = location.envelopeEnd
                                 break
-                            case "PIRSF":
+                            case "pirsf":
                                 locationResult["evalue"] = location.evalue
                                 locationResult["score"] = location.score
                                 locationResult["hmmStart"] = location.start
@@ -94,21 +94,21 @@ process JSON_OUTPUT {
                                 locationResult["envelopeStart"] = location.envelopeStart
                                 locationResult["envelopeEnd"] = location.envelopeEnd
                                 break
-                            case "PRINTS":
+                            case "prints":
                                 locationResult["pvalue"] = location.pvalue
                                 locationResult["score"] = location.score
                                 locationResult["motifNumber"] = location.motifNumber
                                 break
-                            case "PROSITE_PROFILES":
+                            case "prosite_profiles":
                                 locationResult["score"] = location.score
                                 locationResult["alignment"] = location.alignment
                                 break
-                            case "PROSITE_PATTERNS":
+                            case "prosite_patterns":
                                 locationResult["cigarAlignment"] = location.cigarAlignment
                                 locationResult["alignment"] = location.alignment
                                 locationResult["level"] = location.level
                                 break
-                            case ["PIRSR", "SFLD"]:
+                            case ["pirsr", "sfld"]:
                                 locationResult["evalue"] = location.evalue
                                 locationResult["score"] = location.score
                                 locationResult["hmmStart"] = location.hmmStart
@@ -117,12 +117,12 @@ process JSON_OUTPUT {
                                 locationResult["envelopeStart"] = location.envelopeStart
                                 locationResult["envelopeEnd"] = location.envelopeEnd
                                 break
-                            case ["SIGNALP", "SIGNALP_EUK"]:
+                            case ["signalp", "signalp_euk"]:
                                 locationResult["pvalue"] = location.pvalue
                                 locationResult["cleavageStart"] = location.cleavageStart
                                 locationResult["cleavageEnd"] = location.cleavageEnd
                                 break
-                            case "SMART":
+                            case "smart":
                                 locationResult["evalue"] = location.evalue
                                 locationResult["score"] = location.score
                                 locationResult["hmmStart"] = location.hmmStart
@@ -140,7 +140,7 @@ process JSON_OUTPUT {
                                 locationResult["envelopeStart"] = location.envelopeStart
                                 locationResult["envelopeEnd"] = location.envelopeEnd
                         }
-                        if (memberDB in ["CDD", "PIRSR", "SFLD"]) {
+                        if (memberDB in ["cdd", "pirsr", "sfld"]) {
                             locationResult["sites"] = location.sites ?: []
                         }
                         locationResult["location-fragments"] = location.fragments
@@ -149,25 +149,23 @@ process JSON_OUTPUT {
                     }
                 }
 
-                if (!(memberDB in ["CDD", "COILS", "HAMAP", "MOBIDB_LITE", "PHOBIUS", "PIRSR", "PROSITE_PROFILES", "PROSITE_PATTERNS", "PRINTS", "SIGNALP", "SIGNALP_EUK"])) {
+                if (!(memberDB in ["cdd", "coils", "hamap", "mobidb_lite", "phobius", "pirsr", "prosite_profiles", "prosite_patterns", "prints", "signalp", "signalp_euk"])) {
                     matchResult["evalue"] = matchObj.evalue
                     matchResult["score"] = matchObj.score
                 }
-                matchResult["model-ac"] = matchObj.modelAccession
-                if (memberDB == "SFLD") {
+                matchResult["model-ac"] = matchObj.modelAccession.split("\\.")[0]
+                if (memberDB == "sfld") {
                     matchResult["scope"] = null
-                } else if (memberDB == "PANTHER") {
-                    matchResult["name"] = matchObj.entry.subfamily_description
+                } else if (memberDB == "panther") {
+                    matchResult["name"] = matchObj.treegrafter.subfamilyDescription
                     matchResult["accession"] =matchObj.modelAccession
-                    matchResult["goXRefs"] = matchObj.goXrefs
-                    signature["description"] = null
-                    signature["name"] = matchObj.entry.description
-                    matchResult["proteinClass"] = matchObj.proteinClass
-                    matchResult["graftPoint"] = matchObj.graftPoint
-                } else if (memberDB == "PRINTS") {
+                    matchResult["goXRefs"] = matchObj.signature?.entry?.goXRefs ?: []
+                    matchResult["proteinClass"] = matchObj.treegrafter.proteinClass
+                    matchResult["graftPoint"] = matchObj.treegrafter.graftPoint
+                } else if (memberDB == "prints") {
                     matchResult["evalue"] = matchObj.evalue
                     matchResult["graphscan"] = matchObj.graphscan
-                } else if (memberDB in ["SIGNALP", "SIGNALP_EUK"]) {
+                } else if (memberDB in ["signalp", "signalp_euk"]) {
                     matchResult["orgType"] = matchObj.orgType
                 }
             }
