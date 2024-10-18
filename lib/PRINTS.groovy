@@ -6,94 +6,103 @@ class PRINTS {
         // Build up a map of the Model ID to fingerprint hierarchies
         Map<String, HierarchyEntry> hierarchyMap = HierarchyEntry.parseHierarchyDbFile(hierarchyDb)
 
-        // parse the Prints Output into Match instances
-        File printsFile = new File(printsOutput)
         Map<String, Map<String, Match>> hits = new LinkedHashMap<>()  // <protein ID <Model Acc, Match>>
+
+        File printsFile = new File(printsOutput)
         Map<String, String> name2accession = new LinkedHashMap<>()  // <motifName, motifAccession>
         String queryAccession = null  // protein seq ID
         Map<String, Match> thisProteinsMatchesMap = new LinkedHashMap<>()  // modelName: Match()
-        Set<Match> allThisProteinMatches = [] as Set<Match>  // all matches for this protein
-        Set<Match> proteinMatches = [] as Set<Match>
+        Set<Match> allThisProceinsMatches = [] as Set<Match>  // all matches for this protein
+        Set<Match> filteredProteinMatches = [] as Set<Match>
 
         printsFile.withReader { reader ->
             String line
             while ((line = reader.readLine()) != null) {
+
                 if (line.startsWith("Sn;")) { // Start the new protein: Get the query sequence id
                     queryAccession = line.replaceFirst("Sn; ", "").split(" ")[0].trim()
-                    name2accession = new LinkedHashMap<>()
-                    thisProteinsMatchesMap = new LinkedHashMap<>()
                 }
-                else if (line.startsWith("1TBH")) {
-                    // Line: 1TBH 4DISULPHCORE    1.4e-07        4-disulphide core signature       PR00003
-                    def matcher1TBH = line =~ ~/^1TBH\s+(\S+)\s+(\S+)\s+.*?\s+(PR\d+)\s+$/
-                    if (matcher1TBH.find()) {
-                        String modelName = matcher1TBH.group(1).trim()
+
+                // Line: 1TBH 4DISULPHCORE    1.4e-07        4-disulphide core signature       PR00003
+                def matcher1TBH = line =~ ~/^1TBH\s+(\S+)\s+(\S+)\s+.*?\s+(PR\d+)\s+$/
+                if (matcher1TBH.find()) {
+                    String modelName = matcher1TBH.group(1).trim()
+
+                    if (hierarchyMap.containsKey(modelName)) {  // the model has to be in the Hierarchy DB
                         final Double evalue = matcher1TBH.group(2).trim() as Double
                         String modelId = matcher1TBH.group(3).trim()
+
                         Match match = new Match(modelName)
                         match.evalue = evalue
-                        if (!thisProteinsMatchesMap.containsKey(modelName)) {thisProteinsMatchesMap.put(modelName, match)}
+                        if (!thisProteinsMatchesMap.containsKey(modelName)) {
+                            thisProteinsMatchesMap.put(modelName, match)
+                        }
+
                         name2accession.put(modelName, modelId)
                     }
                 }
-                else if (line.startsWithAny("2TBH", "2TBN")) {  // Retrieve the graphScan value
-                    // Line: 2TBH|N  modelId  NumMotifs  SumId  AveId  ProfScore  Ppvalue  Evalue  GraphScan
-                    def matcher2TB = line =~ ~/^2TB[H|N]\s+(\S+)\s+\d+\s+of\s+\d+\s+\d+\.?\d*\s+\d+\.?\d*\s+\d+\s+.*?\s+.*?\s+([\.iI]+)\s+$/
-                    if (matcher2TB.find()) {
-                        String modelName = matcher2TB.group(1).trim()
-                        final String graphScan = matcher2TB.group(2).trim()
-                        if (thisProteinsMatchesMap.containsKey(modelName) && hierarchyMap.containsKey(modelName)) {  // Has to be in the hierarchyDB
-                            thisProteinsMatchesMap[modelName].graphScan = graphScan
-                        }
+
+                // Line: 2TBH|N  modelId  NumMotifs  SumId  AveId  ProfScore  Ppvalue  Evalue  GraphScan
+                // Retrieve the graphScan value
+                def matcher2TB = line =~ ~/^2TB[H|N]\s+(\S+)\s+\d+\s+of\s+\d+\s+\d+\.?\d*\s+\d+\.?\d*\s+\d+\s+.*?\s+.*?\s+([\.iI]+)\s+$/
+                if (matcher2TB.find()) {
+                    String modelName = matcher2TB.group(1).trim()
+                    final String graphScan = matcher2TB.group(2).trim()
+                    if (thisProteinsMatchesMap.containsKey(modelName)) {
+                        thisProteinsMatchesMap[modelName].graphScan = graphScan
                     }
                 }
-                else if (line.startsWithAny("3TBH", "3TBN")) {  // Used to identify match locations
-                    // For the post processing create one Match per location, so each Match obj has one Location obj
-                    // Line: 3TBH|N modelId NoOfMotifs IdScore PfScore Pvalue Sequence Len Low Pos High
-                    def matcher3TB = line =~ ~/^3TB[H|N]\s+(.+?)\s+(\d+)\s+of\s+(\d+)\s+([\d\.]+)\s+\d+\s+(.+?)\s+([\w#]+)\s+(\d+)\s+\d+\s+(-?\d+)\s*\d\s*$/
-                    if (matcher3TB.find()) {
-                        String modelName = matcher3TB.group(1).trim()
 
-                        if (thisProteinsMatchesMap.containsKey(modelName)) {
-                            int motifNumber = matcher3TB.group(2).trim() as int  // number of this motif 'X' of Y
-                            final Double score = matcher3TB.group(4).trim() as Double
-                            final Double pvalue = matcher3TB.group(5).trim() as Double
-                            final String motifSequence = matcher3TB.group(6).trim()
-                            final int motifLength = matcher3TB.group(7).trim() as int
+                // For the post processing create one Match per location, so each Match obj has one Location obj
+                // Line: 3TBH|N modelId NoOfMotifs IdScore PfScore Pvalue Sequence Len Low Pos High
+                def matcher3TB = line =~ ~/^3TB[H|N]\s+(.+?)\s+(\d+)\s+of\s+(\d+)\s+([\d\.]+)\s+\d+\s+(.+?)\s+([\w#]+)\s+(\d+)\s+\d+\s+(-?\d+)\s*\d\s*$/
+                if (matcher3TB.find()) {
+                    String modelName = matcher3TB.group(1).trim()
 
-                            int locationStart = matcher3TB.group(8).trim() as int
-                            if (locationStart < 1) {
-                                locationStart = 1
-                            }
+                    if (thisProteinsMatchesMap.containsKey(modelName) ) {
+                        int motifNumber = matcher3TB.group(2).trim() as int  // number of this motif 'X' of Y
+                        final Double score = matcher3TB.group(4).trim() as Double
+                        final Double pvalue = matcher3TB.group(5).trim() as Double
+                        final String motifSequence = matcher3TB.group(6).trim()
+                        final int motifLength = matcher3TB.group(7).trim() as int
 
-                            int locationEnd = locationStart + motifLength - 1
-                            if (motifSequence.endsWith("#")) { // it overhangs the protein seq so adjust locationEnd
-                                int motifSeqLength = motifSequence.length()
-                                int indexCheck = motifSeqLength - 1
-                                while (motifSequence[indexCheck] == "#") {
-                                    indexCheck -= 1
-                                }
-                                locationEnd = locationEnd - (motifSeqLength - indexCheck) + 1
-                            }
-
-                            Match newMatch = thisProteinsMatchesMap[modelName]
-                            Location location = new Location(locationStart, locationEnd, pvalue, score, motifNumber)
-                            newMatch.addLocation(location)
-                            allThisProteinMatches.add(newMatch)
+                        int locationStart = matcher3TB.group(8).trim() as int
+                        if (locationStart < 1) {
+                            locationStart = 1
                         }
-                    }
 
+                        int locationEnd = locationStart + motifLength - 1
+                        if (motifSequence.endsWith("#")) { // it overhangs the protein seq so adjust locationEnd
+                            int motifSeqLength = motifSequence.length()
+                            int indexCheck = motifSeqLength - 1
+                            while (motifSequence[indexCheck] == "#") {
+                                indexCheck -= 1
+                            }
+                            locationEnd = locationEnd - (motifSeqLength - indexCheck) + 1
+                        }
+
+                        Match newMatch = new Match(
+                                thisProteinsMatchesMap[modelName].modelAccession,
+                                thisProteinsMatchesMap[modelName].evalue,
+                                thisProteinsMatchesMap[modelName].graphScan
+                        )
+                        Location location = new Location(locationStart, locationEnd, pvalue, score, motifNumber)
+                        newMatch.addLocation(location)
+                        allThisProceinsMatches.add(newMatch)
+                    }
                 }
-                else if (line.startsWith("3TBF") && !allThisProteinMatches.isEmpty()) { // parse the matches for this protein
-                    System.out.println("${queryAccession} Matches: ${allThisProteinMatches.size()}")
-                    proteinMatches = filterProteinMatches(queryAccession, allThisProteinMatches, hierarchyMap, name2accession, hits)
-                    System.out.println("${queryAccession} Filtered Matches: ${proteinMatches.size()}")
-                    hits = storeMatches(hits, proteinMatches as List<Match>, queryAccession, name2accession)
+
+                else if (line.startsWith("3TBF") && !allThisProceinsMatches.isEmpty()) { // parse the matches for this protein
+                    if (!allThisProceinsMatches.isEmpty()) {
+                        filteredProteinMatches = filterProteinMatches(queryAccession, allThisProceinsMatches, hierarchyMap, name2accession, hits)
+                        hits = storeMatches(hits, filteredProteinMatches as List<Match>, queryAccession, name2accession)
+                    }
+                    // reset the values
                     name2accession = new LinkedHashMap<>()  // <motifName, motifAccession>
                     queryAccession = null  // protein seq ID
                     thisProteinsMatchesMap = new LinkedHashMap<>()  // modelName: Match()
-                    allThisProteinMatches = [] as Set<Match>  // all matches for this protein
-                    proteinMatches = [] as Set<Match>
+                    allThisProceinsMatches = [] as Set<Match>  // all matches for this protein
+                    filteredProteinMatches = [] as Set<Match>
                 }
             }
         }
@@ -118,7 +127,6 @@ class PRINTS {
         5. Apply the hierarchy constraints to see if the match passes
          */
         List<Match> sortedMatches = sortMatches(thisProteinsMatches as List<Match>)
-        System.out.println("Inside filterProteinMatches: ${sortedMatches.size()} sortedMatches")
         List<Match> filteredMatches = [] as List<Match>
 
         String currentModelAcc = null
@@ -137,7 +145,6 @@ class PRINTS {
                             currentHierarchyEntry, hierarchtEntryIdLimitation
                     )
                     if (passed) {
-                        System.out.println("Passes, ${motifMatchesForCurrentModel}")
                         filteredMatches.addAll(motifMatchesForCurrentModel)
                         if (currentHierarchyEntry.siblingsIds.length < hierarchtEntryIdLimitation.size()) {
                             hierarchtEntryIdLimitation = currentHierarchyEntry.siblingsIds
@@ -190,22 +197,13 @@ class PRINTS {
         HierarchyEntry hierarchy,
         Set<String> hierarchyEntryIdLimitation
     ) {
-        System.out.println("len hier ${hierarchyEntryIdLimitation.size()}")
-        System.out.println("modelName ${modelName} -- ${hierarchyEntryIdLimitation[0]}")
-
         // Check that enough motifs for the current model passed the previous filtering criteria
         if (motifMatchesForCurrentModel.size() < hierarchy.minMotifCount) {
-            System.out.println("*XX* too few motifs")
             return false }
         // If the model is a domain: PASS - there is no hierarchy to deal with
-        if (hierarchy.isDomain) {
-            System.out.println("** isDomain")
-            return true }
+        if (hierarchy.isDomain) { return true }
         // Check the model meets the hierarchy filtering criteria
-        if (hierarchyEntryIdLimitation.contains(modelName)) {
-            System.out.println("** inHierarchy")
-            return true }
-        System.out.println("*XX* notInHierarchy")
+        if (hierarchyEntryIdLimitation.contains(modelName)) { return true }
         return false
     }
 
