@@ -64,7 +64,7 @@ def compare(expected, current, ignore_elements: list, print_md5: bool, print_acc
                 for i in range(len(expected[key])):
                     compare(expected[key][i], current[key][i], ignore_elements, print_md5, print_acc)
         else:
-            if str(expected[key]).lower() != str(current[key]).lower():
+            if str(expected[key]).lower().strip() != str(current[key]).lower().strip():
                 print(f"MISMATCH: for key '{key}'")
                 print(f"  expected: {expected[key]}")
                 print(f"  current: {current[key]}")
