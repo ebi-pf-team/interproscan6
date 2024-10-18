@@ -192,10 +192,10 @@ class PRINTS {
     }
 
     static selectMatches(
-        List<Match> motifMatchesForCurrentModel,
-        String modelName,
-        HierarchyEntry hierarchy,
-        Set<String> hierarchyEntryIdLimitation
+            List<Match> motifMatchesForCurrentModel,
+            String modelName,
+            HierarchyEntry hierarchy,
+            Set<String> hierarchyEntryIdLimitation
     ) {
         // Check that enough motifs for the current model passed the previous filtering criteria
         if (motifMatchesForCurrentModel.size() < hierarchy.minMotifCount) {
@@ -242,7 +242,7 @@ class HierarchyEntry implements Serializable { // represents a row in the Hierar
     int minMotifCount
     boolean isDomain = false
     String[] siblingsIds = []
-    
+
     HierarchyEntry(String modelId, String modelAccession, Double evalueCutoff, int minMotifCount) {
         this.modelId = modelId
         this.modelAccession = modelAccession

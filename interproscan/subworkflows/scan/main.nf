@@ -8,6 +8,8 @@ include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                      
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
 include { RUN_PRINTS; PARSE_PRINTS                                                } from  "../../modules/prints"
+include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
+
 
 workflow SCAN_SEQUENCES {
     take:
@@ -24,7 +26,7 @@ workflow SCAN_SEQUENCES {
         .set { ch_fasta }
 
     ch_seqs
-        .map { index, fasta, json -> json }
+        .map { index, fasta, json -> tuple( index, json ) }
         .set { ch_json }
 
     if (applications.contains("antifam")) {
@@ -115,8 +117,7 @@ workflow SCAN_SEQUENCES {
         PREPROCESS_HAMAP(ch_fasta,
             "${datadir}/${appsConfig.hamap.hmm}")
 
-        PREPARE_HAMAP(PREPROCESS_HAMAP.out,
-            ch_json,
+        PREPARE_HAMAP(PREPROCESS_HAMAP.out.join(ch_json),
             "${datadir}/${appsConfig.hamap.dir}")
 
         RUN_HAMAP(PREPARE_HAMAP.out,
@@ -202,7 +203,13 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("smart")) {
-        // TODO
+        SEARCH_SMART(ch_fasta,
+            "${datadir}/${appsConfig.smart.hmmbin}")
+
+        PARSE_SMART(SEARCH_SMART.out.join(ch_json),
+            "${datadir}/${appsConfig.smart.hmm}")
+
+        results = results.mix(PARSE_SMART.out)  
     }
 
     if (applications.contains("superfamily")) {
