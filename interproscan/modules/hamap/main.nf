@@ -131,7 +131,8 @@ process PARSE_HAMAP {
             match = matches[sequenceId]
         } else {
             match = new Match(modelAccession)
-            matches[sequenceId] = match
+            matches[sequenceId] = [:]
+            matches[sequenceId][modelAccession] = match
         }
 
         Location location = new Location(start, end, score, alignment)
