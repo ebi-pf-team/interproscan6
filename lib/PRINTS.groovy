@@ -12,7 +12,8 @@ class PRINTS {
         Map<String, String> name2accession = new LinkedHashMap<>()  // <motifName, motifAccession>
         String queryAccession = null  // protein seq ID
         Map<String, Match> thisProteinsMatchesMap = new LinkedHashMap<>()  // modelName: Match()
-        Map<String, Set<Match>> allThisProteinMatches = new LinkedHashMap<>()  // all matches for this protein
+        Set<Match> allThisProteinMatches = [] as Set<Match>  // all matches for this protein
+        Set<Match> proteinMatches = [] as Set<Match>
 
         printsFile.withReader { reader ->
             String line
@@ -72,16 +73,12 @@ class PRINTS {
                         Match newMatch = thisProteinsMatchesMap[modelName]
                         Location location = new Location(locationStart, locationEnd, pvalue, score, motifNumber)
                         newMatch.addLocation(location)
-
-                        if (!allThisProteinMatches.containsKey(modelName)) {
-                            allThisProteinMatches.put(modelName, new HashSet<Match>())
-                        }
-                        allThisProteinMatches[modelName].add(newMatch)
+                        allThisProteinMatches.add(newMatch)
                     }
 
                 }
                 else if (line.startsWith("3TBF") && !allThisProteinMatches.isEmpty()) { // parse the matches for this protein
-                    hits = filterProteinMatches(queryAccession, thisProteinsMatches, hierarchyMap, name2accession, hits)
+                    proteinMatches = filterProteinMatches(queryAccession, allThisProteinMatches, hierarchyMap, name2accession, hits)
                 }
             }
         }
@@ -91,30 +88,66 @@ class PRINTS {
 
     static filterProteinMatches(
             String queryAccession,
-            Map<String, Match> thisProteinMatches,
+            Set<Match> thisProteinsMatches,
             Map<String, HierarchyEntry> hierarchyMap,
             Map<String, String> name2accession,
             Map<String, Map<String, Match>> hits
     ) {
-        List<Match> sortedMatches = sortMatches(thisProteinMatches.values() as List<Match>)
-        Set<String> HierarchtEntryIdLimitation = hierarchyMap.keySet() // initialise with all model IDs
+        /* General overview:
+        Matches to "Domain" PRINTS models can match outside of the hierarchy constraints, but apply the
+        hierarchy constraints to all other matches.
+        Filter matches:
+        1. evalue <= cutOff defined in hierarchyDb
+        2. motif >= min number of motifs defined in the hierarchy Db
+        3. order by evalue (best first)
+        4. If a domain pass
+        5. Apply the hierarchy constraints to see if the match passes
+         */
+        List<Match> sortedMatches = sortMatches(thisProteinsMatches as List<Match>)
+        List<Match> filteredMatches = [] as List<Match>
+
+        String currentModelAcc = null
+        List<Match> motifMatchesForCurrentModel = [] as List<Match>
+        boolean currentMatchesPass = true
+        boolean passed = false
+        HierarchyEntry currentHierarchyEntry = null
+        Set<String> hierarchtEntryIdLimitation = hierarchyMap.keySet() // initialise with all model
+
         for (Match match in sortedMatches) {
-            String modelId = name2accession.find{ it.value == match.modelAccession } ?.key
-            HierarchyEntry hierarchyEntry = hierarchyMap[modelId]
-            // check if match passes the filtering criteria
-            if (selectMatch(match, modelId, hierarchyEntry, HierarchtEntryIdLimitation)) {
-                if (!hits.containsKey(queryAccession)) {hits.put(queryAccession, new LinkedHashMap<>())}
-                hits[queryAccession].put(match.modelAccession, match)
-                // passed the filter and may have its own hierarchy so update the hierarchy limitation
-                if (hierarchyEntry.siblingsIds.length < HierarchtEntryIdLimitation.size()) {
-                    HierarchtEntryIdLimitation = hierarchyEntry.siblingsIds
+            if (currentModelAcc == null || currentModelAcc != match.modelAccession) {
+                // just started or moved onto the matches for the next model
+                if (currentModelAcc != null && currentMatchesPass && motifMatchesForCurrentModel.size() > 0) {
+                    passed = selectMatches(
+                            motifMatchesForCurrentModel, currentModelAcc,
+                            currentHierarchyEntry, hierarchtEntryIdLimitation
+                    )
+                    if (passed) {
+                        filteredMatches.addAll(motifMatchesForCurrentModel)
+                        if (currentHierarchyEntry.siblingsIds.length < hierarchtEntryIdLimitation.size()) {
+                            hierarchtEntryIdLimitation = currentHierarchyEntry.siblingsIds
+                        }
+                    }
                 }
+                // reset values
+                currentMatchesPass = true
+                motifMatchesForCurrentModel.clear()
+                currentModelAcc = match.modelAccession
+                currentHierarchyEntry = hierarchyMap[match.modelAccession]
             }
+
+            if (currentMatchesPass) {currentMatchesPass = match.evalue <= currentHierarchyEntry.evalueCutoff}
+            if (currentMatchesPass) {motifMatchesForCurrentModel.add(match)}
         }
 
-        /// Continue implenting: https://github.com/ebi-pf-team/interproscan/blob/13c095e3c6b6784c98f9769c6a07d122cfa160d1/core/business/src/main/java/uk/ac/ebi/interpro/scan/business/postprocessing/prints/PrintsPostProcessing.java#L226
+        // parse the last matches
+        if (motifMatchesForCurrentModel.size() > 0) {
+            if (selectMatches(
+                    motifMatchesForCurrentModel, currentModelAcc,
+                    currentHierarchyEntry, hierarchtEntryIdLimitation
+            )) {filteredMatches.addAll(motifMatchesForCurrentModel)}
+        }
 
-        return hits
+        return filteredMatches
     }
 
     static sortMatches(List<Match> matches) { // This comparator is CRITICAL to the working of PRINTS post-processing
@@ -135,12 +168,45 @@ class PRINTS {
         }
     }
 
-    static selectMatch(Match match, String motifId, HierarchyEntry hierarchy, Set<String> hierarchyEntryIdLimitation) {
-        // if a domain: PASS - there is no hierarchy to deal with
-        if (hierarchy.isDomain) {return true}
-        // if the previous model limited the filtering to its siblings. If the first model, this is all models in HierarchyDB
-        if (hierarchyEntryIdLimitation.contains(motifId)) {return true}
+    static selectMatches(
+        List<Match> motifMatchesForCurrentModel,
+        String modelName,
+        HierarchyEntry hierarchy,
+        Set<String> hierarchyEntryIdLimitation
+    ) {
+        // Check that enough motifs for the current model passed the previous filtering criteria
+        if (motifMatchesForCurrentModel.size() < hierarchy.minMotifCount) { return false }
+        // If the model is a domain: PASS - there is no hierarchy to deal with
+        if (hierarchy.isDomain) { return true }
+        // Check the model meets the hierarchy filtering criteria
+        if (!hierarchyEntryIdLimitation.contains(modelName)) { return true }
         return false
+    }
+
+    static storeMatches(
+            Map<String, Map<String, Match>> hits,
+            List<Match> proteinMatches,
+            String proteinId,
+            Map<String, String> name2accession
+    ) {
+        (!hits.containsKey(proteinId)) {hits.put(proteinId, new LinkedHashMap<String, Match>())}
+        for (Match match: proteinMatches) {
+            // the modelName has been used up to this point, but we need to convert to the correct model Accession/Id
+            String trueModelAccession = name2accession.get(match.modelAccession)
+            if (!hits[proteinId].containsKey(trueModelAccession)) {
+                Match newMatch = new Match(trueModelAccession, match.evalue, match.graphScan)
+                hits[proteinId].put(trueModelAccession, newMatch)
+            }
+            Location newLocation = new Location(
+                    match.locations[0].start,
+                    match.locations[0].end,
+                    match.locations[0].pvalue,
+                    match.locations[0].score,
+                    match.locations[0].motifNumber,
+            )
+            hits[proteinId][trueModelAccession].addLocation(newLocation)
+        }
+        return hits
     }
 }
 
