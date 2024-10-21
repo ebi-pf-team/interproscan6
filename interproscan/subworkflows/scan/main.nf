@@ -7,6 +7,7 @@ include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP               
 include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                        } from  "../../modules/mobidblite"
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
+include { RUN_SFLD; POST_PROCESS_SFLD; PARSE_SFLD                                 } from  "../../modules/sfld"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
 
 workflow SCAN_SEQUENCES {
@@ -189,7 +190,11 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("sfld")) {
-        // TODO
+        RUN_SFLD(ch_fasta, "${datadir}/${appsConfig.sfld.hmm}")
+        POST_PROCESS_SFLD(RUN_SFLD.out, "${datadir}/${appsConfig.sfld.postprocess.sites_annotation}")
+//         PARSE_SFLD(POST_PROCESS_SFLD.out)
+//
+//         results = results.mix(PARSE_SFLD.out)
     }
 
     if (applications.contains("smart")) {
