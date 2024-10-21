@@ -216,6 +216,28 @@ class Location implements Serializable {
         this.fragments = fragments
     }
 
+    Location(int start,
+             int end,
+             Integer hmmStart,
+             Integer hmmEnd,
+             Integer envelopeStart,
+             Integer envelopeEnd,
+             Double evalue,
+             Double score,
+             Double bias,
+             List<LocationFragment> fragments) {
+        this.start = start
+        this.end = end
+        this.hmmStart = hmmStart
+        this.hmmEnd = hmmEnd
+        this.envelopeStart = envelopeStart
+        this.envelopeEnd = envelopeEnd
+        this.evalue = evalue
+        this.score = score
+        this.bias = bias
+        this.fragments = fragments
+    }
+
     Location(int start, int end, String sequenceFeature = null) {
         this.start = start
         this.end = end
