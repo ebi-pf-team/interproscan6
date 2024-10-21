@@ -34,6 +34,18 @@ class Match implements Serializable {
         this.bias = bias
     }
 
+    Match clone() {  // Used in SFLD parsing to create parent matches
+        Match clonedMatch = new Match(
+                this.modelAccession,
+                this.evalue,
+                this.score,
+        )
+        for (Location location: this.locations) {
+            clonedMatch.addLocation(location)
+        }
+        return clonedMatch
+    }
+
     void addSite(Site site) {
         for (Location location: this.locations) {
             if (site.isInRange(location.start, location.end)) {
