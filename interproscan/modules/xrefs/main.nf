@@ -43,10 +43,6 @@ process XREFS {
 
     Map<String, Map<String, Match>> aggregatedMatches = [:]
 
-    if ("${apps}".contains('panther')) {
-        String paintAnnoDir = "${dataDir}/${params.appsConfig.paint}"
-    }
-
     matchesEntries = membersMatches.each { matchesPath  ->
         memberDB = matchesPath.toString().split("/").last().split("\\.")[0]
         def memberRelease = entries.databases.find { key, value ->
