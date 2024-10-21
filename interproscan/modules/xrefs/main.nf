@@ -34,7 +34,6 @@ process XREFS {
     def (ipr2go, goInfo) = loadXRefFiles("goterms", dataDir)
     def (ipr2pa, paInfo) = loadXRefFiles("pathways", dataDir)
 
-    def jsonOutput = []
     JsonSlurper jsonSlurper = new JsonSlurper()
 
     def aggregatedMatches = [:]

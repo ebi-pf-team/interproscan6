@@ -140,7 +140,7 @@ workflow {
 //     WRITE_RESULTS(
 //         input_file.getName(),
 //         AGGREGATE_PARSED_SEQS.out,
-//         XREFS.out,
+//         REPRESENTATIVE_DOMAINS.out.collect(),
 //         ch_format,
 //         params.outdir,
 //         params.ipscn_version,
