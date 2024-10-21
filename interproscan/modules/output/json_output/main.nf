@@ -66,14 +66,14 @@ process JSON_OUTPUT {
                         hmmBounds = HMM_BOUND_PATTERN[location.hmmBounds]
                         switch (memberDB) {
                             case "cdd":
-                                locationResult["evalue"] = location.evalue
-                                locationResult["score"] = location.score
+                                locationResult["evalue"] = matchObj.evalue
+                                locationResult["score"] = matchObj.score
                                 break
                             case "hamap":
                                 locationResult["score"] = location.score
 //                                 locationResult["alignment"] = location.alignment
                                 break
-                            case "mobidb_lite":
+                            case "mobidblite":
                                 locationResult["sequence-feature"] = location.sequenceFeature
                                 break
                             case "panther":
@@ -149,7 +149,7 @@ process JSON_OUTPUT {
                     }
                 }
 
-                if (!(memberDB in ["cdd", "coils", "hamap", "mobidb_lite", "phobius", "pirsr", "prosite_profiles", "prosite_patterns", "prints", "signalp", "signalp_euk"])) {
+                if (!(memberDB in ["cdd", "coils", "hamap", "mobidblite", "phobius", "pirsr", "prosite_profiles", "prosite_patterns", "prints", "signalp", "signalp_euk"])) {
                     matchResult["evalue"] = matchObj.evalue
                     matchResult["score"] = matchObj.score
                 }
