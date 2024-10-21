@@ -8,7 +8,7 @@ include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                      
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
-include { SEARCH_SUPERFAMILY                                               } from  "../../modules/superfamily"
+include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -204,14 +204,20 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("superfamily")) {
-        SEARCH_SUPERFAMILY(ch_fasta,
-            "${datadir}/${appsConfig.superfamily.hmm}",
-            "${datadir}/${appsConfig.superfamily.selfhits}",
-            "${datadir}/${appsConfig.superfamily.cla}",
-            "${datadir}/${appsConfig.superfamily.model}",
-            "${datadir}/${appsConfig.superfamily.pdbj95d}")
+        // SEARCH_SUPERFAMILY(ch_fasta,
+        //     "${datadir}/${appsConfig.superfamily.hmm}",
+        //     "${datadir}/${appsConfig.superfamily.selfhits}",
+        //     "${datadir}/${appsConfig.superfamily.cla}",
+        //     "${datadir}/${appsConfig.superfamily.model}",
+        //     "${datadir}/${appsConfig.superfamily.pdbj95d}")
 
-        SEARCH_SUPERFAMILY.out.view()
+        // PARSE_SUPERFAMILY(SEARCH_SUPERFAMILY.out)
+
+        ch_ssf = channel.of(
+            [1, file("/home/mblum/Projects/i6/work/da/cf5e992147ebef924a4f84e323bde4/superfamily.out")]
+        )
+
+        PARSE_SUPERFAMILY(ch_ssf)
     }
 
     if (applications.contains("signalp")) {
