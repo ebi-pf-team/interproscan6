@@ -4,7 +4,7 @@ class SFLD {
             String sfldHierarchyDb
     ) {
         // get the hierarchy data Map <modelAcc, HierarchyInformation obj>
-        Map<String, HierarchyInformation> hierarchyInformation = HierarchyInformation.parseHierarchyFile(sfldHierarchyDb)
+        Map<String, HierarchyInformation> hierarchyInformation = parseHierarchyFile(sfldHierarchyDb)
 
         Map<String, Map<String, Match>> hits = new LinkedHashMap<>()  // <protein Id, <Model, Match>>
 
@@ -18,7 +18,7 @@ class SFLD {
             Map<String, Set<Match>> thisProteinsMatches = new LinkedHashMap<>()  // <modelAcc, Set<Matches>>
             Map<String, Set<Site>> thisProteinsSites = new LinkedHashMap<>()    // <modelAcc, Set<Sites>>
 
-            while ((line = reader.readLine() != null)) {
+            while ((line = reader.readLine()) != null) {
                 def seqIdMatcher = line =~ ~/^Sequence:\s+(.+)$/
                 if (seqIdMatcher.find()) {
                     // Process the last protein
@@ -29,7 +29,7 @@ class SFLD {
                         Map<String, Set<Match>> filteredProteinMatchesWithSites = filterAndAddProteinSites(
                                 filteredProteinMatches, thisProteinsSites
                         )
-                        hits.put(queryAccession, ffilteredProteinMatchesWithSites)
+                        hits.put(queryAccession, filteredProteinMatchesWithSites)
                     }
                     
                     // Initialise the new protein
@@ -97,11 +97,33 @@ class SFLD {
             Map<String, Set<Match>> filteredProteinMatchesWithSites = filterAndAddProteinSites(
                     filteredProteinMatches, thisProteinsSites
             )
-            hits.put(queryAccession, ffilteredProteinMatchesWithSites)
+            hits.put(queryAccession, filteredProteinMatchesWithSites)
 
         }
 
         return hits
+    }
+
+    static parseHierarchyFile(String hierarcyDbPath) { // Map <modelAcc: HierarchyInformation>
+        Map<String, HierarchyInformation> hierarchyInformation = new LinkedHashMap<>()
+        File hierachyDbFile = new File(hierarcyDbPath)
+        hierachyDbFile.withReader{ reader ->
+            String line
+            while ((line = reader.readLine()) != null) {
+                String[] modelWithParents = line.trim().split(":")
+                if (modelWithParents.length >= 2){
+                    String modelAccession = modelWithParents[0]
+                    HierarchyInformation hierarchyRecord = new HierarchyInformation(modelAccession)
+                    for (String parent: modelWithParents[1].split("\\s+")) {
+                        if (!parent.trim().isEmpty() || parent.trim() == modelAccession) {
+                            hierarchyRecord.addParent(parent.trim())
+                        }
+                    }
+                    hierarchyInformation.put(modelAccession, hierarchyRecord)
+                }
+            }
+        }
+        return hierarchyInformation
     }
 
     static filterProteinHits (Map<String, Set<Match>> rawMatces, Map<String, HierarchyInformation> hierarchyInformationMap) {
@@ -124,7 +146,7 @@ class SFLD {
 
         for (String modelAccession: currentMatches) {
             if (modelAccession.contains("SFLDF") || currentMatches[modelAccession].size() == 1) {
-                nonOverlappingMatches.addAll(currentMatches[modelAccession])
+                nonOverlappingMatches[modelAccession].addAll(currentMatches[modelAccession])
                 continue
             }
 
@@ -282,29 +304,7 @@ class HierarchyInformation {
         this.childModelAcc = childModelAcc
     }
 
-    static addParent(String parentModelAcc) {
+    void addParent(String parentModelAcc) {
         this.parents.add(parentModelAcc)
-    }
-
-    static parseHierarchyFile(String hierarcyDbPath) { // Map <modelAcc: HierarchyInformation>
-        Map<String, HierarchyInformation> hierarchyInformation = new LinkedHashMap<>()
-        File hierachyDbFile = new File(hierarcyDbPath)
-        hierachyDbFile.withReader{ reader ->
-            String line
-            while ((line = reader.readLine() != null)) {
-                String[] modelWithParents = line.trim().split(":")
-                if (modelWithParents.length >= 2){
-                    String modelAccession = modelWithParents[0]
-                    HierarchyInformation hierarchyRecord = new HierarchyInformation(modelAccession)
-                    for (String parent: modelWithParents[1].split("\\s+")) {
-                        if (!parent.trim().isEmpty() || parent.trim() == modelAccession) {
-                            hierarchyRecord.addParent(parent.trim())
-                        }
-                    }
-                    hierarchyInformation.put(modelAccession, hierarchyRecord)
-                }
-            }
-        }
-        return hierarchyInformation
     }
 }
