@@ -159,7 +159,7 @@ class CathDomain {
         if (this.matchId.startsWith("dc_")) {
             matchId = this.matchId.replace("_${this.domainId}", "")
         } else {
-            matchId = this.domainId
+            matchId = this.matchId
         }
 
         return "${matchId}-${leftMost}-${rightMost}"
