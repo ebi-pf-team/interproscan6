@@ -217,8 +217,6 @@ class HMMER3 {
                         m1.bias)
                     m2.addLocation(loc)
                     String key = "${m2.modelAccession}-${loc.envelopeStart}-${loc.envelopeEnd}"
-                    println(key)
-                    assert !results[sequenceId].containsKey(key)
                     results[sequenceId][key] = m2
                 }
             }
