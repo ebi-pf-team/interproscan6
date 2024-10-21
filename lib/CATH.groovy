@@ -89,8 +89,8 @@ class CATH {
                 }
 
                 Location location = new Location(
-                    cathDomain.getStart(),
-                    cathDomain.getEnd(),
+                    cathDomain.getResolvedStart(),
+                    cathDomain.getResolvedEnd(),
                     hmmerDomain.locations[0].hmmStart,
                     hmmerDomain.locations[0].hmmEnd,
                     hmmerDomain.locations[0].hmmLength,
@@ -171,6 +171,14 @@ class CathDomain {
 
     int getEnd() {
         return this.boundaries*.end.max()
+    }
+
+    int getResolvedStart() {
+        return this.resolvedBoundaries*.start.min()
+    }
+
+    int getResolvedEnd() {
+        return this.resolvedBoundaries*.end.max()
     }
 }
 
