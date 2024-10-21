@@ -9,7 +9,7 @@ class CATH {
             if (line[0] != "#") {
                 // #domain_id      cath-superfamily        query-id        match-id        score   boundaries      resolved        aligned-regions cond-evalue     indp-evalue
                 def fields = line.split("\t")
-                assert fields.size() == 10
+                assert fields.size() > 9
                 String sequenceId = fields[2]
                 def dom = new CathDomain(
                     fields[0],
@@ -22,7 +22,7 @@ class CATH {
                 )
 
                 results[sequenceId] << dom
-            }        
+            }
         }
 
         return results
@@ -51,7 +51,7 @@ class CATH {
                 )
 
                 results[sequenceId] << dom
-            }        
+            }
         }
 
         return results
@@ -67,7 +67,6 @@ class CATH {
             domains.each { cathDomain ->
                 def key = cathDomain.getKey()
                 def hmmerDomain = thiSeqHmmerDomains.get(key)
-                assert hmmerDomain != null
 
                 def boundaries = cathDomain.resolvedBoundaries
                 def fragments = []
@@ -88,35 +87,37 @@ class CATH {
                     fragments.add(fragment)
                 }
 
-                Location location = new Location(
-                    cathDomain.getStart(),
-                    cathDomain.getEnd(),
-                    hmmerDomain.locations[0].hmmStart,
-                    hmmerDomain.locations[0].hmmEnd,
-                    hmmerDomain.locations[0].hmmLength,
-                    hmmerDomain.locations[0].hmmBounds,
-                    hmmerDomain.locations[0].envelopeStart,
-                    hmmerDomain.locations[0].envelopeEnd,
-                    cathDomain.evalue,
-                    cathDomain.score,
-                    null,
-                    fragments
-                )
-
-                def sequenceDomains = results[sequenceId]
-                def domId = cathDomain.domainId
-                if (sequenceDomains.containsKey(domId)) {
-                    sequenceDomains[domId].addLocation(location)
-                } else {
-                    Match domain = new Match(
-                        domId, 
-                        hmmerDomain.evalue,
-                        hmmerDomain.score, 
-                        hmmerDomain.bias
+                if (hmmerDomain) {
+                    Location location = new Location(
+                        cathDomain.getStart(),
+                        cathDomain.getEnd(),
+                        hmmerDomain.locations[0].hmmStart,
+                        hmmerDomain.locations[0].hmmEnd,
+                        hmmerDomain.locations[0].hmmLength,
+                        hmmerDomain.locations[0].hmmBounds,
+                        hmmerDomain.locations[0].envelopeStart,
+                        hmmerDomain.locations[0].envelopeEnd,
+                        cathDomain.evalue,
+                        cathDomain.score,
+                        null,
+                        fragments
                     )
-                    domain.signature = new Signature(cathDomain.accession)
-                    domain.addLocation(location)
-                    sequenceDomains[domId] = domain
+
+                    def sequenceDomains = results[sequenceId]
+                    def domId = cathDomain.domainId
+                    if (sequenceDomains.containsKey(domId)) {
+                        sequenceDomains[domId].addLocation(location)
+                    } else {
+                        Match domain = new Match(
+                            domId,
+                            hmmerDomain.evalue,
+                            hmmerDomain.score,
+                            hmmerDomain.bias
+                        )
+                        domain.signature = new Signature(cathDomain.accession)
+                        domain.addLocation(location)
+                        sequenceDomains[domId] = domain
+                    }
                 }
             }
         }
@@ -133,14 +134,14 @@ class CathDomain {
     List<SimpleLocation> boundaries
     List<SimpleLocation> resolvedBoundaries
 
-    CathDomain(String domainId, String matchId, String accession, 
+    CathDomain(String domainId, String matchId, String accession,
                Double score, Double evalue, List<SimpleLocation> boundaries,
                List<SimpleLocation> resolvedBoundaries) {
         this.domainId = domainId
         this.matchId = matchId
         this.accession = accession
         this.score = score
-        this.evalue = evalue       
+        this.evalue = evalue
         this.boundaries = this.sortLocations(boundaries)
         this.resolvedBoundaries = this.sortLocations(resolvedBoundaries)
     }

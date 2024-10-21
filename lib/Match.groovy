@@ -124,8 +124,8 @@ class Entry implements Serializable {
     String name
     String description
     String type
-    List<GoXrefs> goXrefs = []
-    List<PathwayXrefs> pathwayXrefs = []
+    List<GoXRefs> goXRefs = []
+    List<PathwayXRefs> pathwayXRefs = []
 
     Entry(String accession,
           String name,
@@ -141,14 +141,14 @@ class Entry implements Serializable {
           String name,
           String description,
           String type,
-          List<GoXrefs> goXrefs,
-          List<PathwayXrefs> pathwayXrefs) {
+          List<GoXRefs> goXRefs,
+          List<PathwayXRefs> pathwayXRefs) {
         this.accession = accession
         this.name = name
         this.description = description
         this.type = type
-        this.goXrefs = goXrefs
-        this.pathwayXrefs = pathwayXrefs
+        this.goXRefs = goXRefs
+        this.pathwayXRefs = pathwayXRefs
     }
 
     static Entry fromMap(Map data) {
@@ -160,17 +160,17 @@ class Entry implements Serializable {
             data.name,
             data.description,
             data.type,
-            data.goXrefs.collect { GoXrefs.fromMap(it) },
-            data.pathwayXrefs.collect { PathwayXrefs.fromMap(it) }
+            data.goXRefs.collect { GoXRefs.fromMap(it) },
+            data.pathwayXRefs.collect { PathwayXRefs.fromMap(it) }
         )
     }
 
-    void addGoXrefs(GoXrefs go) {
-        this.goXrefs.add(go)
+    void addGoXRefs(GoXRefs go) {
+        this.goXRefs.add(go)
     }
 
-    void addPathwayXrefs(PathwayXrefs pa) {
-        this.pathwayXrefs.add(pa)
+    void addPathwayXRefs(PathwayXRefs pa) {
+        this.pathwayXRefs.add(pa)
     }
 }
 
@@ -420,42 +420,42 @@ class RepresentativeInfo implements Serializable {
     }
 }
 
-class GoXrefs implements Serializable {
+class GoXRefs implements Serializable {
     String name
     String databaseName
     String category
     String id
 
-    GoXrefs(String name, String databaseName, String category, String id) {
+    GoXRefs(String name, String databaseName, String category, String id) {
         this.name = name
         this.databaseName = databaseName
         this.category = category
         this.id = id
     }
 
-    static GoXrefs fromMap(Map data) {
+    static GoXRefs fromMap(Map data) {
         if (data == null) {
             return null
         }
-        return new GoXrefs(data.name, data.databaseName, data.category, data.id)
+        return new GoXRefs(data.name, data.databaseName, data.category, data.id)
     }
 }
 
-class PathwayXrefs implements Serializable {
+class PathwayXRefs implements Serializable {
     String name
     String databaseName
     String id
 
-    PathwayXrefs(String name, String databaseName, String id) {
+    PathwayXRefs(String name, String databaseName, String id) {
         this.name = name
         this.databaseName = databaseName
         this.id = id
     }
 
-    static PathwayXrefs fromMap(Map data) {
+    static PathwayXRefs fromMap(Map data) {
         if (data == null) {
             return null
         }
-        return new PathwayXrefs(data.name, data.databaseName, data.id)
+        return new PathwayXRefs(data.name, data.databaseName, data.id)
     }
 }

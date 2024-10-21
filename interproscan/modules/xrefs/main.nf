@@ -31,19 +31,33 @@ process XREFS {
     File entriesJson = new File(entriesPath.toString())
     def entries = new ObjectMapper().readValue(entriesJson, Map)
 
-    def (ipr2go, goInfo) = loadXrefFiles("goterms", dataDir)
-    def (ipr2pa, paInfo) = loadXrefFiles("pathways", dataDir)
+    def (ipr2go, goInfo) = loadXRefFiles("goterms", dataDir)
+    def (ipr2pa, paInfo) = loadXRefFiles("pathways", dataDir)
 
     def jsonOutput = []
     JsonSlurper jsonSlurper = new JsonSlurper()
+
+    def aggregatedMatches = [:]
+
+    if ("${apps}".contains('panther')) {
+        String paintAnnoDir = "${dataDir}/${params.appsConfig.paint}"
+    }
+
     matchesEntries = membersMatches.each { matchesPath  ->
         memberDB = matchesPath.toString().split("/").last().split("\\.")[0]
-        SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, entries['databases'][memberDB])
+        def memberRelease = entries.databases.find { key, value ->
+            key.toLowerCase().replace("-", "") == memberDB.toLowerCase()
+        }?.value
+        SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
+
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, jsonMatches ->
             [(seqId): jsonMatches.collectEntries { matchId, jsonMatch ->
                 Match matchObject = Match.fromMap(jsonMatch)
                 def entriesInfo = entries['entries']
                 String accId = matchObject.modelAccession.split("\\.")[0]
+                if (memberDB == "cathgene3d") {
+                    accId = matchObject.signature.accession
+                }
                 Signature signatureObject = new Signature(accId, "", "", sigLibRelease, null)
                 matchObject.signature = signatureObject
 
@@ -92,13 +106,13 @@ process XREFS {
                             try {
                                 def goIds = ipr2go[interproKey]
                                 def goTerms = goIds.collect { goId ->
-                                    GoXrefs goXrefObj = new GoXrefs(
+                                    GoXRefs goXRefObj = new GoXRefs(
                                         goInfo[goId][0],
                                         "GO",
                                         GO_PATTERN[goInfo[goId][1]],
                                         goId
                                     )
-                                    matchObject.signature.entry.addGoXrefs(goXrefObj)
+                                    matchObject.signature.entry.addGoXRefs(goXRefObj)
                                 }
                             } catch (java.lang.NullPointerException e) {
                                 // pass
@@ -109,11 +123,11 @@ process XREFS {
                             try {
                                 def paIds = ipr2pa[interproKey]
                                 def paTerms = paIds.collect { paId ->
-                                    PathwayXrefs paXrefObj = new PathwayXrefs(
+                                    PathwayXRefs paXRefObj = new PathwayXRefs(
                                         paInfo[paId][1],
                                         PA_PATTERN[paInfo[paId][0]],
                                         paId)
-                                    matchObject.signature.entry.addPathwayXrefs(paXrefObj)
+                                    matchObject.signature.entry.addPathwayXRefs(paXRefObj)
                                 }
                             } catch (java.lang.NullPointerException e) {
                                 // pass
@@ -132,14 +146,14 @@ process XREFS {
                 return [(matchId): matchObject]
             }]
         }
-        jsonOutput.add(matches)
+        aggregatedMatches.putAll(matches.collect())
     }
     def outputFilePath = task.workDir.resolve("matches2xrefs.json")
-    def json = JsonOutput.toJson(jsonOutput)
+    def json = JsonOutput.toJson(aggregatedMatches)
     new File(outputFilePath.toString()).write(json)
 }
 
-def loadXrefFiles(String xrefType, dataDir) {
+def loadXRefFiles(String xrefType, dataDir) {
     JsonSlurper jsonSlurper = new JsonSlurper()
 
     String iprFilePath = "${dataDir}/${params.xRefsConfig[xrefType]}.ipr.json"
