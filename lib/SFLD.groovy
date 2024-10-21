@@ -6,7 +6,7 @@ class SFLD {
         // get the hierarchy data Map <modelAcc, HierarchyInformation obj>
         Map<String, HierarchyInformation> hierarchyInformation = HierarchyInformation.parseHierarchyFile(sfldHierarchyDb)
 
-        Map<String, Map<String, Match>> hits = new LinkedHashMap<>()  // <ModelAcc <protein ID, Match>>
+        Map<String, Map<String, Match>> hits = new LinkedHashMap<>()  // <protein Id, <Model, Match>>
 
         File sfldPpOut = new File(sfldPostProcessOutput)
         sfldPpOut.withReader{ reader ->
@@ -22,8 +22,15 @@ class SFLD {
                 def seqIdMatcher = line =~ ~/^Sequence:\s+(.+)$/
                 if (seqIdMatcher.find()) {
                     // Process the last protein
-                    //
-                    //
+                    if (!thisProteinsMatches.isEmpty()) {
+                        Map<String, Set<Match>> filteredProteinMatches = filterProteinHits(
+                                thisProteinsMatches, hierarchyInformation
+                        )
+                        Map<String, Set<Match>> filteredProteinMatchesWithSites = filterAndAddProteinSites(
+                                filteredProteinMatches, thisProteinsSites
+                        )
+                        hits.put(queryAccession, ffilteredProteinMatchesWithSites)
+                    }
                     
                     // Initialise the new protein
                     proteinAccession = seqIdMatcher.group(1).trim()
@@ -84,8 +91,13 @@ class SFLD {
             }
 
             // Parse the last protein
-            thisProteinsMatches = resolveOverlappingMatches(thisProteinsMatches, hierarchyInformation)
-            thisProteinsMatches = filterMatches(thisProteinsMatches, hierarchyInformation)
+            Map<String, Set<Match>> filteredProteinMatches = filterProteinHits(
+                    thisProteinsMatches, hierarchyInformation
+            )
+            Map<String, Set<Match>> filteredProteinMatchesWithSites = filterAndAddProteinSites(
+                    filteredProteinMatches, thisProteinsSites
+            )
+            hits.put(queryAccession, ffilteredProteinMatchesWithSites)
 
         }
 
@@ -97,11 +109,10 @@ class SFLD {
         Map<String, Set<Match>> firstFilteredMatches = resolveOverlappingMatches(rawMatces, hierarchyInformationMap)
         // 2. Add matches for parents defined in the hierarchy db
         Map<String, Set<Match>> secondFilteredMatches = addParentMatches(firstFilteredMatches, hierarchyInformationMap)
-        // 3.
-    }
+        // 3. Remove duplicated hits
+        Map<String, Set<Match>> thirdFilteredMatches = resolveDuplicateMatches(secondFilteredMatches)
 
-    static filterProteinSites (Map<String, Set<Match>> filteredMatches, Map<String, Set<Site>> rawSites) {
-        // add the sites retrieved from SFLD binary output file to the corresponding filtered match (if one exists)
+        return thirdFilteredMatches
     }
 
     static resolveOverlappingMatches (
@@ -124,7 +135,9 @@ class SFLD {
                     if (match == otherMatch || modelAccession == otherMatch.modelAccession) {
                         continue
                     }
-                    if (matchesOverlap(match, otherMatch) && otherMatchParents.contains(modelAccession)) {
+                    if ((match.locations[0].start < otherMatch.locations[0].end ||
+                                    otherMatch.locations[0].start < match.locations[0].end)
+                                    && otherMatchParents.contains(modelAccession)) {
                         overlaps = true
                         break
                     }
@@ -146,8 +159,8 @@ class SFLD {
             Map<String, Set<Match>> currentMatches,
             Map<String, HierarchyInformation> hierarchyInformationMap
     ) {
-        Set<Match> allRawMatches = currentMatches.values().collect().flatten().toSet()
         Map<String, Set<Match>> filteredMatches = currentMatches  // we will add the parent matches to these
+        Set<Match> seqMatches = [] as Set<Match>
 
         for (String modelAccession: currentMatches) {
             HierarchyInformation hierarchyRecord = hierarchyInformationMap.get(modelAccession)
@@ -155,15 +168,44 @@ class SFLD {
                 if (hierarchyRecord.parents != null && hierarchyRecord.parents.size() > 0) {
 
                     for (Match match: currentMatches[modelAccession]) {
-                        parentMatches = getParentMatches(match, hierarchyRecord.parents)
-
-                    }
+                        Set<Match> parentMatches = getParents(match, hierarchyRecord.parents)
+                        boolean parentContainsSeqMatch = false
+                        boolean seqMatchContainsParentMatch = false
+                        Match matchToRemove = null
+                        for (Match parentMatch: parentMatches) {
+                            for (Match seqMatch: seqMatches) {
+                                if ( parentMatch.locations[0].start <= seqMatch.locations[0].start &&
+                                    parentMatch.locations[0].end >= seqMatch.locations[0].end) {
+                                    parentContainsSeqMatch = true
+                                    matchToRemove = parentMatch
+                                }
+                                if ( seqMatch.locations[0].start <= parentMatch.locations[0].start &&
+                                    seqMatch.locations[0].end >= parentMatch.locations[0].end) {
+                                    seqMatchContainsParentMatch = true
+                                    break
+                                }
+                            }
+                            if (parentContainsSeqMatch) {seqMatches.remove(matchToRemove)}
+                            if (seqMatchContainsParentMatch) {seqMatches.add(parentMatch)}
+                        } // end of parent Match
+                    } // end of Match
                 }
             }
+        } // end of modelAccession
+
+        for (Match match: seqMatches) {
+            if (!filteredMatches.containsKey(match.modelAccession)) {
+                filteredMatches.put(match.modelAccession, [] as Set<Match>)
+            }
+            filteredMatches[match.modelAccession].add(match)
         }
+
+        return filteredMatches
     }
 
-    static getParentMatches(Match childMatch, Set<String> parents) { // Build parent matches from the child match
+    static getParents(Match childMatch, Set<String> parents) {
+        // Called in addParentMatches
+        // Build parent matches from the child match
         Set<Match> parentMatches = []
         for (String parentModelAcc in parents) {
             if (childMatch.modelAccession != parentModelAcc) {
@@ -175,70 +217,60 @@ class SFLD {
         return parentMatches
     }
 
+    static resolveDuplicateMatches(
+            Map<String, Set<Match>> currentMatches
+    ) {
+        Map<String, Set<Match>> duplicateFreeMatches = new LinkedHashMap<>()
+        Set<Match> allMatches = currentMatches.values().collect().flatten().toSet()
 
-
-    static filterMatches (List<Match> currentMatches, HierarchyInformation hierarchyInfo) {
-        Set<Match> selectedMatches = []  // matches selected for the current protein sequence
-        for (Match match: currentMatches) {
-            Set<String> parents = hierarchyInfo.getParents(match.modelAccession, hierarchyInfo)  // Set of model Accs
-            Set<Match> parentMatches = []
-
-            if (parents != null && parents.size() > 0) {
-                parentMatches = getParentMatches(match, parents)
-                boolean parentContainsSelectedMatch = false
-                boolean selectedMatchContainsParentMatch = false
-                Match matchToRemove = null
-                // Compare the currently selected matches to the current parent matches
-                for (Match parentMatch: parentMatches) {
-                    for (Match selectedMatch: selectedMatches) {
-                        // Does the parentMatch match or extend beyond the selectedMatch?
-                        if (parentMatch.getLocationStart() <= selectedMatch.getLocationStart() &&
-                                parentMatch.getLocationEnd() >= selectedMatch.getLocationEnd()) {
-                            parentContainsSelectedMatch = true
-                            matchToRemove = selectedMatch
-                        }
-                        // Does the selectedMatch match or extend beyond the parentMatch?
-                        else if (selectedMatch.getLocationStart() <= parentMatch.getLocationStart() &&
-                                selectedMatch.getLocationEnd() >= selectedMatch.getLocationEnd()) {
-                            selectedMatchContainsParentMatch = true
-                        }
-                    }
-                    // Update the selectedMatches
-                    if (parentContainsSelectedMatch) {selectedMatches.remove(matchToRemove)}
-                    if (!selectedMatchContainsParentMatch) {selectedMatches.add(parentMatch)}
-                }
-            }
-        }
-
-        // Rewriting this code - https://github.com/ebi-pf-team/interproscan/blob/13c095e3c6b6784c98f9769c6a07d122cfa160d1/core/io/src/main/java/uk/ac/ebi/interpro/scan/io/match/hmmer/hmmer3/SFLDHmmer3MatchParser.java#L433
-        if (selectedMatches.size() > 0) {
-            Set<Match> allMatches = selectedMatches
-            Set<Match> duplicateFreeMatches = []
-            for (Match match: selectedMatches) {
-                boolean isDuplicate = false
-                for (Match otherMatch: selectedMatches) {
-                    // if it's itself or for different signatures, SKIP!
-                    if (match == otherMatch || match.modelAccession != otherMatch.modelAccession) {
-                        continue
-                    }
-                    // then check the start, end and score
-                    if (match.getLocationStart() == otherMatch.getLocationStart() &&
-                            match.getLocationEnd() == otherMatch.getLocationEnd() &&
-                            match.score <= otherMatch.score) {
-                        isDuplicate = true
+        for (String modelAccession: currentMatches) {
+            boolean duplicate = false
+            for (Match match: currentMatches[modelAccession]) {
+                for (Match otherMatch: allMatches) {
+                    if (match == otherMatch || !otherMatch.modelAccession == modelAccession) { continue }
+                    if (match.locations[0].start == otherMatch.locations[0].start &&
+                        match.locations[0].end == otherMatch.locations[0].end &&
+                        match.locations[0].score <= otherMatch.locations[0].score) {
+                        duplicate = true
                         break
                     }
+                } //end of Other match
+                if (duplicate) {
+                    allMatches.remove(match)
                 }
-                if (!isDuplicate) {duplicateFreeMatches.add(Match)}
+                else {
+                    if (!duplicateFreeMatches.containsKey(modelAccession)) {
+                        duplicateFreeMatches.put(modelAccession, [] as Set<Match>)
+                    }
+                    duplicateFreeMatches[modelAccession].add(match)
+                }
+            } // end for match
+        } // end for model Accession
+        return duplicateFreeMatches
+    }
+
+    static filterAndAddProteinSites (Map<String, Set<Match>> filteredMatches, Map<String, Set<Site>> rawSites) {
+        // add the sites retrieved from SFLD binary output file to the corresponding filtered match (if one exists)
+        for (String modelAccession: rawSites) {
+            if (filteredMatches.containsKey(modelAccession)) {
+                for (Site site: rawSites[modelAccession]) {
+                    for (Match match: filteredMatches[modelAccession]) {
+                        if (site.siteLocations[0].start > match.locations[0].end &&
+                                match.locations[0].start > site.siteLocations[0].end) // found the corresponding match
+                            match.addSite(site)
+                            break
+                    }
+                }
             }
         }
     }
 
-    static matchesOverlap(Match match, Match otherMatch) {
-        return match.locations[0].start < otherMatch.locations[0].end || otherMatch.locations[0].start < match.locations[0].end
+    static addMatchesToHits(Map<String, Map<String, Match>> hits, Map<String, Match> proteinFinalMatches) {
+        for (Match match: proteinFinalMatches) {
+
+        }
+        return hits
     }
-
-
 }
 
 
