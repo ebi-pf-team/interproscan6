@@ -28,17 +28,18 @@ process JSON_OUTPUT {
         sequence["matches"].each { matchId, match ->
             Match matchObj = Match.fromMap(match)
             memberDB = matchObj.signature.signatureLibraryRelease.library
+
             matchResult = [
                 "signature": matchObj.signature,
                 "locations": []
             ]
             if (memberDB in ["phobius", "superfamily"]) {
-                match_data['locations'].each { location ->
+                matchObj.locations.each { location ->
                     def locationResult = [
-                        "start"          : location.start,
-                        "end"            : location.end,
-                        "representative" : location.representative,
-                        "location-fragments": location.locationFragments
+                        "start"             : location.start,
+                        "end"               : location.end,
+                        "representative"    : location.representative,
+                        "location-fragments": location.fragments
                     ]
 
                     if (memberDB == "phobius") {
@@ -49,8 +50,6 @@ process JSON_OUTPUT {
                         matchResult["locations"] = location_info
                         matchResult["evalue"] = matchObj.evalue
                         matchResult["model-ac"] = matchObj.modelAccession
-                    } else {
-                        locationResult["sequence-feature"] = matchObj.sequenceFeature
                     }
 
                     matchResult["locations"].add(locationResult)
@@ -71,7 +70,7 @@ process JSON_OUTPUT {
                                 break
                             case "hamap":
                                 locationResult["score"] = location.score
-//                                 locationResult["alignment"] = location.alignment
+                                locationResult["alignment"] = location.targetSequence ?: "Not available"
                                 break
                             case "mobidblite":
                                 locationResult["sequence-feature"] = location.sequenceFeature
@@ -158,7 +157,8 @@ process JSON_OUTPUT {
                     matchResult["scope"] = null
                 } else if (memberDB == "panther") {
                     matchResult["name"] = matchObj.treegrafter.subfamilyDescription
-                    matchResult["accession"] =matchObj.modelAccession
+                    matchResult["accession"] = matchObj.treegrafter.subfamilyAccession
+                    matchResult["model-ac"] = matchObj.treegrafter.subfamilyAccession
                     matchResult["goXRefs"] = matchObj.signature?.entry?.goXRefs ?: []
                     matchResult["proteinClass"] = matchObj.treegrafter.proteinClass
                     matchResult["graftPoint"] = matchObj.treegrafter.graftPoint
@@ -168,6 +168,12 @@ process JSON_OUTPUT {
                 } else if (memberDB in ["signalp", "signalp_euk"]) {
                     matchResult["orgType"] = matchObj.orgType
                 }
+            }
+            if (memberDB in ['cathfunfam', 'cathgene3d', 'panther']) {
+                name = matchObj.signature.description
+                description = matchObj.signature.name
+                matchObj.signature.name = name
+                matchObj.signature.description = description
             }
             seqMatches.add(matchResult)
         }
