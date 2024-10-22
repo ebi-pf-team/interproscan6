@@ -16,19 +16,23 @@ class SFLD {
             String siteResidues
             String siteDescription
             Map<String, Set<Match>> thisProteinsMatches = new LinkedHashMap<>()  // <modelAcc, Set<Matches>>
-            Map<String, Set<Site>> thisProteinsSites = new LinkedHashMap<>()    // <modelAcc, Set<Sites>>
+            Map<String, Set<Site>> thisProteinsSites = new LinkedHashMap<>()     // <modelAcc, Set<Sites>>
 
             while ((line = reader.readLine()) != null) {
                 def seqIdMatcher = line =~ ~/^Sequence:\s+(\S+)$/
                 if (seqIdMatcher.find()) {
                     // Process the last protein
                     if (!thisProteinsMatches.isEmpty()) {
+                        System.out.println("Got matches for ${proteinAccession}")
+                        System.out.println("Hits: ${hits}")
                         Map<String, Set<Match>> filteredProteinMatches = filterProteinHits(
                                 thisProteinsMatches, hierarchyInformation
                         )
+                        System.out.println("Filtered proteins ${filteredProteinMatches}")
                         Map<String, Set<Match>> filteredProteinMatchesWithSites = filterAndAddProteinSites(
                                 filteredProteinMatches, thisProteinsSites
                         )
+                        System.out.println("Filtered proteins with sites ${proteinAccession} ${filteredProteinMatchesWithSites}")
                         hits.put(proteinAccession, filteredProteinMatchesWithSites)
                     }
                     
@@ -97,7 +101,11 @@ class SFLD {
             Map<String, Set<Match>> filteredProteinMatchesWithSites = filterAndAddProteinSites(
                     filteredProteinMatches, thisProteinsSites
             )
+            System.out.println("matches for ${proteinAccession}?")
+            System.out.println("thisProteinsMatches ${thisProteinsMatches}")
+            System.out.println("---")
             hits.put(proteinAccession, filteredProteinMatchesWithSites)
+            System.out.println("Hits: ${hits}")
 
         }
 
@@ -135,9 +143,10 @@ class SFLD {
         Map<String, Set<Match>> firstFilteredMatches = resolveOverlappingMatches(rawMatces, hierarchyInformationMap)
         // 2. Add matches for parents defined in the hierarchy db
         Map<String, Set<Match>> secondFilteredMatches = addParentMatches(firstFilteredMatches, hierarchyInformationMap)
+        System.out.println("2. ${secondFilteredMatches}")
         // 3. Remove duplicated hits
         Map<String, Set<Match>> thirdFilteredMatches = resolveDuplicateMatches(secondFilteredMatches)
-
+        System.out.println("3. ${thirdFilteredMatches}")
         return thirdFilteredMatches
     }
 
@@ -255,7 +264,7 @@ class SFLD {
         Map<String, Set<Match>> duplicateFreeMatches = new LinkedHashMap<>()
         Set<Match> allMatches = currentMatches.values().collect().flatten().toSet()
 
-        for (String modelAccession: currentMatches) {
+        for (String modelAccession: currentMatches.keySet()) {
             boolean duplicate = false
             for (Match match: currentMatches[modelAccession]) {
                 for (Match otherMatch: allMatches) {
@@ -295,13 +304,7 @@ class SFLD {
                 }
             }
         }
-    }
-
-    static addMatchesToHits(Map<String, Map<String, Match>> hits, Map<String, Match> proteinFinalMatches) {
-        for (Match match: proteinFinalMatches) {
-
-        }
-        return hits
+        return filteredMatches
     }
 }
 
