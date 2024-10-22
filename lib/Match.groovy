@@ -233,6 +233,13 @@ class Location implements Serializable {
         this.targetSequence = alignment
     }
 
+    Location(int start, int end, Double evalue, List<LocationFragment> fragments) {
+        this.start = start
+        this.end = end
+        this.evalue = evalue
+        this.fragments = fragments
+    }
+
     void addSite(Site site) {
         this.sites.add(site)
     }
