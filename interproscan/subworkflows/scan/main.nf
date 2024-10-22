@@ -204,20 +204,17 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("superfamily")) {
-        // SEARCH_SUPERFAMILY(ch_fasta,
-        //     "${datadir}/${appsConfig.superfamily.hmm}",
-        //     "${datadir}/${appsConfig.superfamily.selfhits}",
-        //     "${datadir}/${appsConfig.superfamily.cla}",
-        //     "${datadir}/${appsConfig.superfamily.model}",
-        //     "${datadir}/${appsConfig.superfamily.pdbj95d}")
+        SEARCH_SUPERFAMILY(ch_fasta,
+            "${datadir}/${appsConfig.superfamily.hmm}",
+            "${datadir}/${appsConfig.superfamily.selfhits}",
+            "${datadir}/${appsConfig.superfamily.cla}",
+            "${datadir}/${appsConfig.superfamily.model}",
+            "${datadir}/${appsConfig.superfamily.pdbj95d}")
 
-        // PARSE_SUPERFAMILY(SEARCH_SUPERFAMILY.out)
+        PARSE_SUPERFAMILY(SEARCH_SUPERFAMILY.out,
+            "${datadir}/${appsConfig.superfamily.model}")
 
-        ch_ssf = channel.of(
-            [1, file("/home/mblum/Projects/i6/work/da/cf5e992147ebef924a4f84e323bde4/superfamily.out")]
-        )
-
-        PARSE_SUPERFAMILY(ch_ssf)
+        results = results.mix(PARSE_SUPERFAMILY.out)
     }
 
     if (applications.contains("signalp")) {
