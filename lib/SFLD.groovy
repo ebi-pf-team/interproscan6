@@ -23,16 +23,12 @@ class SFLD {
                 if (seqIdMatcher.find()) {
                     // Process the last protein
                     if (!thisProteinsMatches.isEmpty()) {
-                        System.out.println("Got matches for ${proteinAccession}")
-                        System.out.println("Hits: ${hits}")
                         Map<String, Set<Match>> filteredProteinMatches = filterProteinHits(
                                 thisProteinsMatches, hierarchyInformation
                         )
-                        System.out.println("Filtered proteins ${filteredProteinMatches}")
                         Map<String, Set<Match>> filteredProteinMatchesWithSites = filterAndAddProteinSites(
                                 filteredProteinMatches, thisProteinsSites
                         )
-                        System.out.println("Filtered proteins with sites ${proteinAccession} ${filteredProteinMatchesWithSites}")
                         hits.put(proteinAccession, filteredProteinMatchesWithSites)
                     }
                     
@@ -101,11 +97,7 @@ class SFLD {
             Map<String, Set<Match>> filteredProteinMatchesWithSites = filterAndAddProteinSites(
                     filteredProteinMatches, thisProteinsSites
             )
-            System.out.println("matches for ${proteinAccession}?")
-            System.out.println("thisProteinsMatches ${thisProteinsMatches}")
-            System.out.println("---")
             hits.put(proteinAccession, filteredProteinMatchesWithSites)
-            System.out.println("Hits: ${hits}")
 
         }
 
@@ -143,10 +135,8 @@ class SFLD {
         Map<String, Set<Match>> firstFilteredMatches = resolveOverlappingMatches(rawMatces, hierarchyInformationMap)
         // 2. Add matches for parents defined in the hierarchy db
         Map<String, Set<Match>> secondFilteredMatches = addParentMatches(firstFilteredMatches, hierarchyInformationMap)
-        System.out.println("2. ${secondFilteredMatches}")
         // 3. Remove duplicated hits
         Map<String, Set<Match>> thirdFilteredMatches = resolveDuplicateMatches(secondFilteredMatches)
-        System.out.println("3. ${thirdFilteredMatches}")
         return thirdFilteredMatches
     }
 
@@ -292,19 +282,24 @@ class SFLD {
 
     static filterAndAddProteinSites (Map<String, Set<Match>> filteredMatches, Map<String, Set<Site>> rawSites) {
         // add the sites retrieved from SFLD binary output file to the corresponding filtered match (if one exists)
-        for (String modelAccession: rawSites) {
-            if (filteredMatches.containsKey(modelAccession)) {
-                for (Site site: rawSites[modelAccession]) {
-                    for (Match match: filteredMatches[modelAccession]) {
-                        if (site.siteLocations[0].start > match.locations[0].end &&
-                                match.locations[0].start > site.siteLocations[0].end) // found the corresponding match
-                            match.addSite(site)
-                            break
+        Map<String, Set<Match>> filteredMatchesWithSites = new LinkedHashMap<>()
+
+        for (String modelAccession: filteredMatches.keySet()) {
+            if (!filteredMatchesWithSites.containsKey(modelAccession)) {
+                filteredMatchesWithSites.put(modelAccession, [] as Set<Match>)
+            }
+
+            for (Match match: filteredMatches[modelAccession]) {
+                if (rawSites.containsKey(modelAccession)) {
+                    for (Site site: rawSites[modelAccession]) {
+                        match.addSite(site) // will automatically add the site to the correct location
                     }
                 }
+                // gone though all sites (if any), so add the match to the new map
+                filteredMatchesWithSites[modelAccession].add(match)
             }
         }
-        return filteredMatches
+        return filteredMatchesWithSites
     }
 }
 
