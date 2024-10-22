@@ -19,7 +19,7 @@ class SFLD {
             Map<String, Set<Site>> thisProteinsSites = new LinkedHashMap<>()    // <modelAcc, Set<Sites>>
 
             while ((line = reader.readLine()) != null) {
-                def seqIdMatcher = line =~ ~/^Sequence:\s+(.+)$/
+                def seqIdMatcher = line =~ ~/^Sequence:\s+(\S+)$/
                 if (seqIdMatcher.find()) {
                     // Process the last protein
                     if (!thisProteinsMatches.isEmpty()) {
@@ -29,7 +29,7 @@ class SFLD {
                         Map<String, Set<Match>> filteredProteinMatchesWithSites = filterAndAddProteinSites(
                                 filteredProteinMatches, thisProteinsSites
                         )
-                        hits.put(queryAccession, filteredProteinMatchesWithSites)
+                        hits.put(proteinAccession, filteredProteinMatchesWithSites)
                     }
                     
                     // Initialise the new protein
@@ -66,7 +66,7 @@ class SFLD {
                             start, end, hmmStart, hmmEnd, envStart, envEnd, domainEvalue, domainScore, domainBias, fragment
                     )
                     match.addLocation(location)
-                    
+
                     if (!thisProteinsMatches.containsKey(modelAccession)) {
                         thisProteinsMatches.put(modelAccession, [] as Set<Match>)
                     }
@@ -97,7 +97,7 @@ class SFLD {
             Map<String, Set<Match>> filteredProteinMatchesWithSites = filterAndAddProteinSites(
                     filteredProteinMatches, thisProteinsSites
             )
-            hits.put(queryAccession, filteredProteinMatchesWithSites)
+            hits.put(proteinAccession, filteredProteinMatchesWithSites)
 
         }
 
@@ -107,6 +107,10 @@ class SFLD {
     static parseHierarchyFile(String hierarcyDbPath) { // Map <modelAcc: HierarchyInformation>
         Map<String, HierarchyInformation> hierarchyInformation = new LinkedHashMap<>()
         File hierachyDbFile = new File(hierarcyDbPath)
+        if (!hierachyDbFile.exists()) {
+            System.out.println("Could not find hierarchy file for SFLD")
+            System.exit 1
+        }
         hierachyDbFile.withReader{ reader ->
             String line
             while ((line = reader.readLine()) != null) {
@@ -144,8 +148,14 @@ class SFLD {
         Set<Match> allRawMatches = currentMatches.values().collect().flatten().toSet()
         Map<String, Set<Match>> nonOverlappingMatches = new LinkedHashMap<>()
 
-        for (String modelAccession: currentMatches) {
+        for (String modelAccession: currentMatches.keySet()) {
+            if (currentMatches[modelAccession] == null) {
+                continue
+            }
             if (modelAccession.contains("SFLDF") || currentMatches[modelAccession].size() == 1) {
+                if (!nonOverlappingMatches.containsKey(modelAccession)) {
+                    nonOverlappingMatches.put(modelAccession, [] as Set<Match>)
+                }
                 nonOverlappingMatches[modelAccession].addAll(currentMatches[modelAccession])
                 continue
             }
@@ -298,7 +308,7 @@ class SFLD {
 
 class HierarchyInformation {
     String childModelAcc
-    Set<String> parents
+    Set<String> parents = [] as Set<String>
 
     HierarchyInformation(String childModelAcc) {
         this.childModelAcc = childModelAcc
