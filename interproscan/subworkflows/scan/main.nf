@@ -190,11 +190,14 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("sfld")) {
-        RUN_SFLD(ch_fasta, "${datadir}/${appsConfig.sfld.hmm}")
-        POST_PROCESS_SFLD(RUN_SFLD.out, "${datadir}/${appsConfig.sfld.postprocess.sites_annotation}")
-//         PARSE_SFLD(POST_PROCESS_SFLD.out)
-//
-//         results = results.mix(PARSE_SFLD.out)
+        RUN_SFLD(ch_fasta,
+            "${datadir}/${appsConfig.sfld.hmm}")
+        POST_PROCESS_SFLD(RUN_SFLD.out,
+            "${datadir}/${appsConfig.sfld.postprocess.sites_annotation}")
+        PARSE_SFLD(POST_PROCESS_SFLD.out,
+            "${datadir}/${appsConfig.sfld.postprocess.hierarchy}")
+
+        results = results.mix(PARSE_SFLD.out)
     }
 
     if (applications.contains("smart")) {

@@ -50,10 +50,14 @@ process PARSE_SFLD {
 
     input:
     tuple val(meta), val(sfld_postprocess_output)
+    val sfld_hierarchy_db
 
     output:
     tuple val(meta), val("sfld.json")
 
     exec:
-    println "Hello"
+    def outputFilePath = task.workDir.resolve("sfld.json")
+    def matches = SFLD.parseOutput(sfld_postprocess_output.toString(), sfld_hierarchy_db.toString())
+    def json = JsonOutput.toJson(matches)
+    new File(outputFilePath.toString()).write(json)
 }
