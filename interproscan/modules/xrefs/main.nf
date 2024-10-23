@@ -45,7 +45,7 @@ process XREFS {
     matchesEntries = membersMatches.each { matchesPath  ->
         memberDB = matchesPath.toString().split("/").last().split("\\.")[0]
         def memberRelease = entries.databases.find { key, value ->
-            key.toLowerCase().replace("-", "") == memberDB.toLowerCase()
+            key.toLowerCase().replace("-", "").replace(" ", "") == memberDB
         }?.value
         SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
 
@@ -54,7 +54,7 @@ process XREFS {
                 Match matchObject = Match.fromMap(jsonMatch)
                 def entriesInfo = entries['entries']
                 String accId = matchObject.modelAccession.split("\\.")[0]
-                if (memberDB == "cathgene3d") {
+                if (memberDB in ["cathgene3d", "cathfunfam"]) {
                     accId = matchObject.signature.accession
                 }
                 Signature signatureObject = new Signature(accId, "", "", sigLibRelease, null)
@@ -68,6 +68,7 @@ process XREFS {
                         def paintAnnotationsContent = jsonSlurper.parse(paintAnnotationFile)
                         String nodeId = matchObject.treegrafter.ancestralNodeID
                         def nodeData = paintAnnotationsContent[nodeId]
+                        matchObject.treegrafter.subfamilyAccession = nodeData[0]
                         matchObject.treegrafter.proteinClass = nodeData[2]
                         matchObject.treegrafter.graftPoint = nodeData[3]
                     }
@@ -117,7 +118,6 @@ process XREFS {
                                 // pass
                             }
                         }
-
                         if (params.pathways) {
                             try {
                                 def paIds = ipr2pa[interproKey]
