@@ -25,8 +25,7 @@ process PREPARE_HAMAP {
     label 'analysis_parser'
 
     input:
-    tuple val(meta), val(hmmsearch_tab)
-    val seq_json
+    tuple val(meta), val(hmmsearch_tab), val(seq_json)
     val profile_dir
 
     output:
@@ -37,7 +36,7 @@ process PREPARE_HAMAP {
     def jsonSlurper = new JsonSlurper()
     def sequences = jsonSlurper.parse(jsonFile)
         .collectEntries{ seqId, obj ->
-            [ seqId, FastaSequence.fromMap(obj) ]
+            [ (seqId): FastaSequence.fromMap(obj) ]
         }
 
     // Find profiles with matches
@@ -61,7 +60,7 @@ process PREPARE_HAMAP {
     fasta_files = []
 
     // Create a FASTA file for each profile to search with
-    matches = matches
+    matches
         .each { query, targets ->
             Path prfPath = file("${profile_dir.toString()}/${query}.prf")
             File prfFile = new File(prfPath.toString())
