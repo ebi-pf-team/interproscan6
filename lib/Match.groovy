@@ -75,9 +75,9 @@ class Signature implements Serializable {
         this.accession = accession
     }
 
-    Signature(String accession, 
-              String name, 
-              String description, 
+    Signature(String accession,
+              String name,
+              String description,
               SignatureLibraryRelease library,
               Entry entry) {
         this.accession = accession
@@ -164,10 +164,10 @@ class Location implements Serializable {
     // cigarAlignment
     // motifNumber
 
-    Location(int start, 
-             int end, 
+    Location(int start,
+             int end,
              Integer hmmStart = null,
-             Integer hmmEnd = null, 
+             Integer hmmEnd = null,
              Integer hmmLength = null,
              String hmmBounds = null,
              Integer envelopeStart = null,
@@ -190,10 +190,10 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-    Location(int start, 
-             int end, 
+    Location(int start,
+             int end,
              Integer hmmStart,
-             Integer hmmEnd, 
+             Integer hmmEnd,
              Integer hmmLength,
              String hmmBounds,
              Integer envelopeStart,
@@ -238,6 +238,15 @@ class Location implements Serializable {
         this.end = end
         this.evalue = evalue
         this.fragments = fragments
+    }
+
+    Location(int start, int end, String level, String alignment, String cigarAlignment) {
+        this.start = start
+        this.end = end
+        this.score = score
+        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
+        this.fragments = [fragment]
+        this.targetSequence = alignment
     }
 
     void addSite(Site site) {
@@ -308,7 +317,7 @@ class Site implements Serializable {
     }
 
     Site(String description, String residues) {
-        this(description, Site.getSiteLocationsFromString(residues))        
+        this(description, Site.getSiteLocationsFromString(residues))
     }
 
     private static List<SiteLocation> getSiteLocationsFromString(String residues) {
