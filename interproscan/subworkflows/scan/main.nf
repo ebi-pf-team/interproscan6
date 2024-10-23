@@ -7,6 +7,8 @@ include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP               
 include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                        } from  "../../modules/mobidblite"
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
+include { PFSCAN_RUNNER ; PFSCAN_PARSER                                           } from  "../../modules/prosite/patterns"
+include { PFSEARCH_RUNNER ; PFSEARCH_PARSER                                       } from  "../../modules/prosite/profiles"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
 
 workflow SCAN_SEQUENCES {
@@ -129,7 +131,7 @@ workflow SCAN_SEQUENCES {
         RUN_MOBIDBLITE(ch_fasta)
         PARSE_MOBIDBLITE(RUN_MOBIDBLITE.out)
         results = results.mix(PARSE_MOBIDBLITE.out)
-    }    
+    }
 
     if (applications.contains("ncbifam")) {
         RUN_NCBIFAM(
@@ -181,11 +183,25 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("prositepatterns")) {
-        // TODO
+        PFSCAN_RUNNER(
+            ch_fasta,
+            "${datadir}/${appsConfig.prositepatterns.data}",
+            "${datadir}/${appsConfig.prositepatterns.evaluator}"
+        )
+
+        PFSCAN_PARSER(PFSCAN_RUNNER.out)
+        results = results.mix(PFSCAN_PARSER.out)
     }
 
     if (applications.contains("prositeprofiles")) {
-        // TODO
+//         PFSEARCH_RUNNER(
+//             ch_fasta,
+//             "${datadir}/${appsConfig.prositeprofiles.data}",
+//             "${datadir}/${appsConfig.prositeprofiles.skiped_flagged_profiles}"
+//         )
+//
+//         PFSEARCH_PARSER(PFSEARCH_RUNNER.out)
+//         results = results.mix(PFSEARCH_PARSER.out)
     }
 
     if (applications.contains("sfld")) {
@@ -199,7 +215,7 @@ workflow SCAN_SEQUENCES {
         PARSE_SMART(SEARCH_SMART.out.join(ch_json),
             "${datadir}/${appsConfig.smart.hmm}")
 
-        results = results.mix(PARSE_SMART.out)  
+        results = results.mix(PARSE_SMART.out)
     }
 
     if (applications.contains("superfamily")) {
