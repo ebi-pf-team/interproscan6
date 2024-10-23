@@ -101,8 +101,8 @@ process JSON_OUTPUT {
                             break
                         case ["signalp", "signalp_euk"]:
                             locationResult["pvalue"] = location.pvalue
-                            locationResult["cleavageStart"] = location.cleavageStart
-                            locationResult["cleavageEnd"] = location.cleavageEnd
+                            locationResult["cleavageStart"] = signalp.cleavageSiteStart
+                            locationResult["cleavageEnd"] = signalp.cleavageSiteEnd
                             break
                         case "smart":
                             locationResult["evalue"] = location.evalue
