@@ -39,6 +39,8 @@ process PFSCAN_PARSER {
         tuple val(meta), path("ps_scan_parsed.json")
 
     exec:
+
+
     Map patternsMatches = [:]
     pfscan_out.eachLine { line ->
         String lineStrip = line.trim()
@@ -58,13 +60,13 @@ process PFSCAN_PARSER {
         String seqId = matchInfo[0]
         String matchId = matchInfo[2]
         String alignment = matchDetails[2].replaceAll('Sequence ', '').replaceAll('"', '').replaceAll('\\.', '').trim()
-//         List cigarAlignment = CigarAlignmentParser.parse(alignment)
+        String cigarAlignment = cigarAlignmentParser(alignment)
 
         start = matchInfo[3].toInteger()
         end = matchInfo[4].toInteger()
         level = "STRONG"
         alignment = alignment
-        cigarAlignment = "" // CigarAlignmentParser.encode(cigarAlignment),
+        cigarAlignment = cigarAlignmentEncode(cigarAlignment)
 
         if (patternsMatches.containsKey(seqId)) {
             match = patternsMatches[seqId]
@@ -79,4 +81,39 @@ process PFSCAN_PARSER {
     def outputFilePath = task.workDir.resolve("ps_scan_parsed.json")
     def json = JsonOutput.toJson(patternsMatches)
     new File(outputFilePath.toString()).write(json)
+}
+
+def cigarAlignmentParser(String alignment) {
+    def cigarAlignment = ""
+    alignment.each { character ->
+        if (character.isUpperCase()) {
+            cigarAlignment += "M" // match char
+        } else if (character.isLowerCase()) {
+            cigarAlignment += "I" // insert char
+        } else if (character == "-") {
+            cigarAlignment += "D" // delete char
+        } else {
+            throw new IllegalArgumentException("Alignment contains unrecognised character ${character} at ${alignment}")
+        }
+    }
+    return cigarAlignment
+}
+
+def cigarAlignmentEncode(String cigarAlignment) {
+    def encodedAlignment = ""
+    def prevChar = ""
+    def count = 0
+    cigarAlignment.each { character ->
+        if (character == prevChar) {
+            count += 1
+        } else {
+            if (prevChar) {
+                encodedAlignment += "${count}${prevChar}"
+            }
+            count = 1
+            prevChar = character
+        }
+    }
+    encodedAlignment += "${count}${prevChar}"
+    return encodedAlignment
 }
