@@ -8,7 +8,6 @@ include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                      
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
 include { PFSCAN_RUNNER ; PFSCAN_PARSER                                           } from  "../../modules/prosite/patterns"
-include { PFSEARCH_RUNNER ; PFSEARCH_PARSER                                       } from  "../../modules/prosite/profiles"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
 
 workflow SCAN_SEQUENCES {
@@ -194,14 +193,7 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("prositeprofiles")) {
-//         PFSEARCH_RUNNER(
-//             ch_fasta,
-//             "${datadir}/${appsConfig.prositeprofiles.data}",
-//             "${datadir}/${appsConfig.prositeprofiles.skiped_flagged_profiles}"
-//         )
-//
-//         PFSEARCH_PARSER(PFSEARCH_RUNNER.out)
-//         results = results.mix(PFSEARCH_PARSER.out)
+        // TODO
     }
 
     if (applications.contains("sfld")) {
