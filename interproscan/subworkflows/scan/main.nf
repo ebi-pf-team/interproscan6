@@ -8,6 +8,7 @@ include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                      
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
 include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                           } from  "../../modules/phobius"
+include { RUN_PIRSR; PARSE_PIRSR                                                  } from  "../../modules/pirsr"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
 
@@ -131,7 +132,7 @@ workflow SCAN_SEQUENCES {
         RUN_MOBIDBLITE(ch_fasta)
         PARSE_MOBIDBLITE(RUN_MOBIDBLITE.out)
         results = results.mix(PARSE_MOBIDBLITE.out)
-    }    
+    }
 
     if (applications.contains("ncbifam")) {
         RUN_NCBIFAM(
@@ -180,7 +181,13 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("pirsr")) {
-        // TODO
+        RUN_PIRSR(ch_fasta,
+            "${datadir}/${appsConfig.pirsr.hmm}")
+
+        PARSE_PIRSR(RUN_PIRSR.out,
+            "${datadir}/${appsConfig.pirsr.rules}")
+
+        results = results.mix(PARSE_PIRSR.out)
     }
 
     if (applications.contains("prints")) {
@@ -206,7 +213,7 @@ workflow SCAN_SEQUENCES {
         PARSE_SMART(SEARCH_SMART.out.join(ch_json),
             "${datadir}/${appsConfig.smart.hmm}")
 
-        results = results.mix(PARSE_SMART.out)  
+        results = results.mix(PARSE_SMART.out)
     }
 
     if (applications.contains("superfamily")) {
