@@ -70,14 +70,14 @@ process PARSE_PIRSR {
 
                             def querySeq = seqAlign.replaceAll('-', '')
                             println "querySeq: $querySeq"
-                            def targetSeq = (pos.hmmStart < map.size() && pos.hmmEnd < map.size()) ?
-                                            querySeq[map[pos.hmmStart]..map[pos.hmmEnd]] : ''
-
-                            if (targetSeq ==~ condition) {
-                                passCount++
-                                if (pos.start == 'Nter') pos.start = seqFrom
-                                if (pos.end == 'Cter') pos.end = seqTo
-                            }
+//                             def targetSeq = (pos.hmmStart < map.size() && pos.hmmEnd < map.size()) ?
+//                                             querySeq[map[pos.hmmStart]..map[pos.hmmEnd]] : ''
+//
+//                             if (targetSeq ==~ condition) {
+//                                 passCount++
+//                                 if (pos.start == 'Nter') pos.start = seqFrom
+//                                 if (pos.end == 'Cter') pos.end = seqTo
+//                             }
 
                             positionsParsed << [
                                 description: pos.desc,
@@ -100,21 +100,22 @@ process PARSE_PIRSR {
                 }
 
                 if (!ruleSites.isEmpty()) {
-                    domHits << [
-                        score: location.score as float,
-                        evalue: location.evalue as float,
-                        hmmStart: hmmFrom,
-                        hmmEnd: hmmTo,
-                        hmmAlign: hmmAlign,
-                        start: seqFrom,
-                        end: seqTo,
-                        alignment: seqAlign,
-                        sites: ruleSites,
-                        hmmLength: location.hmmLength,
-                        envelopeStart: location.envelopeStart as int,
-                        envelopeEnd: location.envelopeEnd as int
-                    ]
-                }
+                    Sites sites = new Sites(ruleSites)
+//                     domHits << [
+//                         score: location.score,
+//                         evalue: location.evalue,
+//                         hmmStart: hmmFrom,
+//                         hmmEnd: hmmTo,
+//                         hmmAlign: hmmAlign,
+//                         start: seqFrom,
+//                         end: seqTo,
+//                         alignment: seqAlign,
+//                         sites: sites,
+//                         hmmLength: location.hmmLength,
+//                         envelopeStart: location.envelopeStart,
+//                         envelopeEnd: location.envelopeEnd
+//                     ]
+//                 }
             }
 
             domain.locations = domHits
