@@ -13,30 +13,16 @@ process PFSEARCH_RUNNER {
         tuple val(meta), path("prosite_profiles.out")
         val skip_flagged_profiles
 
-    exec:
-    def outputFilePath = task.workDir.resolve("prosite_profiles.out")
-    def outputFile = new File(outputFilePath.toString())
-    outputFile.createNewFile() // create the file to ensure an output file even if empty
-
-    List<String> profilePaths = []
-    new File(models_dir).eachFileRecurse(FileType.FILES) { file ->
-        profilePaths << file.absolutePath
-    }
-
-    profilePaths.each { profile ->
-        def runCmd = ["/bin/bash", "-c", "/opt/pftools/pfsearchV3", "${profile}", "${fasta}", "-f", "-o", "7", "-t", "4"]
-        try {
-            def process = runCmd.execute()
-            def output = process.text
-            if (output.trim()) {
-               outputFile.append(output + '\n')
-            }
-            process.waitFor()
-        } catch (Exception e) {
-            println "Error running pfsearchV3 using cmd: ${runCmd}\nError: ${e.message}"
-            System.exit(1)
-        }
-    }
+    script:
+    """
+    touch prosite_profiles.out
+    find ${models_dir} -type f | while read profile; do
+        output=\$(/opt/pftools/pfsearchV3 "\${profile}" "${fasta}" -f -o 7 -t 4)
+        if [[ -n "\${output}" ]]; then
+            echo "\${output}" >> prosite_profiles.out
+        fi
+    done
+    """
 }
 
 process PFSEARCH_PARSER {
