@@ -47,8 +47,6 @@ process PARSE_PIRSR {
                 def map = mapHMMToSeq(location.hmmStart,
                                   location.querySequence,
                                   location.targetSequence)
-//                 println "location.hmmStart: ${location.hmmStart}"
-//                 println "Map: ${map}"
 
                 def ruleSites = []
                 def rule = rules.get(modelId, null)
@@ -104,6 +102,7 @@ process PARSE_PIRSR {
                 match.evalue = sortedLocations[0].evalue
             }
         }
+        return [(seqId): matches]
     }
 
     def json = JsonOutput.toJson(hmmerMatches)
