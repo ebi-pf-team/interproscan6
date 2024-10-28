@@ -130,7 +130,7 @@ process PARSE_HAMAP {
             match = matches[sequenceId]
         } else {
             match = new Match(modelAccession)
-            matches[sequenceId] = [:]
+            matches.computeIfAbsent(sequenceId, { [:] })
             matches[sequenceId][modelAccession] = match
         }
 
