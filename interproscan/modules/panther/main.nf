@@ -78,7 +78,7 @@ process PREPARE_TREEGRAFTER {
         // Ensure we only have one domain
         assert match.locations.size() == 1
         Location location = match.locations.first()
-        assert location.querySequence.length() == location.targetSequence.length()
+        assert location.querySequence.length() == location.targetAlignment.length()
 
         // Get expected length of the sequence
         String familyId = match.modelAccession
@@ -94,10 +94,10 @@ process PREPARE_TREEGRAFTER {
         sb << ("-" * (location.hmmStart - 1))
 
         // Build sequence
-        String targetSequence = location.targetSequence.replaceAll(/(?i)[UO]/, 'X')
-        for (int i = 0; i < targetSequence.length(); i++) {
+        String targetAlignment = location.targetAlignment.replaceAll(/(?i)[UO]/, 'X')
+        for (int i = 0; i < targetAlignment.length(); i++) {
             char hmmChar = location.querySequence[i]
-            char seqChar = targetSequence[i]
+            char seqChar = targetAlignment[i]
 
             if (hmmChar != '.') {
                 sb << seqChar
