@@ -66,8 +66,7 @@ process XREFS {
 
 
                 if (memberDB == "panther") {
-                    String sigAcc = matchObject.signature.accession
-                    String paintAnnPath = "${dataDir}/${params.appsConfig.panther.paint}/${sigAcc}.json"
+                    String paintAnnPath = "${dataDir}/${params.appsConfig.panther.paint}/${matchObject.signature.accession}.json"
                     File paintAnnotationFile = new File(paintAnnPath.toString())
                     if (paintAnnotationFile.exists()) {
                         def paintAnnotationsContent = jsonSlurper.parse(paintAnnotationFile)
