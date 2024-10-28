@@ -57,8 +57,13 @@ process XREFS {
                 if (memberDB in ["cathgene3d", "cathfunfam"]) {
                     accId = matchObject.signature.accession
                 }
-                Signature signatureObject = new Signature(accId, "", "", sigLibRelease, null)
-                matchObject.signature = signatureObject
+                if (!matchObject.signature) {
+                    matchObject.signature = new Signature(accId, "", "", sigLibRelease, null)
+                } else {
+                    matchObject.signature.accession = accId
+                    matchObject.signature.signatureLibraryRelease = sigLibRelease
+                }
+
 
                 if (memberDB == "panther") {
                     String sigAcc = matchObject.signature.accession
