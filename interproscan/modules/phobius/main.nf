@@ -108,7 +108,8 @@ process PARSE_PHOBIUS {
                 tmpMatches[modelAccession] = new Match(modelAccession)
             }
 
-            tmpMatches[modelAccession].addLocation(new Location(start, end))            
+            Match match = tmpMatches.computeIfAbsent(modelAccession, k -> new Match(modelAccession))
+            match.addLocation(new Location(start, end))            
         }
     }
 
