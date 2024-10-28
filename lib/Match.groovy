@@ -75,9 +75,9 @@ class Signature implements Serializable {
         this.accession = accession
     }
 
-    Signature(String accession, 
-              String name, 
-              String description, 
+    Signature(String accession,
+              String name,
+              String description,
               SignatureLibraryRelease library,
               Entry entry) {
         this.accession = accession
@@ -164,10 +164,10 @@ class Location implements Serializable {
     // cigarAlignment
     // motifNumber
 
-    Location(int start, 
-             int end, 
+    Location(int start,
+             int end,
              Integer hmmStart = null,
-             Integer hmmEnd = null, 
+             Integer hmmEnd = null,
              Integer hmmLength = null,
              String hmmBounds = null,
              Integer envelopeStart = null,
@@ -190,10 +190,10 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-    Location(int start, 
-             int end, 
+    Location(int start,
+             int end,
              Integer hmmStart,
-             Integer hmmEnd, 
+             Integer hmmEnd,
              Integer hmmLength,
              String hmmBounds,
              Integer envelopeStart,
@@ -288,6 +288,8 @@ class Site implements Serializable {
     String description
     int numLocations
     List<SiteLocation> siteLocations = []
+    String label = null
+    String group = null
     private int start = -1
     private int end = -1
 
@@ -307,8 +309,24 @@ class Site implements Serializable {
         }
     }
 
+    // PIRSR case
+    Site(String description,
+        int group,
+        int hmmEnd,
+        int hmmStart,
+        String label,
+        List<SiteLocation> siteLocations) {
+        this.description = description
+        this.group = group
+        this.end = end
+        this.start = start
+        this.label = label
+        this.numLocations = siteLocations.size()
+        this.siteLocations = siteLocations
+    }
+
     Site(String description, String residues) {
-        this(description, Site.getSiteLocationsFromString(residues))        
+        this(description, Site.getSiteLocationsFromString(residues))
     }
 
     private static List<SiteLocation> getSiteLocationsFromString(String residues) {

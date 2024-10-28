@@ -45,65 +45,58 @@ process PARSE_PIRSR {
             }
             sortedLocations.each { location ->
                 def map = mapHMMToSeq(location.hmmStart,
-                    location.querySequence,
-                    location.targetSequence)
-                println "Map: ${map}"
+                                  location.querySequence,
+                                  location.targetSequence)
+//                 println "location.hmmStart: ${location.hmmStart}"
+//                 println "Map: ${map}"
 
-//                 def ruleSites = []
-//                 def rule = rules.get(modelId, null)
-//                 if (rule) {
-//                     rule.Groups.each { grp, positions ->
-//                         int passCount = 0
-//                         def positionsParsed = []
-//                         positions.eachWithIndex { pos, posNum ->
-//                             println "Position: ${pos}"
-//                             println "Position Num: ${posNum}"
-//                             def condition = pos.condition.replaceAll(/[-()]/) { m ->
-//                                 switch (m[0]) {
-//                                     case '-': ''; case '(': '{'; case ')': '}'
-//                                 }
-//                             }.replace('x', '.')
-//                             def querySeq = location.targetSequence.replaceAll('-', '')
-//
-//                             if (pos.hmmStart < map.size() && pos.hmmEnd < map.size()) {
-//                                 targetSeq = querySeq[map[pos.hmmStart]..map[pos.hmmEnd]]
-//                             } else {
-//                                 targetSeq = ''
-//                             }
-//
-//                             println "Target Seq: ${targetSeq}"
-//                             println "Condition: ${condition}"
-//                             if (targetSeq ==~ condition) {
-//                                 passCount++
-//                                 if (pos.start == 'Nter') pos.start = location.start
-//                                 if (pos.end == 'Cter') pos.end = location.end
-//                             }
-//
-//                             positionsParsed << [
-//                                 description: pos.desc,
-//                                 group: pos.group as int,
-//                                 hmmEnd: pos.hmmEnd,
-//                                 hmmStart: pos.hmmStart,
-//                                 label: pos.label,
-//                                 numLocations: 1,
-//                                 siteLocations: [[
-//                                     end: pos.end,
-//                                     residue: pos.condition,
-//                                     start: pos.start
-//                                 ]]
-//                             ]
-//                             println "Position Parsed: ${positionsParsed}"
-//                         }
-//                         println "Pass count: ${passCount}"
-//                         if (passCount == positions.size()) {
-//                             ruleSites.addAll(positionsParsed)
-//                         }
-//                     }
-//                 }
-//                 println "Rule sites: ${ruleSites}"
-//                 if (!ruleSites.isEmpty()) {
-//                     locations.sites: sites
-//                 }
+                def ruleSites = []
+                def rule = rules.get(modelId, null)
+                if (rule) {
+                    rule.Groups.each { grp, positions ->
+                        int passCount = 0
+                        def positionsParsed = []
+                        positions.each { pos ->
+                            def condition = pos.condition.replaceAll(/[-()]/) { m ->
+                                switch (m[0]) {
+                                    case '-': ''; case '(': '{'; case ')': '}'
+                                }
+                            }.replace('x', '.')
+                            def querySeq = location.targetSequence.replaceAll('-', '')
+
+                            if (pos.hmmStart < map.size() && pos.hmmEnd < map.size()) {
+                                targetSeq = querySeq[map[pos.hmmStart]..map[pos.hmmEnd]]
+                            } else {
+                                targetSeq = ''
+                            }
+
+                            if (targetSeq ==~ condition) {
+                                passCount++
+                                if (pos.start == 'Nter') pos.start = location.start
+                                if (pos.end == 'Cter') pos.end = location.end
+                            }
+
+                            SiteLocation siteLocation = new SiteLocation(
+                                pos.condition, pos.start, pos.end)
+
+                            positionsParsed << [new Site(
+                                pos.desc,
+                                pos.group as int,
+                                pos.hmmEnd,
+                                pos.hmmStart,
+                                pos.label,
+                                [siteLocation]
+                            )]
+                        }
+                        if (passCount == positions.size()) {
+                            ruleSites.addAll(positionsParsed)
+                        }
+                    }
+                }
+
+                if (!ruleSites.isEmpty()) {
+                    location.sites = ruleSites
+                }
             }
 
             if (sortedLocations) {
@@ -120,7 +113,7 @@ process PARSE_PIRSR {
 def mapHMMToSeq(int hmmStart, String querySeq, String targetSeq) {
     // map base positions from alignment, from query HMM coords to (ungapped) target sequence coords
     int seqPos = 0
-    def map = [-1] * hmmStart + [0]
+    def map = [0] + (1..<hmmStart).collect { -1 }
     querySeq.eachWithIndex { character, i ->
         map << seqPos
         if (character != '.') hmmStart++
