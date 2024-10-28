@@ -67,7 +67,7 @@ process XREFS {
 
                 if (memberDB == "panther") {
                     String paintAnnPath = "${dataDir}/${params.appsConfig.panther.paint}/${matchObject.signature.accession}.json"
-                    File paintAnnotationFile = new File(paintAnnPath.toString())
+                    File paintAnnotationFile = new File(paintAnnPath)
                     if (paintAnnotationFile.exists()) {
                         def paintAnnotationsContent = jsonSlurper.parse(paintAnnotationFile)
                         String nodeId = matchObject.treegrafter.ancestralNodeID
