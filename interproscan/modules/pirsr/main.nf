@@ -66,18 +66,20 @@ process PARSE_PIRSR {
                                     case '-': ''; case '(': '{'; case ')': '}'
                                 }
                             }.replace('x', '.')
-                            println "positions: $positions"
-
                             def querySeq = seqAlign.replaceAll('-', '')
-                            println "querySeq: $querySeq"
-//                             def targetSeq = (pos.hmmStart < map.size() && pos.hmmEnd < map.size()) ?
-//                                             querySeq[map[pos.hmmStart]..map[pos.hmmEnd]] : ''
-//
-//                             if (targetSeq ==~ condition) {
-//                                 passCount++
-//                                 if (pos.start == 'Nter') pos.start = seqFrom
-//                                 if (pos.end == 'Cter') pos.end = seqTo
-//                             }
+
+                            if (pos.hmmStart < map.size() && pos.hmmEnd < map.size()) {
+                                println "map: $map"
+                                targetSeq = querySeq[map[pos.hmmStart]..map[pos.hmmEnd]]
+                            } else {
+                                targetSeq = ''
+                            }
+
+                            if (targetSeq ==~ condition) {
+                                passCount++
+                                if (pos.start == 'Nter') pos.start = seqFrom
+                                if (pos.end == 'Cter') pos.end = seqTo
+                            }
 
                             positionsParsed << [
                                 description: pos.desc,
@@ -100,28 +102,27 @@ process PARSE_PIRSR {
                 }
 
                 if (!ruleSites.isEmpty()) {
-                    Sites sites = new Sites(ruleSites)
-//                     domHits << [
-//                         score: location.score,
-//                         evalue: location.evalue,
-//                         hmmStart: hmmFrom,
-//                         hmmEnd: hmmTo,
-//                         hmmAlign: hmmAlign,
-//                         start: seqFrom,
-//                         end: seqTo,
-//                         alignment: seqAlign,
-//                         sites: sites,
-//                         hmmLength: location.hmmLength,
-//                         envelopeStart: location.envelopeStart,
-//                         envelopeEnd: location.envelopeEnd
-//                     ]
-//                 }
+                    domHits << [
+                        score: location.score,
+                        evalue: location.evalue,
+                        hmmStart: hmmFrom,
+                        hmmEnd: hmmTo,
+                        hmmAlign: hmmAlign,
+                        start: seqFrom,
+                        end: seqTo,
+                        alignment: seqAlign,
+                        sites: sites,
+                        hmmLength: location.hmmLength,
+                        envelopeStart: location.envelopeStart,
+                        envelopeEnd: location.envelopeEnd
+                    ]
+                }
             }
 
             domain.locations = domHits
             if (sortedLocations) {
-                domain.score = sortedLocations[0].score as float
-                domain.evalue = sortedLocations[0].evalue as float
+                domain.score = sortedLocations[0].score
+                domain.evalue = sortedLocations[0].evalue
             }
         }
     }
@@ -130,20 +131,14 @@ process PARSE_PIRSR {
     new File(outputFilePath.toString()).write(json)
 }
 
-
-def mapHMMToSeq(int hmmPos, String hmm, String seq) {
+def mapHMMToSeq(int hmmFrom, String hmmAlign, String seqAlign) {
+    // map base positions from alignment, from query HMM coords to (ungapped) target sequence coords
     int seqPos = 0
-    def map = [-1] * hmmPos + [0]
-
-    hmm.eachWithIndex { character, i ->
-        map[hmmPos++] = seqPos
-
-        if (character != '.') hmmPos++
-        if (seq[i] != '-') seqPos++
+    def map = [-1] * hmmFrom + [0]
+    hmmAlign.eachWithIndex { character, i ->
+        map[hmmFrom..-1] = [seqPos]
+        if (character != '.') hmmFrom++
+        if (seqAlign[i] != '-') seqPos++
     }
-
     return map
 }
-
-
-
