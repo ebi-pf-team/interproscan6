@@ -31,8 +31,13 @@ process XREFS {
     File entriesJson = new File(entriesPath.toString())
     def entries = new ObjectMapper().readValue(entriesJson, Map)
 
-    def (ipr2go, goInfo) = loadXRefFiles("goterms", dataDir)
-    def (ipr2pa, paInfo) = loadXRefFiles("pathways", dataDir)
+    def (ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null]
+    if (params.goterms) {
+        (ipr2go, goInfo) = loadXRefFiles("goterms", dataDir)
+    }
+    if (params.pathways) {
+        (ipr2pa, paInfo) = loadXRefFiles("pathways", dataDir)
+    }
 
     JsonSlurper jsonSlurper = new JsonSlurper()
 
@@ -58,9 +63,8 @@ process XREFS {
                     accId = matchObject.signature.accession
                 }
                 if (!matchObject.signature) {
-                    matchObject.signature = new Signature(accId, "", "", sigLibRelease, null)
+                    matchObject.signature = new Signature(accId, sigLibRelease)
                 } else {
-                    matchObject.signature.accession = accId
                     matchObject.signature.signatureLibraryRelease = sigLibRelease
                 }
 
@@ -83,7 +87,6 @@ process XREFS {
                     matchObject.signature.name = entry["name"]
                     matchObject.signature.description = entry["description"]
 
-                    def representativeFlag = null
                     if (entry['representative']) {
                         RepresentativeInfo representativeInfo = new RepresentativeInfo(
                             entry['representative']["type"],
@@ -104,37 +107,34 @@ process XREFS {
                         matchObject.signature.entry = entryDataObj
                     }
 
-                    if (params.goterms || params.pathways) {
-                        interproKey = entry["integrated"]
-                        if (params.goterms) {
-                            try {
-                                def goIds = ipr2go[interproKey]
-                                def goTerms = goIds.collect { goId ->
-                                    GoXRefs goXRefObj = new GoXRefs(
-                                        goInfo[goId][0],
-                                        "GO",
-                                        GO_PATTERN[goInfo[goId][1]],
-                                        goId
-                                    )
-                                    matchObject.signature.entry.addGoXRefs(goXRefObj)
-                                }
-                            } catch (java.lang.NullPointerException e) {
-                                // pass
+                    if (params.goterms) {
+                        try {
+                            def goIds = ipr2go[interproKey]
+                            def goTerms = goIds.collect { goId ->
+                                GoXRefs goXRefObj = new GoXRefs(
+                                    goInfo[goId][0],
+                                    "GO",
+                                    GO_PATTERN[goInfo[goId][1]],
+                                    goId
+                                )
+                                matchObject.signature.entry.addGoXRefs(goXRefObj)
                             }
+                        } catch (java.lang.NullPointerException e) {
+                            // pass if no GO Terms found for the current entry
                         }
-                        if (params.pathways) {
-                            try {
-                                def paIds = ipr2pa[interproKey]
-                                def paTerms = paIds.collect { paId ->
-                                    PathwayXRefs paXRefObj = new PathwayXRefs(
-                                        paInfo[paId][1],
-                                        PA_PATTERN[paInfo[paId][0]],
-                                        paId)
-                                    matchObject.signature.entry.addPathwayXRefs(paXRefObj)
-                                }
-                            } catch (java.lang.NullPointerException e) {
-                                // pass
+                    }
+                    if (params.pathways) {
+                        try {
+                            def paIds = ipr2pa[interproKey]
+                            def paTerms = paIds.collect { paId ->
+                                PathwayXRefs paXRefObj = new PathwayXRefs(
+                                    paInfo[paId][1],
+                                    PA_PATTERN[paInfo[paId][0]],
+                                    paId)
+                                matchObject.signature.entry.addPathwayXRefs(paXRefObj)
                             }
+                        } catch (java.lang.NullPointerException e) {
+                            // pass if no Pathways found for the current entry
                         }
                     }
                 }
