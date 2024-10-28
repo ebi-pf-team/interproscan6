@@ -33,112 +33,98 @@ process PARSE_PIRSR {
 
     exec:
     def outputFilePath = task.workDir.resolve("pirsr.json")
-    def matches = HMMER3.parseOutput(hmmsearch_out.toString())
+    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString())
 
-    def matchesInfo = [:]
     JsonSlurper jsonSlurper = new JsonSlurper()
     def rules = jsonSlurper.parse(new File(rulesPath.toString()))
-    matches.each { sequenceId, domains ->
-        domains.each { modelId, domain ->
-            def domHits = []
-            def sortedLocations = domain.locations.sort { a, b ->
+
+    hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
+        matches.each { modelId, match ->
+            def sortedLocations = match.locations.sort { a, b ->
                 a.evalue <=> b.evalue ?: b.score <=> a.score
             }
             sortedLocations.each { location ->
-                def hmmFrom = location.hmmStart
-                def hmmTo = location.hmmEnd
-                def hmmAlign = location.querySequence
-                def seqFrom = location.start
-                def seqTo = location.end
-                def seqAlign = location.targetSequence
+                def map = mapHMMToSeq(location.hmmStart,
+                    location.querySequence,
+                    location.targetSequence)
+                println "Map: ${map}"
 
-                def map = mapHMMToSeq(hmmFrom, hmmAlign, seqAlign)
-
-                def ruleSites = []
-                def rule = rules.get(modelId, null)
-                if (rule) {
-                    rule.Groups.each { grp, positions ->
-                        int passCount = 0
-                        def positionsParsed = []
-                        positions.eachWithIndex { pos, posNum ->
-                            def condition = pos.condition.replaceAll(/[-()]/) { m ->
-                                switch (m[0]) {
-                                    case '-': ''; case '(': '{'; case ')': '}'
-                                }
-                            }.replace('x', '.')
-                            def querySeq = seqAlign.replaceAll('-', '')
-
-                            if (pos.hmmStart < map.size() && pos.hmmEnd < map.size()) {
-                                println "map: $map"
-                                targetSeq = querySeq[map[pos.hmmStart]..map[pos.hmmEnd]]
-                            } else {
-                                targetSeq = ''
-                            }
-
-                            if (targetSeq ==~ condition) {
-                                passCount++
-                                if (pos.start == 'Nter') pos.start = seqFrom
-                                if (pos.end == 'Cter') pos.end = seqTo
-                            }
-
-                            positionsParsed << [
-                                description: pos.desc,
-                                group: pos.group as int,
-                                hmmEnd: pos.hmmEnd,
-                                hmmStart: pos.hmmStart,
-                                label: pos.label,
-                                numLocations: 1,
-                                siteLocations: [[
-                                    end: pos.end,
-                                    residue: pos.condition,
-                                    start: pos.start
-                                ]]
-                            ]
-                        }
-                        if (passCount == positions.size()) {
-                            ruleSites.addAll(positionsParsed)
-                        }
-                    }
-                }
-
-                if (!ruleSites.isEmpty()) {
-                    domHits << [
-                        score: location.score,
-                        evalue: location.evalue,
-                        hmmStart: hmmFrom,
-                        hmmEnd: hmmTo,
-                        hmmAlign: hmmAlign,
-                        start: seqFrom,
-                        end: seqTo,
-                        alignment: seqAlign,
-                        sites: sites,
-                        hmmLength: location.hmmLength,
-                        envelopeStart: location.envelopeStart,
-                        envelopeEnd: location.envelopeEnd
-                    ]
-                }
+//                 def ruleSites = []
+//                 def rule = rules.get(modelId, null)
+//                 if (rule) {
+//                     rule.Groups.each { grp, positions ->
+//                         int passCount = 0
+//                         def positionsParsed = []
+//                         positions.eachWithIndex { pos, posNum ->
+//                             println "Position: ${pos}"
+//                             println "Position Num: ${posNum}"
+//                             def condition = pos.condition.replaceAll(/[-()]/) { m ->
+//                                 switch (m[0]) {
+//                                     case '-': ''; case '(': '{'; case ')': '}'
+//                                 }
+//                             }.replace('x', '.')
+//                             def querySeq = location.targetSequence.replaceAll('-', '')
+//
+//                             if (pos.hmmStart < map.size() && pos.hmmEnd < map.size()) {
+//                                 targetSeq = querySeq[map[pos.hmmStart]..map[pos.hmmEnd]]
+//                             } else {
+//                                 targetSeq = ''
+//                             }
+//
+//                             println "Target Seq: ${targetSeq}"
+//                             println "Condition: ${condition}"
+//                             if (targetSeq ==~ condition) {
+//                                 passCount++
+//                                 if (pos.start == 'Nter') pos.start = location.start
+//                                 if (pos.end == 'Cter') pos.end = location.end
+//                             }
+//
+//                             positionsParsed << [
+//                                 description: pos.desc,
+//                                 group: pos.group as int,
+//                                 hmmEnd: pos.hmmEnd,
+//                                 hmmStart: pos.hmmStart,
+//                                 label: pos.label,
+//                                 numLocations: 1,
+//                                 siteLocations: [[
+//                                     end: pos.end,
+//                                     residue: pos.condition,
+//                                     start: pos.start
+//                                 ]]
+//                             ]
+//                             println "Position Parsed: ${positionsParsed}"
+//                         }
+//                         println "Pass count: ${passCount}"
+//                         if (passCount == positions.size()) {
+//                             ruleSites.addAll(positionsParsed)
+//                         }
+//                     }
+//                 }
+//                 println "Rule sites: ${ruleSites}"
+//                 if (!ruleSites.isEmpty()) {
+//                     locations.sites: sites
+//                 }
             }
 
-            domain.locations = domHits
             if (sortedLocations) {
-                domain.score = sortedLocations[0].score
-                domain.evalue = sortedLocations[0].evalue
+                match.score = sortedLocations[0].score
+                match.evalue = sortedLocations[0].evalue
             }
         }
     }
 
-    def json = JsonOutput.toJson(matches)
+    def json = JsonOutput.toJson(hmmerMatches)
     new File(outputFilePath.toString()).write(json)
 }
 
-def mapHMMToSeq(int hmmFrom, String hmmAlign, String seqAlign) {
+def mapHMMToSeq(int hmmStart, String querySeq, String targetSeq) {
     // map base positions from alignment, from query HMM coords to (ungapped) target sequence coords
     int seqPos = 0
-    def map = [-1] * hmmFrom + [0]
-    hmmAlign.eachWithIndex { character, i ->
-        map[hmmFrom..-1] = [seqPos]
-        if (character != '.') hmmFrom++
-        if (seqAlign[i] != '-') seqPos++
+    def map = [-1] * hmmStart + [0]
+    querySeq.eachWithIndex { character, i ->
+        map << seqPos
+        if (character != '.') hmmStart++
+        if (targetSeq[i] != '-') seqPos++
     }
     return map
 }
