@@ -67,11 +67,6 @@ process PARSE_SUPERFAMILY {
 
                 String regionsAsString = fields[2]
                 Double evalue = Double.parseDouble(fields[3])
-                // Integer hmmStart =  Integer.parseInt(fields[4])
-                // String seqAlignment = fields[5]
-                // Double familyEvalue = Double.parseDouble(fields[6])
-                // Integer scopDomainId = Integer.parseInt(fields[7])
-                // Integer scopFamilyId = Integer.parseInt(fields[8])
 
                 def regions = []
                 regionsAsString.split(",").each { region ->
