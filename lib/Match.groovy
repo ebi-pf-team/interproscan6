@@ -76,6 +76,11 @@ class Signature implements Serializable {
         this.accession = accession
     }
 
+    Signature(String accession, SignatureLibraryRelease library) {
+        this.accession = accession
+        this.signatureLibraryRelease = library
+    }
+
     Signature(String accession,
               String name,
               String description,
