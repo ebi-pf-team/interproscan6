@@ -36,7 +36,7 @@ process XREFS {
 
     JsonSlurper jsonSlurper = new JsonSlurper()
 
-    def aggregatedMatches = [:]
+    Map<String, Map<String, Match>> aggregatedMatches = [:]
 
     if ("${apps}".contains('panther')) {
         String paintAnnoDir = "${dataDir}/${params.appsConfig.paint}"
