@@ -88,7 +88,7 @@ process XREFS {
                     if (entry['representative']) {
                         RepresentativeInfo representativeInfo = new RepresentativeInfo(
                             entry['representative']["type"],
-                            rank = entry['representative']["index"]
+                            entry['representative']["index"]
                         )
                         matchObject.representativeInfo = representativeInfo
                     }
