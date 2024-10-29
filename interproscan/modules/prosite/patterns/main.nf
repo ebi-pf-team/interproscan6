@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
-process PFSCAN_RUNNER {
+process RUN_PFSCAN {
     /*
     The ps_scan.pl script is a wrapper for the pfscan tool that is provided by the
     pftools developers. It automates running pfscan for all provided patterns and
