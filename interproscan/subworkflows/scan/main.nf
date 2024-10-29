@@ -8,7 +8,7 @@ include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                      
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
 include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                           } from  "../../modules/phobius"
-include { PFSCAN_RUNNER ; PFSCAN_PARSER                                           } from  "../../modules/prosite/patterns"
+include { RUN_PFSCAN ; PARSE_PFSCAN                                               } from  "../../modules/prosite/patterns"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
 
@@ -189,14 +189,14 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("prositepatterns")) {
-        PFSCAN_RUNNER(
+        RUN_PFSCAN(
             ch_fasta,
             "${datadir}/${appsConfig.prositepatterns.data}",
             "${datadir}/${appsConfig.prositepatterns.evaluator}"
         )
-        PFSCAN_PARSER(PFSCAN_RUNNER.out)
-        
-        results = results.mix(PFSCAN_PARSER.out)
+        PARSE_PFSCAN(RUN_PFSCAN.out)
+
+        results = results.mix(PARSE_PFSCAN.out)
     }
 
     if (applications.contains("prositeprofiles")) {
