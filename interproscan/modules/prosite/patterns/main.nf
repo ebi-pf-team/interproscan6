@@ -51,7 +51,7 @@ process PARSE_PFSCAN {
         }
         List<String> matchDetails = matchInfo[8].split(';')
         String level = matchDetails[1].trim()
-        if (!level.startsWith("LevelTag") || !level.contains("0")) {  // apenas matches fortes
+        if (!level.startsWith("LevelTag") || !level.contains("0")) {  // Only accept strong matches
             return
         }
 
