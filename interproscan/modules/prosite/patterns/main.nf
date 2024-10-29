@@ -49,22 +49,22 @@ process PARSE_PFSCAN {
         if (matchInfo.size() < 9) {
             return
         }
-        List<String> matchDetails = matchInfo[8].split(';')
-        String level = matchDetails[1].trim()
-        if (!level.startsWith("LevelTag") || !level.contains("0")) {  // Only accept strong matches
-            level = "STRONG"
-        }
-
         String seqId = matchInfo[0]
         String modelAccession = matchInfo[2]
-        String alignment = matchDetails[2].replaceAll('Sequence ', '').replaceAll('"', '').replaceAll('\\.', '').trim()
-        String cigarAlignment = cigarAlignmentParser(alignment)
-
         int start = matchInfo[3].toInteger()
         int end = matchInfo[4].toInteger()
-        alignment = alignment
-        cigarAlignment = cigarAlignmentEncode(cigarAlignment)
 
+        List<String> matchDetails = matchInfo[8].split(';')
+        String name = matchDetails[0].trim()
+        String level = matchDetails[1].trim()
+        if (!level.startsWith("LevelTag") || !level.contains("0")) {
+            // skipping not strong matches
+        } else {
+            level = "STRONG"
+        }
+        String alignment = matchDetails[2].replaceAll('Sequence ', '').replaceAll('"', '').replaceAll('\\.', '').trim()
+        String cigarAlignment = parseCigarAlignment(alignment)
+        cigarAlignment = encodeCigarAlignment(cigarAlignment)
         if (patternsMatches.containsKey(seqId)) {
             match = patternsMatches[seqId]
         } else {
@@ -80,15 +80,20 @@ process PARSE_PFSCAN {
     new File(outputFilePath.toString()).write(json)
 }
 
-def parseCigarAlignment(String alignment) {  // e.g convert 'AAAAA-----BB' -> 'MMMMMDDDDDMM'
-    alignment.collect { baseChar ->
-        switch (baseChar) {
-            case { it.isUpperCase() }: 'M'  // match
-            case { it.isLowerCase() }: 'I'  // insertion
-            case '-': 'D'                   // deletion
-            default: throw new IllegalArgumentException("Unrecognized character ${baseChar} in ${alignment}")
+def parseCigarAlignment(String alignment) {
+    String cigarAlignment = ""
+    alignment.each { baseChar ->
+        if (baseChar.isUpperCase()) {
+            cigarAlignment += "M" // match char
+        } else if (baseChar.isLowerCase()) {
+            cigarAlignment += "I" // insert char
+        } else if (baseChar == "-") {
+            cigarAlignment += "D" // delete char
+        } else {
+            throw new IllegalArgumentException("Unrecognized character ${baseChar} in ${alignment}")
         }
-    }.join('')
+    }
+    return cigarAlignment
 }
 
 def encodeCigarAlignment(String cigarAlignment) {  // Compress alignment, to give '5M' instead of 'MMMMM'
