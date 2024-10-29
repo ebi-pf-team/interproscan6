@@ -80,37 +80,29 @@ process PARSE_PFSCAN {
     new File(outputFilePath.toString()).write(json)
 }
 
-def cigarAlignmentParser(String alignment) {
-    def cigarAlignment = ""
-    alignment.each { character ->
-        if (character.isUpperCase()) {
-            cigarAlignment += "M" // match char
-        } else if (character.isLowerCase()) {
-            cigarAlignment += "I" // insert char
-        } else if (character == "-") {
-            cigarAlignment += "D" // delete char
-        } else {
-            throw new IllegalArgumentException("Alignment contains unrecognised character ${character} at ${alignment}")
+def parseCigarAlignment(String alignment) {  // e.g convert 'AAAAA-----BB' -> 'MMMMMDDDDDMM'
+    alignment.collect { baseChar ->
+        switch (baseChar) {
+            case { it.isUpperCase() }: 'M'  // match
+            case { it.isLowerCase() }: 'I'  // insertion
+            case '-': 'D'                   // deletion
+            default: throw new IllegalArgumentException("Unrecognized character ${baseChar} in ${alignment}")
         }
-    }
-    return cigarAlignment
+    }.join('')
 }
 
-def cigarAlignmentEncode(String cigarAlignment) {
-    def encodedAlignment = ""
-    def prevChar = ""
-    def count = 0
-    cigarAlignment.each { character ->
-        if (character == prevChar) {
-            count += 1
-        } else {
-            if (prevChar) {
-                encodedAlignment += "${count}${prevChar}"
+def encodeCigarAlignment(String cigarAlignment) {  // Compress alignment, to give '5M' instead of 'MMMMM'
+    if (!cigarAlignment) return ""
+    cigarAlignment
+        .split('')
+        .inject([]) { groups, alignChar ->
+            if (groups && groups.last()[1] == alignChar) {
+                groups.last()[0]++  // cigar alignment char matches previous so add 1 to the count
+            } else {
+                groups << [1, alignChar]  // change type of alignment char, restart count
             }
-            count = 1
-            prevChar = character
+            groups
         }
-    }
-    encodedAlignment += "${count}${prevChar}"
-    return encodedAlignment
+        .collect { count, alignChar -> "${count}${alignChar}" }
+        .join()
 }
