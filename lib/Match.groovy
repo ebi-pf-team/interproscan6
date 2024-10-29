@@ -246,7 +246,7 @@ class Location implements Serializable {
         this.level = level
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
-        this.targetSequence = alignment
+        this.targetAlignment = alignment
         this.cigarAlignment = cigarAlignment
     }
 
