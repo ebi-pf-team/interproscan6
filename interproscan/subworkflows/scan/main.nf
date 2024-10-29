@@ -196,10 +196,12 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("prositeprofiles")) {
         PFSEARCH_RUNNER(
             ch_fasta,
-            "${datadir}/${appsConfig.prositeprofiles.data}",
+            "${datadir}/${appsConfig.prositeprofiles.data}"
+        )
+        PFSEARCH_PARSER(
+            PFSEARCH_RUNNER.out,
             "${datadir}/${appsConfig.prositeprofiles.skip_flagged_profiles}"
         )
-        PFSEARCH_PARSER(PFSEARCH_RUNNER.out)
         results = results.mix(PFSEARCH_PARSER.out)
     }
 
