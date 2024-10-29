@@ -91,7 +91,6 @@ process PARSE_PIRSR {
                         }
                     }
                 }
-
                 if (!ruleSites.isEmpty()) {
                     location.sites = ruleSites
                 }
@@ -110,13 +109,13 @@ process PARSE_PIRSR {
 }
 
 def mapHMMToSeq(int hmmStart, String querySeq, String targetSeq) {
-    // Map base positions from alignment, converting querySeq HMM coords to ungapped targetSeq coords
     int seqPos = 0
-    def map = [0] + (1..<hmmStart).collect { -1 }
+    def map = (0..<hmmStart).collect { -1 }
     querySeq.eachWithIndex { character, i ->
-        map << seqPos
-        if (character != '.') hmmStart++
-        if (targetSeq[i] != '-') seqPos++
+        map[hmmStart] = seqPos
+        hmmStart += (character != '.') ? 1 : 0
+        seqPos += (targetSeq[i] != '-') ? 1 : 0
     }
     return map
 }
+
