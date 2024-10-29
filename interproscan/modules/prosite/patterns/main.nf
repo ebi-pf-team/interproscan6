@@ -29,7 +29,7 @@ process PFSCAN_RUNNER {
 }
 
 
-process PFSCAN_PARSER {
+process PARSE_PFSCAN {
     label 'analysis_parser'
 
     input:
