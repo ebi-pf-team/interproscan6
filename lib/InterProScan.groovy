@@ -71,6 +71,10 @@ class InterProScan {
             name: "apps-config",
             description: null
         ],
+        [
+            name: "x-refs-config",
+            description: null
+        ],
     ]
 
     static void validateParams(params, log) {
