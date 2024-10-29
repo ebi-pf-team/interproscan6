@@ -39,9 +39,9 @@ process PARSE_PIRSR {
     def rules = jsonSlurper.parse(new File(rulesPath.toString()))
 
     hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
-        matches.each { modelId, match ->
-            def sortedLocations = match.locations.sort { a, b ->
-                a.evalue <=> b.evalue ?: b.score <=> a.score
+        matches.each { modelAccession, match ->
+            def sortedLocations = match.locations.sort { loc ->
+                [loc.evalue, -loc.score]  // sorting by evalue ASC, score DESC
             }
             sortedLocations.each { location ->
                 def map = mapHMMToSeq(location.hmmStart,
@@ -49,7 +49,7 @@ process PARSE_PIRSR {
                                   location.targetSequence)
 
                 def ruleSites = []
-                def rule = rules.get(modelId, null)
+                def rule = rules.get(modelAccession, null)
                 if (rule) {
                     rule.Groups.each { grp, positions ->
                         int passCount = 0
@@ -110,7 +110,7 @@ process PARSE_PIRSR {
 }
 
 def mapHMMToSeq(int hmmStart, String querySeq, String targetSeq) {
-    // map base positions from alignment, from query HMM coords to (ungapped) target sequence coords
+    // Map base positions from alignment, converting querySeq HMM coords to ungapped targetSeq coords
     int seqPos = 0
     def map = [0] + (1..<hmmStart).collect { -1 }
     querySeq.eachWithIndex { character, i ->
