@@ -60,9 +60,9 @@ process PARSE_PFSCAN {
         String alignment = matchDetails[2].replaceAll('Sequence ', '').replaceAll('"', '').replaceAll('\\.', '').trim()
         String cigarAlignment = cigarAlignmentParser(alignment)
 
-        start = matchInfo[3].toInteger()
-        end = matchInfo[4].toInteger()
-        level = "STRONG"
+        int start = matchInfo[3].toInteger()
+        int end = matchInfo[4].toInteger()
+        String level = "STRONG"
         alignment = alignment
         cigarAlignment = cigarAlignmentEncode(cigarAlignment)
 
