@@ -7,7 +7,7 @@ class PirsfDatEntry {
     Float meanS
     Float stdS
     boolean blast
-    Set<String> children = new HashSet<>()
+    Set<String> children
 
     PirsfDatEntry(String modelAccession) {
         this.modelAccession = modelAccession
@@ -30,51 +30,45 @@ class PirsfDatEntry {
     }
 
     void addChildren(String children) {
-        this.children = new HashSet<>(children.split("\\s+").toList())
+        this.children = children.split("\\s+")
     }
 
     static parsePirsfDatFile (String pirsfDatPath) {
         File pirsfDatFile = new File(pirsfDatPath)
         if (!pirsfDatFile.exists()) {
-            System.out.println("Could not find PIRSF dat file at ${pirsfDatPath}")
-            System.exit(1)  // Added parentheses
+            System.exit(1)
         }
 
-        Map<String, PirsfDatEntry> datEntries = new LinkedHashMap<>()  // model id: datEntry
-        Map<String, String> datChildren = new LinkedHashMap<>()        // Sub family: Parent family
+        Map<String, PirsfDatEntry> datEntries = [:]  // modelAccession: entry
+        Map<String, String> datChildren = [:]   // subfam: parent
 
         pirsfDatFile.withReader { reader ->
             String line
-            PirsfDatEntry entry
-            while ((line = reader.readLine()) != null) {  // Fixed parentheses
+            PirsfDatEntry entry = null
+            while ((line = reader.readLine()) != null) {
                 if (line.startsWith(">")) {
                     if (entry != null) {
                         datEntries.put(entry.modelAccession, entry)
                     }
-                    entry = new PirsfDatEntry(line.split("\\s")[0].replace(">","").trim())  // Removed redundant declaration
+                    entry = new PirsfDatEntry(line.split("\\s")[0].replace(">","").trim())
                     def childLineMatcher = line =~ ~/^>PIRSF\d+\schild:\s(.*)$/
                     if (childLineMatcher.find()) {
                         entry.addChildren(childLineMatcher.group(1).trim())
-                        def children = childLineMatcher.group(1).trim().split("\\s+")  // Added 'def' declaration
+                        def children = childLineMatcher.group(1).trim().split("\\s+")
                         for (String subfamily : children) {
-                            datChildren.put(subfamily, entry.modelAccession)  // Fixed map name
+                            datChildren.put(subfamily, entry.modelAccession)
                         }
                     }
                 }
-                else if (line.startsWith("BLAST:")) {  // Fixed parentheses
+                else if (line.startsWith("BLAST:")) {
                     entry.addBlastBool(line.replace("BLAST:", "").trim())
                 }
-                else {
-                    def numLineMatcher = line =~ ~/^(\d+\.?\d+)\s+(\d+\.?\d+)\s+(\d+\.?\d+)\s+(\d+\.?\d+)\s+(\d+\.?\d+)\s*?$/
-                    if (numLineMatcher.find()) {  // Fixed parentheses
-                        entry.addMeans(
-                                numLineMatcher.group(1),
-                                numLineMatcher.group(2),
-                                numLineMatcher.group(3),
-                                numLineMatcher.group(4),
-                                numLineMatcher.group(5)
-                        )
-                    }
+                else if (line.matches("\\d+\\.?\\d*\\s+\\d+\\.?\\d*\\s+\\d+\\.?\\d*\\s+\\d+\\.?\\d*\\s+\\d+\\.?\\d*")) {
+                    def numbers = line.split("\\s+")
+                    entry.addMeans(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4])
+                }
+                else if (!line.trim().isEmpty()) {
+                    entry.addName(line.trim())
                 }
             }
             // Add the last entry if it exists

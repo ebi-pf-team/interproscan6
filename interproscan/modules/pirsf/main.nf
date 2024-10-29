@@ -139,8 +139,38 @@ process PARSE_PIRSF {
         }
     }
 
+    /* filter to use only the best matches, by score */
+    def bestMatches = [:]
+    processedMatches.each { proteinAccession, proteinMatches ->
+        def matchesSorted = proteinMatches.keySet().sort { key ->
+            proteinMatches[key]?.locations?.get(0)?.score ?: 0
+        }.reverse()
+
+        matchesSorted.each { modelAccession ->
+            // ignore subfamilies
+            if (modelAccession ==~ /^PIRSF5/) { return }
+
+            bestMatches.computeIfAbsent(proteinAccession, { [:] })
+            if (!bestMatches[proteinAccession].containsKey(modelAccession)) {
+                bestMatches[proteinAccession][modelAccession] = proteinMatches[modelAccession]
+            }
+
+            // see if this model has subfamilies that also matched the protein
+            if (datEntries[modelAccession].children != null) {
+                datEntries[modelAccession].children.each { subFamAccession ->
+                    if (proteinMatches.containsKey(subFamAccession)) {
+                        if (!bestMatches[proteinAccession]?.containsKey(subFamAccession)) {
+                            bestMatches[proteinAccession] = bestMatches[proteinAccession] ?: [:]
+                            bestMatches[proteinAccession][subFamAccession] = proteinMatches[subFamAccession]
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     def outputFilePath = task.workDir.resolve("pirsf.json")
-    def json = JsonOutput.toJson(processedMatches)
+    def json = JsonOutput.toJson(bestMatches)
     new File(outputFilePath.toString()).write(json)
 }
 
