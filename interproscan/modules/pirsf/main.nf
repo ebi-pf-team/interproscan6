@@ -8,14 +8,13 @@ process RUN_PIRSF {
     path hmmdb
 
     output:
-    tuple val(meta), path("hmmsearch.out"), path("hmmsearch.dtbl")
+    tuple val(meta), path("hmmsearch.dtbl")
 
     script:
     """
     /opt/hmmer3/bin/hmmsearch \
         -E 0.01 --acc \
         --cpu ${task.cpus} \
-        -o hmmsearch.out \
         --domtblout hmmsearch.dtbl \
         ${hmmdb} ${fasta}
     """
@@ -25,7 +24,7 @@ process PARSE_PIRSF {
     label 'analysis_parser'
 
     input:
-    tuple val(meta), val(hmmsearch_out), val(hmmsearch_dtbl)
+    tuple val(meta), val(hmmsearch_dtbl)
     val pirsf_dat_file
 
     output:
