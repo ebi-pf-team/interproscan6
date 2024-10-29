@@ -54,24 +54,24 @@ process XREFS {
         }?.value
         SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
 
-        def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, jsonMatches ->
-            [(seqId): jsonMatches.collectEntries { matchId, jsonMatch ->
-                Match matchObject = Match.fromMap(jsonMatch)
-                def entriesInfo = entries['entries']
-                String accId = matchObject.modelAccession.split("\\.")[0]
+        def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, matches ->
+            [(seqId): matches.collectEntries { matchAccession, match ->
+                Match matchObject = Match.fromMap(match)
+                def modelAccession = matchObject.modelAccession.split("\\.")[0]
                 if (memberDB in ["cathgene3d", "cathfunfam"]) {
-                    accId = matchObject.signature.accession
+                    modelAccession = matchObject.signature.accession
                 }
+
                 if (!matchObject.signature) {
-                    matchObject.signature = new Signature(accId, sigLibRelease)
+                    matchObject.signature = new Signature(modelAccession, sigLibRelease)
                 } else {
                     matchObject.signature.signatureLibraryRelease = sigLibRelease
                 }
 
-
                 if (memberDB == "panther") {
                     String paintAnnPath = "${dataDir}/${params.appsConfig.panther.paint}/${matchObject.signature.accession}.json"
                     File paintAnnotationFile = new File(paintAnnPath)
+                    // not every signature will have a paint annotation file match
                     if (paintAnnotationFile.exists()) {
                         def paintAnnotationsContent = jsonSlurper.parse(paintAnnotationFile)
                         String nodeId = matchObject.treegrafter.ancestralNodeID
@@ -82,7 +82,7 @@ process XREFS {
                     }
                 }
 
-                def entry = entriesInfo[accId] ?: entriesInfo[matchId]
+                Map entry = entries['entries'][modelAccession] ?: entries['entries'][matchAccession]
                 if (entry) {
                     matchObject.signature.name = entry["name"]
                     matchObject.signature.description = entry["description"]
@@ -96,7 +96,7 @@ process XREFS {
                     }
 
                     def interproKey = entry['integrated']
-                    def entryInfo = entriesInfo.get(interproKey)
+                    def entryInfo = entries['entries'].get(interproKey)
                     if (entryInfo) {
                         Entry entryDataObj = new Entry(
                             interproKey,
@@ -141,12 +141,12 @@ process XREFS {
 
                 if (memberDB == "panther") {
                     accSubfamily = matchObject.signature.accession
-                    if (entriesInfo[accSubfamily]) {
-                        matchObject.treegrafter.subfamilyName = entriesInfo[accSubfamily]["name"]
-                        matchObject.treegrafter.subfamilyDescription = entriesInfo[accSubfamily]["description"]
+                    if (entries['entries'][accSubfamily]) {
+                        matchObject.treegrafter.subfamilyName = entries['entries'][accSubfamily]["name"]
+                        matchObject.treegrafter.subfamilyDescription = entries['entries'][accSubfamily]["description"]
                     }
                 }
-                return [(matchId): matchObject]
+                return [(matchAccession): matchObject]
             }]
         }
         aggregatedMatches.putAll(matches.collect())

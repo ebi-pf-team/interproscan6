@@ -37,11 +37,11 @@ process PARSE_MOBIDBLITE {
         def feature = lineData[3] != "-" ? lineData[3] : null
 
         if (matches.containsKey(sequenceId)) {
-            match = matches[sequenceId]["mobidb-lite"]
+            match = matches[sequenceId]["mobidb_lite"]
         } else {
             match = new Match("mobidb_lite")
             matches[sequenceId] = [:]
-            matches[sequenceId]["mobidb-lite"] = match
+            matches[sequenceId]["mobidb_lite"] = match
         }
 
         match.addLocation(new Location(start, end, feature))
