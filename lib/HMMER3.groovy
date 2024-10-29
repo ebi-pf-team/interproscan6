@@ -135,8 +135,8 @@ class HMMER3 {
 
                     // Find the alignment for each domain
                     int domainIndex = 0
-                    String querySequence = ""
-                    String targetSequence = ""
+                    String queryAlignment = ""
+                    String targetAlignment = ""
                     while (true) {
                         line = reader.readLine().trim()
                         if (line.isEmpty()) {
@@ -144,28 +144,28 @@ class HMMER3 {
                         } else if (line =~ /==\s+domain\s\d+/) {
                             // New domain
                             if (domainIndex > 0) {
-                                assert querySequence.length() > 0
-                                assert targetSequence.length() > 0
-                                hits[targetId][queryAccession].setSequences(
+                                assert queryAlignment.length() > 0
+                                assert targetAlignment.length() > 0
+                                hits[targetId][queryAccession].setAlignments(
                                     domainIndex - 1,
-                                    querySequence,
-                                    targetSequence
+                                    queryAlignment,
+                                    targetAlignment
                                 )
                             }
 
                             domainIndex++
-                            querySequence = ""
-                            targetSequence = ""
+                            queryAlignment = ""
+                            targetAlignment = ""
                         } else if (line.startsWith(">>") || 
                                    line == "Internal pipeline statistics summary:") {
                             // Either new target or end of results for current query
 
-                            assert querySequence.length() > 0
-                            assert targetSequence.length() > 0
-                            hits[targetId][queryAccession].setSequences(
+                            assert queryAlignment.length() > 0
+                            assert targetAlignment.length() > 0
+                            hits[targetId][queryAccession].setAlignments(
                                 domainIndex - 1,
-                                querySequence,
-                                targetSequence
+                                queryAlignment,
+                                targetAlignment
                             )
 
                             break
@@ -184,13 +184,13 @@ class HMMER3 {
                             blocks = blocks[-4..-1]
                             // Consensus of query profile
                             def fields = blocks[0].split(/\s+/)
-                            querySequence += fields[2]
+                            queryAlignment += fields[2]
                             /*
                                 Target sequence, with dashes (-) indicate deletions 
                                 in the target sequence with respect to the profile
                             */
                             fields = blocks[2].split(/\s+/)
-                            targetSequence += fields[2]
+                            targetAlignment += fields[2]
                         }
                     }
 
