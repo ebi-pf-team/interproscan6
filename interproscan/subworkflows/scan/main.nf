@@ -8,6 +8,7 @@ include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                      
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
 include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                           } from  "../../modules/phobius"
+include { RUN_PIRSF; PARSE_PIRSF                                                  } from  "../../modules/pirsf"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
 
@@ -176,7 +177,11 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("pirsf")) {
-        // TODO
+        RUN_PIRSF(ch_fasta,
+            "${datadir}/${appsConfig.pirsf.hmm}"
+        )
+        PARSE_PIRSF(RUN_PIRSF.out,
+            "${datadir}/${appsConfig.pirsf.postprocess.data}")
     }
 
     if (applications.contains("pirsr")) {
