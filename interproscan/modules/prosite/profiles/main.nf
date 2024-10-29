@@ -49,12 +49,7 @@ process PFSEARCH_PARSER {
             }
             def hit = createPrositeHit(lineData)
 
-            if (profilesMatches.containsKey(hit.sequenceId)) {
-                match = profilesMatches[hit.sequenceId]
-            } else {
-                match = new Match(hit.profile)
-                profilesMatches[hit.sequenceId] = match
-            }
+match = profilesMatches.computeIfAbsent(hit.sequenceId) { new Match(hit.profile) }
             name = hit.profileName
             Location location = new Location(hit.start, hit.end, hit.normScore, hit.alignment)
             match.addLocation(location)
