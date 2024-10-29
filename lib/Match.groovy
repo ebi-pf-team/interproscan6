@@ -57,10 +57,10 @@ class Match implements Serializable {
         this.locations.add(location)
     }
 
-    void setSequences(int locationIndex, String querySequence, String targetSequence) {
+    void setAlignments(int locationIndex, String queryAlignment, String targetAlignment) {
         Location location = this.locations[locationIndex]
-        location.querySequence = querySequence
-        location.targetSequence = targetSequence
+        location.queryAlignment = queryAlignment
+        location.targetAlignment = targetAlignment
     }
 }
 
@@ -151,8 +151,8 @@ class Location implements Serializable {
     Double evalue
     Double score
     Double bias
-    String querySequence
-    String targetSequence
+    String queryAlignment
+    String targetAlignment
     String sequenceFeature
     String level
     String cigarAlignment
@@ -224,13 +224,13 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-    Location(int start, int end, Double score, String alignment) {
+    Location(int start, int end, Double score, String targetAlignment) {
         this.start = start
         this.end = end
         this.score = score
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
-        this.targetSequence = alignment
+        this.targetAlignment = alignment
     }
 
     Location(int start, int end, String level, String alignment, String cigarAlignment) {
@@ -239,7 +239,7 @@ class Location implements Serializable {
         this.level = level
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
-        this.targetSequence = alignment
+        this.targetAlignment = alignment
         this.cigarAlignment = cigarAlignment
     }
 
@@ -261,8 +261,8 @@ class Location implements Serializable {
             data.score,
             data.bias
         )
-        loc.querySequence = data.querySequence
-        loc.targetSequence = data.targetSequence
+        loc.queryAlignment = data.queryAlignment
+        loc.targetAlignment = data.targetAlignment
         loc.fragments = data.fragments.collect { LocationFragment.fromMap(it) }
         loc.representative = data.representative
         loc.included = data.included

@@ -7,8 +7,9 @@ include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP               
 include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                        } from  "../../modules/mobidblite"
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
-include { PFSCAN_RUNNER ; PFSCAN_PARSER                                           } from  "../../modules/prosite/patterns"
-include { PFSEARCH_RUNNER ; PFSEARCH_PARSER                                       } from  "../../modules/prosite/profiles"
+include { RUN_PFSEARCH ; PARSE_PFSEARCH.                                          } from  "../../modules/prosite/profiles"
+include { RUN_PFSCAN ; PARSE_PFSCAN                                               } from  "../../modules/prosite/patterns"
+include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                           } from  "../../modules/phobius"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
 
 workflow SCAN_SEQUENCES {
@@ -163,7 +164,12 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("phobius")) {
-        // TODO
+        SEARCH_PHOBIUS(
+            ch_fasta,
+            appsConfig.phobius.dir)
+
+        PARSE_PHOBIUS(SEARCH_PHOBIUS.out)
+        results = results.mix(PARSE_PHOBIUS.out)
     }
 
     if (applications.contains("pfam")) {
@@ -183,14 +189,14 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("prositepatterns")) {
-        PFSCAN_RUNNER(
+        RUN_PFSCAN(
             ch_fasta,
             "${datadir}/${appsConfig.prositepatterns.data}",
             "${datadir}/${appsConfig.prositepatterns.evaluator}"
         )
+        PARSE_PFSCAN(RUN_PFSCAN.out)
 
-        PFSCAN_PARSER(PFSCAN_RUNNER.out)
-        results = results.mix(PFSCAN_PARSER.out)
+        results = results.mix(PARSE_PFSCAN.out)
     }
 
     if (applications.contains("prositeprofiles")) {
