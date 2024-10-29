@@ -7,7 +7,7 @@ include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP               
 include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                        } from  "../../modules/mobidblite"
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
-include { RUN_PFSEARCH ; PARSE_PFSEARCH.                                          } from  "../../modules/prosite/profiles"
+include { RUN_PFSEARCH ; PARSE_PFSEARCH                                           } from  "../../modules/prosite/profiles"
 include { RUN_PFSCAN ; PARSE_PFSCAN                                               } from  "../../modules/prosite/patterns"
 include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                           } from  "../../modules/phobius"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
@@ -192,23 +192,20 @@ workflow SCAN_SEQUENCES {
         RUN_PFSCAN(
             ch_fasta,
             "${datadir}/${appsConfig.prositepatterns.data}",
-            "${datadir}/${appsConfig.prositepatterns.evaluator}"
-        )
+            "${datadir}/${appsConfig.prositepatterns.evaluator}")
         PARSE_PFSCAN(RUN_PFSCAN.out)
 
         results = results.mix(PARSE_PFSCAN.out)
     }
 
     if (applications.contains("prositeprofiles")) {
-        PFSEARCH_RUNNER(
+        RUN_PFSEARCH(
             ch_fasta,
-            "${datadir}/${appsConfig.prositeprofiles.data}"
-        )
-        PFSEARCH_PARSER(
-            PFSEARCH_RUNNER.out,
-            "${datadir}/${appsConfig.prositeprofiles.skip_flagged_profiles}"
-        )
-        results = results.mix(PFSEARCH_PARSER.out)
+            "${datadir}/${appsConfig.prositeprofiles.data}")
+        PARSE_PFSEARCH(
+            RUN_PFSEARCH.out,
+            "${datadir}/${appsConfig.prositeprofiles.skip_flagged_profiles}")
+        results = results.mix(PARSE_PFSEARCH.out)
     }
 
     if (applications.contains("sfld")) {

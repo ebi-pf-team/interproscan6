@@ -1,17 +1,15 @@
 import groovy.io.FileType
 import groovy.json.JsonOutput
 
-process PFSEARCH_RUNNER {
+process RUN_PFSEARCH {
     label 'prosite_pfsearch_runner'
 
     input:
         tuple val(meta), path(fasta)
         val models_dir
-        val skip_flagged_profiles
 
     output:
         tuple val(meta), path("prosite_profiles.out")
-        val skip_flagged_profiles
 
     script:
     """
@@ -25,7 +23,7 @@ process PFSEARCH_RUNNER {
     """
 }
 
-process PFSEARCH_PARSER {
+process PARSE_PFSEARCH {
     label 'analysis_parser'
 
     input:
@@ -36,44 +34,37 @@ process PFSEARCH_PARSER {
         tuple val(meta), path("pfsearch_parsed.json")
 
     exec:
-    Map profilesMatches = [:]
+    Map matches = [:]
     def toSkip = new File(skip_flagged_profiles).readLines()
 
     new File(pfsearch_out.toString()).eachLine { line ->
         if (line.trim()) {
-            def lineData = line.split()
-            assert lineData.size() == 10
-            def profileId = lineData[0].split("\\|")[0]
-            if (profileId in toSkip) {
-                return
+            line = line.split()
+            assert line.size() == 10
+            String modelAccession = line[0].split("\\|")[0]
+            if (modelAccession in toSkip) {
+                // skip accessions flagged
             }
-            def hit = createPrositeHit(lineData)
-
-match = profilesMatches.computeIfAbsent(hit.sequenceId) { new Match(hit.profile) }
-            name = hit.profileName
-            Location location = new Location(hit.start, hit.end, hit.normScore, hit.alignment)
-            match.addLocation(location)
+            def match = createPrositeMatch(line)
+            matchObj = matches.computeIfAbsent(match.sequenceId) { new Match(match.profile) }
+            Location location = new Location(match.start, match.end, match.normScore, match.alignment)
+            matchObj.addLocation(location)
         }
     }
-
     def outputFilePath = task.workDir.resolve("pfsearch_parsed.json")
-    def json = JsonOutput.toJson(profilesMatches)
+    def json = JsonOutput.toJson(matches)
     new File(outputFilePath.toString()).write(json)
 }
 
-def createPrositeHit(value) {
-    def profile, profileName = value[0].split("\\|")
+def createPrositeMatch(line) {
+    def profile = line[0].split("\\|")
     return [
-        profile     : profile,
-        profileName : profileName,
-        motifStart  : value[1].toInteger(),
-        motifEnd    : value[2].toInteger(),
-        sequenceId  : value[3],
-        start       : value[4].toInteger(),
-        end         : value[5].toInteger(),
-        rawScore    : value[6].toFloat(),
-        normScore   : value[7].toFloat(),
-        symbol      : value[8],
-        alignment   : value[9]
+        profile     : profile[0],
+        profileName : profile[1],
+        sequenceId  : line[3],
+        start       : line[4].toInteger(),
+        end         : line[5].toInteger(),
+        normScore   : line[7].toFloat(),
+        alignment   : line[9]
     ]
 }

@@ -230,16 +230,16 @@ class Location implements Serializable {
         this.score = score
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
-        this.targetAlignment = alignment
+        this.targetAlignment = targetAlignment
     }
 
-    Location(int start, int end, String level, String alignment, String cigarAlignment) {
+    Location(int start, int end, String level, String targetAlignment, String cigarAlignment) {
         this.start = start
         this.end = end
         this.level = level
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
-        this.targetAlignment = alignment
+        this.targetAlignment = targetAlignment
         this.cigarAlignment = cigarAlignment
     }
 
