@@ -187,8 +187,8 @@ workflow SCAN_SEQUENCES {
             "${datadir}/${appsConfig.prositepatterns.data}",
             "${datadir}/${appsConfig.prositepatterns.evaluator}"
         )
-
         PFSCAN_PARSER(PFSCAN_RUNNER.out)
+        
         results = results.mix(PFSCAN_PARSER.out)
     }
 
