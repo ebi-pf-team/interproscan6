@@ -39,8 +39,6 @@ process PARSE_PFSCAN {
         tuple val(meta), path("ps_scan_parsed.json")
 
     exec:
-
-
     Map patternsMatches = [:]
     pfscan_out.eachLine { line ->
         String lineStrip = line.trim()
