@@ -175,6 +175,8 @@ workflow SCAN_SEQUENCES {
         )
         PARSE_PIRSF(RUN_PIRSF.out,
             "${datadir}/${appsConfig.pirsf.postprocess.data}")
+
+        results = results.mix(PARSE_PIRSF.out)
     }
 
     if (applications.contains("pirsr")) {
