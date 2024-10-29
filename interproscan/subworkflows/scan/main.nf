@@ -10,7 +10,9 @@ include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER   
 include { RUN_PFSEARCH ; PARSE_PFSEARCH                                           } from  "../../modules/prosite/profiles"
 include { RUN_PFSCAN ; PARSE_PFSCAN                                               } from  "../../modules/prosite/patterns"
 include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                           } from  "../../modules/phobius"
+include { RUN_PFSCAN ; PARSE_PFSCAN                                               } from  "../../modules/prosite/patterns"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
+include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -223,7 +225,17 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("superfamily")) {
-        // TODO
+        SEARCH_SUPERFAMILY(ch_fasta,
+            "${datadir}/${appsConfig.superfamily.hmm}",
+            "${datadir}/${appsConfig.superfamily.selfhits}",
+            "${datadir}/${appsConfig.superfamily.cla}",
+            "${datadir}/${appsConfig.superfamily.model}",
+            "${datadir}/${appsConfig.superfamily.pdbj95d}")
+
+        PARSE_SUPERFAMILY(SEARCH_SUPERFAMILY.out,
+            "${datadir}/${appsConfig.superfamily.model}")
+
+        results = results.mix(PARSE_SUPERFAMILY.out)
     }
 
     if (applications.contains("signalp")) {
