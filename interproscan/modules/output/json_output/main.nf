@@ -135,7 +135,7 @@ process JSON_OUTPUT {
                 }
             }
 
-            if (!(memberDB in ["cdd", "coils", "hamap", "mobidblite", "phobius", "pirsr", "prosite_profiles", "prosite_patterns", "prints", "signalp", "signalp_euk"])) {
+            if (!(memberDB in ["cdd", "coils", "hamap", "mobidblite", "phobius", "prosite_profiles", "prosite_patterns", "prints", "signalp", "signalp_euk"])) {
                 matchResult["evalue"] = matchObj.evalue
                 matchResult["score"] = matchObj.score
             }
