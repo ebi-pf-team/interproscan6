@@ -77,20 +77,19 @@ process PARSE_PIRSR {
                             def seqAlignmentPosMap = getPositionMap(location.targetSequence, location.start)
                             def seqAlignmentReversePosMap = seqAlignmentPosMap.collectEntries { k, v -> [(v): k] }
                             def hmmAlignmentPosMap = getPositionMap(location.querySequence, pos.hmmStart)
-                            if (pos.hmmStart in hmmAlignmentPosMap) {
+                            if (hmmAlignmentPosMap.containsKey(pos.hmmStart)) {
                                 int residueStartSeqAlign = hmmAlignmentPosMap[pos.hmmStart]
-                                if (pos.hmmEnd in hmmAlignmentPosMap) {
+                                if (hmmAlignmentPosMap.containsKey(pos.hmmEnd)) {
                                     int residueEndSeqAlign = hmmAlignmentPosMap[pos.hmmEnd]
                                     residue = location.targetSequence.substring(residueStartSeqAlign, residueEndSeqAlign + 1)
-                                    if (residueStartSeqAlign in seqAlignmentReversePosMap &&
-                                            residueEndSeqAlign in seqAlignmentReversePosMap) {
+                                    if (seqAlignmentReversePosMap.containsKey(residueStartSeqAlign) &&
+                                            seqAlignmentReversePosMap.containsKey(residueEndSeqAlign)) {
                                         residueStart = seqAlignmentReversePosMap[residueStartSeqAlign]
                                         residueEnd = seqAlignmentReversePosMap[residueEndSeqAlign]
                                     }
                                 }
                             }
-
-                            if (!residueStart == 0 && !residueEnd == 0) {
+                            if (residueStart != 0 && residueEnd != 0) {
                                 SiteLocation siteLocation = new SiteLocation(pos.condition, residueStart, residueEnd)
                                 positionsParsed << [new Site(
                                     pos.desc,
