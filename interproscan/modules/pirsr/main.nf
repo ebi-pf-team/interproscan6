@@ -40,28 +40,27 @@ process PARSE_PIRSR {
 
     hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
         matches.each { modelAccession, match ->
-            println "modelAccession: $modelAccession"
-            def sortedLocations = match.locations.sort { loc ->
+            List<Location> sortedLocations = match.locations.sort { loc ->
                 [loc.evalue, -loc.score]  // sorting by evalue ASC, score DESC
             }
             sortedLocations.each { location ->
-                def map = mapHMMToSeq(location.hmmStart,
-                                  location.querySequence,
-                                  location.targetSequence)
+                List<Integer> map = mapHMMToSeq(location.hmmStart,
+                                                location.querySequence,
+                                                location.targetSequence)
 
-                def ruleSites = []
+                List<Site> ruleSites = []
                 def rule = rules.get(modelAccession, null)
                 if (rule) {
                     rule.Groups.each { grp, positions ->
                         int passCount = 0
-                        def positionsParsed = []
+                        List<Site> positionsParsed = []
                         positions.each { pos ->
-                            def condition = pos.condition.replaceAll(/[-()]/) { m ->
+                            String condition = pos.condition.replaceAll(/[-()]/) { m ->
                                 switch (m[0]) {
                                     case '-': ''; case '(': '{'; case ')': '}'
                                 }
                             }.replace('x', '.')
-                            def querySeq = location.targetSequence.replaceAll('-', '')
+                            String querySeq = location.targetSequence.replaceAll('-', '')
 
                             String targetSeq = ''
                             if (pos.hmmStart < map.size() && pos.hmmEnd < map.size()) {
@@ -74,9 +73,9 @@ process PARSE_PIRSR {
                                 if (pos.end == 'Cter') pos.end = location.end
                             }
                             def (residueStart, residueEnd, residue) = [0, 0, null]
-                            def seqAlignmentPosMap = getPositionMap(location.targetSequence, location.start)
-                            def seqAlignmentReversePosMap = seqAlignmentPosMap.collectEntries { k, v -> [(v): k] }
-                            def hmmAlignmentPosMap = getPositionMap(location.querySequence, location.hmmStart)
+                            Map<Integer, Integer> seqAlignmentPosMap = getPositionMap(location.targetSequence, location.start)
+                            Map<Integer, Integer> seqAlignmentReversePosMap = seqAlignmentPosMap.collectEntries { k, v -> [(v): k] }
+                            Map<Integer, Integer> hmmAlignmentPosMap = getPositionMap(location.querySequence, location.hmmStart)
                             if (hmmAlignmentPosMap.containsKey(pos.hmmStart)) {
                                 int residueStartSeqAlign = hmmAlignmentPosMap[pos.hmmStart]
                                 if (hmmAlignmentPosMap.containsKey(pos.hmmEnd)) {
@@ -125,7 +124,7 @@ process PARSE_PIRSR {
 
 def mapHMMToSeq(int hmmStart, String querySeq, String targetSeq) {
     int seqPos = 0
-    def map = (0..<hmmStart).collect { -1 }
+    List<Integer> map = (0..<hmmStart).collect { -1 }
     querySeq.eachWithIndex { character, i ->
         map[hmmStart] = seqPos
         hmmStart += (character != '.') ? 1 : 0
@@ -135,7 +134,7 @@ def mapHMMToSeq(int hmmStart, String querySeq, String targetSeq) {
 }
 
 def getPositionMap(alignment, position) {
-    def positionMap = [:]
+    Map<Integer, Integer> positionMap = [:]
     alignment.eachWithIndex { character, index ->
         if (Character.isLetter(character as char)) {
             positionMap[position] = index
