@@ -45,8 +45,8 @@ process PARSE_PIRSR {
             }
             sortedLocations.each { location ->
                 List<Integer> map = mapHMMToSeq(location.hmmStart,
-                                                location.querySequence,
-                                                location.targetSequence)
+                                                location.queryAlignment,
+                                                location.targetAlignment)
 
                 List<Site> ruleSites = []
                 def rule = rules.get(modelAccession, null)
@@ -60,7 +60,7 @@ process PARSE_PIRSR {
                                     case '-': ''; case '(': '{'; case ')': '}'
                                 }
                             }.replace('x', '.')
-                            String querySeq = location.targetSequence.replaceAll('-', '')
+                            String querySeq = location.targetAlignment.replaceAll('-', '')
 
                             String targetSeq = ''
                             if (pos.hmmStart < map.size() && pos.hmmEnd < map.size()) {
@@ -73,14 +73,14 @@ process PARSE_PIRSR {
                                 if (pos.end == 'Cter') pos.end = location.end
                             }
                             def (residueStart, residueEnd, residue) = [0, 0, null]
-                            Map<Integer, Integer> seqAlignmentPosMap = getPositionMap(location.targetSequence, location.start)
+                            Map<Integer, Integer> seqAlignmentPosMap = getPositionMap(location.targetAlignment, location.start)
                             Map<Integer, Integer> seqAlignmentReversePosMap = seqAlignmentPosMap.collectEntries { k, v -> [(v): k] }
-                            Map<Integer, Integer> hmmAlignmentPosMap = getPositionMap(location.querySequence, location.hmmStart)
+                            Map<Integer, Integer> hmmAlignmentPosMap = getPositionMap(location.queryAlignment, location.hmmStart)
                             if (hmmAlignmentPosMap.containsKey(pos.hmmStart)) {
                                 int residueStartSeqAlign = hmmAlignmentPosMap[pos.hmmStart]
                                 if (hmmAlignmentPosMap.containsKey(pos.hmmEnd)) {
                                     int residueEndSeqAlign = hmmAlignmentPosMap[pos.hmmEnd]
-                                    residue = location.targetSequence.substring(residueStartSeqAlign, residueEndSeqAlign + 1)
+                                    residue = location.targetAlignment.substring(residueStartSeqAlign, residueEndSeqAlign + 1)
                                     if (seqAlignmentReversePosMap.containsKey(residueStartSeqAlign) &&
                                             seqAlignmentReversePosMap.containsKey(residueEndSeqAlign)) {
                                         residueStart = seqAlignmentReversePosMap[residueStartSeqAlign]
