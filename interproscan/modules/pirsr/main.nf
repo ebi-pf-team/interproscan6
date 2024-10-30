@@ -40,6 +40,7 @@ process PARSE_PIRSR {
 
     hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
         matches.each { modelAccession, match ->
+            println "modelAccession: $modelAccession"
             def sortedLocations = match.locations.sort { loc ->
                 [loc.evalue, -loc.score]  // sorting by evalue ASC, score DESC
             }
@@ -72,11 +73,10 @@ process PARSE_PIRSR {
                                 if (pos.start == 'Nter') pos.start = location.start
                                 if (pos.end == 'Cter') pos.end = location.end
                             }
-
                             def (residueStart, residueEnd, residue) = [0, 0, null]
                             def seqAlignmentPosMap = getPositionMap(location.targetSequence, location.start)
                             def seqAlignmentReversePosMap = seqAlignmentPosMap.collectEntries { k, v -> [(v): k] }
-                            def hmmAlignmentPosMap = getPositionMap(location.querySequence, pos.hmmStart)
+                            def hmmAlignmentPosMap = getPositionMap(location.querySequence, location.hmmStart)
                             if (hmmAlignmentPosMap.containsKey(pos.hmmStart)) {
                                 int residueStartSeqAlign = hmmAlignmentPosMap[pos.hmmStart]
                                 if (hmmAlignmentPosMap.containsKey(pos.hmmEnd)) {
