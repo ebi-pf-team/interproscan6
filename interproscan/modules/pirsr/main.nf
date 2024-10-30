@@ -62,10 +62,9 @@ process PARSE_PIRSR {
                             }.replace('x', '.')
                             def querySeq = location.targetSequence.replaceAll('-', '')
 
+                            String targetSeq = ''
                             if (pos.hmmStart < map.size() && pos.hmmEnd < map.size()) {
                                 targetSeq = querySeq[map[pos.hmmStart]..map[pos.hmmEnd]]
-                            } else {
-                                targetSeq = ''
                             }
 
                             if (targetSeq ==~ condition) {
@@ -74,17 +73,34 @@ process PARSE_PIRSR {
                                 if (pos.end == 'Cter') pos.end = location.end
                             }
 
-                            SiteLocation siteLocation = new SiteLocation(
-                                pos.condition, pos.start, pos.end)
+                            def (residueStart, residueEnd, residue) = [0, 0, null]
+                            def seqAlignmentPosMap = getPositionMap(location.targetSequence, location.start)
+                            def seqAlignmentReversePosMap = seqAlignmentPosMap.collectEntries { k, v -> [(v): k] }
+                            def hmmAlignmentPosMap = getPositionMap(location.querySequence, pos.hmmStart)
+                            if (pos.hmmStart in hmmAlignmentPosMap) {
+                                int residueStartSeqAlign = hmmAlignmentPosMap[pos.hmmStart]
+                                if (pos.hmmEnd in hmmAlignmentPosMap) {
+                                    int residueEndSeqAlign = hmmAlignmentPosMap[pos.hmmEnd]
+                                    residue = location.targetSequence.substring(residueStartSeqAlign, residueEndSeqAlign + 1)
+                                    if (residueStartSeqAlign in seqAlignmentReversePosMap &&
+                                            residueEndSeqAlign in seqAlignmentReversePosMap) {
+                                        residueStart = seqAlignmentReversePosMap[residueStartSeqAlign]
+                                        residueEnd = seqAlignmentReversePosMap[residueEndSeqAlign]
+                                    }
+                                }
+                            }
 
-                            positionsParsed << [new Site(
-                                pos.desc,
-                                pos.group as int,
-                                pos.hmmEnd,
-                                pos.hmmStart,
-                                pos.label,
-                                [siteLocation]
-                            )]
+                            if (!residueStart == 0 && !residueEnd == 0) {
+                                SiteLocation siteLocation = new SiteLocation(pos.condition, residueStart, residueEnd)
+                                positionsParsed << [new Site(
+                                    pos.desc,
+                                    pos.group as int,
+                                    pos.hmmEnd,
+                                    pos.hmmStart,
+                                    pos.label,
+                                    [siteLocation]
+                                )]
+                            }
                         }
                         if (passCount == positions.size()) {
                             ruleSites.addAll(positionsParsed)
@@ -119,3 +135,13 @@ def mapHMMToSeq(int hmmStart, String querySeq, String targetSeq) {
     return map
 }
 
+def getPositionMap(alignment, position) {
+    def positionMap = [:]
+    alignment.eachWithIndex { character, index ->
+        if (Character.isLetter(character as char)) {
+            positionMap[position] = index
+            position++
+        }
+    }
+    return positionMap
+}
