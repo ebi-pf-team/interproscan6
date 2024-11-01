@@ -55,72 +55,62 @@ process PARSE_PFAM {
 }
 
 def stockholmSeedParser(String pfamASeedFile) {
-    def nestingInfo = [:]
-    def accession = null
-    new File(pfamASeedFile).withInputStream { stream ->
-        stream.eachLine { rawLine ->
-            def line = decode(rawLine.bytes)
-            if (line.startsWith("#=GF AC")) {
-                accession = line.split("\\s+")[2]
-            } else if (line.startsWith("#=GF NE")) {
-                def nestedAcc = line.split("\\s+")[2].replace(";", "")
-                nestingInfo[accession]?.nestedAcc?.add(nestedAcc) ?:
-                    (nestingInfo[accession] = [nested: [nestedAcc]])
-            }
+    Map nestingInfo = [:]
+    String accession = null
+    new File(pfamASeedFile).eachLine { rawLine ->
+        def line = decode(rawLine.bytes)
+        if (line.startsWith("#=GF AC")) {
+            accession = line.split("\\s+")[2].split("\\.")[0]
+        } else if (line.startsWith("#=GF NE")) {
+            String nestedAcc = line.split("\\s+")[2].replace(";", "")
+            nestingInfo[accession]?.nested?.add(nestedAcc) ?:
+                (nestingInfo[accession] = [nested: [nestedAcc]])
         }
     }
-//     println "nestingInfo: $nestingInfo"
     return nestingInfo
 }
 
-def stockholmClansParser(String pfamClansFile, Map parsedSeed) {
-    def parsedResult = [:]
-    def accession = null
-    new File(pfamClansFile).withInputStream { stream ->
-        stream.eachLine { rawLine ->
-            def line = decode(rawLine.bytes)
-            if (line.startsWith("#=GF AC")) {
-                accession = line.split("\\s+")[2]
-            } else if (line.startsWith("#=GF MB")) {
-                def modelAccession = line.split("\\s+")[2].replace(";", "")
-                if (modelAccession) {
-                    parsedResult[modelAccession]?.clan = accession ?:
-                        (parsedResult[modelAccession] = [clan: accession])
-                }
+def stockholmClansParser(String pfamClansFile, Map nestingInfo) {
+    String accession = null
+    new File(pfamClansFile).eachLine { rawLine ->
+        def line = decode(rawLine.bytes)
+        if (line.startsWith("#=GF AC")) {
+            accession = line.split("\\s+")[2].split("\\.")[0]
+        } else if (line.startsWith("#=GF MB")) {
+            String modelAccession = line.split("\\s+")[2].replace(";", "")
+            if (modelAccession) {
+                nestingInfo[modelAccession]?.clan = accession ?:
+                    (nestingInfo[modelAccession] = [clan: accession])
             }
         }
     }
-    println "Parsed clans: $parsedResult"
-    return parsedResult
+    return nestingInfo
 }
 
 def stockholmDatParser(String pfamADatFile) {
-    def name2acc = [:]
-    def acc2nested = [:]
-    name = null
-    accession = null
-    new File(pfamADatFile).withInputStream { stream ->
-        stream.eachLine { rawLine ->
-            def line = decode(rawLine.bytes)
-            if (line.startsWith("#=GF ID")) {
-                def name = line.split()[2]
-            } else if (line.startsWith("#=GF AC")) {
-                def accession = line.split()[2].split("\\.")[0]
-                name2acc[name] = accession
-            } else if (line.startsWith("#=GF NE")) {
-                def nestedAcc = line.split()[2]
-                acc2nested[accession]?.add(nestedAcc) ?: (acc2nested[accession] = [nestedAcc] as Set)
-            }
+    Map name2acc = [:]
+    Map acc2nested = [:]
+    String name = null
+    String accession = null
+    new File(pfamADatFile).eachLine { rawLine ->
+        def line = decode(rawLine.bytes)
+        if (line.startsWith("#=GF ID")) {
+            name = line.split()[2]
+        } else if (line.startsWith("#=GF AC")) {
+            accession = line.split()[2].split("\\.")[0]
+            name2acc[name] = accession
+        } else if (line.startsWith("#=GF NE")) {
+            String nestedAcc = line.split()[2]
+            acc2nested[accession]?.add(nestedAcc) ?: (acc2nested[accession] = [nestedAcc] as Set)
         }
     }
-    def parsedDat = [:]
+    Map parsedDat = [:]
     acc2nested.each { acc, nestedNames ->
-        nestedNames.each { name ->
-            def nestedAccession = name2acc[name]
+        nestedNames.each { nestedName ->
+            String nestedAccession = name2acc[nestedName]
             parsedDat[acc]?.add(nestedAccession) ?: (parsedDat[acc] = [nestedAccession] as List)
         }
     }
-    println "Parsed dat: $parsedDat"
     return parsedDat
 }
 
