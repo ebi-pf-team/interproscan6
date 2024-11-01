@@ -38,20 +38,71 @@ process PARSE_PFAM {
     def outputFilePath = task.workDir.resolve("pfam.json")
     def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString())
 
-    // Return Pfam clans AND nesting relationships between models
-    seedNesting = stockholmSeedParser(seedPath)
-    clan = stockholmClansParser(clanPath, seedNesting)
+    nestedSeeds = stockholmSeedParser(seedPath)
+    clans = stockholmClansParser(clanPath, nestedSeeds)
     dat = stockholmDatParser(datPath)
 
-//     hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
-//         matches.each { modelAccession, match ->
-//
-//         }
-//         return [(seqId): matches]
-//     }
-//
-//     def json = JsonOutput.toJson(hmmerMatches)
-//     new File(outputFilePath.toString()).write(json)
+    filteredMatches = [:]
+    hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
+        // sorting matches by evalue ASC, score DESC
+        def sortedMatches = matches.sort { a, b ->
+            def evalueComparison = a.value.evalue <=> b.value.evalue
+            def scoreComparison = -(a.value.score <=> b.value.score)
+            evalueComparison != 0 ? evalueComparison : scoreComparison
+        }
+
+        filteredMatches[seqId] = [:]
+        sortedMatches.each { modelAccession, match ->
+            boolean keep = true
+            accession = modelAccession.split("\\.")[0]
+            def candidateMatch = clans[accession] ?: [:]
+            def candidateClan = candidateMatch?.get("clan", null)
+            filteredMatches[seqId].each { filteredAcc, filteredMatch ->
+                filteredMatch = clans[filteredAcc] ?: [:]
+                def filteredClan = filteredMatch?.get("clan", null)
+                if (candidateClan && candidateClan == filteredClan) {  // case of same clan
+                    println "Same clan: ${candidateClan}"
+                    def notOverlappingLocations = []
+                    match.locations.each { candidateLocation ->  // checking overlapping locations
+                        boolean overlapping = false
+                        filteredMatches.locations.each { filteredLocation ->
+                            if (matchesOverlap(candidateLocation, filteredLocation)) {
+                                def candidateNested = candidateMatch?.get("nested", [])
+                                def filteredNested = filteredMatch?.get("nested", [])
+                                if (!matchesAreNested(candidateNested, filteredNested)) {  // case of overlapped but NOT nested
+                                    overlapping = true
+                                    return
+                                }
+                            }
+                        }
+                        if (!overlapping) notOverlappingLocations << candidateLocation
+                    }
+                    if (!notOverlappingLocations) {
+                        keep = false
+                    } else {
+                        match.locations = notOverlappingLocations
+                    }
+                }
+            }
+            if (keep) {
+                filteredMatches[seqId][modelAccession] = match
+            }
+        }
+    }
+
+    finalMatches = filteredMatches.collectEntries { seqId, matches ->
+        matches.each { modelAccession, match ->
+            if (!match.locations) {
+                return
+            }
+            String accession = modelAccession.split("\\.")[0]
+            def nestedModels = dat.get(accession, [])
+            //build fragments...
+        }
+    }
+
+    json = JsonOutput.toJson(finalMatches)
+    new File(outputFilePath.toString()).write(json)
 }
 
 def stockholmSeedParser(String pfamASeedFile) {
@@ -120,4 +171,15 @@ def decode(byte[] b) {
     } catch (Exception e) {
         return new String(b, "ISO-8859-1").trim()
     }
+}
+
+def matchesOverlap(Map one, Map two) {
+    return Math.max(one['start'].toInteger(), two['start'].toInteger()) <= Math.min(one['end'].toInteger(), two['end'].toInteger())
+}
+
+def matchesAreNested(List one, List two) {
+    if (one == null || two == null) {
+        return false
+    }
+    return one.intersect(two).size() > 0
 }
