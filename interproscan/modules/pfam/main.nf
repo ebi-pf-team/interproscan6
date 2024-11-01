@@ -97,7 +97,22 @@ process PARSE_PFAM {
             }
             String accession = modelAccession.split("\\.")[0]
             def nestedModels = dat.get(accession, [])
-            //build fragments...
+            if (nestedModels) {
+                println "Nested models: ${nestedModels}"
+                List locationFragments = []
+                matches.each { otherModelAccession, otherMatch ->
+                    String otherAccession = otherModelAccession.split("\\.")[0]
+                    otherMatch.locations.each { location ->
+                        println "Checking ${otherAccession}"
+                        if (otherAccession in nestedModels && matchesOverlap(location, match.locations[0])) {
+                            locationFragments << [
+                                start: location['start'],
+                                end: location['end']
+                            ]
+                        }
+                    }
+                }
+            }
         }
     }
 
