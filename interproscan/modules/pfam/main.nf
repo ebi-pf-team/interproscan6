@@ -26,7 +26,7 @@ process PARSE_PFAM {
 
     input:
     tuple val(meta), val(hmmsearch_out)
-    val min_length
+    val minLength
     val seedPath
     val clanPath
     val datPath
@@ -54,8 +54,8 @@ process PARSE_PFAM {
         filteredMatches[seqId] = [:]
         sortedMatches.each { modelAccession, match ->
             boolean keep = true
-            accession = modelAccession.split("\\.")[0]
-            def candidateMatch = clans[accession] ?: [:]
+            modelAccession = modelAccession.split("\\.")[0]
+            def candidateMatch = clans[modelAccession] ?: [:]
             def candidateClan = candidateMatch?.get("clan", null)
             filteredMatches[seqId].each { filteredAcc, filteredMatch ->
                 filteredMatch = clans[filteredAcc] ?: [:]
@@ -90,20 +90,16 @@ process PARSE_PFAM {
         }
     }
 
-    finalMatches = filteredMatches.collectEntries { seqId, matches ->
+    processedMatches = filteredMatches.collectEntries { seqId, matches ->
         matches.each { modelAccession, match ->
             if (!match.locations) {
                 return
             }
-            String accession = modelAccession.split("\\.")[0]
-            def nestedModels = dat.get(accession, [])
+            def nestedModels = dat.get(modelAccession, [])
             if (nestedModels) {
-                println "Nested models: ${nestedModels}"
                 List locationFragments = []
-                matches.each { otherModelAccession, otherMatch ->
-                    String otherAccession = otherModelAccession.split("\\.")[0]
+                matches.each { otherAccession, otherMatch ->
                     otherMatch.locations.each { location ->
-                        println "Checking ${otherAccession}"
                         if (otherAccession in nestedModels && matchesOverlap(location, match.locations[0])) {
                             locationFragments << [
                                 start: location['start'],
@@ -112,11 +108,57 @@ process PARSE_PFAM {
                         }
                     }
                 }
+                locationFragments.sort { a, b ->
+                    a['start'] <=> b['start'] ?: a['end'] <=> b['end']
+                }
+                def fragmentDcStatus = "CONTINUOUS"
+                List rawDiscontinuousMatches = [match]
+                locationFragments.each { fragment ->
+                    boolean twoActualRegions = false
+                    (newLocationStart, newLocationEnd, finalLocationEnd,
+                        fragmentDcStatus, twoActualRegions) = createFragment(
+                            rawDiscontinuousMatches[0],
+                            fragment,
+                            fragmentDcStatus,
+                            twoActualRegions
+                    )
+                    rawDiscontinuousMatches[0].locations.each { loc ->
+                        loc['location-fragments'] = loc['location-fragments'] ?: []
+                        loc['location-fragments'] << [
+                            start: newLocationStart,
+                            end: newLocationEnd,
+                            'dc-status': fragmentDcStatus
+                        ]
+                        if (twoActualRegions) {
+                            loc['location-fragments'] << [
+                                start: fragment['end'] + 1,
+                                end: finalLocationEnd,
+                                'dc-status': "N_TERMINAL_DISC"
+                            ]
+                        }
+                    }
+                }
+
+                rawDiscontinuousMatches.each { rawDiscontinuousMatch ->
+                    rawDiscontinuousMatch.locations.each { location ->
+                        def matchLength = (location.end as int) - (location.start as int) + 1
+                        if (matchLength >= minLength) {
+                            processedMatches << [seqId, modelAccession, rawDiscontinuousMatch]
+                        }
+                    }
+                }
+            } else {
+                if (match.locations.size() > 0) {
+                    def matchLength = (match.locations[0].end as int) - (match.locations[0].start as int) + 1
+                    if (matchLength >= minLength) {
+                        processedMatches << [seqId, modelAccession, match]
+                    }
+                }
             }
         }
     }
 
-    json = JsonOutput.toJson(finalMatches)
+    json = JsonOutput.toJson(processedMatches)
     new File(outputFilePath.toString()).write(json)
 }
 
@@ -197,4 +239,30 @@ def matchesAreNested(List one, List two) {
         return false
     }
     return one.intersect(two).size() > 0
+}
+
+def createFragment(Map rawMatch, Map fragment, String fragmentDcStatus, boolean twoActualRegions) {
+    int newLocationStart = rawMatch["locations"][0]['start'] as int
+    int newLocationEnd = rawMatch["locations"][0]['end'] as int
+    int finalLocationEnd = rawMatch["locations"][0]['end'] as int
+
+    if ((fragment['start'] as int) <= newLocationStart && (fragment['end'] as int) >= newLocationEnd) {
+        fragmentDcStatus = "NC_TERMINAL_DISC"
+    } else if (fragmentDcStatus == "CONTINUOUS") {
+        fragmentDcStatus = null
+    }
+
+    if ((fragment['start'] as int) <= newLocationStart) {
+        newLocationStart = (fragment['end'] as int) + 1
+        fragmentDcStatus = "N_TERMINAL_DISC"
+    } else if ((fragment['end'] as int) >= newLocationEnd) {
+        newLocationEnd = (fragment['start'] as int) - 1
+        fragmentDcStatus = "C_TERMINAL_DISC"
+    } else if ((fragment['start'] as int) > newLocationStart && (fragment['end'] as int) < newLocationEnd) {
+        newLocationEnd = (fragment['start'] as int) - 1
+        twoActualRegions = true
+        fragmentDcStatus = "C_TERMINAL_DISC"
+    }
+
+    return [newLocationStart, newLocationEnd, finalLocationEnd, fragmentDcStatus, twoActualRegions]
 }
