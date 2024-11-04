@@ -58,7 +58,7 @@ process PARSE_PFSCAN {
         String name = matchDetails[0].trim()
         String level = matchDetails[1].trim()
         if (!level.startsWith("LevelTag") || !level.contains("0")) {
-            // skipping not strong matches
+            // skipping non-strong matches
         } else {
             level = "STRONG"
         }

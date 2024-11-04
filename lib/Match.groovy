@@ -7,12 +7,13 @@ class Match implements Serializable {
     Signature signature = null
     List<Location> locations = []
     boolean included = true  // for HMMER3 matches (inclusion threshold)
+    RepresentativeInfo representativeInfo = null
 
     // PANTHER
     TreeGrafter treegrafter = null
 
     // SignalP
-    // String orgType
+    SignalP signalp = null
 
     // PRINTS
     // String graphscan
@@ -57,6 +58,10 @@ class Match implements Serializable {
         this.locations.add(location)
     }
 
+    void addSignalPeptide(String orgType, int cleavageSiteStart, int cleavageSiteEnd) {
+        this.signalp = new SignalP(orgType, cleavageSiteStart, cleavageSiteEnd)
+    }
+
     void setAlignments(int locationIndex, String queryAlignment, String targetAlignment) {
         Location location = this.locations[locationIndex]
         location.queryAlignment = queryAlignment
@@ -73,6 +78,11 @@ class Signature implements Serializable {
 
     Signature(String accession) {
         this.accession = accession
+    }
+
+    Signature(String accession, SignatureLibraryRelease library) {
+        this.accession = accession
+        this.signatureLibraryRelease = library
     }
 
     Signature(String accession,
@@ -92,11 +102,11 @@ class Signature implements Serializable {
             return null
         }
         return new Signature(
-            data.accession,
-            data.name,
-            data.description,
-            SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
-            Entry.fromMap(data.entry)
+                data.accession,
+                data.name,
+                data.description,
+                SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
+                Entry.fromMap(data.entry)
         )
     }
 }
@@ -123,19 +133,53 @@ class Entry implements Serializable {
     String name
     String description
     String type
+    List<GoXRefs> goXRefs = []
+    List<PathwayXRefs> pathwayXRefs = []
 
-    Entry(String accession, String name, String description, String type) {
+    Entry(String accession,
+          String name,
+          String description,
+          String type) {
         this.accession = accession
         this.name = name
         this.description = description
         this.type = type
     }
 
+    Entry(String accession,
+          String name,
+          String description,
+          String type,
+          List<GoXRefs> goXRefs,
+          List<PathwayXRefs> pathwayXRefs) {
+        this.accession = accession
+        this.name = name
+        this.description = description
+        this.type = type
+        this.goXRefs = goXRefs
+        this.pathwayXRefs = pathwayXRefs
+    }
+
     static Entry fromMap(Map data) {
         if (data == null) {
             return null
         }
-        return new Entry(data.accession, data.name, data.description, data.type)
+        return new Entry(
+                data.accession,
+                data.name,
+                data.description,
+                data.type,
+                data.goXRefs.collect { GoXRefs.fromMap(it) },
+                data.pathwayXRefs.collect { PathwayXRefs.fromMap(it) }
+        )
+    }
+
+    void addGoXRefs(GoXRefs go) {
+        this.goXRefs.add(go)
+    }
+
+    void addPathwayXRefs(PathwayXRefs pa) {
+        this.pathwayXRefs.add(pa)
     }
 }
 
@@ -160,6 +204,7 @@ class Location implements Serializable {
     List<Site> sites = []
     boolean representative = false
     boolean included = true  // for HMMER3 matches (inclusion threshold)
+    Float pvalue = null // SignalP
 
     // pvalue
     // motifNumber
@@ -250,14 +295,22 @@ class Location implements Serializable {
         this.fragments = fragments
     }
 
-    Location(int start, int end, String level, String alignment, String cigarAlignment) {
+    Location(int start, int end, String level, String targetAlignment, String cigarAlignment) {
         this.start = start
         this.end = end
         this.level = level
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
-        this.targetAlignment = alignment
+        this.targetAlignment = targetAlignment
         this.cigarAlignment = cigarAlignment
+    }
+
+    Location(int start, int end, float pvalue) { // Used for SignalP
+        this.start = start
+        this.end = end
+        this.pvalue = pvalue
+        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
+        this.fragments = [fragment]
     }
 
     void addSite(Site site) {
@@ -266,17 +319,17 @@ class Location implements Serializable {
 
     static Location fromMap(data) {
         Location loc = new Location(
-            data.start,
-            data.end,
-            data.hmmStart,
-            data.hmmEnd,
-            data.hmmLength,
-            data.hmmBounds,
-            data.envelopeStart,
-            data.envelopeEnd,
-            data.evalue,
-            data.score,
-            data.bias
+                data.start,
+                data.end,
+                data.hmmStart,
+                data.hmmEnd,
+                data.hmmLength,
+                data.hmmBounds,
+                data.envelopeStart,
+                data.envelopeEnd,
+                data.evalue,
+                data.score,
+                data.bias
         )
         loc.queryAlignment = data.queryAlignment
         loc.targetAlignment = data.targetAlignment
@@ -347,8 +400,8 @@ class Site implements Serializable {
 
     static Site fromMap(Map data) {
         return new Site(
-            data.description,
-            data.siteLocations.collect { SiteLocation.fromMap(it) })
+                data.description,
+                data.siteLocations.collect { SiteLocation.fromMap(it) })
     }
 
     boolean isInRange(int start, int end) {
@@ -377,6 +430,7 @@ class TreeGrafter implements Serializable {
     String graftPoint
     String subfamilyAccession
     String subfamilyName
+    String subfamilyDescription
     String proteinClass
 
     TreeGrafter(String ancestralNodeID) {
@@ -391,7 +445,89 @@ class TreeGrafter implements Serializable {
         tg.graftPoint = data.graftPoint
         tg.subfamilyAccession = data.subfamilyAccession
         tg.subfamilyName = data.subfamilyName
+        tg.subfamilyDescription = data.subfamilyDescription
         tg.proteinClass = data.proteinClass
         return tg
+    }
+}
+
+class SignalP implements Serializable {
+    String orgType
+    int cleavageSiteStart
+    int cleavageSiteEnd
+
+    SignalP(String orgType, int cleavageSiteStart, int cleavageSiteEnd) {
+        this.orgType = orgType
+        this.cleavageSiteStart = cleavageSiteStart
+        this.cleavageSiteEnd = cleavageSiteEnd
+    }
+
+    static SignalP fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
+        SignalP sp = new SignalP(
+                data.orgType,
+                data.cleavageSiteStart,
+                data.cleavageSiteEnd
+        )
+        return sp
+    }
+}
+
+class RepresentativeInfo implements Serializable {
+    String type
+    int rank
+
+    RepresentativeInfo(String type, int rank) {
+        this.type = type
+        this.rank = rank
+    }
+
+    static RepresentativeInfo fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
+        return new RepresentativeInfo(data.type, data.rank)
+    }
+}
+
+class GoXRefs implements Serializable {
+    String name
+    String databaseName
+    String category
+    String id
+
+    GoXRefs(String name, String databaseName, String category, String id) {
+        this.name = name
+        this.databaseName = databaseName
+        this.category = category
+        this.id = id
+    }
+
+    static GoXRefs fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
+        return new GoXRefs(data.name, data.databaseName, data.category, data.id)
+    }
+}
+
+class PathwayXRefs implements Serializable {
+    String name
+    String databaseName
+    String id
+
+    PathwayXRefs(String name, String databaseName, String id) {
+        this.name = name
+        this.databaseName = databaseName
+        this.id = id
+    }
+
+    static PathwayXRefs fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
+        return new PathwayXRefs(data.name, data.databaseName, data.id)
     }
 }

@@ -1,3 +1,5 @@
+// Class and methods for validating the user inputs
+
 import java.nio.file.*
 
 class InterProScan {
@@ -43,7 +45,7 @@ class InterProScan {
             description: "do no retrieve pre-calculated matches from the match lookup service."
         ],
         [
-            name: "go-terms",
+            name: "goterms",
             description: "include Gene Ontology (GO) mapping in output files."
         ],
         [
@@ -71,6 +73,10 @@ class InterProScan {
             name: "apps-config",
             description: null
         ],
+        [
+            name: "x-refs-config",
+            description: null
+        ],
     ]
 
     static void validateParams(params, log) {
@@ -84,8 +90,8 @@ class InterProScan {
             if (paramName.contains("-")) {
                 /*
                     From https://www.nextflow.io/docs/latest/cli.html#pipeline-parameters
-                    When the parameter name is formatted using `camelCase`, 
-                    a second parameter is created with the same 
+                    When the parameter name is formatted using `camelCase`,
+                    a second parameter is created with the same
                     value using kebab-case, and vice versa.
 
                     However, we don't want to evalue the `kebab-case` params.
@@ -93,12 +99,12 @@ class InterProScan {
                     see https://github.com/nextflow-io/nextflow/pull/4702.
                 */
                 continue
-            } 
+            }
 
             // Convert to kebab-case
             def kebabParamName = this.camelToKebab(paramName)
             if (!allowedParams.contains(kebabParamName.toLowerCase())) {
-                log.warn "Unrecognized option: --${kebabParamName}. Try '--help' for more information."
+                log.warn "Unrecognised option: --${kebabParamName}. Try '--help' for more information."
             }
         }
 
@@ -144,7 +150,7 @@ class InterProScan {
     static validateApplications(String applications, Map appsConfig) {
         if (!applications) {
             // Run all applications
-            def appsToRun = appsConfig.findAll{ it -> 
+            def appsToRun = appsConfig.findAll{ it ->
                 !(it.value.disabled)
             }.keySet().toList()
             return [appsToRun, null]
@@ -152,7 +158,7 @@ class InterProScan {
 
         // Make a collection of recognized application names
         def allApps = [:]
-        appsConfig.each { label, appl -> 
+        appsConfig.each { label, appl ->
             allApps[label] = label
             def stdName = appl.name.toLowerCase().replaceAll("[- ]", "")
             allApps[stdName] = label
@@ -169,12 +175,22 @@ class InterProScan {
             if (allApps.containsKey(key)) {
                 appsToRun.add(allApps[key])
             } else {
-                def error = "unrecognized application: '${appName}'. Try '--help' to list available applications."
+                def error = "Unrecognised application: '${appName}'. Try '--help' to list available applications."
                 return [null, error]
             }
         }
 
         return [appsToRun.toSet().toList(), null]
+    }
+
+    static List<String> validateSignalpMode(String signalpMode) {
+        if (signalpMode.toLowerCase() !in ['fast', 'slow', 'slow-sequential']) {
+            def error = "Unrecognised SignalP mode: '${signalpMode}'. Accepted modes: 'fast', 'slow', 'slow-sequential'"
+            return [null, error]
+        }
+        else {
+            return [signalpMode.toLowerCase(), null]
+        }
     }
 
     static String kebabToCamel(String kebabName) {
@@ -203,7 +219,7 @@ class InterProScan {
         }
 
         result << "\nAvailable applications:\n"
-        appsConfig.each { label, appl -> 
+        appsConfig.each { label, appl ->
             result << "  ${appl.name.replace(' ', '-')}\n"
         }
 
