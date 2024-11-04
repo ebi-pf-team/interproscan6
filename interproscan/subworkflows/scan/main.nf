@@ -8,7 +8,9 @@ include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                      
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
 include { RUN_SIGNALP; PARSE_SIGNALP                                              } from  "../../modules/signalp"
+include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                           } from  "../../modules/phobius"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
+include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
 
 
 workflow SCAN_SEQUENCES {
@@ -164,7 +166,12 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("phobius")) {
-        // TODO
+        SEARCH_PHOBIUS(
+            ch_fasta,
+            appsConfig.phobius.dir)
+
+        PARSE_PHOBIUS(SEARCH_PHOBIUS.out)
+        results = results.mix(PARSE_PHOBIUS.out)
     }
 
     if (applications.contains("pfam")) {
@@ -206,7 +213,17 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("superfamily")) {
-        // TODO
+        SEARCH_SUPERFAMILY(ch_fasta,
+            "${datadir}/${appsConfig.superfamily.hmm}",
+            "${datadir}/${appsConfig.superfamily.selfhits}",
+            "${datadir}/${appsConfig.superfamily.cla}",
+            "${datadir}/${appsConfig.superfamily.model}",
+            "${datadir}/${appsConfig.superfamily.pdbj95d}")
+
+        PARSE_SUPERFAMILY(SEARCH_SUPERFAMILY.out,
+            "${datadir}/${appsConfig.superfamily.model}")
+
+        results = results.mix(PARSE_SUPERFAMILY.out)
     }
 
     if (applications.contains("signalp") || applications.contains("signalp_euk")) {
