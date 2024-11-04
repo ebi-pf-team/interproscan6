@@ -5,18 +5,18 @@ include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan
 include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
 include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
+include { XREFS                         } from "./interproscan/modules/xrefs"
+
 
 // include { PARSE_SEQUENCE } from "$projectDir/interproscan/modules/parse_sequence/main"
 // include { GET_ORFS } from "$projectDir/interproscan/modules/get_orfs/main"
 // include { REPRESENTATIVE_DOMAINS } from "$projectDir/interproscan/modules/output/representative_domains/main"
 // include { AGGREGATE_PARSED_SEQS } from "$projectDir/interproscan/modules/output/aggregate_parsed_seqs/main"
-// include { AGGREGATE_RESULTS } from "$projectDir/interproscan/subworkflows/aggregate_results/main"
 // include { WRITE_RESULTS } from "$projectDir/interproscan/modules/output/write_results/main"
 
 // include { PRE_CHECKS } from "$projectDir/interproscan/subworkflows/pre_checks/main"
 // include { SEQUENCE_PRECALC } from "$projectDir/interproscan/subworkflows/sequence_precalc/main"
 // include { SEQUENCE_ANALYSIS } from "$projectDir/interproscan/subworkflows/sequence_analysis/main"
-// include { XREFS } from "$projectDir/interproscan/subworkflows/xrefs/main"
 
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
@@ -65,14 +65,14 @@ workflow {
     //     .set { ch_json }
 
     // TODO: add new match lookup
-    
+
     SCAN_SEQUENCES(
         ch_seqs,
         apps,
         params.appsConfig,
         data_dir)
 
-    SCAN_SEQUENCES.out.view()
+//     SCAN_SEQUENCES.out.view()
 
 
     // disable_precalc = params.disable_precalc
@@ -115,31 +115,37 @@ workflow {
 
     // AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
 
+    // This is to concat MLS with scan sequences result
     // all_results = parsed_matches.concat(parsed_analysis)
-    // AGGREGATE_RESULTS(all_results)
 
-    // /* XREFS:
-    // Add signature and entry desc and names
-    // Add PAINT annotations (if panther is enabled)
-    // Add go terms (if enabled)
-    // Add pathways (if enabled)
-    // */
-    // XREFS(AGGREGATE_RESULTS.out, applications, dataDirPath)
+
+    /* XREFS:
+    Add signature and entry desc and names
+    Add PAINT annotations (if panther is enabled)
+    Add go terms (if enabled)
+    Add pathways (if enabled)
+    */
+    XREFS(
+        SCAN_SEQUENCES.out,
+        apps,
+        data_dir
+    )
+    XREFS.out.view()
 
     // REPRESENTATIVE_DOMAINS(XREFS.out.collect())
 
-    // Channel.from(params.formats.toLowerCase().split(','))
-    // .set { ch_format }
+    Channel.from(params.formats.toLowerCase().split(','))
+    .set { ch_format }
 
-    // WRITE_RESULTS(
-    //     input_file.getName(),
-    //     AGGREGATE_PARSED_SEQS.out,
-    //     REPRESENTATIVE_DOMAINS.out.collect(),
-    //     ch_format,
-    //     params.outdir,
-    //     params.ipscn_version,
-    //     params.nucleic
-    // )
+//     WRITE_RESULTS(
+//         input_file.getName(),
+//         AGGREGATE_PARSED_SEQS.out,
+//         REPRESENTATIVE_DOMAINS.out.collect(),
+//         ch_format,
+//         params.outdir,
+//         params.ipscn_version,
+//         params.nucleic
+//     )
 }
 
 // workflow.onComplete = {

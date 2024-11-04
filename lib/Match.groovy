@@ -7,6 +7,7 @@ class Match implements Serializable {
     Signature signature = null
     List<Location> locations = []
     boolean included = true  // for HMMER3 matches (inclusion threshold)
+    RepresentativeInfo representativeInfo = null
 
     // PANTHER
     TreeGrafter treegrafter = null
@@ -75,9 +76,14 @@ class Signature implements Serializable {
         this.accession = accession
     }
 
-    Signature(String accession, 
-              String name, 
-              String description, 
+    Signature(String accession, SignatureLibraryRelease library) {
+        this.accession = accession
+        this.signatureLibraryRelease = library
+    }
+
+    Signature(String accession,
+              String name,
+              String description,
               SignatureLibraryRelease library,
               Entry entry) {
         this.accession = accession
@@ -123,19 +129,53 @@ class Entry implements Serializable {
     String name
     String description
     String type
+    List<GoXRefs> goXRefs = []
+    List<PathwayXRefs> pathwayXRefs = []
 
-    Entry(String accession, String name, String description, String type) {
+    Entry(String accession,
+          String name,
+          String description,
+          String type) {
         this.accession = accession
         this.name = name
         this.description = description
         this.type = type
     }
 
+    Entry(String accession,
+          String name,
+          String description,
+          String type,
+          List<GoXRefs> goXRefs,
+          List<PathwayXRefs> pathwayXRefs) {
+        this.accession = accession
+        this.name = name
+        this.description = description
+        this.type = type
+        this.goXRefs = goXRefs
+        this.pathwayXRefs = pathwayXRefs
+    }
+
     static Entry fromMap(Map data) {
         if (data == null) {
             return null
         }
-        return new Entry(data.accession, data.name, data.description, data.type)
+        return new Entry(
+            data.accession,
+            data.name,
+            data.description,
+            data.type,
+            data.goXRefs.collect { GoXRefs.fromMap(it) },
+            data.pathwayXRefs.collect { PathwayXRefs.fromMap(it) }
+        )
+    }
+
+    void addGoXRefs(GoXRefs go) {
+        this.goXRefs.add(go)
+    }
+
+    void addPathwayXRefs(PathwayXRefs pa) {
+        this.pathwayXRefs.add(pa)
     }
 }
 
@@ -164,10 +204,10 @@ class Location implements Serializable {
     // cigarAlignment
     // motifNumber
 
-    Location(int start, 
-             int end, 
+    Location(int start,
+             int end,
              Integer hmmStart = null,
-             Integer hmmEnd = null, 
+             Integer hmmEnd = null,
              Integer hmmLength = null,
              String hmmBounds = null,
              Integer envelopeStart = null,
@@ -190,10 +230,10 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-    Location(int start, 
-             int end, 
+    Location(int start,
+             int end,
              Integer hmmStart,
-             Integer hmmEnd, 
+             Integer hmmEnd,
              Integer hmmLength,
              String hmmBounds,
              Integer envelopeStart,
@@ -308,7 +348,7 @@ class Site implements Serializable {
     }
 
     Site(String description, String residues) {
-        this(description, Site.getSiteLocationsFromString(residues))        
+        this(description, Site.getSiteLocationsFromString(residues))
     }
 
     private static List<SiteLocation> getSiteLocationsFromString(String residues) {
@@ -354,6 +394,7 @@ class TreeGrafter implements Serializable {
     String graftPoint
     String subfamilyAccession
     String subfamilyName
+    String subfamilyDescription
     String proteinClass
 
     TreeGrafter(String ancestralNodeID) {
@@ -368,7 +409,65 @@ class TreeGrafter implements Serializable {
         tg.graftPoint = data.graftPoint
         tg.subfamilyAccession = data.subfamilyAccession
         tg.subfamilyName = data.subfamilyName
+        tg.subfamilyDescription = data.subfamilyDescription
         tg.proteinClass = data.proteinClass
         return tg
+    }
+}
+
+class RepresentativeInfo implements Serializable {
+    String type
+    int rank
+
+    RepresentativeInfo(String type, int rank) {
+        this.type = type
+        this.rank = rank
+    }
+
+    static RepresentativeInfo fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
+        return new RepresentativeInfo(data.type, data.rank)
+    }
+}
+
+class GoXRefs implements Serializable {
+    String name
+    String databaseName
+    String category
+    String id
+
+    GoXRefs(String name, String databaseName, String category, String id) {
+        this.name = name
+        this.databaseName = databaseName
+        this.category = category
+        this.id = id
+    }
+
+    static GoXRefs fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
+        return new GoXRefs(data.name, data.databaseName, data.category, data.id)
+    }
+}
+
+class PathwayXRefs implements Serializable {
+    String name
+    String databaseName
+    String id
+
+    PathwayXRefs(String name, String databaseName, String id) {
+        this.name = name
+        this.databaseName = databaseName
+        this.id = id
+    }
+
+    static PathwayXRefs fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
+        return new PathwayXRefs(data.name, data.databaseName, data.id)
     }
 }
