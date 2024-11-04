@@ -194,14 +194,14 @@ class Location implements Serializable {
     String queryAlignment
     String targetAlignment
     String sequenceFeature
+    String level
+    String cigarAlignment
     List<LocationFragment> fragments = []
     List<Site> sites = []
     boolean representative = false
     boolean included = true  // for HMMER3 matches (inclusion threshold)
 
     // pvalue
-    // level
-    // cigarAlignment
     // motifNumber
 
     Location(int start,
@@ -280,6 +280,16 @@ class Location implements Serializable {
         this.fragments = fragments
     }
 
+    Location(int start, int end, String level, String alignment, String cigarAlignment) {
+        this.start = start
+        this.end = end
+        this.level = level
+        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
+        this.fragments = [fragment]
+        this.targetAlignment = alignment
+        this.cigarAlignment = cigarAlignment
+    }
+
     void addSite(Site site) {
         this.sites.add(site)
     }
@@ -304,6 +314,9 @@ class Location implements Serializable {
         loc.representative = data.representative
         loc.included = data.included
         loc.sites = data.sites
+        loc.sequenceFeature = data.sequenceFeature
+        loc.level = data.level
+        loc.cigarAlignment = data.cigarAlignment
         return loc
     }
 }
