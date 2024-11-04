@@ -55,7 +55,7 @@ process XREFS {
         SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
 
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, matches ->
-            [(seqId): matches.collectEntries { matchAccession, match ->
+            [(seqId): matches.collectEntries { rawModelAccession, match ->
                 Match matchObject = Match.fromMap(match)
                 def modelAccession = matchObject.modelAccession.split("\\.")[0]
                 if (memberDB in ["cathgene3d", "cathfunfam"]) {
@@ -82,7 +82,7 @@ process XREFS {
                     }
                 }
 
-                Map entry = entries['entries'][modelAccession] ?: entries['entries'][matchAccession]
+                Map entry = entries['entries'][modelAccession] ?: entries['entries'][rawModelAccession]
                 if (entry) {
                     matchObject.signature.name = entry["name"]
                     matchObject.signature.description = entry["description"]
@@ -146,7 +146,7 @@ process XREFS {
                         matchObject.treegrafter.subfamilyDescription = entries['entries'][accSubfamily]["description"]
                     }
                 }
-                return [(matchAccession): matchObject]
+                return [(rawModelAccession): matchObject]
             }]
         }
         aggregatedMatches.putAll(matches.collect())
