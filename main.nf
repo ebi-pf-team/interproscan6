@@ -7,17 +7,6 @@ include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_s
 include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { XREFS                         } from "./interproscan/modules/xrefs"
 
-
-// include { PARSE_SEQUENCE } from "$projectDir/interproscan/modules/parse_sequence/main"
-// include { GET_ORFS } from "$projectDir/interproscan/modules/get_orfs/main"
-// include { REPRESENTATIVE_DOMAINS } from "$projectDir/interproscan/modules/output/representative_domains/main"
-// include { AGGREGATE_PARSED_SEQS } from "$projectDir/interproscan/modules/output/aggregate_parsed_seqs/main"
-// include { WRITE_RESULTS } from "$projectDir/interproscan/modules/output/write_results/main"
-
-// include { PRE_CHECKS } from "$projectDir/interproscan/subworkflows/pre_checks/main"
-// include { SEQUENCE_PRECALC } from "$projectDir/interproscan/subworkflows/sequence_precalc/main"
-// include { SEQUENCE_ANALYSIS } from "$projectDir/interproscan/subworkflows/sequence_analysis/main"
-
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
     println "# ${workflow.manifest.description}\n"
@@ -33,6 +22,7 @@ workflow {
     data_dir        = INIT_PIPELINE.out.datadir.val
     outut_dir       = INIT_PIPELINE.out.outdir.val
     apps            = INIT_PIPELINE.out.apps.val
+    signalpMode     = INIT_PIPELINE.out.signalpMode.val
 
     // Chunk input file in smaller files
     fasta_file
@@ -70,7 +60,9 @@ workflow {
         ch_seqs,
         apps,
         params.appsConfig,
-        data_dir)
+        data_dir,
+        signalpMode
+    )
 
 //     SCAN_SEQUENCES.out.view()
 

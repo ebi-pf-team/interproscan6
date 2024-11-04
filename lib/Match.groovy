@@ -13,7 +13,7 @@ class Match implements Serializable {
     TreeGrafter treegrafter = null
 
     // SignalP
-    // String orgType
+    SignalP signalp = null
 
     // PRINTS
     // String graphscan
@@ -58,6 +58,10 @@ class Match implements Serializable {
         this.locations.add(location)
     }
 
+    void addSignalPeptide(String orgType, int cleavageSiteStart, int cleavageSiteEnd) {
+        this.signalp = new SignalP(orgType, cleavageSiteStart, cleavageSiteEnd)
+    }
+
     void setAlignments(int locationIndex, String queryAlignment, String targetAlignment) {
         Location location = this.locations[locationIndex]
         location.queryAlignment = queryAlignment
@@ -98,11 +102,11 @@ class Signature implements Serializable {
             return null
         }
         return new Signature(
-            data.accession,
-            data.name,
-            data.description,
-            SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
-            Entry.fromMap(data.entry)
+                data.accession,
+                data.name,
+                data.description,
+                SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
+                Entry.fromMap(data.entry)
         )
     }
 }
@@ -161,12 +165,12 @@ class Entry implements Serializable {
             return null
         }
         return new Entry(
-            data.accession,
-            data.name,
-            data.description,
-            data.type,
-            data.goXRefs.collect { GoXRefs.fromMap(it) },
-            data.pathwayXRefs.collect { PathwayXRefs.fromMap(it) }
+                data.accession,
+                data.name,
+                data.description,
+                data.type,
+                data.goXRefs.collect { GoXRefs.fromMap(it) },
+                data.pathwayXRefs.collect { PathwayXRefs.fromMap(it) }
         )
     }
 
@@ -200,6 +204,7 @@ class Location implements Serializable {
     List<Site> sites = []
     boolean representative = false
     boolean included = true  // for HMMER3 matches (inclusion threshold)
+    Float pvalue = null // SignalP
 
     // pvalue
     // motifNumber
@@ -270,7 +275,7 @@ class Location implements Serializable {
         this.score = score
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
-        this.targetAlignment = alignment
+        this.targetAlignment = targetAlignment
     }
 
     Location(int start, int end, Double evalue, List<LocationFragment> fragments) {
@@ -290,23 +295,31 @@ class Location implements Serializable {
         this.cigarAlignment = cigarAlignment
     }
 
+    Location(int start, int end, float pvalue) { // Used for SignalP
+        this.start = start
+        this.end = end
+        this.pvalue = pvalue
+        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
+        this.fragments = [fragment]
+    }
+
     void addSite(Site site) {
         this.sites.add(site)
     }
 
     static Location fromMap(data) {
         Location loc = new Location(
-            data.start,
-            data.end,
-            data.hmmStart,
-            data.hmmEnd,
-            data.hmmLength,
-            data.hmmBounds,
-            data.envelopeStart,
-            data.envelopeEnd,
-            data.evalue,
-            data.score,
-            data.bias
+                data.start,
+                data.end,
+                data.hmmStart,
+                data.hmmEnd,
+                data.hmmLength,
+                data.hmmBounds,
+                data.envelopeStart,
+                data.envelopeEnd,
+                data.evalue,
+                data.score,
+                data.bias
         )
         loc.queryAlignment = data.queryAlignment
         loc.targetAlignment = data.targetAlignment
@@ -377,8 +390,8 @@ class Site implements Serializable {
 
     static Site fromMap(Map data) {
         return new Site(
-            data.description,
-            data.siteLocations.collect { SiteLocation.fromMap(it) })
+                data.description,
+                data.siteLocations.collect { SiteLocation.fromMap(it) })
     }
 
     boolean isInRange(int start, int end) {
@@ -425,6 +438,30 @@ class TreeGrafter implements Serializable {
         tg.subfamilyDescription = data.subfamilyDescription
         tg.proteinClass = data.proteinClass
         return tg
+    }
+}
+
+class SignalP implements Serializable {
+    String orgType
+    int cleavageSiteStart
+    int cleavageSiteEnd
+
+    SignalP(String orgType, int cleavageSiteStart, int cleavageSiteEnd) {
+        this.orgType = orgType
+        this.cleavageSiteStart = cleavageSiteStart
+        this.cleavageSiteEnd = cleavageSiteEnd
+    }
+
+    static SignalP fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
+        SignalP sp = new SignalP(
+                data.orgType,
+                data.cleavageSiteStart,
+                data.cleavageSiteEnd
+        )
+        return sp
     }
 }
 
