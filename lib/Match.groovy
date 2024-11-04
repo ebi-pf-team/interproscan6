@@ -44,7 +44,7 @@ class Match implements Serializable {
         }
     }
 
-    static Match fromMap(Map data) { // Convert a JSON string to a Match obj
+    static Match fromMap(Map data) {
         Match match = new Match(data.modelAccession, data.evalue, data.score, data.bias)
         match.sequenceLength = data.sequenceLength
         match.signature = Signature.fromMap(data.signature)
@@ -102,11 +102,11 @@ class Signature implements Serializable {
             return null
         }
         return new Signature(
-            data.accession,
-            data.name,
-            data.description,
-            SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
-            Entry.fromMap(data.entry)
+                data.accession,
+                data.name,
+                data.description,
+                SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
+                Entry.fromMap(data.entry)
         )
     }
 }
@@ -165,12 +165,12 @@ class Entry implements Serializable {
             return null
         }
         return new Entry(
-            data.accession,
-            data.name,
-            data.description,
-            data.type,
-            data.goXRefs.collect { GoXRefs.fromMap(it) },
-            data.pathwayXRefs.collect { PathwayXRefs.fromMap(it) }
+                data.accession,
+                data.name,
+                data.description,
+                data.type,
+                data.goXRefs.collect { GoXRefs.fromMap(it) },
+                data.pathwayXRefs.collect { PathwayXRefs.fromMap(it) }
         )
     }
 
@@ -205,6 +205,9 @@ class Location implements Serializable {
     boolean representative = false
     boolean included = true  // for HMMER3 matches (inclusion threshold)
     Float pvalue = null // SignalP
+
+    // pvalue
+    // motifNumber
 
     Location(int start,
              int end,
@@ -272,7 +275,7 @@ class Location implements Serializable {
         this.score = score
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
-        this.targetAlignment = alignment
+        this.targetAlignment = targetAlignment
     }
 
     Location(int start, int end, Double evalue, List<LocationFragment> fragments) {
@@ -281,13 +284,6 @@ class Location implements Serializable {
         this.evalue = evalue
         this.fragments = fragments
     }
-
-    Location(int start, int end, float pvalue) {  // Used for SignalP
-        this.start = start
-        this.end = end
-        this.pvalue = pvalue
-        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
-        this.fragments = [fragment]
 
     Location(int start, int end, String level, String alignment, String cigarAlignment) {
         this.start = start
@@ -299,23 +295,31 @@ class Location implements Serializable {
         this.cigarAlignment = cigarAlignment
     }
 
+    Location(int start, int end, float pvalue) { // Used for SignalP
+        this.start = start
+        this.end = end
+        this.pvalue = pvalue
+        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
+        this.fragments = [fragment]
+    }
+
     void addSite(Site site) {
         this.sites.add(site)
     }
 
     static Location fromMap(data) {
         Location loc = new Location(
-            data.start,
-            data.end,
-            data.hmmStart,
-            data.hmmEnd,
-            data.hmmLength,
-            data.hmmBounds,
-            data.envelopeStart,
-            data.envelopeEnd,
-            data.evalue,
-            data.score,
-            data.bias
+                data.start,
+                data.end,
+                data.hmmStart,
+                data.hmmEnd,
+                data.hmmLength,
+                data.hmmBounds,
+                data.envelopeStart,
+                data.envelopeEnd,
+                data.evalue,
+                data.score,
+                data.bias
         )
         loc.queryAlignment = data.queryAlignment
         loc.targetAlignment = data.targetAlignment
@@ -386,8 +390,8 @@ class Site implements Serializable {
 
     static Site fromMap(Map data) {
         return new Site(
-            data.description,
-            data.siteLocations.collect { SiteLocation.fromMap(it) })
+                data.description,
+                data.siteLocations.collect { SiteLocation.fromMap(it) })
     }
 
     boolean isInRange(int start, int end) {
@@ -453,9 +457,9 @@ class SignalP implements Serializable {
             return null
         }
         SignalP sp = new SignalP(
-            data.orgType,
-            data.cleavageSiteStart,
-            data.cleavageSiteEnd
+                data.orgType,
+                data.cleavageSiteStart,
+                data.cleavageSiteEnd
         )
         return sp
     }
