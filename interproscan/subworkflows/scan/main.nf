@@ -9,6 +9,7 @@ include { RUN_NCBIFAM; PARSE_NCBIFAM                                            
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
 include { RUN_SIGNALP; PARSE_SIGNALP                                              } from  "../../modules/signalp"
 include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                           } from  "../../modules/phobius"
+include { RUN_PFSCAN ; PARSE_PFSCAN                                               } from  "../../modules/prosite/patterns"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
 
@@ -134,7 +135,7 @@ workflow SCAN_SEQUENCES {
         RUN_MOBIDBLITE(ch_fasta)
         PARSE_MOBIDBLITE(RUN_MOBIDBLITE.out)
         results = results.mix(PARSE_MOBIDBLITE.out)
-    }    
+    }
 
     if (applications.contains("ncbifam")) {
         RUN_NCBIFAM(
@@ -191,7 +192,14 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("prositepatterns")) {
-        // TODO
+        RUN_PFSCAN(
+            ch_fasta,
+            "${datadir}/${appsConfig.prositepatterns.data}",
+            "${datadir}/${appsConfig.prositepatterns.evaluator}"
+        )
+        PARSE_PFSCAN(RUN_PFSCAN.out)
+
+        results = results.mix(PARSE_PFSCAN.out)
     }
 
     if (applications.contains("prositeprofiles")) {
@@ -209,7 +217,7 @@ workflow SCAN_SEQUENCES {
         PARSE_SMART(SEARCH_SMART.out.join(ch_json),
             "${datadir}/${appsConfig.smart.hmm}")
 
-        results = results.mix(PARSE_SMART.out)  
+        results = results.mix(PARSE_SMART.out)
     }
 
     if (applications.contains("superfamily")) {

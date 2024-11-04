@@ -198,15 +198,13 @@ class Location implements Serializable {
     String queryAlignment
     String targetAlignment
     String sequenceFeature
+    String level
+    String cigarAlignment
     List<LocationFragment> fragments = []
     List<Site> sites = []
     boolean representative = false
     boolean included = true  // for HMMER3 matches (inclusion threshold)
     Float pvalue = null // SignalP
-
-    // level
-    // cigarAlignment
-    // motifNumber
 
     Location(int start,
              int end,
@@ -284,14 +282,21 @@ class Location implements Serializable {
         this.fragments = fragments
     }
 
-    // Used for SignalP
-    Location(int start, int end, float pvalue) {
+    Location(int start, int end, float pvalue) {  // Used for SignalP
         this.start = start
         this.end = end
         this.pvalue = pvalue
-        // to avoid a potential NullPointerException
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
+
+    Location(int start, int end, String level, String alignment, String cigarAlignment) {
+        this.start = start
+        this.end = end
+        this.level = level
+        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
+        this.fragments = [fragment]
+        this.targetAlignment = alignment
+        this.cigarAlignment = cigarAlignment
     }
 
     void addSite(Site site) {
@@ -318,6 +323,9 @@ class Location implements Serializable {
         loc.representative = data.representative
         loc.included = data.included
         loc.sites = data.sites
+        loc.sequenceFeature = data.sequenceFeature
+        loc.level = data.level
+        loc.cigarAlignment = data.cigarAlignment
         return loc
     }
 }
