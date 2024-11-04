@@ -278,16 +278,6 @@ class Location implements Serializable {
         this.targetAlignment = targetAlignment
     }
 
-    Location(int start, int end, String level, String targetAlignment, String cigarAlignment) {
-        this.start = start
-        this.end = end
-        this.level = level
-        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
-        this.fragments = [fragment]
-        this.targetAlignment = targetAlignment
-        this.cigarAlignment = cigarAlignment
-    }
-
     Location(int start, int end, Double evalue, List<LocationFragment> fragments) {
         this.start = start
         this.end = end
