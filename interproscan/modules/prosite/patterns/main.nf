@@ -65,14 +65,15 @@ process PARSE_PFSCAN {
         String alignment = matchDetails[2].replaceAll('Sequence ', '').replaceAll('"', '').replaceAll('\\.', '').trim()
         String cigarAlignment = parseCigarAlignment(alignment)
         cigarAlignment = encodeCigarAlignment(cigarAlignment)
-        if (patternsMatches.containsKey(seqId)) {
-            match = patternsMatches[seqId]
+        patternsMatches[seqId] = patternsMatches[seqId] ?: [:]
+        if (patternsMatches[seqId][modelAccession]) {
+            matchObj = patternsMatches[seqId][modelAccession]
         } else {
-            match = new Match(modelAccession)
-            patternsMatches[seqId] = match
+            matchObj = new Match(modelAccession)
+            patternsMatches[seqId][modelAccession] = matchObj
         }
         Location location = new Location(start, end, level, alignment, cigarAlignment)
-        match.addLocation(location)
+        matchObj.addLocation(location)
     }
 
     def outputFilePath = task.workDir.resolve("psscan.json")

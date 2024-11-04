@@ -46,7 +46,14 @@ process PARSE_PFSEARCH {
                 // skip flagged accessions
             }
             def match = createPrositeMatch(line)
-            matchObj = matches.computeIfAbsent(match.sequenceId) { new Match(match.profile) }
+            seqId = match.sequenceId
+            matches[seqId] = matches[seqId] ?: [:]
+            if (matches[seqId][modelAccession]) {
+                matchObj = matches[seqId][modelAccession]
+            } else {
+                matchObj = new Match(match.profile)
+                matches[seqId][modelAccession] = matchObj
+            }
             Location location = new Location(match.start, match.end, match.normScore, match.alignment)
             matchObj.addLocation(location)
         }
