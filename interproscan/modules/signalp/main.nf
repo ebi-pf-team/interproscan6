@@ -44,6 +44,8 @@ process PARSE_SIGNALP {
     String orgType = orgType as String
     def Map<String, Match> hits = new LinkedHashMap<>()
 
+    String modelAccession = "SIGNAL_PEPTIDE"
+
     // Retrieve all signal peptide hits from the gff3 file
     File gff3File = new File(signalDir, gff3FileName)
     gff3File.withReader { reader ->
@@ -61,7 +63,8 @@ process PARSE_SIGNALP {
                         pvalue
                     )
                     match.addLocation(location)
-                    hits.put(queryAccession, match)
+                    hits.computeIfAbsent(queryAccession, {[:]})
+                    hits[queryAccession].computeIfAbsent(modelAccession, {match})
                 }
             }
         }
@@ -76,7 +79,7 @@ process PARSE_SIGNALP {
             if (matcher.find()) {
                 String queryAccession = matcher.group(1).trim()
                 if (hits.containsKey(queryAccession)) {  // protein may not have passed the earlier threshold check
-                    hits[queryAccession].addSignalPeptide(
+                    hits[queryAccession][modelAccession].addSignalPeptide(
                             orgType,
                             matcher.group(2).trim().toInteger(),  // cleavageSite Start
                             matcher.group(3).trim().toInteger()   // cleavageSite End
