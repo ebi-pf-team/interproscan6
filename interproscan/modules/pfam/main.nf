@@ -91,7 +91,8 @@ process PARSE_PFAM {
     }
 
     // building fragments
-    processedMatches = filteredMatches.collectEntries { seqId, matches ->
+    processedMatches = [:]
+    filteredMatches.collectEntries { seqId, matches ->
         matches.each { modelAccession, match ->
             if (!match.locations) {
                 return
@@ -125,27 +126,27 @@ process PARSE_PFAM {
                             twoActualRegions
                     )
                     rawDiscontinuousMatches[0].locations.each { loc ->
-                        loc.fragments = loc.fragments ?: []
-                        loc.fragments << [
-                            start: newLocationStart,
-                            end: newLocationEnd,
-                            'dc-status': fragmentDcStatus
-                        ]
+                        loc.fragments = []
+                        loc.fragments << new LocationFragment(
+                            newLocationStart,
+                            newLocationEnd,
+                            fragmentDcStatus)
                         if (twoActualRegions) {
-                            loc.fragments << [
-                                start: fragment['end'] + 1,
-                                end: finalLocationEnd,
-                                'dc-status': "N_TERMINAL_DISC"
-                            ]
+                            loc.fragments << new LocationFragment(
+                                fragment['end'] + 1,
+                                finalLocationEnd,
+                                "N_TERMINAL_DISC")
                         }
                     }
                 }
 
                 rawDiscontinuousMatches.each { rawDiscontinuousMatch ->
                     rawDiscontinuousMatch.locations.each { location ->
-                        def matchLength = (location.end) - (location.start) + 1
+                        def matchLength = location.end - location.start + 1
                         if (matchLength >= minLength) {
-                            processedMatches[seqId][modelAccession] <<  rawDiscontinuousMatch
+                            processedMatches.putIfAbsent(seqId, [:])
+                            processedMatches[seqId].putIfAbsent(modelAccession, [])
+                            processedMatches[seqId][modelAccession] << rawDiscontinuousMatch
                         }
                     }
                 }
@@ -153,6 +154,8 @@ process PARSE_PFAM {
                 if (match.locations.size() > 0) {
                     def matchLength = (match.locations[0].end) - (match.locations[0].start) + 1
                     if (matchLength >= minLength) {
+                        processedMatches.putIfAbsent(seqId, [:])
+                        processedMatches[seqId].putIfAbsent(modelAccession, [])
                         processedMatches[seqId][modelAccession] << match
                     }
                 }
@@ -237,20 +240,20 @@ def createFragment(Match rawMatch, Map fragment, String fragmentDcStatus, boolea
     int newLocationEnd = rawMatch.locations[0].end
     int finalLocationEnd = rawMatch.locations[0].end
 
-    if ((fragment['start'] as int) <= newLocationStart && (fragment['end'] as int) >= newLocationEnd) {
+    if ((fragment['start']) <= newLocationStart && (fragment['end']) >= newLocationEnd) {
         fragmentDcStatus = "NC_TERMINAL_DISC"
     } else if (fragmentDcStatus == "CONTINUOUS") {
         fragmentDcStatus = null
     }
 
-    if ((fragment['start'] as int) <= newLocationStart) {
-        newLocationStart = (fragment['end'] as int) + 1
+    if ((fragment['start']) <= newLocationStart) {
+        newLocationStart = (fragment['end']) + 1
         fragmentDcStatus = "N_TERMINAL_DISC"
-    } else if ((fragment['end'] as int) >= newLocationEnd) {
-        newLocationEnd = (fragment['start'] as int) - 1
+    } else if ((fragment['end']) >= newLocationEnd) {
+        newLocationEnd = (fragment['start']) - 1
         fragmentDcStatus = "C_TERMINAL_DISC"
-    } else if ((fragment['start'] as int) > newLocationStart && (fragment['end'] as int) < newLocationEnd) {
-        newLocationEnd = (fragment['start'] as int) - 1
+    } else if ((fragment['start']) > newLocationStart && (fragment['end']) < newLocationEnd) {
+        newLocationEnd = (fragment['start']) - 1
         twoActualRegions = true
         fragmentDcStatus = "C_TERMINAL_DISC"
     }
