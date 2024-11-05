@@ -146,7 +146,7 @@ process PARSE_PFAM {
                         if (matchLength >= minLength) {
                             processedMatches.putIfAbsent(seqId, [:])
                             processedMatches[seqId].putIfAbsent(modelAccession, [])
-                            processedMatches[seqId][modelAccession] << rawDiscontinuousMatch
+                            processedMatches[seqId][modelAccession] = rawDiscontinuousMatch
                         }
                     }
                 }
@@ -155,8 +155,7 @@ process PARSE_PFAM {
                     def matchLength = (match.locations[0].end) - (match.locations[0].start) + 1
                     if (matchLength >= minLength) {
                         processedMatches.putIfAbsent(seqId, [:])
-                        processedMatches[seqId].putIfAbsent(modelAccession, [])
-                        processedMatches[seqId][modelAccession] << match
+                        processedMatches[seqId][modelAccession] = match
                     }
                 }
             }
