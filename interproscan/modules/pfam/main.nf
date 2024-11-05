@@ -60,16 +60,16 @@ process PARSE_PFAM {
             filteredMatches[seqId].each { filteredAcc, filteredMatch ->
                 filteredMatch = clans[filteredAcc] ?: [:]
                 def filteredClan = filteredMatch?.get("clan", null)
-                if (candidateClan && candidateClan == filteredClan) {  // case of same clan
-                    println "Same clan: ${candidateClan}"
+                if (candidateClan && candidateClan == filteredClan) {  // enter if same clan
                     def notOverlappingLocations = []
-                    match.locations.each { candidateLocation ->  // checking overlapping locations
+                    match.locations.each { candidateLocation ->
                         boolean overlapping = false
                         filteredMatches.locations.each { filteredLocation ->
-                            if (matchesOverlap(candidateLocation, filteredLocation)) {
+                            if (Math.max(candidateLocation.start, filteredLocation.start) <= Math.min(candidateLocation.end, filteredLocation.end)) {  // checking overlapping locations
                                 def candidateNested = candidateMatch?.get("nested", [])
                                 def filteredNested = filteredMatch?.get("nested", [])
-                                if (!matchesAreNested(candidateNested, filteredNested)) {  // case of overlapped but NOT nested
+                                matchesAreNested = (candidateNested != null && filteredNested != null) && candidateNested.intersect(filteredNested).size() > 0
+                                if (!matchesAreNested) {  // case of overlapped but NOT nested
                                     overlapping = true
                                     return
                                 }
@@ -90,6 +90,7 @@ process PARSE_PFAM {
         }
     }
 
+    // building fragments
     processedMatches = filteredMatches.collectEntries { seqId, matches ->
         matches.each { modelAccession, match ->
             if (!match.locations) {
@@ -100,10 +101,11 @@ process PARSE_PFAM {
                 List locationFragments = []
                 matches.each { otherAccession, otherMatch ->
                     otherMatch.locations.each { location ->
-                        if (otherAccession in nestedModels && matchesOverlap(location, match.locations[0])) {
+                        overlapping = Math.max(location.start, match.locations[0].start) <= Math.min(location.end, match.locations[0].end)
+                        if (otherAccession in nestedModels && overlapping) {
                             locationFragments << [
-                                start: location['start'],
-                                end: location['end']
+                                start: location.start,
+                                end: location.end
                             ]
                         }
                     }
@@ -123,14 +125,14 @@ process PARSE_PFAM {
                             twoActualRegions
                     )
                     rawDiscontinuousMatches[0].locations.each { loc ->
-                        loc['location-fragments'] = loc['location-fragments'] ?: []
-                        loc['location-fragments'] << [
+                        loc.fragments = loc.fragments ?: []
+                        loc.fragments << [
                             start: newLocationStart,
                             end: newLocationEnd,
                             'dc-status': fragmentDcStatus
                         ]
                         if (twoActualRegions) {
-                            loc['location-fragments'] << [
+                            loc.fragments << [
                                 start: fragment['end'] + 1,
                                 end: finalLocationEnd,
                                 'dc-status': "N_TERMINAL_DISC"
@@ -141,17 +143,17 @@ process PARSE_PFAM {
 
                 rawDiscontinuousMatches.each { rawDiscontinuousMatch ->
                     rawDiscontinuousMatch.locations.each { location ->
-                        def matchLength = (location.end as int) - (location.start as int) + 1
+                        def matchLength = (location.end) - (location.start) + 1
                         if (matchLength >= minLength) {
-                            processedMatches << [seqId, modelAccession, rawDiscontinuousMatch]
+                            processedMatches[seqId][modelAccession] <<  rawDiscontinuousMatch
                         }
                     }
                 }
             } else {
                 if (match.locations.size() > 0) {
-                    def matchLength = (match.locations[0].end as int) - (match.locations[0].start as int) + 1
+                    def matchLength = (match.locations[0].end) - (match.locations[0].start) + 1
                     if (matchLength >= minLength) {
-                        processedMatches << [seqId, modelAccession, match]
+                        processedMatches[seqId][modelAccession] << match
                     }
                 }
             }
@@ -230,21 +232,10 @@ def decode(byte[] b) {
     }
 }
 
-def matchesOverlap(Map one, Map two) {
-    return Math.max(one['start'].toInteger(), two['start'].toInteger()) <= Math.min(one['end'].toInteger(), two['end'].toInteger())
-}
-
-def matchesAreNested(List one, List two) {
-    if (one == null || two == null) {
-        return false
-    }
-    return one.intersect(two).size() > 0
-}
-
-def createFragment(Map rawMatch, Map fragment, String fragmentDcStatus, boolean twoActualRegions) {
-    int newLocationStart = rawMatch["locations"][0]['start'] as int
-    int newLocationEnd = rawMatch["locations"][0]['end'] as int
-    int finalLocationEnd = rawMatch["locations"][0]['end'] as int
+def createFragment(Match rawMatch, Map fragment, String fragmentDcStatus, boolean twoActualRegions) {
+    int newLocationStart = rawMatch.locations[0].start
+    int newLocationEnd = rawMatch.locations[0].end
+    int finalLocationEnd = rawMatch.locations[0].end
 
     if ((fragment['start'] as int) <= newLocationStart && (fragment['end'] as int) >= newLocationEnd) {
         fragmentDcStatus = "NC_TERMINAL_DISC"
