@@ -38,44 +38,40 @@ process PARSE_PFAM {
     def outputFilePath = task.workDir.resolve("pfam.json")
     def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString())
 
-    nestedSeeds = stockholmSeedParser(seedPath)
-    clans = stockholmClansParser(clanPath, nestedSeeds)
+    seeds = stockholmSeedParser(seedPath)
+    nestedInfo = stockholmClansParser(clanPath, seeds)
     dat = stockholmDatParser(datPath)
 
-    filteredMatches = [:]
+    Map<String, Map<String, Match>> filteredMatches = [:]
+
+    // filter matches
     hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
         // sorting matches by evalue ASC, score DESC
-        def sortedMatches = matches.sort { a, b ->
-            def evalueComparison = a.value.evalue <=> b.value.evalue
-            def scoreComparison = -(a.value.score <=> b.value.score)
-            evalueComparison != 0 ? evalueComparison : scoreComparison
+        Map<String, Match> sortedMatches = matches.sort { a, b ->
+            (a.value.evalue <=> b.value.evalue) ?: -(a.value.score <=> b.value.score)
         }
-
         filteredMatches[seqId] = [:]
-        sortedMatches.each { modelAccession, match ->
+        sortedMatches.each { rawModelAccession, match ->
             boolean keep = true
-            modelAccession = modelAccession.split("\\.")[0]
-            def candidateMatch = clans[modelAccession] ?: [:]
-            def candidateClan = candidateMatch?.get("clan", null)
+            String modelAccession = rawModelAccession.split("\\.")[0]
+            Map<String, List<String>> candidateMatch = nestedInfo[rawModelAccession] ?: [:]
+            String candidateClan = candidateMatch?.get("clan", null)
             filteredMatches[seqId].each { filteredAcc, filteredMatch ->
-                filteredMatch = clans[filteredAcc] ?: [:]
-                def filteredClan = filteredMatch?.get("clan", null)
-                if (candidateClan && candidateClan == filteredClan) {  // enter if same clan
-                    def notOverlappingLocations = []
-                    match.locations.each { candidateLocation ->
-                        boolean overlapping = false
-                        filteredMatches.locations.each { filteredLocation ->
-                            if (Math.max(candidateLocation.start, filteredLocation.start) <= Math.min(candidateLocation.end, filteredLocation.end)) {  // checking overlapping locations
-                                def candidateNested = candidateMatch?.get("nested", [])
-                                def filteredNested = filteredMatch?.get("nested", [])
-                                matchesAreNested = (candidateNested != null && filteredNested != null) && candidateNested.intersect(filteredNested).size() > 0
-                                if (!matchesAreNested) {  // case of overlapped but NOT nested
-                                    overlapping = true
-                                    return
-                                }
-                            }
+                Map<String, List<String>> filteredInfo = nestedInfo[filteredAcc] ?: [:]
+                String filteredClan = filteredInfo?.get("clan", null)
+                if (candidateClan && candidateClan == filteredClan) {  // check if same clan
+                    List<Location> notOverlappingLocations = match.locations.findAll { candidateLocation ->
+                        boolean isOverlapping = filteredMatch.locations.any { filteredLocation ->
+                            isOverlapping(candidateLocation, filteredLocation)
                         }
-                        if (!overlapping) notOverlappingLocations << candidateLocation
+                        if (isOverlapping) {
+                            List<String> candidateNested = candidateMatch.get("nested", [])
+                            List<String> filteredNested = filteredInfo.get("nested", [])
+                            boolean matchesAreNested = candidateNested && filteredNested && candidateNested.intersect(filteredNested)
+                            !matchesAreNested  // just keep if NOT nested
+                        } else {
+                            true
+                        }
                     }
                     if (!notOverlappingLocations) {
                         keep = false
@@ -90,76 +86,36 @@ process PARSE_PFAM {
         }
     }
 
-    // building fragments
-    processedMatches = [:]
-    filteredMatches.collectEntries { seqId, matches ->
-        matches.each { modelAccession, match ->
-            if (!match.locations) {
-                return
-            }
-            def nestedModels = dat.get(modelAccession, [])
+    // build fragments
+    processedMatches = filteredMatches.collectEntries { seqId, matches ->
+        [(seqId): matches.findAll { modelAccession, match -> match.locations }
+        .collectEntries { modelAccession, match ->
+            List<String> nestedModels = dat.get(modelAccession, [])
             if (nestedModels) {
-                List locationFragments = []
-                matches.each { otherAccession, otherMatch ->
-                    otherMatch.locations.each { location ->
-                        overlapping = Math.max(location.start, match.locations[0].start) <= Math.min(location.end, match.locations[0].end)
-                        if (otherAccession in nestedModels && overlapping) {
-                            locationFragments << [
-                                start: location.start,
-                                end: location.end
-                            ]
-                        }
+                List<Map<String, Integer>> locationFragments = matches.findAll { otherAccession, _ -> otherAccession in nestedModels }
+                    .collectMany { _, otherMatch ->
+                        otherMatch.locations.findAll { loc -> isOverlapping(loc, match.locations[0]) }
+                                            .collect { loc -> [start: loc.start, end: loc.end] }
                     }
-                }
-                locationFragments.sort { a, b ->
-                    a['start'] <=> b['start'] ?: a['end'] <=> b['end']
-                }
-                def fragmentDcStatus = "CONTINUOUS"
-                List rawDiscontinuousMatches = [match]
+                    .sort { a, b -> a['start'] <=> b['start'] ?: a['end'] <=> b['end'] }
+                String fragmentDcStatus = "CONTINUOUS"
                 locationFragments.each { fragment ->
-                    boolean twoActualRegions = false
-                    (newLocationStart, newLocationEnd, finalLocationEnd,
-                        fragmentDcStatus, twoActualRegions) = createFragment(
-                            rawDiscontinuousMatches[0],
-                            fragment,
-                            fragmentDcStatus,
-                            twoActualRegions
-                    )
-                    rawDiscontinuousMatches[0].locations.each { loc ->
-                        loc.fragments = []
-                        loc.fragments << new LocationFragment(
-                            newLocationStart,
-                            newLocationEnd,
-                            fragmentDcStatus)
-                        if (twoActualRegions) {
-                            loc.fragments << new LocationFragment(
-                                fragment['end'] + 1,
-                                finalLocationEnd,
-                                "N_TERMINAL_DISC")
-                        }
-                    }
-                }
+                    def (newLocationStart, newLocationEnd, finalLocationEnd, updatedStatus, twoActualRegions) =
+                        createFragment(match, fragment, fragmentDcStatus, false)
 
-                rawDiscontinuousMatches.each { rawDiscontinuousMatch ->
-                    rawDiscontinuousMatch.locations.each { location ->
-                        def matchLength = location.end - location.start + 1
-                        if (matchLength >= minLength) {
-                            processedMatches.putIfAbsent(seqId, [:])
-                            processedMatches[seqId].putIfAbsent(modelAccession, [])
-                            processedMatches[seqId][modelAccession] = rawDiscontinuousMatch
+                    match.locations.each { loc ->
+                        loc.fragments = [new LocationFragment(newLocationStart, newLocationEnd, updatedStatus)]
+                        if (twoActualRegions) {
+                            loc.fragments << new LocationFragment(fragment['end'] + 1, finalLocationEnd, "N_TERMINAL_DISC")
                         }
-                    }
-                }
-            } else {
-                if (match.locations.size() > 0) {
-                    def matchLength = (match.locations[0].end) - (match.locations[0].start) + 1
-                    if (matchLength >= minLength) {
-                        processedMatches.putIfAbsent(seqId, [:])
-                        processedMatches[seqId][modelAccession] = match
                     }
                 }
             }
-        }
+            List<Location> validLocations = match.locations.findAll { loc ->
+                loc.end - loc.start + 1 >= minLength
+            }
+            validLocations ? [(modelAccession): match] : null
+        }.findAll { it != null }]
     }
 
     json = JsonOutput.toJson(processedMatches)
@@ -167,7 +123,7 @@ process PARSE_PFAM {
 }
 
 def stockholmSeedParser(String pfamASeedFile) {
-    Map nestingInfo = [:]
+    Map<String, List<Map<String, List<String>>>> nestingInfo = [:]
     String accession = null
     new File(pfamASeedFile).eachLine { rawLine ->
         def line = decode(rawLine.bytes)
@@ -200,8 +156,8 @@ def stockholmClansParser(String pfamClansFile, Map nestingInfo) {
 }
 
 def stockholmDatParser(String pfamADatFile) {
-    Map name2acc = [:]
-    Map acc2nested = [:]
+    Map<String, String> name2acc = [:]
+    Map<String, List<String>> acc2nested = [:]
     String name = null
     String accession = null
     new File(pfamADatFile).eachLine { rawLine ->
@@ -216,7 +172,7 @@ def stockholmDatParser(String pfamADatFile) {
             acc2nested[accession]?.add(nestedAcc) ?: (acc2nested[accession] = [nestedAcc] as Set)
         }
     }
-    Map parsedDat = [:]
+    Map<String, List<String>> parsedDat = [:]
     acc2nested.each { acc, nestedNames ->
         nestedNames.each { nestedName ->
             String nestedAccession = name2acc[nestedName]
@@ -245,17 +201,20 @@ def createFragment(Match rawMatch, Map fragment, String fragmentDcStatus, boolea
         fragmentDcStatus = null
     }
 
-    if ((fragment['start']) <= newLocationStart) {
-        newLocationStart = (fragment['end']) + 1
+    if (fragment['start'] <= newLocationStart) {
+        newLocationStart = fragment['end'] + 1
         fragmentDcStatus = "N_TERMINAL_DISC"
-    } else if ((fragment['end']) >= newLocationEnd) {
-        newLocationEnd = (fragment['start']) - 1
+    } else if (fragment['end'] >= newLocationEnd) {
+        newLocationEnd = fragment['start'] - 1
         fragmentDcStatus = "C_TERMINAL_DISC"
-    } else if ((fragment['start']) > newLocationStart && (fragment['end']) < newLocationEnd) {
-        newLocationEnd = (fragment['start']) - 1
+    } else if (fragment['start'] > newLocationStart && fragment['end'] < newLocationEnd) {
+        newLocationEnd = fragment['start'] - 1
         twoActualRegions = true
         fragmentDcStatus = "C_TERMINAL_DISC"
     }
-
     return [newLocationStart, newLocationEnd, finalLocationEnd, fragmentDcStatus, twoActualRegions]
+}
+
+def isOverlapping(location1, location2) {
+    Math.max(location1.start, location2.start) <= Math.min(location1.end, location2.end)
 }
