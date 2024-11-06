@@ -261,7 +261,7 @@ class Location implements Serializable {
         this.fragments = fragments
     }
 
-    Location(int start, int end, String sequenceFeature = null) {
+    Location(int start, int end, String sequenceFeature = null) { // Used for CDD, Coils, MobiDB, Phobius
         this.start = start
         this.end = end
         this.sequenceFeature = sequenceFeature
@@ -269,7 +269,7 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-    Location(int start, int end, Double score, String targetAlignment) {
+    Location(int start, int end, Double score, String targetAlignment) { // Used for Hamap, PrositeProfiles
         this.start = start
         this.end = end
         this.score = score
@@ -278,14 +278,14 @@ class Location implements Serializable {
         this.targetAlignment = targetAlignment
     }
 
-    Location(int start, int end, Double evalue, List<LocationFragment> fragments) {
+    Location(int start, int end, Double evalue, List<LocationFragment> fragments) { // Used for Superfamily
         this.start = start
         this.end = end
         this.evalue = evalue
         this.fragments = fragments
     }
 
-    Location(int start, int end, String level, String targetAlignment, String cigarAlignment) {
+    Location(int start, int end, String level, String targetAlignment, String cigarAlignment) { // Used for PrositePatterns
         this.start = start
         this.end = end
         this.level = level
