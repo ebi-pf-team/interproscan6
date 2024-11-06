@@ -164,7 +164,12 @@ process PARSE_SFLD {
         }
         
         if (selectedMatches.size() > 0) {
-            // Remove duplicated matches?
+            /*
+            KEEP THIS BLOCK
+            I5 has a "remove duplicates" step, but it seems bugged,
+            and I couldn't even find one case where it had consequence.
+            We'll implement the same thing here if we want such a case.
+            */
         }
 
         // Add initial matches (the ones used for promotion)

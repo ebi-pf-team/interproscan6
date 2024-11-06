@@ -199,10 +199,12 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("sfld")) {
         RUN_SFLD(ch_fasta,
             "${datadir}/${appsConfig.sfld.hmm}")
+
         POST_PROCESS_SFLD(RUN_SFLD.out,
-            "${datadir}/${appsConfig.sfld.postprocess.sites_annotation}")
+            "${datadir}/${appsConfig.sfld.sites_annotation}")
+
         PARSE_SFLD(POST_PROCESS_SFLD.out,
-            "${datadir}/${appsConfig.sfld.postprocess.hierarchy}")
+            "${datadir}/${appsConfig.sfld.hierarchy}")
 
         results = results.mix(PARSE_SFLD.out)
     }
