@@ -46,27 +46,28 @@ process PARSE_PFAM {
 
     // filter matches
     hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
-        // sorting matches by evalue ASC, score DESC
+        // sorting matches by evalue ASC, score DESC to keep the best matches
         Map<String, Match> sortedMatches = matches.sort { a, b ->
             (a.value.evalue <=> b.value.evalue) ?: -(a.value.score <=> b.value.score)
         }
         filteredMatches[seqId] = [:]
-        sortedMatches.each { rawModelAccession, match ->
+        sortedMatches.each { modelAccession, match ->
+            modelAccession = modelAccession.split("\\.")[0]
             boolean keep = true
-            String modelAccession = rawModelAccession.split("\\.")[0]
-            Map<String, List<String>> candidateMatch = nestedInfo[rawModelAccession] ?: [:]
+            Map<String, List<String>> candidateMatch = nestedInfo[modelAccession] ?: [:]
             String candidateClan = candidateMatch?.get("clan", null)
-            filteredMatches[seqId].each { filteredAcc, filteredMatch ->
-                Map<String, List<String>> filteredInfo = nestedInfo[filteredAcc] ?: [:]
-                String filteredClan = filteredInfo?.get("clan", null)
-                if (candidateClan && candidateClan == filteredClan) {  // check if same clan
+
+            filteredMatches[seqId].each { filteredAcc, filteredMatch -> // iterates through the matches already chosen
+                Map<String, List<String>> filteredMatchInfo = nestedInfo[filteredAcc] ?: [:]
+                String filteredMatchClan = filteredMatchInfo?.get("clan", null)
+                if (candidateClan && candidateClan == filteredMatchClan) {  // check if both are on the same clan
                     List<Location> notOverlappingLocations = match.locations.findAll { candidateLocation ->
                         boolean isOverlapping = filteredMatch.locations.any { filteredLocation ->
                             isOverlapping(candidateLocation, filteredLocation)
                         }
                         if (isOverlapping) {
                             List<String> candidateNested = candidateMatch.get("nested", [])
-                            List<String> filteredNested = filteredInfo.get("nested", [])
+                            List<String> filteredNested = filteredMatchInfo.get("nested", [])
                             boolean matchesAreNested = candidateNested && filteredNested && candidateNested.intersect(filteredNested)
                             !matchesAreNested  // just keep if NOT nested
                         } else {
@@ -195,7 +196,7 @@ def createFragment(Match rawMatch, Map fragment, String fragmentDcStatus, boolea
     int newLocationEnd = rawMatch.locations[0].end
     int finalLocationEnd = rawMatch.locations[0].end
 
-    if ((fragment['start']) <= newLocationStart && (fragment['end']) >= newLocationEnd) {
+    if (fragment['start'] <= newLocationStart && fragment['end'] >= newLocationEnd) {
         fragmentDcStatus = "NC_TERMINAL_DISC"
     } else if (fragmentDcStatus == "CONTINUOUS") {
         fragmentDcStatus = null
