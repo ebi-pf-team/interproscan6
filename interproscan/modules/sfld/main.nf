@@ -8,7 +8,7 @@ process RUN_SFLD {
     path hmmdb
 
     output:
-    tuple val(meta), path("hmmsearch.out"), path("hmmsearch.dtbl"), path("hmmsearch.alignment")
+    tuple val(meta), path("hmmsearch.out"), path("hmmsearch.tab"), path("hmmsearch.sto")
 
     script:
     """
@@ -17,8 +17,8 @@ process RUN_SFLD {
         --cut_ga \
         --cpu ${task.cpus} \
         -o hmmsearch.out \
-        --domtblout hmmsearch.dtbl \
-        -A hmmsearch.alignment \
+        --domtblout hmmsearch.tab \
+        -A hmmsearch.sto \
         ${hmmdb} ${fasta}
     """
 }
@@ -31,16 +31,16 @@ process POST_PROCESS_SFLD {
     val site_info
 
     output:
-    tuple val(meta), path("sfld.post.processed.out")
+    tuple val(meta), path("sfld.tsv")
 
     script:
     """
     $projectDir/interproscan/bin/sfld/sfld_postprocess \
-        --alignment '${hmmsearch_alignment}' \
-        --dom '${hmmsearch_dtbl}' \
-        --hmmer-out '${hmmsearch_out}' \
-        --site-info '${site_info}' \
-        --output 'sfld.post.processed.out'
+        --alignment ${hmmsearch_alignment} \
+        --dom ${hmmsearch_dtbl} \
+        --hmmer-out ${hmmsearch_out} \
+        --site-info ${site_info} \
+        --output sfld.tsv
     """
 }
 
@@ -49,16 +49,16 @@ process PARSE_SFLD {
     label 'analysis_parser'
 
     input:
-    tuple val(meta), val(sfld_postprocess_output)
-    val sfld_hierarchy_db
+    tuple val(meta), val(postprocess_out)
+    val hierarchy_db
 
     output:
     tuple val(meta), val("sfld.json")
 
     exec:
     def outputFilePath = task.workDir.resolve("sfld.json")
-    def sequences = SFLD.parseOutput(sfld_postprocess_output.toString())
-    def hierarchy = SFLD.parseHierarchy(sfld_hierarchy_db.toString())
+    def sequences = SFLD.parseOutput(postprocess_out.toString())
+    def hierarchy = SFLD.parseHierarchy(hierarchy_db.toString())
 
     sequences = sequences.collectEntries { seqId, matches -> 
         // Flatten matches (one location per match)
