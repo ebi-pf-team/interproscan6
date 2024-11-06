@@ -44,6 +44,9 @@ process PARSE_PIRSR {
                 [loc.evalue, -loc.score]  // sorting by evalue ASC, score DESC
             }
             sortedLocations.each { location ->
+                if (!location.targetAlignment || !location.queryAlignment) {
+                    return
+                }
                 List<Integer> map = mapHMMToSeq(location.hmmStart,
                                                 location.queryAlignment,
                                                 location.targetAlignment)
