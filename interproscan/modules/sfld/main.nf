@@ -57,7 +57,133 @@ process PARSE_SFLD {
 
     exec:
     def outputFilePath = task.workDir.resolve("sfld.json")
-    def matches = SFLD.parseOutput(sfld_postprocess_output.toString(), sfld_hierarchy_db.toString())
-    def json = JsonOutput.toJson(matches)
+    def sequences = SFLD.parseOutput(sfld_postprocess_output.toString())
+    def hierarchy = SFLD.parseHierarchy(sfld_hierarchy_db.toString())
+
+    sequences = sequences.collectEntries { seqId, matches -> 
+        // Flatten matches (one location per match)
+        matches = matches.collectMany { key, match ->
+            return match.locations.collect { location ->
+                Match newMatch = new Match(match.modelAccession, match.evalue, match.score, match.bias)
+                newMatch.addLocation(location.clone())
+                return newMatch
+            }
+        }
+
+        if (matches.size() > 1) {
+            // Now resolve matches to remove overlapping matches from the same hierarchy
+            Set<Integer> ignored = [] as Set
+            matches = matches
+                .collect { match ->
+                    if (match.modelAccession.startsWith("SFLDF")) {
+                        // Hihgly specific model: always add
+                        return match
+                    }
+
+                    boolean overlaps = false
+                    for (Match otherMatch: matches) {
+                        if (ignored.contains(otherMatch)) {
+                            // Current match overlaps with another match: ignore
+                            continue
+                        } else if (match.modelAccession == otherMatch.modelAccession) {
+                            // Two matches/locations from the same model: keep
+                            continue
+                        }
+
+                        Location l1 = match.locations[0]
+                        Location l2 = otherMatch.locations[0]
+
+                        if (!(l1.start > l2.end || l2.start > l1.end)) {
+                            // Matches overlap
+                            
+                            def otherParents = hierarchy.get(otherMatch.modelAccession)
+                            if (otherParents != null && otherParents.contains(match.modelAccession)) {
+                                // Current match overlaps a more specific match: we want to keep the most specific
+                                overlaps = true
+                                break
+                            }    
+                        }
+                    }
+
+                    if (overlaps) {
+                        // Mark this match as to be ignored
+                        ignored.add(match)
+                        return null
+                    }
+
+                    return match
+                }
+                .findAll { it != null }
+        }
+
+        def selectedMatches = [] as Set
+        matches.each { match ->
+            def parents = hierarchy.get(match.modelAccession)
+
+            if (parents) {
+                /*
+                    Propagate match up through it hierarchy.
+                    If there are Superfamily, Group, and Family models in a tree,
+                    and a sequence matches F, it should inherit the S and G annotations
+                */
+                def promotedMatches = parents
+                    .findAll { it != match.modelAccession }
+                    .collect {
+                        Match promotedMatch = new Match(it, match.evalue, match.score, match.bias)
+                        promotedMatch.addLocation(match.locations[0].clone())
+                        return promotedMatch
+                    }
+
+                /*
+                    Check newly promoted matches against previously selected matches:
+                        - promoted fully contains other match: keep promoted and remove other
+                        - promoted fully within other match: skip promoted
+                        - partial or no overlap: keep promoted
+                */
+                boolean keepPromoted = true
+                Set<Match> toRemove = [] as Set
+                promotedMatches.each { promotedMatch ->
+                    for (Match selectedMatch: selectedMatches) {
+                        if (promotedMatch.locations[0].start <= selectedMatch.locations[0].start &&
+                            promotedMatch.locations[0].end >= selectedMatch.locations[0].end) {
+                            toRemove.add(selectedMatch)
+                        } else if (promotedMatch.locations[0].start >= selectedMatch.locations[0].start &&
+                                  promotedMatch.locations[0].end <= selectedMatch.locations[0].end) {
+                            keepPromoted = false
+                            break
+                        }
+                    }
+
+                    toRemove.each { selectedMatches.remove(it) }
+
+                    if (keepPromoted) {
+                        selectedMatches.add(promotedMatch)
+                    }
+                }
+            }
+        }
+        
+        if (selectedMatches.size() > 0) {
+            // Remove duplicated matches?
+        }
+
+        // Add initial matches (the ones used for promotion)
+        selectedMatches.addAll(matches)
+
+        // List to Map
+        def finalMatches = [:]
+        selectedMatches.each { match ->
+            Match finalMatch = finalMatches.get(match.modelAccession)
+            if (finalMatch) {
+                finalMatch.addLocation(match.locations[0])
+            } else {
+                finalMatches[match.modelAccession] = match
+            }
+        }
+
+        return [seqId, finalMatches]
+    }
+
+    def json = JsonOutput.toJson(sequences)
     new File(outputFilePath.toString()).write(json)
 }
