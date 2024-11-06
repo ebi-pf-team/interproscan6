@@ -210,6 +210,20 @@ workflow SCAN_SEQUENCES {
         // TODO
     }
 
+    ["signalp_euk", "signalp_prok"].each { appl ->
+        if (applications.contains(appl)) {
+            def config = appsConfig[appl]
+            RUN_SIGNALP(
+                ch_fasta, 
+                config.organism, 
+                config.mode,
+                config.dir
+            )
+            PARSE_SIGNALP(RUN_SIGNALP.out)
+            results = results.mix(PARSE_SIGNALP.out)
+        }
+    }
+
     if (applications.contains("smart")) {
         SEARCH_SMART(ch_fasta,
             "${datadir}/${appsConfig.smart.hmmbin}")
@@ -232,18 +246,6 @@ workflow SCAN_SEQUENCES {
             "${datadir}/${appsConfig.superfamily.model}")
 
         results = results.mix(PARSE_SUPERFAMILY.out)
-    }
-
-    if (applications.contains("signalp") || applications.contains("signalp_euk")) {
-        orgType = applications.contains("signalp_euk") ? "euk" : "other"
-        RUN_SIGNALP(ch_fasta, orgType, signalpMode)
-
-        PARSE_SIGNALP(
-            RUN_SIGNALP.out,
-            "${datadir}/${appsConfig.signalp.data.threshold}".split('/')[-1].toFloat()
-        )
-
-        results = results.mix(PARSE_SIGNALP.out)
     }
 
     if (applications.contains("tmhmm")) {

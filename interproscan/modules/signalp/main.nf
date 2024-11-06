@@ -5,19 +5,22 @@ process RUN_SIGNALP {
 
     input:
     tuple val(meta), path(fasta)
-    val orgType
+    val organism
     val mode
+    path signalp_dir
 
     output:
-    tuple val(meta), path("signalp_out"), val(orgType)
+    tuple val(meta), path("outdir"), val(organism)
 
     script:
     """
-    signalp6 \
-        --organism ${orgType} \
+    cp -Lr ${signalp_dir}/signalp-6-package/signalp signalp
+    python -m signalp.predict \
         --fastafile ${fasta} \
-        --output_dir signalp_out \
-        --mode ${mode}
+        --output_dir outdir \
+        --organism ${organism} \
+        --mode ${mode} \
+        --model_dir ${signalp_dir}/signalp-6-package/models
     """
 }
 
@@ -26,7 +29,6 @@ process PARSE_SIGNALP {
 
     input:
     tuple val(meta), val(signalp_out), val(orgType)
-    val threshold
 
     output:
     tuple val(meta), path("signalp.json")
