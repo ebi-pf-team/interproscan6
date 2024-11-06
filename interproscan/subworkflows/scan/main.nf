@@ -7,10 +7,13 @@ include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP               
 include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                        } from  "../../modules/mobidblite"
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
+include { RUN_SIGNALP; PARSE_SIGNALP                                              } from  "../../modules/signalp"
 include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                           } from  "../../modules/phobius"
 include { RUN_PIRSR; PARSE_PIRSR                                                  } from  "../../modules/pirsr"
+include { RUN_PFSCAN ; PARSE_PFSCAN                                               } from  "../../modules/prosite/patterns"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
+
 
 workflow SCAN_SEQUENCES {
     take:
@@ -18,6 +21,7 @@ workflow SCAN_SEQUENCES {
     applications        // list of applications to run
     appsConfig          // map of applications
     datadir             // path to data directory
+    signalpMode         // SignalP running mode, 'fast', 'slow', 'slow-sequential'
 
     main:
     results = Channel.empty()
@@ -195,7 +199,14 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("prositepatterns")) {
-        // TODO
+        RUN_PFSCAN(
+            ch_fasta,
+            "${datadir}/${appsConfig.prositepatterns.data}",
+            "${datadir}/${appsConfig.prositepatterns.evaluator}"
+        )
+        PARSE_PFSCAN(RUN_PFSCAN.out)
+
+        results = results.mix(PARSE_PFSCAN.out)
     }
 
     if (applications.contains("prositeprofiles")) {
@@ -230,12 +241,16 @@ workflow SCAN_SEQUENCES {
         results = results.mix(PARSE_SUPERFAMILY.out)
     }
 
-    if (applications.contains("signalp")) {
-        // TODO
-    }
+    if (applications.contains("signalp") || applications.contains("signalp_euk")) {
+        orgType = applications.contains("signalp_euk") ? "euk" : "other"
+        RUN_SIGNALP(ch_fasta, orgType, signalpMode)
 
-    if (applications.contains("signalp_euk")) {
-        // TODO
+        PARSE_SIGNALP(
+            RUN_SIGNALP.out,
+            "${datadir}/${appsConfig.signalp.data.threshold}".split('/')[-1].toFloat()
+        )
+
+        results = results.mix(PARSE_SIGNALP.out)
     }
 
     if (applications.contains("tmhmm")) {
