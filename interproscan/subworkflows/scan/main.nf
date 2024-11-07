@@ -14,8 +14,6 @@ include { SEARCH_SMART; PARSE_SMART                                             
 include { RUN_SIGNALP; PARSE_SIGNALP                                              } from  "../../modules/signalp"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
 
-
-
 workflow SCAN_SEQUENCES {
     take:
     ch_seqs             // channel of tuples (index, fasta file, json file)
