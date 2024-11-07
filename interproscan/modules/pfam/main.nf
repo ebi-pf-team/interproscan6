@@ -2,7 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import java.util.regex.Pattern
 
-process RUN_PFAM {
+process SEARCH_PFAM {
     label 'hmmer_runner'
 
     input:
