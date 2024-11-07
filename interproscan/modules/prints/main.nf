@@ -176,26 +176,29 @@ process PARSE_PRINTS {
         passed = selectMatches(
              motifMatchesForCurrentModel, currentModelAcc,
              currentHierarchyEntry, hierarchyEntryIdLimitation
-         )
+        )
         if (passed) {
-        filteredMatches.addAll(motifMatchesForCurrentModel) }
+            filteredMatches.addAll(motifMatchesForCurrentModel)
+        }
 
         // add the filteredMatches to matches
-        matches.computeIfAbsent(proteinAccession, { [:] })
-        for (Prints filteredMatch: filteredMatches) {
-            // the modelName has been used up to this point, but we need to convert to the model ID
-            matches[proteinAccession].computeIfAbsent(
-                filteredMatch.modelId,
-                { new Match(filteredMatch.modelId, filteredMatch.evalue, filteredMatch.graphScan) }
-            )
-            Location location = new Location(
-                filteredMatch.locationStart,
-                filteredMatch.locationEnd,
-                filteredMatch.pvalue,
-                filteredMatch.score,
-                filteredMatch.motifNumber
-            )
-            matches[proteinAccession][filteredMatch.modelId].addLocation(location)
+        if (!filteredMatches.isEmpty()) {
+            matches.computeIfAbsent(proteinAccession, { [:] })
+            for (Prints filteredMatch: filteredMatches) {
+                // the modelName has been used up to this point, but we need to convert to the model ID
+                matches[proteinAccession].computeIfAbsent(
+                    filteredMatch.modelId,
+                    { new Match(filteredMatch.modelId, filteredMatch.evalue, filteredMatch.graphScan) }
+                )
+                Location location = new Location(
+                    filteredMatch.locationStart,
+                    filteredMatch.locationEnd,
+                    filteredMatch.pvalue,
+                    filteredMatch.score,
+                    filteredMatch.motifNumber
+                )
+                matches[proteinAccession][filteredMatch.modelId].addLocation(location)
+            }
         }
     }
 
