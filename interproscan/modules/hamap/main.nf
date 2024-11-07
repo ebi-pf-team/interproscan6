@@ -126,13 +126,8 @@ process PARSE_HAMAP {
         Double score = Double.parseDouble(fields[7])
         String alignment = fields[9]
 
-        if (matches.containsKey(sequenceId)) {
-            match = matches[sequenceId]
-        } else {
-            match = new Match(modelAccession)
-            matches.computeIfAbsent(sequenceId, { [:] })
-            matches[sequenceId][modelAccession] = match
-        }
+        match = matches.computeIfAbsent(sequenceId, { [:] })[modelAccession] ?: new Match(modelAccession)
+        matches[sequenceId][modelAccession] = match
 
         Location location = new Location(start, end, score, alignment)
         match.addLocation(location)
