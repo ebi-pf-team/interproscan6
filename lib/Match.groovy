@@ -7,12 +7,13 @@ class Match implements Serializable {
     Signature signature = null
     List<Location> locations = []
     boolean included = true  // for HMMER3 matches (inclusion threshold)
+    RepresentativeInfo representativeInfo = null
 
     // PANTHER
     TreeGrafter treegrafter = null
 
     // SignalP
-    // String orgType
+    SignalP signalp = null
 
     // PRINTS
     String graphScan = null
@@ -63,10 +64,14 @@ class Match implements Serializable {
         this.locations.add(location)
     }
 
-    void setSequences(int locationIndex, String querySequence, String targetSequence) {
+    void addSignalPeptide(String orgType, int cleavageSiteStart, int cleavageSiteEnd) {
+        this.signalp = new SignalP(orgType, cleavageSiteStart, cleavageSiteEnd)
+    }
+
+    void setAlignments(int locationIndex, String queryAlignment, String targetAlignment) {
         Location location = this.locations[locationIndex]
-        location.querySequence = querySequence
-        location.targetSequence = targetSequence
+        location.queryAlignment = queryAlignment
+        location.targetAlignment = targetAlignment
     }
 }
 
@@ -81,9 +86,14 @@ class Signature implements Serializable {
         this.accession = accession
     }
 
-    Signature(String accession, 
-              String name, 
-              String description, 
+    Signature(String accession, SignatureLibraryRelease library) {
+        this.accession = accession
+        this.signatureLibraryRelease = library
+    }
+
+    Signature(String accession,
+              String name,
+              String description,
               SignatureLibraryRelease library,
               Entry entry) {
         this.accession = accession
@@ -98,11 +108,11 @@ class Signature implements Serializable {
             return null
         }
         return new Signature(
-            data.accession,
-            data.name,
-            data.description,
-            SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
-            Entry.fromMap(data.entry)
+                data.accession,
+                data.name,
+                data.description,
+                SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
+                Entry.fromMap(data.entry)
         )
     }
 }
@@ -129,19 +139,53 @@ class Entry implements Serializable {
     String name
     String description
     String type
+    List<GoXRefs> goXRefs = []
+    List<PathwayXRefs> pathwayXRefs = []
 
-    Entry(String accession, String name, String description, String type) {
+    Entry(String accession,
+          String name,
+          String description,
+          String type) {
         this.accession = accession
         this.name = name
         this.description = description
         this.type = type
     }
 
+    Entry(String accession,
+          String name,
+          String description,
+          String type,
+          List<GoXRefs> goXRefs,
+          List<PathwayXRefs> pathwayXRefs) {
+        this.accession = accession
+        this.name = name
+        this.description = description
+        this.type = type
+        this.goXRefs = goXRefs
+        this.pathwayXRefs = pathwayXRefs
+    }
+
     static Entry fromMap(Map data) {
         if (data == null) {
             return null
         }
-        return new Entry(data.accession, data.name, data.description, data.type)
+        return new Entry(
+                data.accession,
+                data.name,
+                data.description,
+                data.type,
+                data.goXRefs.collect { GoXRefs.fromMap(it) },
+                data.pathwayXRefs.collect { PathwayXRefs.fromMap(it) }
+        )
+    }
+
+    void addGoXRefs(GoXRefs go) {
+        this.goXRefs.add(go)
+    }
+
+    void addPathwayXRefs(PathwayXRefs pa) {
+        this.pathwayXRefs.add(pa)
     }
 }
 
@@ -157,25 +201,23 @@ class Location implements Serializable {
     Double evalue
     Double score
     Double bias
-    String querySequence
-    String targetSequence
+    String queryAlignment
+    String targetAlignment
     String sequenceFeature
-    // for PRINTS
     Double pvalue
     Integer motifNumber
-
+    String level
+    String cigarAlignment
     List<LocationFragment> fragments = []
     List<Site> sites = []
     boolean representative = false
     boolean included = true  // for HMMER3 matches (inclusion threshold)
+    Float pvalue = null // SignalP
 
-    // level
-    // cigarAlignment
-
-    Location(int start, 
-             int end, 
+    Location(int start,
+             int end,
              Integer hmmStart = null,
-             Integer hmmEnd = null, 
+             Integer hmmEnd = null,
              Integer hmmLength = null,
              String hmmBounds = null,
              Integer envelopeStart = null,
@@ -198,10 +240,10 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-    Location(int start, 
-             int end, 
+    Location(int start,
+             int end,
              Integer hmmStart,
-             Integer hmmEnd, 
+             Integer hmmEnd,
              Integer hmmLength,
              String hmmBounds,
              Integer envelopeStart,
@@ -232,13 +274,38 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-    Location(int start, int end, Double score, String alignment) {
+    Location(int start, int end, Double score, String targetAlignment) {
         this.start = start
         this.end = end
         this.score = score
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
-        this.targetSequence = alignment
+        this.targetAlignment = targetAlignment
+    }
+
+    Location(int start, int end, Double evalue, List<LocationFragment> fragments) {
+        this.start = start
+        this.end = end
+        this.evalue = evalue
+        this.fragments = fragments
+    }
+
+    Location(int start, int end, String level, String alignment, String cigarAlignment) {
+        this.start = start
+        this.end = end
+        this.level = level
+        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
+        this.fragments = [fragment]
+        this.targetAlignment = alignment
+        this.cigarAlignment = cigarAlignment
+    }
+
+    Location(int start, int end, float pvalue) { // Used for SignalP
+        this.start = start
+        this.end = end
+        this.pvalue = pvalue
+        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
+        this.fragments = [fragment]
     }
 
     Location(int start, int end, Double pvalue, Double score, Integer motifNumber) {
@@ -257,24 +324,27 @@ class Location implements Serializable {
 
     static Location fromMap(data) {
         Location loc = new Location(
-            data.start,
-            data.end,
-            data.hmmStart,
-            data.hmmEnd,
-            data.hmmLength,
-            data.hmmBounds,
-            data.envelopeStart,
-            data.envelopeEnd,
-            data.evalue,
-            data.score,
-            data.bias
+                data.start,
+                data.end,
+                data.hmmStart,
+                data.hmmEnd,
+                data.hmmLength,
+                data.hmmBounds,
+                data.envelopeStart,
+                data.envelopeEnd,
+                data.evalue,
+                data.score,
+                data.bias
         )
-        loc.querySequence = data.querySequence
-        loc.targetSequence = data.targetSequence
+        loc.queryAlignment = data.queryAlignment
+        loc.targetAlignment = data.targetAlignment
         loc.fragments = data.fragments.collect { LocationFragment.fromMap(it) }
         loc.representative = data.representative
         loc.included = data.included
         loc.sites = data.sites
+        loc.sequenceFeature = data.sequenceFeature
+        loc.level = data.level
+        loc.cigarAlignment = data.cigarAlignment
         return loc
     }
 }
@@ -319,7 +389,7 @@ class Site implements Serializable {
     }
 
     Site(String description, String residues) {
-        this(description, Site.getSiteLocationsFromString(residues))        
+        this(description, Site.getSiteLocationsFromString(residues))
     }
 
     private static List<SiteLocation> getSiteLocationsFromString(String residues) {
@@ -335,8 +405,8 @@ class Site implements Serializable {
 
     static Site fromMap(Map data) {
         return new Site(
-            data.description,
-            data.siteLocations.collect { SiteLocation.fromMap(it) })
+                data.description,
+                data.siteLocations.collect { SiteLocation.fromMap(it) })
     }
 
     boolean isInRange(int start, int end) {
@@ -365,6 +435,7 @@ class TreeGrafter implements Serializable {
     String graftPoint
     String subfamilyAccession
     String subfamilyName
+    String subfamilyDescription
     String proteinClass
 
     TreeGrafter(String ancestralNodeID) {
@@ -379,7 +450,89 @@ class TreeGrafter implements Serializable {
         tg.graftPoint = data.graftPoint
         tg.subfamilyAccession = data.subfamilyAccession
         tg.subfamilyName = data.subfamilyName
+        tg.subfamilyDescription = data.subfamilyDescription
         tg.proteinClass = data.proteinClass
         return tg
+    }
+}
+
+class SignalP implements Serializable {
+    String orgType
+    int cleavageSiteStart
+    int cleavageSiteEnd
+
+    SignalP(String orgType, int cleavageSiteStart, int cleavageSiteEnd) {
+        this.orgType = orgType
+        this.cleavageSiteStart = cleavageSiteStart
+        this.cleavageSiteEnd = cleavageSiteEnd
+    }
+
+    static SignalP fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
+        SignalP sp = new SignalP(
+                data.orgType,
+                data.cleavageSiteStart,
+                data.cleavageSiteEnd
+        )
+        return sp
+    }
+}
+
+class RepresentativeInfo implements Serializable {
+    String type
+    int rank
+
+    RepresentativeInfo(String type, int rank) {
+        this.type = type
+        this.rank = rank
+    }
+
+    static RepresentativeInfo fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
+        return new RepresentativeInfo(data.type, data.rank)
+    }
+}
+
+class GoXRefs implements Serializable {
+    String name
+    String databaseName
+    String category
+    String id
+
+    GoXRefs(String name, String databaseName, String category, String id) {
+        this.name = name
+        this.databaseName = databaseName
+        this.category = category
+        this.id = id
+    }
+
+    static GoXRefs fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
+        return new GoXRefs(data.name, data.databaseName, data.category, data.id)
+    }
+}
+
+class PathwayXRefs implements Serializable {
+    String name
+    String databaseName
+    String id
+
+    PathwayXRefs(String name, String databaseName, String id) {
+        this.name = name
+        this.databaseName = databaseName
+        this.id = id
+    }
+
+    static PathwayXRefs fromMap(Map data) {
+        if (data == null) {
+            return null
+        }
+        return new PathwayXRefs(data.name, data.databaseName, data.id)
     }
 }

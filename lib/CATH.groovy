@@ -7,9 +7,9 @@ class CATH {
 
         new File(filePath).eachLine { line ->
             if (line[0] != "#") {
-                // #domain_id      cath-superfamily        query-id        match-id        score   boundaries      resolved        aligned-regions cond-evalue     indp-evalue
+                // #domain_id cath-superfamily query-id match-id score boundaries resolved aligned-regions cond-evalue indp-evalue [comment]
                 def fields = line.split("\t")
-                assert fields.size() == 10
+                assert fields.size() == 10 || fields.size() == 11
                 String sequenceId = fields[2]
                 def dom = new CathDomain(
                     fields[0],
@@ -89,8 +89,8 @@ class CATH {
                 }
 
                 Location location = new Location(
-                    cathDomain.getStart(),
-                    cathDomain.getEnd(),
+                    cathDomain.getResolvedStart(),
+                    cathDomain.getResolvedEnd(),
                     hmmerDomain.locations[0].hmmStart,
                     hmmerDomain.locations[0].hmmEnd,
                     hmmerDomain.locations[0].hmmLength,
@@ -154,7 +154,15 @@ class CathDomain {
     String getKey() {
         int leftMost = this.getStart()
         int rightMost = this.getEnd()
-        return "${this.matchId}-${leftMost}-${rightMost}"
+
+        String matchId
+        if (this.matchId.startsWith("dc_")) {
+            matchId = this.matchId.replace("_${this.domainId}", "")
+        } else {
+            matchId = this.matchId
+        }
+
+        return "${matchId}-${leftMost}-${rightMost}"
     }
 
     int getStart() {
@@ -163,6 +171,14 @@ class CathDomain {
 
     int getEnd() {
         return this.boundaries*.end.max()
+    }
+
+    int getResolvedStart() {
+        return this.resolvedBoundaries*.start.min()
+    }
+
+    int getResolvedEnd() {
+        return this.resolvedBoundaries*.end.max()
     }
 }
 
