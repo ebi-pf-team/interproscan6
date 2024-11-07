@@ -35,12 +35,13 @@ process PARSE_COILS {
         if (line.startsWith(">")) {
             // Coils report the full sequence header (ID + description)
             sequenceId = line.substring(1).split()[0]
-            matches[sequenceId] = new Match("coils")
+            matches[sequenceId] = [:]
+            matches[sequenceId]["Coil"] = new Match("coils")
         } else if (line != "//" && sequenceId) {
             def fields = line.split(/\s+/)
             def start = fields[0].toInteger()
             def end = fields[1].toInteger()
-            matches[sequenceId].addLocation(new Location(start, end))
+            matches[sequenceId]["Coil"].addLocation(new Location(start, end))
         }
     }
 

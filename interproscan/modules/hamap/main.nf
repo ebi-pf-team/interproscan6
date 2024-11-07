@@ -38,7 +38,7 @@ process PREPARE_HAMAP {
         .collectEntries{ seqId, obj ->
             [ (seqId): FastaSequence.fromMap(obj) ]
         }
-    
+
     // Find profiles with matches
     def matches = [:]
     file(hmmsearch_tab.toString()).eachLine { line ->
@@ -68,7 +68,7 @@ process PREPARE_HAMAP {
                 Path fastaPath = task.workDir.resolve("${query}.fa")
                 new File(fastaPath.toString()).withWriter('UTF-8') { writer ->
                     targets.each { seqId ->
-                        FastaSequence seq = sequences[seqId]                   
+                        FastaSequence seq = sequences[seqId]
                         writer.writeLine(">${seqId}")
                         writer.writeLine(seq.sequence)
                     }
@@ -82,7 +82,7 @@ process PREPARE_HAMAP {
 
 process RUN_HAMAP {
     label 'analysis_parser'
-    
+
     input:
     tuple val(meta), val(profiles), path(fasta_files)
     path profile_dir
@@ -95,7 +95,7 @@ process RUN_HAMAP {
 
     [profiles, fasta_files]
         .transpose()
-        .each { profile, fasta -> 
+        .each { profile, fasta ->
             def profilePath = "${profile_dir.toString()}/${profile}.prf"
             commands += "/opt/pftools/pfsearchV3 -f -o 7 ${profilePath} ${fasta}\n"
         }
@@ -119,7 +119,7 @@ process PARSE_HAMAP {
     pfsearch_out.eachLine { line ->
         def fields = line.split()
         assert fields.size() == 10
-        String modelAccession = fields[0].split("|")[0]
+        String modelAccession = fields[0].split("\\|")[0]
         String sequenceId = fields[3]
         int start = fields[4].toInteger()
         int end = fields[5].toInteger()
@@ -130,7 +130,8 @@ process PARSE_HAMAP {
             match = matches[sequenceId]
         } else {
             match = new Match(modelAccession)
-            matches[sequenceId] = match
+            matches.computeIfAbsent(sequenceId, { [:] })
+            matches[sequenceId][modelAccession] = match
         }
 
         Location location = new Location(start, end, score, alignment)
