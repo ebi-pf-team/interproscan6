@@ -69,9 +69,9 @@ process PARSE_PFAM {
                             List<String> candidateNested = candidateMatch.get("nested", [])
                             List<String> filteredNested = filteredMatchInfo.get("nested", [])
                             boolean matchesAreNested = candidateNested && filteredNested && candidateNested.intersect(filteredNested)
-                            !matchesAreNested  // just keep if NOT nested
+                            matchesAreNested  // if they are nested, keep both
                         } else {
-                            true
+                            true  // keep if not overlapping
                         }
                     }
                     if (!notOverlappingLocations) {
@@ -148,8 +148,11 @@ def stockholmClansParser(String pfamClansFile, Map nestingInfo) {
         } else if (line.startsWith("#=GF MB")) {
             String modelAccession = line.split("\\s+")[2].replace(";", "")
             if (modelAccession) {
-                nestingInfo[modelAccession]?.clan = accession ?:
-                    (nestingInfo[modelAccession] = [clan: accession])
+                if (!nestingInfo.containsKey(modelAccession)) {
+                    nestingInfo[modelAccession] = [clan: accession]
+                } else {
+                    nestingInfo[modelAccession].clan = accession
+                }
             }
         }
     }
