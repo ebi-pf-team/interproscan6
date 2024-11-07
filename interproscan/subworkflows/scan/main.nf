@@ -180,7 +180,7 @@ workflow SCAN_SEQUENCES {
         SEARCH_PFAM(ch_fasta,
             "${datadir}/${appsConfig.pfam.hmm}")
 
-        PARSE_PFAM(RUN_PFAM.out,
+        PARSE_PFAM(SEARCH_PFAM.out,
             appsConfig.pfam.min_length,
             "${datadir}/${appsConfig.pfam.seed}",
             "${datadir}/${appsConfig.pfam.clan}",
