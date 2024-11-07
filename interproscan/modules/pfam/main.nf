@@ -1,6 +1,4 @@
 import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
-import java.util.regex.Pattern
 
 process SEARCH_PFAM {
     label 'hmmer_runner'
@@ -26,7 +24,6 @@ process PARSE_PFAM {
 
     input:
     tuple val(meta), val(hmmsearch_out)
-    val minLength
     val seedPath
     val clanPath
     val datPath
@@ -88,6 +85,7 @@ process PARSE_PFAM {
     }
 
     // build fragments
+    minResiduesLength = 8
     processedMatches = filteredMatches.collectEntries { seqId, matches ->
         [(seqId): matches.findAll { modelAccession, match -> match.locations }
         .collectEntries { modelAccession, match ->
@@ -113,7 +111,7 @@ process PARSE_PFAM {
                 }
             }
             List<Location> validLocations = match.locations.findAll { loc ->
-                loc.end - loc.start + 1 >= minLength
+                loc.end - loc.start + 1 >= minResiduesLength // filter out locations with less than 8 residues
             }
             validLocations ? [(modelAccession): match] : null
         }.findAll { it != null }]

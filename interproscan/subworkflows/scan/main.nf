@@ -181,7 +181,6 @@ workflow SCAN_SEQUENCES {
             "${datadir}/${appsConfig.pfam.hmm}")
 
         PARSE_PFAM(SEARCH_PFAM.out,
-            appsConfig.pfam.min_length,
             "${datadir}/${appsConfig.pfam.seed}",
             "${datadir}/${appsConfig.pfam.clan}",
             "${datadir}/${appsConfig.pfam.dat}"
