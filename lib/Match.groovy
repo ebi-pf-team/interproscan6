@@ -212,7 +212,6 @@ class Location implements Serializable {
     List<Site> sites = []
     boolean representative = false
     boolean included = true  // for HMMER3 matches (inclusion threshold)
-    Float pvalue = null // SignalP
 
     Location(int start,
              int end,
@@ -274,6 +273,16 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
+    Location(int start, int end, Double pvalue, Double score, Integer motifNumber) {
+        this.start = start
+        this.end = end
+        this.pvalue = pvalue
+        this.score = score
+        this.motifNumber = motifNumber
+        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
+        this.fragments = [fragment]
+    }
+
     Location(int start, int end, Double score, String targetAlignment) {
         this.start = start
         this.end = end
@@ -304,16 +313,6 @@ class Location implements Serializable {
         this.start = start
         this.end = end
         this.pvalue = pvalue
-        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
-        this.fragments = [fragment]
-    }
-
-    Location(int start, int end, Double pvalue, Double score, Integer motifNumber) {
-        this.start = start
-        this.end = end
-        this.pvalue = pvalue
-        this.score = score
-        this.motifNumber = motifNumber
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
     }
