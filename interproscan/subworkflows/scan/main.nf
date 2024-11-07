@@ -177,7 +177,7 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("pfam")) {
-        RUN_PFAM(ch_fasta,
+        SEARCH_PFAM(ch_fasta,
             "${datadir}/${appsConfig.pfam.hmm}")
 
         PARSE_PFAM(RUN_PFAM.out,
