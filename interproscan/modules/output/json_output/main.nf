@@ -19,128 +19,127 @@ process JSON_OUTPUT {
 
     exec:
     def jsonSlurper = new JsonSlurper()
-    def jsonOutput = [
-        "interproscan-version": ips6Version,
-        "results": []
-    ]
+    def jsonOutput = [:]
+    jsonOutput["interproscan-version"] = ips6Version
+    jsonOutput["results"] = []
 
     jsonSlurper.parse(seqMatches).each { sequence ->
         def seqMatches = []
-        sequence["matches"].each { modelAccession, match ->
+        sequence["matches"].each { matchId, match ->
             Match matchObj = Match.fromMap(match)
-            String memberDB = matchObj.signature.signatureLibraryRelease.library
+            memberDB = matchObj.signature.signatureLibraryRelease.library
 
-            def matchResult = [
+            matchResult = [
                 "signature": matchObj.signature,
                 "locations": []
             ]
-            matchObj.locations?.each { location ->
-                def locationResult = [
-                    "start": location.start,
-                    "end": location.end,
-                    "representative": location.representative,
-                    "location-fragments": location.fragments
-                ]
-                hmmBounds = HMM_BOUND_PATTERN[location.hmmBounds]
-                switch (memberDB) {
-                    case "cdd":
-                        locationResult["evalue"] = matchObj.evalue
-                        locationResult["score"] = matchObj.score
-                        break
-                    case "hamap":
-                        locationResult["score"] = location.score
-                        locationResult["alignment"] = location.targetSequence ?: "Not available"
-                        break
-                    case "mobidblite":
-                        locationResult["sequence-feature"] = location.sequenceFeature
-                        break
-                    case "panther":
-                        locationResult["hmmStart"] = location.hmmStart
-                        locationResult["hmmEnd"] = location.hmmEnd
-                        locationResult["hmmLength"] = 0
-                        locationResult["hmmBounds"] = hmmBounds
-                        locationResult["envelopeStart"] = location.envelopeStart
-                        locationResult["envelopeEnd"] = location.envelopeEnd
-                        break
-                    case "phobius":
-                        locationResult["score"] = location.score
-                        locationResult["prediction"] = location.prediction
-                        locationResult["topology"] = location.topology
-                        break
-                    case "pirsf":
-                        locationResult["evalue"] = location.evalue
-                        locationResult["score"] = location.score
-                        locationResult["hmmStart"] = location.start
-                        locationResult["hmmEnd"] = location.end
-                        locationResult["hmmLength"] = location.hmmLength
-                        locationResult["hmmBounds"] = hmmBounds
-                        locationResult["envelopeStart"] = location.envelopeStart
-                        locationResult["envelopeEnd"] = location.envelopeEnd
-                        break
-                    case "prints":
-                        locationResult["pvalue"] = location.pvalue
-                        locationResult["score"] = location.score
-                        locationResult["motifNumber"] = location.motifNumber
-                        break
-                    case "prosite_profiles":
-                        locationResult["score"] = location.score
-                        locationResult["alignment"] = location.alignment
-                        break
-                    case "prosite_patterns":
-                        locationResult["cigarAlignment"] = location.cigarAlignment
-                        locationResult["alignment"] = location.alignment
-                        locationResult["level"] = location.level
-                        break
-                    case ["pirsr", "sfld"]:
-                        locationResult["evalue"] = location.evalue
-                        locationResult["score"] = location.score
-                        locationResult["hmmStart"] = location.hmmStart
-                        locationResult["hmmEnd"] = location.hmmEnd
-                        locationResult["hmmLength"] = location.hmmLength
-                        locationResult["envelopeStart"] = location.envelopeStart
-                        locationResult["envelopeEnd"] = location.envelopeEnd
-                        break
-                    case ["signalp", "signalp_euk"]:
-                        locationResult["pvalue"] = location.pvalue
-                        locationResult["cleavageStart"] = signalp.cleavageSiteStart
-                        locationResult["cleavageEnd"] = signalp.cleavageSiteEnd
-                        break
-                    case "smart":
-                        locationResult["evalue"] = location.evalue
-                        locationResult["score"] = location.score
-                        locationResult["hmmStart"] = location.hmmStart
-                        locationResult["hmmEnd"] = location.hmmEnd
-                        locationResult["hmmLength"] = location.hmmLength
-                        locationResult["hmmBounds"] = hmmBounds
-                        break
-                    case "superfamily":
-                        locationResult['evalue'] = location.evalue
-                        locationResult["hmmLength"] = location.hmmLength
-                        break
-                    default:
-                        locationResult["evalue"] = location.evalue
-                        locationResult["score"] = location.score
-                        locationResult["hmmStart"] = location.hmmStart
-                        locationResult["hmmEnd"] = location.hmmEnd
-                        locationResult["hmmLength"] = location.hmmLength
-                        locationResult["hmmBounds"] = hmmBounds
-                        locationResult["envelopeStart"] = location.envelopeStart
-                        locationResult["envelopeEnd"] = location.envelopeEnd
-                }
-                if (memberDB in ["cdd", "pirsr", "sfld"]) {
-                    locationResult["sites"] = location.sites ?: []
-                }
+            if (matchObj.locations) {
+                matchObj.locations.each { location ->
+                    locationResult = [
+                        "start": location.start,
+                        "end": location.end,
+                        "representative": location.representative
+                    ]
+                    hmmBounds = HMM_BOUND_PATTERN[location.hmmBounds]
+                    switch (memberDB) {
+                        case "cdd":
+                            locationResult["evalue"] = matchObj.evalue
+                            locationResult["score"] = matchObj.score
+                            break
+                        case "hamap":
+                            locationResult["score"] = location.score
+                            locationResult["alignment"] = location.targetSequence ?: "Not available"
+                            break
+                        case "mobidblite":
+                            locationResult["sequence-feature"] = location.sequenceFeature
+                            break
+                        case "panther":
+                            locationResult["hmmStart"] = location.hmmStart
+                            locationResult["hmmEnd"] = location.hmmEnd
+                            locationResult["hmmLength"] = 0
+                            locationResult["hmmBounds"] = hmmBounds
+                            locationResult["envelopeStart"] = location.envelopeStart
+                            locationResult["envelopeEnd"] = location.envelopeEnd
+                            break
+                       case "phobius":
+                            locationResult["score"] = location.score
+                            locationResult["prediction"] = location.prediction
+                            locationResult["topology"] = location.topology
+                            break
+                        case "pirsf":
+                            locationResult["evalue"] = location.evalue
+                            locationResult["score"] = location.score
+                            locationResult["hmmStart"] = location.start
+                            locationResult["hmmEnd"] = location.end
+                            locationResult["hmmLength"] = location.hmmLength
+                            locationResult["hmmBounds"] = hmmBounds
+                            locationResult["envelopeStart"] = location.envelopeStart
+                            locationResult["envelopeEnd"] = location.envelopeEnd
+                            break
+                        case "prints":
+                            locationResult["pvalue"] = location.pvalue
+                            locationResult["score"] = location.score
+                            locationResult["motifNumber"] = location.motifNumber
+                            break
+                        case "prosite_profiles":
+                            locationResult["score"] = location.score
+                            locationResult["alignment"] = location.alignment
+                            break
+                        case "prosite_patterns":
+                            locationResult["cigarAlignment"] = location.cigarAlignment
+                            locationResult["alignment"] = location.alignment
+                            locationResult["level"] = location.level
+                            break
+                        case ["pirsr", "sfld"]:
+                            locationResult["evalue"] = location.evalue
+                            locationResult["score"] = location.score
+                            locationResult["hmmStart"] = location.hmmStart
+                            locationResult["hmmEnd"] = location.hmmEnd
+                            locationResult["hmmLength"] = location.hmmLength
+                            locationResult["envelopeStart"] = location.envelopeStart
+                            locationResult["envelopeEnd"] = location.envelopeEnd
+                            break
+                        case ["signalp", "signalp_euk"]:
+                            locationResult["pvalue"] = location.pvalue
+                            locationResult["cleavageStart"] = signalp.cleavageSiteStart
+                            locationResult["cleavageEnd"] = signalp.cleavageSiteEnd
+                            break
+                        case "smart":
+                            locationResult["evalue"] = location.evalue
+                            locationResult["score"] = location.score
+                            locationResult["hmmStart"] = location.hmmStart
+                            locationResult["hmmEnd"] = location.hmmEnd
+                            locationResult["hmmLength"] = location.hmmLength
+                            locationResult["hmmBounds"] = hmmBounds
+                            break
+                        case "superfamily":
+                            locationResult['evalue'] = location.evalue
+                            locationResult["hmmLength"] = location.hmmLength
+                            break
+                        default:
+                            locationResult["evalue"] = location.evalue
+                            locationResult["score"] = location.score
+                            locationResult["hmmStart"] = location.hmmStart
+                            locationResult["hmmEnd"] = location.hmmEnd
+                            locationResult["hmmLength"] = location.hmmLength
+                            locationResult["hmmBounds"] = hmmBounds
+                            locationResult["envelopeStart"] = location.envelopeStart
+                            locationResult["envelopeEnd"] = location.envelopeEnd
+                    }
+                    if (memberDB in ["cdd", "pirsr", "sfld"]) {
+                        locationResult["sites"] = location.sites ?: []
+                    }
+                    locationResult["location-fragments"] = location.fragments
 
-                matchResult["locations"] << locationResult
+                    matchResult["locations"].add(locationResult)
+                }
             }
 
             if (!(memberDB in ["cdd", "coils", "hamap", "mobidblite", "phobius", "prosite_profiles", "prosite_patterns", "prints", "signalp", "signalp_euk"])) {
                 matchResult["evalue"] = matchObj.evalue
                 matchResult["score"] = matchObj.score
             }
-
             matchResult["model-ac"] = matchObj.modelAccession.split("\\.")[0]
-
             if (memberDB == "sfld") {
                 matchResult["scope"] = null
             } else if (memberDB == "panther") {
@@ -158,15 +157,15 @@ process JSON_OUTPUT {
             }
 
             if (memberDB in ['cathfunfam', 'cathgene3d', 'panther']) {
-                (name, description) = [matchObj.signature.description, matchObj.signature.name] // name and desc are swapped
+                name = matchObj.signature.description
+                description = matchObj.signature.name
                 matchObj.signature.name = name
                 matchObj.signature.description = description
             }
-
-            seqMatches << matchResult
+            seqMatches.add(matchResult)
         }
-
-        jsonOutput["results"] << ["matches": seqMatches]
+        sequence["matches"] = seqMatches
+        jsonOutput["results"].add(sequence)
     }
 
     def outputFilePath = "${outputPath}.ips6.json"
