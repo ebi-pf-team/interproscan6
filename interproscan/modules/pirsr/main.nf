@@ -38,11 +38,14 @@ process PARSE_PIRSR {
     JsonSlurper jsonSlurper = new JsonSlurper()
     def rules = jsonSlurper.parse(new File(rulesPath.toString()))
 
-    hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
+    def validMatches = [:]
+    hmmerMatches.each { seqId, matches ->
+        def filteredSeqMatches = [:]
         matches.each { modelAccession, match ->
             List<Location> sortedLocations = match.locations.sort { loc ->
                 [loc.evalue, -loc.score]  // sorting by evalue ASC, score DESC
             }
+            List<Location> selectedLocations = []
             sortedLocations.each { location ->
                 if (!location.targetAlignment || !location.queryAlignment) {
                     return
@@ -110,18 +113,21 @@ process PARSE_PIRSR {
                 }
                 if (!ruleSites.isEmpty()) {
                     location.sites = ruleSites
+                    selectedLocations << location
                 }
             }
-
-            if (sortedLocations) {
-                match.score = sortedLocations[0].score
-                match.evalue = sortedLocations[0].evalue
+            if (!selectedLocations.isEmpty()) {
+                match.score = selectedLocations[0].score
+                match.evalue = selectedLocations[0].evalue
+                match.locations = selectedLocations
+                filteredSeqMatches[modelAccession] = match
             }
         }
-        return [(seqId): matches]
+        if (!filteredSeqMatches.isEmpty()) {
+            validMatches[seqId] = filteredSeqMatches
+        }
     }
-
-    def json = JsonOutput.toJson(hmmerMatches)
+    def json = JsonOutput.toJson(validMatches)
     new File(outputFilePath.toString()).write(json)
 }
 
