@@ -98,7 +98,7 @@ process PARSE_PIRSR {
                                 }
                             }
                             if (residueStart != 0 && residueEnd != 0) {
-                                SiteLocation siteLocation = new SiteLocation(pos.condition, residueStart, residueEnd)
+                                SiteLocation siteLocation = new SiteLocation(targetSeq, residueStart, residueEnd)
                                 positionsParsed << [new Site(
                                     pos.desc,
                                     pos.group as int,
