@@ -63,14 +63,17 @@ process PARSE_PIRSR {
                         positions.each { pos ->
                             String condition = pos.condition.replaceAll(/[-()]/) { m ->
                                 switch (m[0]) {
-                                    case '-': ''; case '(': '{'; case ')': '}'
+                                    case '-': return ''
+                                    case '(': return '{'
+                                    case ')': return '}'
                                 }
                             }.replace('x', '.')
-                            String querySeq = location.targetAlignment.replaceAll('-', '')
 
-                            String targetSeq = ''
+                            String querySeq = location.targetAlignment.replaceAll('-', '')
                             if (pos.hmmStart < map.size() && pos.hmmEnd < map.size()) {
-                                targetSeq = querySeq[map[pos.hmmStart]..map[pos.hmmEnd]]
+                                targetSeq = querySeq[map[pos.hmmStart]..<map[pos.hmmEnd] + 1]
+                            } else {
+                                targetSeq = ''
                             }
 
                             if (targetSeq ==~ condition) {
@@ -106,6 +109,7 @@ process PARSE_PIRSR {
                                 )]
                             }
                         }
+
                         if (passCount == positions.size()) {
                             ruleSites.addAll(positionsParsed)
                         }
@@ -133,11 +137,18 @@ process PARSE_PIRSR {
 
 def mapHMMToSeq(int hmmStart, String querySeq, String targetSeq) {
     int seqPos = 0
-    List<Integer> map = (0..<hmmStart).collect { -1 }
-    querySeq.eachWithIndex { character, i ->
-        map[hmmStart] = seqPos
-        hmmStart += (character != '.') ? 1 : 0
-        seqPos += (targetSeq[i] != '-') ? 1 : 0
+    def map = [0]
+    for (int i = 1; i <= hmmStart; i++) {
+        map << -1
+    }
+    for (int i = 0; i < querySeq.length(); i++) {
+        map = map[0..hmmStart - 1] + [seqPos]
+        if (querySeq[i] != '.') {
+            hmmStart += 1
+        }
+        if (targetSeq[i] != '-') {
+            seqPos += 1
+        }
     }
     return map
 }
