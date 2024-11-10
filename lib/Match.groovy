@@ -356,6 +356,8 @@ class Site implements Serializable {
     List<SiteLocation> siteLocations = []
     String label = null
     String group = null
+    int hmmStart
+    int hmmEnd
     private int start = -1
     private int end = -1
 
@@ -384,8 +386,8 @@ class Site implements Serializable {
         List<SiteLocation> siteLocations) {
         this.description = description
         this.group = group
-        this.end = end
-        this.start = start
+        this.hmmEnd = hmmEnd
+        this.hmmStart = hmmStart
         this.label = label
         this.numLocations = siteLocations.size()
         this.siteLocations = siteLocations
