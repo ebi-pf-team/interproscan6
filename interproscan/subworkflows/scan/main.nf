@@ -10,6 +10,7 @@ include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER   
 include { SEARCH_PFAM; PARSE_PFAM                                                 } from  "../../modules/pfam"
 include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                           } from  "../../modules/phobius"
 include { RUN_PIRSR; PARSE_PIRSR                                                  } from  "../../modules/pirsr"
+include { RUN_PIRSF; PARSE_PIRSF                                                  } from  "../../modules/pirsf"
 include { RUN_PRINTS; PARSE_PRINTS                                                } from  "../../modules/prints"
 include { RUN_PFSCAN ; PARSE_PFSCAN                                               } from  "../../modules/prosite/patterns"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
@@ -190,7 +191,13 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("pirsf")) {
-        // TODO
+        RUN_PIRSF(ch_fasta,
+            "${datadir}/${appsConfig.pirsf.hmm}"
+        )
+        PARSE_PIRSF(RUN_PIRSF.out,
+            "${datadir}/${appsConfig.pirsf.postprocess.data}")
+
+        results = results.mix(PARSE_PIRSF.out)
     }
 
     if (applications.contains("pirsr")) {
