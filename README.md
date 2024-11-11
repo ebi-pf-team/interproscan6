@@ -828,7 +828,7 @@ If you use `InterProScan` or `InterPro` in your work, please cite the following 
 
 You can find more information about the InterPro consortium (including the member databases) on the [InterPro website](https://www.ebi.ac.uk/interpro/about/consortium/).
 
-# Trouble shooting
+# Troubleshooting
 
 ## Permission denied
 
@@ -849,7 +849,7 @@ Try running Nextflow with root privileges:
 sudo nextflow run ebi-pf-team/interproscan6 --input <path to fasta file> 
 ```
 
-Also try providing root privileges to docker within Nextflow, by changing the the `runOptions` key in `nextflow.config`:
+Also try providing root privileges to docker within Nextflow, by changing the `runOptions` key in `./utilities/profiles/docker.config` (you will need to be working with a [local installation of `InterProScan`](#installing-from-source) for this fix):
 
 ```
  docker {
@@ -861,7 +861,7 @@ Also try providing root privileges to docker within Nextflow, by changing the th
 
 ## File not found
 
-If you recieve a file not found error:
+If you receive a file not found error:
 
 ```bash
 FileNotFoundError: [Errno 2] No such file or directory
@@ -875,9 +875,9 @@ Try running docker with root privileges:
 sudo docker build -t interproscan6 .
 ```
 
-Check the docker installtion is configured correctly, with all necessary privileges. [StackOverflow](https://stackoverflow.com/questions/48957195/how-to-fix-docker-got-permission-denied-issue)
+Check the docker installation is configured correctly, with all necessary privileges. [StackOverflow](https://stackoverflow.com/questions/48957195/how-to-fix-docker-got-permission-denied-issue)
 
-For example, check root privileges have been provided to the docker socket
+For example, check root privileges have been provided to the docker socket, although be careful of the security implications of this:
 
 ```bash
 sudo chmod 666 /var/run/docker.sock
@@ -885,7 +885,7 @@ sudo chmod 666 /var/run/docker.sock
 
 ## Segmentation fault
 
-If you a recieve an error such as the following:
+If you a receive an error such as the following:
 
 ```bash
 Command error:
@@ -899,7 +899,7 @@ directory location in the project dir.
 
 ## Segmentation fault
 
-If you a recieve an error such as the following:
+If you a receive an error such as the following:
 ```bash
 Command error:
   .command.sh: line 2:     7 Segmentation fault      (core dumped) /opt/hmmer3/bin/hmmsearch --cut_ga --cpu 1 -o 7.0._.antifam._.out AntiFam.hmm mini_test.1.fasta
@@ -921,12 +921,12 @@ Command error:
 
 This is most likely a file permission error.
 
-A potential fix is to provide root privilges to the docker contains run by Nextflow in `nextflow.config`:
+A potential fix is to provide root privileges to the docker contains run by Nextflow in `./utilities/profiles/docker.config` (you will need to be working with a [local installation of `InterProScan`](#installing-from-source) for this fix):
 
 ```groovy
-process.container = 'interproscan6'
 docker {
     enabled = true
-    runOptions = '--user root'
+    mountFlags = 'Z'
+    runOptions = '--user root'  <---- add this line
 }
 ```
