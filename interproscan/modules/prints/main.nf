@@ -139,9 +139,9 @@ process PARSE_PRINTS {
     Map<String, Map<String, Match>> matches = [:]
     rawMatches.each { proteinAccession, proteinMatches ->
         List<Prints> sortedMatches = sortMatches(proteinMatches)
-        List<Prints> filteredMatches = [] as List<Prints>
+        List<Prints> filteredMatches = []
         String currentModelAcc = null
-        List<Prints> motifMatchesForCurrentModel = [] as List<Prints>
+        List<Prints> motifMatchesForCurrentModel = []
         boolean currentMatchesPass = true
         boolean passed = false
         HierarchyEntry currentHierarchyEntry = null
@@ -184,10 +184,10 @@ process PARSE_PRINTS {
 
         // add the filteredMatches to matches
         if (!filteredMatches.isEmpty()) {
-            matches.computeIfAbsent(proteinAccession, { [:] })
+            def finalMatches = matches.computeIfAbsent(proteinAccession, { [:] })
             for (Prints filteredMatch: filteredMatches) {
                 // the modelName has been used up to this point, but we need to convert to the model ID
-                matches[proteinAccession].computeIfAbsent(
+                Match match = finalMatches.computeIfAbsent(
                     filteredMatch.modelId,
                     { new Match(filteredMatch.modelId, filteredMatch.evalue, filteredMatch.graphScan) }
                 )
@@ -198,7 +198,7 @@ process PARSE_PRINTS {
                     filteredMatch.score,
                     filteredMatch.motifNumber
                 )
-                matches[proteinAccession][filteredMatch.modelId].addLocation(location)
+                match.addLocation(location)
             }
         }
     }
