@@ -257,7 +257,7 @@ workflow SCAN_SEQUENCES {
 
         PARSE_SIGNALP(
             RUN_SIGNALP.out,
-            "${datadir}/${appsConfig.signalp.data.threshold}".split('/')[-1].toFloat()
+            "${datadir}/${appsConfig.signalp.threshold}".split('/')[-1].toFloat()
         )
 
         results = results.mix(PARSE_SIGNALP.out)
