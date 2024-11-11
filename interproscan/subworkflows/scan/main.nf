@@ -7,6 +7,7 @@ include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP               
 include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                        } from  "../../modules/mobidblite"
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
+include { SEARCH_PFAM; PARSE_PFAM                                                 } from  "../../modules/pfam"
 include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                           } from  "../../modules/phobius"
 include { RUN_PRINTS; PARSE_PRINTS                                                } from  "../../modules/prints"
 include { RUN_PFSCAN ; PARSE_PFSCAN                                               } from  "../../modules/prosite/patterns"
@@ -176,7 +177,15 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("pfam")) {
-        // TODO
+        SEARCH_PFAM(ch_fasta,
+            "${datadir}/${appsConfig.pfam.hmm}")
+
+        PARSE_PFAM(SEARCH_PFAM.out,
+            "${datadir}/${appsConfig.pfam.seed}",
+            "${datadir}/${appsConfig.pfam.clan}",
+            "${datadir}/${appsConfig.pfam.dat}"
+        )
+        results = results.mix(PARSE_PFAM.out)
     }
 
     if (applications.contains("pirsf")) {
