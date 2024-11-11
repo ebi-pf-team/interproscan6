@@ -72,6 +72,7 @@ process PARSE_PIRSR {
                             String querySeq = location.targetAlignment.replaceAll('-', '')
                             if (pos.hmmStart < map.size() && pos.hmmEnd < map.size()) {
                                 targetSeq = querySeq[map[pos.hmmStart]..<map[pos.hmmEnd] + 1]
+                                residue = location.targetAlignment[map[pos.hmmStart]..<map[pos.hmmEnd] + 1]
                             } else {
                                 targetSeq = ''
                             }
@@ -98,15 +99,15 @@ process PARSE_PIRSR {
                                 }
                             }
                             if (residueStart != 0 && residueEnd != 0) {
-                                SiteLocation siteLocation = new SiteLocation(targetSeq, residueStart, residueEnd)
-                                positionsParsed << [new Site(
+                                SiteLocation siteLocation = new SiteLocation(residue, residueStart, residueEnd)
+                                positionsParsed << new Site(
                                     pos.desc,
                                     pos.group as int,
                                     pos.hmmEnd,
                                     pos.hmmStart,
                                     pos.label,
                                     [siteLocation]
-                                )]
+                                )
                             }
                         }
 
