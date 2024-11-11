@@ -208,7 +208,7 @@ process PARSE_PRINTS {
     new File(outputFilePath.toString()).write(json)
 }
 
-def sortMatches(List<Prints> matches) {
+List<Prints> sortMatches(List<Prints> matches) {
     // This comparator is CRITICAL to the working of PRINTS post-processing
     return matches.sort { matchA, matchB ->
         int evalueComparison = matchA.evalue <=> matchB.evalue
@@ -227,7 +227,7 @@ def sortMatches(List<Prints> matches) {
     }
 }
 
-def selectMatches(  // check if the matches should be selected. Returns a boolean
+boolean selectMatches(  // check if the matches should be selected. Returns a boolean
         List<Match> motifMatchesForCurrentModel,
         String modelName,
         HierarchyEntry hierarchy,
