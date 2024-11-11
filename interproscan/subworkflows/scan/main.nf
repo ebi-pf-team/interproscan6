@@ -8,12 +8,12 @@ include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                      
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
 include { SEARCH_PFAM; PARSE_PFAM                                                 } from  "../../modules/pfam"
-include { RUN_SIGNALP; PARSE_SIGNALP                                              } from  "../../modules/signalp"
 include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                           } from  "../../modules/phobius"
+include { RUN_PRINTS; PARSE_PRINTS                                                } from  "../../modules/prints"
 include { RUN_PFSCAN ; PARSE_PFSCAN                                               } from  "../../modules/prosite/patterns"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
+include { RUN_SIGNALP; PARSE_SIGNALP                                              } from  "../../modules/signalp"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
-
 
 workflow SCAN_SEQUENCES {
     take:
@@ -197,7 +197,15 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("prints")) {
-        // TODO
+        RUN_PRINTS(
+            ch_fasta,
+            "${datadir}/${appsConfig.prints.pval}"
+        )
+        PARSE_PRINTS(
+            RUN_PRINTS.out,
+            "${datadir}/${appsConfig.prints.hierarchy}"
+        )
+        results = results.mix(PARSE_PRINTS.out)
     }
 
     if (applications.contains("prositepatterns")) {
