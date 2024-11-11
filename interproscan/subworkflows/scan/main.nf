@@ -190,11 +190,11 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("prints")) {
         RUN_PRINTS(
             ch_fasta,
-            "${datadir}/${appsConfig.prints.data.pval}"
+            "${datadir}/${appsConfig.prints.pval}"
         )
         PARSE_PRINTS(
             RUN_PRINTS.out,
-            "${datadir}/${appsConfig.prints.data.hierarchy}"
+            "${datadir}/${appsConfig.prints.hierarchy}"
         )
         results = results.mix(PARSE_PRINTS.out)
     }
