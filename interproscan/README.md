@@ -2,6 +2,10 @@
 
 This `interproscan` dir contains all binaries, modules, subworkflows and scripts that are developed and maintained by EMBL-EBI.
 
+`bin` - Contains all binary files that are maintained and compiled by EMBL-EBI.
+`modules` - Contains all Nextflow processes (`process`).
+`subworkflows` - Contains all Nextflow workflows (`workflow`).
+
 Copyright EMBL-EBI. 2024.
 
 Interproscan6 is licensed under the Apache License 2.0.  
