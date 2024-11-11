@@ -117,8 +117,9 @@ process PARSE_PRINTS {
                             motifNumber,
                             motifCount
                     )
-                    rawMatches.computeIfAbsent(queryAccession, {[]})
-                    rawMatches[queryAccession].add(matchLocation)
+                    rawMatches
+                        .computeIfAbsent(queryAccession, {[]})
+                        .add(matchLocation)
                 }
             }
         }
