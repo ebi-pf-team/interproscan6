@@ -23,17 +23,30 @@ process JSON_OUTPUT {
     jsonOutput["interproscan-version"] = ips6Version
     jsonOutput["results"] = []
 
+    def md5Results = [:]
     jsonSlurper.parse(seqMatches).each { sequence ->
-        def seqMatches = []
         sequence["matches"].each { matchId, match ->
             Match matchObj = Match.fromMap(match)
             memberDB = matchObj.signature.signatureLibraryRelease.library
 
-            matchResult = [
-                "signature": matchObj.signature,
-                "locations": []
+            if (!md5Results.containsKey(sequence.md5)) {
+                md5Results[sequence.md5] = [
+                    sequence: sequence.sequence,
+                    md5: sequence.md5,
+                    matches: [
+                        "signature": matchObj.signature,
+                        "locations": []
+                    ],
+                    xref: []
+                ]
+            }
+            md5Results[sequence.md5].xref << [
+                name: sequence.description,
+                id: sequence.id
             ]
+
             if (matchObj.locations) {
+                def distinctLocations = []
                 matchObj.locations.each { location ->
                     locationResult = [
                         "start": location.start,
@@ -48,7 +61,7 @@ process JSON_OUTPUT {
                             break
                         case "hamap":
                             locationResult["score"] = location.score
-                            locationResult["alignment"] = location.targetSequence ?: "Not available"
+                            locationResult["alignment"] = location.targetAlignment ?: "Not available"
                             break
                         case "mobidblite":
                             locationResult["sequence-feature"] = location.sequenceFeature
@@ -130,8 +143,13 @@ process JSON_OUTPUT {
                         locationResult["sites"] = location.sites ?: []
                     }
                     locationResult["location-fragments"] = location.fragments
-
-                    matchResult["locations"].add(locationResult)
+                    allLocations << locationResult
+                }
+                allLocations.each { loc ->
+                    def locTuple = loc.collectEntries { [it.key, it.value] }
+                    if (!distinctLocations.any { existingLoc -> existingLoc.collectEntries() == locTuple }) {
+                        matchResult["locations"] << loc
+                    }
                 }
             }
 
@@ -151,7 +169,7 @@ process JSON_OUTPUT {
                 matchResult["graftPoint"] = matchObj.treegrafter.graftPoint
             } else if (memberDB == "prints") {
                 matchResult["evalue"] = matchObj.evalue
-                matchResult["graphscan"] = matchObj.graphscan
+                matchResult["graphscan"] = matchObj.graphScan
             } else if (memberDB in ["signalp", "signalp_euk"]) {
                 matchResult["orgType"] = matchObj.orgType
             }
@@ -162,10 +180,9 @@ process JSON_OUTPUT {
                 matchObj.signature.name = name
                 matchObj.signature.description = description
             }
-            seqMatches.add(matchResult)
+            md5Results[sequence.md5][matches].add(matchResult)
         }
-        sequence["matches"] = seqMatches
-        jsonOutput["results"].add(sequence)
+        jsonOutput["results"].add(md5Results)
     }
 
     def outputFilePath = "${outputPath}.ips6.json"
