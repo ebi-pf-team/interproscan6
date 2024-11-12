@@ -25,6 +25,13 @@ workflow INIT_PIPELINE {
         exit 1
     }
 
+    // SignalP mode validation
+    (signalpMode, error) = InterProScan.validateSignalpMode(params.signalpMode)
+    if (!signalpMode) {
+        log.error error
+        exit 1
+    }
+
     // Sequences validation
     (error, numSequences) = FastaFile.validate(params.input, params.nucleic, params.appsConfig, apps)
     if (error) {
@@ -36,8 +43,9 @@ workflow INIT_PIPELINE {
     }
 
     emit:
-    fasta      // str: path to input fasta file
-    datadir    // str: path to data directory
-    apps       // list: list of application to
-    outdir     // str: path to output directory
+    fasta        // str: path to input fasta file
+    datadir      // str: path to data directory
+    apps         // list: list of application to
+    outdir       // str: path to output directory
+    signalpMode  // str: Models to be used with SignalP
 }
