@@ -1,13 +1,15 @@
 nextflow.enable.dsl=2
 
-include { AGGREGATE_SEQS_MATCHES        } from "./interproscan/modules/output/aggregate_results"
-include { AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/output/aggregate_results"
 include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
 include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
+
 include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
 include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { XREFS                         } from "./interproscan/modules/xrefs"
+include { AGGREGATE_SEQS_MATCHES,
+          AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_matches"
+include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
 
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
@@ -63,7 +65,6 @@ workflow {
     // This is to concat MLS with scan sequences result
     // all_results = parsed_matches.concat(parsed_analysis)
 
-
     /* XREFS:
     Add signature and entry desc and names
     Add PAINT annotations (if panther is enabled)
@@ -91,15 +92,12 @@ workflow {
     Channel.from(params.formats.toLowerCase().split(','))
     .set { ch_format }
 
-//     WRITE_RESULTS(
-//         input_file.getName(),
-//         AGGREGATE_PARSED_SEQS.out,
-//         REPRESENTATIVE_DOMAINS.out.collect(),
-//         ch_format,
-//         params.outdir,
-//         params.ipscn_version,
-//         params.nucleic
-//     )
+    def formats = params.formats.toUpperCase().split(',') as Set
+    def fileName = params.input.split('/').last()
+    def outFileName = "${params.outdir}/${fileName}"
+    if (formats.contains("TSV")) {
+        WRITE_TSV_OUTPUT(AGGREGATE_RESULTS.out, "${outFileName}")
+    }
 }
 
 // workflow.onComplete = {
