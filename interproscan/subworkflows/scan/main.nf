@@ -60,7 +60,8 @@ workflow SCAN_SEQUENCES {
         ASSIGN_CATH(
             RESOLVE_GENE3D.out,
             "${datadir}/${appsConfig.cathgene3d.model2sfs}",
-            "${datadir}/${appsConfig.cathgene3d.disc_regs}")
+            "${datadir}/${appsConfig.cathgene3d.disc_regs}"
+        )
 
         // Join results and parse them
         ch_cathgene3d = ch_gene3d.join(ASSIGN_CATH.out)
@@ -72,8 +73,10 @@ workflow SCAN_SEQUENCES {
 
         if (applications.contains("cathfunfam")) {
             // Find unique CATH superfamilies with at least one hit
-            PREPARE_FUNFAM(PARSE_CATHGENE3D.out,
-                "${datadir}/${appsConfig.cathfunfam.dir}")
+            PREPARE_FUNFAM(
+                PARSE_CATHGENE3D.out,
+                "${datadir}/${appsConfig.cathfunfam.dir}"
+            )
 
             /*
                 Join input fasta file with superfamilies.
@@ -89,8 +92,10 @@ workflow SCAN_SEQUENCES {
                 .set { ch_funfams }
 
             // Search FunFam profiles
-            SEARCH_FUNFAM(ch_funfams,
-                "${datadir}/${appsConfig.cathfunfam.dir}")
+            SEARCH_FUNFAM(
+                ch_funfams,
+                "${datadir}/${appsConfig.cathfunfam.dir}"
+            )
 
             // Select best domain matches
             RESOLVE_FUNFAM(SEARCH_FUNFAM.out)
@@ -105,10 +110,13 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("cdd")) {
         RUN_RPSBLAST(
             ch_fasta,
-            "${datadir}/${appsConfig.cdd.rpsblast_db}")
+            "${datadir}/${appsConfig.cdd.rpsblast_db}"
+        )
+
         RUN_RPSPROC(
             RUN_RPSBLAST.out,
-            "${datadir}/${appsConfig.cdd.rpsproc_db}")
+            "${datadir}/${appsConfig.cdd.rpsproc_db}"
+        )
 
         PARSE_RPSPROC(RUN_RPSPROC.out)
         results = results.mix(PARSE_RPSPROC.out)
@@ -121,14 +129,20 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("hamap")) {
-        PREPROCESS_HAMAP(ch_fasta,
-            "${datadir}/${appsConfig.hamap.hmm}")
+        PREPROCESS_HAMAP(
+            ch_fasta,
+            "${datadir}/${appsConfig.hamap.hmm}"
+        )
 
-        PREPARE_HAMAP(PREPROCESS_HAMAP.out.join(ch_json),
-            "${datadir}/${appsConfig.hamap.dir}")
+        PREPARE_HAMAP(
+            PREPROCESS_HAMAP.out.join(ch_json),
+            "${datadir}/${appsConfig.hamap.dir}"
+        )
 
-        RUN_HAMAP(PREPARE_HAMAP.out,
-            "${datadir}/${appsConfig.hamap.dir}")
+        RUN_HAMAP(
+            PREPARE_HAMAP.out,
+            "${datadir}/${appsConfig.hamap.dir}"
+        )
 
         PARSE_HAMAP(RUN_HAMAP.out)
         results = results.mix(PARSE_HAMAP.out)
@@ -136,6 +150,7 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("mobidblite")) {
         RUN_MOBIDBLITE(ch_fasta)
+
         PARSE_MOBIDBLITE(RUN_MOBIDBLITE.out)
         results = results.mix(PARSE_MOBIDBLITE.out)
     }
@@ -153,36 +168,44 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("panther")) {
         SEARCH_PANTHER(
             ch_fasta,
-            "${datadir}/${appsConfig.panther.hmm}")
+            "${datadir}/${appsConfig.panther.hmm}"
+        )
         ch_panther = SEARCH_PANTHER.out
 
-        PREPARE_TREEGRAFTER(ch_panther,
-            "${datadir}/${appsConfig.panther.msf}")
+        PREPARE_TREEGRAFTER(
+            ch_panther,
+            "${datadir}/${appsConfig.panther.msf}"
+        )
 
-        RUN_TREEGRAFTER(PREPARE_TREEGRAFTER.out.fasta,
-            "${datadir}/${appsConfig.panther.msf}")
+        RUN_TREEGRAFTER(
+            PREPARE_TREEGRAFTER.out.fasta,
+            "${datadir}/${appsConfig.panther.msf}"
+        )
 
         PARSE_PANTHER(
             PREPARE_TREEGRAFTER.out.json.join(RUN_TREEGRAFTER.out)
         )
-
         results = results.mix(PARSE_PANTHER.out)
     }
 
     if (applications.contains("phobius")) {
         SEARCH_PHOBIUS(
             ch_fasta,
-            appsConfig.phobius.dir)
+            appsConfig.phobius.dir
+        )
 
         PARSE_PHOBIUS(SEARCH_PHOBIUS.out)
         results = results.mix(PARSE_PHOBIUS.out)
     }
 
     if (applications.contains("pfam")) {
-        SEARCH_PFAM(ch_fasta,
-            "${datadir}/${appsConfig.pfam.hmm}")
+        SEARCH_PFAM(
+            ch_fasta,
+            "${datadir}/${appsConfig.pfam.hmm}"
+        )
 
-        PARSE_PFAM(SEARCH_PFAM.out,
+        PARSE_PFAM(
+            SEARCH_PFAM.out,
             "${datadir}/${appsConfig.pfam.seed}",
             "${datadir}/${appsConfig.pfam.clan}",
             "${datadir}/${appsConfig.pfam.dat}"
@@ -215,6 +238,7 @@ workflow SCAN_SEQUENCES {
             ch_fasta,
             "${datadir}/${appsConfig.prints.pval}"
         )
+
         PARSE_PRINTS(
             RUN_PRINTS.out,
             "${datadir}/${appsConfig.prints.hierarchy}"
@@ -228,8 +252,8 @@ workflow SCAN_SEQUENCES {
             "${datadir}/${appsConfig.prositepatterns.data}",
             "${datadir}/${appsConfig.prositepatterns.evaluator}"
         )
-        PARSE_PFSCAN(RUN_PFSCAN.out)
 
+        PARSE_PFSCAN(RUN_PFSCAN.out)
         results = results.mix(PARSE_PFSCAN.out)
     }
 
@@ -242,26 +266,32 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("smart")) {
-        SEARCH_SMART(ch_fasta,
-            "${datadir}/${appsConfig.smart.hmmbin}")
+        SEARCH_SMART(
+            ch_fasta,
+            "${datadir}/${appsConfig.smart.hmmbin}"
+        )
 
-        PARSE_SMART(SEARCH_SMART.out.join(ch_json),
-            "${datadir}/${appsConfig.smart.hmm}")
-
+        PARSE_SMART(
+            SEARCH_SMART.out.join(ch_json),
+            "${datadir}/${appsConfig.smart.hmm}"
+        )
         results = results.mix(PARSE_SMART.out)
     }
 
     if (applications.contains("superfamily")) {
-        SEARCH_SUPERFAMILY(ch_fasta,
+        SEARCH_SUPERFAMILY(
+            ch_fasta,
             "${datadir}/${appsConfig.superfamily.hmm}",
             "${datadir}/${appsConfig.superfamily.selfhits}",
             "${datadir}/${appsConfig.superfamily.cla}",
             "${datadir}/${appsConfig.superfamily.model}",
-            "${datadir}/${appsConfig.superfamily.pdbj95d}")
+            "${datadir}/${appsConfig.superfamily.pdbj95d}"
+        )
 
-        PARSE_SUPERFAMILY(SEARCH_SUPERFAMILY.out,
-            "${datadir}/${appsConfig.superfamily.model}")
-
+        PARSE_SUPERFAMILY(
+            SEARCH_SUPERFAMILY.out,
+            "${datadir}/${appsConfig.superfamily.model}"
+        )
         results = results.mix(PARSE_SUPERFAMILY.out)
     }
 
@@ -271,9 +301,8 @@ workflow SCAN_SEQUENCES {
 
         PARSE_SIGNALP(
             RUN_SIGNALP.out,
-            "${datadir}/${appsConfig.signalp.data.threshold}".split('/')[-1].toFloat()
+            "${datadir}/${appsConfig.signalp.threshold}".split('/')[-1].toFloat()
         )
-
         results = results.mix(PARSE_SIGNALP.out)
     }
 

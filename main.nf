@@ -46,14 +46,6 @@ workflow {
         ch_seqs = PREPARE_PROTEIN_SEQUENCES(ch_fasta)
     }
 
-    // ch_seqs
-    //     .map { index, fasta, json -> tuple( index, fasta ) }
-    //     .set { ch_fasta }
-
-    // ch_seqs
-    //     .map { index, fasta, json -> json }
-    //     .set { ch_json }
-
     // TODO: add new match lookup
 
     SCAN_SEQUENCES(
@@ -63,47 +55,6 @@ workflow {
         data_dir,
         signalpMode
     )
-
-//     SCAN_SEQUENCES.out.view()
-
-
-    // disable_precalc = params.disable_precalc
-    // sequences_to_analyse = null
-    // parsed_matches = Channel.empty()
-    // if (!disable_precalc) {
-    //     log.info "Using precalculated match lookup service"
-    //     SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications, false)  // final: bool to indicate not a unit test
-    //     sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
-    //     parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
-    // }
-
-    // if (parsed_matches.collect() == null) {
-    //         // cases in which the lookup check ran successfully but lookup matches not
-    //         disable_precalc = true
-    //         log.info "ERROR: unable to connect to match lookup service. Max retries reached. Running analysis locally..."
-    // }
-
-    // analysis_result = Channel.empty()
-    // if (disable_precalc || sequences_to_analyse) {
-    //     log.info "Running sequence analysis"
-    //     if (sequences_to_analyse && !disable_precalc) {
-    //         fasta_to_runner = sequences_to_analyse
-    //     }
-    //     else {
-    //         if (params.nucleic) {
-    //             fasta_to_runner = orfs_fasta
-    //         }
-    //         else {
-    //             fasta_to_runner = ch_fasta
-    //         }
-    //     }
-    //     parsed_analysis = SEQUENCE_ANALYSIS(
-    //         fasta_to_runner,
-    //         applications,
-    //         dataDirPath,
-    //         params.signalp_mode
-    //     )
-    // }
 
     // AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
 
