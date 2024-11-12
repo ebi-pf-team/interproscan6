@@ -35,7 +35,7 @@ process AGGREGATE_SEQS_MATCHES {
     new File(outputFilePath.toString()).write(json)
 }
 
-process AGGREGATE_RESULTS {
+process AGGREGATE_ALL_MATCHES {
     input:
     val seqMatches
 
