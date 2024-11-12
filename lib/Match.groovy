@@ -16,10 +16,16 @@ class Match implements Serializable {
     SignalP signalp = null
 
     // PRINTS
-    // String graphscan
+    String graphScan = null
 
     Match(String modelAccession) {
         this.modelAccession = modelAccession
+    }
+
+    Match(String modelAccession, Double evalue, String graphScan) {
+        this.modelAccession = modelAccession
+        this.evalue = evalue
+        this.graphScan = graphScan
     }
 
     Match(String modelAccession, Double evalue, Double score) {
@@ -66,6 +72,27 @@ class Match implements Serializable {
         Location location = this.locations[locationIndex]
         location.queryAlignment = queryAlignment
         location.targetAlignment = targetAlignment
+    }
+
+    @Override
+    public int hashCode() {
+        int x = Objects.hash(modelAccession, sequenceLength, evalue, score, bias, signature, locations)
+        return x
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true
+        if (obj == null || getClass() != obj.getClass()) return false
+        return (
+            modelAccession == obj.modelAccession &&
+            sequenceLength == obj.sequenceLength &&
+            evalue == obj.evalue &&
+            score == obj.score &&
+            bias == obj.bias &&
+            signature == obj.signature &&
+            locations == obj.locations
+        )
     }
 }
 
@@ -198,16 +225,14 @@ class Location implements Serializable {
     String queryAlignment
     String targetAlignment
     String sequenceFeature
+    Double pvalue
+    Integer motifNumber
     String level
     String cigarAlignment
     List<LocationFragment> fragments = []
     List<Site> sites = []
     boolean representative = false
     boolean included = true  // for HMMER3 matches (inclusion threshold)
-    Float pvalue = null // SignalP
-
-    // pvalue
-    // motifNumber
 
     Location(int start,
              int end,
@@ -261,6 +286,28 @@ class Location implements Serializable {
         this.fragments = fragments
     }
 
+    Location(int start,
+             int end,
+             Integer hmmStart,
+             Integer hmmEnd,
+             Integer envelopeStart,
+             Integer envelopeEnd,
+             Double evalue,
+             Double score,
+             Double bias,
+             List<LocationFragment> fragments) { // Used for SFLD
+        this.start = start
+        this.end = end
+        this.hmmStart = hmmStart
+        this.hmmEnd = hmmEnd
+        this.envelopeStart = envelopeStart
+        this.envelopeEnd = envelopeEnd
+        this.evalue = evalue
+        this.score = score
+        this.bias = bias
+        this.fragments = fragments
+    }
+
     Location(int start, int end, String sequenceFeature = null) { // Used for CDD, Coils, MobiDB, Phobius
         this.start = start
         this.end = end
@@ -268,14 +315,24 @@ class Location implements Serializable {
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
     }
-
-    Location(int start, int end, Double score, String targetAlignment) { // Used for Hamap, PrositeProfiles
+  
+     Location(int start, int end, Double score, String targetAlignment) { // Used for Hamap, PrositeProfiles
         this.start = start
         this.end = end
         this.score = score
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
         this.targetAlignment = targetAlignment
+    }
+
+    Location(int start, int end, Double pvalue, Double score, Integer motifNumber) { // Used for PRINTS
+        this.start = start
+        this.end = end
+        this.pvalue = pvalue
+        this.score = score
+        this.motifNumber = motifNumber
+        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
+        this.fragments = [fragment]
     }
 
     Location(int start, int end, Double evalue, List<LocationFragment> fragments) { // Used for Superfamily
@@ -332,6 +389,59 @@ class Location implements Serializable {
         loc.cigarAlignment = data.cigarAlignment
         return loc
     }
+      
+    @Override
+    public int hashCode() {
+        return Objects.hash(start, end, hmmStart, hmmEnd, hmmLength, hmmBounds, 
+                            envelopeStart, envelopeEnd, evalue, score, bias, 
+                            queryAlignment, targetAlignment, fragments, sites)
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true
+        if (obj == null || getClass() != obj.getClass()) return false
+        return (
+            start == obj.start &&
+            end == obj.end &&
+            hmmStart == obj.hmmStart &&
+            hmmEnd == obj.hmmEnd &&
+            hmmLength == obj.hmmLength &&
+            hmmBounds == obj.hmmBounds &&
+            envelopeStart == obj.envelopeStart &&
+            envelopeEnd == obj.envelopeEnd &&
+            evalue == obj.evalue &&
+            score == obj.score &&
+            bias == obj.bias &&
+            queryAlignment == obj.queryAlignment &&
+            targetAlignment == obj.targetAlignment &&
+            Objects.equals(fragments, obj.fragments) &&
+            Objects.equals(sites, obj.sites)
+        )
+    }
+
+    public Object clone() {
+        Location loc = new Location(
+            start,
+            end,
+            hmmStart,
+            hmmEnd,
+            hmmLength,
+            hmmBounds,
+            envelopeStart,
+            envelopeEnd,
+            evalue,
+            score,
+            bias
+        )
+        loc.queryAlignment = queryAlignment
+        loc.targetAlignment = targetAlignment
+        loc.fragments = fragments.collect { it.clone() }
+        loc.representative = representative
+        loc.included = included
+        loc.sites = sites.collect { it.clone() }
+        return loc
+    }
 }
 
 class LocationFragment implements Serializable {
@@ -348,12 +458,36 @@ class LocationFragment implements Serializable {
     static LocationFragment fromMap(Map data) {
         return new LocationFragment(data.start, data.end, data.dcStatus)
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(start, end, dcStatus)
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true
+        if (obj == null || getClass() != obj.getClass()) return false
+        return (
+            start == obj.start &&
+            end == obj.end &&
+            dcStatus == obj.dcStatus
+        )
+    }
+
+    public Object clone() {
+        return new LocationFragment(start, end, dcStatus)
+    }
 }
 
 class Site implements Serializable {
     String description
     int numLocations
     List<SiteLocation> siteLocations = []
+    String label = null
+    String group = null
+    int hmmStart
+    int hmmEnd
     private int start = -1
     private int end = -1
 
@@ -373,6 +507,22 @@ class Site implements Serializable {
         }
     }
 
+    // PIRSR case
+    Site(String description,
+        int group,
+        int hmmEnd,
+        int hmmStart,
+        String label,
+        List<SiteLocation> siteLocations) {
+        this.description = description
+        this.group = group
+        this.hmmEnd = hmmEnd
+        this.hmmStart = hmmStart
+        this.label = label
+        this.numLocations = siteLocations.size()
+        this.siteLocations = siteLocations
+    }
+
     Site(String description, String residues) {
         this(description, Site.getSiteLocationsFromString(residues))
     }
@@ -381,7 +531,7 @@ class Site implements Serializable {
         def residueAnnotations = residues.split(",")
         List<SiteLocation> siteLocations = []
         for (String residueAnnotation: residueAnnotations) {
-            String residue = residueAnnotation.substring(0, 1);
+            String residue = residueAnnotation.substring(0, 1)
             int position = residueAnnotation.substring(1).toInteger()
             siteLocations.add(new SiteLocation(residue, position, position))
         }
@@ -396,6 +546,26 @@ class Site implements Serializable {
 
     boolean isInRange(int start, int end) {
         return start <= this.start && this.end <= end
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(description, numLocations, siteLocations)
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true
+        if (obj == null || getClass() != obj.getClass()) return false
+        return (
+            description == obj.description &&
+            numLocations == obj.numLocations &&
+            Objects.equals(siteLocations, obj.siteLocations)
+        )
+    }
+
+    public Object clone() {
+        return new Site(description, siteLocations.collect{ it.clone() })
     }
 }
 
@@ -412,6 +582,26 @@ class SiteLocation implements Serializable {
 
     static SiteLocation fromMap(Map data) {
         return new SiteLocation(data.start, data.end, data.residue)
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(residue, start, end)
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true
+        if (obj == null || getClass() != obj.getClass()) return false
+        return (
+            residue == obj.residue &&
+            start == obj.start &&
+            end == obj.end
+        )
+    }
+
+    public Object clone() {
+        return new SiteLocation(residue, start, end)
     }
 }
 
