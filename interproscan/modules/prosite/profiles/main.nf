@@ -43,7 +43,7 @@ process PARSE_PFSEARCH {
             assert line.size() == 10
             String modelAccession = line[0].split("\\|")[0]
             if (modelAccession in toSkip) {
-                // skip flagged accessions
+                return // skip flagged accessions
             }
             def match = createPrositeMatch(line)
             seqId = match.sequenceId
