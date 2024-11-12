@@ -1,7 +1,7 @@
 nextflow.enable.dsl=2
 
 include { AGGREGATE_SEQS_MATCHES        } from "./interproscan/modules/output/aggregate_results"
-include { AGGREGATE_RESULTS             } from "./interproscan/modules/output/aggregate_results"
+include { AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/output/aggregate_results"
 include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
 include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
 include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
@@ -82,9 +82,9 @@ workflow {
     }.set { ch_seq_matches }
 
     AGGREGATE_SEQS_MATCHES(ch_seq_matches)
-    AGGREGATE_RESULTS(AGGREGATE_SEQS_MATCHES.out.collect())
+    AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
 
-    AGGREGATE_RESULTS.out.view()
+    AGGREGATE_ALL_MATCHES.out.view()
 
     // REPRESENTATIVE_DOMAINS(XREFS.out.collect())
 
