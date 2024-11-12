@@ -81,11 +81,11 @@ process JSON_OUTPUT {
                             locationResult["score"] = location.score
                             locationResult["motifNumber"] = location.motifNumber
                             break
-                        case "prosite_profiles":
+                        case "pfsearch_parsed":
                             locationResult["score"] = location.score
-                            locationResult["alignment"] = location.alignment
+                            locationResult["alignment"] = location.targetAlignment
                             break
-                        case "prosite_patterns":
+                        case "prositepatterns":
                             locationResult["cigarAlignment"] = location.cigarAlignment
                             locationResult["alignment"] = location.alignment
                             locationResult["level"] = location.level
@@ -134,7 +134,7 @@ process JSON_OUTPUT {
                 }
             }
 
-            if (!(memberDB in ["cdd", "coils", "hamap", "mobidblite", "phobius", "prosite_profiles", "prosite_patterns", "prints", "signalp", "signalp_euk"])) {
+            if (!(memberDB in ["cdd", "coils", "hamap", "mobidblite", "phobius", "pfsearch_parsed", "prosite_patterns", "prints", "signalp", "signalp_euk"])) {
                 matchResult["evalue"] = matchObj.evalue
                 matchResult["score"] = matchObj.score
             }
