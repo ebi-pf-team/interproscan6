@@ -2,6 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 process AGGREGATE_SEQS_MATCHES {
+    // Aggregates sequence meta data with the corresponding match data
     input:
     tuple val(meta), val(seqsPath), val(matchesPath)
 
