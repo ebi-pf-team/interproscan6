@@ -23,30 +23,17 @@ process JSON_OUTPUT {
     jsonOutput["interproscan-version"] = ips6Version
     jsonOutput["results"] = []
 
-    def md5Results = [:]
     jsonSlurper.parse(seqMatches).each { sequence ->
+        def seqMatches = []
         sequence["matches"].each { matchId, match ->
             Match matchObj = Match.fromMap(match)
             memberDB = matchObj.signature.signatureLibraryRelease.library
 
-            if (!md5Results.containsKey(sequence.md5)) {
-                md5Results[sequence.md5] = [
-                    sequence: sequence.sequence,
-                    md5: sequence.md5,
-                    matches: [
-                        "signature": matchObj.signature,
-                        "locations": []
-                    ],
-                    xref: []
-                ]
-            }
-            md5Results[sequence.md5].xref << [
-                name: sequence.description,
-                id: sequence.id
+            matchResult = [
+                "signature": matchObj.signature,
+                "locations": []
             ]
-
             if (matchObj.locations) {
-                def distinctLocations = []
                 matchObj.locations.each { location ->
                     locationResult = [
                         "start": location.start,
@@ -143,13 +130,7 @@ process JSON_OUTPUT {
                         locationResult["sites"] = location.sites ?: []
                     }
                     locationResult["location-fragments"] = location.fragments
-                    allLocations << locationResult
-                }
-                allLocations.each { loc ->
-                    def locTuple = loc.collectEntries { [it.key, it.value] }
-                    if (!distinctLocations.any { existingLoc -> existingLoc.collectEntries() == locTuple }) {
-                        matchResult["locations"] << loc
-                    }
+                    matchResult["locations"].add(locationResult)
                 }
             }
 
@@ -180,9 +161,10 @@ process JSON_OUTPUT {
                 matchObj.signature.name = name
                 matchObj.signature.description = description
             }
-            md5Results[sequence.md5][matches].add(matchResult)
+            seqMatches.add(matchResult)
         }
-        jsonOutput["results"].add(md5Results)
+        sequence["matches"] = seqMatches
+        jsonOutput["results"].add(sequence)
     }
 
     def outputFilePath = "${outputPath}.ips6.json"
