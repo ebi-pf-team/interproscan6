@@ -12,6 +12,7 @@ include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                         
 include { RUN_PIRSR; PARSE_PIRSR                                                  } from  "../../modules/pirsr"
 include { RUN_PIRSF; PARSE_PIRSF                                                  } from  "../../modules/pirsf"
 include { RUN_PRINTS; PARSE_PRINTS                                                } from  "../../modules/prints"
+include { RUN_SFLD; POST_PROCESS_SFLD; PARSE_SFLD                                 } from  "../../modules/sfld"
 include { RUN_PFSCAN ; PARSE_PFSCAN                                               } from  "../../modules/prosite/patterns"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
 include { RUN_SIGNALP; PARSE_SIGNALP                                              } from  "../../modules/signalp"
@@ -262,7 +263,16 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("sfld")) {
-        // TODO
+        RUN_SFLD(ch_fasta,
+            "${datadir}/${appsConfig.sfld.hmm}")
+
+        POST_PROCESS_SFLD(RUN_SFLD.out,
+            "${datadir}/${appsConfig.sfld.sites_annotation}")
+
+        PARSE_SFLD(POST_PROCESS_SFLD.out,
+            "${datadir}/${appsConfig.sfld.hierarchy}")
+
+        results = results.mix(PARSE_SFLD.out)
     }
 
     if (applications.contains("smart")) {
