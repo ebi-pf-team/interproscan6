@@ -295,7 +295,7 @@ class Location implements Serializable {
              Double evalue,
              Double score,
              Double bias,
-             List<LocationFragment> fragments) {
+             List<LocationFragment> fragments) { // Used for SFLD
         this.start = start
         this.end = end
         this.hmmStart = hmmStart
@@ -308,15 +308,24 @@ class Location implements Serializable {
         this.fragments = fragments
     }
 
-    Location(int start, int end, String sequenceFeature = null) {
+    Location(int start, int end, String sequenceFeature = null) { // Used for CDD, Coils, MobiDB, Phobius
         this.start = start
         this.end = end
         this.sequenceFeature = sequenceFeature
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
     }
+  
+     Location(int start, int end, Double score, String targetAlignment) { // Used for Hamap, PrositeProfiles
+        this.start = start
+        this.end = end
+        this.score = score
+        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
+        this.fragments = [fragment]
+        this.targetAlignment = targetAlignment
+    }
 
-    Location(int start, int end, Double pvalue, Double score, Integer motifNumber) {
+    Location(int start, int end, Double pvalue, Double score, Integer motifNumber) { // Used for PRINTS
         this.start = start
         this.end = end
         this.pvalue = pvalue
@@ -326,29 +335,20 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-    Location(int start, int end, Double score, String targetAlignment) {
-        this.start = start
-        this.end = end
-        this.score = score
-        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
-        this.fragments = [fragment]
-        this.targetAlignment = targetAlignment
-    }
-
-    Location(int start, int end, Double evalue, List<LocationFragment> fragments) {
+    Location(int start, int end, Double evalue, List<LocationFragment> fragments) { // Used for Superfamily
         this.start = start
         this.end = end
         this.evalue = evalue
         this.fragments = fragments
     }
 
-    Location(int start, int end, String level, String alignment, String cigarAlignment) {
+    Location(int start, int end, String level, String targetAlignment, String cigarAlignment) { // Used for PrositePatterns
         this.start = start
         this.end = end
         this.level = level
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
-        this.targetAlignment = alignment
+        this.targetAlignment = targetAlignment
         this.cigarAlignment = cigarAlignment
     }
 

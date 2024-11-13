@@ -14,6 +14,7 @@ include { RUN_PIRSF; PARSE_PIRSF                                                
 include { RUN_PRINTS; PARSE_PRINTS                                                } from  "../../modules/prints"
 include { RUN_SFLD; POST_PROCESS_SFLD; PARSE_SFLD                                 } from  "../../modules/sfld"
 include { RUN_PFSCAN ; PARSE_PFSCAN                                               } from  "../../modules/prosite/patterns"
+include { RUN_PFSEARCH ; PARSE_PFSEARCH                                           } from  "../../modules/prosite/profiles"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
 include { RUN_SIGNALP; PARSE_SIGNALP                                              } from  "../../modules/signalp"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
@@ -251,15 +252,20 @@ workflow SCAN_SEQUENCES {
         RUN_PFSCAN(
             ch_fasta,
             "${datadir}/${appsConfig.prositepatterns.data}",
-            "${datadir}/${appsConfig.prositepatterns.evaluator}"
-        )
+            "${datadir}/${appsConfig.prositepatterns.evaluator}")
 
         PARSE_PFSCAN(RUN_PFSCAN.out)
         results = results.mix(PARSE_PFSCAN.out)
     }
 
     if (applications.contains("prositeprofiles")) {
-        // TODO
+        RUN_PFSEARCH(
+            ch_fasta,
+            "${datadir}/${appsConfig.prositeprofiles.data}")
+        PARSE_PFSEARCH(
+            RUN_PFSEARCH.out,
+            "${datadir}/${appsConfig.prositeprofiles.skip_flagged_profiles}")
+        results = results.mix(PARSE_PFSEARCH.out)
     }
 
     if (applications.contains("sfld")) {
