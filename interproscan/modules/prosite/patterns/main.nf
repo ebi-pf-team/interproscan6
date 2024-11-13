@@ -76,7 +76,7 @@ process PARSE_PFSCAN {
         matchObj.addLocation(location)
     }
 
-    def outputFilePath = task.workDir.resolve("psscan.json")
+    def outputFilePath = task.workDir.resolve("prositepatterns.json")
     def json = JsonOutput.toJson(patternsMatches)
     new File(outputFilePath.toString()).write(json)
 }

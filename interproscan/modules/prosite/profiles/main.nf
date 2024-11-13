@@ -58,7 +58,7 @@ process PARSE_PFSEARCH {
             matchObj.addLocation(location)
         }
     }
-    def outputFilePath = task.workDir.resolve("pfsearch_parsed.json")
+    def outputFilePath = task.workDir.resolve("prositeprofiles.json")
     def json = JsonOutput.toJson(matches)
     new File(outputFilePath.toString()).write(json)
 }
