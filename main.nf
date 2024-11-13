@@ -8,8 +8,6 @@ include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_trans
 include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { XREFS                         } from "./interproscan/modules/xrefs"
-include { AGGREGATE_SEQS_MATCHES        } from "./interproscan/modules/output/aggregate_results"
-include { AGGREGATE_RESULTS             } from "./interproscan/modules/output/aggregate_results"
 include { JSON_OUTPUT                   } from "./interproscan/modules/output/json_output"
 
 
@@ -89,21 +87,13 @@ workflow {
     AGGREGATE_SEQS_MATCHES(ch_seq_matches)
     AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
 
-    ch_seqs.join(XREFS.out, by: 0)
-    .map { batchnumber, fasta, sequences, matches ->
-        [batchnumber, sequences, matches]
-    }.set { ch_seq_matches }
-
-    AGGREGATE_SEQS_MATCHES(ch_seq_matches)
-    AGGREGATE_RESULTS(AGGREGATE_SEQS_MATCHES.out.collect())
-
-    // REPRESENTATIVE_DOMAINS(AGGREGATE_RESULTS.out)
+    // REPRESENTATIVE_DOMAINS(AGGREGATE_ALL_MATCHES.out)
 
     def formats = params.formats.toUpperCase().split(',') as Set
     def fileName = params.input.split('/').last()
     def outFileName = "${params.outdir}/${fileName}"
     if (formats.contains("JSON")) {
-        JSON_OUTPUT(AGGREGATE_RESULTS.out, "${outFileName}", workflow.manifest.version)
+        JSON_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}", workflow.manifest.version)
     }
 //     if (outputFormat.contains("TSV")) {
 //         TSV_OUTPUT(seqMatches, "${outFileName}.ips6.tsv")
