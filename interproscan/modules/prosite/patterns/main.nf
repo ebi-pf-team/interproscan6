@@ -36,7 +36,7 @@ process PARSE_PFSCAN {
         tuple val(meta), val(pfscan_out)
 
     output:
-        tuple val(meta), path("psscan.json")
+        tuple val(meta), path("prositepatterns.json")
 
     exec:
     Map<String, Map<String, Match>> patternsMatches = [:]

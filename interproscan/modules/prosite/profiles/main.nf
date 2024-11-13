@@ -31,7 +31,7 @@ process PARSE_PFSEARCH {
         val skip_flagged_profiles
 
     output:
-        tuple val(meta), path("pfsearch_parsed.json")
+        tuple val(meta), path("prositeprofiles.json")
 
     exec:
     Map matches = [:]
