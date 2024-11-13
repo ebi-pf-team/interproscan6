@@ -21,6 +21,8 @@ process WRITE_TSV_OUTPUT {
         seqData["matches"].each { modelAccession, matchData ->
             Match match = Match.fromMap(matchData)
             String memberDb = match.signature.signatureLibraryRelease.library
+            String accession = (memberDb == "cathfunfam" ||
+                                memberDb == "cathgene3d") ? Output.formatCathAccession(modelAccession) : modelAccession
             String goterms = match.signature.entry?.goXRefs ? (match.signature.entry.goXRefs.isEmpty() ? '-' : match.signature.entry.goXRefs.join('|')) : '-'
             String pathways = match.signature.entry?.pathwayXRefs ? (match.signature.entry.pathwayXRefs.isEmpty() ? '-' : match.signature.entry.pathwayXRefs.join('|')) : '-'
             String entryAcc = match.signature.entry?.accession ?: '-'
@@ -45,7 +47,8 @@ process WRITE_TSV_OUTPUT {
 
                     tsvFile.append([
                         xrefData["id"], seqData["md5"], seqData["sequence"].length(),
-                        Output.convertDbName(memberDb), modelAccession, entryDesc,
+                        Output.convertDbName(memberDb),
+                        accession, entryDesc,
                         start, end, evalue, status,
                         currentDate,
                         entryAcc, entryDesc, goterms, "${pathways}\n"
