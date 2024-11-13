@@ -14,7 +14,7 @@ process WRITE_TSV_OUTPUT {
     tsvFile.text = "" // clear the file if it already exists
 
     // Each line contains: seqId md5 seqLength memberDb modelAcc entryDesc start end evalue status date entryAcc entryDesc xrefs
-    def currentDate = LocalDate.now().toString()
+    def currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
     def jsonSlurper = new JsonSlurper()
     jsonSlurper.parse(matches).each { seqData ->
         seqData["matches"].each { modelAccession, matchData ->
@@ -30,7 +30,7 @@ process WRITE_TSV_OUTPUT {
                 match.locations.each { location ->
                     int start = location.start
                     int end = location.end
-                    double evalue = location.evalue
+                    def evalue = location.evalue  // may be null so don't worry about type
                     switch (memberDb) {
                         case ["prints", "signalp", "signalp_euk"]:
                             evalue = location.pvalue
@@ -43,8 +43,8 @@ process WRITE_TSV_OUTPUT {
                     }
 
                     tsvFile.append([
-                        xrefData["id"], seqData["md5"], seqData["sequenceLength"],
-                        memberDb, entryDesc,
+                        xrefData["id"], seqData["md5"], seqData["sequence"].length(),
+                        Output.convertDbName(memberDb), modelAccession, entryDesc,
                         start, end, evalue, status,
                         currentDate,
                         entryAcc, entryDesc, goterms, "${pathways}\n"
