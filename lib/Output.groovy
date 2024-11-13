@@ -29,6 +29,8 @@ class Output {
                 return "Phobius"
             case "prints":
                 return "PRINTS"
+            case "sfld":
+                return "SFLD"
             case "signalp":
                 return "SignalP"
             case "signalp_euk":
