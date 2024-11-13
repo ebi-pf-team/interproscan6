@@ -7,7 +7,7 @@ include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_trans
 include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { XREFS                         } from "./interproscan/modules/xrefs"
-include { AGGREGATE_SEQS_MATCHES,
+include { AGGREGATE_SEQS_MATCHES;
           AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_matches"
 include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
 
@@ -96,16 +96,16 @@ workflow {
     def fileName = params.input.split('/').last()
     def outFileName = "${params.outdir}/${fileName}"
     if (formats.contains("TSV")) {
-        WRITE_TSV_OUTPUT(AGGREGATE_RESULTS.out, "${outFileName}")
+        WRITE_TSV_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}")
     }
 }
 
-// workflow.onComplete = {
-//     def input_file = file(params.input)
-//     def outputFileName = input_file.getName()
-//     def outputDir = params.outdir.endsWith('/') ? params.outdir[0..-2] : params.outdir
+workflow.onComplete = {
+    def input_file = file(params.input)
+    def outputFileName = input_file.getName()
+    def outputDir = params.outdir.endsWith('/') ? params.outdir[0..-2] : params.outdir
 
-//     println "InterProScan workflow completed successfully: $workflow.success."
-//     println "Any results are located at ${outputDir}/${outputFileName}.ips6.*"
-//     println "Duration: $workflow.duration"
-// }
+    println "InterProScan workflow completed successfully: $workflow.success."
+    println "Any results are located at ${outputDir}/${outputFileName}.ips6.*"
+    println "Duration: $workflow.duration"
+}
