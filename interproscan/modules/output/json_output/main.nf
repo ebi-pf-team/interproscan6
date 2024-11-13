@@ -2,13 +2,6 @@ import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 import java.util.regex.Pattern
 
-HMM_BOUND_PATTERN = [
-    "[]": "COMPLETE",
-    "[.": "N_TERMINAL_COMPLETE",
-    ".]": "C_TERMINAL_COMPLETE",
-    "..": "INCOMPLETE"
-]
-
 process JSON_OUTPUT {
     label 'write_output'
 
@@ -40,11 +33,13 @@ process JSON_OUTPUT {
                         "end": location.end,
                         "representative": location.representative
                     ]
-                    hmmBounds = HMM_BOUND_PATTERN[location.hmmBounds]
+                    hmmBounds = Output.convertHmmBound(location.hmmBounds)
                     switch (memberDB) {
                         case "cdd":
                             locationResult["evalue"] = matchObj.evalue
                             locationResult["score"] = matchObj.score
+                            break
+                        case "coils":
                             break
                         case "hamap":
                             locationResult["score"] = location.score
@@ -81,7 +76,7 @@ process JSON_OUTPUT {
                             locationResult["score"] = location.score
                             locationResult["motifNumber"] = location.motifNumber
                             break
-                        case "pfsearch_parsed":
+                        case "prositeprofiles":
                             locationResult["score"] = location.score
                             locationResult["alignment"] = location.targetAlignment
                             break
@@ -113,8 +108,8 @@ process JSON_OUTPUT {
                             locationResult["hmmBounds"] = hmmBounds
                             break
                         case "superfamily":
-                            locationResult['evalue'] = location.evalue
                             locationResult["hmmLength"] = location.hmmLength
+                            matchResult['evalue'] = location.evalue
                             break
                         default:
                             locationResult["evalue"] = location.evalue
@@ -126,42 +121,53 @@ process JSON_OUTPUT {
                             locationResult["envelopeStart"] = location.envelopeStart
                             locationResult["envelopeEnd"] = location.envelopeEnd
                     }
-                    if (memberDB in ["cdd", "pirsr", "sfld"]) {
+                    if (memberDB in ["pirsr", "sfld"]) {
                         locationResult["sites"] = location.sites ?: []
+                    }
+                    if (memberDB == "cdd") {
+                        locationResult["sites"] = location.sites?.collect { site ->
+                            site.remove("label")
+                            site.remove("group")
+                            site.remove("hmmStart")
+                            site.remove("hmmEnd")
+                            return site
+                        } ?: []
                     }
                     locationResult["location-fragments"] = location.fragments
                     matchResult["locations"].add(locationResult)
                 }
             }
 
-            if (!(memberDB in ["cdd", "coils", "hamap", "mobidblite", "phobius", "pfsearch_parsed", "prosite_patterns", "prints", "signalp", "signalp_euk"])) {
-                matchResult["evalue"] = matchObj.evalue
-                matchResult["score"] = matchObj.score
-            }
-            matchResult["model-ac"] = matchObj.modelAccession.split("\\.")[0]
-            if (memberDB == "sfld") {
-                matchResult["scope"] = null
-            } else if (memberDB == "panther") {
-                matchResult["name"] = matchObj.treegrafter.subfamilyDescription
-                matchResult["accession"] = matchObj.treegrafter.subfamilyAccession
-                matchResult["model-ac"] = matchObj.treegrafter.subfamilyAccession
-                matchResult["goXRefs"] = matchObj.signature?.entry?.goXRefs ?: []
-                matchResult["proteinClass"] = matchObj.treegrafter.proteinClass
-                matchResult["graftPoint"] = matchObj.treegrafter.graftPoint
-            } else if (memberDB == "prints") {
-                matchResult["evalue"] = matchObj.evalue
-                matchResult["graphscan"] = matchObj.graphScan
-            } else if (memberDB in ["signalp", "signalp_euk"]) {
-                matchResult["orgType"] = matchObj.orgType
-            }
+            if (matchResult["locations"]) {
+                if (!(memberDB in ["cdd", "coils", "hamap", "mobidblite", "phobius", "prositeprofiles", "prositepatterns", "prints", "signalp", "signalp_euk", "superfamily"])) {
+                    matchResult["evalue"] = matchObj.evalue
+                    matchResult["score"] = matchObj.score
+                }
+                matchResult["model-ac"] = matchObj.modelAccession.split("\\.")[0]
+                if (memberDB == "sfld") {lib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovy
+                    matchResult["scope"] = null
+                } else if (memberDB == "panther") {
+                    matchResult["name"] = matchObj.treegrafter.subfamilyDescription
+                    matchResult["accession"] = matchObj.treegrafter.subfamilyAccession
+                    matchResult["model-ac"] = matchObj.treegrafter.subfamilyAccession
+                    matchResult["goXRefs"] = matchObj.signature?.entry?.goXRefs ?: []
+                    matchResult["proteinClass"] = matchObj.treegrafter.proteinClass
+                    matchResult["graftPoint"] = matchObj.treegrafter.graftPoint
+                } else if (memberDB == "prints") {
+                    matchResult["evalue"] = matchObj.evalue
+                    matchResult["graphscan"] = matchObj.graphScan
+                } else if (memberDB in ["signalp", "signalp_euk"]) {
+                    matchResult["orgType"] = matchObj.orgType
+                }
 
-            if (memberDB in ['cathfunfam', 'cathgene3d', 'panther']) {
-                name = matchObj.signature.description
-                description = matchObj.signature.name
-                matchObj.signature.name = name
-                matchObj.signature.description = description
+                if (memberDB in ['cathfunfam', 'cathgene3d', 'panther']) {
+                    name = matchObj.signature.description
+                    description = matchObj.signature.name
+                    matchObj.signature.name = name
+                    matchObj.signature.description = description
+                }
+                seqMatches.add(matchResult)
             }
-            seqMatches.add(matchResult)
         }
         sequence["matches"] = seqMatches
         jsonOutput["results"].add(sequence)
