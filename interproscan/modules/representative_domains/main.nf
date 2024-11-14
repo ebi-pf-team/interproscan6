@@ -18,6 +18,8 @@ process REPRESENTATIVE_DOMAINS {
     float DOM_OVERLAP_THRESHOLD = 0.3
     List<String> REPR_DOM_DBS = ["cdd", "ncbifam", "pfam", "prositeprofiles", "smart"]
 
+    List allMatches = []
+
     JsonSlurper jsonSlurper = new JsonSlurper()
     jsonSlurper.parse(matchesPath).each { seqData ->
         // keys in seqData: sequence, md5, matches, xref, id
@@ -26,7 +28,7 @@ process REPRESENTATIVE_DOMAINS {
         seqData["matches"].each { modelAccession, matchMap ->
             if (matchMap["signature"]["signatureLibraryRelease"]["library"] in REPR_DOM_DBS) {
                 Match match = Match.fromMap(matchMap)
-                for (Location loc: match.locations) {
+                match.locations.each { loc ->
                     loc.representativeRank = match.representativeInfo.rank
                     seqDomains.add(loc)
                 }
@@ -48,15 +50,16 @@ process REPRESENTATIVE_DOMAINS {
             int stop = seqDomains[0].fragments[-1].end
             List groups = []
             List group = [seqDomains[0]]
-            for (Location loc: seqDomains[1..-1]) {
-                int start = loc.fragments[0].start
-                if (start <= stop) {
-                    group.add(loc)
-                    stop = Math.max(stop, loc.fragments[-1].end)
-                } else {
-                    groups.add(group)
-                    group = [loc]
-                    stop = loc.fragments[-1].end
+            if (seqDomains.size() > 1) {
+                for (Location loc: seqDomains[1..-1]) {
+                    if (loc.fragments[0].start <= stop) {
+                        group.add(loc)
+                        stop = Math.max(stop, loc.fragments[-1].end)
+                    } else {
+                        groups.add(group)
+                        group = [loc]
+                        stop = loc.fragments[-1].end
+                    }
                 }
             }
             groups.add(group)
@@ -108,10 +111,11 @@ process REPRESENTATIVE_DOMAINS {
                 bestSubgroup.each { loc -> loc.representative = true }
             }
         }
+        allMatches.add(seqData)
     }
 
     def outputFilePath = task.workDir.resolve("matches_repr_domains.json")
-    def json = JsonOutput.toJson(matches)
+    def json = JsonOutput.toJson(allMatches)
     new File(outputFilePath.toString()).write(json)
 }
 
@@ -127,30 +131,21 @@ boolean locationsOverlap(Set<Integer> loc1Residues, Set<Integer> loc2Residues, f
 }
 
 Set<Set<Integer>> getValidSets(Map<Integer, Set<Integer>> graph) {
-    def allValidSets = []
-    // Iterate over each pair of nodes in candidate to ensure each node is connected to every other node.
-    def setIsValid = { candidate ->
-        candidate.every { a ->
-            candidate.every { b ->
-                a == b || graph[b].contains(a)
-            }
-        }
-    }
-
-    def buildValidSets = { currentSet, remainingNodes ->
+    Set<Set<Integer>> allValidSets = new HashSet<>()
+    def setIsValid = { candidate -> candidate.every { a -> candidate.every { b -> a == b || graph[a].contains(b) } } }
+    def buildValidSets
+    buildValidSets = { currentSet, remainingNodes ->
         if (setIsValid(currentSet)) {
             if (!remainingNodes) {
                 allValidSets << currentSet.toSet()
             } else {
                 def currentNode = remainingNodes[0]
-                def restNodes = remainingNodes[1..-1] ?: []
-                // Consider both including and excluding the currentNode in/from the currentSet
+                def restNodes = remainingNodes.size() > 1 ? remainingNodes[1..-1] : []
                 buildValidSets(currentSet + [currentNode], restNodes)
                 buildValidSets(currentSet, restNodes)
             }
         }
     }
-
     buildValidSets([], graph.keySet().toList())
-    return allValidSets.toSet()
+    return allValidSets
 }
