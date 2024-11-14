@@ -58,8 +58,6 @@ process JSON_OUTPUT {
                             break
                        case "phobius":
                             locationResult["score"] = location.score
-                            locationResult["prediction"] = location.prediction
-                            locationResult["topology"] = location.topology
                             break
                         case "pirsf":
                             locationResult["evalue"] = location.evalue
@@ -96,8 +94,8 @@ process JSON_OUTPUT {
                             break
                         case ["signalp", "signalp_euk"]:
                             locationResult["pvalue"] = location.pvalue
-                            locationResult["cleavageStart"] = signalp.cleavageSiteStart
-                            locationResult["cleavageEnd"] = signalp.cleavageSiteEnd
+                            locationResult["cleavageStart"] = matchObj.signalp.cleavageSiteStart
+                            locationResult["cleavageEnd"] = matchObj.signalp.cleavageSiteEnd
                             break
                         case "smart":
                             locationResult["evalue"] = location.evalue
@@ -157,7 +155,7 @@ process JSON_OUTPUT {
                     matchResult["evalue"] = matchObj.evalue
                     matchResult["graphscan"] = matchObj.graphScan
                 } else if (memberDB in ["signalp", "signalp_euk"]) {
-                    matchResult["orgType"] = matchObj.orgType
+                    matchResult["orgType"] = matchObj.signalp.orgType
                 }
 
                 if (memberDB in ['cathfunfam', 'cathgene3d', 'panther']) {
