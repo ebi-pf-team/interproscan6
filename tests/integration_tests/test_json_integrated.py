@@ -6,7 +6,7 @@ import subprocess
 def get_current_output(test_output_dir: str, current_output_path: str, input_path: str, applications: str, disable_precalc: bool) -> dict:
     disable_precalc = "--disable_precalc" if disable_precalc else ""
     command = f"nextflow run main.nf --input {input_path} --applications {applications} {disable_precalc} " \
-              f"--formats json --outdir {test_output_dir} -profile docker --datadir data"
+              f"--formats json --outdir {test_output_dir} --goterms --pathways -profile docker --datadir data"
     if os.path.exists(str(current_output_path) + ".json"):
         os.remove(str(current_output_path) + ".json")
     subprocess.run(command, shell=True)
@@ -79,7 +79,7 @@ def test_json_output(test_output_dir, input_path, expected_output_path, output_p
     with open('tests/integration_tests/temp_current.json', 'w') as file:
         json.dump(current, file, indent=2)
 
-    ignore_elements = ['representative', 'postProcessed']
+    ignore_elements = []
     compare(expected, current, ignore_elements, True)
     # compare(current, expected, ignore_elements, False)
 
