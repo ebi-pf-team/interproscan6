@@ -22,7 +22,7 @@ class CATH {
                 )
 
                 results[sequenceId] << dom
-            }
+            }        
         }
 
         return results
@@ -51,7 +51,7 @@ class CATH {
                 )
 
                 results[sequenceId] << dom
-            }
+            }        
         }
 
         return results
@@ -109,9 +109,9 @@ class CATH {
                     sequenceDomains[domId].addLocation(location)
                 } else {
                     Match domain = new Match(
-                        domId,
+                        domId, 
                         hmmerDomain.evalue,
-                        hmmerDomain.score,
+                        hmmerDomain.score, 
                         hmmerDomain.bias
                     )
                     domain.signature = new Signature(cathDomain.accession)
@@ -133,14 +133,14 @@ class CathDomain {
     List<SimpleLocation> boundaries
     List<SimpleLocation> resolvedBoundaries
 
-    CathDomain(String domainId, String matchId, String accession,
+    CathDomain(String domainId, String matchId, String accession, 
                Double score, Double evalue, List<SimpleLocation> boundaries,
                List<SimpleLocation> resolvedBoundaries) {
         this.domainId = domainId
         this.matchId = matchId
         this.accession = accession
         this.score = score
-        this.evalue = evalue
+        this.evalue = evalue       
         this.boundaries = this.sortLocations(boundaries)
         this.resolvedBoundaries = this.sortLocations(resolvedBoundaries)
     }

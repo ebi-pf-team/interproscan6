@@ -20,18 +20,19 @@ process JSON_OUTPUT {
         def seqMatches = []
         sequence["matches"].each { matchId, match ->
             Match matchObj = Match.fromMap(match)
-            memberDB = matchObj.signature.signatureLibraryRelease.library
-
+            String memberDB = matchObj.signature.signatureLibraryRelease.library
             matchResult = [
                 "signature": matchObj.signature,
                 "locations": []
             ]
             if (matchObj.locations) {
+                // Locations
                 matchObj.locations.each { location ->
                     locationResult = [
                         "start": location.start,
                         "end": location.end,
-                        "representative": location.representative
+                        "representative": location.representative,
+                        "location-fragments": location.fragments
                     ]
                     hmmBounds = Output.convertHmmBound(location.hmmBounds)
                     switch (memberDB) {
@@ -39,7 +40,7 @@ process JSON_OUTPUT {
                             locationResult["evalue"] = matchObj.evalue
                             locationResult["score"] = matchObj.score
                             break
-                        case "coils":
+                        case ["coils", "phobius"]:
                             break
                         case "hamap":
                             locationResult["score"] = location.score
@@ -55,9 +56,6 @@ process JSON_OUTPUT {
                             locationResult["hmmBounds"] = hmmBounds
                             locationResult["envelopeStart"] = location.envelopeStart
                             locationResult["envelopeEnd"] = location.envelopeEnd
-                            break
-                       case "phobius":
-                            locationResult["score"] = location.score
                             break
                         case "pirsf":
                             locationResult["evalue"] = location.evalue
@@ -119,6 +117,8 @@ process JSON_OUTPUT {
                             locationResult["envelopeStart"] = location.envelopeStart
                             locationResult["envelopeEnd"] = location.envelopeEnd
                     }
+
+                    // Sites
                     if (memberDB in ["pirsr", "sfld"]) {
                         locationResult["sites"] = location.sites ?: []
                     }
@@ -131,17 +131,18 @@ process JSON_OUTPUT {
                             return site
                         } ?: []
                     }
-                    locationResult["location-fragments"] = location.fragments
                     matchResult["locations"].add(locationResult)
                 }
             }
 
             if (matchResult["locations"]) {
+                // Match level fields
                 if (!(memberDB in ["cdd", "coils", "hamap", "mobidblite", "phobius", "prositeprofiles", "prositepatterns", "prints", "signalp", "signalp_euk", "superfamily"])) {
                     matchResult["evalue"] = matchObj.evalue
                     matchResult["score"] = matchObj.score
                 }
-                matchResult["model-ac"] = matchObj.modelAccession.split("\\.")[0]
+                matchResult["model-ac"] = memberDB == "FunFam" ? matchObj.modelAccession : matchObj.modelAccession.split("\\.")[0]
+
                 if (memberDB == "sfld") {
                     matchResult["scope"] = null
                 } else if (memberDB == "panther") {

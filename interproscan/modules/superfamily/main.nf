@@ -50,7 +50,7 @@ process PARSE_SUPERFAMILY {
         String modelId = fields[0]
         String superfamilyAccession = fields[1]
         assert !model2sf.containsKey(modelId)
-        model2sf[modelId] = "SSF${superfamilyAccession}"
+        model2sf[modelId] = "SFF${superfamilyAccession}"
     }
 
     def matches = [:].withDefault { [:] }
@@ -80,7 +80,7 @@ process PARSE_SUPERFAMILY {
                 assert regions.size() >= 1
 
                 // Sort by start/end
-                regions = regions.sort { a, b ->
+                regions = regions.sort { a, b -> 
                     a[0] <=> b[0] ?: a[1] <=> b[1]
                 }
 
@@ -100,7 +100,7 @@ process PARSE_SUPERFAMILY {
                         }
                         fragments.add(new LocationFragment(fragStart, fragEnd, dcStatus))
                     }
-
+                    
                 } else {
                     def (fragStart, fragEnd) = regions[0]
                     fragments.add(new LocationFragment(fragStart, fragEnd, "CONTINUOUS"))
