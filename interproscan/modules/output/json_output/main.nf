@@ -82,7 +82,7 @@ process JSON_OUTPUT {
                             break
                         case "prositepatterns":
                             locationResult["cigarAlignment"] = location.cigarAlignment
-                            locationResult["alignment"] = location.alignment
+                            locationResult["alignment"] = location.targetAlignment
                             locationResult["level"] = location.level
                             break
                         case ["pirsr", "sfld"]:
@@ -144,7 +144,7 @@ process JSON_OUTPUT {
                     matchResult["score"] = matchObj.score
                 }
                 matchResult["model-ac"] = matchObj.modelAccession.split("\\.")[0]
-                if (memberDB == "sfld") {lib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovylib/Match.groovy
+                if (memberDB == "sfld") {
                     matchResult["scope"] = null
                 } else if (memberDB == "panther") {
                     matchResult["name"] = matchObj.treegrafter.subfamilyDescription
