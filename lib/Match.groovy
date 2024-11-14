@@ -229,6 +229,7 @@ class Location implements Serializable {
     Integer motifNumber
     String level
     String cigarAlignment
+    Integer representativeRank // used only in REPR_DOMAINS
     List<LocationFragment> fragments = []
     List<Site> sites = []
     boolean representative = false
