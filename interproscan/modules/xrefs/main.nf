@@ -52,7 +52,9 @@ process XREFS {
         def memberRelease = entries.databases.find { key, value ->
             key.toLowerCase().replace("-", "").replace(" ", "") == memberDB
         }?.value
-        SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
+        SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(
+            Output.convertDbName(memberDB),
+            memberRelease)
 
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, matches ->
             [(seqId): matches.collectEntries { rawModelAccession, match ->
