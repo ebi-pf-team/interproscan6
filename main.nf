@@ -8,6 +8,7 @@ include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_trans
 include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { XREFS                         } from "./interproscan/modules/xrefs"
+include { REPRESENTATIVE_DOMAINS        } from "./interproscan/modules/representative_domains"
 
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
@@ -84,9 +85,8 @@ workflow {
     AGGREGATE_SEQS_MATCHES(ch_seq_matches)
     AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
 
-    AGGREGATE_ALL_MATCHES.out.view()
-
-    // REPRESENTATIVE_DOMAINS(XREFS.out.collect())
+    REPRESENTATIVE_DOMAINS(AGGREGATE_ALL_MATCHES.out.collect())
+    REPRESENTATIVE_DOMAINS.out.view()
 
     Channel.from(params.formats.toLowerCase().split(','))
     .set { ch_format }
