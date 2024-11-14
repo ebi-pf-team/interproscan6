@@ -149,7 +149,17 @@ process XREFS {
                 return [(rawModelAccession): matchObject]
             }]
         }
-        aggregatedMatches.putAll(matches.collect())
+        matches.each { seqId, seqMatches ->
+            if (aggregatedMatches.containsKey(seqId)) {
+                seqMatches.each { rawModelAccession, matchObject ->
+                    if (!aggregatedMatches[seqId].containsKey(rawModelAccession)) {
+                        aggregatedMatches[seqId][rawModelAccession] = matchObject
+                    }
+                }
+            } else {
+                aggregatedMatches[seqId] = seqMatches
+            }
+        }
     }
     def outputFilePath = task.workDir.resolve("matches2xrefs.json")
     def json = JsonOutput.toJson(aggregatedMatches)
