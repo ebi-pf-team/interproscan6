@@ -1,13 +1,13 @@
 nextflow.enable.dsl=2
 
-include { AGGREGATE_SEQS_MATCHES        } from "./interproscan/modules/output/aggregate_results"
-include { AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/output/aggregate_results"
 include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
 include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
 include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
 include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { XREFS                         } from "./interproscan/modules/xrefs"
+include { AGGREGATE_SEQS_MATCHES;
+          AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_results"
 include { REPRESENTATIVE_DOMAINS        } from "./interproscan/modules/representative_domains"
 
 workflow {
@@ -60,10 +60,8 @@ workflow {
     )
 
     // AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
-
     // This is to concat MLS with scan sequences result
     // all_results = parsed_matches.concat(parsed_analysis)
-
 
     /* XREFS:
     Add signature and entry desc and names
@@ -84,7 +82,7 @@ workflow {
 
     AGGREGATE_SEQS_MATCHES(ch_seq_matches)
     AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
-    // AGGREGATE_ALL_MATCHES.out.view()
+
     REPRESENTATIVE_DOMAINS(AGGREGATE_ALL_MATCHES.out)
     REPRESENTATIVE_DOMAINS.out.view()
 
