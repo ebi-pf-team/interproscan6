@@ -84,8 +84,8 @@ workflow {
 
     AGGREGATE_SEQS_MATCHES(ch_seq_matches)
     AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
-
-    REPRESENTATIVE_DOMAINS(AGGREGATE_ALL_MATCHES.out.collect())
+    // AGGREGATE_ALL_MATCHES.out.view()
+    REPRESENTATIVE_DOMAINS(AGGREGATE_ALL_MATCHES.out)
     REPRESENTATIVE_DOMAINS.out.view()
 
     Channel.from(params.formats.toLowerCase().split(','))
