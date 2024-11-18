@@ -1,0 +1,2620 @@
+{
+ "interproscan-version": "5.71-102.0",
+"results": [ {
+  "sequence" : "MLSALIPSTHSYPAMPLARQLVHQRCVHPGPLVLRTAPLKFPTPTTDRDRTVSRRSEPSSRTALMGEQPNPWDRLQPQDAMSRHRGAKPPRRCGLLGEISLLSPG",
+  "md5" : "f307e6542dbbcd24e26634d9908cb3fb",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "UPI0000009763",
+    "id" : "UPI0000009763"
+  } ]
+},{
+  "sequence" : "MAWSITNKADTSSFTKMAEIRAHLKNSAENKDKNEDIFPEDVIIPSTKPKTKRATTPRKPAATKRSTKKEEVEEEVVIEEYHQTTEKNSPSPGVSDIVESVAAVELDDSDGDDEPMVQVEAGKVNHSARSDLSDLKVATDNIVKDLKKIITRISAVSTVLEDVQAAGISRQFTSMTKAITTLSDLVTEGKSKVVRKKVKTCKK",
+  "md5" : "e970757b38f99dbc9bb8cb5107693597",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q77TK2 UPI000000001B",
+    "id" : "tr|Q77TK2"
+  } ]
+},{
+  "sequence" : "VGFKAGVKDYKLTYYTPDYETKDTDILAAFRVTPQPGVPPEEAGAAVAAESSTGTWTTVWTDGLTSLDRYKGRCYHIEPVAGEEDQYIAYVAYPLDLFEEGSVTNMFTSIVGNVFGFKALRALRLEDLRIPTAYVKTFQGPPHGIQVERDKLNKYGRPLLGCTIKPKLGLSAKNYGRAVYECLRGGLDFTKDDENVNSQPFMRWRDRFLFCAEALYKAQAETGEIKGHYLNATAGTCEEMMKRAVFARELGVPIVMHDYLTGGFTANTTLAHYCRDNGLLLHIHRAMHAVIDRQKNHGIHFRVLAKALRMSGGDHIHAGTVVGKLEGERDITLGFVDLLRDDFIQKDRSRGIYFTQDWVSMPGVLPVASGGIHVWHMPALTEIFGDDSVLQFGGGTLGHPWGNAPGAVANRVALEACVKARNEGRDLAREGNEIIREACKWSPELAAACEVWKEIKFEFKAVDTLD",
+  "md5" : "d1b5e557788eca7553689233b97e79d3",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.20.20.110:FF:000001",
+      "name" : null,
+      "description" : "Ribulose bisphosphate carboxylase large chain",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 140,
+      "end" : 465,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 326,
+      "hmmLength" : 326,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 0.0,
+      "score" : 764.2,
+      "envelopeStart" : 140,
+      "envelopeEnd" : 465,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 140,
+        "end" : 465,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 0.0,
+    "score" : 764.4,
+    "model-ac" : "3.20.20.110-FF-000001"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:3.30.70.150:FF:000001",
+      "name" : null,
+      "description" : "Ribulose bisphosphate carboxylase large chain",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 1,
+      "end" : 137,
+      "representative" : false,
+      "hmmStart" : 3,
+      "hmmEnd" : 139,
+      "hmmLength" : 139,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 1.6E-91,
+      "score" : 305.3,
+      "envelopeStart" : 1,
+      "envelopeEnd" : 137,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 1,
+        "end" : 137,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 1.0E-91,
+    "score" : 305.9,
+    "model-ac" : "3.30.70.150-FF-000001"
+  } ],
+  "xref" : [ {
+    "name" : "sp|P28402 UPI00000001F4",
+    "id" : "sp|P28402"
+  } ]
+},{
+  "sequence" : "MEIKDLQIFQKVVEYGSVSKAAKSLNYVQSYVTVRIQKLEEELQTELFHRSSRGMVLNSEGKTLLFYSQNIISMVDEMIKVVQDCDNPAGSLEIGTVETVNKLPSILSAYHKKYPKIDLSLITGVTEDLVDDVLNYKLDGAFVTGYYNHPQIIQYEVFEEELVLISNYDKLPFEELKNKPLLVFKQGCSYRAKLEGWVRDEGEINAKIMEFGTMETILGSVIAGLGITIIPKSTISLLEAEGVVRIYEIPEKYSKITTVFIHRADTFLTNALQKFIETIKNAPETARKL",
+  "md5" : "d0778a722c923bd01ac1ca1373784dfb",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:1.10.10.10:FF:000001",
+      "name" : null,
+      "description" : "LysR family transcriptional regulator",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 1,
+      "end" : 84,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 80,
+      "hmmLength" : 84,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 2.0E-19,
+      "score" : 71.1,
+      "envelopeStart" : 1,
+      "envelopeEnd" : 84,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 1,
+        "end" : 84,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 1.1E-19,
+    "score" : 71.8,
+    "model-ac" : "1.10.10.10-FF-000001"
+  } ],
+  "xref" : [ {
+    "name" : "tr|Q7DL34 UPI000000004E",
+    "id" : "tr|Q7DL34"
+  } ]
+},{
+  "sequence" : "MDFFNKFSQGLAESSTPKSSIYYSEEKDPDTKKDEAIEIGLKSQESYYQRQLREQLARDNMTVASRQPIQPLQPTIHITPQPVPTATPAPILLPSSTVPTPKPRQQTNTSSDMSNLFDWLSEDTDAPASSLLPALTPSNAVQDIISKFNKDQKTTTPPSTQPSQTLPTTTCTQQSDGNISCTTPTVTPPQPPIVATVCTPTPTGGTVCTTAQQNPNPGAASQQNLDDMALKDLMSNVERDMHQLQAETNDLVTNVYDAREYTRRAIDQILQLVKGFERFQK",
+  "md5" : "b8d0a623c1d07ccf744bc7ba9e4da537",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q6LD94 UPI0000000006",
+    "id" : "tr|Q6LD94"
+  } ]
+},{
+  "sequence" : "RGRTFDQISAVFHRTPSLLEQEVKPSTELEYLGPDEHD",
+  "md5" : "ac8be90757fab3bfaa9690a8de104737",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q76N67 UPI0000000049",
+    "id" : "tr|Q76N67"
+  } ]
+},{
+  "sequence" : "MGAMAPRTLLLLLAAALAPTQTRAGPHSMRYFETAVSRPGLEEPRYISVGYVDNKEFVRFDSDAENPRYEPRAPWMEQEGPEYWERETQKAKGQEQWFRVSLRNLLGYYNQSAGGSHTLQQMSGCDLGSDWRLLRGYLQFAYEGRDYIALNEDLKTWTAADMAAQITRRKWEQSGAAEHYKAYLEGECVEWLHRYLKNGNATLLRTDSPKAHVTHHPRSKGEVTLRCWALGFYPADITLTWQLNGEELTQDMELVETRPAGDGTFQKWASVVVPLGKEQNYTCRVYHEGLPEPLTLRWEPPPSTDSYMVIVAVLGVLGAMAIIGAVVAFVMKRRRNTGGKGGDYALAPGSQSSEMSLRDCKA",
+  "md5" : "6d0f339302b8f8774a8c7fee8a2cabb2",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.30.500.10:FF:000001",
+      "name" : null,
+      "description" : "H-2 class I histocompatibility antigen, alpha chain",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 24,
+      "end" : 205,
+      "representative" : false,
+      "hmmStart" : 2,
+      "hmmEnd" : 182,
+      "hmmLength" : 182,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 3.8E-93,
+      "score" : 312.2,
+      "envelopeStart" : 24,
+      "envelopeEnd" : 205,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 24,
+        "end" : 205,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 2.9E-93,
+    "score" : 312.6,
+    "model-ac" : "3.30.500.10-FF-000001"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:2.60.40.10:FF:000014",
+      "name" : null,
+      "description" : "H-2 class I histocompatibility antigen, alpha chain",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 206,
+      "end" : 306,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 98,
+      "hmmLength" : 101,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 1.0E-55,
+      "score" : 187.6,
+      "envelopeStart" : 206,
+      "envelopeEnd" : 306,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 206,
+        "end" : 306,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 4.8E-56,
+    "score" : 188.7,
+    "model-ac" : "2.60.40.10-FF-000014"
+  } ],
+  "xref" : [ {
+    "name" : "tr|Q792Z7 UPI00000000C3",
+    "id" : "tr|Q792Z7"
+  } ]
+},{
+  "sequence" : "MGAAASIQTTVNTLSERISSKLEQEANASAQTKCDIEIGNFYIRQNHGCNLTVKNMCSADADAQLDAVLSAATETYSGLTPEQKAYVPAMFTAALNIQTSVNTVVRDFENYVKQTCNSSAVVDNKLKIQNVIIDECYGAPGSPTNLEFINTGSSKGNCAIKALMQLTTKATTQIAPKQVAGTGVQFYMIVIGVIILAALFMYYAKRMLFTSTNDKIKLILANKENVHWTTYMDTFFRTSPMVIATTDMQN",
+  "md5" : "ef8a186543fe2e2243b5f2c571e8ce69",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|G0XTE8 UPI0000000001",
+    "id" : "tr|G0XTE8"
+  }, {
+    "name" : "tr|A0A2I2MDI1 UPI0000000001",
+    "id" : "tr|A0A2I2MDI1"
+  }, {
+    "name" : "tr|Q76QK2 UPI0000000001",
+    "id" : "tr|Q76QK2"
+  }, {
+    "name" : "sp|P07612 UPI0000000001",
+    "id" : "sp|P07612"
+  }, {
+    "name" : "tr|Q71TT2 UPI0000000001",
+    "id" : "tr|Q71TT2"
+  }, {
+    "name" : "tr|Q0GNZ6 UPI0000000001",
+    "id" : "tr|Q0GNZ6"
+  }, {
+    "name" : "tr|Q6RZL4 UPI0000000001",
+    "id" : "tr|Q6RZL4"
+  } ]
+},{
+  "sequence" : "MELTSTRKKANAITSSILNRIAIRGQRKVADALGINESQISRWKGDFIPKMGMLLAVLEWGVEDEELAELAKKVAHLLTKEKPQDCGNSFEA",
+  "md5" : "a98d0bf5ab702291c4a8488ed6c474e7",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|A0A7L8ZHI3 UPI0000000037",
+    "id" : "tr|A0A7L8ZHI3"
+  } ]
+},{
+  "sequence" : "MDGTLFPGDDDLAIPATEFFSTKADKKPEAKREAIVKADEDDNEETLKQRLTNLEKKITNVTTKFEQIEKCCKRNDEVLFRLENHAETLRAAMISLAKKIDVQTGRRPYE",
+  "md5" : "e03855b157b3ab2102a7563dc2de82f9",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "sp|P20535 UPI000000002E",
+    "id" : "sp|P20535"
+  } ]
+},{
+  "sequence" : "MDKLYAAIFGVFMGSPEDDLTDFIEIVKSVLSDEKTVTSTNNTGCWGWYWLIIIFFIVLILLLLIYLYLKVVW",
+  "md5" : "e971fed8defd429f015dfcd1c73887b2",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q76QK9 UPI000000000F",
+    "id" : "tr|Q76QK9"
+  } ]
+},{
+  "sequence" : "MRLSFRTLQRRNALGDAPRHRSAQRRAVKTGRRASRTACDAERRTIAKRASHDS",
+  "md5" : "09dd007b5bd22ce0ad4846c918fafe0d",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "UPI00000091AE",
+    "id" : "UPI00000091AE"
+  } ]
+},{
+  "sequence" : "MHIQDRTQSVQNRVPTLERRNDNPNYRATLRVVTPFRDALRHNSAPRCTFKTGRRASRTAFLRWSVGTITPTIVRRSASSRRFVTLCVTILRRVAHSRPDAERPEPRSYAGA",
+  "md5" : "aea4539f45ae37bb738ed964da4c8dba",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "UPI0000009002",
+    "id" : "UPI0000009002"
+  } ]
+},{
+  "sequence" : "MALVMHTYKGNKGANKALIAAEYAGVKIEESADFQMGVTNKSPEFLKMNPIGKVPVLETPEGPIFESNAIARYVSRKNGDNSLNGSSLIEYAHIEQWIDFSSLEIDANMLKWFAPRMGYAPFSAPAEEAAISALKRGLEALNTHLASNTFLVGHSVTLADIVTICNLNLGFATVMTKKFTSAFPHVERYFWTMVNQPEFKKVLGDAKQTEAVPPVPTKKAPQPAKPKEEPKKAAPVAEAPKPAEEEEAPKPKAKNPLDLLPPSPMVLDDWKRLYSNTKSNFREVAIKGFWDMYDPEGYSLWFCDYKYNDENMVSFVTLNKVGGFLQRMDLARKYSFGKMLICGSEGPFKVKGLWLFRGPEIPKFIMDEVYDMELYEWTKVDISDEAQKERVSQMIEDAEPFEGEALLDAKCFK",
+  "md5" : "9f1fb227d68b82f6c4fd179f6905c839",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.40.30.10:FF:000148",
+      "name" : null,
+      "description" : "Elongation factor 1B gamma",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 1,
+      "end" : 74,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 73,
+      "hmmLength" : 73,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 3.4E-31,
+      "score" : 108.8,
+      "envelopeStart" : 1,
+      "envelopeEnd" : 74,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 1,
+        "end" : 74,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 1.3E-31,
+    "score" : 110.1,
+    "model-ac" : "3.40.30.10-FF-000148"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:3.30.70.1010:FF:000001",
+      "name" : null,
+      "description" : "Elongation factor 1-gamma 1",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 253,
+      "end" : 413,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 158,
+      "hmmLength" : 158,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 4.2E-63,
+      "score" : 213.4,
+      "envelopeStart" : 253,
+      "envelopeEnd" : 413,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 253,
+        "end" : 413,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 2.4E-63,
+    "score" : 214.2,
+    "model-ac" : "3.30.70.1010-FF-000001"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:1.20.1050.10:FF:000006",
+      "name" : null,
+      "description" : "Elongation factor 1 gamma",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 80,
+      "end" : 216,
+      "representative" : false,
+      "hmmStart" : 2,
+      "hmmEnd" : 133,
+      "hmmLength" : 137,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 2.5E-44,
+      "score" : 152.2,
+      "envelopeStart" : 80,
+      "envelopeEnd" : 216,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 80,
+        "end" : 216,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 1.7E-44,
+    "score" : 152.8,
+    "model-ac" : "1.20.1050.10-FF-000006"
+  } ],
+  "xref" : [ {
+    "name" : "sp|Q9FVT2 UPI0000000993",
+    "id" : "sp|Q9FVT2"
+  } ]
+},{
+  "sequence" : "MASHAGQQHAPAFGQAARASGPTDGRAASRPSHRQGASEARGDPELPTLLRVYIDGPHGVGKTTTSAQLMEALGPRDNIVYVPEPMTYWQVLGASETLTNIYNTQHRLDRGEISAGEAAVVMTSAQITMSTPYAATDAVLAPHIGGEAVGPQAPPPALTLVFDRHPIASLLCYPAARYLMGSMTPQAVLAFVALMPPTAPGTNLVLGVLPEAEHADRLARRQRPGERLDLAMLSAIRRVYDLLANTVRYLQRGGRWREDWGRLTGVAAATRPDPEDGAGSLPRIEDTLFALFRVPELLAPNGDLYHIFAWVLDVLADRLLPMHLFVLDYDQSPVGCRDALLRLTAGMIPTRVTTAGSIAEIRDLARTFAREVGGV",
+  "md5" : "665602aedbd61e43036d95dc529215a1",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q76N38 UPI0000000055",
+    "id" : "tr|Q76N38"
+  } ]
+},{
+  "sequence" : "MAGQVQARWQHIQDRTQSVQNRVPTLERRNDNPNYRAMLRVVMPFRDALRHNSAPRCTFKTGRRASRTAFLRWSVGTIIPTIVRRSASSCRFVTLCVTTLRRVAHSRPDAERPEPRSYAGA",
+  "md5" : "f0c62b2ee4815ba3a55dbcadbb2f8c2e",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "UPI0000009003",
+    "id" : "UPI0000009003"
+  } ]
+},{
+  "sequence" : "MGRLLLLAGLVLLMKHSDGTAYKLVCYFTNWAHSRPGPASIMPHDLDPFLCTHLIFAFASMSNNQIVAKNLQDENVLYPEFNKLKERNRELKTLLSIGGWNFGTSRFTAMLSTLANREKFIDSVISFLRIHGFDGLDLFFLYPGLRGSPPHDRWNFLFLIEELQFAFEREALLTQHPRLLLSAAVSGIPSIIHTSYDALLLGRRLDFINVLSYDLHGSWEKFTGHNSPLFSLPEDSKSSAYAMNYWRKLGTPADKLIMGFPTYGRNFYLLKESKNGLQTASMGPASPGKYTKQAGFLAYYEVCSFVQRAKKHWIDYQYVPYAFKGKEWLGYDDTISFSYKAMYVKREHFGGAMVWTLDMDDVRGTFCGNGPFPLVHILNELLVQTESNSTPLPQFWFTSSVNASGPGSENTALTEVLTTDTIKILPPGGEAMTTEVHRRYENMTTVPSDGSVTPGGTASPRKHAVTPENNTMAAEAKTMSTLDFFSKTTTGVSKTTTGISKTTTGVSKTTTGVSKATAGISKTIPEISKATAGVSKTTTGVSKTTTGISKTITGVSKTTTGISKTTTGISKTTTGVSKITTGVSKTTTGISKTTTGISQTTTGISKTTTDISKTTTGISKTTPGISKTTPGMTVIVQTQANEAETTATMDHQSVTPTEMDTTLFYLKTMTPSEKETSRKKTMVLEKATVSPREMSATPNGQSKTLKWASLITEVETYSQDG",
+  "md5" : "7a7fff924051b7acde6b07e18bba7030",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.10.50.10:FF:000001",
+      "name" : null,
+      "description" : "Chitinase 3-like 1",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 262,
+      "end" : 331,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 71,
+      "hmmLength" : 71,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 9.6E-25,
+      "score" : 88.8,
+      "envelopeStart" : 262,
+      "envelopeEnd" : 331,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 262,
+        "end" : 331,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 3.0E-25,
+    "score" : 90.4,
+    "model-ac" : "3.10.50.10-FF-000001"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:3.20.20.80:FF:000007",
+      "name" : null,
+      "description" : "Acidic mammalian chitinase",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 25,
+      "end" : 282,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 249,
+      "hmmLength" : 274,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 2.3E-104,
+      "score" : 350.4,
+      "envelopeStart" : 25,
+      "envelopeEnd" : 282,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 25,
+        "end" : 282,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 1.6E-114,
+    "score" : 383.7,
+    "model-ac" : "3.20.20.80-FF-000007"
+  } ],
+  "xref" : [ {
+    "name" : "tr|Q54AJ4 UPI000000004C",
+    "id" : "tr|Q54AJ4"
+  } ]
+},{
+  "sequence" : "MLPALLPLLLPALLPGAGGGRCPQRCACTQPALRCPTPPPGARPAPARASFTHLPVKVIPSHAFEGLRDAFIIEISQSDSLERIEASAFDSLPALSEILILNTKNLLHIEDGAFRNLPRLKYLSICNTGIIEFPDLTQIFSSEAHFILELCDNLRMTTIPQNAFQGMSNESLTLKLYKNGFEDIHSHAFNGTKLNQLILKDNKNLRRIHNDALRGATGPDVLDISSTALESLPSYGLEAIQVLNAMSSYSLKRLPPLDKFSSLLEAVLTYPSHCCAFQNLRTEKQNSLLSIFDNFSKQCESTMRKPASEVFYRDASSNTSLWPAEKHMYPLETGEEAFPYSYSTVFYEDEMTGFDFEYDFCQPKILTCTPEPDAFNPCEDILGYSFLRVLIWFINILALAGNFIVLLVLITSHYKLTVPRFLMCNLSFADFCMGLYLLLIASVDAQTSGQYYNHAIDWQTGSGCSTAGFFTVFASELSVYTLTVITIERWHTITYAMQLDRKLRLRHAVPIMLGGWVFSILIAVLPLLGVSSYMKVSICLPMDIETGLSQAYILLILMLNVIAFLVICACYIKIYVAVQNPELVAANKDTKIAKRMAILIFTDFTCMAPISFFAISAAIKVPLITVTNSKILLVLFYPVNSCANPFLYAIFTKAFQRDFFLLMSKLGCCKSRAELYRVNYFSAYTPNCKNGSSAPGPSKASQALLLLSASEKLCKTRRSTKKSQPECQ",
+  "md5" : "6319a3e5e6f1d977da0273390e7b3363",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:1.20.1070.10:FF:000019",
+      "name" : null,
+      "description" : "Lutropin-choriogonadotropic hormone receptor",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 387,
+      "end" : 671,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 282,
+      "hmmLength" : 284,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 0.0,
+      "score" : 535.6,
+      "envelopeStart" : 387,
+      "envelopeEnd" : 671,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 387,
+        "end" : 671,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 0.0,
+    "score" : 536.0,
+    "model-ac" : "1.20.1070.10-FF-000019"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:3.80.10.10:FF:000128",
+      "name" : null,
+      "description" : "Lutropin-choriogonadotropic hormone receptor",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 24,
+      "end" : 333,
+      "representative" : false,
+      "hmmStart" : 2,
+      "hmmEnd" : 295,
+      "hmmLength" : 329,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 0.0,
+      "score" : 493.2,
+      "envelopeStart" : 24,
+      "envelopeEnd" : 333,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 24,
+        "end" : 333,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 0.0,
+    "score" : 550.0,
+    "model-ac" : "3.80.10.10-FF-000128"
+  } ],
+  "xref" : [ {
+    "name" : "sp|Q90674 UPI0000000056",
+    "id" : "sp|Q90674"
+  } ]
+},{
+  "sequence" : "MNTQLMGERIRARRKKLKIRQAALGKMVGVSNVAISQWERSETEPNGENLLALSKALQCSPDYLLKGDLSQTNVAYHSRHEPRGSYPLISWVSAGQWMEAVEPYHKRAIENWHDTTVDCSEDSFWLDVQGDSMTAPAGLSIPEGMIILVDPEVEPRNGKLVVAKLEGENEATFKKLVMDAGRKFLKPLNPQYPMIEINGNCKIIGVVVDAKLANLP",
+  "md5" : "c6b29c211591c37f2a1e2b045d1bafcb",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|B1B6L9 UPI0000000036",
+    "id" : "tr|B1B6L9"
+  } ]
+},{
+  "sequence" : "MACGGKRLLFLALAWVLLAHLCSQAEAASNYDCCLSYIQTPLPSRAIVGFTRQMADEACDINAIIFHTKKRKSVCADPKQNWVKRAVNLLSLRVKKM",
+  "md5" : "bfadee4cd4b8bed398c9ecf721db1418",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:2.40.50.40:FF:000012",
+      "name" : null,
+      "description" : "C-C motif chemokine",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 26,
+      "end" : 97,
+      "representative" : false,
+      "hmmStart" : 3,
+      "hmmEnd" : 72,
+      "hmmLength" : 74,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 2.2E-28,
+      "score" : 99.7,
+      "envelopeStart" : 26,
+      "envelopeEnd" : 97,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 26,
+        "end" : 97,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 1.8E-28,
+    "score" : 100.0,
+    "model-ac" : "2.40.50.40-FF-000012"
+  } ],
+  "xref" : [ {
+    "name" : "sp|O89093 UPI0000000064",
+    "id" : "sp|O89093"
+  } ]
+},{
+  "sequence" : "MFNMNINSPVRFVKETNRAKSPTRQSPGAAGYDLYSAYDYTIPPGERQLIKTDISMSMPKICYGRIAPRSGLSLKGIDIGGGVIDEDYRGNIGVILINNGKCTFNVNTGDRIAQLIYQRIYYPELEEVQSLDSTNRGDQGFGSTGLR",
+  "md5" : "89fcc95ac70f807462319dd5dc076e4f",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q49PV3 UPI0000000008",
+    "id" : "tr|Q49PV3"
+  } ]
+},{
+  "sequence" : "MRLSFRTLQRRNALGDAPRHRSAQRRAVKTGRRASRTACDAERRTIVERAWHDS",
+  "md5" : "399e79a277b8f76be259d86f23e01ce8",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "UPI00000091AF",
+    "id" : "UPI00000091AF"
+  } ]
+},{
+  "sequence" : "MNDDNQQSAHDVDASGSLVSDTHHRRLSGAQKLIVGGVVLALSLSLIWLGGREKKENGDAPPSTMIATNTKPFHPAPIDVTLDPPAAQEAVQPTAPPPARSEPERHEPRPEETPIFAYTSGDQGTSKRVQQGETDRRREGNGEDSPLPKVEVSAENDLSIRMKPTELQPTRATLLPHPDFMVTEGTIIPCILQTAIDTSLAGYVKCVLPWDVRGTTNNVVLLDRGTTVVGEIQRGLQQGDARVFVLWDRAETPDHAMISLASPSADELGRSGLPGTVDNHFWQRFSGAMLLSVVQGAFQAASTYAGSSGGGTSFNSVQNNGEQTADTALKATINIPPTLKKNQGDTVSIFVARDLDFSGIYQLRMAGRAARGRDRRP",
+  "md5" : "0994c72474f851e0ad71468e2f60c9cb",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:2.40.128.260:FF:000001",
+      "name" : null,
+      "description" : "Type IV secretion system protein",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 179,
+      "end" : 358,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 180,
+      "hmmLength" : 180,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 2.9E-124,
+      "score" : 413.5,
+      "envelopeStart" : 179,
+      "envelopeEnd" : 358,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 179,
+        "end" : 358,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 1.8E-124,
+    "score" : 414.1,
+    "model-ac" : "2.40.128.260-FF-000001"
+  } ],
+  "xref" : [ {
+    "name" : "tr|A0A2Z2Q163 UPI0000000071",
+    "id" : "tr|A0A2Z2Q163"
+  } ]
+},{
+  "sequence" : "MFVIKRNGYKENVMFDKITSRIRKLCYGLNTDHIDPIKIAMKVIQGIYNGVTTVELDTLAAEIAATCTTQHPDYAILAARIAVSNLHKETKKLFSEVMEDLFNYVNPKNGKHSPIISSITMDIVNKYKDKLNSVIIYERDFSYNYFGFKTLEKSYLLKINNKIVERPQHMLMRVAVGIHQWDIDSAIETYNLLSEKWFTHASPTLFNAGTSRHQMSSCFLLNMIDDSIEGIYDTLKRCALISKMAGGIGLSISNIRASGSYISGTNGISNGIIPMLRVYNNTARYIDQGGNKRPGVMAIYLEPWHSDIMAFLDLKKNTGNEEHRTRDLFIALWIPDLFMKRVKDDGEWSLMCPDECPGLDNVWGDEFERLYTLYERERRYKSIIKARVVWKAIIESQIETGTPFILYKDACNKKSNQQNLGTIKCSNLCTEIIQYADANEVAVCNLASVALNMFVIDGRFDFLKLKDVVKVIVRNLNKIIDINYYPIPEAEISNKRHRPIGIGVQGLADAFILLNYPFDSLEAQDLNKKIFETIYYGALEASCELAEKEGPYDTYVGSYASNGILQYDLWNVVPSDLWNWEPLKDKIRTYGLRNSLLVAPMPTASTAQILGNNESVEPYTSNIYTRRVLSGEFQVVNPHLLRVLTERKLWNDEIKNRIMADGGSIQNTNLPEDIKRVYKTIWEIPQKTIIKMAADRGAFIDQSQSMNIHIADPSYSKLTSMHFYGWSLGLKTGMYYLRTKPASAPIQFTLDKDKIKPLVVCDSEICTSCSG",
+  "md5" : "e2082d1be40de80e9baefef1f8e16702",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.20.70.20:FF:000010",
+      "name" : null,
+      "description" : "Ribonucleoside-diphosphate reductase",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 74,
+      "end" : 746,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 676,
+      "hmmLength" : 676,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 0.0,
+      "score" : 1197.1,
+      "envelopeStart" : 74,
+      "envelopeEnd" : 746,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 74,
+        "end" : 746,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 0.0,
+    "score" : 1197.3,
+    "model-ac" : "3.20.70.20-FF-000010"
+  } ],
+  "xref" : [ {
+    "name" : "tr|V5R0F1 UPI0000000010",
+    "id" : "tr|V5R0F1"
+  } ]
+},{
+  "sequence" : "MPQQLSPINIETKKAISNARLKPLDIHYNESKPTTIQNTGKLVRINFKGGYISGGFLPNEYVLSSLHIYWGKEDDYGSNHLIDVYKYSGEINLVHWNKKKYSSYEEAKKHDDGLIIISIFLQVLDHKNVYFQKIVNQLDSIRSANTSAPFDSVFYLDNLLPSKLDYFTYLGTTINHSADAVWIIFPTPINIHSDQLSKFRTLLSSSNHDGKPHYITENYRNPYKLNDDTQVYYSGEIIRAATTSPARENYFMRWLSDLRETCFSYYQKYIEENKTFAIIAIVFVFILTAILFFMSRRYSREKQN",
+  "md5" : "a5a86e0883c185bc3d40a0ff0d49d9c7",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q6LDV9 UPI0000000004",
+    "id" : "tr|Q6LDV9"
+  } ]
+},{
+  "sequence" : "MLKPLGDRVVIEVIETEEKTASGIVLPDTAKEKPQEGRVVAVGKGRVLDSGERVAPEVEVGDRIIFSKYAGTEVKYDGKEYLILRESDILAVIG",
+  "md5" : "64c5df6423f2d64b96e59f3de9f650a2",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:2.30.33.40:FF:000001",
+      "name" : null,
+      "description" : "10 kDa chaperonin",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 1,
+      "end" : 94,
+      "representative" : false,
+      "hmmStart" : 3,
+      "hmmEnd" : 94,
+      "hmmLength" : 96,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 2.0E-41,
+      "score" : 141.6,
+      "envelopeStart" : 1,
+      "envelopeEnd" : 94,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 1,
+        "end" : 94,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 1.9E-41,
+    "score" : 141.7,
+    "model-ac" : "2.30.33.40-FF-000001"
+  } ],
+  "xref" : [ {
+    "name" : "tr|A0A5C8MS24 UPI00000000AC",
+    "id" : "tr|A0A5C8MS24"
+  } ]
+},{
+  "sequence" : "MSMSIMDFINDLKKKNITLYHNKGKIKIIGPQELLTADLKQQIKRYKEDIIAALEAGETDIERSFPKAAPSKSGTYPLSREQKRMFILNQLDDSKTAYNMPLAVKINGEVQISRLEQAWKALIKRHESLRTSFVMLDGEPVQKIEQEAEFRLEYSELGDQSIQEKISRFIKPFELEKAPLLRAEIVKVDEAEHMMMVDMHHIISDGVSIGILMKEFADCCEGKELSPLAVQYKDYSEWQRDIEQQSRLKKQEAYWLNTFRGDIPVLNMPLDFPRPKIRSFQGNRTVVELDQDTTKKLKTIAAKNGVTMYMLLLAGYTILLSKYTGQEDIIVGSPIAGRPHADLNGTIGMFVGTLALRNRPKGNMTFSEYVQTVKNNTLKAYENQDYQFDALIEHLGLTHDMSRNPLFDTMFDLQ",
+  "md5" : "38287e5ae55888c26728890ac3535ff5",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q76N16 UPI000000007F",
+    "id" : "tr|Q76N16"
+  } ]
+},{
+  "sequence" : "MTTATAGLAVELKQSTAQAHEKAEHSTFMSDLLKGRLGVAEFTRLQEQAWLFYTALEQAVDAVRASGFAESLLDPALNRAEVLARDLDKLNGSSEWRSRITASPAVIDYVNRLEEIRDNVDGPALVAHHYVRYLGDLSGGQVIARMMQRHYGVDPEALGFYHFEGIAKLKVYKDEYREKLNNLELSDEQREHLLKEATDAFVFNHQVFADLGKGL",
+  "md5" : "363e775cf6997e864ff73e8eb65932ff",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q54AI1 UPI0000000089",
+    "id" : "tr|Q54AI1"
+  } ]
+},{
+  "sequence" : "MALKRINKELSDLARDPPAQCSAGPVGDDMFHWQATIMGPNDSPYQGGVFFLTIHFPTDYPFKPPKVAFTTRIYHPNINSNGSICLDILRSQWSPALTISKVLLSICSLLCDPNPDDPLVPEIARIYKTDRDKYNRISREWTQKYAM",
+  "md5" : "383b5f66ed235d0114cece8eea12e15b",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.10.110.10:FF:000101",
+      "name" : null,
+      "description" : "Ubiquitin-conjugating enzyme E2 D2",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 1,
+      "end" : 147,
+      "representative" : false,
+      "hmmStart" : 3,
+      "hmmEnd" : 149,
+      "hmmLength" : 149,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 6.9E-103,
+      "score" : 342.6,
+      "envelopeStart" : 1,
+      "envelopeEnd" : 147,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 1,
+        "end" : 147,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 6.2E-103,
+    "score" : 342.8,
+    "model-ac" : "3.10.110.10-FF-000101"
+  } ],
+  "xref" : [ {
+    "name" : "tr|A0A6B2F8B5 UPI000000004D",
+    "id" : "tr|A0A6B2F8B5"
+  } ]
+},{
+  "sequence" : "MDVVSLDKPFMYFEEIDNELDYEPESANEVAKKLPYQGQLKLLLGELFFLSKLQRHGILDGATVVYIGSAPGTHIRYLRDHFYNLGVIIKWMLIDGRHHDPILNGLRDVTLVTRFVDEEYLRSIKKQLHPSKIILISDVRSKRGGNEPSTADLLSNYALQNVMISILNPVASSLKWRCPFPDQWIKDFYIPHGNKMLQPFAPSYSAEMRLLSIYTGENMRLTRVTKSDAVNYEKKMYYLNKIVRNKVVVNFDYPNQEYDYFHMYFMLRTVYCNKTFPTTKAKVLFLQQSIFRFLNIPTTSTEKVSHEPIQRKISSKNSMSKNRNSKRSVRSNK",
+  "md5" : "3b5c4496cfc3b37e5f39083026766b5b",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|A0A2I6TDT0 UPI0000000018",
+    "id" : "tr|A0A2I6TDT0"
+  } ]
+},{
+  "sequence" : "MSSPASTPSRRSSRRGRVTPTQSLRSEESRSSPNRRRRGE",
+  "md5" : "cfa0179dae1a227203e07c673627b28f",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q76NI2 UPI000000003A",
+    "id" : "tr|Q76NI2"
+  } ]
+},{
+  "sequence" : "MEDLNEANFSHLLINLSNNKDIDAQYASTLSVVHELLSAINFKIFNINKKSKKNSKSIEQHPVVHHAASAGREFNRR",
+  "md5" : "b5dab3829c7f91584a12152093a25ac0",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q0N508 UPI0000000029",
+    "id" : "tr|Q0N508"
+  } ]
+},{
+  "sequence" : "MEVIADRLDDIVKQNIADEKFVDFVIHGLEHQCPAILRPLIRLFIDILLFVIVIYIFTVRLVSRNYQMLLALVALVITLTIFYYFIL",
+  "md5" : "c43ffc55fcbfdb97736040769087a733",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|A0A4P8D5W1 UPI0000000016",
+    "id" : "tr|A0A4P8D5W1"
+  } ]
+},{
+  "sequence" : "RKTHPLMKIVNNAFIDLPAPSNISSWWNFGSLLGICLILQILTGLFLAMHYTSDTMTAFSSVTHICRDVNYGWIIRYMHANGASMFFICLFMHVGRGLYYGSYTFLETWNIGVILLFTVMAT",
+  "md5" : "81debe252faf10373214a59feac4a908",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q9XKB8 UPI0000000040",
+    "id" : "tr|Q9XKB8"
+  } ]
+},{
+  "sequence" : "AIIGLQGGVWAASANCTPSAQESVAIGTACASNIAGLQQTGVVIGGKKYMITRVDADEGTAMGKKGAEGISIYKTKQAVIIGYFSDASVSAGQNSDATYKCAKYLMDAGY",
+  "md5" : "cd97bf2f3ae6cc33efac0ae5412c222a",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q76N78 UPI0000000041",
+    "id" : "tr|Q76N78"
+  } ]
+},{
+  "sequence" : "MTVGQRIKAIRKERKLTQVQLAEKANLSRSYLADIERDRYNPSLSTLEAVAGALGIQVSAIVGEETLIKEEQAEYNSKEEKDIAKRMEEIRKDLEKSDGLSFSGEPMSQEAVESLMEAMEHIVRQTQRINKKYTPKKYRNDDQE",
+  "md5" : "0fb28b4408e5fa5dc814ac5c4e86ec48",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "sp|P06153 UPI0000000079",
+    "id" : "sp|P06153"
+  } ]
+},{
+  "sequence" : "GTENKSKFGANAILGVSLAVCKAGAVEKGVPLYRHIADLAGNSEVILPVPAFNVINGGSHAGNKLAMQEFMILPVGAANFREAMRIGAEVYHNLKNVIKEKYGKDATNVGDEGGFAPNILENKEGLELLKTAIGKAGYTDKVVIGMDVAASEFFRSGKYDLDFKSPDDPSRYISPDQLADLYKSFIKDYPVVSIEDPFDQDDWGAWQKFTASAGIQVVGDDLTVTNPKRIAKAVNEKSCNCLLLKVNQIGSVTESLQACKLAQANGWGVMVSHRSGETEDTFIADLVVGLCTGQIKTGAPCRSERLAKYNQLLRIEEELGSKAKFAGRNFRNPLAK",
+  "md5" : "41b2063c8bac15469b29371bf6befb48",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.20.20.120:FF:000002",
+      "name" : null,
+      "description" : "Enolase 1",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 30,
+      "end" : 335,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 307,
+      "hmmLength" : 308,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 0.0,
+      "score" : 608.9,
+      "envelopeStart" : 30,
+      "envelopeEnd" : 335,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 30,
+        "end" : 335,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 0.0,
+    "score" : 609.2,
+    "model-ac" : "3.20.20.120-FF-000002"
+  } ],
+  "xref" : [ {
+    "name" : "UPI0000000874",
+    "id" : "UPI0000000874"
+  } ]
+},{
+  "sequence" : "MSIQHFRVALIPFFAAFCLPVFAHPETLVKVKDAEDQLGARVGYIELDLNSGKILESFRPEERFPMMSTFKVLLCGAVLSRVDAGQEQLGRRIHYSQNDLVEYSPVTEKHLTDGMTVRELCSAAITMSDNTAANLLLTTIGGPKELTAFLHNMGDHVTRLDRWEPELNEAIPNDERDTTMPAAMATTLRKLLTGELLTLASRQQLIDWMEADKVAGPLLRSALPAGWFIADKSGAGERGSRGIIAALGPDGKPSRIVVIYTTGSQATMDERNRQIAEIGASLIKHW",
+  "md5" : "a57302ca27229fb06a22728ba4bd7aca",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|A0AAX3Q6C9 UPI00000000E4",
+    "id" : "tr|A0AAX3Q6C9"
+  } ]
+},{
+  "sequence" : "MDIDPYKEFGASVELLSFLPSDFFPSIRDLLDTASALYREALESPEHCSPHHTALRQAILCWGELMNLATWVGSNLEDPASRELVVSYVNVNMGLKIRQLLWFHISCLTFGRETVLEYLVSFGVWIRTPPAYRPPNAPILSTLPETTVVRRRGRSPRRRTPSPRRRRSQSPRRRRSQSRESQC",
+  "md5" : "a74e5f142699c4279536112bf47ee1b2",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:1.10.4090.10:FF:000001",
+      "name" : null,
+      "description" : "Capsid protein",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 1,
+      "end" : 154,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 154,
+      "hmmLength" : 154,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 3.7E-104,
+      "score" : 347.1,
+      "envelopeStart" : 1,
+      "envelopeEnd" : 154,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 1,
+        "end" : 154,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 3.2E-104,
+    "score" : 347.3,
+    "model-ac" : "1.10.4090.10-FF-000001"
+  } ],
+  "xref" : [ {
+    "name" : "tr|Q77QZ2 UPI00000000A0",
+    "id" : "tr|Q77QZ2"
+  } ]
+},{
+  "sequence" : "MMTPENDEEQTSVFSATVYGDKIQGKNKRKRVIGLCIRISMVISLLSMITMSAFLIVRLNQCMSANEAAITDAAVAVAAASSTHRKVASSTTQYDHKESCNGLYYQGSCYILHSDYQLFSDAKANCTAESSTLPNKSDVLITWLIDYVEDTWGSDGNPITKTTSDYQDSDVSQEVRKYFCVKTMN",
+  "md5" : "f9fa17d0397cc30e7f0094f0770c24c7",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|A0A2I2MC80 UPI0000000002",
+    "id" : "tr|A0A2I2MC80"
+  } ]
+},{
+  "sequence" : "MNPKHWGRAVWTIIFIVLSQAGLDGNIEACKRKLYTIVSTLPCPACRRHATIAIEDNNVMSSDDLNYIYYFFIRLFNNLASDPKYAIDVTKVNPL",
+  "md5" : "4d408d3c18311519769a1af770f6a985",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|A4GDC1 UPI000000000C",
+    "id" : "tr|A4GDC1"
+  } ]
+},{
+  "sequence" : "MVDAITVLTAIGITVLMLLMVISGAAMIVKELNPNDIFTMQSLKFNRAVTIFKYIGLFIYIPGTIILYATYVKSLLMKS",
+  "md5" : "547483126eef37576e88ee8afe97c28e",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|H2DWB7 UPI0000000011",
+    "id" : "tr|H2DWB7"
+  } ]
+},{
+  "sequence" : "LASQEKQQDREIPVLCPVCTSLVGKLIDLVLGGAVDKVTDYLETLCAKADGLVETLCTKIVSYGIDKLIEKILEGGSAKLICGLIHAC",
+  "md5" : "9157126c4d823514eaec68b22a09b78f",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q76N77 UPI0000000042",
+    "id" : "tr|Q76N77"
+  } ]
+},{
+  "sequence" : "MLSAILPMLILTSIVSGAMPIALDIMAGEKDRKSIEALLLTPVSRNKVLVGKWLAVSTFGVASGVFALVFLILSTVLFTENLKTAFQLGDHMWSVIGASALIIVLSALLISAMELFISIMSSSVKEAQSYMSLVVFLPVFPMFFIFSKAPNQFDLSYFLIPFLNLHALFKQLLFGMVDPATILSTSGTIAVLIAIFFLLARACFLKDKWVLPK",
+  "md5" : "7d2405486fd3c5915b730f7231cf7535",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q7DLB6 UPI0000000039",
+    "id" : "tr|Q7DLB6"
+  } ]
+},{
+  "sequence" : "MSPWQPLLLALLAFGCSSAAPYQRQPTFVVFPKDLKTSNLTDTQLAE",
+  "md5" : "a43cfa5653f097e7f5b462ad5c9afc7a",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q9QWS6 UPI00000000C6",
+    "id" : "tr|Q9QWS6"
+  } ]
+},{
+  "sequence" : "MSPQTETKASVGFKAGVKEYKLNYYTPEYETKDTDILAAFRVTPQPGVPPEEAGAAVAAESSTGTWTTVWTDGLTSLDRYKGRCYHIEPVPGEETQFIAYVAYPLDLFEEGSVTNMFTSIVGNVFGFKALAALRLEDLRIPPAYTKTFQGPPHGIQVERDKLNKYGRPLLGCTIKPKLGLSAKNYGRAVYECLRGGLDFTKDDENVNSQPFMRWRDRFLFCAEAIYKSQAETGEIKGHYLNATAGTCEEMMKRAIFARELGVPIVMHDYLTGGFTANTSLAHYCRDNGLLLHIHRAMHAVIDRQKNHGMHFRVLAKALRLSGGDHVHAGTVVGKLEGDRESTLGFVDLLRDDYVEKDRSRGIFFTQDWVSLPGVLPVASGGIHVWHMPALTEIFGDDSVLQFGGGTLGHPWGNAPGAVANRVALEACVQARNEGRDLAVEGNEIIREACKWSPELAAACEVWKEITFNFPTIDKLDGQD",
+  "md5" : "4c71e7528014f60ea0bec521bf81ec12",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.20.20.110:FF:000001",
+      "name" : null,
+      "description" : "Ribulose bisphosphate carboxylase large chain",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 150,
+      "end" : 475,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 326,
+      "hmmLength" : 326,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 0.0,
+      "score" : 754.4,
+      "envelopeStart" : 150,
+      "envelopeEnd" : 475,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 150,
+        "end" : 475,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 0.0,
+    "score" : 754.7,
+    "model-ac" : "3.20.20.110-FF-000001"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:3.30.70.150:FF:000001",
+      "name" : null,
+      "description" : "Ribulose bisphosphate carboxylase large chain",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 9,
+      "end" : 147,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 139,
+      "hmmLength" : 139,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 1.7E-90,
+      "score" : 302.0,
+      "envelopeStart" : 9,
+      "envelopeEnd" : 147,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 9,
+        "end" : 147,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 1.1E-90,
+    "score" : 302.6,
+    "model-ac" : "3.30.70.150-FF-000001"
+  } ],
+  "xref" : [ {
+    "name" : "tr|A0A249RSV5 UPI00000008A4",
+    "id" : "tr|A0A249RSV5"
+  } ]
+},{
+  "sequence" : "MPRYTVHVRGEWLAVPCQDGKLSVGWLGREAVRRYMKNKPDNGGFTSVDEVRFLVRRCKGLGLLDNEDLLEVALED",
+  "md5" : "adb8c844b5fdc5aa379dff2371a6181f",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.10.20.90:FF:000111",
+      "name" : null,
+      "description" : "Histidine ammonia-lyase",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 2,
+      "end" : 76,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 75,
+      "hmmLength" : 86,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 2.0E-43,
+      "score" : 148.1,
+      "envelopeStart" : 2,
+      "envelopeEnd" : 76,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 2,
+        "end" : 76,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 1.8E-43,
+    "score" : 148.2,
+    "model-ac" : "3.10.20.90-FF-000111"
+  } ],
+  "xref" : [ {
+    "name" : "tr|Q76N87 UPI000000003E",
+    "id" : "tr|Q76N87"
+  } ]
+},{
+  "sequence" : "MALKTQLLWSFVVVFVVSFSTTSCSGSSFQEVNALHSYVDHVDDKESGYNSRAYPSYTDTIEGLKVMELI",
+  "md5" : "312e1ddd3e070731ccab3a5aec72f9d4",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q71V66 UPI0000000122",
+    "id" : "tr|Q71V66"
+  } ]
+},{
+  "sequence" : "MRLSFLTLQRRNAVGDALRHKSALRRILKTGRRASGTACDAERRTIVEKLPHDS",
+  "md5" : "85d10fb9e7309ac927a4ada56d427fa8",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "UPI0000008307",
+    "id" : "UPI0000008307"
+  } ]
+},{
+  "sequence" : "MSQPYLKIAILVAATIVSAIPVWTTPVSTSPPQQTKLHYVGNGTWVHNNTFNVTRYDRITMEPVYNNNLSSTTFFVAISERNFRTVNTPLGASVFWILKSALNPPKHQPCIANVPEPGDPRGPCVNSTVSLFFNDNLEPFLMTKNLLEFEVLPDNYITGWTFERSKTVATKGNPVGVVLSPPRTSPDVNNTIRDDGTPKQHLSIIDEHTTFVLDLQNFTKTLTYISPFAAVWPITAFHAGITVMGCDTTQAIAYLGNGFMGLQISSVNNPPLEMIVAPNDVRARIVNRLPPRRRLEPPGPYAGPIYKVYVLSDGNFYLGHGMSKISREVAAYPEESLDYRYHLSLANLDTLAMLAELSSGKSKDVSYYLYRIIARLAVATFSLAEVIRLSDYMLLQEAIDVDINLRLIVPLVMKYAAGGTADSSYTSSDVAMDQFEVAQAQIEKIVADINIENELRKPMYEHRSLLKSVYAYSRKPLPNAVSFANRLITAMYKEAIKDRITWNSTMREVLFFAVGAAAGSHVILTDGPDLGLHAHKDSSMFLSLNRNILLLCTAMCTASHAVSAGVKLEEVMAGLIAGGVQFSLLEVFSPCMASARFDLAEEEHVLDLLSVIPPRLYTDLNTGLEDDGTTIHSYGRSANGILNSRIAYNFDAVRVFTPELASCSTKLPKVLVVLPLASNRSYVITRTAPNIGLTYSLDGVNIAKPIVISYITYGNCQVSRATIRSVYLDHPGHTQSCVYCGSVFMRYMASGAIMDLIYIDDKDVELQLVAGENSTIPAFNPKLYTPSMNALLMFPNGTVTLMSAFASYSAFKIPSTYLWASIGGLLLAILILYVIVKMLCGGVINNDYSLLLNSE",
+  "md5" : "25a3d83a49f80212912a2d8a770b9c68",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "sp|P24430 UPI000000011D",
+    "id" : "sp|P24430"
+  } ]
+},{
+  "sequence" : "MDKKSLYKYLLLRSTGDMHKAKSPTIMTRVTNNVYLGNYKNAMDAPSSEVKFKYVLNLTMDKYTLPNSNINIIHIPLVDDTTTDISKYFDDVTAFLSKCDQRNEPVLVHCAAGVNRSGAMILAYLMSKNKESLPMLYFLYVYHSMRDLRGAFVENPSFKRQIIEKYVIDKN",
+  "md5" : "16b339368e57fd7ef16462001ab849f9",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q49PN3 UPI000000001A",
+    "id" : "tr|Q49PN3"
+  } ]
+},{
+  "sequence" : "MSKILTFVKNKIIDLINNDQIKYSRVIMIEESDSLLPVDEVHANHGFDCVEMIDENISNENIEQYKTESFFTIN",
+  "md5" : "ce9b43864f2990d8dd925b9deaae20a1",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|A0A0A1CPY9 UPI0000000009",
+    "id" : "tr|A0A0A1CPY9"
+  } ]
+},{
+  "sequence" : "MAARLCCQLDPARDVLCLRPVGAESRGRPLPGPLGALPPASPSAVPSDHGAHLSLRGLPVCAFSSAGPCALRFTSARRMETTVNAHRNLPKVLHKRTLGLSAMSTTDLEAYFKDCVFNEWEELGEEIRLKVFVLGGCRHKLVCSPAPCNFFTSA",
+  "md5" : "3ca0b4ff6ea8bba29065b0327d851ce6",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q787B3 UPI0000000059",
+    "id" : "tr|Q787B3"
+  } ]
+},{
+  "sequence" : "MLLALLTPIWASCAPVNKSNIDKIAQPIDFIGAGNEARTRDLNLGKVALYQLSYSRLGHEILHA",
+  "md5" : "6896649e43b753b732599dd8a8942bb6",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q87BX0 UPI0000007C84",
+    "id" : "tr|Q87BX0"
+  } ]
+},{
+  "sequence" : "MKLLTFCSFKGGAGKTTALMGLCAAFASDGKRLALFDADENRPLTRWKENALRSNTWGSFCEVYAAEEMALLEAAYEDAELQGFDYALADTHGGSSELNNTIIASSNLLLIPTMLTPLDIDEALSTYRYVIELLLSENLAIPTAVLRQRVPVGRLTTSQRAMSDMLASLPVVQSPMHERDAFAAMKERGMLHLTLLNMRTDPTMRLLERNLRIAMEELVTISKLVSEALEG",
+  "md5" : "658142b53f63c9f940db6c8a7dac70d5",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.40.50.300:FF:001775",
+      "name" : null,
+      "description" : "Protein virC1",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 1,
+      "end" : 212,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 212,
+      "hmmLength" : 212,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 0.0,
+      "score" : 490.9,
+      "envelopeStart" : 1,
+      "envelopeEnd" : 212,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 1,
+        "end" : 212,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 0.0,
+    "score" : 491.1,
+    "model-ac" : "3.40.50.300-FF-001775"
+  } ],
+  "xref" : [ {
+    "name" : "tr|A0A2Z2PUM5 UPI0000000074",
+    "id" : "tr|A0A2Z2PUM5"
+  } ]
+},{
+  "sequence" : "MATKLDYEDAVFYFVDDDKICSRDSIIDLIDEYITWRNHVIVFNKDITSCGRLYKELMKFDDVAIRYYGIDKINEIVEAMSEGDHYINFTKVHDQESLFATIGICAKITEHWGYKKISESRFQSLGNITDLMTDDNINILILFLEKKLN",
+  "md5" : "9ae5125cbcdce54f6e042a387fb74c49",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|A4GD94 UPI0000000007",
+    "id" : "tr|A4GD94"
+  } ]
+},{
+  "sequence" : "MILGYWNVRGLTHPIRLLLEYTDSSYEEKRYAMGDAPDYDRSQWLNEKFKLGLDFPNLPYLIDGSRKITQSNAIMRYLARKHHLCGETEEERIRADIVENQVMDNRMQLIMLCYNPDFEKQKPEFLKTIPEKMKLYSEFLGKRPWFAGDKVTYVDFLAYDILDQYHIFEPKCLDAFPNLKDFLARFEGLKKISAYMKSSRYLSTPIFSKLAQWSNK",
+  "md5" : "f67706d5052ca513b292f77736fd0626",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.40.30.10:FF:000603",
+      "name" : null,
+      "description" : "Glutathione S-transferase Mu 1",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 1,
+      "end" : 107,
+      "representative" : false,
+      "hmmStart" : 2,
+      "hmmEnd" : 85,
+      "hmmLength" : 112,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 3.7E-49,
+      "score" : 167.5,
+      "envelopeStart" : 1,
+      "envelopeEnd" : 107,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 1,
+        "end" : 107,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 4.6E-60,
+    "score" : 202.7,
+    "model-ac" : "3.40.30.10-FF-000603"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:1.20.1050.10:FF:000083",
+      "name" : null,
+      "description" : "Glutathione S-transferase Mu 1",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 85,
+      "end" : 189,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 105,
+      "hmmLength" : 105,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 7.8E-65,
+      "score" : 217.7,
+      "envelopeStart" : 85,
+      "envelopeEnd" : 189,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 85,
+        "end" : 189,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 4.8E-65,
+    "score" : 218.4,
+    "model-ac" : "1.20.1050.10-FF-000083"
+  } ],
+  "xref" : [ {
+    "name" : "tr|Q6LDP3 UPI000000046D",
+    "id" : "tr|Q6LDP3"
+  } ]
+},{
+  "sequence" : "VDNSSNWAVCGKSCGVISMPVAARATHRVHMEVMPLFAGYLPLPDVRLFKYLPHHSAHSSQLDADSWIENDSLSVDKHGDDQPDSSSLKSRGSVHSACSSEHKGLPMPRLQALPAGQVFNSSSGTQVLVIPSQDDHVLEVSVT",
+  "md5" : "9284049773aa8c821e77744749fe8a88",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q76NH5 UPI000000003D",
+    "id" : "tr|Q76NH5"
+  } ]
+},{
+  "sequence" : "MGKGVSKAVEHINKTIAPALISKNVNVVEQDKIDKLMLDMDGSENKSKFGANAILGVSLAVCKAGAAEKGVPLYRHIADLAGNPEVILPVPAFNVINGGSHAGNKLAMQEFMIPPCGADSFKEAMRIGAEVYHNLKNVIKEKYGKDATNVGDEGGFAPNILENKEALELLKTAIGKAGYSDKVVIGMDVAASEFYRDGKYDLDFKSPDDPSRYISPDQLADLYKGFVKNYPVVSIEDPFDQDDWGAWKKFTGSVGIQVVGDDLTVTNPKRIAKAVEEKACNCLLLKVNQIGSVTESLQACKLAQSNGWGVMVSHRSGETEDTFIADLVVGLCTGQIKTGAPCRSERLAKYNQLLRIEEELGSKARFAGRNFRNPRIN",
+  "md5" : "74dd94fcec2f44ca49ec52375c197f53",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.20.20.120:FF:000002",
+      "name" : null,
+      "description" : "Enolase 1",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 71,
+      "end" : 376,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 306,
+      "hmmLength" : 308,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 0.0,
+      "score" : 604.8,
+      "envelopeStart" : 71,
+      "envelopeEnd" : 376,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 71,
+        "end" : 376,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 0.0,
+    "score" : 605.1,
+    "model-ac" : "3.20.20.120-FF-000002"
+  } ],
+  "xref" : [ {
+    "name" : "tr|Q6LDK3 UPI0000000497",
+    "id" : "tr|Q6LDK3"
+  } ]
+},{
+  "sequence" : "MPAIQPPLYPTFLLLILLSLIITLYAWIISTITYKTAMRHAALYQRSFFRWSFDHSL",
+  "md5" : "21e82649e05d20b1ebe19c7899c67047",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q787S4 UPI0000000047",
+    "id" : "tr|Q787S4"
+  } ]
+},{
+  "sequence" : "MLSRSRCVSRAFSRSLSAFQKGNCPLGRRSLPGVSLCQGPGYPNSRKVVINNSVFSVRFFRTTAVCKDDLVTVKTPAFAESVTEGDVRWEKAVGDTVAEDEVVCEIETDKTSVQVPSPANGVIEALLVPDGGKVEGGTPLFTLRKTGAAPAKAKPAEAPAAAAPKAEPTAAAVPPPAAPIPTQMPPVPSPSQPPSGKPVSAVKPTVAPPLAEPGAGKGLRSEHREKMNRMRQRIAQRLKEAQNTCAMLTTFNEIDMSNIQEMRARHKEAFLKKHNLKLGFMSAFVKASAFALQEQPVVNAVIDDTTKEVVYRDYIDISVAVATPRGLVVPVIRNVEAMNFADIERTITELGEKARKNELAIEDMDGGTFTISNGGVFGSLFGTPIINPPQSAILGMHGIFDRPVAIGGKVEVRPMMYVALTYDHRLIDGREAVTFLRKIKAAVEDPRVLLLDL",
+  "md5" : "2950ec8ff7e8aa95cffbca83852cc60a",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.30.559.10:FF:000006",
+      "name" : null,
+      "description" : "Dihydrolipoyllysine-residue succinyltransferase component of 2-oxoglutarate dehydrogenase complex, mitochondrial",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 211,
+      "end" : 451,
+      "representative" : false,
+      "hmmStart" : 4,
+      "hmmEnd" : 238,
+      "hmmLength" : 238,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 0.0,
+      "score" : 483.4,
+      "envelopeStart" : 211,
+      "envelopeEnd" : 451,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 211,
+        "end" : 451,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 0.0,
+    "score" : 483.7,
+    "model-ac" : "3.30.559.10-FF-000006"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:2.40.50.100:FF:000033",
+      "name" : null,
+      "description" : "Dihydrolipoyllysine-residue succinyltransferase component of 2-oxoglutarate dehydrogenase complex, mitochondrial",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 67,
+      "end" : 168,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 102,
+      "hmmLength" : 102,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 1.1E-58,
+      "score" : 197.3,
+      "envelopeStart" : 67,
+      "envelopeEnd" : 168,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 67,
+        "end" : 168,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 1.1E-58,
+    "score" : 197.3,
+    "model-ac" : "2.40.50.100-FF-000033"
+  } ],
+  "xref" : [ {
+    "name" : "tr|A0A6D2XZM2 UPI00000000C0",
+    "id" : "tr|A0A6D2XZM2"
+  } ]
+},{
+  "sequence" : "MMKKTITLLTALLPLASAVAEEPTLSPEMVSASEVISTQENQTYTYVRCWYRTSYSKDDPATDWEWAKNEDGSYFTIDGYWWSSVSFKNMFYTNTSQNVIRQRCEATLDLANENADITFFAADNRFSYNHTIWSNDAAMQPDQINKVVALGDSLSDTGNIFNASQWRFPNPNSWFLGHFSNGFVWTEYIAKAKNLPLYNWAVGGAAGENQYIALTGVGDQVSSYLTYAKLAKNYKPANTLFTLEFGLNDFMNYNRGVPEVKADYAEALIRLTDAGAKNFMLMTLPDATKAPQFKYSTQEEIDKIRAKVLEMNEFIKAQAMYYKAQGYNITLFDTHALFETLTSAPEEHGFVNASDPCLDINRSSSVDYMYTHALRSECAASGAEKFVFWNVTHPTTATHRYVAEKMLESSNNLAEYRF",
+  "md5" : "19f3e06ca4ee22cdc947904ec0455ae0",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q68CM4 UPI0000000060",
+    "id" : "tr|Q68CM4"
+  } ]
+},{
+  "sequence" : "MKTEIQEIVTRLDQQSNKGEGGESMKWLFRPLLQMLAGGESVTIEDMATTTGKPVEEVKKVLQSLPSVEIDEQGRVVGLGLTLIPTPHHFTVDGKQLYAWCALDTLIFPALIGRSVNIESPCHSTGEPIRLNVEPDHIVSVEPSTAVVSIVTPDDMSSIRTAFCNEVHFFSSPNAAEDWLDQHPGGKVLSVEDAFELGRLMGTRYEESRPANGSCCHI",
+  "md5" : "31e952c6ddc794a5613213d947499289",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|A0A0S2IKL5 UPI00000000A3",
+    "id" : "tr|A0A0S2IKL5"
+  } ]
+},{
+  "sequence" : "MTTVPVTDIQNDLITEFSEDNYPSNKNYEITLRQMSILTHVNNVVDREHNAAVVSSPEEISSQLNEDLFPDDDSPATIIERVQPHTTIIDDTPPPTFRRELLISEQRQQREKRFNITVSKNAEAIMESRSMISSMPTQTPSLGVVYDKDKRIQMLEDEVVNLRNQRSNTKSSDNLDNFTRILFGKTPYKSTEVNKRIAIVNYANLNGSPLSVEDLDVCSEDEIDRIYKTIKQYHESRKRKIIVTNVIIIVINIIEQALLKLGFEEIKGLSTDITSEIIDVEIGDDCDAVASKLGIGNSPVLNIVLFILKIFVKRIKII",
+  "md5" : "7e20142a65616ad435658766f330458a",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "sp|Q76RB8 UPI0000000022",
+    "id" : "sp|Q76RB8"
+  } ]
+},{
+  "sequence" : "MASLLYLILFLLFVCISYYFTYYPTNKLQAAVMETDRENAIIRQRNDEIPTRTLDTAIFTDASTVASAQIHLYYNSNIGKIIMSLNGKKHTFNLYDDNDIRTLLPILLLSK",
+  "md5" : "7aadd4f8b7284d93a3d54cb139a783de",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|A4GDD4 UPI0000000013",
+    "id" : "tr|A4GDD4"
+  } ]
+},{
+  "sequence" : "MNQYNVKYLAKILCLKTEIARDPYAVINRNVLLRYTTDIEYNDLVTLITVRHKIDSMKTVFQVFNESSINYTPVDDDYGEPIIITSYLQKGHNKFPVNFLYIDVVISDLFPSFVRLDTTETNIVNSVLQTGDGKKTLRLPKMLETEIVVKILYRPNIPLKIVRFFRNNMVTGVEIADRSVISVAD",
+  "md5" : "11fbd561d708080674ff1c572a7cb6cc",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q49PN7 UPI0000000019",
+    "id" : "tr|Q49PN7"
+  } ]
+},{
+  "sequence" : "MSRGALIVFEGLDKSGKTTQCMNIMESIPANTIKYLNFPQRSTVTGKMIDDYLTRKKTYNDHIVNLLFCANRWEFASFIQEQLEQGITLIVDRYAFSGVAYAAAKGASMTLSKSYESGLPKPDLVIFLESGSKEINRNVGEEIYEDVTFQQKVLQEYKKMIEEGDIHWQIISSEFEEDVKKELIKNIVIEAIHTVTGPVGQLWM",
+  "md5" : "b8f3bbdaedd3f05da5c9a3244e3b8621",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q1M233 UPI000000002B",
+    "id" : "tr|Q1M233"
+  } ]
+},{
+  "sequence" : "MLNYTGLENKNVLVVGLAKSGYEAAKLLSKLGANVTVNDGKDLSQDAHAKDLESMGISVVSGSHPLTLLDNNPIIVKNPGIPYTVSIIDEAVKRGLKILTEVELSYLISEAPIIAVTGTNGKTTVTSLIGDMFKKSRLTGRLSGNIGYVASKVAQEVKPTDYLVTELSSFQLLGIEKYKPHIAIITNIYSAHLDYHENLENYQNAKKQIYKNQTEEDYLICNYHQRQVIESEELKAKTLYFSTQQEVDGIYIKDGFIVYKGVRIINTED",
+  "md5" : "6e4d7e6e15f53cac7da47b9d59b4d36c",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q7DL31 UPI000000004F",
+    "id" : "tr|Q7DL31"
+  } ]
+},{
+  "sequence" : "MITLFLILCYFILIFNIIVPAISEKMRRERAAYVNYKRLNKNFICVDDRLFSYNFTTSGIKAKVAVDNKNVPIPCSKINEVNNNKDVDTLYCDKDRDDIPGFARSCYRAYSDLFFTT",
+  "md5" : "81f1a97a9618fc23a4964506fff28b0a",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|A0A4P8D530 UPI0000000026",
+    "id" : "tr|A0A4P8D530"
+  } ]
+},{
+  "sequence" : "MFRRPVLQVLRQFVRHESETTTSLVLERSLNRVHLLGRVGQDPVLRQVEGKNPVTIFSLATNEMWRSGDSEVYQLGDVSQKTTWHRISVFRPGLRDVAYQYVKKGSRIYLEGKIDYGEYMDKNNVRRQATTIIA",
+  "md5" : "6b76d8fd7b26c47d6e181c01970524cd",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:2.40.50.140:FF:000129",
+      "name" : null,
+      "description" : "Single-stranded DNA-binding protein 1, mitochondrial",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 17,
+      "end" : 134,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 118,
+      "hmmLength" : 132,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 1.5E-76,
+      "score" : 256.4,
+      "envelopeStart" : 17,
+      "envelopeEnd" : 134,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 17,
+        "end" : 134,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 1.2E-76,
+    "score" : 256.7,
+    "model-ac" : "2.40.50.140-FF-000129"
+  } ],
+  "xref" : [ {
+    "name" : "tr|A0A0G2JLD8 UPI00000000B9",
+    "id" : "tr|A0A0G2JLD8"
+  } ]
+},{
+  "sequence" : "MAETKEFKTLYNLFIDSYLQKLAQHSIPTNVTCAIHIGEVIGQFKNCALRITNKCMSNSRLSFTLMVESFIEVISLLPEKDRRAIAEEIGIDLDDVPSAVSKLEKNCNAYAEVNNIIDIQKLDIGECSAPPGQHMLLQIVNTGSAEANCGLQTIVKSLNKIYVPPIIENRLPYYDPWFLVGVAIILVIFTVAICSIRRNLALKYRYGTFLYV",
+  "md5" : "8869480f6c4ab10c36ab8943e6d9fe98",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q76QL2 UPI000000000A",
+    "id" : "tr|Q76QL2"
+  } ]
+},{
+  "sequence" : "MSKLSQPATTPGVNGISVIHTQAHASGLQQVPQLVPAGPGGGGKAVPPSKQSKKSSPMDRNSDEYRQRRERNNMAVKKSRLKSKQKAQDTLQRVNQLKEENERLEAKIKLLTKELSVLKDLFLEHAHSLADNVQPISTETTATNSDNPGQ",
+  "md5" : "17b7eecebebbc60db7d1d2ae40de3b1e",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:1.20.5.170:FF:000055",
+      "name" : null,
+      "description" : "CCAAT/enhancer-binding protein gamma",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 58,
+      "end" : 133,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 75,
+      "hmmLength" : 75,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 3.4E-44,
+      "score" : 150.8,
+      "envelopeStart" : 58,
+      "envelopeEnd" : 133,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 58,
+        "end" : 133,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 2.4E-44,
+    "score" : 151.3,
+    "model-ac" : "1.20.5.170-FF-000055"
+  } ],
+  "xref" : [ {
+    "name" : "tr|A0A8C6N0Z2 UPI000000005E",
+    "id" : "tr|A0A8C6N0Z2"
+  } ]
+},{
+  "sequence" : "ENRAMKDEEKMELQEMQLKEAKHIAEDSDRKYEEVARKLVIL",
+  "md5" : "b734a97716859ff1c9ffb7693a69fa00",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q6LC00 UPI0000000033",
+    "id" : "tr|Q6LC00"
+  } ]
+},{
+  "sequence" : "MSDPVRITNPGAESLGYDSDGHEIMAVDIYVNPPRVDVFHGTPPAWSSFGNKTIWGGNEWVDDSPTRSDIEKRDKEITAYKNTLSAQQKENENKRTEAGKRLSAAIAAREKDENTLKTLRAGNADAADITRQEFRLLQAELREYGFRTEIAGYDALRLHTESRMLFADADSLRISPREARSLIEQAEKRQKDAQNADKKAADMLAEYERRKGILDTRLSELEKNGGAALAVLDAQQARLLGQQTRNDRAISEARNKLSSVTESLKTARNALTRAEQQLTQQKNTPDGKTIVSPEKFPGRSSTNHSIVVSGDPRFAGTIKITTSAVIDNRANLNYLLTHSGLDYKRNILNDRNPVVTEDVEGDKKIYNAEVAEWDKLRQRLLDARNKITSAESAINSARNNVSARTNEQKHANDALNALLKEKENIRSQLADINQKIAEEKRKRDEINMVKDAIKLTSDFYRTIYDEFGKQASELAKELASVSQGKQIKSVDDALNAFDKFRNNLNKKYNIQDRMAISKALEAINQVHMAENFKLFSKAFGFTGKVIERYDVAVELQKAVKTDNWRPFFVKLESLAAGRAASAVTAWAFSVMLGTPVGILGFAIIMAAVSALVNDKFIEQVNKLIGI",
+  "md5" : "38a104249e81502b2aab894af6ab2dc4",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q7DJZ6 UPI000000008D",
+    "id" : "tr|Q7DJZ6"
+  } ]
+},{
+  "sequence" : "MSGRGKGGKGLGKGGAKRHRKVLRDNIQGITKPAIRRLARRGGVKRISGLIYEETRGVLKVFLENVIRDAVTYTEHAKRKTVTAMDVVYALKRQGRTLYGFGG",
+  "md5" : "cd835bc39369079207f534a9e7ba6095",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:1.10.20.10:FF:000002",
+      "name" : null,
+      "description" : "Histone H4",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 2,
+      "end" : 103,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 102,
+      "hmmLength" : 102,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 3.4E-65,
+      "score" : 218.4,
+      "envelopeStart" : 2,
+      "envelopeEnd" : 103,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 2,
+        "end" : 103,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 3.1E-65,
+    "score" : 218.5,
+    "model-ac" : "1.10.20.10-FF-000002"
+  } ],
+  "xref" : [ {
+    "name" : "tr|A0AAV1F053 UPI000000003C",
+    "id" : "tr|A0AAV1F053"
+  } ]
+},{
+  "sequence" : "MDAKVVAVLALVLAALCLSDGKPVSLSYRCPCRFFESHVARANVKHLKILNTPNCALQIVARLKNNNRQVCIDPKLKWIQEYLEKALNK",
+  "md5" : "151df00e3f841ef57bfb277d3f2ab5fb",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:2.40.50.40:FF:000010",
+      "name" : null,
+      "description" : "Stromal cell-derived factor 1 precursor",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 20,
+      "end" : 89,
+      "representative" : false,
+      "hmmStart" : 2,
+      "hmmEnd" : 70,
+      "hmmLength" : 70,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 2.0E-46,
+      "score" : 157.5,
+      "envelopeStart" : 20,
+      "envelopeEnd" : 89,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 20,
+        "end" : 89,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 1.6E-46,
+    "score" : 157.8,
+    "model-ac" : "2.40.50.40-FF-000010"
+  } ],
+  "xref" : [ {
+    "name" : "UPI000000005B",
+    "id" : "UPI000000005B"
+  } ]
+},{
+  "sequence" : "MTNLKAVIPVAGLGMHMLPATKAIPKEMLPIVDKPMIQYIVDEIVAAGIKEILLVTHASKNAVENHFDTSYELESLLEQRVKRQLLAEVQSICPPGVTIMNVRQGEPLGLGHSILCARPAIGDNPFVVVLPDVVIDDASADPLRYNLAAMIARFNETGRSQVLAKRMPGDLSEYSVIQTKEPLDREGKVSRIVEFIEKPDQPQTLDSDIMAVGRYVLSADIWPELERTQPGAWGRIQLTDAIAELAKKQSVDAMLMTGDSYDCGKKMGYMQAFVKYGLRNLKEGAKFRKGIEKLLSE",
+  "md5" : "82b18d472babf79a0c6f7c73093e156d",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.90.550.10:FF:000008",
+      "name" : null,
+      "description" : "UTP--glucose-1-phosphate uridylyltransferase",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 1,
+      "end" : 297,
+      "representative" : false,
+      "hmmStart" : 7,
+      "hmmEnd" : 299,
+      "hmmLength" : 302,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 0.0,
+      "score" : 566.2,
+      "envelopeStart" : 1,
+      "envelopeEnd" : 297,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 1,
+        "end" : 297,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 0.0,
+    "score" : 566.4,
+    "model-ac" : "3.90.550.10-FF-000008"
+  } ],
+  "xref" : [ {
+    "name" : "tr|G1UFZ8 UPI0000000053",
+    "id" : "tr|G1UFZ8"
+  } ]
+},{
+  "sequence" : "MGAAASIQTTVNTLSERISSKLEQEANASAQTKCDIEIGNFYIRQNHGCNLTVKNMCSADADAQLDAVLSAATETYSGLTPEQKAYVPAMFTAALNIQTSVNTVVRDFENYVKQTCNSSAVVDNKLKIQNVIIDECYGAPGSPTNLEFINTGSSKGNCAIKALMQLTTKATTQIAPRQVAGTGVQFYMIVIGVIILAALFMYYAKRMLFTSTNDKIKLILANKENVHWTTYMDTFFRTSPMVIATTDMQN",
+  "md5" : "658a6705800260d3eb70516c9749b1d3",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q0NPC0 UPI0000000015",
+    "id" : "tr|Q0NPC0"
+  } ]
+},{
+  "sequence" : "MEAFPTEYFLGTAVRLLENVKYRDSNYTREERVENLQYAYNKAAAHFAQERQQQILKVSPKRLEASLRTIVGMVVYSWAKVSKELMADLSIHYTYTLILDDSEDDPHPQMLTYFDDLQSGNPQKHPWWMLVNEHFPNVLRHFGPFCSLNLIRSTLDFFEGCWIEQYNFHGFPGSFDYPGFLRRMNGLGHCVGGSLWPKENFNEQEHFLEITSAIAQMENWMVWVNDLMSFYKEFDDPRDQTSLVKNYVVSEGITLNQALEKLTQDTLQSSEQMMVVFSQKDPKIMDTIECFMHGYITWHLCDNRYRLKEIYDRTKDIQTEDAMKFRKFYEQAFKVGAIEATEWAYPTVVERLEQRKAEEQAERDEQAALANPEKAQVAQVVLA",
+  "md5" : "721022b185aafedbb8ce87708d25415b",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q71RX9 UPI00000009DB",
+    "id" : "tr|Q71RX9"
+  } ]
+},{
+  "sequence" : "MKRLSFLTLRPRHLSFLTLQRRNALRDALRHRSAPRRAFRIGRRASRTACDAERRTIVRLSFRALQPRRLSLLTLQRRNALRDALRHRSAPRRVFRIGRRASRTACDAQRCTIVRLSFRALQPRRLSFLTLQRRSALRDALHHKSAPRCTFKIGRGASRTACDAERRTIVRLSFRALQPRRLSFLTLQRRNALGDALRHKSAPRCTFKIGREASRTACDAERRTIVRLSFRALQPRRLSFLTLQRRNALRDALRHKSAPRRAFRIGRRASRTACDAERRTIVSQISLNA",
+  "md5" : "674e10c6bd86e013ab3513fbfd3bf7b4",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "UPI00000093CB",
+    "id" : "UPI00000093CB"
+  } ]
+},{
+  "sequence" : "MDLTLLQWGDAGWGDELARGAMMTVVVAACSYFFGIIFGSLFAAAKLSRFWSLRLLGDVYTTVVRGVPELLIIFLVFFGGGTLLRTIANGLFGYEGYIEPPIFVIGVLCISVSAGAYATEVIRAAVLAVPPGQIEAAKSIGMGPWLRLRRVLIPQAARFALPGLGNVWQFTLKDTSLISVVGLVEIMRTAAMGAGSTKQPFTFYITAFVIFLLLSSVSNRGFLKAEKWANRGVRSQ",
+  "md5" : "050957b0b45d9351bb9ab09fa72ee03f",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|A0A2Z2PQP5 UPI000000006B",
+    "id" : "tr|A0A2Z2PQP5"
+  } ]
+},{
+  "sequence" : "MAKVSSAYLKFALVMILLLSVISAVMSAGCIKNGGRCNASAGPPYCCSSYCFQIAGQSYGVCKNR",
+  "md5" : "9cc169e940cadd2241523fec7799b87f",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "sp|P81418 UPI0000000086",
+    "id" : "sp|P81418"
+  } ]
+},{
+  "sequence" : "MSARGINKVILVGRLGNDPEVRYIPNGGAVANLQVATSESWRDKQTGEMREQTEWHRVVLFGKLAEVAGEYLRKGAQVYIEGQLRTRSWDDNGITRYITEILVKTTGTMQMLGSAPQQNAQAQPKPQQNGQPQSADATKKGGAKTKGRGRKAAQPEPQPQTPEGEDYGFSDDIPF",
+  "md5" : "85e93ac6655946744c4606215f6c5f43",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|A0A5Y2F4A1 UPI0000000091",
+    "id" : "tr|A0A5Y2F4A1"
+  } ]
+},{
+  "sequence" : "MDEIVKNIREGTHVLLPFYETLPELNLSLGKSPLPSLEYGANYFLQISRVNDLNRMPTDMLKLFTHDIMLPESDLDKVYEILKINSVKYYGRSTKADAVVADLSARNKLFKRERDAIKSNNHLTENNLYISDYKMLTFDVFRPLFDFVNEKYCIIKLPTLFGRGVIDTMRIYCSLFKNVRLLKCVSDSWLKDSAIMVASDVCKKNLDLFMSHVKSVTKSSSWKDVNSVQFSILNNPVDTEFINKFLEFSNRVYEALYYVHSLLYSSMTSDSKSIENKHQRRLVKLLL",
+  "md5" : "58298257f905b7a11afef662aec815ce",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q1PIT2 UPI0000000005",
+    "id" : "tr|Q1PIT2"
+  } ]
+},{
+  "sequence" : "MLKKLAVCLSIVLLLLGAASPISAHTVYPVNPNAQQTTKDIMNWLAHLPNRSENRVMSGAFGGYSDVTFSMTEENRLKNATGQSPAIYGCDYGRGWLETADITDTIDYCCNSSLISYWKSGGLPQVSLHLANPAFPSGNYKTAISNSQYKNILDPSTVEGKRLEALLSKIADGLTQLKNQGVTVLFRPLHEMNGEWFWWGLTGYNQKDNERISLYKELYKKIYRYMTETRGLDNLLWVYSPDANRDFKTDFYPGSSYVDITGLDAYFTDPYAISGYDEMLSLKKPFAFAETGPSGNIGSFDYAAFINAIRQKYPQTTYFLTWDEQLSPAANQGAQSLYQNSWTLNKGEIWNGGSLTPIAE",
+  "md5" : "4ff3eae796b7570ed793ed2a2c61a77b",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q76N66 UPI000000004A",
+    "id" : "tr|Q76N66"
+  } ]
+},{
+  "sequence" : "MPNIKIFSGSSHQDLSQKIADRLGLELGKVVTKKFSNQETCVEIGESVRGEDVYIVQSGCGEINDNLMELLIMINACKIASASRVTAVIPCFPYARQDKKDKSRAPISAKLVANMLSVAGADHIITMDLHASQIQGFFDIPVDNLYAEPAVLKWIRENISEWRNCTIVSPDAGGAKRVTSIADRLNVDFALIHKERKKANEVDRMVLVGDVKDRVAILVDDMADTCGTICHAADKLLSAGATRVYAILTHGIFSGPAISRINNACFEAVVVTNTIPQEDKMKHCSKIQVIDISMILAEAIRRTHNGESVSYLFSHVPL",
+  "md5" : "9a253203f2900e4e03845c669ff11e17",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.40.50.2020:FF:000005",
+      "name" : null,
+      "description" : "Ribose-phosphate pyrophosphokinase 1",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 147,
+      "end" : 290,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 144,
+      "hmmLength" : 144,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 8.5E-82,
+      "score" : 274.0,
+      "envelopeStart" : 147,
+      "envelopeEnd" : 290,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 147,
+        "end" : 290,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 8.5E-82,
+    "score" : 274.0,
+    "model-ac" : "3.40.50.2020-FF-000005"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:3.40.50.2020:FF:000031",
+      "name" : null,
+      "description" : "Probable PRS4-ribose-phosphate pyrophosphokinase 3",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 7,
+      "end" : 146,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 138,
+      "hmmLength" : 139,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 2.5E-58,
+      "score" : 197.7,
+      "envelopeStart" : 7,
+      "envelopeEnd" : 146,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 7,
+        "end" : 146,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 1.1E-58,
+    "score" : 199.0,
+    "model-ac" : "3.40.50.2020-FF-000031"
+  } ],
+  "xref" : [ {
+    "name" : "tr|A0A6P3TG37 UPI00000000A5",
+    "id" : "tr|A0A6P3TG37"
+  } ]
+},{
+  "sequence" : "MRALFYKDGKLFTDNNFLNPVSDDNPAYEVLQHVKIPTHLTDVVVYEQTWEEALTRLIFVGSDSKGRRQYFYGKMHVQNRNAKRDRIFVRVYNVMKRINCFINKNIKKSSTDSNYQLAVFMLMETMFFIRFGKMKYLKENETVGLLTLKNKHIEISPDEIVIKFVGKDKVSHEFVVHKSNRLYKPLLKLTDDSSPEEFLFNKLSERKVYECIKQFGIRIKDLRTYGVNYTFLYNFWTNVKSISPLPSPKKLIALTIKQTAEVVGHTPSISKRAYMATTILEMVKDKNFLDVVSKTTFDEFLSIVVDHVKSSTDG",
+  "md5" : "60d95e56e18bf4d4b32120d23d7380c5",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|V5R0H7 UPI000000001C",
+    "id" : "tr|V5R0H7"
+  } ]
+},{
+  "sequence" : "MLPRLGGPALPLLLPSLLLLLLLGAGGCGPGVRAEVLFRCPPCTPERLAACGPPPDAPCAELVREPGCGCCSVCARQEGEACGVYIPRCAQTLRCYPNPGSELPLKALVTGAGTCEKRRVGATPQQVA",
+  "md5" : "a8a969c50acd728e708d366137a52cda",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:4.10.40.20:FF:000007",
+      "name" : null,
+      "description" : "Insulin-like growth factor-binding protein 2",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 44,
+      "end" : 117,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 87,
+      "hmmLength" : 87,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 1.4E-34,
+      "score" : 119.7,
+      "envelopeStart" : 44,
+      "envelopeEnd" : 117,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 44,
+        "end" : 117,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 3.4E-35,
+    "score" : 121.7,
+    "model-ac" : "4.10.40.20-FF-000007"
+  } ],
+  "xref" : [ {
+    "name" : "tr|Q6LDG0 UPI000000002F",
+    "id" : "tr|Q6LDG0"
+  } ]
+},{
+  "sequence" : "MARGPKKHLKRVAAPKHWMLDKLTGVFAPRPSTGPHKLRECLPLIIFLRNRLKYALTGDEVKKICMQRFIKIDGKVRTDITYPAGFMDVISIDKTGENFRLIYDTKGRFAVHRITPEEAKYKLCKVRKIFVGTKGIPHLVTHDARTIRYPDPLIKVNDTIQIDLETGKITDFIKFDTGNLCMVTGGANLGRIGVITNRERHPGSFDVVHVKDANGNSFATRLSNIFVIGKGNKPWISLPRGKGIRLTIAEERDKRLAAKQSSG",
+  "md5" : "5dc97d3219c391e6c0fcac3f028e06d4",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.10.290.10:FF:000051",
+      "name" : null,
+      "description" : "40S ribosomal protein S4, X isoform",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 1,
+      "end" : 117,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 117,
+      "hmmLength" : 117,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 4.3E-79,
+      "score" : 263.8,
+      "envelopeStart" : 1,
+      "envelopeEnd" : 117,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 1,
+        "end" : 117,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 2.1E-79,
+    "score" : 264.8,
+    "model-ac" : "3.10.290.10-FF-000051"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:2.40.50.740:FF:000001",
+      "name" : null,
+      "description" : "40S ribosomal protein S4",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 122,
+      "end" : 172,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 51,
+      "hmmLength" : 51,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 2.0E-33,
+      "score" : 115.6,
+      "envelopeStart" : 122,
+      "envelopeEnd" : 172,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 122,
+        "end" : 172,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 9.5E-34,
+    "score" : 116.6,
+    "model-ac" : "2.40.50.740-FF-000001"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:2.30.30.30:FF:000005",
+      "name" : null,
+      "description" : "40S ribosomal protein S4",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 175,
+      "end" : 245,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 71,
+      "hmmLength" : 71,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 5.4E-45,
+      "score" : 152.7,
+      "envelopeStart" : 175,
+      "envelopeEnd" : 245,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 175,
+        "end" : 245,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 2.8E-45,
+    "score" : 153.6,
+    "model-ac" : "2.30.30.30-FF-000005"
+  } ],
+  "xref" : [ {
+    "name" : "tr|A0A9V1F3Q7 UPI0000000066",
+    "id" : "tr|A0A9V1F3Q7"
+  } ]
+},{
+  "sequence" : "GVGFKAGVKDYKLTYYTPEYQTKDTDILAAFRVTPQPGVPPEEAGAAVAAESSTGTWTTVWTDGLTSLDRYKGRCYHIEPVIGEENQYFCYVAYPLDLFEEGSVTNMFTSIVGNVFGFKALRALRLEDLRIPPAYSKTFQGPPHGIQVERDKLNKYGRPLLGCTIKPKLGLSAKNYGRAVYECLRGGLDFTKDDENVNSQPFMRWRDRFLFCAEAIYKSQAETGEIKGHYLNATAGTCEEMIKRAVFARELGVPIVMHDYLTGGFTANTTLAAYCRDNGLLLHIHRAMHAVIDRQKNHGMHFRVLAKALRMSGGDHIHSGTVVGKLEGDRQLTLGFVDLLRDDYIEKDRSRGIFFTQDWVSMPGVLPVASGGIHVWHMPALTEIFGDDSVLQFG",
+  "md5" : "795204ee2abe3689c1138313b7b0926c",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.30.70.150:FF:000001",
+      "name" : null,
+      "description" : "Ribulose bisphosphate carboxylase large chain",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 1,
+      "end" : 138,
+      "representative" : false,
+      "hmmStart" : 3,
+      "hmmEnd" : 139,
+      "hmmLength" : 139,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 3.7E-91,
+      "score" : 304.1,
+      "envelopeStart" : 1,
+      "envelopeEnd" : 138,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 1,
+        "end" : 138,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 2.5E-91,
+    "score" : 304.7,
+    "model-ac" : "3.30.70.150-FF-000001"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:3.20.20.110:FF:000003",
+      "name" : null,
+      "description" : "Ribulose bisphosphate carboxylase large chain",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 140,
+      "end" : 335,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 195,
+      "hmmLength" : 196,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 0.0,
+      "score" : 447.9,
+      "envelopeStart" : 140,
+      "envelopeEnd" : 335,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 140,
+        "end" : 335,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 0.0,
+    "score" : 448.2,
+    "model-ac" : "3.20.20.110-FF-000003"
+  } ],
+  "xref" : [ {
+    "name" : "tr|Q6LC81 UPI0000000613",
+    "id" : "tr|Q6LC81"
+  } ]
+},{
+  "sequence" : "MAVTNVAELNALVERVKKAQREYASFTQEQVDKIFRAAALAAADARIPLAKMAVAESGMGIVEDKVIKNHFASEYIYNAYKDEKTCGVLSEDDTFGTITIAEPIGIICGIVPTTNPTSTAIFKSLISLKTRNAIIFSPHPRAKDATNKAADIVLQAAIAAGAPKDLIGWIDQPSVELSNALMHHPDINLILATGGPGMVKAAYSSGKPAIGVGAGNTPVVIDETADIKRAVASVLMSKTFDNGVICASEQSVVVVDSVYDAVRERFATHGGYLLQGKELKAVQDVILKNGALNAAIVGQPAYKIAELAGFSVPENTKILIGEVTVVDESEPFAHEKLSPTLAMYRAKDFEDAVEKAEKLVAMGGIGHTSCLYTDQDNQPARVSYFGQKMKTARILINTPASQGGIGDLYNFKLAPSLTLGCGSWGGNSISENVGPKHLINKKTVAKRAENMLWHKLPKSIYFRRGSLPIALDEVITDGHKRALIVTDRFLFNNGYADQITSVLKAAGVETEVFFEVEADPTLSIVRKGAELANSFKPDVIIALGGGSPMDAAKIMWVMYEHPETHFEELALRFMDIRKRIYKFPKMGVKAKMIAVTTTSGTGSEVTPFAVVTDDATGQKYPLADYALTPDMAIVDANLVMDMPKSLCAFGGLDAVTHAMEAYVSVLASEFSDGQALQALKLLKEYLPASYHEGSKNPVARERVHSAATIAGIAFANAFLGVCHSMAHKLGSQFHIPHGLANALLICNVIRYNANDNPTKQTAFSQYDRPQARRRYAEIADHLGLSAPGDRTAAKIEKLLAWLETLKAELGIPKSIREAGVQEADFLANVDKLSEDAFDDQCTGANPRYPLISELKQILLDTYYGRDYVEGETAAKKEAAPAKAEKKAKKSA",
+  "md5" : "74428bf03d3c75c944ea0b2eb632701f",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.40.309.10:FF:000007",
+      "name" : null,
+      "description" : "Aldehyde-alcohol dehydrogenase",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 218,
+      "end" : 404,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 187,
+      "hmmLength" : 187,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 5.9E-100,
+      "score" : 334.3,
+      "envelopeStart" : 218,
+      "envelopeEnd" : 404,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 218,
+        "end" : 404,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 2.4E-100,
+    "score" : 335.6,
+    "model-ac" : "3.40.309.10-FF-000007"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:3.40.50.1970:FF:000002",
+      "name" : null,
+      "description" : "Aldehyde-alcohol dehydrogenase",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 450,
+      "end" : 643,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 192,
+      "hmmLength" : 192,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 4.2E-109,
+      "score" : 364.3,
+      "envelopeStart" : 450,
+      "envelopeEnd" : 643,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 450,
+        "end" : 643,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 2.1E-109,
+    "score" : 365.3,
+    "model-ac" : "3.40.50.1970-FF-000002"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:3.40.605.10:FF:000008",
+      "name" : null,
+      "description" : "Aldehyde-alcohol dehydrogenase",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 10,
+      "end" : 224,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 206,
+      "hmmLength" : 231,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 3.7E-121,
+      "score" : 404.8,
+      "envelopeStart" : 10,
+      "envelopeEnd" : 224,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 10,
+        "end" : 224,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 0.0,
+    "score" : 445.5,
+    "model-ac" : "3.40.605.10-FF-000008"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:1.20.1090.10:FF:000001",
+      "name" : null,
+      "description" : "Aldehyde-alcohol dehydrogenase",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 644,
+      "end" : 862,
+      "representative" : false,
+      "hmmStart" : 2,
+      "hmmEnd" : 199,
+      "hmmLength" : 199,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 1.6E-82,
+      "score" : 277.9,
+      "envelopeStart" : 644,
+      "envelopeEnd" : 862,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 644,
+        "end" : 862,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 8.6E-83,
+    "score" : 278.8,
+    "model-ac" : "1.20.1090.10-FF-000001"
+  } ],
+  "xref" : [ {
+    "name" : "tr|A0AAV3HCU7 UPI0000000054",
+    "id" : "tr|A0AAV3HCU7"
+  } ]
+},{
+  "sequence" : "MAEEFVQQRLANNKVTIFVKYTCPFCRNALDILNKFSFKRGAYEIVDIKEFKPENELRDYFEQITGGRTVPRIFFGKTSIGGYSDLLEIDNMDALGDILSSIGVLRTC",
+  "md5" : "1b5918f06f4f882985d20ef81a430be5",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|A9J1L4 UPI000000000E",
+    "id" : "tr|A9J1L4"
+  } ]
+},{
+  "sequence" : "GAYTGLPNKKPNVPTIRTAKVQ",
+  "md5" : "a648f63078510cb2901a9ef763db2da1",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q76R70 UPI0000000034",
+    "id" : "tr|Q76R70"
+  } ]
+},{
+  "sequence" : "TALAATVNDRFELKNEASDLMYHLLVLLQDQGLDLGEVIDNLKSRH",
+  "md5" : "1e0ecbb167f225f3d2fc6a5f39318713",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q7DLC3 UPI0000000038",
+    "id" : "tr|Q7DLC3"
+  } ]
+},{
+  "sequence" : "MKIMQLVAAAMAVSLLSVGPARAQFVVSDPATEAETLATALETAANLEQTITMVAMLTSAYGVTGLLTSLNQKNQYPSTRDLDTEMFSPRMPMSTTARAITTDTDRAVVGGDAEADLLRSQITGSANSAGIAADNLETMDKRLTANAETSTQLSRSRNIMQATVTNGLLLKQIHDAMIQNVQATSLLTMTTAQAGLHEAEEAAAQRKEHQKTAVIFGAVP",
+  "md5" : "6da7affa61937d9d1220a9150fe2f756",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|A0A2Z2PKN3 UPI000000006E",
+    "id" : "tr|A0A2Z2PKN3"
+  } ]
+},{
+  "sequence" : "MADTDDIIDYESDDLTEYEDDEEEEEDGESLETSDIDPKSSYKIVESASTHIEDAHSNLKHIGNHISALKRRYTRRISLFEIAGIIAESYNLLQRGRLPLVSEFSDETMKQNMLHVIIQEIEEGSCPIVIEKNGELLSVNDFDKDGLKFHLDYIIKIWKLQKRY",
+  "md5" : "43d125a170f0f82949836abdefdb8e1d",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q76QJ0 UPI0000000021",
+    "id" : "tr|Q76QJ0"
+  } ]
+},{
+  "sequence" : "MRLSFLTLQRRHALRDALRHKPAPRCRTQERTQSVQNGMPTRSVAR",
+  "md5" : "3ceae8226255f0257dde6108cb972582",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "UPI0000009527",
+    "id" : "UPI0000009527"
+  } ]
+},{
+  "sequence" : "FVGFKAGVKDYKLTYYTPDYETKDTDILAAFRVTPQPGVPPEEAGAAVAAESSTGTWTTVWTDGLTSLDRYKGRCYGIEPVAGEENQFIAYVAYPLDLFEEGSVTNMFTSIVGNVFGFKALRALRLEDLRIPPAYSKTFQGPPHGIQVERDKLNKYGRPLLGCTIKPKLGLSAKNYGRAVYECLRGGLDFTKDDENVNSQPFMRWRDRFLFCAEAIYKSQAETGEIKGHYLNATAGTCEEMIKRAVFARELGVPIVMHDYLTGGFTANTSLAHYCRDNGLLLHIHRAMHAVIDRQKNHGMHFRVLAKALRMSGGDHIHAGTVVGKLEGEREITLGFVDLLRDDFIEKDRSRGIYFTQDWVSMPGVLPVASGGIHVWHMPALTEIFGDDSVLQFG",
+  "md5" : "dc001b5b4e7f48cfcdf99c03d427aad1",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.20.20.110:FF:000003",
+      "name" : null,
+      "description" : "Ribulose bisphosphate carboxylase large chain",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 140,
+      "end" : 335,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 195,
+      "hmmLength" : 196,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 0.0,
+      "score" : 454.9,
+      "envelopeStart" : 140,
+      "envelopeEnd" : 335,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 140,
+        "end" : 335,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 0.0,
+    "score" : 455.2,
+    "model-ac" : "3.20.20.110-FF-000003"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:3.30.70.150:FF:000001",
+      "name" : null,
+      "description" : "Ribulose bisphosphate carboxylase large chain",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 1,
+      "end" : 138,
+      "representative" : false,
+      "hmmStart" : 3,
+      "hmmEnd" : 139,
+      "hmmLength" : 139,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 5.1E-91,
+      "score" : 303.7,
+      "envelopeStart" : 1,
+      "envelopeEnd" : 138,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 1,
+        "end" : 138,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 3.5E-91,
+    "score" : 304.2,
+    "model-ac" : "3.30.70.150-FF-000001"
+  } ],
+  "xref" : [ {
+    "name" : "tr|Q6LEF1 UPI00000003B0",
+    "id" : "tr|Q6LEF1"
+  } ]
+},{
+  "sequence" : "MDSNTITSFQDILQRMSKMQLESSSVDLNGMITQFERLKIYRDSLGESVMRMGDLHSLQNRNATWREELSQKFEEIRWLIAECRNILTKTENSFEQITFLQALQLLLEVESEIRTFSFQLI",
+  "md5" : "ff94281ff1c67c3d7b0c71fa2b71dd17",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|I7ERK8 UPI00000000C8",
+    "id" : "tr|I7ERK8"
+  } ]
+},{
+  "sequence" : "RFIEKLENEVYQNQVSITWMFGGLHYSDVVEIYSPLTRSKDTYLTKLRAIRYLGRGTFTDCAISNMTQQFQSQTARDVKFAVVITDGHVTGSPCGGMKMQAERARDMGIKLFAVAPSEDVYEQGLREIASPPHDLYRSNYTITPKDALHIDENTIERIIKAMKHEAYAECYKMTCLEIAGPAGPKGYRGQKGAKGNMGEPGSPGLKGRQGDPGIEGPIGYPGPKGVPGLKGEKGEIGSDGRRGAAGLAGRNGTDGQKGKLGRIGPPGCKGDRGDKGPDGYPGDAGDQGERGDEGMKGDPGRPGRSGPPGPPGEKGSPGIPGNPGAQGPGGTKGRKGETGPPGPKGEPGRRGDPGTKGSKGGPGAKGERGDPGPEGPRGLPGEVGNKGARGDQGLPGPRGPTGAVGEPGNIGSRGDPGDLGPRGDAGPPGPKGDRGRPGFSYPGPRGPQGDKGEKGQPGPKGGRGELGPKGTQGTKGEKGEPGDPGPRGEPGTRGPPGEAGPEGTPGPPGDPGLTDCDVMTYVRETCGCCDCEKRCGALDIMFVIDSSESIGYTNFTLEKNFVVNVVSRLGSIAKDPKSETGARVGVVQYSHEGTFEAIKLDDERINSLSSFKEAVKRLEWIAGGTWTPSALQFAYNKLIKESRREKAQVFAVVITDGRYDPRDDDKNLGALCGRDVLVNTIGIGDIFDQPEQSETLVSIACNEPQRVQKMRLFSDLVAEE",
+  "md5" : "7b7327407ebf75fd497fdd272a3c0b51",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:3.40.50.410:FF:000026",
+      "name" : null,
+      "description" : "Collagen, type VI, alpha 1",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 1,
+      "end" : 165,
+      "representative" : false,
+      "hmmStart" : 45,
+      "hmmEnd" : 213,
+      "hmmLength" : 213,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 3.9E-64,
+      "score" : 217.8,
+      "envelopeStart" : 1,
+      "envelopeEnd" : 165,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 1,
+        "end" : 165,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 3.8E-83,
+    "score" : 279.9,
+    "model-ac" : "3.40.50.410-FF-000026"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:3.40.50.410:FF:000027",
+      "name" : null,
+      "description" : "collagen alpha-2(VI) chain isoform X1",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 528,
+      "end" : 720,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 193,
+      "hmmLength" : 212,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 1.6E-109,
+      "score" : 366.2,
+      "envelopeStart" : 528,
+      "envelopeEnd" : 720,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 528,
+        "end" : 720,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 2.7E-114,
+    "score" : 381.8,
+    "model-ac" : "3.40.50.410-FF-000027"
+  } ],
+  "xref" : [ {
+    "name" : "UPI0000000030",
+    "id" : "UPI0000000030"
+  } ]
+},{
+  "sequence" : "MTDEQIYAFCDANKDDIRCKCIYPDKSIVRIGIDTRLPYYCWYEPCKRSDALLPASLKKNITKCNVSDCTISLGNVSITDSKLDVNNVCDSKRVATENIAVRYLNQEIRYPIIDIKWLPIGLLALAILILAFF",
+  "md5" : "497f3787fa640054b0a97b82f5ecba6d",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|A0A7D3UKB3 UPI0000000003",
+    "id" : "tr|A0A7D3UKB3"
+  } ]
+},{
+  "sequence" : "MDIQLIIESFPKLLAAVPTTLTLAFISLLIGFVVSVPVALMRLSKNRIVSSLAYGYVYIIRSTPLLVQMFLIYYGSAQFRGVLSEVGLWSSFREPWFCAILALALNTAAYTSEIIRGGIQSVSLGQIEAARAVGMSTFLQFRRIVFPIAIRQALPAYGNEVMLIIKSTSLASTITIVEVTGLAKQIISATYSPVEVFIVAGAIYLFITFVVSRLVMLAEWWLNPHMRARVGGTAPKAAETH",
+  "md5" : "836672e7622fa7f28ccc4f9fbc1daeb8",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|A0A1C7P822 UPI000000006A",
+    "id" : "tr|A0A1C7P822"
+  } ]
+},{
+  "sequence" : "MPGKPVLHYFDGRGRMEPIRWLLAAAGVEFEEQFLKTRDDLARLRNDGSLMFQQVPMVEIDGMKLVQTRAILNYIATKYNLYGKDMKERALIDMYAEGVADLDEIVLHYPYIPPGEKEASLAKIKDKARNRYFPAFEKVLKSHGQDYLVGNRLSRADVYLVQVLYHVEELDPSALANFPLLKALRTRVSNLPTVKKFLQPGSQRKPLEDEKCVESAVKIFS",
+  "md5" : "a40a1c13ce77dc84c94c66028ed62fc6",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:1.20.1050.10:FF:000005",
+      "name" : null,
+      "description" : "Glutathione S-transferase A1",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 82,
+      "end" : 190,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 109,
+      "hmmLength" : 109,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 1.4E-46,
+      "score" : 159.0,
+      "envelopeStart" : 82,
+      "envelopeEnd" : 190,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 82,
+        "end" : 190,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 1.0E-46,
+    "score" : 159.5,
+    "model-ac" : "1.20.1050.10-FF-000005"
+  } ],
+  "xref" : [ {
+    "name" : "tr|B6DYP8 UPI0000000271",
+    "id" : "tr|B6DYP8"
+  } ]
+},{
+  "sequence" : "IQVPLWMAGKTCGICGKYDAECEQEYRMPNGYLAKNAVSFGHSWILEEAPCRG",
+  "md5" : "3bb4b32e2a0c8078f05e8a642273f364",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "UPI0000000035",
+    "id" : "UPI0000000035"
+  } ]
+},{
+  "sequence" : "MELVNIFLETDAGRVKFAIKNTDDVCASELINKFVELLSEYIHIDQSEFYLVVKDKDIFYFKCDRGSISIVNNEFYVFDEPLLFVKDFTNVTGVEFIVTETMPCRIIPKNNHAVISVVTNHKFYNGLSL",
+  "md5" : "d36afa1076853f8adda431ec9402837b",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "tr|Q49QK0 UPI000000000D",
+    "id" : "tr|Q49QK0"
+  } ]
+},{
+  "sequence" : "MKSCGLLPFTVLLALGILAPWTVEGGKNDAIKIGACPAKKPAQCLKLEKPQCRTDWECPGKQRCCQDACGSKCVNPVPIRKPVWRKPGRCVKTQARCMMLNPPNVCQRDGQCDGKYKCCEGICGKVCLPPM",
+  "md5" : "bc27e4b51b2f1c558319183cbe7e50c5",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:4.10.75.10:FF:000001",
+      "name" : null,
+      "description" : "Anosmin 1",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 82,
+      "end" : 131,
+      "representative" : false,
+      "hmmStart" : 2,
+      "hmmEnd" : 49,
+      "hmmLength" : 50,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 6.0E-16,
+      "score" : 60.0,
+      "envelopeStart" : 82,
+      "envelopeEnd" : 131,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 82,
+        "end" : 131,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    }, {
+      "start" : 28,
+      "end" : 77,
+      "representative" : false,
+      "hmmStart" : 3,
+      "hmmEnd" : 50,
+      "hmmLength" : 50,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 2.8E-15,
+      "score" : 57.9,
+      "envelopeStart" : 28,
+      "envelopeEnd" : 77,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 28,
+        "end" : 77,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 4.6E-32,
+    "score" : 111.6,
+    "model-ac" : "4.10.75.10-FF-000001"
+  } ],
+  "xref" : [ {
+    "name" : "tr|Q548X8 UPI00000000CF",
+    "id" : "tr|Q548X8"
+  } ]
+},{
+  "sequence" : "MVEHLVWDQGVAGSNPVFPTTYGALAQLGERLPCTQEVSGSIPLGSTIQYTEEYPSPAEGIGLENRQGC",
+  "md5" : "abdbb47f1220b40f020f563390062d3f",
+  "matches" : [ ],
+  "xref" : [ {
+    "name" : "UPI0000009762",
+    "id" : "UPI0000009762"
+  } ]
+},{
+  "sequence" : "MSYDLETAERAAYAPFFGYMGAASAQIFTVLGAAYGTAKSAVGICSMGVMRPELIMKSVIPVIMAGIIGIYGLVVAMVLKGKVTSASAGYDLNKGFAHLAAGLTCGLCGLGAGYAIGIVGDAGVRGTAQQPRLFVGMILILIFSEVLGLYGMIVALILGTS",
+  "md5" : "30abf4a14cb34ed6a2d8929d935bc4f9",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "G3DSA:1.20.120.610:FF:000001",
+      "name" : null,
+      "description" : "V-type proton ATPase proteolipid subunit",
+      "signatureLibraryRelease" : {
+        "library" : "FUNFAM",
+        "version" : "4.3.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 14,
+      "end" : 161,
+      "representative" : false,
+      "hmmStart" : 1,
+      "hmmEnd" : 146,
+      "hmmLength" : 150,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 4.5E-69,
+      "score" : 232.5,
+      "envelopeStart" : 14,
+      "envelopeEnd" : 161,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 14,
+        "end" : 161,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 4.0E-69,
+    "score" : 232.7,
+    "model-ac" : "1.20.120.610-FF-000001"
+  } ],
+  "xref" : [ {
+    "name" : "sp|C0HLB4 UPI0000000057",
+    "id" : "sp|C0HLB4"
+  } ]
+} ]
+}
