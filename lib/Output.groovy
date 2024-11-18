@@ -33,6 +33,10 @@ class Output {
                 return "Phobius"
             case "prints":
                 return "PRINTS"
+            case "prositepatterns":
+                return "ProSitePatterns"
+            case "prositeprofiles":
+                return "ProSiteProfiles"
             case "sfld":
                 return "SFLD"
             case "signalp":
