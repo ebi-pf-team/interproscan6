@@ -60,7 +60,7 @@ process PARSE_SFLD {
     def sequences = parseOutput(postprocess_out.toString())
     def hierarchy = parseHierarchy(hierarchy_db.toString())
 
-    sequences = sequences.collectEntries { seqId, matches -> 
+    sequences = sequences.collectEntries { seqId, matches ->
         // Flatten matches (one location per match)
         matches = matches.collectMany { key, match ->
             return match.locations.collect { location ->
@@ -95,13 +95,13 @@ process PARSE_SFLD {
 
                         if (!(l1.start > l2.end || l2.start > l1.end)) {
                             // Matches overlap
-                            
+
                             def otherParents = hierarchy.get(otherMatch.modelAccession)
                             if (otherParents != null && otherParents.contains(match.modelAccession)) {
                                 // Current match overlaps a more specific match: we want to keep the most specific
                                 overlaps = true
                                 break
-                            }    
+                            }
                         }
                     }
 
@@ -162,7 +162,7 @@ process PARSE_SFLD {
                 }
             }
         }
-        
+
         if (selectedMatches.size() > 0) {
             /*
             KEEP THIS BLOCK
@@ -283,7 +283,7 @@ Map<String, Match> parseBlock(Reader reader) {
             Match match = domains.get(modelAccession)
             if (match != null) {
                 Site site = new Site(description, residues)
-                match.addSite(site)                        
+                match.addSite(site)
             }
         }
     }
