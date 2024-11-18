@@ -61,7 +61,6 @@ workflow {
     )
 
     // AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
-
     // This is to concat MLS with scan sequences result
     // all_results = parsed_matches.concat(parsed_analysis)
 
@@ -84,8 +83,6 @@ workflow {
 
     AGGREGATE_SEQS_MATCHES(ch_seq_matches)
     AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
-
-    AGGREGATE_ALL_MATCHES.out.view()
 
     // REPRESENTATIVE_DOMAINS(XREFS.out.collect())
 

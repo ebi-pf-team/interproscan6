@@ -1,8 +1,4 @@
 class Output {
-    static formatCathAccession (String modelAccession) {
-        return "G3DSA:" + modelAccession.replace("-", ":")
-    }
-
     static convertDbName (String memberDB) {
         switch (memberDB) {
             case "antifam":

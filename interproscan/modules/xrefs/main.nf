@@ -64,6 +64,7 @@ process XREFS {
 
                 if (!matchObject.signature) {
                     matchObject.signature = new Signature(modelAccession, sigLibRelease)
+                    if (memberDB == "mobidb_lite") { matchObject.signature.description = "consensus disorder prediction" }
                 } else {
                     matchObject.signature.signatureLibraryRelease = sigLibRelease
                 }
@@ -149,7 +150,17 @@ process XREFS {
                 return [(rawModelAccession): matchObject]
             }]
         }
-        aggregatedMatches.putAll(matches.collect())
+        matches.each { seqId, seqMatches ->
+            if (aggregatedMatches.containsKey(seqId)) {
+                seqMatches.each { rawModelAccession, matchObject ->
+                    if (!aggregatedMatches[seqId].containsKey(rawModelAccession)) {
+                        aggregatedMatches[seqId][rawModelAccession] = matchObject
+                    }
+                }
+            } else {
+                aggregatedMatches[seqId] = seqMatches
+            }
+        }
     }
     def outputFilePath = task.workDir.resolve("matches2xrefs.json")
     def json = JsonOutput.toJson(aggregatedMatches)
