@@ -22,22 +22,22 @@ def test_output_dir(test_dir):
 
 @pytest.fixture
 def input_path(test_input_dir):
-    return test_input_dir / 'integration_input.fasta'
+    return test_input_dir / 'test_prot.fa'
 
 
 @pytest.fixture
 def output_path(test_output_dir):
-    return test_output_dir / 'integration_input.fasta.ips6'
+    return test_output_dir / 'test_prot.fa.ips6'
 
 
 @pytest.fixture
 def expected_output_path(test_output_dir):
-    return test_output_dir / 'expected_output'
+    return test_output_dir / 'expected_result_<MEMBER_DB>'
 
 
 @pytest.fixture
 def applications():
-    return 'AntiFam,CDD,Coils,FunFam,Gene3D,HAMAP,NCBIfam,MobiDB,Panther,Phobius,Pfam,PIRSF,PIRSR,PRINTS,PROSITE_PATTERNS,PROSITE_Profiles,SFLD,SMART,SignalP,SUPERFAMILY'
+    return '<MEMBER_DB>'
 
 
 @pytest.fixture
