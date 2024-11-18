@@ -50,10 +50,11 @@ process XREFS {
     matchesEntries = membersMatches.each { matchesPath  ->
         memberDB = matchesPath.toString().split("/").last().split("\\.")[0]
         def memberRelease = entries.databases.find { key, value ->
-            key.toLowerCase().replace("-", "").replace(" ", "") == memberDB
+            memberDBStandardised = key
+            InterProScan.standardiseMemberDB(key) == memberDB
         }?.value
         SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(
-            Output.convertDbName(memberDB),
+            memberDBStandardised,
             memberRelease)
 
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, matches ->
