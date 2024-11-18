@@ -35,6 +35,13 @@ process JSON_OUTPUT {
         "others": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
     ]
 
+    def boundsMapping = [
+        "[]"  : "COMPLETE",
+        "[."  : "N_TERMINAL_COMPLETE",
+        ".]"  : "C_TERMINAL_COMPLETE",
+        ".."  : "INCOMPLETE"
+    ]
+
     jsonSlurper.parse(seqMatches).each { sequence ->
         def seqMatches = []
         sequence["matches"].each { matchId, match ->
@@ -54,17 +61,6 @@ process JSON_OUTPUT {
                         "location-fragments": location.fragments
                     ]
 
-                    hmmBounds = switch (location.hmmBounds) {
-                        case "[]":
-                            return "COMPLETE"
-                        case "[.":
-                            return "N_TERMINAL_COMPLETE"
-                        case ".]":
-                            return "C_TERMINAL_COMPLETE"
-                        case "..":
-                            return "INCOMPLETE"
-                    }
-
                     // field value exceptions
                     if (memberDB = "pirsf") {
                         locationResult["hmmStart"] = location.start
@@ -74,7 +70,8 @@ process JSON_OUTPUT {
                         locationResult["score"] = matchObj.score
                     }
 
-                    specialCases.each { db, fields ->
+                    hmmBounds = boundsMapping[location.hmmBounds]
+                    locationCases.each { db, fields ->
                         if (db == memberDB || (db instanceof List && memberDB in db)) {
                             fields.each { field ->
                                 switch (field) {
@@ -157,7 +154,7 @@ process JSON_OUTPUT {
                         matchResult["evalue"] = matchObj.evalue
                         matchResult["graphscan"] = matchObj.graphScan
                         break
-                    case in ["signalp", "signalp_euk"]:
+                    case ["signalp", "signalp_euk"]:
                         matchResult["orgType"] = matchObj.signalp.orgType
                 }
 
