@@ -10,7 +10,7 @@ process REPRESENTATIVE_DOMAINS {
     output:
     path("matches_repr_domains.json")
 
-    script:
+    exec:
     int MAX_DOMS_PER_GROUP = 20 // only consider N "best" domains otherwise there are too many comparisons (2^domains)
     float DOM_OVERLAP_THRESHOLD = 0.3
     List<String> REPR_DOM_DBS = ["cdd", "ncbifam", "pfam", "prositeprofiles", "smart"]
@@ -34,13 +34,10 @@ process REPRESENTATIVE_DOMAINS {
 
         // Identify/select representative domains
         if (!seqDomains.isEmpty()) {
-        for (Location loc: seqDomains) {
-            println("loc ${loc} - ${loc.residues} -- ${loc.fragments}")
-        }
             // Sort based on location position
             seqDomains.sort { Location loc1, Location loc2 ->
-                int delta = loc1.location.start - loc2.location.start
-                delta != 0 ? delta : loc1.location.end - loc2.location.end
+                int delta = loc1.start - loc2.start
+                delta != 0 ? delta : loc1.end - loc2.end
             }
 
             // Group domains together
@@ -64,24 +61,24 @@ process REPRESENTATIVE_DOMAINS {
             // Select representative domain in each group
             groups.each { grp ->
                 grp = grp.sort { a, b ->
-                    int resComparison = b.residues.size() <=> a.residues.size()  // number fragments in desending order
-                    resComparison != 0 ? resComp : a.rank <=> b.rank             // rank in ascending order
+                    int resComparison = b.residues.size() <=> a.residues.size()  // number of fragments in desending order
+                    resComparison != 0 ? resComparison : a.rank <=> b.rank       // rank in ascending order
                 }.take(MAX_DOMS_PER_GROUP)
 
                 // Process representative domains in the group
                 if (grp.size() > 1) {
-                    Map<Integer, Set<Integer>> graph = (0..<grp.size()).collectEntries { i -> [i, (0..<grp.size()) - i] }
+                    Map<Integer, Set<Integer>> graph = (0..<grp.size()).collectEntries { i ->
+                        [i, new HashSet<>((0..<grp.size()) - i)]
+                    }
 
                     grp.eachWithIndex { loc1, i ->
                         (i + 1..<grp.size()).each { j ->
                             if (locationsOverlap(loc1.residues, grp[j].residues, DOM_OVERLAP_THRESHOLD)) {
-                                println("i ${i} j ${j} graph ${graph}")
-                                graph[i].remove(j)
-                                graph[j].remove(i)
+                                graph[i].remove(Integer.valueOf(j))
+                                graph[j].remove(Integer.valueOf(i))
                             }
                         }
                     }
-                    println("------")
 
                     // Select the best subgroup
                     Set<Set<Integer>> subgroups = getValidSets(graph)
@@ -120,6 +117,7 @@ process REPRESENTATIVE_DOMAINS {
         }
         allMatches.add(seqData)
     }
+
     def outputFilePath = task.workDir.resolve("matches_repr_domains.json")
     def json = JsonOutput.toJson(allMatches)
     new File(outputFilePath.toString()).write(json)

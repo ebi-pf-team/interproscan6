@@ -403,11 +403,15 @@ class Location implements Serializable {
     }
 
     Set<Integer> getResidues() {
-        this.residues = [] as Set
-        this.fragments.each { frag -> this.residues.addAll((frag.start..frag.end).toSet()) }
+        if (this.residues == null) {
+            this.residues = new HashSet<>()
+            this.fragments.each { frag ->
+                this.residues.addAll((frag.start..frag.end).toSet())
+            }
+        }
         return this.residues
     }
-      
+
     @Override
     public int hashCode() {
         return Objects.hash(start, end, hmmStart, hmmEnd, hmmLength, hmmBounds, 
