@@ -393,10 +393,19 @@ class Location implements Serializable {
         return loc
     }
 
+    void sortFragments() {
+        if (this.fragments.size() > 1 ) {
+            this.fragments.sort { a, b ->
+                int comparison = a.start <=> b.start
+                comparison != 0 ? comparison : a.end <=> b.end
+            }
+        }
+    }
+
     Set<Integer> getResidues() {
-        Set<Integer> residues = []
-        this.fragments.each { frag -> residues.addAll((frag.start..frag.end).toSet()) }
-        this.residues = residues
+        this.residues = [] as Set
+        this.fragments.each { frag -> this.residues.addAll((frag.start..frag.end).toSet()) }
+        return this.residues
     }
       
     @Override

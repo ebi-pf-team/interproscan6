@@ -25,6 +25,8 @@ process REPRESENTATIVE_DOMAINS {
                 Match match = Match.fromMap(matchMap)
                 match.locations.each { loc ->
                     loc.representativeRank = match.representativeInfo.rank
+                    loc.sortFragments()
+                    loc.getResidues()
                     seqDomains.add(loc)
                 }
             }
@@ -32,12 +34,20 @@ process REPRESENTATIVE_DOMAINS {
 
         // Identify/select representative domains
         if (!seqDomains.isEmpty()) {
-            int stop = seqDomains[0].fragments[-1].end
+        for (Location loc: seqDomains) {
+            println("loc ${loc} - ${loc.residues} -- ${loc.fragments}")
+        }
+            // Sort based on location position
+            seqDomains.sort { Location loc1, Location loc2 ->
+                int delta = loc1.location.start - loc2.location.start
+                delta != 0 ? delta : loc1.location.end - loc2.location.end
+            }
+
+            // Group domains together
             List groups = []
             List group = [seqDomains[0]]
-
+            int stop = seqDomains[0].fragments[-1].end
             if (seqDomains.size() > 1) {
-                // Safely iterate over the remainder of the list
                 for (Location loc : seqDomains[1..-1]) {
                     if (loc.fragments[0].start <= stop) {
                         group.add(loc)
@@ -51,11 +61,11 @@ process REPRESENTATIVE_DOMAINS {
             }
             groups.add(group) // Add the last group
 
-            // Process groups as before
+            // Select representative domain in each group
             groups.each { grp ->
                 grp = grp.sort { a, b ->
-                    int resComp = a.residues.size() <=> b.residues.size()
-                    resComp != 0 ? resComp : a.rank <=> b.rank
+                    int resComparison = b.residues.size() <=> a.residues.size()  // number fragments in desending order
+                    resComparison != 0 ? resComp : a.rank <=> b.rank             // rank in ascending order
                 }.take(MAX_DOMS_PER_GROUP)
 
                 // Process representative domains in the group
