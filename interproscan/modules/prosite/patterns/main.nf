@@ -36,7 +36,7 @@ process PARSE_PFSCAN {
         tuple val(meta), val(pfscan_out)
 
     output:
-        tuple val(meta), path("psscan.json")
+        tuple val(meta), path("prositepatterns.json")
 
     exec:
     Map<String, Map<String, Match>> patternsMatches = [:]
@@ -65,17 +65,18 @@ process PARSE_PFSCAN {
         String alignment = matchDetails[2].replaceAll('Sequence ', '').replaceAll('"', '').replaceAll('\\.', '').trim()
         String cigarAlignment = parseCigarAlignment(alignment)
         cigarAlignment = encodeCigarAlignment(cigarAlignment)
-        if (patternsMatches.containsKey(seqId)) {
-            match = patternsMatches[seqId]
+        patternsMatches[seqId] = patternsMatches[seqId] ?: [:]
+        if (patternsMatches[seqId][modelAccession]) {
+            matchObj = patternsMatches[seqId][modelAccession]
         } else {
-            match = new Match(modelAccession)
-            patternsMatches[seqId] = match
+            matchObj = new Match(modelAccession)
+            patternsMatches[seqId][modelAccession] = matchObj
         }
         Location location = new Location(start, end, level, alignment, cigarAlignment)
-        match.addLocation(location)
+        matchObj.addLocation(location)
     }
 
-    def outputFilePath = task.workDir.resolve("psscan.json")
+    def outputFilePath = task.workDir.resolve("prositepatterns.json")
     def json = JsonOutput.toJson(patternsMatches)
     new File(outputFilePath.toString()).write(json)
 }
