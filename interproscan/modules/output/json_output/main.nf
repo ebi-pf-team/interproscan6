@@ -77,37 +77,52 @@ process JSON_OUTPUT {
                                 switch (field) {
                                     case "alignment":
                                         locationResult["alignment"] = location.alignment
+                                        break
                                     case "cigarAlignment":
                                         locationResult["cigarAlignment"] = location.cigarAlignment
+                                        break
                                     case "cleavageStart":
                                         locationResult["cleavageStart"] = matchObj.signalp.cleavageSiteStart
+                                        break
                                     case "cleavageEnd":
                                         locationResult["cleavageEnd"] = matchObj.signalp.cleavageSiteEnd
+                                        break
                                     case "envelopeStart":
                                         locationResult["envelopeStart"] = location.envelopeStart
+                                        break
                                     case "envelopeEnd":
                                         locationResult["envelopeEnd"] = location.envelopeEnd
+                                        break
                                     case "evalue":
                                         locationResult["evalue"] = location.evalue
+                                        break
                                     case "hmmStart":
                                         locationResult["hmmStart"] = location.hmmStart
+                                        break
                                     case "hmmEnd":
                                         locationResult["hmmEnd"] = location.hmmEnd
+                                        break
                                     case "hmmLength":
                                         locationResult["hmmLength"] = location.hmmLength
+                                        break
                                     case "hmmBounds":
                                         locationResult["hmmBounds"] = hmmBounds
+                                        break
                                     case "level":
                                         locationResult["level"] = location.level
+                                        break
                                     case "motifNumber":
                                         locationResult["motifNumber"] = location.motifNumber
+                                        break
                                     case "pvalue":
                                         locationResult["pvalue"] = location.pvalue
+                                        break
                                     case "score":
                                         locationResult["score"] = location.score
+                                        break
                                     case "sequence-feature":
                                         locationResult["sequence-feature"] = location.sequenceFeature
-
+                                        break
                                 }
                             }
                         }
