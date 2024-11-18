@@ -7,7 +7,8 @@ include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP               
 include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                        } from  "../../modules/mobidblite"
 include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
-include { RUN_SIGNALP; PARSE_SIGNALP                                              } from  "../../modules/signalp"
+include { RUN_SIGNALP as RUN_SIGNALP_EUK; PARSE_SIGNALP as PARSE_SIGNALP_EUK      } from  "../../modules/signalp"
+include { RUN_SIGNALP as RUN_SIGNALP_PROK; PARSE_SIGNALP as PARSE_SIGNALP_PROK    } from  "../../modules/signalp"
 include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                           } from  "../../modules/phobius"
 include { RUN_PFSCAN ; PARSE_PFSCAN                                               } from  "../../modules/prosite/patterns"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
@@ -210,18 +211,26 @@ workflow SCAN_SEQUENCES {
         // TODO
     }
 
-    ["signalp_euk", "signalp_prok"].each { appl ->
-        if (applications.contains(appl)) {
-            def config = appsConfig[appl]
-            RUN_SIGNALP(
-                ch_fasta, 
-                config.organism, 
-                config.mode,
-                config.dir
-            )
-            PARSE_SIGNALP(RUN_SIGNALP.out)
-            results = results.mix(PARSE_SIGNALP.out)
-        }
+    if (applications.contains("signalp_euk")) {
+        RUN_SIGNALP_EUK(
+            ch_fasta, 
+            appsConfig.signalp_euk.organism, 
+            appsConfig.signalp_euk.mode,
+            appsConfig.signalp_euk.dir
+        )
+        PARSE_SIGNALP_EUK(RUN_SIGNALP_EUK.out)
+        results = results.mix(PARSE_SIGNALP_EUK.out)
+    }
+
+    if (applications.contains("signalp_prok")) {
+        RUN_SIGNALP_PROK(
+            ch_fasta, 
+            appsConfig.signalp_prok.organism, 
+            appsConfig.signalp_prok.mode,
+            appsConfig.signalp_prok.dir
+        )
+        PARSE_SIGNALP_PROK(RUN_SIGNALP_PROK.out)
+        results = results.mix(PARSE_SIGNALP_PROK.out)
     }
 
     if (applications.contains("smart")) {
