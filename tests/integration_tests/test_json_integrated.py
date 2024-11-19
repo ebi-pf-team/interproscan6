@@ -36,35 +36,48 @@ def json2dict(obj):
         return obj
 
 
-def compare(expected, current, ignore_elements: list, print_seq_info: bool):
+def compare(expected, current, ignore_elements: list, seq_info=None, output_file=None):
+    seq_info = seq_info or {}
+
+    def update_seq_info(obj, seq_info):
+        if "xref" in obj and isinstance(obj["xref"], list) and obj["xref"]:
+            seq_info["xref_id"] = obj["xref"][0].get("id", "-")
+        if "matches" in obj and isinstance(obj["matches"], list) and obj["matches"]:
+            match = obj["matches"][0]
+            seq_info["model_ac"] = match.get("model-ac", "-")
+            if "signature" in match:
+                seq_info["library"] = match["signature"].get("signatureLibraryRelease", {}).get("library", "-")
+
+    update_seq_info(expected, seq_info)
+    update_seq_info(current, seq_info)
+
     for key in expected:
-        if key == "id" and print_seq_info:
-            print(f"seqId: {expected[key]}")
-        if key == "accession" and print_seq_info:
-            print(f"accession: {expected[key]}")
         if key in ignore_elements:
             continue
         if key not in current:
-            print(f"MISMATCH: Key '{key}' missing in current dict")
-            print_seq_info = True
+            output_file.write(
+                f"{key}\tKey missing\t-\t{seq_info.get('xref_id', '-')}\t"
+                f"{seq_info.get('model_ac', '-')}\t{seq_info.get('library', '-')}\n"
+            )
             continue
+
         if isinstance(expected[key], dict):
-            compare(expected[key], current[key], ignore_elements, print_seq_info)
+            compare(expected[key], current[key], ignore_elements, seq_info, output_file)
         elif isinstance(expected[key], list):
             if len(expected[key]) != len(current[key]):
-                print((
-                    f"MISMATCH: list length for key '{key}'\n"
-                    f"expected: {len(expected[key])}\n"
-                    f"current: {len(current[key])}"
-                ))
+                output_file.write(
+                    f"{key}\tList length mismatch\t-\t{seq_info.get('xref_id', '-')}\t"
+                    f"{seq_info.get('model_ac', '-')}\t{seq_info.get('library', '-')}\n"
+                )
             else:
                 for i in range(len(expected[key])):
-                    compare(expected[key][i], current[key][i], ignore_elements, print_seq_info)
+                    compare(expected[key][i], current[key][i], ignore_elements, seq_info, output_file)
         else:
             if str(expected[key]).lower().strip() != str(current[key]).lower().strip():
-                print(f"MISMATCH: for key '{key}'")
-                print(f"  expected: {expected[key]}")
-                print(f"  current: {current[key]}")
+                output_file.write(
+                    f"{key}\t{expected[key]}\t{current[key]}\t{seq_info.get('xref_id', '-')}\t"
+                    f"{seq_info.get('model_ac', '-')}\t{seq_info.get('library', '-')}\n"
+                )
 
 
 def test_json_output(test_output_dir, input_path, expected_output_path, output_path, applications, disable_precalc):
@@ -74,13 +87,14 @@ def test_json_output(test_output_dir, input_path, expected_output_path, output_p
     expected = json2dict(expected_output)
     current = json2dict(current_output)
 
+    # just creating temp files for debugging
     with open('tests/integration_tests/temp_expected.json', 'w') as file:
         json.dump(expected, file, indent=2)
     with open('tests/integration_tests/temp_current.json', 'w') as file:
         json.dump(current, file, indent=2)
 
-    ignore_elements = []
-    compare(expected, current, ignore_elements, True)
-    # compare(current, expected, ignore_elements, False)
+    ignore_fields = ["postProcessed", 'dc-status', 'representative']
+    with open("mismatches.txt", "w") as file:
+        compare(expected, current, ignore_fields, output_file=file)
 
     assert expected == current
