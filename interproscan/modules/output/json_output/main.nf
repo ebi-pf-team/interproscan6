@@ -18,15 +18,15 @@ process JSON_OUTPUT {
     Map<String, List<String>> membersLocationFields = [
         "cdd": [],
         "coils": [],
-        "hamap": ["score", "alignment"],
+        "hamap": ["score", "targetAlignment"],
         "mobidblite": ["sequence-feature"],
         "panther": ["hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
         "phobius": [],
         "pirsf": ["evalue", "score", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
         "pirsr": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "envelopeStart", "envelopeEnd"],
         "prints": ["pvalue", "score", "motifNumber"],
-        "prositeprofiles": ["score", "alignment"],
-        "prositepatterns": ["cigarAlignment", "alignment", "level"],
+        "prositeprofiles": ["score", "targetAlignment"],
+        "prositepatterns": ["cigarAlignment", "targetAlignment", "level"],
         "sfld": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "envelopeStart", "envelopeEnd"],
         "signalp": ["pvalue", "cleavageStart", "cleavageEnd"],
         "signalp_euk": ["pvalue", "cleavageStart", "cleavageEnd"],
@@ -75,8 +75,8 @@ process JSON_OUTPUT {
                     def fields = membersLocationFields.get(memberDB, otherMembersLocationFields)
                     fields.each { field ->
                         switch (field) {
-                            case "alignment":
-                                locationResult["alignment"] = location.alignment
+                            case "targetAlignment":
+                                locationResult["alignment"] = location.targetAlignment
                                 break
                             case "cigarAlignment":
                                 locationResult["cigarAlignment"] = location.cigarAlignment
