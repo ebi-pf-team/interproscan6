@@ -94,7 +94,7 @@ def test_json_output(test_output_dir, input_path, expected_output_path, output_p
         json.dump(current, file, indent=2)
 
     ignore_fields = ["postProcessed", 'dc-status', 'representative']
-    with open("mismatches.txt", "w") as file:
+    with open("'tests/integration_tests/mismatches.txt", "w") as file:
         compare(expected, current, ignore_fields, output_file=file)
 
     assert expected == current
