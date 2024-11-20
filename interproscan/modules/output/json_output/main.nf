@@ -31,7 +31,7 @@ process JSON_OUTPUT {
         "signalp": ["pvalue", "cleavageStart", "cleavageEnd"],
         "signalp_euk": ["pvalue", "cleavageStart", "cleavageEnd"],
         "smart": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
-        "superfamily": ["hmmLength", "evalue"]
+        "superfamily": ["hmmLength"]
     ]
     List<String> otherMembersLocationFields = ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
 
@@ -68,6 +68,8 @@ process JSON_OUTPUT {
                     } else if (memberDB == "cdd") {
                         locationResult["evalue"] = matchObj.evalue
                         locationResult["score"] = matchObj.score
+                    } else if (memberDB == "superfamily") {
+                        matchResult["evalue"] = location.evalue
                     }
 
                     hmmBounds = boundsMapping[location.hmmBounds]
@@ -171,7 +173,7 @@ process JSON_OUTPUT {
                         matchResult["orgType"] = matchObj.signalp.orgType
                 }
 
-                if (memberDB in ['cathfunfam', 'cathgene3d', 'panther']) {
+                if (memberDB in ['cathfunfam', 'cathgene3d', 'panther', 'superfamily']) {
                     name = matchObj.signature.description
                     description = matchObj.signature.name
                     matchObj.signature.name = name

@@ -61,7 +61,7 @@ process XREFS {
             [(seqId): matches.collectEntries { rawModelAccession, match ->
                 Match matchObject = Match.fromMap(match)
                 def modelAccession = matchObject.modelAccession.split("\\.")[0]
-                if (memberDB in ["cathgene3d", "cathfunfam"]) {
+                if (memberDB in ["cathgene3d", "cathfunfam", "superfamily"]) {
                     modelAccession = matchObject.signature.accession
                 }
 
