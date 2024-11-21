@@ -147,11 +147,11 @@ process JSON_OUTPUT {
 
             if (matchResult["locations"]) {
                 // Match level fields
-                if (memberDB in ["antifam", "funfam", "gene3d", "ncbifam", "panther", "pfam", "pirsf", "pirsr", "sfld", "smart", "tmhmm"]) {
+                if (memberDB in ["antifam", "cathfunfam", "cathgene3d", "ncbifam", "panther", "pfam", "pirsf", "pirsr", "sfld", "smart", "tmhmm"]) {
                     matchResult["evalue"] = matchObj.evalue
                     matchResult["score"] = matchObj.score
                 }
-                matchResult["model-ac"] = memberDB == "FunFam" ? matchObj.modelAccession : matchObj.modelAccession.split("\\.")[0]
+                matchResult["model-ac"] = memberDB == "cathfunfam" ? matchObj.modelAccession : matchObj.modelAccession.split("\\.")[0]
 
                 switch (memberDB) {
                     case "sfld":
