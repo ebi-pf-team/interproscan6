@@ -26,7 +26,6 @@ workflow SCAN_SEQUENCES {
     applications        // list of applications to run
     appsConfig          // map of applications
     datadir             // path to data directory
-    signalpMode         // SignalP running mode, 'fast', 'slow', 'slow-sequential'
 
     main:
     results = Channel.empty()
@@ -332,18 +331,6 @@ workflow SCAN_SEQUENCES {
             "${datadir}/${appsConfig.superfamily.model}"
         )
         results = results.mix(PARSE_SUPERFAMILY.out)
-    }
-
-    if (applications.contains("signalp") || applications.contains("signalp_euk")) {
-        orgType = applications.contains("signalp_euk") ? "euk" : "other"
-        RUN_SIGNALP(ch_fasta, orgType, signalpMode)
-
-        PARSE_SIGNALP(
-            RUN_SIGNALP.out,
-            "${datadir}/${appsConfig.signalp.data.threshold}".split('/')[-1].toFloat()
-        )
-
-        results = results.mix(PARSE_SIGNALP.out)
     }
 
     if (applications.contains("tmhmm")) {
