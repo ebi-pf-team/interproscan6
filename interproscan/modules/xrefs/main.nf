@@ -49,10 +49,21 @@ process XREFS {
 
     matchesEntries = membersMatches.each { matchesPath  ->
         memberDB = matchesPath.toString().split("/").last().split("\\.")[0]
-        def memberRelease = entries.databases.find { key, value ->
-            library = key
+        String memberRelease = null
+        String library = null
+        def libraryRelease = entries.databases.find { key, value ->
             InterProScan.standardiseMemberDB(key) == memberDB
-        }?.value
+        }
+        try {
+            memberRelease = libraryRelease.value
+            library = libraryRelease.key
+        } catch (java.lang.NullPointerException e) {
+            if (memberDB == "cathfunfam") { // TODO: standardise FunFam on entries file and remove this block
+                library = "cathfunfam"
+            } else {
+                throw new Exception("No library release found for ${memberDB} on entries data")
+            }
+        }
         SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(
             library,
             memberRelease)
