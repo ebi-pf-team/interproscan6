@@ -58,8 +58,8 @@ process XREFS {
             memberRelease = libraryRelease.value
             library = libraryRelease.key
         } catch (java.lang.NullPointerException e) {
-            if (memberDB == "cathfunfam") { // TODO: standardise FunFam on entries file and remove this block
-                library = "cathfunfam"
+            if (memberDB in ["signalp", "cathfunfam"]) { // TODO: this block is to not crash. When standardise FunFam and SignalP with entries file, remove this block
+                library = memberDB
             } else {
                 throw new Exception("No library release found for ${memberDB} on entries data")
             }
