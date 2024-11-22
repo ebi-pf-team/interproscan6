@@ -68,7 +68,7 @@ process XREFS {
                     matchObject.signature.signatureLibraryRelease = sigLibRelease
                 }
 
-                if (memberDB == "panther") {
+                if (memberDB == "panther" && matchObject.treegrafter.ancestralNodeID != null) {
                     String paintAnnPath = "${dataDir}/${params.appsConfig.panther.paint}/${matchObject.signature.accession}.json"
                     File paintAnnotationFile = new File(paintAnnPath)
                     // not every signature will have a paint annotation file match
