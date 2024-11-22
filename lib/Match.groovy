@@ -12,9 +12,6 @@ class Match implements Serializable {
     // PANTHER
     TreeGrafter treegrafter = null
 
-    // SignalP
-    SignalP signalp = null
-
     // PRINTS
     String graphScan = null
 
@@ -62,10 +59,6 @@ class Match implements Serializable {
 
     void addLocation(Location location) {
         this.locations.add(location)
-    }
-
-    void addSignalPeptide(String orgType, int cleavageSiteStart, int cleavageSiteEnd) {
-        this.signalp = new SignalP(orgType, cleavageSiteStart, cleavageSiteEnd)
     }
 
     void setAlignments(int locationIndex, String queryAlignment, String targetAlignment) {
@@ -352,14 +345,6 @@ class Location implements Serializable {
         this.cigarAlignment = cigarAlignment
     }
 
-    Location(int start, int end, float pvalue) { // Used for SignalP
-        this.start = start
-        this.end = end
-        this.pvalue = pvalue
-        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
-        this.fragments = [fragment]
-    }
-
     void addSite(Site site) {
         this.sites.add(site)
     }
@@ -628,30 +613,6 @@ class TreeGrafter implements Serializable {
         tg.subfamilyDescription = data.subfamilyDescription
         tg.proteinClass = data.proteinClass
         return tg
-    }
-}
-
-class SignalP implements Serializable {
-    String orgType
-    int cleavageSiteStart
-    int cleavageSiteEnd
-
-    SignalP(String orgType, int cleavageSiteStart, int cleavageSiteEnd) {
-        this.orgType = orgType
-        this.cleavageSiteStart = cleavageSiteStart
-        this.cleavageSiteEnd = cleavageSiteEnd
-    }
-
-    static SignalP fromMap(Map data) {
-        if (data == null) {
-            return null
-        }
-        SignalP sp = new SignalP(
-                data.orgType,
-                data.cleavageSiteStart,
-                data.cleavageSiteEnd
-        )
-        return sp
     }
 }
 
