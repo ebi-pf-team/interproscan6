@@ -234,9 +234,4 @@ class InterProScan {
 
         return text.padRight(40) + ": ${option.description}"
     }
-
-    static standardiseMemberDB (String rawMemberDB) {
-        def memberDB = rawMemberDB.toLowerCase().replace("-", "").replace(" ", "")
-        return memberDB
-    }
 }

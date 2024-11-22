@@ -46,7 +46,8 @@ process JSON_OUTPUT {
         def seqMatches = []
         sequence["matches"].each { matchId, match ->
             Match matchObj = Match.fromMap(match)
-            String memberDB = InterProScan.standardiseMemberDB(matchObj.signature.signatureLibraryRelease.library)
+            String rawMemberDB = matchObj.signature.signatureLibraryRelease.library
+            String memberDB = String memberDB = rawMemberDB.toLowerCase().replace("-", "").replace(" ", "")
             matchResult = [
                 "signature": matchObj.signature,
                 "locations": []

@@ -308,7 +308,7 @@ class Location implements Serializable {
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
     }
-
+  
      Location(int start, int end, Double score, String targetAlignment) { // Used for Hamap, PrositeProfiles
         this.start = start
         this.end = end
@@ -374,11 +374,11 @@ class Location implements Serializable {
         loc.cigarAlignment = data.cigarAlignment
         return loc
     }
-
+      
     @Override
     public int hashCode() {
-        return Objects.hash(start, end, hmmStart, hmmEnd, hmmLength, hmmBounds,
-                            envelopeStart, envelopeEnd, evalue, score, bias,
+        return Objects.hash(start, end, hmmStart, hmmEnd, hmmLength, hmmBounds, 
+                            envelopeStart, envelopeEnd, evalue, score, bias, 
                             queryAlignment, targetAlignment, fragments, sites)
     }
 
