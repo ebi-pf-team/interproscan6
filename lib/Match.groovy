@@ -54,8 +54,6 @@ class Match implements Serializable {
         match.included = data.included
         match.locations = data.locations.collect { Location.fromMap(it) }
         match.treegrafter = TreeGrafter.fromMap(data.treegrafter)
-        match.signalp = SignalP.fromMap(data.signalp)
-        match.graphScan = data.graphScan
         return match
     }
 
@@ -310,7 +308,7 @@ class Location implements Serializable {
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
     }
-  
+
      Location(int start, int end, Double score, String targetAlignment) { // Used for Hamap, PrositeProfiles
         this.start = start
         this.end = end
@@ -374,8 +372,6 @@ class Location implements Serializable {
         loc.sequenceFeature = data.sequenceFeature
         loc.level = data.level
         loc.cigarAlignment = data.cigarAlignment
-        loc.pvalue = data.pvalue
-        loc.motifNumber = data.motifNumber
         return loc
     }
 
