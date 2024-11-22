@@ -47,7 +47,7 @@ process JSON_OUTPUT {
         sequence["matches"].each { matchId, match ->
             Match matchObj = Match.fromMap(match)
             String rawMemberDB = matchObj.signature.signatureLibraryRelease.library
-            String memberDB = String memberDB = rawMemberDB.toLowerCase().replace("-", "").replace(" ", "")
+            String memberDB = rawMemberDB.toLowerCase().replace("-", "").replace(" ", "")
             matchResult = [
                 "signature": matchObj.signature,
                 "locations": []
