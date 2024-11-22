@@ -62,7 +62,6 @@ process XREFS {
                         memberDB = "PIRSR"
                         memberRelease = entries["databases"][memberDB]
                     } else {
-                        println "No database found for ${modelAccession} MEMBERDB NULL"
                         memberDB = null
                         memberRelease = null
                     }
