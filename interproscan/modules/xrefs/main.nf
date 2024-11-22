@@ -30,6 +30,7 @@ process XREFS {
     String entriesPath = "${dataDir}/${params.xRefsConfig.entries}"
     File entriesJson = new File(entriesPath.toString())
     def entries = new ObjectMapper().readValue(entriesJson, Map)
+    JsonSlurper jsonSlurper = new JsonSlurper()
 
     def (ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null]
     if (params.goterms) {
@@ -38,51 +39,42 @@ process XREFS {
     if (params.pathways) {
         (ipr2pa, paInfo) = loadXRefFiles("pathways", dataDir)
     }
-
-    JsonSlurper jsonSlurper = new JsonSlurper()
-
-    Map<String, Map<String, Match>> aggregatedMatches = [:]
-
     if ("${apps}".contains('panther')) {
         String paintAnnoDir = "${dataDir}/${params.appsConfig.paint}"
     }
 
+    Map<String, Map<String, Match>> aggregatedMatches = [:]
     matchesEntries = membersMatches.each { matchesPath  ->
-        memberDB = matchesPath.toString().split("/").last().split("\\.")[0]
-        String memberRelease = null
-        String library = null
-        def libraryRelease = entries.databases.find { key, value ->
-            InterProScan.standardiseMemberDB(key) == memberDB
-        }
-        try {
-            memberRelease = libraryRelease.value
-            library = libraryRelease.key
-        } catch (java.lang.NullPointerException e) {
-            if (memberDB in ["signalp", "cathfunfam"]) { // TODO: this block is to not crash. When standardise FunFam and SignalP with entries file, remove this block
-                library = memberDB
-            } else {
-                throw new Exception("No library release found for ${memberDB} on entries data")
-            }
-        }
-        SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(
-            library,
-            memberRelease)
-
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, matches ->
             [(seqId): matches.collectEntries { rawModelAccession, match ->
                 Match matchObject = Match.fromMap(match)
-                def modelAccession = matchObject.modelAccession.split("\\.")[0]
-                if (memberDB in ["cathgene3d", "cathfunfam", "superfamily"]) {
-                    modelAccession = matchObject.signature.accession
+                modelAccession = matchObject.signature?.accession ?: matchObject.modelAccession.split("\\.")[0]
+                Map signatureInfo = entries['entries'][modelAccession] ?: entries['entries'][rawModelAccession]
+
+                try {
+                    String memberDB = matchObject.signature.signatureLibraryRelease.library
+                } catch (java.lang.NullPointerException e) {
+                    if (signatureInfo) {
+                        memberDB = signatureInfo["database"]
+                        memberRelease = entries["databases"][memberDB]
+                    }
+                    else if (modelAccession.startsWith("PIRSR")) {
+                        memberDB = "PIRSR"
+                        memberRelease = entries["databases"][memberDB]
+                    } else {
+                        println "No database found for ${modelAccession} MEMBERDB NULL"
+                        memberDB = null
+                        memberRelease = null
+                    }
+                    SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
+                    if (!matchObject.signature) {
+                        matchObject.signature = new Signature(modelAccession, sigLibRelease)
+                    } else {
+                        matchObject.signature.signatureLibraryRelease = sigLibRelease
+                    }
                 }
 
-                if (!matchObject.signature) {
-                    matchObject.signature = new Signature(modelAccession, sigLibRelease)
-                } else {
-                    matchObject.signature.signatureLibraryRelease = sigLibRelease
-                }
-
-                if (memberDB == "panther") {
+                if (memberDB.toLowerCase() == "panther") {
                     String paintAnnPath = "${dataDir}/${params.appsConfig.panther.paint}/${matchObject.signature.accession}.json"
                     File paintAnnotationFile = new File(paintAnnPath)
                     // not every signature will have a paint annotation file match
@@ -96,20 +88,19 @@ process XREFS {
                     }
                 }
 
-                Map entry = entries['entries'][modelAccession] ?: entries['entries'][rawModelAccession]
-                if (entry) {
-                    matchObject.signature.name = entry["name"]
-                    matchObject.signature.description = entry["description"]
+                if (signatureInfo) {
+                    matchObject.signature.name = signatureInfo["name"]
+                    matchObject.signature.description = signatureInfo["description"]
 
-                    if (entry['representative']) {
+                    if (signatureInfo['representative']) {
                         RepresentativeInfo representativeInfo = new RepresentativeInfo(
-                            entry['representative']["type"],
-                            entry['representative']["index"]
+                            signatureInfo['representative']["type"],
+                            signatureInfo['representative']["index"]
                         )
                         matchObject.representativeInfo = representativeInfo
                     }
 
-                    def interproKey = entry['integrated']
+                    def interproKey = signatureInfo['integrated']
                     def entryInfo = entries['entries'].get(interproKey)
                     if (entryInfo) {
                         Entry entryDataObj = new Entry(
@@ -153,7 +144,7 @@ process XREFS {
                     }
                 }
 
-                if (memberDB == "panther") {
+                if (memberDB.toLowerCase() == "panther") {
                     accSubfamily = matchObject.signature.accession
                     if (entries['entries'][accSubfamily]) {
                         matchObject.treegrafter.subfamilyName = entries['entries'][accSubfamily]["name"]
