@@ -14,7 +14,7 @@ def get_current_output(test_output_dir: str,
                        disable_precalc: bool) -> dict:
     disable_precalc = "--disable_precalc" if disable_precalc else ""
     command = f"nextflow run main.nf --input {input_path} --applications {applications} " \
-              f"--formats json --outdir {test_output_dir} --goterms --pathways -profile docker \
+              f"--formats json --outdir {test_output_dir} -profile docker \
               --datadir {data_dir}"
     if os.path.exists(str(current_output_path) + ".json"):
         os.remove(str(current_output_path) + ".json")
@@ -85,45 +85,50 @@ def compare(expected: dict,
     update_seq_info(expected, seq_info)
     update_seq_info(current, seq_info)
 
-    for key in expected:
-        if key in ignore_elements:
-            continue
-        if key not in current:
-            output_file.write(
-                f"{key}\tKey missing\t-\t{seq_info.get('xref_id', '-')}\t"
-                f"{seq_info.get('model_ac', '-')}\t{seq_info.get('library', '-')}\n"
-            )
-            continue
-
-        if isinstance(expected[key], dict):
-            compare(expected[key], current[key], ignore_elements, applications, seq_info, output_file)
-        elif isinstance(expected[key], list):
-            if key == "matches":
-                filtered_expected = filter_matches(expected[key], applications)
-
-                if len(filtered_expected) != len(current[key]):
-                    output_file.write(
-                        f"{key}\tList length mismatch\t-\t{seq_info.get('xref_id', '-')}\t"
-                        f"{seq_info.get('model_ac', '-')}\t{seq_info.get('library', '-')}\n"
-                    )
-                else:
-                    for i in range(len(filtered_expected)):
-                        compare(filtered_expected[i], current[key][i], ignore_elements, applications, seq_info, output_file)
-            else:
-                if len(expected[key]) != len(current[key]):
-                    output_file.write(
-                        f"{key}\tList length mismatch\t-\t{seq_info.get('xref_id', '-')}\t"
-                        f"{seq_info.get('model_ac', '-')}\t{seq_info.get('library', '-')}\n"
-                    )
-                else:
-                    for i in range(len(expected[key])):
-                        compare(expected[key][i], current[key][i], ignore_elements, applications, seq_info, output_file)
-        else:
-            if str(expected[key]).lower().strip() != str(current[key]).lower().strip():
+    # just creating temp files for debugging
+    with open('tests/integration_tests/temp_current.json', 'w') as file:
+        json.dump(current, file, indent=2)
+    with open('tests/integration_tests/temp_expected.json', 'w') as file:
+        for key in expected:
+            if key in ignore_elements:
+                continue
+            if key not in current:
                 output_file.write(
-                    f"{key}\t{expected[key]}\t{current[key]}\t{seq_info.get('xref_id', '-')}\t"
+                    f"{key}\tKey missing\t-\t{seq_info.get('xref_id', '-')}\t"
                     f"{seq_info.get('model_ac', '-')}\t{seq_info.get('library', '-')}\n"
                 )
+                continue
+
+            if isinstance(expected[key], dict):
+                compare(expected[key], current[key], ignore_elements, applications, seq_info, output_file)
+            elif isinstance(expected[key], list):
+                if key == "matches":
+                    filtered_expected = filter_matches(expected[key], applications)
+                    json.dump(filtered_expected, file, indent=2)
+
+                    if len(filtered_expected) != len(current[key]):
+                        output_file.write(
+                            f"{key}\tList length mismatch\t-\t{seq_info.get('xref_id', '-')}\t"
+                            f"{seq_info.get('model_ac', '-')}\t{seq_info.get('library', '-')}\n"
+                        )
+                    else:
+                        for i in range(len(filtered_expected)):
+                            compare(filtered_expected[i], current[key][i], ignore_elements, applications, seq_info, output_file)
+                else:
+                    if len(expected[key]) != len(current[key]):
+                        output_file.write(
+                            f"{key}\tList length mismatch\t-\t{seq_info.get('xref_id', '-')}\t"
+                            f"{seq_info.get('model_ac', '-')}\t{seq_info.get('library', '-')}\n"
+                        )
+                    else:
+                        for i in range(len(expected[key])):
+                            compare(expected[key][i], current[key][i], ignore_elements, applications, seq_info, output_file)
+            else:
+                if str(expected[key]).lower().strip() != str(current[key]).lower().strip():
+                    output_file.write(
+                        f"{key}\t{expected[key]}\t{current[key]}\t{seq_info.get('xref_id', '-')}\t"
+                        f"{seq_info.get('model_ac', '-')}\t{seq_info.get('library', '-')}\n"
+                    )
 
 
 def test_json_output(test_output_dir, input_path, expected_result_path, output_path, applications, data_dir, disable_precalc):
@@ -132,12 +137,6 @@ def test_json_output(test_output_dir, input_path, expected_result_path, output_p
 
     expected = json2dict(expected_result)
     current = json2dict(current_result)
-
-    # just creating temp files for debugging
-    with open('tests/integration_tests/temp_expected.json', 'w') as file:
-        json.dump(expected, file, indent=2)
-    with open('tests/integration_tests/temp_current.json', 'w') as file:
-        json.dump(current, file, indent=2)
 
     ignore_fields = ["postProcessed", 'dc-status', 'representative', 'library']
     applications_list = applications.split(',')

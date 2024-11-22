@@ -49,30 +49,16 @@ process XREFS {
 
     matchesEntries = membersMatches.each { matchesPath  ->
         memberDB = matchesPath.toString().split("/").last().split("\\.")[0]
-        String memberRelease = null
-        String library = null
-        def libraryRelease = entries.databases.find { key, value ->
-            InterProScan.standardiseMemberDB(key) == memberDB
-        }
-        try {
-            memberRelease = libraryRelease.value
-            library = libraryRelease.key
-        } catch (java.lang.NullPointerException e) {
-            if (memberDB == "cathfunfam") { // TODO: standardise FunFam on entries file and remove this block
-                library = "cathfunfam"
-            } else {
-                throw new Exception("No library release found for ${memberDB} on entries data")
-            }
-        }
-        SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(
-            library,
-            memberRelease)
+        def memberRelease = entries.databases.find { key, value ->
+            key.toLowerCase().replace("-", "").replace(" ", "") == memberDB
+        }?.value
+        SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
 
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, matches ->
             [(seqId): matches.collectEntries { rawModelAccession, match ->
                 Match matchObject = Match.fromMap(match)
                 def modelAccession = matchObject.modelAccession.split("\\.")[0]
-                if (memberDB in ["cathgene3d", "cathfunfam", "superfamily"]) {
+                if (memberDB in ["cathgene3d", "cathfunfam"]) {
                     modelAccession = matchObject.signature.accession
                 }
 
@@ -163,17 +149,7 @@ process XREFS {
                 return [(rawModelAccession): matchObject]
             }]
         }
-        matches.each { seqId, seqMatches ->
-            if (aggregatedMatches.containsKey(seqId)) {
-                seqMatches.each { rawModelAccession, matchObject ->
-                    if (!aggregatedMatches[seqId].containsKey(rawModelAccession)) {
-                        aggregatedMatches[seqId][rawModelAccession] = matchObject
-                    }
-                }
-            } else {
-                aggregatedMatches[seqId] = seqMatches
-            }
-        }
+        aggregatedMatches.putAll(matches.collect())
     }
     def outputFilePath = task.workDir.resolve("matches2xrefs.json")
     def json = JsonOutput.toJson(aggregatedMatches)

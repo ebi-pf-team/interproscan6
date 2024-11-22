@@ -44,7 +44,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--applications",
         action="store",
-        default="AntiFam,CDD,Coils,FunFam,Gene3D,HAMAP,MobiDB_lite,NCBIfam,Panther,Pfam,PIRSF,PIRSR,PRINTS,PROSITE_PATTERNS,PROSITE_Profiles,SFLD,SMART,SUPERFAMILY",
+        default="antifam,cdd,coils,funfam,gene3d,hamap,mobidblite,ncbifam,panther,pfam,pirsf,pirsr,prints,prositepatterns,prositeprofiles,sfld,smart,superfamily",
     )
 
 
