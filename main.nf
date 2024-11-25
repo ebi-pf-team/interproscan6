@@ -63,8 +63,7 @@ workflow {
         ch_seqs,
         apps,
         params.appsConfig,
-        data_dir,
-        signalpMode
+        data_dir
     )
 
     /* XREFS:

@@ -37,7 +37,6 @@ process PREPARE_TREEGRAFTER {
         def filteredMatches = matches
             .values()
             .collect { m1 ->
-                // TODO: do we need to filter by e-value here? Cannot it be done with hmmsearch?
                 if (!m1.included || m1.evalue > 0.00000001) {
                     return null
                 }
@@ -54,6 +53,8 @@ process PREPARE_TREEGRAFTER {
                 m2.included = m1.included
                 // Only keep the domain with the highest score
                 m2.locations = [locations.max { it.score }]
+                // Init empty TreeGrafter attribute
+                m2.treegrafter = new TreeGrafter(null)
                 return m2
             }
             .findAll { it != null }
@@ -114,9 +115,8 @@ process PREPARE_TREEGRAFTER {
         String sequence = sb.toString()
         assert sequence.length() == length
 
-        fastaPath = task.workDir.resolve("${seqId}.fa")
-        File file = new File(fastaPath.toString())
-        file.withWriter { writer ->
+        File fastaFile = File.createTempFile("tmp", ".fa", task.workDir.toFile())
+        fastaFile.withWriter { writer ->
             writer.writeLine(">${familyId}")
             for (int i = 0; i < sequence.length(); i += 80) {
                 int j = Math.min(i + 80, length) - 1
@@ -126,7 +126,7 @@ process PREPARE_TREEGRAFTER {
         }
 
         familyIds.add( familyId )
-        fastas.add( fastaPath )
+        fastas.add( fastaFile.toString() )
         sequenceIds.add( seqId )
     } 
 }
@@ -147,30 +147,31 @@ process RUN_TREEGRAFTER {
 
     [sequenceIds, familyIds, fastas]
         .transpose()
-        .eachWithIndex { entry, index -> 
+        .each { entry -> 
             String seqID  = entry[0]
             String family = entry[1]
             def fastaPath = entry[2]
            
            // Run EPA-ng
-            def command = "/opt/epa-ng/bin/epa-ng"
-            command += " -G 0.05"
-            command += " -m WAG"
-            command += " -T ${task.cpus}"
-            command += " -t ${msf_dir.toString()}/${family}.bifurcate.newick"
-            command += " -s ${msf_dir.toString()}/${family}.AN.fasta"
-            command += " -q ${fastaPath}"
-            command += " --redo\n"
+            def epang_command = "/opt/epa-ng/bin/epa-ng"
+            epang_command += " -G 0.05"
+            epang_command += " -m WAG"
+            epang_command += " -T ${task.cpus}"
+            epang_command += " -t ${msf_dir.toString()}/${family}.bifurcate.newick"
+            epang_command += " -s ${msf_dir.toString()}/${family}.AN.fasta"
+            epang_command += " -q ${fastaPath}"
+            epang_command += " --redo"
 
             // Parse results
-            command += "python ${projectDir}/bin/panther/parse_epang.py"
-            command += " epa_result.jplace"
-            command += " ${msf_dir.toString()}/${family}.newick | "
+            def py_command = "python ${projectDir}/bin/panther/parse_epang.py"
+            py_command += " epa_result.jplace"
+            py_command += " ${msf_dir.toString()}/${family}.newick"
 
             // Add sequence ID
-            command += "awk '{print \"${seqID}\",\$0}' >> epang.tsv\n"
+            def awk_command = "awk '{print \"${seqID}\",\$0}'"
 
-            commands += command 
+            // Only run Python + Awk if EPA-ng doesn't fail
+            commands += "${epang_command} && ${py_command} | ${awk_command} >> epang.tsv || :\n"
         }
 
     """
