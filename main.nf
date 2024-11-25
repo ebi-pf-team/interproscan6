@@ -8,6 +8,7 @@ include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_trans
 include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { XREFS                         } from "./interproscan/modules/xrefs"
+include { WRITE_XML_OUTPUT              } from "./interproscan/modules/output/xml"
 
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
@@ -83,30 +84,26 @@ workflow {
     AGGREGATE_SEQS_MATCHES(ch_seq_matches)
     AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
 
-    AGGREGATE_ALL_MATCHES.out.view()
-
     // REPRESENTATIVE_DOMAINS(XREFS.out.collect())
 
     Channel.from(params.formats.toLowerCase().split(','))
     .set { ch_format }
 
-//     WRITE_RESULTS(
-//         input_file.getName(),
-//         AGGREGATE_PARSED_SEQS.out,
-//         REPRESENTATIVE_DOMAINS.out.collect(),
-//         ch_format,
-//         params.outdir,
-//         params.ipscn_version,
-//         params.nucleic
-//     )
+    def formats = params.formats.toUpperCase().split(',') as Set
+    def fileName = params.input.split('/').last()
+    def outFileName = "${params.outdir}/${fileName}"
+    if (formats.contains("XML")) {
+        WRITE_XML_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}", workflow.manifest.version)
+    }
 }
 
-// workflow.onComplete = {
-//     def input_file = file(params.input)
-//     def outputFileName = input_file.getName()
-//     def outputDir = params.outdir.endsWith('/') ? params.outdir[0..-2] : params.outdir
+workflow.onComplete = {
+    def input_file = file(params.input)
+    def outputFileName = input_file.getName()
+    def outputDir = params.outdir.endsWith('/') ? params.outdir[0..-2] : params.outdir
 
-//     println "InterProScan workflow completed successfully: $workflow.success."
-//     println "Any results are located at ${outputDir}/${outputFileName}.ips6.*"
-//     println "Duration: $workflow.duration"
-// }
+    println "InterProScan workflow completed successfully: $workflow.success."
+    println "Any results are located at ${outputDir}/${outputFileName}.ips6.*"
+    println "Duration: $workflow.duration"
+}
+
