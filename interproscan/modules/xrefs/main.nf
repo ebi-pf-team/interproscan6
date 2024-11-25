@@ -49,23 +49,19 @@ process XREFS {
             [(seqId): matches.collectEntries { rawModelAccession, match ->
                 Match matchObject = Match.fromMap(match)
                 modelAccession = matchObject.signature?.accession ?: matchObject.modelAccession.split("\\.")[0]
-                if (matchObject.modelAccession.split("\\.")[0] != modelAccession) {
-                    println "Model Accession: ${matchObject.modelAccession} -> ${modelAccession}"
-                }
-                Map entry = entries['entries'][modelAccession] ?: entries['entries'][rawModelAccession]
+                Map signatureInfo = entries['entries'][modelAccession] ?: entries['entries'][rawModelAccession]
 
                 try {
                     String memberDB = matchObject.signature.signatureLibraryRelease.library
                 } catch (java.lang.NullPointerException e) {
-                    if (entry) {
-                        memberDB = entry["database"]
+                    if (signatureInfo) {
+                        memberDB = signatureInfo["database"]
                         memberRelease = entries["databases"][memberDB]
                     }
                     else if (modelAccession.startsWith("PIRSR")) {
                         memberDB = "PIRSR"
                         memberRelease = entries["databases"][memberDB]
                     } else {
-                        println "No database found for ${modelAccession} MEMBERDB NULL"
                         memberDB = null
                         memberRelease = null
                     }
@@ -77,7 +73,7 @@ process XREFS {
                     }
                 }
 
-                if (memberDB.toLowerCase() == "panther") {
+                if (memberDB == "PANTHER") {
                     String paintAnnPath = "${dataDir}/${params.appsConfig.panther.paint}/${matchObject.signature.accession}.json"
                     File paintAnnotationFile = new File(paintAnnPath)
                     // not every signature will have a paint annotation file match
@@ -91,19 +87,19 @@ process XREFS {
                     }
                 }
 
-                if (entry) {
-                    matchObject.signature.name = entry["name"]
-                    matchObject.signature.description = entry["description"]
+                if (signatureInfo) {
+                    matchObject.signature.name = signatureInfo["name"]
+                    matchObject.signature.description = signatureInfo["description"]
 
-                    if (entry['representative']) {
+                    if (signatureInfo['representative']) {
                         RepresentativeInfo representativeInfo = new RepresentativeInfo(
-                            entry['representative']["type"],
-                            entry['representative']["index"]
+                            signatureInfo['representative']["type"],
+                            signatureInfo['representative']["index"]
                         )
                         matchObject.representativeInfo = representativeInfo
                     }
 
-                    def interproKey = entry['integrated']
+                    def interproKey = signatureInfo['integrated']
                     def entryInfo = entries['entries'].get(interproKey)
                     if (entryInfo) {
                         Entry entryDataObj = new Entry(
@@ -147,7 +143,7 @@ process XREFS {
                     }
                 }
 
-                if (memberDB.toLowerCase() == "panther") {
+                if (memberDB == "PANTHER") {
                     accSubfamily = matchObject.signature.accession
                     if (entries['entries'][accSubfamily]) {
                         matchObject.treegrafter.subfamilyName = entries['entries'][accSubfamily]["name"]
