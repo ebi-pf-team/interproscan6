@@ -56,8 +56,7 @@ workflow {
         ch_seqs,
         apps,
         params.appsConfig,
-        data_dir,
-        signalpMode
+        data_dir
     )
 
     // AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())

@@ -1,3 +1,4 @@
+import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
 process RUN_SIGNALP {
@@ -5,19 +6,26 @@ process RUN_SIGNALP {
 
     input:
     tuple val(meta), path(fasta)
-    val orgType
+    val organism
     val mode
+    path signalp_dir
 
     output:
-    tuple val(meta), path("signalp_out"), val(orgType)
+    tuple val(meta), val(organism), val(mode), path("outdir")
 
     script:
     """
-    signalp6 \
-        --organism ${orgType} \
+    cp -Lr ${signalp_dir}/signalp-6-package/signalp signalp
+    python -m signalp.predict \
         --fastafile ${fasta} \
-        --output_dir signalp_out \
-        --mode ${mode}
+        --output_dir outdir \
+        --format none \
+        --organism ${organism} \
+        --mode ${mode} \
+        --write_procs 1 \
+        --model_dir ${signalp_dir}/signalp-6-package/models
+    rm -r signalp
+    chmod -R 777 outdir
     """
 }
 
@@ -25,68 +33,42 @@ process PARSE_SIGNALP {
     label 'analysis_parser'
 
     input:
-    tuple val(meta), val(signalp_out), val(orgType)
-    val threshold
+    tuple val(meta), val(organism), val(mode), val(signalp_out)
 
     output:
     tuple val(meta), path("signalp.json")
 
     exec:
-    /*
-    Don't parse only the JSON as we want the start and end positions
-    that are annotated by SignalP for the rare cases were the signal
-    peptide does not start at position 1.
-    */
     String signalDir = signalp_out.toString()
-    String gff3FileName = "output.gff3"
-    String txtFileName = "prediction_results.txt"
-    float threshold = threshold as float
-    String orgType = orgType as String
-    def Map<String, Match> hits = new LinkedHashMap<>()
 
-    String modelAccession = "SIGNAL_PEPTIDE"
+    File jsonFile = new File(signalDir, "output.json")
+    def jsonSlurper = new JsonSlurper()
+    def jsonOutput = jsonSlurper.parse(jsonFile)
 
-    // Retrieve all signal peptide hits from the gff3 file
-    File gff3File = new File(signalDir, gff3FileName)
-    gff3File.withReader { reader ->
-        String line
-        while ((line = reader.readLine()) != null) {
-            def matcher = line =~ ~/^(.+?)\sSignalP-\d+\.\d+\ssignal_peptide\s+(\d+)\s(\d+)\s(\d+\.?\d*)\s\.\s\.\s\.$/
-            if (matcher.find()) {
-                String queryAccession = matcher.group(1).trim()
-                float pvalue = Float.parseFloat(matcher.group(4).trim())
-                if (pvalue >= threshold) {
-                    Match match = new Match("SignalP")
-                    Location location = new Location(
-                        Integer.parseInt(matcher.group(2).trim()),  // start
-                        Integer.parseInt(matcher.group(3).trim()),  // end
-                        pvalue
-                    )
-                    match.addLocation(location)
-                    hits.computeIfAbsent(queryAccession, {[:]})
-                    hits[queryAccession].computeIfAbsent(modelAccession, {match})
-                }
-            }
+    String modelAcc = "SignalP_${mode}_${organism}"
+
+    def hits = [:]
+    new File(signalDir, "output.gff3").eachLine { line ->
+        if (line.startsWith("#")) {
+            return
         }
-    }
 
-    // Retrieve the cleavage site start/end from the TSV (.txt) file, and add to the matches
-    File tsvFile = new File(signalDir, txtFileName)
-    tsvFile.withReader { reader ->
-        String line
-        while ((line = reader.readLine()) != null) {
-            def matcher = line =~ ~/^(.+?)\sSP\s.+?CS pos: (\d+)-(\d+)\.\sPr:\s\d+\.?\d+$/
-            if (matcher.find()) {
-                String queryAccession = matcher.group(1).trim()
-                if (hits.containsKey(queryAccession)) {  // protein may not have passed the earlier threshold check
-                    hits[queryAccession][modelAccession].addSignalPeptide(
-                            orgType,
-                            matcher.group(2).trim().toInteger(),  // cleavageSite Start
-                            matcher.group(3).trim().toInteger()   // cleavageSite End
-                    )
-                }
-            }
-        }
+        def fields = line.split(/\t/)
+        assert fields.size() == 9
+        String seqHeader = fields[0]
+        String seqId = seqHeader.split(/\s+/)[0]
+        int start = fields[3].toInteger()
+        int end = fields[4].toInteger()
+        Double score = Double.parseDouble(fields[5])
+        String prediction = jsonOutput["SEQUENCES"][seqHeader]["Prediction"]
+
+        SignatureLibraryRelease library = new SignatureLibraryRelease("SignalP", "6.0h")
+        Match match = new Match(modelAcc)       
+        match.signature = new Signature("SignalP", library)
+        Location location = new Location(start, end, prediction)
+        location.score = score
+        match.addLocation(location)
+        hits[seqId] = [(modelAcc) : match]
     }
 
     def outputFilePath = task.workDir.resolve("signalp.json")
