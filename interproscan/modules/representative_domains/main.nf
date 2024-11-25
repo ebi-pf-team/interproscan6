@@ -23,11 +23,13 @@ process REPRESENTATIVE_DOMAINS {
         seqData["matches"].each { modelAccession, matchMap ->
             if (matchMap["signature"]["signatureLibraryRelease"]["library"] in REPR_DOM_DBS) {
                 Match match = Match.fromMap(matchMap)
-                match.locations.each { loc ->
-                    loc.representativeRank = match.representativeInfo.rank
-                    loc.sortFragments()
-                    loc.getResidues()
-                    seqDomains.add(loc)
+                if (match.representativeInfo.type) {
+                    match.locations.each { loc ->
+                        loc.representativeRank = match.representativeInfo.rank
+                        loc.sortFragments()
+                        loc.getResidues()
+                        seqDomains.add(loc)
+                    }
                 }
             }
         }
