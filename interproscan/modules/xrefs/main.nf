@@ -65,7 +65,7 @@ process XREFS {
                 if (!matchObject.signature) {
                     matchObject.signature = new Signature(modelAccession, sigLibRelease)
                     if (memberDB == "mobidb_lite") { matchObject.signature.description = "consensus disorder prediction" }
-                } else {
+                } else if (!matchObject.signature.signatureLibraryRelease) {
                     matchObject.signature.signatureLibraryRelease = sigLibRelease
                 }
 
