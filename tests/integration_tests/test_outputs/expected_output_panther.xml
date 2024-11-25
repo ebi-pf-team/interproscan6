@@ -1,0 +1,398 @@
+<protein-matches interproscan-version="6.0.0">
+<protein>
+<sequence md5="88d47cc807fe8e977130b0cc93e0bd61">
+MSKIGKSIRLERIIDRKTRKTVIVPMDHGLTVGPIPGLIDLAAAVDKVAEGGANAVLGHMGLPLYGHRGYGKDVGLIIHLSASTSLGPDANHKVLVTRVEDAIRVGADGVSIHVNVGAEDEAEMLRDLGMVARRCDLWGMPLLAMMYPRGAKVRSEHSVEYVKHAARVGAELGVDIVKTNYTGSPETFREVVRGCPAPVVIAGGPKMDTEADLLQMVYDAMQAGAAGISIGRNIFQAENPTLLTRKLSKIVHEGYTPEEAARLKL
+</sequence>
+<xref id="A0B6J9" name="A0B6J9"/>
+<matches>
+<hmmer3-match ac="PTHR47916:SF1" evalue="1.0E-86" graft-point="METAC|EnsemblGenome=MA_0439|UniProtKB=Q8TTJ2" name="3-HYDROXY-5-PHOSPHONOOXYPENTANE-2,4-DIONE THIOLASE-RELATED" protein-class="PC00044" score="302.3">
+<signature ac="PTHR47916" name="FRUCTOSE-BISPHOSPHATE ALDOLASE CLASS 1">
+<entry ac="IPR050456" desc="DeoC/FbaB aldolase" name="DeoC/FbaB_aldolase" type="FAMILY">
+<pathway-xref db="MetaCyc" id="PWY-6672" name="cis-geranyl-CoA degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-7695" name="aurofusarin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8151" name="cholesterol degradation to androstenedione III (anaerobic)"/>
+<pathway-xref db="MetaCyc" id="PWY-6142" name="gluconeogenesis II (Methanobacterium thermoautotrophicum)"/>
+<pathway-xref db="MetaCyc" id="PWY-7045" name="mithramycin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-5409" name="divinyl ether biosynthesis II"/>
+<pathway-xref db="MetaCyc" id="PWY-7354" name="aclacinomycin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-6946" name="cholesterol degradation to androstenedione II (cholesterol dehydrogenase)"/>
+<pathway-xref db="MetaCyc" id="PWY-7814" name="dTDP-L-daunosamine biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8029" name="limonene degradation IV (anaerobic)"/>
+<pathway-xref db="MetaCyc" id="PWY-7757" name="bisphenol A degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-7428" name="2-chloroacrylate degradation II"/>
+<pathway-xref db="MetaCyc" id="PWY-6627" name="salinosporamide A biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-5644" name="4-nitrotoluene degradation II"/>
+<pathway-xref db="MetaCyc" id="PWY-7189" name="pinocembrin C-glucosylation"/>
+<pathway-xref db="MetaCyc" id="PWY-7610" name="GDP-6-deoxy-D-altro-heptose biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-6944" name="androstenedione degradation I (aerobic)"/>
+<pathway-xref db="MetaCyc" id="PWY-721" name="3-methylquinoline degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-7275" name="L-homophenylalanine biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-1861" name="formaldehyde assimilation II (assimilatory RuMP Cycle)"/>
+<pathway-xref db="MetaCyc" id="PWY-5408" name="9-lipoxygenase and 9-hydroperoxide lyase pathway"/>
+<pathway-xref db="MetaCyc" id="PWY-6948" name="sitosterol degradation to androstenedione"/>
+<pathway-xref db="MetaCyc" id="PWY-6602" name="naringenin C-glucosylation"/>
+<pathway-xref db="MetaCyc" id="PWY-7153" name="grixazone biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-6945" name="cholesterol degradation to androstenedione I (cholesterol oxidase)"/>
+<pathway-xref db="MetaCyc" id="PWY-5410" name="traumatin and (Z)-3-hexen-1-yl acetate biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-2467" name="(+)-pisatin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-5780" name="hypericin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7821" name="tunicamycin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7130" name="L-glucose degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-7352" name="daunorubicin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8296" name="cremeomycin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-5367" name="petroselinate biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7811" name="6-methylpretetramide biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8134" name="bile acid 7beta-dehydroxylation"/>
+<pathway-xref db="MetaCyc" id="PWY-8044" name="cyclohexane-1-carboxyl-CoA biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-2229" name="superpathway of pterocarpan biosynthesis (via formononetin)"/>
+<pathway-xref db="MetaCyc" id="PWY-6160" name="3-dehydroquinate biosynthesis II (archaea)"/>
+<pathway-xref db="MetaCyc" id="PWY-7510" name="rhizocticin A and B biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-5484" name="glycolysis II (from fructose 6-phosphate)"/>
+<pathway-xref db="MetaCyc" id="PWY-8179" name="platensimycin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-6679" name="jadomycin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7385" name="1,3-propanediol biosynthesis (engineered)"/>
+<pathway-xref db="MetaCyc" id="PWY-8335" name="plasmalogen biosynthesis II (anaerobic)"/>
+<pathway-xref db="MetaCyc" id="PWY-6749" name="CMP-legionaminate biosynthesis I"/>
+<pathway-xref db="MetaCyc" id="PWY-8319" name="NiFe(CO)(CN)2 cofactor biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7769" name="phosalacine biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWYG-321" name="mycolate biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8178" name="pentose phosphate pathway (non-oxidative branch) II"/>
+<pathway-xref db="MetaCyc" id="PWY-1042" name="glycolysis IV"/>
+<pathway-xref db="MetaCyc" id="PWY-5061" name="6,7,4'-trihydroxyisoflavone biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7547" name="prodigiosin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7613" name="GDP-6-deoxy-D-manno-heptose biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8152" name="androstenedione degradation II (anaerobic)"/>
+<pathway-xref db="MetaCyc" id="PWY-8012" name="mupirocin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7897" name="flavonoid di-C-glucosylation"/>
+<pathway-xref db="MetaCyc" id="PWY-5979" name="3-amino-5-hydroxybenzoate biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7188" name="orientin and isoorientin biosynthesis I"/>
+<pathway-xref db="MetaCyc" id="PWY-735" name="jasmonic acid biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8404" name="glycolysis VI (from fructose)"/>
+<pathway-xref db="MetaCyc" id="PWY-6322" name="phosphinothricin tripeptide biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-6721" name="sangivamycin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-5793" name="maysin biosynthesis"/>
+</entry>
+<signature-library-release library="hmmer3" version="18.0"/>
+</signature>
+<model-ac>PTHR47916:SF1</model-ac>
+<locations>
+<hmmer3-location env-start="1" env-end="265" hmm-start="5" hmm-end="264" hmm-length="0" hmm-bounds="INCOMPLETE" start="2" end="262" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="2" end="262" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="7bcb28d452c1f7ad86b5e0da7fa21fd3">
+MNLQRFPRHPLTFGPTPIQPLKRLSAHLGGQVELYAKREDCNSGLAFGGNKTRKLEYLIPEALAQGCDTLVSIGGIQSNQTRQVAAVAAHLGMKCVLVQENWVNYSDAVYDRVGNIEMSRILGADVRLDAAGFDIGIRPSWEQAMADVRAAGGKPFPIPAGCSEHRLGGLGFVGFAEEVRAQEAELGFKFDYIVVCSVTGSTQAGMVVGFAADGRAERVIGIDASAKPEQTHAQILRIAQNTAELVGLGREITAQDVVLDTRYGGPEYGLPSEGTLEAIRLCARQEGMLTDPVYEGKSMHGMIDKVKRGEFPAGSRVLYAHLGGVPALNAYSFLFRNG
+</sequence>
+<xref id="sp|A2SLW2|1A1D_METPP" name="sp|A2SLW2|1A1D_METPP 1-aminocyclopropane-1-carboxylate deaminase OS=Methylibium petroleiphilum (strain ATCC BAA-1232 / LMG 22953 / PM1) OX=420662 GN=acdS PE=3 SV=1"/>
+<matches>
+<hmmer3-match ac="PTHR43780:SF2" evalue="1.8E-67" graft-point="PTN002465090" name="1-AMINOCYCLOPROPANE-1-CARBOXYLATE DEAMINASE-RELATED" protein-class="PC00088" score="239.7">
+<signature ac="PTHR43780" name="1-AMINOCYCLOPROPANE-1-CARBOXYLATE DEAMINASE-RELATED">
+<entry ac="IPR027278" desc="1-aminocyclopropane-1-carboxylate deaminase/D-cysteine desulfhydrase" name="ACCD_DCysDesulf" type="FAMILY">
+<pathway-xref db="MetaCyc" id="PWY-6638" name="sulfolactate degradation III"/>
+<pathway-xref db="MetaCyc" id="PWY-7797" name="nocardicin A biosynthesis"/>
+</entry>
+<signature-library-release library="hmmer3" version="18.0"/>
+</signature>
+<model-ac>PTHR43780:SF2</model-ac>
+<locations>
+<hmmer3-location env-start="2" env-end="333" hmm-start="23" hmm-end="335" hmm-length="0" hmm-bounds="INCOMPLETE" start="10" end="329" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="10" end="329" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+<go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0019148" name="D-cysteine desulfhydrase activity"/>
+</hmmer3-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="268e4659f70d6eb10e6545eccaa347cf">
+MLIERMFPFISESVRVHQLPEGGVLEIDYMRDNVSISDFEYLDLNKTAYELCMLMDGQKTAEQILEYQCAAYNESPEDHKDWYYEMLDMLLNKQVIRLTDQPEYRRIATSGSSDFPMPLHATFELTHRCNLKCAHCYLESSPEALGTVSLEQFKKTADMLYEKGVLTCEITGGEIFVHPNANELLEYVLKKFKKVAVLTNGTLMRKESLEILRAYKQKIIVGISLDSVHSEVHDSFRGRKGSFAQTCKTIKLLSDHGIFVRVAMSVFEKNMWEIHDMAQKVRDLGAKAFSYNWVDDFGRGKDMIHPTKDAEQHRKFMEYEQNVIDEFKDLIPIIPYERKRAANCGAGWKSIVISPFGEVRPCALFPKEFSLGNIFHDSYESIFDSALVHKLWKAQAPRFSEHCKKDKCPFSGYCGGCYLKGLNSNKYHRKNICSWAKNEQLEDVVQLI
+</sequence>
+<xref id="A0A0H3E4R3_BACA1" name="A0A0H3E4R3_BACA1 1-448"/>
+<matches>
+<hmmer3-match ac="PTHR11228:SF7" evalue="4.3E-84" graft-point="BACSU|EnsemblGenome=BSU_37370|UniProtKB=P71011" name="PQQA PEPTIDE CYCLASE" score="294.3">
+<signature ac="PTHR11228" name="RADICAL SAM DOMAIN PROTEIN">
+<entry ac="IPR050377" desc="Radical SAM superfamily enzymes" name="Radical_SAM_sf_enzymes" type="FAMILY">
+<pathway-xref db="MetaCyc" id="PWY-6670" name="citronellol degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-5644" name="4-nitrotoluene degradation II"/>
+<pathway-xref db="MetaCyc" id="PWY-7552" name="heme b biosynthesis III (from siroheme)"/>
+<pathway-xref db="MetaCyc" id="PWY-7636" name="astaxanthin biosynthesis (flowering plants)"/>
+<pathway-xref db="MetaCyc" id="PWY-7599" name="anditomin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8122" name="mycofactocin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-282" name="cuticular wax biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-2582" name="brassinolide biosynthesis II"/>
+<pathway-xref db="MetaCyc" id="PWY-5748" name="gamma-coniciene and coniine biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-699" name="brassinolide biosynthesis I"/>
+<pathway-xref db="MetaCyc" id="PWY-7300" name="ecdysone and 20-hydroxyecdysone biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7510" name="rhizocticin A and B biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-6420" name="pyrroloquinoline quinone biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-6530" name="perchlorate reduction"/>
+<pathway-xref db="MetaCyc" id="PWY-6942" name="dTDP-D-desosamine biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8110" name="L-dopa degradation II (bacterial)"/>
+</entry>
+<signature-library-release library="hmmer3" version="18.0"/>
+</signature>
+<model-ac>PTHR11228:SF7</model-ac>
+<locations>
+<hmmer3-location env-start="26" env-end="439" hmm-start="19" hmm-end="341" hmm-length="0" hmm-bounds="INCOMPLETE" start="108" end="437" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="108" end="437" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="f1f6c0f82668b5315244caa65040cad9">
+MGIRYDNTVYGLSPLARGTRGNGNRPRGRGRFIPAGAGNTMSGTMPRLSGPVYPRWRGEHNERNNAQAFWSGLSPLARGTPNGSDVRRLRYRFIPAGAGNTATRCSNEPFDPVYPRWRGEHAQNDRRSEDSGGLSPLARGTRRPDQVMVLPLRFIPAGAGNTDIPPDPRPKSAVYPRWRGEHNGTDSTNQNFRGLSPLARGTLYDCRRYEKPRRFIPAGAGNTCYGVGALNIGAVYPRWRGEH
+</sequence>
+<xref id="UPI0010EB9177" name="UPI0010EB9177"/>
+<matches/>
+</protein>
+<protein>
+<sequence md5="3156952d6b1f52bf18e848ccc4e7e455">
+MDNVNKLTAISLAVAAALPMMASADVMITEYVEGSSNNKAIELYNSGDTAIDLAGYKLVRYKDGATVASDMVALDGQSIAPKTTKVILNSSAVITLDQGVDSYSGSLSFNGGDAVALVKDDAVVDIIGDVPTPTGWGFDVTLKRKLDALVANTVFNAAQWEQLPKDTFSGLGSLETPAEPEVPLFSCSGAKIVPIYQVQGAGESSPYVPEGAFESEAEVTVRGIVTARGESLFKGFYLQEVKGDNSPYTSDGVFVFLGEAVPEAIQPGVEVCVQGKVKEYFGLTQIDIKADKKFEVGAKGEVPVAAPFYVADGETLAQALERYEGMNVALDAGSDLKISRTFSYDYAGRRNNMLVSYKEPLMKSTQLYPALSAEATALVKSNLENQLFIESDYKPADGVIPYFPDFNVETGYIRVGDQLTNLQGVIGYSYGAYRLVATNTITAGDFIRGDDRTDAPSVATKGDLRVASFNVLNFFNDVDGGDTNPSGSNRGALTLEEMVLQRTKIVSAITAMNADIVGLMEIANNGFGEKSAIKNLVDALNEKQTPENAYSFVEITDADKYDGKYFGTDAITVGMLYRGGKVTLAGAAQAIDTPEQHASAGSVTRTKDGKTETNPGNDAYQRHSLAQTFKIHDESLTVVVNHLKSKGSGCLEDWANFEESVDPADQQGKCNAFRVSAAKVLGETLKDVKGDLLIIGDMNAYGMEDPIRVLTDFDASKSDRDIMTASWTTLDGKVFERQGSKIEKGYGLINLNTKAHGAGTYSYSYNGELGNLDHALANASLAKRLVDIEDWHINSVESNLFEYGKKFSGDLAKSENAFSASDHDPVIVALSYPAPVVPPKPEPTPKDDGGALGYLGLALMSLFGLQRRRR
+</sequence>
+<xref id="WP_338726824.1" name="WP_338726824.1 extracellular exonuclease ExeM [Shewanella baltica]"/>
+<matches>
+<hmmer3-match ac="PTHR42834:SF1" evalue="1.6E-200" graft-point="SHEON|Gene_ORFName=SO_1066|UniProtKB=Q8EHY8" name="ENDONUCLEASE_EXONUCLEASE_PHOSPHATASE FAMILY PROTEIN (AFU_ORTHOLOGUE AFUA_3G09210)" score="680.1">
+<signature ac="PTHR42834" name="ENDONUCLEASE/EXONUCLEASE/PHOSPHATASE FAMILY PROTEIN (AFU_ORTHOLOGUE AFUA_3G09210)">
+<signature-library-release library="hmmer3" version="18.0"/>
+</signature>
+<model-ac>PTHR42834:SF1</model-ac>
+<locations>
+<hmmer3-location env-start="1" env-end="866" hmm-start="14" hmm-end="837" hmm-length="0" hmm-bounds="INCOMPLETE" start="7" end="851" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="7" end="851" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="f91cb3cf61f2d7c7f5aaf6ea04e07868">
+MKKNFYLYVALFVAAIVAISAIASSFSAKANNENVTVNNENNNEQKEELPNVVILATGGTIAGTGSSSTQTTGYKSGDLGIETLIEAVPEMKELANITGEQIVKVDSTDITNEILLKLGKRVNELLASDDVDGIVITHGTDTLEETAYFLNLVVKSDKPVVLTAAMRPATAMSADGPFNLYNAVLLASHESSKGKGVLVTLNDRIASARNITKTNTTATDAFKSFENGYLGAIVAGKPYYYNNVERLHTTETPFDISKIKKLPQVDIIYGYQNSPTYMYKAAVQNGAKGIIVAAPGDGTLSAKSVEGVKYAMNKGVKVVLSSRVGTGTVSPKEGYITSDSLNPQKARILLMLALTVTNDPQEIQSFFDKY
+</sequence>
+<xref id="UPI0002E0D40B" name="UPI0002E0D40B status=active"/>
+<matches>
+<hmmer3-match ac="PTHR11707:SF28" evalue="5.4E-42" graft-point="HELPY|EnsemblGenome=HP_0723|UniProtKB=O25424" name="60 KDA LYSOPHOSPHOLIPASE" score="155.7">
+<signature ac="PTHR11707" name="L-ASPARAGINASE">
+<entry ac="IPR006034" desc="Asparaginase/glutaminase-like" name="Asparaginase/glutaminase-like" type="FAMILY">
+<pathway-xref db="MetaCyc" id="PWY-8229" name="UDP-3-acetamido-2,3-dideoxy-2-(seryl)amino-alpha-D-glucuronamide biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-8402" name="N-(1-deoxy-D-fructos-1-yl)-L-asparagine degradation"/>
+<pathway-xref db="Reactome" id="R-MMU-8963693" name="Aspartate and asparagine metabolism"/>
+<pathway-xref db="MetaCyc" id="PWY-7811" name="6-methylpretetramide biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-7409" name="phospholipid remodeling (phosphatidylethanolamine, yeast)"/>
+<pathway-xref db="Reactome" id="R-HSA-8963693" name="Aspartate and asparagine metabolism"/>
+<pathway-xref db="Reactome" id="R-RNO-8963693" name="Aspartate and asparagine metabolism"/>
+<pathway-xref db="MetaCyc" id="PWY-5297" name="siroheme amide biosynthesis"/>
+</entry>
+<signature-library-release library="hmmer3" version="18.0"/>
+</signature>
+<model-ac>PTHR11707:SF28</model-ac>
+<locations>
+<hmmer3-location env-start="40" env-end="369" hmm-start="4" hmm-end="349" hmm-length="0" hmm-bounds="INCOMPLETE" start="43" end="366" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="43" end="366" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="8394be2ab076e2920aff07d0c2fb0e06">
+MSPRPLRALLGAAAAALVSAAALAFPSQAAANDSPFYVNPNMSSAEWVRNNPNDPRTPVIRDRIASVPQGTWFAHHNPGQITGQVDALMSAAQAAGKIPILVVYNAPGRDCGNHSSGGAPSHSAYRSWIDEFAAGLKNRPAYIIVEPDLISLMSSCMQHVQQEVLETMAYAGKALKAGSSQARIYFDAGHSAWHSPAQMASWLQQADISNSAHGIATNTSNYRWTADEVAYAKAVLSAIGNPSLRAVIDTSRNGNGPAGNEWCDPSGRAIGTPSTTNTGDPMIDAFLWIKLPGEADGCIAGAGQFVPQAAYEMAIAAGGTNPNPNPNPTPTPTPTPTPPPGSSGACTATYTIANEWNDGFQATVTVTANQNITGWTVTWTFTDGQTITNAWNADVSTSGSSVTARNVGHNGTLSQGASTEFGFVGSKGNSNSVPTLTCAAS
+</sequence>
+<xref id="P26222" name="P26222"/>
+<matches>
+<hmmer3-match ac="PTHR34876:SF4" evalue="3.8E-69" graft-point="STRCO|Gene_OrderedLocusName=SCO1451|UniProtKB=Q9L108" name="1,4-BETA-D-GLUCAN CELLOBIOHYDROLASE C-RELATED" score="245.2">
+<signature ac="PTHR34876" name="">
+<entry ac="IPR016288" desc="1, 4-beta cellobiohydrolase" name="Beta_cellobiohydrolase" type="FAMILY">
+<go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0004553" name="hydrolase activity, hydrolyzing O-glycosyl compounds"/>
+<go-xref category="BIOLOGICAL_PROCESS" db="GO" id="GO:0030245" name="cellulose catabolic process"/>
+<pathway-xref db="MetaCyc" id="PWY-5976" name="dhurrin degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-7256" name="cyanidin diglucoside biosynthesis (acyl-glucose dependent)"/>
+<pathway-xref db="MetaCyc" id="PWY-1921" name="indole-3-acetate activation II"/>
+<pathway-xref db="MetaCyc" id="PWY-7134" name="rutin degradation (plants)"/>
+<pathway-xref db="MetaCyc" id="PWY-7133" name="quercetin glucoside degradation (Allium)"/>
+<pathway-xref db="MetaCyc" id="PWY-6527" name="stachyose degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-7091" name="linustatin bioactivation"/>
+<pathway-xref db="MetaCyc" id="PWY-8435" name="yeast mannan degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-8366" name="septacidin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-6848" name="rutin degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-6749" name="CMP-legionaminate biosynthesis I"/>
+<pathway-xref db="MetaCyc" id="PWY-6821" name="kappa-carrageenan degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-7491" name="podophyllotoxin glucosides metabolism"/>
+<pathway-xref db="MetaCyc" id="PWY-8436" name="mammalian high-mannose N-glycan degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-6737" name="starch degradation V"/>
+<pathway-xref db="MetaCyc" id="PWY-7056" name="daphnin interconversion"/>
+<pathway-xref db="MetaCyc" id="PWY-7647" name="ulvan degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-6972" name="oleandomycin activation/inactivation"/>
+<pathway-xref db="MetaCyc" id="PWY-7445" name="luteolin triglucuronide degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-7057" name="cichoriin interconversion"/>
+<pathway-xref db="MetaCyc" id="PWY-6717" name="(1,4)-beta-D-xylan degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-7529" name="CMP-N-acetyl-7-O-acetylneuraminate biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-6735" name="starch degradation IV"/>
+<pathway-xref db="MetaCyc" id="PWY-6788" name="cellulose degradation II (fungi)"/>
+<pathway-xref db="MetaCyc" id="PWY-5821" name="dalcochinin biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-6906" name="chitin derivatives degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-7074" name="phenylethanol glycoconjugate biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-842" name="starch degradation I"/>
+<pathway-xref db="MetaCyc" id="PWY-6784" name="cellulose and hemicellulose degradation (cellulolosome)"/>
+<pathway-xref db="MetaCyc" id="PWY-862" name="fructan degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-6855" name="chitin degradation I (archaea)"/>
+</entry>
+<signature-library-release library="hmmer3" version="18.0"/>
+</signature>
+<model-ac>PTHR34876:SF4</model-ac>
+<locations>
+<hmmer3-location env-start="1" env-end="335" hmm-start="12" hmm-end="342" hmm-length="0" hmm-bounds="INCOMPLETE" start="9" end="313" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="9" end="313" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="493932c1f43289805b4c4e651ceb9249">
+GRGLLPFVLLALGIXAPWAVEGAENALKGGACPPRKIVQCLRYEKPKCTSDWQCPDKKKCCRDTCAIKCLNPVAITNPVKVKPGKCPVVYGQCMMLNPPNHCKTDSQCLGDLKCCKSMCGKVCLTPVKA
+</sequence>
+<xref id="P22298" name="P22298"/>
+<matches>
+<hmmer3-match ac="PTHR19441:SF44" evalue="7.7E-21" graft-point="PIG|Gene=SLPI|UniProtKB=P22298" name="ANTILEUKOPROTEINASE" protein-class="PC00191" score="85.6">
+<signature ac="PTHR19441" name="WHEY ACDIC PROTEIN WAP">
+<entry ac="IPR050514" desc="WAP four-disulfide core domain" name="WAP_four-disulfide_core" type="FAMILY">
+<pathway-xref db="Reactome" id="R-MMU-6798695" name="Neutrophil degranulation"/>
+<pathway-xref db="Reactome" id="R-HSA-6798695" name="Neutrophil degranulation"/>
+</entry>
+<signature-library-release library="hmmer3" version="18.0"/>
+</signature>
+<model-ac>PTHR19441:SF44</model-ac>
+<locations>
+<hmmer3-location env-start="2" env-end="128" hmm-start="10" hmm-end="118" hmm-length="0" hmm-bounds="INCOMPLETE" start="7" end="126" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="7" end="126" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+<go-xref category="CELLULAR_COMPONENT" db="GO" id="GO:0005615" name="extracellular space"/>
+<go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0004867" name="serine-type endopeptidase inhibitor activity"/>
+</hmmer3-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="4229019f6f6d6fbcd8988593755fe395">
+MDNVKKLSVLALSIAAALPVSAKADLLISEYVEGNSNNKAIELYNSGDAALDLTGYKLVRYKDGATNALDMVALDGLTIDAKKLKVIVHPSAEIALGSDVDSSTGNLYFNGGDAVALVKDGAVVDIIGAVPTPSGWGMNTTMQRNTDALSASNVFVESQWKVLPVDTFSGLGNLDGSSAPTEPEAPAFTCTGAKITPIYSVQGAGKSSPLIADGEYASKEEVTIRGVVTARGDSLFKGFYLQEVQGDGSPYTSDGIFVYLGEAAGEEIQPGVEVCVQGLVKEYYGLTQLDIKADKKMEVGENLGAPAATPFYVADGENLGDALERFEGMNVVLDAGSDMKVSRTFSYDYAARRNNMMLSHKAPLMKPTQLYPAMTDEAIALEKKNRANQLFVESDFKAKNGEVPYFPTFNAETGYIRVGDQLTNLEGVISYSYNEYRLVATNEIVAGDFIREDDRVDAPEVATKGDIRVASFNVLNLFTSDSDVGGALNASCKDQADADASRGCGRGAHTLEDYLLQRTKIVSALTEMNADIIGLMEIENNGFGEDSSIQYLVNDLNANLPAADAYKFIEVADADKYKGEYVGGDAITVGMLYRPSKVEPTGDAFVIETPEQHAMEGVVTRGEGDKLELSPAFDKYQRHSLGQAFSVNGEKLTVVVNHLKSKGSGCIEDWANFEDSSDPADLQGKCNEFRVSAAKVIGDALQDVEGDLLVIGDMNAYGLEDPIRVLTDYDAANSDRDIMTASWTTLGGKVYEREGSKIEKGYGMVNLNTQVHGTATYSYSYNGELGNLDHALANTSLAARVVDIQDWHINSVESNLFEYSSKYTGELEKSENAFSASDHDPVIVALSYPAPKPEPKPEPKEKDDGGSLGYLGLMLLGLAGLRRRN
+</sequence>
+<xref id="WP_249252303.1" name="WP_249252303.1 extracellular exonuclease ExeM [Shewanella aquimarina]"/>
+<matches>
+<hmmer3-match ac="PTHR42834:SF1" evalue="0.0" graft-point="SHEON|Gene_ORFName=SO_1066|UniProtKB=Q8EHY8" name="ENDONUCLEASE_EXONUCLEASE_PHOSPHATASE FAMILY PROTEIN (AFU_ORTHOLOGUE AFUA_3G09210)" score="581.2">
+<signature ac="PTHR42834" name="ENDONUCLEASE/EXONUCLEASE/PHOSPHATASE FAMILY PROTEIN (AFU_ORTHOLOGUE AFUA_3G09210)">
+<signature-library-release library="hmmer3" version="18.0"/>
+</signature>
+<model-ac>PTHR42834:SF1</model-ac>
+<locations>
+<hmmer3-location env-start="1" env-end="870" hmm-start="18" hmm-end="830" hmm-length="0" hmm-bounds="INCOMPLETE" start="9" end="856" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="9" end="856" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="5a40425be664fc947906456e8fc0e722">
+MLARGGIQSNQSRLSAHLGGKVDLYAKREDCNSGLAFGGNKLRKLEYIVPDAIASGADTLVSIGGVQSNHTRMVAAVAAKIGMKCRLVQEAWVPHEDAVYDRVGNIMLSRIMGADVGKE
+</sequence>
+<xref id="TESTESEMLOOKUP" name="TESTESEMLOOKUP"/>
+<matches>
+<hmmer3-match ac="PTHR43780:SF2" evalue="1.7E-24" graft-point="BRADU|EnsemblGenome=BAC45506|UniProtKB=Q89XR6" name="1-AMINOCYCLOPROPANE-1-CARBOXYLATE DEAMINASE-RELATED" protein-class="PC00088" score="98.4">
+<signature ac="PTHR43780" name="1-AMINOCYCLOPROPANE-1-CARBOXYLATE DEAMINASE-RELATED">
+<entry ac="IPR027278" desc="1-aminocyclopropane-1-carboxylate deaminase/D-cysteine desulfhydrase" name="ACCD_DCysDesulf" type="FAMILY">
+<pathway-xref db="MetaCyc" id="PWY-6638" name="sulfolactate degradation III"/>
+<pathway-xref db="MetaCyc" id="PWY-7797" name="nocardicin A biosynthesis"/>
+</entry>
+<signature-library-release library="hmmer3" version="18.0"/>
+</signature>
+<model-ac>PTHR43780:SF2</model-ac>
+<locations>
+<hmmer3-location env-start="7" env-end="118" hmm-start="41" hmm-end="129" hmm-length="0" hmm-bounds="INCOMPLETE" start="20" end="116" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="20" end="116" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+<go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0019148" name="D-cysteine desulfhydrase activity"/>
+</hmmer3-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="b66e5ed56c0ea43a14a02b37b513ea8d">
+MNLNRFERYPLTFGPSPITPLKRLSQHLGGKVELYAKREDCNSGLAFGGNKTRKLEYLIPEAIEQGCDTLVSIGGIQSNQTRQVAAVAAHLGMKCVLVQENWVNYSDAVYDRVGNIEMSRIMGADVRLDAAGFDIGIRPSWEKAMSDVVEQGGKPFPIPAGCSEHPYGGLGFVGFAEEVRQQEKELGFKFDYIVVCSVTGSTQAGMVVGFAADGRSKNVIGIDASAKPEQTKAQILRIARHTAELVELGREITEEDVVLDTRFAYPEYGLPNEGTLEAIRLCGSLEGVLTDPVYEGKSMHGMIEMVRRGEFPEGSMIDLVRKGFFPAGAKVLYAHLGGAPALNGYAYAFRNG
+</sequence>
+<xref id="OUTROSEMLOOKUP" name="OUTROSEMLOOKUP"/>
+<matches>
+<hmmer3-match ac="PTHR43780:SF2" evalue="5.5E-63" graft-point="PTN002465090" name="1-AMINOCYCLOPROPANE-1-CARBOXYLATE DEAMINASE-RELATED" protein-class="PC00088" score="224.9">
+<signature ac="PTHR43780" name="1-AMINOCYCLOPROPANE-1-CARBOXYLATE DEAMINASE-RELATED">
+<entry ac="IPR027278" desc="1-aminocyclopropane-1-carboxylate deaminase/D-cysteine desulfhydrase" name="ACCD_DCysDesulf" type="FAMILY">
+<pathway-xref db="MetaCyc" id="PWY-6638" name="sulfolactate degradation III"/>
+<pathway-xref db="MetaCyc" id="PWY-7797" name="nocardicin A biosynthesis"/>
+</entry>
+<signature-library-release library="hmmer3" version="18.0"/>
+</signature>
+<model-ac>PTHR43780:SF2</model-ac>
+<locations>
+<hmmer3-location env-start="2" env-end="351" hmm-start="21" hmm-end="339" hmm-length="0" hmm-bounds="INCOMPLETE" start="8" end="347" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="8" end="347" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+<go-xref category="MOLECULAR_FUNCTION" db="GO" id="GO:0019148" name="D-cysteine desulfhydrase activity"/>
+</hmmer3-match>
+</matches>
+</protein>
+<protein>
+<sequence md5="c3e71fe6439f734a5b28ef1fdd640db9">
+MTTLFNKIKEVTELKAAAGFETPVRDYLRKTITPLVDEVQTDGLGGIFGIKHSQTENAPKVLVAAHMDEVGFMIKEIKADGTFRVVELGGWNPLVVSSQRFTLHTRDGRIYPVISGSVPPHFLRGSSGTSSLPGVSDIVFDAGFANQEEANTYGVFPGDVIIPESETILTANQKNVISKAWDNRYGVLMIRELLENVKDQELNNTLITGANVQEEVGLRGAHVSTTKFDPEVFFAVDCSPAGDIYGNQGKVGDGTLIRFFDPGHIMLPNMKDFLLTTAEEAGIKYQYYCAAGGTDAGAAHLQNSGVPSTTIGVCARYIHSHQTLYAMDDFLEAQAFLQAIVKKLDRSTVDLIKNY
+</sequence>
+<xref id="WP_134973503.1" name="WP_134973503.1 glutamyl aminopeptidase [Streptococcus thermophilus]"/>
+<matches>
+<hmmer3-match ac="PTHR32481:SF0" evalue="1.4E-96" graft-point="STRR6|EnsemblGenome=spr1682|UniProtKB=Q8DNJ7" name="AMINOPEPTIDASE YPDE-RELATED" protein-class="PC00153" score="335.0">
+<signature ac="PTHR32481" name="AMINOPEPTIDASE">
+<entry ac="IPR051464" desc="Peptidase M42 aminopeptidase" name="Peptidase_M42_aminopept" type="FAMILY">
+<pathway-xref db="MetaCyc" id="PWY-8454" name="aspartame degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-6423" name="hemoglobin degradation"/>
+<pathway-xref db="MetaCyc" id="PWY-7614" name="methiin metabolism"/>
+<pathway-xref db="MetaCyc" id="PWY-7694" name="zwittermicin A biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-5707" name="propanethial S-oxide biosynthesis"/>
+<pathway-xref db="MetaCyc" id="PWY-5706" name="alliin metabolism"/>
+<pathway-xref db="MetaCyc" id="PWY-7954" name="tabtoxinine-beta-lactam biosynthesis"/>
+</entry>
+<signature-library-release library="hmmer3" version="18.0"/>
+</signature>
+<model-ac>PTHR32481:SF0</model-ac>
+<locations>
+<hmmer3-location env-start="1" env-end="349" hmm-start="4" hmm-end="351" hmm-length="0" hmm-bounds="INCOMPLETE" start="3" end="348" representative="false">
+<location-fragments>
+<hmmer3-location-fragment start="3" end="348" dc-status="CONTINUOUS"/>
+</location-fragments>
+</hmmer3-location>
+</locations>
+</hmmer3-match>
+</matches>
+</protein>
+</protein-matches>

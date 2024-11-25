@@ -4,50 +4,42 @@ import pytest
 
 
 @pytest.fixture
-def test_input_dir():
-    dir_path = Path('tests/data')
+def test_dir():
+    return Path('tests/integration_tests/')
+
+
+@pytest.fixture
+def test_input_dir(test_dir):
+    dir_path = test_dir / 'test_inputs'
     return dir_path
 
 
 @pytest.fixture
-def test_output_dir():
-    dir_path = Path('tests/integration_tests')
+def test_output_dir(test_dir):
+    dir_path = test_dir / 'test_outputs'
     return dir_path
 
 
 @pytest.fixture
 def input_path(test_input_dir):
-    return test_input_dir / 'test_prot.fa'
-
-
-@pytest.fixture
-def expected_result_path(test_input_dir):
-    return test_input_dir / 'iprscan5.zip'
+    return test_input_dir / 'integration_input.fasta'
 
 
 @pytest.fixture
 def output_path(test_output_dir):
-    return test_output_dir / 'test_prot.fa.ips6'
+    return test_output_dir / 'integration_input.fasta.ips6'
 
 
 @pytest.fixture
-def data_dir():
-    return Path('data')
+def expected_output_path(test_output_dir):
+    return test_output_dir / 'expected_output'
+
+
+@pytest.fixture
+def applications():
+    return 'AntiFam,CDD,Coils,FunFam,Gene3D,HAMAP,NCBIfam,MobiDB,Panther,Phobius,Pfam,PIRSF,PIRSR,PRINTS,PROSITE_PATTERNS,PROSITE_Profiles,SFLD,SMART,SignalP,SUPERFAMILY'
 
 
 @pytest.fixture
 def disable_precalc():
     return True
-
-
-def pytest_addoption(parser):
-    parser.addoption(
-        "--applications",
-        action="store",
-        default="antifam,cdd,coils,funfam,gene3d,hamap,mobidblite,ncbifam,panther,pfam,pirsf,pirsr,prints,prositepatterns,prositeprofiles,sfld,smart,superfamily",
-    )
-
-
-@pytest.fixture
-def applications(request):
-    return request.config.getoption("--applications")
