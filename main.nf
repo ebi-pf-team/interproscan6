@@ -8,15 +8,6 @@ include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_trans
 include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { XREFS                         } from "./interproscan/modules/xrefs"
-include { JSON_OUTPUT                   } from "./interproscan/modules/output/json_output"
-
-
-// include { GET_ORFS } from "$projectDir/interproscan/modules/get_orfs/main"
-// include { REPRESENTATIVE_DOMAINS } from "$projectDir/interproscan/modules/output/representative_domains/main"
-// include { PRE_CHECKS } from "$projectDir/interproscan/subworkflows/pre_checks/main"
-// include { SEQUENCE_PRECALC } from "$projectDir/interproscan/subworkflows/sequence_precalc/main"
-// include { SEQUENCE_ANALYSIS } from "$projectDir/interproscan/subworkflows/sequence_analysis/main"
-
 
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
@@ -66,6 +57,12 @@ workflow {
         data_dir
     )
 
+    // AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
+
+    // This is to concat MLS with scan sequences result
+    // all_results = parsed_matches.concat(parsed_analysis)
+
+
     /* XREFS:
     Add signature and entry desc and names
     Add PAINT annotations (if panther is enabled)
@@ -86,31 +83,30 @@ workflow {
     AGGREGATE_SEQS_MATCHES(ch_seq_matches)
     AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
 
-    // REPRESENTATIVE_DOMAINS(AGGREGATE_ALL_MATCHES.out)
+    AGGREGATE_ALL_MATCHES.out.view()
 
-    def formats = params.formats.toUpperCase().split(',') as Set
-    def fileName = params.input.split('/').last()
-    def outFileName = "${params.outdir}/${fileName}"
-    if (formats.contains("JSON")) {
-        JSON_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}", workflow.manifest.version)
-    }
-//     if (outputFormat.contains("TSV")) {
-//         TSV_OUTPUT(seqMatches, "${outFileName}.ips6.tsv")
-//     }
-//     if (outputFormat.contains("TSV-PRO")) {
-//         TSV_PRO_OUTPUT(seqMatches, "${outFileName}.ips6.tsv-pro.tsv")
-//     }
-//     if (outputFormat.contains("XML")) {
-//         XML_OUTPUT(seqMatches, "${outFileName}.ips6.xml", workflow.manifest.version)
-//     }
+    // REPRESENTATIVE_DOMAINS(XREFS.out.collect())
+
+    Channel.from(params.formats.toLowerCase().split(','))
+    .set { ch_format }
+
+//     WRITE_RESULTS(
+//         input_file.getName(),
+//         AGGREGATE_PARSED_SEQS.out,
+//         REPRESENTATIVE_DOMAINS.out.collect(),
+//         ch_format,
+//         params.outdir,
+//         params.ipscn_version,
+//         params.nucleic
+//     )
 }
 
-workflow.onComplete = {
-    def input_file = file(params.input)
-    def outputFileName = input_file.getName()
-    def outputDir = params.outdir.endsWith('/') ? params.outdir[0..-2] : params.outdir
+// workflow.onComplete = {
+//     def input_file = file(params.input)
+//     def outputFileName = input_file.getName()
+//     def outputDir = params.outdir.endsWith('/') ? params.outdir[0..-2] : params.outdir
 
-    println "InterProScan workflow completed successfully: $workflow.success."
-    println "Any results are located at ${outputDir}/${outputFileName}.ips6.*"
-    println "Duration: $workflow.duration"
-}
+//     println "InterProScan workflow completed successfully: $workflow.success."
+//     println "Any results are located at ${outputDir}/${outputFileName}.ips6.*"
+//     println "Duration: $workflow.duration"
+// }
