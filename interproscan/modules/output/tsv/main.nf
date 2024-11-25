@@ -52,7 +52,7 @@ process WRITE_TSV_OUTPUT {
 
                     tsvFile.append([
                         xrefData["id"], seqData["md5"], seqData["sequence"].length(),
-                        Output.convertDbName(memberDb),
+                        memberDb,
                         match.signature.accession, sigDesc,
                         start, end, scoringValue, status,
                         currentDate,
