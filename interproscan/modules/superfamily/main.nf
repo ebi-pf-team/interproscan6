@@ -39,6 +39,7 @@ process PARSE_SUPERFAMILY {
     input:
     tuple val(meta), val(superfamily_out)
     val model_tsv
+    val hmmdb
 
     output:
     tuple val(meta), path("superfamily.json")
@@ -52,6 +53,23 @@ process PARSE_SUPERFAMILY {
         assert !model2sf.containsKey(modelId)
         model2sf[modelId] = "SSF${superfamilyAccession}"
     }
+
+    def model2length = [:]
+    def modelAc = length = null
+    new File(hmmdb).eachLine { line ->
+        line = line.trim()
+        if (line.startsWith('//')) {
+            if (modelAc) model2length[modelAc] = length
+            modelAc = length = null
+        } else if (line.startsWith('N') && !modelAc) {
+            def match = (line =~ ~/^NAME\s+(.+)$/)
+            if (match) modelAc = match[0][1]
+        } else if (line.startsWith('L') && !length) {
+            def match = (line =~ ~/^LENG\s+([0-9]+)$/)
+            if (match) length = match[0][1].toInteger()
+        }
+    }
+    if (modelAc) model2length[modelAc] = hmmLength
 
     def matches = [:].withDefault { [:] }
     file(superfamily_out.toString()).eachLine { line ->
@@ -86,6 +104,7 @@ process PARSE_SUPERFAMILY {
 
                 int start = regions[0][0]
                 int end = regions.collect { it[1] }.max()
+                int hmmLength = model2length[modelId]
                 List<LocationFragment> fragments = []
                 if (regions.size() > 1) {
                     regions.eachWithIndex { obj, idx ->
@@ -106,7 +125,7 @@ process PARSE_SUPERFAMILY {
                     fragments.add(new LocationFragment(fragStart, fragEnd, "CONTINUOUS"))
                 }
 
-                Location location = new Location(start, end, evalue, fragments)
+                Location location = new Location(start, end, hmmLength, evalue, fragments)
                 Match match = matches[seqId][modelId]
                 if (match == null) {
                     match = new Match(modelId)

@@ -310,7 +310,7 @@ class Location implements Serializable {
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
     }
-  
+
      Location(int start, int end, Double score, String targetAlignment) { // Used for Hamap, PrositeProfiles
         this.start = start
         this.end = end
@@ -330,9 +330,10 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-    Location(int start, int end, Double evalue, List<LocationFragment> fragments) { // Used for Superfamily
+    Location(int start, int end, int hmmLength, Double evalue, List<LocationFragment> fragments) { // Used for Superfamily
         this.start = start
         this.end = end
+        this.hmmLength = hmmLength
         this.evalue = evalue
         this.fragments = fragments
     }
