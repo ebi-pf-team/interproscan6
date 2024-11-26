@@ -372,6 +372,7 @@ class Location implements Serializable {
         loc.sequenceFeature = data.sequenceFeature
         loc.level = data.level
         loc.cigarAlignment = data.cigarAlignment
+        loc.pvalue = data.pvalue
         return loc
     }
       
