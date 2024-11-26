@@ -81,6 +81,35 @@ process WRITE_XML_OUTPUT {
                                         library(matchObj.signature.signatureLibraryRelease.library)
                                         version(matchObj.signature.signatureLibraryRelease.version)
                                     }
+                                    if (matchObj.signature.entry) {
+                                        matchObj.signature.entry.each { entryObj ->
+                                            entry(
+                                                ac: entryObj.accession,
+                                                desc: entryObj.description,
+                                                name: entryObj.name,
+                                                type: entryObj.type
+                                            )
+                                            if (entryObj.goXRefs) {
+                                                entryObj.goXRefs.each { goXrefObj ->
+                                                    "go-xref"(
+                                                        category: goXrefObj.category,
+                                                        db: goXrefObj.databaseName,
+                                                        id: goXrefObj.id,
+                                                        name: goXrefObj.name
+                                                    )
+                                                }
+                                            }
+                                            if (entryObj.pathwayXRefs) {
+                                                entryObj.pathwayXRefs.each { pathwayObj ->
+                                                    "pathway-xref"(
+                                                        db: pathwayObj.databaseName,
+                                                        id: pathwayObj.id,
+                                                        name: pathwayObj.name
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
 
                                 if (matchObj.locations) {
