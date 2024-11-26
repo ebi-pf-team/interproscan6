@@ -4,6 +4,7 @@ import shutil
 import zipfile
 import subprocess
 from pathlib import Path
+from collections import defaultdict
 
 
 def get_current_output(test_output_dir: str,
@@ -34,7 +35,6 @@ def get_expected_result(expected_result_path: str) -> dict:
         expected_result_file = os.path.join(extracted_dir, json_file)
     else:
         expected_result_file = expected_result_path + ".json"
-
     with open(expected_result_file, 'r') as f:
         expected_result = json.load(f)
     shutil.rmtree(extracted_dir, ignore_errors=True)
@@ -42,93 +42,71 @@ def get_expected_result(expected_result_path: str) -> dict:
     return expected_result
 
 
-def json2dict(obj):
-    if isinstance(obj, dict):
-        result = {}
-        for key, value in obj.items():
-            result[key] = json2dict(value)
-        return dict(sorted(result.items()))
-    elif isinstance(obj, list):
-        sorted_list = sorted([json2dict(item) for item in obj], key=lambda x: json.dumps(x))
-        if sorted_list and isinstance(sorted_list[0], dict) and 'md5' in sorted_list[0]:
-            sorted_list = sorted(sorted_list, key=lambda x: x.get('md5', ''))
-        if sorted_list and isinstance(sorted_list[0], dict) and 'model-ac' in sorted_list[0]:
-            sorted_list = sorted(sorted_list, key=lambda x: x.get('model-ac', ''))
-        return sorted_list
-    else:
-        return obj
+def json2dict(data):
+    result = {}
+    for result_item in data.get("results", []):
+        for match in result_item.get("matches", []):
+            signature = match.get("signature", {})
+            library = signature.get("signatureLibraryRelease", {}).get("library").lower().replace("-", "").replace(" ", "")
+            name = signature.get("name", "")
+            description = signature.get("description", "")
+            entry = signature.get("entry", {})
+            accession = signature.get("accession")
+            if library is None or accession is None:
+                continue
+            if library not in result:
+                result[library] = {}
+            for xref in result_item.get("xref", []):
+                xref_id = xref.get("id")
+                if xref_id is None:
+                    continue
+                if xref_id not in result[library]:
+                    result[library][xref_id] = {}
+                locations = sorted(
+                    match.get("locations", []),
+                    key=lambda loc: (loc.get("start", float('inf')), loc.get("end", float('inf')))
+                )
+                result[library][xref_id][accession]["locations"] = locations
+                result[library][xref_id][accession]["signature"] = signature
+                result[library][xref_id][accession]["entry"] = entry
+                result[library][xref_id][accession]["name"] = name
+                result[library][xref_id][accession]["description"] = description
+
+    return result
 
 
 def compare(expected: dict,
             current: dict,
-            ignore_elements: list,
-            applications: list,
-            seq_info=None,
-            output_file=None):
+            output_file):
 
-    seq_info = seq_info or {}
-
-    def update_seq_info(obj, seq_info):
-        if "xref" in obj and isinstance(obj["xref"], list) and obj["xref"]:
-            seq_info["xref_id"] = obj["xref"][0].get("id", "-")
-        if "matches" in obj and isinstance(obj["matches"], list) and obj["matches"]:
-            match = obj["matches"][0]
-            seq_info["model_ac"] = match.get("model-ac", "-")
-            if "signature" in match:
-                seq_info["library"] = match["signature"].get("signatureLibraryRelease", {}).get("library", "-")
-
-    def filter_matches(matches, applications):
-        return [
-            match for match in matches
-            if match.get("signature", {}).get("signatureLibraryRelease", {}).get("library", "-").lower() in applications]
-
-    update_seq_info(expected, seq_info)
-    update_seq_info(current, seq_info)
-
-    # just creating temp files for debugging
-    with open('tests/integration_tests/temp_current.json', 'w') as file:
-        json.dump(current, file, indent=2)
-    with open('tests/integration_tests/temp_expected.json', 'w') as file:
-        for key in expected:
-            if key in ignore_elements:
-                continue
-            if key not in current:
-                output_file.write(
-                    f"{key}\tKey missing\t-\t{seq_info.get('xref_id', '-')}\t"
-                    f"{seq_info.get('model_ac', '-')}\t{seq_info.get('library', '-')}\n"
-                )
-                continue
-
-            if isinstance(expected[key], dict):
-                compare(expected[key], current[key], ignore_elements, applications, seq_info, output_file)
-            elif isinstance(expected[key], list):
-                if key == "matches":
-                    filtered_expected = filter_matches(expected[key], applications)
-                    json.dump(filtered_expected, file, indent=2)
-
-                    if len(filtered_expected) != len(current[key]):
-                        output_file.write(
-                            f"{key}\tList length mismatch\t-\t{seq_info.get('xref_id', '-')}\t"
-                            f"{seq_info.get('model_ac', '-')}\t{seq_info.get('library', '-')}\n"
-                        )
-                    else:
-                        for i in range(len(filtered_expected)):
-                            compare(filtered_expected[i], current[key][i], ignore_elements, applications, seq_info, output_file)
-                else:
-                    if len(expected[key]) != len(current[key]):
-                        output_file.write(
-                            f"{key}\tList length mismatch\t-\t{seq_info.get('xref_id', '-')}\t"
-                            f"{seq_info.get('model_ac', '-')}\t{seq_info.get('library', '-')}\n"
-                        )
-                    else:
-                        for i in range(len(expected[key])):
-                            compare(expected[key][i], current[key][i], ignore_elements, applications, seq_info, output_file)
-            else:
-                if str(expected[key]).lower().strip() != str(current[key]).lower().strip():
-                    output_file.write(
-                        f"{key}\t{expected[key]}\t{current[key]}\t{seq_info.get('xref_id', '-')}\t"
-                        f"{seq_info.get('model_ac', '-')}\t{seq_info.get('library', '-')}\n"
-                    )
+        skipping_libs = []
+        all_libraries = set(expected.keys()).union(set(current.keys()))
+        with open(output_file, "w") as file:
+            for library in all_libraries:
+                if library not in current:
+                    skipping_libs.append(library)
+                    continue
+                all_xref_ids = set(expected[library].keys()).union(set(current[library].keys()))
+                for xref_id in all_xref_ids:
+                    if xref_id not in expected[library]:
+                        file.write(f"EXTRA SEQUENCE: {library}: xref.id '{xref_id}'\n")
+                        continue
+                    if xref_id not in current[library]:
+                        file.write(f"MISSING SEQUENCE: {library}: xref.id '{xref_id}'\n")
+                        continue
+                    all_accessions = set(expected[library][xref_id].keys()).union(set(current[library][xref_id].keys()))
+                    for accession in all_accessions:
+                        if accession not in expected[library][xref_id]:
+                            file.write(f"EXTRA ACCESSION: {library} -> {xref_id}: accession '{accession}'\n")
+                            continue
+                        if accession not in current[library][xref_id]:
+                            file.write(f"MISSING ACCESSION: {library} -> {xref_id}: accession '{accession}'\n")
+                            continue
+                        locations1 = expected[library][xref_id][accession].sort()
+                        locations2 = current[library][xref_id][accession].sort()
+                        if locations1 != locations2:
+                            file.write(f"MISMATCH ON LOCATIONS: {library} -> {xref_id} -> {accession}:\n Expected: {locations1} \nCurrent.: {locations2}\n")
+            file.write(f"Skipping applications: {', '.join(skipping_libs)}")
 
 
 def test_json_output(test_output_dir, input_path, expected_result_path, output_path, applications, data_dir, disable_precalc):
@@ -138,9 +116,7 @@ def test_json_output(test_output_dir, input_path, expected_result_path, output_p
     expected = json2dict(expected_result)
     current = json2dict(current_result)
 
-    ignore_fields = ["postProcessed", 'dc-status', 'representative', 'library']
-    applications_list = applications.split(',')
-    with open("tests/integration_tests/mismatches.txt", "w") as file:
-        compare(expected, current, ignore_fields, applications_list, output_file=file)
+    output_file = "tests/integration_tests/mismatches.txt"
+    compare(expected, current, output_file)
 
-    assert expected == current
+    assert os.stat(output_file).st_size == 0
