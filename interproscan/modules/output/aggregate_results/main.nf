@@ -31,8 +31,11 @@ process AGGREGATE_SEQS_MATCHES {
         seq_matches_aggreg[md5].sequence = sequence.sequence
         seq_matches_aggreg[md5].md5 = md5
         seq_matches_aggreg[md5].xref << ["name": "${sequence.id} ${sequence.description}", "id": sequence.id]
-        if (matchesInfo[seqId]) { // the nucleic seq matches Map is keyed by the OrfId
+        if (matchesInfo[seqId]) {  // the nucleic seq matches Map is keyed by the OrfId
             seq_matches_aggreg[md5].matches = matchesInfo[seqId]
+        }
+        if (nucleic) {  // add nucleic seq metadata
+            seq_matches_aggreg[md5].translatedFrom = info.translatedFrom
         }
     }
     def outputFilePath = task.workDir.resolve("seq_matches_aggreg.json")
