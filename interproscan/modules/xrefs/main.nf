@@ -54,11 +54,9 @@ process XREFS {
         def memberRelease = entries.databases.find { key, value ->
             key.toLowerCase().replace("-", "").replace(" ", "") == memberDB
         }?.value
-        println("Member: ${memberDB}")
         SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
 
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, matches ->
-            if (["sfld", "cdd"].contains(memberDB)) { println("memberDB: ${memberDB}, seqId ${seqId}") }
             [(seqId): matches.collectEntries { rawModelAccession, match ->
                 Match matchObject = Match.fromMap(match)
                 def modelAccession = matchObject.modelAccession.split("\\.")[0]
@@ -153,7 +151,11 @@ process XREFS {
                 return [(rawModelAccession): matchObject]
             }]
         }
-        aggregatedMatches.putAll(matches.collect())
+        matches.each { seqId, seqMatches ->
+            aggregatedMatches[seqId] = aggregatedMatches.get(seqId, [:]) + seqMatches.findAll { rawModelAccession, _ ->
+                !aggregatedMatches[seqId]?.containsKey(rawModelAccession)
+            }
+        }
     }
     def outputFilePath = task.workDir.resolve("matches2xrefs.json")
     def json = JsonOutput.toJson(aggregatedMatches)
