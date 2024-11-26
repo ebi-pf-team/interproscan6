@@ -92,7 +92,7 @@ workflow {
     def fileName = params.input.split('/').last()
     def outFileName = "${params.outdir}/${fileName}"
     if (formats.contains("TSV")) {
-        WRITE_TSV_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}")
+        WRITE_TSV_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}", params.nucleic)
     }
 }
 

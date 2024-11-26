@@ -8,6 +8,7 @@ process WRITE_TSV_OUTPUT {
     input:
     val matches
     val outputPath
+    val nucleic
 
     exec:
     def outputFilePath = "${outputPath}.ips6.tsv"
@@ -29,6 +30,7 @@ process WRITE_TSV_OUTPUT {
 
             seqData["xref"].each { xrefData ->
                 match.locations.each { Location loc ->
+                    String seqId = nucleic ? "${seqData.translatedFrom.id}_${xrefData.id}" : xrefData.id
                     int start = loc.start
                     int end = loc.end
                     def scoringValue = "-"
@@ -51,7 +53,7 @@ process WRITE_TSV_OUTPUT {
                     }
 
                     tsvFile.append([
-                        xrefData["id"], seqData["md5"], seqData["sequence"].length(),
+                        seqId, seqData["md5"], seqData["sequence"].length(),
                         memberDb,
                         match.signature.accession, sigDesc,
                         start, end, scoringValue, status,
