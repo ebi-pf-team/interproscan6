@@ -37,16 +37,16 @@ process WRITE_XML_OUTPUT {
     ]
 
     xml."protein-matches"("interproscan-version": ips6Version){
-        proteins {
-            jsonData.each { protein ->
-                sequence(md5: protein["md5"], protein["sequence"])
-                if (protein["matches"]) {
+        jsonData.each { seqData ->
+            protein {
+                sequence(md5: seqData["md5"], seqData["sequence"])
+                if (seqData["matches"]) {
                     matches {
-                        protein["matches"].each { modelAcc, matchMap ->
+                        seqData["matches"].each { modelAcc, matchMap ->
                             Match matchObj = Match.fromMap(matchMap)
                             def matchNodeName
                             def memberDb = matchObj.signature.signatureLibraryRelease.library
-                           if (hmmer3Members.contains(memberDb)) {
+                            if (hmmer3Members.contains(memberDb)) {
                                 matchNodeName = "hmmer3"
                             } else if (memberDb == "smart") {
                                 matchNodeName = "hmmer2"
@@ -131,7 +131,7 @@ process WRITE_XML_OUTPUT {
                     }
                 }
                 xrefs {
-                    protein.xref.each { ref ->
+                    seqData.xref.each { ref ->
                         xref {
                             name(ref["name"])
                             id(ref["id"])
