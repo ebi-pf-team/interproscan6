@@ -80,7 +80,7 @@ workflow {
         [batchnumber, sequences, matches]
     }.set { ch_seq_matches }
 
-    AGGREGATE_SEQS_MATCHES(ch_seq_matches)
+    AGGREGATE_SEQS_MATCHES(ch_seq_matches, params.nucleic)
     AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
 
     // REPRESENTATIVE_DOMAINS(XREFS.out.collect())
