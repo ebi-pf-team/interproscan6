@@ -22,8 +22,12 @@ process WRITE_TSV_OUTPUT {
             Match match = Match.fromMap(matchData)
             String memberDb = match.signature.signatureLibraryRelease.library
             String sigDesc = match.signature.description?: '-'
-            String goterms = match.signature.entry?.goXRefs ? (match.signature.entry.goXRefs.isEmpty() ? '-' : match.signature.entry.goXRefs.join('|')) : '-'
-            String pathways = match.signature.entry?.pathwayXRefs ? (match.signature.entry.pathwayXRefs.isEmpty() ? '-' : match.signature.entry.pathwayXRefs.join('|')) : '-'
+            String goterms = match.signature.entry?.goXRefs ?
+                             (match.signature.entry.goXRefs.isEmpty() ? '-' :
+                             match.signature.entry.goXRefs.collect { goXref -> "${goXref.id}(${goXref.databaseName})" }.join('|')) : '-'
+            String pathways = match.signature.entry?.pathwayXRefs ?
+                             (match.signature.entry.pathwayXRefs.isEmpty() ? '-' :
+                             match.signature.entry.pathwayXRefs.collect { ptXref -> "${ptXref.databaseName}:${ptXref.id}" }.join('|')) : '-'
             String entryAcc = match.signature.entry?.accession ?: '-'
             String entryDesc = match.signature.entry?.description ?: '-'
             char status = 'T'
