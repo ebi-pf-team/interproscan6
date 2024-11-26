@@ -15,6 +15,9 @@ process WRITE_XML_OUTPUT {
     exec:
     def writer = new StringWriter()
     def xml = new MarkupBuilder(writer)
+    // set the correct encoding so symbols are formatted correctly in the final output
+    xml.setEscapeAttributes(false) // Prevent escaping attributes
+    xml.setEscapeText(false)       // Prevent escaping text
 
     def jsonSlurper = new JsonSlurper()
     def jsonData = jsonSlurper.parse(matches)
