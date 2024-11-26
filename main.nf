@@ -62,7 +62,6 @@ workflow {
     // This is to concat MLS with scan sequences result
     // all_results = parsed_matches.concat(parsed_analysis)
 
-
     /* XREFS:
     Add signature and entry desc and names
     Add PAINT annotations (if panther is enabled)
@@ -72,7 +71,13 @@ workflow {
     XREFS(
         SCAN_SEQUENCES.out,
         apps,
-        data_dir
+        data_dir,
+        params.xRefsConfig.entries,
+        params.xRefsConfig.goterms,
+        params.xRefsConfig.pathways,
+        params.goterms,
+        params.pathways,
+        "${dataDir}/${params.appsConfig.paint}"
     )
 
     ch_seqs.join(XREFS.out, by: 0)
