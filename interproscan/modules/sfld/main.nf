@@ -53,7 +53,7 @@ process PARSE_SFLD {
     val hierarchy_db
 
     output:
-    tuple val(meta), val("sfld.json")
+    tuple val(meta), path("sfld.json")
 
     exec:
     def outputFilePath = task.workDir.resolve("sfld.json")

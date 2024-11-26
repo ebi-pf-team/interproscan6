@@ -70,10 +70,10 @@ process WRITE_XML_OUTPUT {
                             }
                             "$matchNodeName-match"(matchAttributes) {
                                 def signatureAttributes = [ac: matchObj.signature.accession]
-                                if(matchObj.signature.name){
+                                if (matchObj.signature.name){
                                     signatureAttributes.name = matchObj.signature.name
                                 }
-                                if(matchObj.signature.description) {
+                                if (matchObj.signature.description) {
                                     signatureAttributes.description = matchObj.signature.description
                                 }
                                 signature(signatureAttributes) {
@@ -102,16 +102,16 @@ process WRITE_XML_OUTPUT {
                                                     alignment(loc.queryAlignment)
                                                 }
                                                 if (loc.sites) {
-                                                    "$matchNodeName-sites" {
+                                                    "sites" {
                                                         loc.sites.each { siteObj ->
-                                                            site(description: siteObj.description, numLocations: siteObj.numLocations) {
+                                                            "$matchNodeName-site"(description: siteObj.description, numLocations: siteObj.numLocations) {
                                                                 if(siteObj.group){ group(siteObj.group) }
-                                                                if(siteObj.label){ label(siteObj.lable) }
+                                                                if(siteObj.label){ label(siteObj.label) }
                                                                 hmmStart(siteObj.hmmStart)
                                                                 hmmEnd(siteObj.hmmEnd)
                                                                 "site-locations" {
                                                                     siteObj.siteLocations.each { siteLoc ->
-                                                                        "site-loc"(
+                                                                        "site-location"(
                                                                             residue: siteLoc.residue,
                                                                             start: siteLoc.start,
                                                                             end: siteLoc.end
