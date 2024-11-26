@@ -77,7 +77,7 @@ workflow {
         params.xRefsConfig.pathways,
         params.goterms,
         params.pathways,
-        "${dataDir}/${params.appsConfig.paint}"
+        "${data_dir}/${params.appsConfig.paint}"
     )
 
     ch_seqs.join(XREFS.out, by: 0)
