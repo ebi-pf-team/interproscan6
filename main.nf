@@ -1,123 +1,67 @@
 nextflow.enable.dsl=2
 
-include { PARSE_SEQUENCE } from "$projectDir/interproscan/modules/parse_sequence/main"
-include { GET_ORFS } from "$projectDir/interproscan/modules/get_orfs/main"
-include { REPRESENTATIVE_DOMAINS } from "$projectDir/interproscan/modules/output/representative_domains/main"
-include { AGGREGATE_PARSED_SEQS } from "$projectDir/interproscan/modules/output/aggregate_parsed_seqs/main"
-include { AGGREGATE_RESULTS } from "$projectDir/interproscan/subworkflows/aggregate_results/main"
-include { WRITE_RESULTS } from "$projectDir/interproscan/modules/output/write_results/main"
+include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
+include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
 
-include { PRE_CHECKS } from "$projectDir/interproscan/subworkflows/pre_checks/main"
-include { SEQUENCE_PRECALC } from "$projectDir/interproscan/subworkflows/sequence_precalc/main"
-include { SEQUENCE_ANALYSIS } from "$projectDir/interproscan/subworkflows/sequence_analysis/main"
-include { XREFS } from "$projectDir/interproscan/subworkflows/xrefs/main"
+include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
+include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
+include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
+include { XREFS                         } from "./interproscan/modules/xrefs"
+include { AGGREGATE_SEQS_MATCHES;
+          AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_matches"
+include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
 
 workflow {
-    // Perform preliminary validation checks before running the analysis
-    if (params.input != null) {
-        input_file = file(params.input)
-    } else {
-        input_file = null
+    println "# ${workflow.manifest.name} ${workflow.manifest.version}"
+    println "# ${workflow.manifest.description}\n"
+
+    if (params.keySet().any { it.equalsIgnoreCase("help") }) {
+        InterProScan.printHelp(params.appsConfig)
+        exit 0
     }
 
-    /*
-    The data dir path is reconfigured and passed from PRE_CHECKS
-    to SEQUENCE_ANALYSIS to ensure PRE_CHECKS is completed before
-    the other subworkflow starts.
-    */
-    dataDirPath = Channel.empty()
-    PRE_CHECKS(
-        params.help,
-        input_file,
-        params.datadir,
-        params.nucleic,
-        params.keySet(),
-        params.applications,
-        params.formats,
-        params.version,
-        params.ipscn_version,
-        params.signalp_mode,
-        params.signalp_gpu,
-        params.goterms,
-        params.pathways
-    )
-    dataDirPath = file(PRE_CHECKS.out.dataDir.val).toAbsolutePath().toString()
-    log.info "Using data files located in ${dataDirPath}"
+    INIT_PIPELINE()
 
-    applications = (params.applications.toLowerCase().split(',') as Set).join(',')
+    fasta_file      = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
+    data_dir        = INIT_PIPELINE.out.datadir.val
+    outut_dir       = INIT_PIPELINE.out.outdir.val
+    apps            = INIT_PIPELINE.out.apps.val
+    signalpMode     = INIT_PIPELINE.out.signalpMode.val
 
-    Channel.fromPath( input_file , checkIfExists: true)
-    .unique()
-    .splitFasta( by: params.batchsize, file: true )
-    .set { ch_fasta }
+    // Chunk input file in smaller files
+    fasta_file
+        .splitFasta( by: params.batchSize, file: true )
+        .set { ch_fasta }
 
-    // if nucleic acid seqs provided, predict ORFs
-    // either way, then break up input FASTA into batches
     if (params.nucleic) {
-        if (params.translate.strand.toLowerCase() !in ['both','plus','minus']) {
-            log.info "Strand option '${params.translate.strand.toLowerCase()}' in nextflow.config not recognised. Accepted: 'both', 'plus', 'minus'"
-            exit 1
-        }
-        GET_ORFS(
-            ch_fasta,
-            params.translate.strand,
-            params.translate.methionine,
-            params.translate.min_len,
-            params.translate.genetic_code
-        )
-        GET_ORFS.out.splitFasta( by: params.batchsize, file: true )
-        .set { orfs_fasta }
-        /* Provide the translated ORFs and the original nts seqs
-        So that the ORFs can be associated with the source nucleic seq
-        in the final output */
-        PARSE_SEQUENCE(orfs_fasta, ch_fasta, params.nucleic)
-    }
-    else {
-        PARSE_SEQUENCE(ch_fasta, ch_fasta, params.nucleic)
+        // Translate DNA/RNA sequences to protein sequences
+        ch_translated = ESL_TRANSLATE(ch_fasta)
+
+        // Split again
+        ch_translated
+            .splitFasta( by: params.batchSize, file: true )
+            .map { split_pt_file, orig_nt_file -> tuple ( orig_nt_file, split_pt_file ) }
+            .set { ch_translated_split }
+
+        // Store sequences as JSON objects
+        ch_seqs = PREPARE_NUCLEIC_SEQUENCES(ch_translated_split)
+    } else {
+        // Store sequences as JSON objects
+        ch_seqs = PREPARE_PROTEIN_SEQUENCES(ch_fasta)
     }
 
-    disable_precalc = params.disable_precalc
-    sequences_to_analyse = null
-    parsed_matches = Channel.empty()
-    if (!disable_precalc) {
-        log.info "Using precalculated match lookup service"
-        SEQUENCE_PRECALC(PARSE_SEQUENCE.out, applications, false)  // final: bool to indicate not a unit test
-        sequences_to_analyse = SEQUENCE_PRECALC.out.sequences_to_analyse
-        parsed_matches = SEQUENCE_PRECALC.out.parsed_matches
-    }
+    // TODO: add new match lookup
 
-    if (parsed_matches.collect() == null) {
-            // cases in which the lookup check ran successfully but lookup matches not
-            disable_precalc = true
-            log.info "ERROR: unable to connect to match lookup service. Max retries reached. Running analysis locally..."
-    }
+    SCAN_SEQUENCES(
+        ch_seqs,
+        apps,
+        params.appsConfig,
+        data_dir
+    )
 
-    analysis_result = Channel.empty()
-    if (disable_precalc || sequences_to_analyse) {
-        log.info "Running sequence analysis"
-        if (sequences_to_analyse && !disable_precalc) {
-            fasta_to_runner = sequences_to_analyse
-        }
-        else {
-            if (params.nucleic) {
-                fasta_to_runner = orfs_fasta
-            }
-            else {
-                fasta_to_runner = ch_fasta
-            }
-        }
-        parsed_analysis = SEQUENCE_ANALYSIS(
-            fasta_to_runner,
-            applications,
-            dataDirPath,
-            params.signalp_mode
-        )
-    }
-
-    AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
-
-    all_results = parsed_matches.concat(parsed_analysis)
-    AGGREGATE_RESULTS(all_results)
+    // AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
+    // This is to concat MLS with scan sequences result
+    // all_results = parsed_matches.concat(parsed_analysis)
 
     /* XREFS:
     Add signature and entry desc and names
@@ -125,22 +69,31 @@ workflow {
     Add go terms (if enabled)
     Add pathways (if enabled)
     */
-    XREFS(AGGREGATE_RESULTS.out, applications, dataDirPath)
+    XREFS(
+        SCAN_SEQUENCES.out,
+        apps,
+        data_dir
+    )
 
-    REPRESENTATIVE_DOMAINS(XREFS.out.collect())
+    ch_seqs.join(XREFS.out, by: 0)
+    .map { batchnumber, fasta, sequences, matches ->
+        [batchnumber, sequences, matches]
+    }.set { ch_seq_matches }
+
+    AGGREGATE_SEQS_MATCHES(ch_seq_matches, params.nucleic)
+    AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
+
+    // REPRESENTATIVE_DOMAINS(XREFS.out.collect())
 
     Channel.from(params.formats.toLowerCase().split(','))
     .set { ch_format }
 
-    WRITE_RESULTS(
-        input_file.getName(),
-        AGGREGATE_PARSED_SEQS.out,
-        REPRESENTATIVE_DOMAINS.out.collect(),
-        ch_format,
-        params.outdir,
-        params.ipscn_version,
-        params.nucleic
-    )
+    def formats = params.formats.toUpperCase().split(',') as Set
+    def fileName = params.input.split('/').last()
+    def outFileName = "${params.outdir}/${fileName}"
+    if (formats.contains("TSV")) {
+        WRITE_TSV_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}")
+    }
 }
 
 workflow.onComplete = {
@@ -152,24 +105,3 @@ workflow.onComplete = {
     println "Any results are located at ${outputDir}/${outputFileName}.ips6.*"
     println "Duration: $workflow.duration"
 }
-
-
-log.info """
-If you use InterProScan in your work please cite:
-
-InterProScan:
-> Jones P, Binns D, Chang HY, Fraser M, Li W, McAnulla C, McWilliam H,
-Maslen J, Mitchell A, Nuka G, Pesseat S, Quinn AF, Sangrador-Vegas A,
-Scheremetjew M, Yong SY, Lopez R, Hunter S.
-InterProScan 5: genome-scale protein function classification.
-Bioinformatics. 2014 May 1;30(9):1236-40. doi: 10.1093/bioinformatics/btu031.
-Epub 2014 Jan 21. PMID: 24451626; PMCID: PMC3998142.
-
-InterPro:
-> Paysan-Lafosse T, Blum M, Chuguransky S, Grego T, Pinto BL, Salazar GA, Bileschi ML,
-Bork P, Bridge A, Colwell L, Gough J, Haft DH, Letunić I, Marchler-Bauer A, Mi H,
-Natale DA, Orengo CA, Pandurangan AP, Rivoire C, Sigrist CJA, Sillitoe I, Thanki N,
-Thomas PD, Tosatto SCE, Wu CH, Bateman A.
-InterPro in 2022. Nucleic Acids Res. 2023 Jan 6;51(D1):D418-D427.
-doi: 10.1093/nar/gkac993. PMID: 36350672; PMCID: PMC9825450.
-"""

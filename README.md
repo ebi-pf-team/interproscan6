@@ -1,18 +1,16 @@
 # InterProScan6
 
 [![nf-test](https://img.shields.io/badge/tested_with-nf--test-337ab7.svg)](https://github.com/askimed/nf-test)
-[![pytest](https://img.shields.io/badge/tested_with-pytest-337ab7.svg)]([https://github.com/askimed/nf-test](https://docs.pytest.org/en/stable/))
 ![Unit tests](https://github.com/ebi-pf-team/interproscan6/actions/workflows/unit-tests.yml/badge.svg)
-[![codecov](https://codecov.io/gh/ebi-pf-team/interproscan6/graph/badge.svg?token=7MP9WCJHAQ)](https://codecov.io/gh/ebi-pf-team/interproscan6)  
 [![Check Docker Files](https://github.com/ebi-pf-team/interproscan6/actions/workflows/docker-check.yml/badge.svg)](https://github.com/ebi-pf-team/interproscan6/actions/workflows/docker-check.yml)
 [![Citation](https://github.com/ebi-pf-team/interproscan6/actions/workflows/citation.yml/badge.svg)](#citation)
 
 > [!CAUTION]
 > InterProScan6 is currently under active development and is not yet stable enough for a full release.
 
-[InterPro](http://www.ebi.ac.uk/interpro/) is a database which integrates together predictive information about proteins’ function from a number of partner resources, giving an overview of the families that a protein belongs to and the domains and sites it contains.
+[InterPro](http://www.ebi.ac.uk/interpro/) is a database which integrates together predictive information about proteins’ functions from a number of partner resources, giving an overview of the families that a protein belongs to as well as the domains and sites it contains.
 
-Users who have novel nucleotide or protein sequences that they wish to functionally characterise can use the software package `InterProScan` to run the scanning algorithms from the InterPro database in an integrated way. Sequences are submitted in FASTA format. Matches are then calculated against all of the required member database’s signatures and the results are then output in a variety of formats.
+Users who have novel nucleotide or protein sequences that they wish to functionally characterise can use the software package `InterProScan` to run the scanning algorithms from the InterPro database in an integrated way. Sequences are submitted in FASTA format. Matches are then calculated against all the required member databases signatures and the results are then output in a variety of formats.
 
 # Documentation
 
@@ -49,7 +47,7 @@ Our full documentation is still under construction.
 # Requirements
 
 * `Java` (version >= 11)
-* `Nextflow` (version >=23.04.02)
+* `Nextflow` (version >=23.04.01)
 * A container run time
   * `InterProScan` includes built in support for:
     * `Docker` (version >= 24.0.5)
@@ -57,11 +55,51 @@ Our full documentation is still under construction.
     * `Apptainer` (version >= 1.3.4)
   * Nextflow also supports using Charliecloud, Podman, Sarus, and Shifter. However you will need to build your own [Nextflow profiles](https://nextflow.io/docs/latest/config.html#config-profiles) to support these container runtimes
 
+> [!WARNING]
+> Support for Java versions prior to 17 were dropped in [Nextflow version 24.11.0-edge](https://www.nextflow.io/docs/latest/install.html).
+
 # Set up
 
 The instructions below rely on an internet connection to pull the necessary images from Docker Hub.
 
+> [!IMPORTANT]
+> By default `InterProScan` will look for a `data` directory in the `InterProScan` project dir.
+> If you store these data in an alternative directory use the `--datadir` flag to
+> provide the relative or absolute path to the directory when running `InterProScan`.
+
 ## Quick
+
+Instead of setting up an installation, Nextflow can pull down the latest `InterProScan` image from DockerHub if one is not already available on the system being used to run `InterProScan`, otherwise Nextflow will use the available `InterProScan` image.
+
+1. **Download InterPro data files**
+
+```bash
+curl -OJ https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/102.0/interproscan-data-102.0.tar.gz
+tar -pxzf interproscan-data-102.0.tar.gz
+```
+
+2. **Run `InterProScan`**
+
+```bash
+nextflow run ebi-pf-team/interproscan6 \
+  -profile <ContainerRuntime,Executor> \
+  --input <Fasta> \
+  --datadir <Data>
+```
+
+For example, to run `InterProScan` locally using Docker:
+```bash
+nextflow run ebi-pf-team/interproscan6 \
+  -profile docker,local \
+  --input my-fasta.faa \
+  --datadir interproscan-data-102.0
+```
+
+3. **(Optional) Install licensed software**
+
+By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` because they contain licensed components. In order to activate these analyses please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
+
+## Installing from source
 
 1. **Download InterPro data files**
 
@@ -70,82 +108,82 @@ Run the following commands within the `InterProScan` project directory to downlo
 ```bash
 curl -OJ https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/102.0/interproscan-data-102.0.tar.gz
 tar -pxzf interproscan-data-102.0.tar.gz
-mv interproscan-data-102.0 data
 ```
 
-> [!IMPORTANT]
-> By default `InterProScan` will look for a `data` directory in the `InterProScan` project dir. 
-> If you store these data in an alternative directory use the `--datadir` flag to 
-> provide the relative or absolute path to the directory when running `InterProScan`.
-
-2. **(Optional) Install licensed software**
-
-By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
-because they contain licensed components. In order to activate these analyses 
-please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
-
-## Installing from source
-
-1. **Download InterPro data file.**
+2. **Clone the `InterProScan` repository**
 
 ```bash
-curl -OJ https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/102.0/interproscan-data-102.0.tar.gz
-tar -pxzf interproscan-data-102.0.tar.gz
-mv interproscan-data-102.0 data
+git clone https://github.com/ebi-pf-team/interproscan6.git
 ```
 
-2. **Build the Docker image.** Run this command from the root of this repository.
+3. **Pull or build the container images**
 
+Pull down the `InterProScan` image from DockerHub using your container runtime of choice. E.g. using Docker:
 ```bash
-docker build -t interproscan6 .
+docker pull interpro/interproscan6:latest
 ```
 
-3. **(Optional) Install licensed software**
+Or build the Docker image locally:
+```bash
+docker build -t interproscan6 . <-----
+```
 
-By default `Phobius`, `SignalP`, and `TMHMM` member database analyses are deactivated in `InterProScan6` 
-because they contain licensed components. In order to activate these analyses 
-please see the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
-
-4. **(Optional) Convert the Docker images to alternative container runtime images**
-
-For example, to convert the ``interproscan6`` image to a Apptainer image, save the Docker image to a ``tar`` archive file then build an Apptainer image from the ``tar`` archive.
-
+Then, optionally, convert the Docker images to alternative container runtimes. For example to convert the Docker image to an Apptainer image:
 ```bash
 docker save interproscan6 > interproscan6.tar
 apptainer build interproscan6.sif docker-daemon://interproscan6:latest
 ```
 
-The same applies for Singularity:
+4. **Run `InterProScan`**
 
 ```bash
-docker save interproscan6 > interproscan6.tar
-singularity build interproscan6.sif docker-daemon://interproscan6:latest
+nextflow run <Path-to-Interproscan-repo>/main.nf \
+  -profile <ContainerRuntime,Executor> \
+  --input <Fasta> \
+  --datadir <Data>
+```
+
+For example, to run `InterProScan` locally using Docker:
+```bash
+nextflow run interproscan6/main.nf \
+  -profile docker,local \
+  --input my-fasta.faa \
+  --datadir interproscan-data-102.0
 ```
 
 # Using `InterProScan6`
 
 ## Quick start
 
-`InterProScan6` is configured via the command-line. The only mandatory arguments are the runtime profiles (`-profiles`) and input FASTA file (`--input`).
+`InterProScan6` is configured via the command-line. The only mandatory arguments are the:
+
+* Runtime profiles (`-profiles`)
+* Path to input FASTA file (`--input`)
+* Path to the InterPro data (`--datadir`)
 
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
   -profile <container runtime, and executor> \
-  --input <path to fasta file>
+  --input <path to fasta file> \
+  --datadir <path to the data dir>
 ```
 
 **`-profile` must** be included, and is used to define the executor and the container runtime used.
 
 **`--input` must** be included, and is used to define the path to the input file containing the query sequences to be analysed in FASTA format.
 
+**`--datadir` must** be included, and is used to define the path to the directory containing the downloaded InterPro data.
+
 > [!NOTE]  
-> Note that `-profile` has a single dash because this is a Nextflow argument, but `--input` has two dashes because this is a `InterProScan6` argument.
+> Note that `-profile` has a single dash because this is a Nextflow argument, but `--input` and `--datadir` have two dashes because these are `InterProScan6` argument.
 
 ## Profiles
 
 A [Nextflow profile](https://nextflow.io/docs/latest/config.html#config-profiles) is a configuration file that defines runtime configuration attributes.
 
-For `InterProScan6` to run, a profile for the container runtime and a profile for a executor must also be defined. `InterProScan6` includes the following profiles:
+For `InterProScan6` to run, a profile for the container runtime and a profile for an executor must also be defined.
+
+`InterProScan6` includes the following profiles:
 
 * Executor profiles:
   * local
@@ -156,22 +194,20 @@ For `InterProScan6` to run, a profile for the container runtime and a profile fo
   * singularity
   * apptainer
 
-For example, to run `InterProScan` a cluster with the SLURM scheduler and Singularity:
+For example, to run `InterProScan` on a cluster with the SLURM scheduler and Singularity:
 
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
   -profile slurm,singularity \
-  --input <path to fasta file> 
+  --input <path to fasta file> \
+  --datadir <data>
 ```
 
-Nextflow also supports using Charliecloud, Podman, Sarus, and Shifter. However you will need to build your own [Nextflow profiles](https://nextflow.io/docs/latest/config.html#config-profiles) to support these container runtimes.
+Nextflow also supports using Charliecloud, Podman, Sarus, and Shifter. However, you will need to build your own [Nextflow profiles](https://nextflow.io/docs/latest/config.html#config-profiles) to support these container runtimes.
 
 ## Optional arguments
 
 **`--applications`** - Applications/member databases to run. By default `InterProScan` runs all member databases in the consortium. Use the `--applications` to define a comma separate list of applications names (case insensitive).
-
-**`--datadir`** - Path to the data directory. By default `InterProScan` looks for a `data` directory 
-in the `InterProScan` project directory.
 
 **`--disable_precalc`** - `InterProScan6` will check against a remote database of precalculated matches. The downstream analyses will then only be run against query sequences for whom no precalcualted match is available. You can disable this operation and run the analyses against all sequences in the input FASTA file by including the `--disable_precalc` flag in the `InterProScan6` command.
 
@@ -181,19 +217,22 @@ in the `InterProScan` project directory.
 
 **`--help`** - Display the help message.
 
-**`--outdir`** - Output directory. By default the output files are written to the current working directory. Use `--outdir` to define the relative or abosolute path to the output directory. `InterProScan` will build all necessary directories.
+**`--nucleic`** - Instead of providing protein sequences, the input FASTA file contains nucleic sequences. See the '[Using DNA sequences](#using-dna-sequences)' section for more information.
+
+**`--outdir`** - Output directory. By default, the output files are written to the current working directory. Use `--outdir` to define the relative or abosolute path to the output directory. `InterProScan` will build all necessary directories.
 
 **`--pathways`** - Include corresponding Pathway annotations in the final results. 
 
 > [!WARNING]
-> When using `--datadir` and `--outdir`, `InterProScan6` does not tolerate spaces in file paths.
+> Nextflow does not tolerate spaces in file paths.
 
-For example, to run `InterProScan6` using only AntiFam and SFLD, without checking for pre-calculated matches in InterPro (using an example input file), with writing the results to the directory `results`, writing the results to a JSON and XML file and including GO term and Pathway annotation data in the final results, while using Docker on a local system:
+For example, to run `InterProScan6` locally using Docker and only member databases AntiFam and SFLD, without checking for pre-calculated matches in InterPro, and writing the results only in the JSON and XML formats to the directory `results` that include GO terms and pathway annotations (presuming the InterPro data is located in `./data`):
 
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
   -profile docker,local \
   --input files_test/best_to_test.fasta \
+  --datadir data \
   --applications signalp,antifam \
   --disable_precalc \
   --formats json,xml \
@@ -201,9 +240,6 @@ nextflow run ebi-pf-team/interproscan6 \
   --goterms \
   --pathways
 ```
-
-> [!TIP]
-> `InterproScan6` parameters are prefixed with a double dash, `--` (e.g. `--input`), Nextflow parameters are prefixed with a single dash, `-` (e.g. `-resume`)
 
 ## Applications
 
@@ -224,7 +260,7 @@ Below is a list of the applications (built in and those that require additional 
   * [SMART](http://smart.embl-heidelberg.de/)
   * [SUPERFAMILY](https://supfam.mrc-lmb.cam.ac.uk/)
 * Applications not in the consortium:
-  * Antifam
+  * [Antifam](https://github.com/ebi-pf-team/antifam)
   * [COILS](http://www.ch.embnet.org/software/COILS_form.html)
   * [DeepTMHMM](https://www.biorxiv.org/content/10.1101/2022.04.08.487609v1) (*not yet available*)
   * [FunFam](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-2988-x)
@@ -236,13 +272,13 @@ Below is a list of the applications (built in and those that require additional 
 
 > [!NOTE]
 > Quoting the SignalP documentation:  
-> Specifying the eukarya method of `SignalP6` (`SignalP_EUK`) triggers post-processing of the SP predictions by `SignalP6` to prevent spurious results (it will only predicts type Sec/SPI).
+> Specifying the eukarya method of `SignalP6` (`SignalP_EUK`) triggers post-processing of the SP predictions by `SignalP6` to prevent spurious results (it will only predict type Sec/SPI).
 
 ## Using DNA sequences
 
 `InterProScan6` takes advantage of the Open Reading Frame (ORF) prediction tool `esl-translate` within the [`easel` tool suite](https://github.com/EddyRivasLab/easel) in order to analyse nucleic acid sequences.
 
-The `easel` application itself and all of its dependencies are integrated in InterProScan via a docker image (see [set-up](#set-up)).
+The `easel` application itself and all of its dependencies are already integrated in `InterProScan` so no additional set up is required!
 
 **To run anlyses with nucleic acid sequences, run `InterProScan6` with the `--nucleic` flag**
 
@@ -251,7 +287,7 @@ The `easel` application itself and all of its dependencies are integrated in Int
         -profile <executor,container runtime> \
         --nucleic
 
-By default `InterProScan6` will assume the input FASTA file contains protein sequences. The `--nucleic` flag instructs `InterProScan6` to retrieve all possible ORFs using the `easel` tool suite.
+By default `InterProScan6` will assume the input FASTA file contains protein sequences. The `--nucleic` flag instructs `InterProScan6` to retrieve possible ORFs using the `easel` tool suite.
 
 > [!WARNING]  
 > The input FASTA file must contain sequences of the same type, i.e. _all_ protein sequences or _all_ nucleic acid sequences.
@@ -550,14 +586,19 @@ is broken up into fragments, each of the fragments are represented under the
 * "NC_TERMINAL_DISC" - all other fragments
 
 > [!NOTE]  
-> Not all member database analyses can detect discontinious domains. At the present only Gene3D and 
-> FunFam are able to detect discontinious domains.
+> At the moment, only Gene3D and FunFam are able to detect discontinious domains.
 
-### The envelop
+### The envelope
 
 The envelope represents the region of a protein sequence where the domain may be located. Often it is wider than what HMMER chooses as a reasonably confident alignment.
 
-**Panther exception:** The output from HMMER3 against the HMM models of Panther is post-processed to select only the best homologous family. Therefore, there is a maximum of one domain hit for each Panther signature in a protein sequence. Owing to this the E-value and Score and listed under the `signature` key, not the `locations` key.
+### The PIRSF exception
+
+PIRSF uses the envelope as for start and end of the location, and lists the hmmStart and hmmEnd as the aliFrom and aliTo from HMMER3. 
+
+### The Panther exception
+
+The output from HMMER3 against the HMM models of Panther is post-processed to select only the best homologous family. Therefore, there is a maximum of one domain hit for each Panther signature in a protein sequence. Owing to this the E-value and Score are listed under the `signature` key, not the `locations` key.
 
 # Installing licensed applications (`Phobius`, `SignalP`, `TMHMM`)
 
@@ -566,7 +607,7 @@ By default `Phobius`, `SignalP`, and `DeepTMHMM` member database analyses are de
 Files can be placed in any location.
 
 > [!NOTE]  
-> The instructions below presume `InterProScan6` is being run with the Docker. If an alterantive 
+> The instructions below presume `InterProScan6` is being run with the Docker. If an alternative 
 > container runtime is used the methods below will need to be adapated accordingly.
 > As above, if using Singularity and Apptainer, the images should be kept in the root of the 
 > `InterProScan6` directory. Otherwise please update the container paths in the respective `utilities/profiles/` config files.
@@ -584,7 +625,7 @@ Coming soon...
 tar -xzf phobius101_linux.tgz -C <PHOBIUS-DIR>
 ```
 
-3. Copy the docker file available in the `./docker_files/phobius/` directory to your local `Phobius` directory
+3. Copy the docker file at `./utilities/docker/phobius/Dockerfile` from the `InterProScan` repo to your local `Phobius` directory
 ```bash
 # with the terminal pointed at the root of this repo
 cp docker_files/phobius/Dockerfile <PHOBIUS-DIR>/Dockerfile
@@ -596,7 +637,7 @@ cp docker_files/phobius/Dockerfile <PHOBIUS-DIR>/Dockerfile
 docker image build -t phobius .
 ```
 
-5. Check the `subworkflows/sequence_analysis/members.config` file to make sure the `Phobius` version is correct.
+5. Check the `conf/applications.config` file to make sure the `Phobius` version is correct.
 ```groovy
     phobius {
             release = "1.01" <---- update if necessary
@@ -612,9 +653,20 @@ docker save phobius > phobius.tar
 singularity build phobius.sif docker-archive://phobius.tar
 ```
 
-## `SignalP`
+7. Running `InterProScan6` with `Phobius`
 
-### Set up
+Include `phobius` in the list of applications defined using the `--applications` flag.
+
+For example, when running `InterProScan` locally, using Docker and with the InterPro data dir located at `./data`:
+```bash
+nextflow run ebi-pf-team/interproscan6 \
+  -profile local,docker
+    --input utilities/test_files/best_to_test.fasta \
+    --datadir data \
+    --applications phobius
+```
+
+## `SignalP`
 
 1. Obtain a license and download `SignalP6` (`SignalP` version 6) from the [SignalP6 server](https://services.healthtech.dtu.dk/services/SignalP-6.0/) (under 'Downloads').
     * Either fast or slow models can be implemented
@@ -626,37 +678,26 @@ singularity build phobius.sif docker-archive://phobius.tar
 tar -xzf signalp-6.0h.fast.tar.gz -C <SIGNALP-DIR>
 ```
 
-3. Copy the docker file available in the `./docker_files/signalp/` directory to your local `SignalP6` directory
+3Build a docker image - _the Nextflow pipeline needs all third party tools to be stored within linux containers_. 
 
 ```bash
-# with the terminal point at the root of this repo
-cp docker_files/signalp/Dockerfile <SIGNALP-DIR>/Dockerfile
-```
-
-4. Build a docker image - _the Nextflow pipeline needs all third party tools to be stored within linux containers_. 
-
-```bash
-# with the terminal pointed at your local signalp dir
+# with the terminal pointed at your signalp dir
+# copy the dockerfile to here before building the image
 docker build -t signalp6 .
 ```
 
-5. Check the version number in `subworkflows/sequence_analysis/members.config` is correct:
+4. Check the version number in `conf/applications.config` is correct:
 
 ```groovy
 signalp {
-    release = "6.0h"  <--- make sure the release is correct
-    runner = "signalp"
-    ...
-}
-...
-signalp_euk {
-    release = "6.0h"  <--- make sure the release is correct
-    runner = "signalp_euk"
-    ...
+    name = "SignalP"
+    aliases = ["signalp_euk"]
+    release = "6.0h"    <----- update if necessary
+    threshold = 0.95
 }
 ```
 
-6. (Optional) Convert the Docker image to an image of your container runtime.
+5. (Optional) Convert the Docker image to an image of your container runtime.
 
 For example, to build a singularity image:
 ```bash
@@ -664,27 +705,25 @@ docker save signalp6 > signalp6.tar
 singularity build signalp6.sif docker-archive://signalp6.tar
 ```
 
-### Running `InterProScan6` with `SignalP6`
+6. Running `InterProScan6` with `SignalP6`
 
 Include `signalp` or `signalp_euk` in the list of applications defined using the `--applications` flag.
 
+For example, when running `InterProScan` locally, using Docker and with the InterPro data dir located at `./data`:
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
+  -profile local,docker
     --input utilities/test_files/best_to_test.fasta \
-    --applications signalp \
-    -profile local,docker
+    --datadir data \
+    --applications signalp
 ```
 
-```bash
-nextflow run ebi-pf-team/interproscan6 \
-    --input utilities/test_files/best_to_test.fasta \
-    --applications signalp_euk \
-    -profile local,docker
-```
+> [!NOTE]  
+> `InterProScan6` only supports implementing one `SignalP` mode at a time.
 
 > [!NOTE]
 > Quoting the SignalP documentation:  
-> Specifying the eukarya method of `SignalP6` (`SignalP_EUK`) triggers post-processing of the SP predictions by `SignalP6` to prevent spurious results (it will only predicts type Sec/SPI).
+> Specifying the eukarya method of `SignalP6` (`SignalP_EUK`) triggers post-processing of the SP predictions by `SignalP6` to prevent spurious results (it will only predict type Sec/SPI).
 
 ### Changing the mode of `Signalp6` in `InterProScan6`
 
@@ -693,21 +732,19 @@ nextflow run ebi-pf-team/interproscan6 \
 > [!WARNING]
 > The slow mode can take 6x longer to compute. Use when accurate region borders are needed.
 
-You may need to install the other models mannually, please see the [SignalP documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#installing-additional-modes).
+You may need to install the other models manually, please see the [SignalP documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#installing-additional-modes).
 
-For example, to run `InterProScan` with the input file `best_to_test.fasta`, using SignalP with only eukaryotic models in slow mode, and with retrieving precalculated matches disabled on a local machine using docker:
+For example, to run `InterProScan` with the input file `best_to_test.fasta`, using SignalP with only eukaryotic models in slow mode, and with retrieving precalculated matches disabled on a local machine using docker, and the InterPro data dir is located at `./data`:
 
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
+  -profile docker,local \
   --input utilities/test_files/best_to_test.fasta \
+  --datadir data \
   --applications signalp_euk \
   --disable_precalc \
-  --signalp_mode slow \
-  -profile docker,local
+  --signalp_mode slow
 ```
-
-> [!NOTE]  
-> `InterProScan6` only supports implementing one `SignalP` mode at a time.
 
 ### Converting from CPU to GPU, and back again
 
@@ -717,10 +754,11 @@ You will need to install `SignalP` in order to convert to GPU models.
 
 1. Convert the ``SignalP`` installation to GPU by following the [SignalP documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#converting-to-gpu)
 
-2. Build a docker image for `SignalP` with GPU
+2. Build a docker image for `SignalP` with GPU using the Dockerfile located at `./utilities/docker/signalp/Dockerfile` in the `InterProScan` repo
 
 ```bash
-# with the terminal pointed at your local signalp dir
+# with the terminal pointed at your signalp dir
+# copy the dockerfile to here before building the image
 docker image build -t signalp6_gpu .
 ```
 
@@ -744,9 +782,9 @@ nextflow run ebi-pf-team/interproscan6 \
   -profile singularity,slurm
 ```
 
-# Benchmarking and trouble shooting the performance
+# Benchmarking and troubleshooting the performance
 
-Nextflow provides some built in options for assessing the operation of `IPS6`, including generating a HTML report. However, these reports are limited to presenting the resource usage from only a single run, and can only be generated if a run is successful. Consequently, we have packaged a simple benchmarking script into IPS6 to enable assessing the task duration and resource usage across multiple runs, and customised grouping of the data. For example, you may wish to clearly see differences in performance with altering the batch size, the number of CPUs or amount of memory allocated. 
+Nextflow provides some built in options for assessing the operation of `IPS6`, including generating an HTML report. However, these reports are limited to presenting the resource usage from only a single run, and can only be generated if a run is successful. Consequently, we have packaged a simple benchmarking script into IPS6 to enable assessing the task duration and resource usage across multiple runs, and customised grouping of the data. For example, you may wish to clearly see differences in performance with altering the batch size, the number of CPUs or amount of memory allocated. 
 
 You can find the complete details for benchmarking and assessing the performance of `IPS6` in `./benchmarking/README.md`.
 
@@ -790,7 +828,7 @@ If you use `InterProScan` or `InterPro` in your work, please cite the following 
 
 You can find more information about the InterPro consortium (including the member databases) on the [InterPro website](https://www.ebi.ac.uk/interpro/about/consortium/).
 
-# Trouble shooting
+# Troubleshooting
 
 ## Permission denied
 
@@ -811,7 +849,7 @@ Try running Nextflow with root privileges:
 sudo nextflow run ebi-pf-team/interproscan6 --input <path to fasta file> 
 ```
 
-Also try providing root privileges to docker within Nextflow, by changing the the `runOptions` key in `nextflow.config`:
+Also try providing root privileges to docker within Nextflow, by changing the `runOptions` key in `./utilities/profiles/docker.config` (you will need to be working with a [local installation of `InterProScan`](#installing-from-source) for this fix):
 
 ```
  docker {
@@ -823,7 +861,7 @@ Also try providing root privileges to docker within Nextflow, by changing the th
 
 ## File not found
 
-If you recieve a file not found error:
+If you receive a file not found error:
 
 ```bash
 FileNotFoundError: [Errno 2] No such file or directory
@@ -837,9 +875,9 @@ Try running docker with root privileges:
 sudo docker build -t interproscan6 .
 ```
 
-Check the docker installtion is configured correctly, with all necessary privileges. [StackOverflow](https://stackoverflow.com/questions/48957195/how-to-fix-docker-got-permission-denied-issue)
+Check the docker installation is configured correctly, with all necessary privileges. [StackOverflow](https://stackoverflow.com/questions/48957195/how-to-fix-docker-got-permission-denied-issue)
 
-For example, check root privileges have been provided to the docker socket
+For example, check root privileges have been provided to the docker socket, although be careful of the security implications of this:
 
 ```bash
 sudo chmod 666 /var/run/docker.sock
@@ -847,7 +885,7 @@ sudo chmod 666 /var/run/docker.sock
 
 ## Segmentation fault
 
-If you a recieve an error such as the following:
+If you a receive an error such as the following:
 
 ```bash
 Command error:
@@ -861,7 +899,7 @@ directory location in the project dir.
 
 ## Segmentation fault
 
-If you a recieve an error such as the following:
+If you a receive an error such as the following:
 ```bash
 Command error:
   .command.sh: line 2:     7 Segmentation fault      (core dumped) /opt/hmmer3/bin/hmmsearch --cut_ga --cpu 1 -o 7.0._.antifam._.out AntiFam.hmm mini_test.1.fasta
@@ -883,12 +921,12 @@ Command error:
 
 This is most likely a file permission error.
 
-A potential fix is to provide root privilges to the docker contains run by Nextflow in `nextflow.config`:
+A potential fix is to provide root privileges to the docker contains run by Nextflow in `./utilities/profiles/docker.config` (you will need to be working with a [local installation of `InterProScan`](#installing-from-source) for this fix):
 
 ```groovy
-process.container = 'interproscan6'
 docker {
     enabled = true
-    runOptions = '--user root'
+    mountFlags = 'Z'
+    runOptions = '--user root'  <---- add this line
 }
 ```
