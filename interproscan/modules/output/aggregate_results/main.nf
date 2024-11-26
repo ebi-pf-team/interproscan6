@@ -1,10 +1,12 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
+
 process AGGREGATE_SEQS_MATCHES {
     // Aggregates sequence meta data with the corresponding match data
     input:
     tuple val(meta), val(seqsPath), val(matchesPath)
+    val(nucleic)
 
     output:
     path("seq_matches_aggreg.json")
@@ -20,13 +22,16 @@ process AGGREGATE_SEQS_MATCHES {
         matches: [],
         xref: []
     ] }
-    seqsInfo.each { seqId, info ->
+    seqsInfo.each { seqKey, info ->
+        /* seqKey = seq ID when input consists of protein seqs
+           seqKey = md5 of ORF protein seq when input consists of nucleic seqs */
+        seqId = nucleic ? info.id : seqKey
         FastaSequence sequence = FastaSequence.fromMap(info)
         String md5 = sequence.md5
         seq_matches_aggreg[md5].sequence = sequence.sequence
         seq_matches_aggreg[md5].md5 = md5
         seq_matches_aggreg[md5].xref << ["name": "${sequence.id} ${sequence.description}", "id": sequence.id]
-        if (matchesInfo[seqId]) {
+        if (matchesInfo[seqId]) { // the nucleic seq matches Map is keyed by the OrfId
             seq_matches_aggreg[md5].matches = matchesInfo[seqId]
         }
     }
