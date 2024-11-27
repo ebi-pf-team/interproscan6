@@ -25,7 +25,7 @@ process WRITE_XML_OUTPUT {
     List<String> hmmer3Members = ["antifam", "cathgene3d", "cathfunfam", "hamap", "ncbifam", "pfam", "pirsf", "pirsr", "sfld", "superfamily"]
     List<String> hmmer3LocationFields = ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
     Map<String, List<String>> memberLocationFields = [
-        "cdd": ["evalue", "score"],
+        "cdd": ["match-evalue", "match-score"],
         "coils": [],
         "hamap": ["score"],
         "mobidblite": ["sequence-feature"],
@@ -62,14 +62,16 @@ process WRITE_XML_OUTPUT {
                                 matchAttributes.evalue = matchObj.evalue
                                 matchAttributes.score = matchObj.score
                             } else if (memberDb == "panther") {
-                                matchAttributes.ac = matchObj.modelAccession
+                                matchAttributes.ac = matchObj.treegrafter.subfamilyAccession
                                 matchAttributes.evalue = matchObj.evalue
                                 matchAttributes."graft-point" = matchObj.treegrafter.graftPoint
                                 matchAttributes.name = matchObj.signature.name
                                 matchAttributes.score = matchObj.score
                             } else if (memberDb == "prints") {
                                 matchAttributes.evalue = matchObj.evalue
-                                matchAttributes.graftscan = matchObj.graftscan
+                                matchAttributes.graftscan = matchObj.graphScan
+                            } else if (memberDb == "superfamily") {
+                                matchAttributes.evalue = matchObj.evalue
                             }
                             "$matchNodeName-match"(matchAttributes) {
                                 def signatureAttributes = [ac: matchObj.signature.accession]
@@ -116,11 +118,13 @@ process WRITE_XML_OUTPUT {
                                     }
                                 }
 
+                                "model-ac"(memberDb == "panther" ? matchObj.treegrafter.subfamilyAccession : matchObj.modelAccession)
+
                                 if (matchObj.locations) {
                                     def fields = memberLocationFields.get(memberDb, hmmer3LocationFields)
                                     locations {
                                         matchObj.locations.each { loc ->
-                                            def locationAttributes = getLocationAttributes(loc, fields)
+                                            def locationAttributes = getLocationAttributes(loc, fields, matchObj)
                                             location(locationAttributes) {
                                                 if (loc.fragments) {
                                                     "$matchNodeName-fragment" {
@@ -132,7 +136,7 @@ process WRITE_XML_OUTPUT {
                                                     }
                                                 }
                                                 if (memberDb in ["hamap", "prositepatterns", "prositeprofiles"]) {
-                                                    alignment(loc.queryAlignment)
+                                                    alignment(loc.targetAlignment ?: "")
                                                 }
                                                 if (loc.sites) {
                                                     "sites" {
@@ -140,8 +144,10 @@ process WRITE_XML_OUTPUT {
                                                             "$matchNodeName-site"(description: siteObj.description, numLocations: siteObj.numLocations) {
                                                                 if(siteObj.group){ group(siteObj.group) }
                                                                 if(siteObj.label){ label(siteObj.label) }
-                                                                hmmStart(siteObj.hmmStart)
-                                                                hmmEnd(siteObj.hmmEnd)
+                                                                if (memberDb != "cdd") {
+                                                                    hmmStart(siteObj.hmmStart)
+                                                                    hmmEnd(siteObj.hmmEnd)
+                                                                }
                                                                 "site-locations" {
                                                                     siteObj.siteLocations.each { siteLoc ->
                                                                         "site-location"(
@@ -179,7 +185,7 @@ process WRITE_XML_OUTPUT {
     new File(outputFilePath).text = writer.toString()
 }
 
-def getLocationAttributes(location, memberFields) {
+def getLocationAttributes(Location location, List<String> memberFields, Match matchObj) {
     def locationAttributes = [
         start: location.start,
         end: location.end,
@@ -192,6 +198,12 @@ def getLocationAttributes(location, memberFields) {
                 break
             case "score":
                 locationAttributes.score = location.score
+                break
+            case "match-evalue":
+                locationAttributes.evalue = matchObj.evalue
+                break
+            case "match-score":
+                locationAttributes.score = matchObj.score
                 break
             case "motifNumber":
                 locationAttributes.motifNumber = location.motifNumber
