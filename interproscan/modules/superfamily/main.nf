@@ -60,7 +60,8 @@ process PARSE_SUPERFAMILY {
     new File(hmmdb).eachLine { line ->
         line = line.trim()
         if (line.startsWith('//')) {
-            if (modelAc) model2length[modelAc] = length
+            assert modelAc != null && length != null
+            model2length[modelAc] = length
             modelAc = length = null
         } else if (line.startsWith('N') && !modelAc) {
             def match = (line =~ ~/^NAME\s+(.+)$/)
