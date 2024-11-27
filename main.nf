@@ -1,13 +1,15 @@
 nextflow.enable.dsl=2
 
-include { AGGREGATE_SEQS_MATCHES        } from "./interproscan/modules/output/aggregate_results"
-include { AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/output/aggregate_results"
 include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
 include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
+
 include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
 include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { XREFS                         } from "./interproscan/modules/xrefs"
+include { AGGREGATE_SEQS_MATCHES;
+          AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_matches"
+include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
 include { WRITE_XML_OUTPUT              } from "./interproscan/modules/output/xml"
 
 workflow {
@@ -59,10 +61,8 @@ workflow {
     )
 
     // AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
-
     // This is to concat MLS with scan sequences result
     // all_results = parsed_matches.concat(parsed_analysis)
-
 
     /* XREFS:
     Add signature and entry desc and names
@@ -81,7 +81,7 @@ workflow {
         [batchnumber, sequences, matches]
     }.set { ch_seq_matches }
 
-    AGGREGATE_SEQS_MATCHES(ch_seq_matches)
+    AGGREGATE_SEQS_MATCHES(ch_seq_matches, params.nucleic)
     AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
 
     // REPRESENTATIVE_DOMAINS(XREFS.out.collect())
@@ -92,8 +92,11 @@ workflow {
     def formats = params.formats.toUpperCase().split(',') as Set
     def fileName = params.input.split('/').last()
     def outFileName = "${params.outdir}/${fileName}"
+    if (formats.contains("TSV")) {
+        WRITE_TSV_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}")
     if (formats.contains("XML")) {
         WRITE_XML_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}", workflow.manifest.version)
+
     }
 }
 
@@ -101,7 +104,6 @@ workflow.onComplete = {
     def input_file = file(params.input)
     def outputFileName = input_file.getName()
     def outputDir = params.outdir.endsWith('/') ? params.outdir[0..-2] : params.outdir
-
     println "InterProScan workflow completed successfully: $workflow.success."
     println "Any results are located at ${outputDir}/${outputFileName}.ips6.*"
     println "Duration: $workflow.duration"
