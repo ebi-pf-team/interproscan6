@@ -44,16 +44,16 @@ process REPRESENTATIVE_DOMAINS {
             List<Location> groups = new ArrayList<>()
             List<Location> group = new ArrayList<>()
             group.add(seqDomains[0])
-            int stop = seqDomains[0].fragments[-1].end
+            int stop = seqDomains[0].end
             if (seqDomains.size() > 1) {
                 for (Location loc : seqDomains[1..-1]) {
-                    if (loc.fragments[0].start <= stop) {
+                    if (loc.start <= stop) {
                         group.add(loc)
-                        stop = Math.max(stop, loc.fragments[-1].end)
+                        stop = Math.max(stop, loc.end)
                     } else {
                         groups.add(group)
                         group = [loc]
-                        stop = loc.fragments[-1].end
+                        stop = loc.end
                     }
                 }
             }
@@ -141,7 +141,9 @@ Set<Set<Integer>> getValidSets(Map<Integer, Set<Integer>> graph) {
     def setIsValid = { candidate ->
         candidate.every { a -> candidate.every { b -> a == b || graph[a].contains(b) } }
     }
-
+    /* Closures must reference variables that are already defined.
+    This is because closures capture vars and their scope during definition.
+    Defining buildValidSets first to prevent a MissingPropertyException error. */
     def buildValidSets
     buildValidSets = { currentSet, remainingNodes ->
         if (setIsValid(currentSet)) {
