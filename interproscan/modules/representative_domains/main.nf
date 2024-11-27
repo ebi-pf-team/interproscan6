@@ -70,6 +70,11 @@ process REPRESENTATIVE_DOMAINS {
                 // Process representative domains in the group
                 if (grp.size() > 1) {
                     Map<Integer, Set<Integer>> graph = (0..<grp.size()).collectEntries { i ->
+                        /*
+                        `(0..<x) - y` creates a range from 0 (inclusive) to x (exclusive)
+                        `- i` removes the value represented by `i` in the range
+                        so `(0..<5) - 2`, the result is `[0, 1, 3, 4]`
+                        */
                         [i, new HashSet<>((0..<grp.size()) - i)]
                     }
 
