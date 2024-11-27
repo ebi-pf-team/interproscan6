@@ -328,7 +328,7 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-    Location(int start, int end, int hmmLength, Double evalue, List<LocationFragment> fragments) { // Used for Superfamily
+    Location(int start, int end, Integer hmmLength, Double evalue, List<LocationFragment> fragments) { // Used for Superfamily
         this.start = start
         this.end = end
         this.hmmLength = hmmLength
