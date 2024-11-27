@@ -18,16 +18,19 @@ process REPRESENTATIVE_DOMAINS {
     JsonSlurper jsonSlurper = new JsonSlurper()
     def matchesMap = jsonSlurper.parse(matchesPath.toFile())
     matchesMap.each { seqData ->  // keys in seqData: sequence, md5, matches, xref, id
+        // Serialise the matches so we don't need to edit the map later
+        seqData["matches"] = seqData["matches"].collectEntries { modelAccession, matchMap ->
+            [(modelAccession): Match.fromMap(matchMap)]
+        }
         // Gather relevant locations
-        List<Match> seqDomains = []
-        seqData["matches"].each { modelAccession, matchMap ->
-            Match match = Match.fromMap(matchMap)
+        def seqDomains = []
+        seqData["matches"].each { String modelAccession, Match match ->
             if (match.representativeInfo.type) {
-                match.locations.each { loc ->
-                    loc.representativeRank = match.representativeInfo.rank
-                    loc.sortFragments()
-                    loc.getResidues()
-                    seqDomains.add(loc)
+                match.locations.each { Location loc ->
+                    CandidateDomain candidate = new CandidateDomain(loc, match.representativeInfo.rank)
+                    candidate.sortFragments()
+                    candidate.getResidues()
+                    seqDomains.add(candidate)
                 }
             }
         }
@@ -35,25 +38,25 @@ process REPRESENTATIVE_DOMAINS {
         // Identify/select representative domains
         if (!seqDomains.isEmpty()) {
             // Sort based on location position
-            seqDomains.sort { Location loc1, Location loc2 ->
-                int delta = loc1.start - loc2.start
-                delta != 0 ? delta : loc1.end - loc2.end
+            seqDomains.sort { CandidateDomain loc1, CandidateDomain loc2 ->
+                int delta = loc1.location.start - loc2.location.start
+                delta != 0 ? delta : loc1.location.end - loc2.location.end
             }
 
             // Group domains together
             List<Location> groups = new ArrayList<>()
             List<Location> group = new ArrayList<>()
             group.add(seqDomains[0])
-            int stop = seqDomains[0].end
+            int stop = seqDomains[0].location.end
             if (seqDomains.size() > 1) {
-                for (Location loc : seqDomains[1..-1]) {
-                    if (loc.start <= stop) {
-                        group.add(loc)
-                        stop = Math.max(stop, loc.end)
+                for (CandidateDomain candidate : seqDomains[1..-1]) {
+                    if (candidate.location.start <= stop) {
+                        group.add(candidate)
+                        stop = Math.max(stop, candidate.location.end)
                     } else {
                         groups.add(group)
-                        group = [loc]
-                        stop = loc.end
+                        group = [candidate]
+                        stop = candidate.location.end
                     }
                 }
             }
@@ -64,8 +67,8 @@ process REPRESENTATIVE_DOMAINS {
                 grp = grp.sort { a, b ->
                     // compare the number of residues covered by each match
                     int resComparison = b.residues.size() - a.residues.size()
-                    // if their coverage is the same, use the database rank  
-                    resComparison != 0 ? resComparison : a.rank - b.rank
+                    // if their coverage is the same, use the database rank
+                    resComparison != 0 ? resComparison : a.representativeRank - b.representativeRank
                 }.take(MAX_DOMS_PER_GROUP)
 
                 // Process representative domains in the group
@@ -78,7 +81,6 @@ process REPRESENTATIVE_DOMAINS {
                         */
                         [i, new HashSet<>((0..<grp.size()) - i)]
                     }
-
                     grp.eachWithIndex { loc1, i ->
                         (i + 1..<grp.size()).each { j ->
                             if (locationsOverlap(loc1.residues, grp[j].residues, DOM_OVERLAP_THRESHOLD)) {
@@ -110,17 +112,10 @@ process REPRESENTATIVE_DOMAINS {
                             bestSubgroup = currentGrp
                         }
                     }
-                    bestSubgroup.each { loc -> loc.representative = true }
+                    bestSubgroup.each { candidate -> candidate.location.representative = true }
                 } else {
-                    grp.each { loc -> loc.representative = true }
+                    grp.each { candidate -> candidate.location.representative = true }
                 }
-            }
-        }
-        // Ensure updates are reflected in seqData
-        seqData["matches"].each { modelAccession, matchMap ->
-            matchMap["locations"].each { loc ->
-                def updatedLoc = seqDomains.find { it.start == loc.start && it.end == loc.end }
-                if (updatedLoc) { loc.representative = updatedLoc.representative }
             }
         }
         allMatches.add(seqData)

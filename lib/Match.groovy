@@ -230,8 +230,6 @@ class Location implements Serializable {
     Integer motifNumber
     String level
     String cigarAlignment
-    Set<Integer> residues // used only in REPR_DOMAINS
-    Integer representativeRank // used only in REPR_DOMAINS
     List<LocationFragment> fragments = []
     List<Site> sites = []
     boolean representative = false
@@ -391,25 +389,6 @@ class Location implements Serializable {
         loc.level = data.level
         loc.cigarAlignment = data.cigarAlignment
         return loc
-    }
-
-    void sortFragments() {
-        if (this.fragments.size() > 1 ) {
-            this.fragments.sort { a, b ->
-                int comparison = a.start <=> b.start
-                comparison != 0 ? comparison : a.end <=> b.end
-            }
-        }
-    }
-
-    Set<Integer> getResidues() {
-        if (this.residues == null) {
-            this.residues = new HashSet<>()
-            this.fragments.each { frag ->
-                this.residues.addAll((frag.start..frag.end).toSet())
-            }
-        }
-        return this.residues
     }
 
     @Override
