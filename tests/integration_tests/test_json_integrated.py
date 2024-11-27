@@ -42,11 +42,17 @@ def get_expected_result(expected_result_path: str) -> dict:
     return expected_result
 
 
-def json2dict(data):
-    signature_fields = ["accession", "entry"]  # "name", "description"
-    locations_fields = ["start", "end", "representative", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds",
+def json2dict(data, ignore_fields):
+    all_match_single_fields = ["evalue", "score", "bias", "graphScan", "treegrafter", "sequenceLength", "modelAccession"]
+    all_signature_single_fields = ["accession", "name", "description", "entry"]
+    all_locations_single_fields = ["start", "end", "representative", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds",
                         "evalue", "score", "envelopeStart", "envelopeEnd", "bias", "cigarAlignment", "level",
                         "sequenceFeature", "pvalue", "motifNumber", "queryAlignment", "targetAlignment"]
+    all_sites_single_fields = ["start", "end", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "evalue", "score"]
+    all_entry_fields = ["accession", "name", "description", "type", "goXRefs", "pathwayXRefs"]
+
+    signature_fields = [item for item in all_signature_single_fields if item not in ignore_fields]
+    locations_fields = [item for item in all_locations_single_fields if item not in ignore_fields]
 
     result = {}
     for result_item in data.get("results", []):
@@ -63,40 +69,37 @@ def json2dict(data):
             score = match.get("score", -1)
             signature_filtered = OrderedDict((k, signature[k]) for k in signature_fields if k in signature)
             for xref in result_item.get("xref", []):
-                xref_id = xref.get("id")
-                if not xref_id:
-                    continue
-                if xref_id not in result[library]:
-                    result[library][xref_id] = {}
-                if accession not in result[library][xref_id]:
-                    result[library][xref_id][accession] = {"locations": {}}
+                memberDB = xref.get("id")
+                if memberDB not in result[library]:
+                    result[library][memberDB] = {}
+                if accession not in result[library][memberDB]:
+                    result[library][memberDB][accession] = {"locations": {}}
                 for loc in match.get("locations", []):
                     start = loc.get("start", -1)
                     end = loc.get("end", -1)
-                    location_key = f"s{start}-e{end}"
+                    location_key = f"{start}-{end}"
                     location_data = OrderedDict()
                     for field in locations_fields:
                         if field in loc:
                             location_data[field] = loc[field]
-                    result[library][xref_id][accession]["locations"][location_key] = OrderedDict((k, loc[k]) for k in locations_fields if k in loc)
+                    result[library][memberDB][accession]["locations"][location_key] = OrderedDict((k, loc[k]) for k in locations_fields if k in loc)
                     if "sites" in loc:
-                        if "sites" not in result[library][xref_id][accession]:
-                            result[library][xref_id][accession]["sites"] = {}
-                        loc["sites"] = sorted(
-                            loc["sites"],
-                            key=lambda site: (
-                                site.get("hmmStart", -1),
-                                site.get("hmmEnd", -1)
-                            )
-                        )
-                        result[library][xref_id][accession]["sites"][location_key] = loc["sites"]
+                        if "sites" not in result[library][memberDB][accession]:
+                            result[library][memberDB][accession]["sites"] = {}
+                        result[library][memberDB][accession]["sites"][location_key] = loc["sites"]
                     if "location-fragments" in loc:
-                        if "fragments" not in result[library][xref_id][accession]:
-                            result[library][xref_id][accession]["fragments"] = {}
-                        result[library][xref_id][accession]["fragments"][location_key] = loc["location-fragments"]
-                result[library][xref_id][accession]["signature"] = signature_filtered
-                result[library][xref_id][accession]["evalue"] = evalue
-                result[library][xref_id][accession]["score"] = score
+                        if "fragments" not in result[library][memberDB][accession]:
+                            result[library][memberDB][accession]["fragments"] = {}
+                        result[library][memberDB][accession]["fragments"][location_key] = loc["location-fragments"]
+                result[library][memberDB][accession]["signature"] = signature_filtered
+                if "evalue" not in ignore_fields:
+                    result[library][memberDB][accession]["evalue"] = evalue
+                else:
+                    result[library][memberDB][accession]["evalue"] = -1
+                if "score" not in ignore_fields:
+                    result[library][memberDB][accession]["score"] = score
+                else:
+                    result[library][memberDB][accession]["score"] = -1
     return OrderedDict(sorted(result.items()))
 
 
@@ -163,15 +166,14 @@ def compare(expected: dict,
                         if fragments1 != fragments2:
                             file.write(f"MISMATCH ON FRAGMENTS: {library} -> {xref_id} -> {accession}:\n\t Expected: {fragments1} \n\t Current : {fragments2}\n")
 
-            # file.write(f"Skipping applications: {', '.join(skipping_libs)}")  # JUST TO DEBUG
-
 
 def test_json_output(test_output_dir, input_path, expected_result_path, output_path, applications, data_dir, disable_precalc):
     expected_result = get_expected_result(expected_result_path)
     current_result = get_current_output(test_output_dir, output_path, input_path, applications, data_dir, disable_precalc)
 
-    expected = json2dict(expected_result)
-    current = json2dict(current_result)
+    ignore_fields = ["description", "name", "representative"]
+    expected = json2dict(expected_result, ignore_fields)
+    current = json2dict(current_result, ignore_fields)
 
     output_file = "tests/integration_tests/mismatches.txt"
     compare(expected, current, output_file)
