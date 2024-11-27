@@ -215,7 +215,7 @@ def getLocationAttributes(location, memberFields) {
                 locationAttributes["hmm-length"] = location.hmmLength
                 break
             case "hmmBounds":
-                locationAttributes["hmm-bounds"] = location.hmmBounds
+                locationAttributes["hmm-bounds"] = location.getHmmBounds(location.hmmBounds)
                 break
             case "envelopeStart":
                 locationAttributes["env-start"] = location.envelopeStart
