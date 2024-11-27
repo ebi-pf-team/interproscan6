@@ -19,7 +19,7 @@ process REPRESENTATIVE_DOMAINS {
     def matchesMap = jsonSlurper.parse(matchesPath.toFile())
     matchesMap.each { seqData ->  // keys in seqData: sequence, md5, matches, xref, id
         // Gather relevant locations
-        List seqDomains = []
+        List<Match> seqDomains = []
         seqData["matches"].each { modelAccession, matchMap ->
             Match match = Match.fromMap(matchMap)
             if (match.representativeInfo.type) {
@@ -41,8 +41,9 @@ process REPRESENTATIVE_DOMAINS {
             }
 
             // Group domains together
-            List groups = []
-            List group = [seqDomains[0]]
+            List<Location> groups = new ArrayList<>()
+            List<Location> group = new ArrayList<>()
+            group.add(seqDomains[0])
             int stop = seqDomains[0].fragments[-1].end
             if (seqDomains.size() > 1) {
                 for (Location loc : seqDomains[1..-1]) {
