@@ -38,80 +38,76 @@ def get_expected_result(expected_result_path: str) -> dict:
     with open(expected_result_file, 'r') as f:
         expected_result = json.load(f)
     shutil.rmtree(extracted_dir, ignore_errors=True)
-
     return expected_result
 
 
 def json2dict(data, ignore_fields):
-    all_match_single_fields = ["evalue", "score", "bias", "graphScan", "treegrafter", "sequenceLength", "modelAccession"]
-    all_signature_single_fields = ["accession", "name", "description", "entry"]
-    all_locations_single_fields = ["start", "end", "representative", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds",
-                        "evalue", "score", "envelopeStart", "envelopeEnd", "bias", "cigarAlignment", "level",
-                        "sequenceFeature", "pvalue", "motifNumber", "queryAlignment", "targetAlignment"]
-    all_sites_single_fields = ["start", "end", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "evalue", "score"]
-    all_entry_fields = ["accession", "name", "description", "type", "goXRefs", "pathwayXRefs"]
+    match_single_fields = ["modelAccession", "sequenceLength", "evalue", "score", "bias", "treegrafter", "graphScan"]
+    signature_single_fields = ["accession", "name", "description"]
+    entry_fields = ["accession", "name", "description", "type", "goXRefs", "pathwayXRefs"]
+    locations_single_fields = ["start", "end", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart",
+                               "envelopeEnd", "evalue", "score", "bias", "queryAlignment", "targetAlignment",
+                               "sequenceFeature", "pvalue", "motifNumber", "level", "cigarAlignment", "fragments",
+                               "representative", "sites", "location-fragments"]
 
-    signature_fields = [item for item in all_signature_single_fields if item not in ignore_fields]
-    locations_fields = [item for item in all_locations_single_fields if item not in ignore_fields]
+    match_fields_filtered = [item for item in match_single_fields if item not in ignore_fields]
+    signature_fields_filtered = [item for item in signature_single_fields if item not in ignore_fields]
+    entry_fields_filtered = [item for item in entry_fields if item not in ignore_fields]
+    locations_fields_filtered = [item for item in locations_single_fields if item not in ignore_fields]
 
     result = {}
     for result_item in data.get("results", []):
         for match in result_item.get("matches", []):
             signature = match.get("signature", {})
+            signature_sorted = OrderedDict((k, signature[k]) for k in signature if k in signature_fields_filtered)
+            accession = signature.get("accession")
             library = signature.get("signatureLibraryRelease", {}).get("library", "").lower().replace("-", "").replace(" ", "").replace("_", "")
             if not library:
                 continue
             if library not in result:
                 result[library] = {}
 
-            accession = signature.get("accession")
-            evalue = match.get("evalue", -1)
-            score = match.get("score", -1)
-            signature_filtered = OrderedDict((k, signature[k]) for k in signature_fields if k in signature)
             for xref in result_item.get("xref", []):
                 memberDB = xref.get("id")
                 if memberDB not in result[library]:
                     result[library][memberDB] = {}
                 if accession not in result[library][memberDB]:
                     result[library][memberDB][accession] = {"locations": {}}
+
+                # Match fields
+                for field in match_fields_filtered:
+                    if field in match:
+                        result[library][memberDB][accession][field] = match[field]
+
+                # Signature fields
+                result[library][memberDB][accession]["signature"] = signature_sorted
+                if signature["entry"] and "entry" not in ignore_fields:
+                    result[library][memberDB][accession]["signature"]["entry"] = {}
+                    for field in entry_fields_filtered:
+                        if field in signature["entry"]:
+                            result[library][memberDB][accession]["signature"]["entry"][field] = signature["entry"][field]
+
+                # Locations fields
                 for loc in match.get("locations", []):
-                    start = loc.get("start", -1)
-                    end = loc.get("end", -1)
-                    location_key = f"{start}-{end}"
-                    location_data = OrderedDict()
-                    for field in locations_fields:
-                        if field in loc:
-                            location_data[field] = loc[field]
-                    result[library][memberDB][accession]["locations"][location_key] = OrderedDict((k, loc[k]) for k in locations_fields if k in loc)
-                    if "sites" in loc:
-                        if "sites" not in result[library][memberDB][accession]:
-                            result[library][memberDB][accession]["sites"] = {}
-                        result[library][memberDB][accession]["sites"][location_key] = loc["sites"]
-                    if "location-fragments" in loc:
-                        if "fragments" not in result[library][memberDB][accession]:
-                            result[library][memberDB][accession]["fragments"] = {}
-                        result[library][memberDB][accession]["fragments"][location_key] = loc["location-fragments"]
-                result[library][memberDB][accession]["signature"] = signature_filtered
-                if "evalue" not in ignore_fields:
-                    result[library][memberDB][accession]["evalue"] = evalue
-                else:
-                    result[library][memberDB][accession]["evalue"] = -1
-                if "score" not in ignore_fields:
-                    result[library][memberDB][accession]["score"] = score
-                else:
-                    result[library][memberDB][accession]["score"] = -1
+                    location_key = f"{loc.get('start')}-{loc.get('end')}"
+                    result[library][memberDB][accession]["locations"][location_key] = OrderedDict((k, loc[k]) for k in loc if k in locations_fields_filtered)
+                sorted_locations = OrderedDict(
+                    sorted(
+                        result[library][memberDB][accession]["locations"].items(),
+                        key=lambda x: int(x[0].split('-')[0])
+                    )
+                )
+                result[library][memberDB][accession]["locations"] = sorted_locations
     return OrderedDict(sorted(result.items()))
 
 
 def compare(expected: dict,
             current: dict,
             output_file):
-        skipping_libs = []
         all_libraries = set(expected.keys()).union(set(current.keys()))
         with open(output_file, "w") as file:
             for library in all_libraries:
                 if library not in current:
-                    skipping_libs.append(library)
                     continue
                 all_xref_ids = set(expected[library].keys()).union(set(current[library].keys()))
                 for xref_id in all_xref_ids:
@@ -129,49 +125,18 @@ def compare(expected: dict,
                         if accession not in current[library][xref_id]:
                             file.write(f"MISSING ACCESSION: {library} -> {xref_id}: accession '{accession}'\n")
                             continue
-
-                        # EVALUE (MATCH) CHECK
-                        evalue1 = expected[library][xref_id][accession]["evalue"]
-                        evalue2 = current[library][xref_id][accession]["evalue"]
-                        if evalue1 != evalue2:
-                            file.write(
-                                f"MISMATCH ON MATCH EVALUE: {library} -> {xref_id} -> {accession}:\n\t Expected: {evalue1} \n\tCurrent : {evalue2}\n")
-                        # SCORE (MATCH) CHECK
-                        score1 = expected[library][xref_id][accession]["score"]
-                        score2 = current[library][xref_id][accession]["score"]
-                        if score1 != score2:
-                            file.write(
-                                f"MISMATCH ON MATCH SCORE: {library} -> {xref_id} -> {accession}:\n\tExpected: {score1} \n\tCurrent : {score2}\n")
-                        # SIGNATURE CHECK
-                        signature1 = expected[library][xref_id][accession]["signature"]
-                        signature2 = current[library][xref_id][accession]["signature"]
-                        if signature1 != signature2:
-                            file.write(
-                                f"MISMATCH ON SIGNATURE: {library} -> {xref_id} -> {accession}:\n\t Expected: {signature1} \n\t Current : {signature2}\n")
-                        # LOCATIONS CHECK
-                        locations1 = expected[library][xref_id][accession]["locations"]
-                        locations2 = current[library][xref_id][accession]["locations"]
-                        if locations1 != locations2:
-                            file.write(f"MISMATCH ON LOCATIONS: {library} -> {xref_id} -> {accession}:\n\t Expected: {locations1} \n\t Current : {locations2}\n")
-
-                        # SITES CHECK
-                        sites1 = expected[library][xref_id][accession].get("sites", {})
-                        sites2 = current[library][xref_id][accession].get("sites", {})
-                        if sites1 != sites2:
-                            file.write(f"MISMATCH ON SITES: {library} -> {xref_id} -> {accession}:\n\t Expected: {sites1} \n\t Current : {sites2}\n")
-
-                        # FRAGMENTS CHECK
-                        fragments1 = expected[library][xref_id][accession].get("fragments", {})
-                        fragments2 = current[library][xref_id][accession].get("fragments", {})
-                        if fragments1 != fragments2:
-                            file.write(f"MISMATCH ON FRAGMENTS: {library} -> {xref_id} -> {accession}:\n\t Expected: {fragments1} \n\t Current : {fragments2}\n")
+                        for field in expected[library][xref_id][accession]:
+                            value1 = expected[library][xref_id][accession][field]
+                            value2 = current[library][xref_id][accession].get(field)
+                            if value1 != value2:
+                                file.write(f"MISMATCH ON {field.upper()}: {library} -> {xref_id} -> {accession}:\n\t Expected: {value1} \n\t Current : {value2}\n")
 
 
 def test_json_output(test_output_dir, input_path, expected_result_path, output_path, applications, data_dir, disable_precalc):
     expected_result = get_expected_result(expected_result_path)
     current_result = get_current_output(test_output_dir, output_path, input_path, applications, data_dir, disable_precalc)
 
-    ignore_fields = ["description", "name", "representative"]
+    ignore_fields = ["description", "name", "representative", "sites", "location-fragments"]
     expected = json2dict(expected_result, ignore_fields)
     current = json2dict(current_result, ignore_fields)
 

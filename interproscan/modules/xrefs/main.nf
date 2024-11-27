@@ -106,7 +106,7 @@ process XREFS {
                             interproKey,
                             entryInfo["name"],
                             entryInfo["description"],
-                            entryInfo["type"]
+                            entryInfo["type"].toUpperCase()
                         )
                         matchObject.signature.entry = entryDataObj
                     }
