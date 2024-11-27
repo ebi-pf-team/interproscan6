@@ -63,8 +63,10 @@ process REPRESENTATIVE_DOMAINS {
             // Select representative domain in each group
             groups.each { grp ->
                 grp = grp.sort { a, b ->
-                    int resComparison = b.residues.size() <=> a.residues.size()  // number of fragments in desending order
-                    resComparison != 0 ? resComparison : a.rank <=> b.rank       // rank in ascending order
+                    // compare the number of residues covered by each match
+                    int resComparison = b.residues.size() - a.residues.size()
+                    // if their coverage is the same, use the database rank  
+                    resComparison != 0 ? resComparison : a.rank - b.rank
                 }.take(MAX_DOMS_PER_GROUP)
 
                 // Process representative domains in the group
