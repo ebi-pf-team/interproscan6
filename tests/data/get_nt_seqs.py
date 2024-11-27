@@ -82,11 +82,8 @@ def download_dna_fasta(uniparc_to_gene_ids: dict[str, set[str]]) -> list[Path]:
     for prot_id in tqdm(uniparc_to_gene_ids, desc="Download nt seq fasta for protein ids"):
         for dna_id in uniparc_to_gene_ids[prot_id]:
             url = EMBL_BASE_URL.replace("<DNAID>", dna_id)
-
             dl_path = DL_DIR / f"{prot_id}_{dna_id}.fna"
-
             response = requests.get(url)
-
             if response.status_code == 200:
                 all_dl_paths.append(dl_path)
                 with open(dl_path, 'wb') as file:
