@@ -13,7 +13,7 @@ process REPRESENTATIVE_DOMAINS {
     exec:
     int MAX_DOMS_PER_GROUP = 20 // only consider N "best" domains otherwise there are too many comparisons (2^domains)
     float DOM_OVERLAP_THRESHOLD = 0.3
-    List<String> REPR_DOM_DBS = ["cdd", "ncbifam", "pfam", "prositeprofiles", "smart"]
+
     def allMatches = []
     JsonSlurper jsonSlurper = new JsonSlurper()
     def matchesMap = jsonSlurper.parse(matchesPath.toFile())
@@ -21,15 +21,13 @@ process REPRESENTATIVE_DOMAINS {
         // Gather relevant locations
         List seqDomains = []
         seqData["matches"].each { modelAccession, matchMap ->
-            if (matchMap["signature"]["signatureLibraryRelease"]["library"] in REPR_DOM_DBS) {
-                Match match = Match.fromMap(matchMap)
-                if (match.representativeInfo.type) {
-                    match.locations.each { loc ->
-                        loc.representativeRank = match.representativeInfo.rank
-                        loc.sortFragments()
-                        loc.getResidues()
-                        seqDomains.add(loc)
-                    }
+            Match match = Match.fromMap(matchMap)
+            if (match.representativeInfo.type) {
+                match.locations.each { loc ->
+                    loc.representativeRank = match.representativeInfo.rank
+                    loc.sortFragments()
+                    loc.getResidues()
+                    seqDomains.add(loc)
                 }
             }
         }
