@@ -48,9 +48,8 @@ process XREFS {
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, matches ->
             [(seqId): matches.collectEntries { rawModelAccession, match ->
                 Match matchObject = Match.fromMap(match)
-                modelAccession = matchObject.signature?.accession ?: matchObject.modelAccession.split("\\.")[0]
+                def modelAccession = matchObject.signature?.accession ?: matchObject.modelAccession.split("\\.")[0]
                 Map signatureInfo = entries['entries'][modelAccession] ?: entries['entries'][rawModelAccession]
-
                 try {
                     String memberDB = matchObject.signature.signatureLibraryRelease.library
                 } catch (java.lang.NullPointerException e) {
@@ -68,7 +67,8 @@ process XREFS {
                     SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
                     if (!matchObject.signature) {
                         matchObject.signature = new Signature(modelAccession, sigLibRelease)
-                    } else {
+                        if (memberDB == "mobidb_lite") { matchObject.signature.description = "consensus disorder prediction" }
+                    } else if (!matchObject.signature.signatureLibraryRelease) {
                         matchObject.signature.signatureLibraryRelease = sigLibRelease
                     }
                 }
