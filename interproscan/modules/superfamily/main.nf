@@ -71,8 +71,6 @@ process PARSE_SUPERFAMILY {
             if (match) length = match[0][1].toInteger()
         }
     }
-    assert modelAc != null && length != null
-    model2length[modelAc] = length
 
     def matches = [:].withDefault { [:] }
     file(superfamily_out.toString()).eachLine { line ->
