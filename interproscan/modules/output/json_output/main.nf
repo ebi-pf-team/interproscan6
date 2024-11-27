@@ -126,6 +126,9 @@ process JSON_OUTPUT {
                             case "sequence-feature":
                                 locationResult["sequence-feature"] = location.sequenceFeature
                                 break
+                            default:
+                                println "Warning: Unknown fields '${field}'"
+                                break
                         }
                     }
 
