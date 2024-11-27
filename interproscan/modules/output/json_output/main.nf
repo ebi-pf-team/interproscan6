@@ -31,7 +31,7 @@ process JSON_OUTPUT {
         "signalp": ["pvalue", "cleavageStart", "cleavageEnd"],
         "signalp_euk": ["pvalue", "cleavageStart", "cleavageEnd"],
         "smart": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
-        "superfamily": ["hmmLength"]
+        "superfamily": ["hmmLength", "evalue"]
     ]
     List<String> otherMembersLocationFields = ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
 
@@ -145,9 +145,6 @@ process JSON_OUTPUT {
                 if (memberDB in ["antifam", "cathfunfam", "cathgene3d", "ncbifam", "panther", "pfam", "pirsf", "pirsr", "sfld", "smart", "tmhmm"]) {
                     matchResult["evalue"] = matchObj.evalue
                     matchResult["score"] = matchObj.score
-                }
-                if (memberDB == "superfamily") {
-                    matchResult["evalue"] = matchObj.locations[0].evalue
                 }
                 matchResult["model-ac"] = matchObj.modelAccession
 
