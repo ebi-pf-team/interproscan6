@@ -105,7 +105,7 @@ process PARSE_SUPERFAMILY {
 
                 int start = regions[0][0]
                 int end = regions.collect { it[1] }.max()
-                int hmmLength = model2length[modelId]
+                Integer hmmLength = model2length[modelId]
                 List<LocationFragment> fragments = []
                 if (regions.size() > 1) {
                     regions.eachWithIndex { obj, idx ->
