@@ -374,7 +374,7 @@ class Location implements Serializable {
         loc.cigarAlignment = data.cigarAlignment
         return loc
     }
-      
+
     @Override
     public int hashCode() {
         return Objects.hash(start, end, hmmStart, hmmEnd, hmmLength, hmmBounds, 
