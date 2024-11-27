@@ -55,7 +55,8 @@ process PARSE_SUPERFAMILY {
     }
 
     def model2length = [:]
-    def modelAc = length = null
+    String modelAc = null
+    Integer length = null
     new File(hmmdb).eachLine { line ->
         line = line.trim()
         if (line.startsWith('//')) {
