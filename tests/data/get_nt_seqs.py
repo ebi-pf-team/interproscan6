@@ -9,8 +9,6 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from tests.unit_tests.test_inputs.xrefs.build_entries_json import entries
-
 
 FASTA = "test_prot.fa"
 NT_FASTA = "test_nt.fna"
@@ -23,7 +21,7 @@ DOWNLOAD_ERR_FILE = "failed_fasta_downloads"
 
 def main():
     try:
-        DL_DIR.mkdir(parnets=True, exists_ok=True)
+        DL_DIR.mkdir(parents=True, exist_ok=True)
     except PermissionError:
         print(f"Do not have permission to make the temp download dir at {DL_DIR}")
         sys.exit(1)
