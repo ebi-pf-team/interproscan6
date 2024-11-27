@@ -36,7 +36,8 @@ process WRITE_XML_OUTPUT {
         "prositeprofiles": ["score"],
         "signalp": ["score"],
         "signalp-euk": ["score"],
-        "smart": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"]
+        "smart": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
+        "superfamily": ["evalue", "hmmLength"]
     ]
 
     xml."protein-matches"("interproscan-version": ips6Version){
@@ -58,7 +59,7 @@ process WRITE_XML_OUTPUT {
                             }
 
                             def matchAttributes = [:]
-                            if (hmmer3Members.contains(memberDb) || memberDb == "smart") {
+                            if (hmmer3Members.findAll { it != "superfamily"}.contains(memberDb) || memberDb == "smart") {
                                 matchAttributes.evalue = matchObj.evalue
                                 matchAttributes.score = matchObj.score
                             } else if (memberDb == "panther") {
@@ -70,8 +71,6 @@ process WRITE_XML_OUTPUT {
                             } else if (memberDb == "prints") {
                                 matchAttributes.evalue = matchObj.evalue
                                 matchAttributes.graftscan = matchObj.graphScan
-                            } else if (memberDb == "superfamily") {
-                                matchAttributes.evalue = matchObj.evalue
                             }
                             "$matchNodeName-match"(matchAttributes) {
                                 def signatureAttributes = [ac: matchObj.signature.accession]
