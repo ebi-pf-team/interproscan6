@@ -77,7 +77,7 @@ process WRITE_XML_OUTPUT {
                                     signatureAttributes.name = matchObj.signature.name
                                 }
                                 if (matchObj.signature.description) {
-                                    signatureAttributes.description = matchObj.signature.description
+                                    signatureAttributes.desc = matchObj.signature.description
                                 }
                                 signature(signatureAttributes) {
                                     signatureLibraryRelease {
@@ -206,22 +206,22 @@ def getLocationAttributes(location, memberFields) {
                 locationAttributes["sequence-feature"] = location.sequenceFeature
                 break
             case "hmmStart":
-                locationAttributes.hmmStart = location.hmmStart
+                locationAttributes["hmm-start"] = location.hmmStart
                 break
             case "hmmEnd":
-                locationAttributes.hmmEnd = location.hmmEnd
+                locationAttributes["hmm-end"] = location.hmmEnd
                 break
             case "hmmLength":
-                locationAttributes.hmmLength = location.hmmLength
+                locationAttributes["hmm-length"] = location.hmmLength
                 break
             case "hmmBounds":
-                locationAttributes.hmmBounds = location.hmmBounds
+                locationAttributes["hmm-bounds"] = location.hmmBounds
                 break
             case "envelopeStart":
-                locationAttributes.envelopeStart = location.envelopeStart
+                locationAttributes["env-start"] = location.envelopeStart
                 break
             case "envelopeEnd":
-                locationAttributes.envelopeEnd = location.envelopeEnd
+                locationAttributes["env-end"] = location.envelopeEnd
                 break
             default:
                 println "Warning: Unknown fields '${field}'"
