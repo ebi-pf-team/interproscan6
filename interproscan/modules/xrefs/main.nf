@@ -57,6 +57,7 @@ process XREFS {
                         memberDB = signatureInfo["database"]
                         memberRelease = entries["databases"][memberDB]
                     }
+                    // PIRSR is the only memberDB that doesn't have entries associated on entries.json data file
                     else if (modelAccession.startsWith("PIRSR")) {
                         memberDB = "PIRSR"
                         memberRelease = entries["databases"][memberDB]
@@ -73,7 +74,7 @@ process XREFS {
                     }
                 }
 
-                if (memberDB == "panther" && matchObject.treegrafter.ancestralNodeID != null) {
+                if (memberDB == "PANTHER" && matchObject.treegrafter.ancestralNodeID != null) {
                     String paintAnnPath = "${dataDir}/${params.appsConfig.panther.paint}/${matchObject.signature.accession}.json"
                     File paintAnnotationFile = new File(paintAnnPath)
                     // not every signature will have a paint annotation file match
@@ -143,7 +144,7 @@ process XREFS {
                     }
                 }
 
-                if (memberDB.toLowerCase() == "panther") {
+                if (memberDB == "PANTHER") {
                     accSubfamily = matchObject.signature.accession
                     if (entries['entries'][accSubfamily]) {
                         matchObject.treegrafter.subfamilyName = entries['entries'][accSubfamily]["name"]
