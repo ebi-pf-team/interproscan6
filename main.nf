@@ -96,7 +96,6 @@ workflow {
         WRITE_TSV_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}")
     if (formats.contains("XML")) {
         WRITE_XML_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}", workflow.manifest.version)
-
     }
 }
 
@@ -108,4 +107,3 @@ workflow.onComplete = {
     println "Any results are located at ${outputDir}/${outputFileName}.ips6.*"
     println "Duration: $workflow.duration"
 }
-
