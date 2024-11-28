@@ -378,6 +378,16 @@ class Location implements Serializable {
         return loc
     }
 
+    String getHmmBounds(String hmmBounds) {
+        def boundsMapping = [
+                "[]"  : "COMPLETE",
+                "[."  : "N_TERMINAL_COMPLETE",
+                ".]"  : "C_TERMINAL_COMPLETE",
+                ".."  : "INCOMPLETE"
+        ]
+        return boundsMapping[hmmBounds]
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(start, end, hmmStart, hmmEnd, hmmLength, hmmBounds,
