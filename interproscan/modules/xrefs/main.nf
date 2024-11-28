@@ -64,11 +64,12 @@ process XREFS {
 
                 if (!matchObject.signature) {
                     matchObject.signature = new Signature(modelAccession, sigLibRelease)
-                } else {
+                    if (memberDB == "mobidb_lite") { matchObject.signature.description = "consensus disorder prediction" }
+                } else if (!matchObject.signature.signatureLibraryRelease) {
                     matchObject.signature.signatureLibraryRelease = sigLibRelease
                 }
 
-                if (memberDB == "panther") {
+                if (memberDB == "panther" && matchObject.treegrafter.ancestralNodeID != null) {
                     String paintAnnPath = "${dataDir}/${params.appsConfig.panther.paint}/${matchObject.signature.accession}.json"
                     File paintAnnotationFile = new File(paintAnnPath)
                     // not every signature will have a paint annotation file match
@@ -149,7 +150,17 @@ process XREFS {
                 return [(rawModelAccession): matchObject]
             }]
         }
-        aggregatedMatches.putAll(matches.collect())
+        matches.each { seqId, seqMatches ->
+            if (aggregatedMatches.containsKey(seqId)) {
+                seqMatches.each { rawModelAccession, matchObject ->
+                    if (!aggregatedMatches[seqId].containsKey(rawModelAccession)) {
+                        aggregatedMatches[seqId][rawModelAccession] = matchObject
+                    }
+                }
+            } else {
+                aggregatedMatches[seqId] = seqMatches
+            }
+        }
     }
     def outputFilePath = task.workDir.resolve("matches2xrefs.json")
     def json = JsonOutput.toJson(aggregatedMatches)

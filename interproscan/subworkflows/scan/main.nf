@@ -16,7 +16,8 @@ include { RUN_SFLD; POST_PROCESS_SFLD; PARSE_SFLD                               
 include { RUN_PFSCAN ; PARSE_PFSCAN                                               } from  "../../modules/prosite/patterns"
 include { RUN_PFSEARCH ; PARSE_PFSEARCH                                           } from  "../../modules/prosite/profiles"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
-include { RUN_SIGNALP; PARSE_SIGNALP                                              } from  "../../modules/signalp"
+include { RUN_SIGNALP as RUN_SIGNALP_EUK; PARSE_SIGNALP as PARSE_SIGNALP_EUK      } from  "../../modules/signalp"
+include { RUN_SIGNALP as RUN_SIGNALP_PROK; PARSE_SIGNALP as PARSE_SIGNALP_PROK    } from  "../../modules/signalp"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
 
 workflow SCAN_SEQUENCES {
@@ -25,7 +26,6 @@ workflow SCAN_SEQUENCES {
     applications        // list of applications to run
     appsConfig          // map of applications
     datadir             // path to data directory
-    signalpMode         // SignalP running mode, 'fast', 'slow', 'slow-sequential'
 
     main:
     results = Channel.empty()
@@ -281,6 +281,28 @@ workflow SCAN_SEQUENCES {
         results = results.mix(PARSE_SFLD.out)
     }
 
+    if (applications.contains("signalp_euk")) {
+        RUN_SIGNALP_EUK(
+            ch_fasta, 
+            appsConfig.signalp_euk.organism, 
+            appsConfig.signalp_euk.mode,
+            appsConfig.signalp_euk.dir
+        )
+        PARSE_SIGNALP_EUK(RUN_SIGNALP_EUK.out)
+        results = results.mix(PARSE_SIGNALP_EUK.out)
+    }
+
+    if (applications.contains("signalp_prok")) {
+        RUN_SIGNALP_PROK(
+            ch_fasta, 
+            appsConfig.signalp_prok.organism, 
+            appsConfig.signalp_prok.mode,
+            appsConfig.signalp_prok.dir
+        )
+        PARSE_SIGNALP_PROK(RUN_SIGNALP_PROK.out)
+        results = results.mix(PARSE_SIGNALP_PROK.out)
+    }
+
     if (applications.contains("smart")) {
         SEARCH_SMART(
             ch_fasta,
@@ -306,20 +328,10 @@ workflow SCAN_SEQUENCES {
 
         PARSE_SUPERFAMILY(
             SEARCH_SUPERFAMILY.out,
-            "${datadir}/${appsConfig.superfamily.model}"
+            "${datadir}/${appsConfig.superfamily.model}",
+            "${datadir}/${appsConfig.superfamily.hmm}"
         )
         results = results.mix(PARSE_SUPERFAMILY.out)
-    }
-
-    if (applications.contains("signalp") || applications.contains("signalp_euk")) {
-        orgType = applications.contains("signalp_euk") ? "euk" : "other"
-        RUN_SIGNALP(ch_fasta, orgType, signalpMode)
-
-        PARSE_SIGNALP(
-            RUN_SIGNALP.out,
-            "${datadir}/${appsConfig.signalp.threshold}".split('/')[-1].toFloat()
-        )
-        results = results.mix(PARSE_SIGNALP.out)
     }
 
     if (applications.contains("tmhmm")) {

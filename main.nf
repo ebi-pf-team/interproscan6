@@ -2,6 +2,7 @@ nextflow.enable.dsl=2
 
 include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
 include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
+
 include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
 include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
@@ -56,8 +57,7 @@ workflow {
         ch_seqs,
         apps,
         params.appsConfig,
-        data_dir,
-        signalpMode
+        data_dir
     )
 
     // AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
@@ -81,7 +81,7 @@ workflow {
         [batchnumber, sequences, matches]
     }.set { ch_seq_matches }
 
-    AGGREGATE_SEQS_MATCHES(ch_seq_matches)
+    AGGREGATE_SEQS_MATCHES(ch_seq_matches, params.nucleic)
     AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
 
     REPRESENTATIVE_DOMAINS(AGGREGATE_ALL_MATCHES.out)

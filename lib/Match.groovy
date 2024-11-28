@@ -12,9 +12,6 @@ class Match implements Serializable {
     // PANTHER
     TreeGrafter treegrafter = null
 
-    // SignalP
-    SignalP signalp = null
-
     // PRINTS
     String graphScan = null
 
@@ -63,10 +60,6 @@ class Match implements Serializable {
 
     void addLocation(Location location) {
         this.locations.add(location)
-    }
-
-    void addSignalPeptide(String orgType, int cleavageSiteStart, int cleavageSiteEnd) {
-        this.signalp = new SignalP(orgType, cleavageSiteStart, cleavageSiteEnd)
     }
 
     void setAlignments(int locationIndex, String queryAlignment, String targetAlignment) {
@@ -316,7 +309,7 @@ class Location implements Serializable {
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
     }
-  
+
      Location(int start, int end, Double score, String targetAlignment) { // Used for Hamap, PrositeProfiles
         this.start = start
         this.end = end
@@ -336,9 +329,10 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-    Location(int start, int end, Double evalue, List<LocationFragment> fragments) { // Used for Superfamily
+    Location(int start, int end, Integer hmmLength, Double evalue, List<LocationFragment> fragments) { // Used for Superfamily
         this.start = start
         this.end = end
+        this.hmmLength = hmmLength
         this.evalue = evalue
         this.fragments = fragments
     }
@@ -351,14 +345,6 @@ class Location implements Serializable {
         this.fragments = [fragment]
         this.targetAlignment = targetAlignment
         this.cigarAlignment = cigarAlignment
-    }
-
-    Location(int start, int end, float pvalue) { // Used for SignalP
-        this.start = start
-        this.end = end
-        this.pvalue = pvalue
-        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
-        this.fragments = [fragment]
     }
 
     void addSite(Site site) {
@@ -388,13 +374,14 @@ class Location implements Serializable {
         loc.sequenceFeature = data.sequenceFeature
         loc.level = data.level
         loc.cigarAlignment = data.cigarAlignment
+        loc.pvalue = data.pvalue
         return loc
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(start, end, hmmStart, hmmEnd, hmmLength, hmmBounds, 
-                            envelopeStart, envelopeEnd, evalue, score, bias, 
+        return Objects.hash(start, end, hmmStart, hmmEnd, hmmLength, hmmBounds,
+                            envelopeStart, envelopeEnd, evalue, score, bias,
                             queryAlignment, targetAlignment, fragments, sites)
     }
 
@@ -629,30 +616,6 @@ class TreeGrafter implements Serializable {
         tg.subfamilyDescription = data.subfamilyDescription
         tg.proteinClass = data.proteinClass
         return tg
-    }
-}
-
-class SignalP implements Serializable {
-    String orgType
-    int cleavageSiteStart
-    int cleavageSiteEnd
-
-    SignalP(String orgType, int cleavageSiteStart, int cleavageSiteEnd) {
-        this.orgType = orgType
-        this.cleavageSiteStart = cleavageSiteStart
-        this.cleavageSiteEnd = cleavageSiteEnd
-    }
-
-    static SignalP fromMap(Map data) {
-        if (data == null) {
-            return null
-        }
-        SignalP sp = new SignalP(
-                data.orgType,
-                data.cleavageSiteStart,
-                data.cleavageSiteEnd
-        )
-        return sp
     }
 }
 
