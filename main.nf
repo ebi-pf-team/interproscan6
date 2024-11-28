@@ -7,7 +7,7 @@ include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_s
 include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { XREFS                         } from "./interproscan/modules/xrefs"
 include { AGGREGATE_SEQS_MATCHES;
-          AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_results"
+          AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_matches"
 include { REPRESENTATIVE_DOMAINS        } from "./interproscan/modules/representative_domains"
 
 workflow {
