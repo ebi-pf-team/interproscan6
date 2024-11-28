@@ -17,9 +17,9 @@ def get_current_output(test_output_dir: str,
     command = f"nextflow run main.nf --input {input_path} --applications {applications} " \
               f"--formats json --outdir {test_output_dir} -profile docker \
               --datadir {data_dir} -resume"
-    # if os.path.exists(str(current_output_path) + ".json"):
-    #     os.remove(str(current_output_path) + ".json")
-    # subprocess.run(command, shell=True)
+    if os.path.exists(str(current_output_path) + ".json"):
+        os.remove(str(current_output_path) + ".json")
+    subprocess.run(command, shell=True)
     with open(str(current_output_path) + ".json", 'r') as f:
         return json.load(f)
 
@@ -42,18 +42,22 @@ def get_expected_result(expected_result_path: str) -> dict:
 
 
 def json2dict(data, ignore_fields):
-    match_single_fields = ["modelAccession", "sequenceLength", "evalue", "score", "bias", "treegrafter", "graphScan"]
+    match_single_fields = ["modelAccession", "sequenceLength", "evalue", "score", "bias", "graphScan"]
     signature_single_fields = ["accession", "name", "description"]
     entry_fields = ["accession", "name", "description", "type", "goXRefs", "pathwayXRefs"]
     locations_single_fields = ["start", "end", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart",
                                "envelopeEnd", "evalue", "score", "bias", "queryAlignment", "targetAlignment",
-                               "sequenceFeature", "pvalue", "motifNumber", "level", "cigarAlignment", "fragments",
-                               "representative", "sites", "location-fragments"]
+                               "sequenceFeature", "pvalue", "motifNumber", "level", "cigarAlignment", "representative"]
 
     match_fields_filtered = [item for item in match_single_fields if item not in ignore_fields]
     signature_fields_filtered = [item for item in signature_single_fields if item not in ignore_fields]
     entry_fields_filtered = [item for item in entry_fields if item not in ignore_fields]
     locations_fields_filtered = [item for item in locations_single_fields if item not in ignore_fields]
+
+    site_single_fields = ["description", "numLocations", "label", "group", "hmmStart", "hmmEnd", "start", "end"]
+    site_location_fields = ["residue", "start", "end"]
+    location_fragment_fields = ["start", "end", "dcStatus"]
+    tree_grafter_fields = ["ancestralNodeID", "graftPoint", "subfamilyAccession", "subfamilyName", "subfamilyDescription", "proteinClass"]
 
     result = {}
     for result_item in data.get("results", []):
@@ -81,6 +85,7 @@ def json2dict(data, ignore_fields):
 
                 # Signature fields
                 result[library][memberDB][accession]["signature"] = signature_sorted
+                # Entry fields
                 if signature["entry"] and "entry" not in ignore_fields:
                     result[library][memberDB][accession]["signature"]["entry"] = {}
                     for field in entry_fields_filtered:
