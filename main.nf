@@ -73,7 +73,13 @@ workflow {
     XREFS(
         SCAN_SEQUENCES.out,
         apps,
-        data_dir
+        data_dir,
+        params.xRefsConfig.entries,
+        params.xRefsConfig.goterms,
+        params.xRefsConfig.pathways,
+        params.goterms,
+        params.pathways,
+        "${data_dir}/${params.appsConfig.paint}"
     )
 
     ch_seqs.join(XREFS.out, by: 0)
