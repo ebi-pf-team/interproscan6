@@ -15,6 +15,7 @@ NT_FASTA = "test_nt.fna"
 DL_DIR = Path("temp")
 BASE_UNIPROT_URL = "https://rest.uniprot.org/uniprotkb/search?query=(accession:<ACC>)&fields=accession,xref_embl"
 EMBL_BASE_URL = "https://www.ebi.ac.uk/ena/browser/api/fasta/<DNAID>?download=true"
+PROT_TO_DNA_FILE = "protein_to_dna.tsv"
 UNIPROT_ERR_FILE = "failed_uniprot_connections"
 DOWNLOAD_ERR_FILE = "failed_fasta_downloads"
 
@@ -28,6 +29,11 @@ def main():
 
     protein_ids = get_protein_ids(FASTA)
     uniparc_to_gene_ids = get_dna_ids(protein_ids)
+    with open("protein_to_dna.tsv", "w") as fh:
+        fh.write("Protein\tNumOfDNA\tDnaIds\n")
+        for prot_id in uniparc_to_gene_ids:
+            fh.write(f"{prot_id}\t{len(uniparc_to_gene_ids[prot_id])}\t{','.join(uniparc_to_gene_ids[prot_id])}\n")
+    print(f"The protein-to-dna seq relationships are summarised in {PROT_TO_DNA_FILE}")
     all_dl_paths = download_dna_fasta(uniparc_to_gene_ids)
     concatenate_fasta_files(all_dl_paths)
 
