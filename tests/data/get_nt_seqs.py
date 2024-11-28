@@ -60,10 +60,11 @@ def get_dna_ids(protein_ids: list[str]) -> dict[str: set[str]]:
         if response.status_code == 200:
             json_data = response.json()
             for result in json_data["results"]:
-                if "uniProtKBCrossReferences" in result:
-                    for result_dict in result["uniProtKBCrossReferences"]:
-                        if result_dict["database"] == "EMBL":
-                            uniparc_to_gene_ids[prot_id].add(result_dict["id"])
+                for result_dict in result.get("uniProtKBCrossReferences", []):
+                    if result_dict.get("database") == "EMBL":
+                        for property in result_dict.get("properties", []):
+                            if property["key"] == "ProteinId":
+                                uniparc_to_gene_ids[prot_id].add(property["value"])
         else:
             failed_connections.add(prot_id)
 
@@ -118,10 +119,7 @@ def concatenate_fasta_files(all_dl_paths: list[Path]) -> None:
     with open(NT_FASTA, "w") as outfile:
         for fasta in all_dl_paths:
             try:
-                with gzip.open(fasta, "rt") as infile:
-                    outfile.write(infile.read())
-            except gzip.BadGzipFile:
-                with open(fasta, "rt") as infile:
+                with open(fasta, "r") as infile:
                     outfile.write(infile.read())
             except Exception as err:
                 print(f"Could not read file {fasta} - {err}")
