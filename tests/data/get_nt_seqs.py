@@ -14,7 +14,7 @@ FASTA = "test_prot.fa"
 NT_FASTA = "test_nt.fna"
 DL_DIR = Path("temp")
 BASE_UNIPROT_URL = "https://rest.uniprot.org/uniprotkb/search?query=(accession:<ACC>)&fields=accession,xref_embl"
-EMBL_BASE_URL = "https://www.ebi.ac.uk/ena/browser/api/fasta/<DNAID>?download=true"
+DOWNLOAD_URL = "https://www.ebi.ac.uk/ena/data/view/<DNAID>&display=fasta&download=txt"
 PROT_TO_DNA_FILE = "protein_to_dna.tsv"
 UNIPROT_ERR_FILE = "failed_uniprot_connections"
 DOWNLOAD_ERR_FILE = "failed_fasta_downloads"
@@ -29,7 +29,7 @@ def main():
 
     protein_ids = get_protein_ids(FASTA)
     uniparc_to_gene_ids = get_dna_ids(protein_ids)
-    with open("protein_to_dna.tsv", "w") as fh:
+    with open(PROT_TO_DNA_FILE, "w") as fh:
         fh.write("Protein\tNumOfDNA\tDnaIds\n")
         for prot_id in uniparc_to_gene_ids:
             fh.write(f"{prot_id}\t{len(uniparc_to_gene_ids[prot_id])}\t{','.join(uniparc_to_gene_ids[prot_id])}\n")
@@ -59,8 +59,8 @@ def get_dna_ids(protein_ids: list[str]) -> dict[str: set[str]]:
         if response.status_code == 200:
             json_data = response.json()
             for result in json_data["results"]:
-                if "uniParcCrossReferences" in result:
-                    for result_dict in result["uniParcCrossReferences"]:
+                if "uniProtKBCrossReferences" in result:
+                    for result_dict in result["uniProtKBCrossReferences"]:
                         if result_dict["database"] == "EMBL":
                             uniparc_to_gene_ids[prot_id].add(result_dict["id"])
         else:
@@ -82,17 +82,20 @@ def download_dna_fasta(uniparc_to_gene_ids: dict[str, set[str]]) -> list[Path]:
     """Download nt FASTA files from EBI/ena"""
     all_dl_paths = []
     failed_connections = []
+    session = requests.Session()
 
     for prot_id in tqdm(uniparc_to_gene_ids, desc="Download nt seq fasta for protein ids"):
         for dna_id in uniparc_to_gene_ids[prot_id]:
-            url = EMBL_BASE_URL.replace("<DNAID>", dna_id)
             dl_path = DL_DIR / f"{prot_id}_{dna_id}.fna"
-            response = requests.get(url)
-            if response.status_code == 200:
+            url = DOWNLOAD_URL.replace("<DNAID>", dna_id)
+            try:
+                response = session.get(url)
+                response.raise_for_status()
+                with open(dl_path, "wb") as fh:
+                    fh.write(response.content)
                 all_dl_paths.append(dl_path)
-                with open(dl_path, 'wb') as file:
-                    file.write(response.content)
-            else:
+            except requests.exceptions.RequestException as err:
+                print("Download Error::", err, url)
                 failed_connections.append(dl_path)
 
     if all_dl_paths:
@@ -115,7 +118,6 @@ def concatenate_fasta_files(all_dl_paths: list[Path]) -> None:
         for fasta in all_dl_paths:
             with open(fasta, "r") as infile:
                 outfile.write(infile.read())
-
     print(f"Files have been concatenated into {NT_FASTA}.\nDeleting the temp dir {DL_DIR}")
     shutil.rmtree(DL_DIR)
 
