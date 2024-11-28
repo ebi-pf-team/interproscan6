@@ -22,7 +22,7 @@ process JSON_OUTPUT {
         "mobidblite": ["sequence-feature"],
         "panther": ["hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
         "phobius": [],
-        "pirsf": ["evalue", "score", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
+        "pirsf": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
         "pirsr": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "envelopeStart", "envelopeEnd"],
         "prints": ["pvalue", "score", "motifNumber"],
         "prositeprofiles": ["score", "targetAlignment"],
@@ -55,10 +55,6 @@ process JSON_OUTPUT {
                         "location-fragments": location.fragments
                     ]
 
-                    if (memberDB == "pirsf") {
-                        locationResult["hmmStart"] = location.start
-                        locationResult["hmmEnd"] = location.end
-                    }
                     hmmBounds = location.getHmmBounds(location.hmmBounds)
                     def fields = membersLocationFields.get(memberDB, otherMembersLocationFields)
                     fields.each { field ->
