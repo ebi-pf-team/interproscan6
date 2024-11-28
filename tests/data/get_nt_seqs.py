@@ -13,7 +13,7 @@ from tqdm import tqdm
 FASTA = "test_prot.fa"
 NT_FASTA = "test_nt.fna"
 DL_DIR = Path("temp")
-BASE_UNIPROT_URL = "https://rest.uniprot.org/uniparc/search?query=(uniprotkb:<ACC>)"
+BASE_UNIPROT_URL = "https://rest.uniprot.org/uniprotkb/search?query=(accession:<ACC>)&fields=accession,xref_embl"
 EMBL_BASE_URL = "https://www.ebi.ac.uk/ena/browser/api/fasta/<DNAID>?download=true"
 UNIPROT_ERR_FILE = "failed_uniprot_connections"
 DOWNLOAD_ERR_FILE = "failed_fasta_downloads"
@@ -47,7 +47,7 @@ def get_dna_ids(protein_ids: list[str]) -> dict[str: set[str]]:
     """Retrieve EMBL DNA uniparc cross references from UniProt"""
     failed_connections = set()
     uniparc_to_gene_ids = {}  # {protein id: set(uniparcCrossReference ids)}
-    for prot_id in tqdm(protein_ids, "Checking responses"):
+    for prot_id in tqdm(protein_ids, "Getting DNA seq IDs"):
         uniparc_to_gene_ids[prot_id] = set()
         response = requests.get(BASE_UNIPROT_URL.replace("<ACC>", prot_id))
         if response.status_code == 200:
