@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import gzip
 import requests
 import shutil
 import sys
@@ -116,8 +117,14 @@ def concatenate_fasta_files(all_dl_paths: list[Path]) -> None:
     """Concatenate the many download FASTA files into a single file and delete the temp dir"""
     with open(NT_FASTA, "w") as outfile:
         for fasta in all_dl_paths:
-            with open(fasta, "r") as infile:
-                outfile.write(infile.read())
+            try:
+                with gzip.open(fasta, "rt") as infile:
+                    outfile.write(infile.read())
+            except gzip.BadGzipFile:
+                with open(fasta, "rt") as infile:
+                    outfile.write(infile.read())
+            except Exception as err:
+                print(f"Could not read file {fasta} - {err}")
     print(f"Files have been concatenated into {NT_FASTA}.\nDeleting the temp dir {DL_DIR}")
     shutil.rmtree(DL_DIR)
 
