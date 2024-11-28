@@ -11,6 +11,7 @@ include { JSON_OUTPUT                   } from "./interproscan/modules/output/js
 include { AGGREGATE_SEQS_MATCHES;
           AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_matches"
 include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
+include { WRITE_XML_OUTPUT } from "./interproscan/modules/output/xml"
 
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
@@ -73,7 +74,13 @@ workflow {
     XREFS(
         SCAN_SEQUENCES.out,
         apps,
-        data_dir
+        data_dir,
+        params.xRefsConfig.entries,
+        params.xRefsConfig.goterms,
+        params.xRefsConfig.pathways,
+        params.goterms,
+        params.pathways,
+        "${data_dir}/${params.appsConfig.paint}"
     )
 
     ch_seqs.join(XREFS.out, by: 0)
@@ -97,6 +104,9 @@ workflow {
     }
     if (formats.contains("TSV")) {
         WRITE_TSV_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}")
+    }
+    if (formats.contains("XML")) {
+        WRITE_XML_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}", workflow.manifest.version)
     }
 }
 

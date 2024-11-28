@@ -22,27 +22,30 @@ process XREFS {
     tuple val(meta), val(membersMatches)
     val apps
     val dataDir
+    val entriesFile
+    val gotermFilePrefix
+    val pathwaysFilePrefix
+    val addGoterms
+    val addPathways
+    val paintAnnoDir
 
     output:
     tuple val(meta), path("matches2xrefs.json")
 
     exec:
-    String entriesPath = "${dataDir}/${params.xRefsConfig.entries}"
+    String entriesPath = "${dataDir}/${entriesFile}"
     File entriesJson = new File(entriesPath.toString())
     def entries = new ObjectMapper().readValue(entriesJson, Map)
-    JsonSlurper jsonSlurper = new JsonSlurper()
 
     def (ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null]
-    if (params.goterms) {
-        (ipr2go, goInfo) = loadXRefFiles("goterms", dataDir)
+    if (addGoterms) {
+        (ipr2go, goInfo) = loadXRefFiles(gotermFilePrefix, dataDir)
     }
-    if (params.pathways) {
-        (ipr2pa, paInfo) = loadXRefFiles("pathways", dataDir)
-    }
-    if ("${apps}".contains('panther')) {
-        String paintAnnoDir = "${dataDir}/${params.appsConfig.paint}"
+    if (addPathways) {
+        (ipr2pa, paInfo) = loadXRefFiles(pathwaysFilePrefix, dataDir)
     }
 
+    JsonSlurper jsonSlurper = new JsonSlurper()
     Map<String, Map<String, Match>> aggregatedMatches = [:]
     matchesEntries = membersMatches.each { matchesPath  ->
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, matches ->
@@ -75,7 +78,7 @@ process XREFS {
                 }
 
                 if (memberDB == "PANTHER" && matchObject.treegrafter.ancestralNodeID != null) {
-                    String paintAnnPath = "${dataDir}/${params.appsConfig.panther.paint}/${matchObject.signature.accession}.json"
+                    String paintAnnPath = "${dataDir}/${paintAnnoDir}/${matchObject.signature.accession}.json"
                     File paintAnnotationFile = new File(paintAnnPath)
                     // not every signature will have a paint annotation file match
                     if (paintAnnotationFile.exists()) {
@@ -112,7 +115,7 @@ process XREFS {
                         matchObject.signature.entry = entryDataObj
                     }
 
-                    if (params.goterms) {
+                    if (addGoterms) {
                         try {
                             def goIds = ipr2go[interproKey]
                             def goTerms = goIds.collect { goId ->
@@ -128,7 +131,7 @@ process XREFS {
                             // pass if no GO Terms found for the current entry
                         }
                     }
-                    if (params.pathways) {
+                    if (addPathways) {
                         try {
                             def paIds = ipr2pa[interproKey]
                             def paTerms = paIds.collect { paId ->
@@ -155,14 +158,8 @@ process XREFS {
             }]
         }
         matches.each { seqId, seqMatches ->
-            if (aggregatedMatches.containsKey(seqId)) {
-                seqMatches.each { rawModelAccession, matchObject ->
-                    if (!aggregatedMatches[seqId].containsKey(rawModelAccession)) {
-                        aggregatedMatches[seqId][rawModelAccession] = matchObject
-                    }
-                }
-            } else {
-                aggregatedMatches[seqId] = seqMatches
+            aggregatedMatches[seqId] = aggregatedMatches.get(seqId, [:]) + seqMatches.findAll { rawModelAccession, _ ->
+                !aggregatedMatches[seqId]?.containsKey(rawModelAccession)
             }
         }
     }
@@ -171,11 +168,11 @@ process XREFS {
     new File(outputFilePath.toString()).write(json)
 }
 
-def loadXRefFiles(String xrefType, dataDir) {
+def loadXRefFiles(String xrefType, dataDir, xrefDir) {
     JsonSlurper jsonSlurper = new JsonSlurper()
 
-    String iprFilePath = "${dataDir}/${params.xRefsConfig[xrefType]}.ipr.json"
-    String infoFilePath = "${dataDir}/${params.xRefsConfig[xrefType]}.json"
+    String iprFilePath = "${dataDir}/${xrefDir}.ipr.json"
+    String infoFilePath = "${dataDir}/${xrefDir}.json"
     File iprFile = new File(iprFilePath.toString())
     File infoFile = new File(infoFilePath.toString())
 
