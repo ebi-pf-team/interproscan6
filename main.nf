@@ -100,10 +100,10 @@ workflow {
     def fileName = params.input.split('/').last()
     def outFileName = "${params.outdir}/${fileName}"
     if (formats.contains("TSV")) {
-        WRITE_TSV_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}")
+        WRITE_TSV_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}")
     }
     if (formats.contains("XML")) {
-        WRITE_XML_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}", workflow.manifest.version)
+        WRITE_XML_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", workflow.manifest.version)
     }
 }
 
