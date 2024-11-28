@@ -16,13 +16,13 @@ process JSON_OUTPUT {
     jsonOutput["results"] = []
 
     Map<String, List<String>> membersLocationFields = [
-        "cdd": [],
+        "cdd": ["evalue-match", "score-match"],
         "coils": [],
         "hamap": ["score", "targetAlignment"],
         "mobidblite": ["sequence-feature"],
         "panther": ["hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
         "phobius": [],
-        "pirsf": ["evalue", "score", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
+        "pirsf": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
         "pirsr": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "envelopeStart", "envelopeEnd"],
         "prints": ["pvalue", "score", "motifNumber"],
         "prositeprofiles": ["score", "targetAlignment"],
@@ -31,22 +31,15 @@ process JSON_OUTPUT {
         "signalp": ["pvalue", "cleavageStart", "cleavageEnd"],
         "signalp_euk": ["pvalue", "cleavageStart", "cleavageEnd"],
         "smart": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
-        "superfamily": ["hmmLength"]
+        "superfamily": ["hmmLength", "evalue"]
     ]
     List<String> otherMembersLocationFields = ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
-
-    def boundsMapping = [
-        "[]"  : "COMPLETE",
-        "[."  : "N_TERMINAL_COMPLETE",
-        ".]"  : "C_TERMINAL_COMPLETE",
-        ".."  : "INCOMPLETE"
-    ]
 
     jsonSlurper.parse(seqMatches).each { sequence ->
         def seqMatches = []
         sequence["matches"].each { matchId, match ->
             Match matchObj = Match.fromMap(match)
-            String rawMemberDB = matchObj.signature.signatureLibraryRelease.library
+            String rawMemberDB = matchObj.signature.signatureLibraryRelease.library ?: ""
             String memberDB = rawMemberDB.toLowerCase().replace("-", "").replace(" ", "")
             matchResult = [
                 "signature": matchObj.signature,
@@ -62,19 +55,7 @@ process JSON_OUTPUT {
                         "location-fragments": location.fragments
                     ]
 
-                    // field value exceptions
-                    if (memberDB == "pirsf") {
-                        locationResult["hmmStart"] = location.start
-                        locationResult["hmmEnd"] = location.end
-                    } else if (memberDB == "cdd") {
-                        locationResult["evalue"] = matchObj.evalue
-                        locationResult["score"] = matchObj.score
-                    } else if (memberDB == "superfamily") {
-                        matchResult["evalue"] = location.evalue
-                    }
-
-                    hmmBounds = boundsMapping[location.hmmBounds]
-
+                    hmmBounds = location.getHmmBounds(location.hmmBounds)
                     def fields = membersLocationFields.get(memberDB, otherMembersLocationFields)
                     fields.each { field ->
                         switch (field) {
@@ -97,7 +78,10 @@ process JSON_OUTPUT {
                                 locationResult["envelopeEnd"] = location.envelopeEnd
                                 break
                             case "evalue":
-                                locationResult["evalue"] = location.evalue
+                                locationResult["evalue"] = matchObj.evalue
+                                break
+                            case "evalue-match":
+                                locationResult["evalue"] = match.evalue
                                 break
                             case "hmmStart":
                                 locationResult["hmmStart"] = location.hmmStart
@@ -123,8 +107,14 @@ process JSON_OUTPUT {
                             case "score":
                                 locationResult["score"] = location.score
                                 break
+                            case "score-match":
+                                locationResult["score"] = matchObj.score
+                                break
                             case "sequence-feature":
                                 locationResult["sequence-feature"] = location.sequenceFeature
+                                break
+                            default:
+                                println "Warning: Unknown fields '${field}'"
                                 break
                         }
                     }
@@ -152,7 +142,7 @@ process JSON_OUTPUT {
                     matchResult["evalue"] = matchObj.evalue
                     matchResult["score"] = matchObj.score
                 }
-                matchResult["model-ac"] = memberDB == "cathfunfam" ? matchObj.modelAccession : matchObj.modelAccession.split("\\.")[0]
+                matchResult["model-ac"] = matchObj.modelAccession
 
                 switch (memberDB) {
                     case "sfld":
