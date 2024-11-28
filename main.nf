@@ -9,6 +9,7 @@ include { XREFS                         } from "./interproscan/modules/xrefs"
 include { AGGREGATE_SEQS_MATCHES;
           AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_matches"
 include { REPRESENTATIVE_DOMAINS        } from "./interproscan/modules/representative_domains"
+include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
 
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
@@ -84,28 +85,24 @@ workflow {
     AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
 
     REPRESENTATIVE_DOMAINS(AGGREGATE_ALL_MATCHES.out)
-    REPRESENTATIVE_DOMAINS.out.view()
 
     Channel.from(params.formats.toLowerCase().split(','))
     .set { ch_format }
 
-//     WRITE_RESULTS(
-//         input_file.getName(),
-//         AGGREGATE_PARSED_SEQS.out,
-//         REPRESENTATIVE_DOMAINS.out.collect(),
-//         ch_format,
-//         params.outdir,
-//         params.ipscn_version,
-//         params.nucleic
-//     )
+    def formats = params.formats.toUpperCase().split(',') as Set
+    def fileName = params.input.split('/').last()
+    def outFileName = "${params.outdir}/${fileName}"
+    if (formats.contains("TSV")) {
+        WRITE_TSV_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}")
+    }
 }
 
-// workflow.onComplete = {
-//     def input_file = file(params.input)
-//     def outputFileName = input_file.getName()
-//     def outputDir = params.outdir.endsWith('/') ? params.outdir[0..-2] : params.outdir
+workflow.onComplete = {
+    def input_file = file(params.input)
+    def outputFileName = input_file.getName()
+    def outputDir = params.outdir.endsWith('/') ? params.outdir[0..-2] : params.outdir
 
-//     println "InterProScan workflow completed successfully: $workflow.success."
-//     println "Any results are located at ${outputDir}/${outputFileName}.ips6.*"
-//     println "Duration: $workflow.duration"
-// }
+    println "InterProScan workflow completed successfully: $workflow.success."
+    println "Any results are located at ${outputDir}/${outputFileName}.ips6.*"
+    println "Duration: $workflow.duration"
+}
