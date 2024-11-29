@@ -46,7 +46,6 @@ process JSON_OUTPUT {
                 "locations": []
             ]
             if (matchObj.locations) {
-                // Locations
                 matchObj.locations.each { location ->
                     locationResult = [
                         "start": location.start,
