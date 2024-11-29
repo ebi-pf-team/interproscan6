@@ -77,10 +77,10 @@ process JSON_OUTPUT {
                                 locationResult["envelopeEnd"] = location.envelopeEnd
                                 break
                             case "evalue":
-                                locationResult["evalue"] = matchObj.evalue
+                                locationResult["evalue"] = location.evalue
                                 break
                             case "evalue-match":
-                                locationResult["evalue"] = match.evalue
+                                locationResult["evalue"] = matchObj.evalue
                                 break
                             case "hmmStart":
                                 locationResult["hmmStart"] = location.hmmStart
