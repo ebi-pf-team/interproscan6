@@ -7,11 +7,12 @@ include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_trans
 include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { XREFS                         } from "./interproscan/modules/xrefs"
-include { JSON_OUTPUT                   } from "./interproscan/modules/output/json_output"
 include { AGGREGATE_SEQS_MATCHES;
           AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_matches"
+include { WRITE_JSON_OUTPUT             } from "./interproscan/modules/output/json"
 include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
 include { WRITE_XML_OUTPUT } from "./interproscan/modules/output/xml"
+
 
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
