@@ -16,22 +16,22 @@ process WRITE_JSON_OUTPUT {
     jsonOutput["results"] = []
 
     Map<String, List<String>> membersLocationFields = [
-        "cdd": ["evalue-match", "score-match"],
-        "coils": [],
-        "hamap": ["score", "targetAlignment"],
-        "mobidblite": ["sequence-feature"],
-        "panther": ["hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
-        "phobius": [],
-        "pirsf": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
-        "pirsr": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "envelopeStart", "envelopeEnd"],
-        "prints": ["pvalue", "score", "motifNumber"],
-        "prositeprofiles": ["score", "targetAlignment"],
-        "prositepatterns": ["cigarAlignment", "targetAlignment", "level"],
-        "sfld": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "envelopeStart", "envelopeEnd"],
-        "signalp": ["pvalue", "cleavageStart", "cleavageEnd"],
-        "signalp_euk": ["pvalue", "cleavageStart", "cleavageEnd"],
-        "smart": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
-        "superfamily": ["hmmLength", "evalue"]
+        "CDD": ["evalue-match", "score-match"],
+        "COILS": [],
+        "HAMAP": ["score", "targetAlignment"],
+        "MobiDB Lite": ["sequence-feature"],
+        "PANTHER": ["hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
+        "Phobius": [],
+        "PIRSF": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
+        "PIRSR": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "envelopeStart", "envelopeEnd"],
+        "PRINTS": ["pvalue", "score", "motifNumber"],
+        "PROSITE profiles": ["score", "targetAlignment"],
+        "PROSITE patterns": ["cigarAlignment", "targetAlignment", "level"],
+        "SFLD": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "envelopeStart", "envelopeEnd"],
+        "SignalP_Euk": ["pvalue", "cleavageStart", "cleavageEnd"],
+        "SignalP-Prok": ["pvalue", "cleavageStart", "cleavageEnd"],
+        "SMART": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
+        "SUPERFAMILY": ["hmmLength", "evalue"]
     ]
     List<String> otherMembersLocationFields = ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
 
@@ -39,8 +39,7 @@ process WRITE_JSON_OUTPUT {
         def seqMatches = []
         sequence["matches"].each { matchId, match ->
             Match matchObj = Match.fromMap(match)
-            String rawMemberDB = matchObj.signature.signatureLibraryRelease.library ?: ""
-            String memberDB = rawMemberDB.toLowerCase().replace("-", "").replace(" ", "")
+            String memberDB = matchObj.signature.signatureLibraryRelease.library ?: ""
             matchResult = [
                 "signature": matchObj.signature,
                 "locations": []
@@ -120,10 +119,10 @@ process WRITE_JSON_OUTPUT {
                     }
 
                     // Sites
-                    if (memberDB in ["pirsr", "sfld"]) {
+                    if (memberDB in ["PIRSR", "SFLD"]) {
                         locationResult["sites"] = location.sites ?: []
                     }
-                    if (memberDB == "cdd") {
+                    if (memberDB == "CDD") {
                         locationResult["sites"] = location.sites?.collect { site ->
                             site.remove("label")
                             site.remove("group")
@@ -138,17 +137,17 @@ process WRITE_JSON_OUTPUT {
 
             if (matchResult["locations"]) {
                 // Match level fields
-                if (memberDB in ["antifam", "cathfunfam", "cathgene3d", "ncbifam", "panther", "pfam", "pirsf", "pirsr", "sfld", "smart", "tmhmm"]) {
+                if (memberDB in ["AntiFam", "FunFam", "CATH-Gene3D", "NCBIfam", "PANTHER", "Pfam", "PIRSF", "PIRSR", "SFLD", "SMART", "TMHMM"]) {
                     matchResult["evalue"] = matchObj.evalue
                     matchResult["score"] = matchObj.score
                 }
                 matchResult["model-ac"] = matchObj.modelAccession
 
                 switch (memberDB) {
-                    case "sfld":
+                    case "SFLD":
                         matchResult["scope"] = null
                         break
-                    case "panther":
+                    case "PANTHER":
                         matchResult["name"] = matchObj.treegrafter.subfamilyDescription
                         matchResult["accession"] = matchObj.treegrafter.subfamilyAccession
                         matchResult["model-ac"] = matchObj.treegrafter.subfamilyAccession
@@ -156,11 +155,11 @@ process WRITE_JSON_OUTPUT {
                         matchResult["proteinClass"] = matchObj.treegrafter.proteinClass
                         matchResult["graftPoint"] = matchObj.treegrafter.graftPoint
                         break
-                    case "prints":
+                    case "PRINTS":
                         matchResult["evalue"] = matchObj.evalue
                         matchResult["graphscan"] = matchObj.graphScan
                         break
-                    case ["signalp", "signalp_euk"]:
+                    case ["SignalP_Euk", "SignalP-Prok"]:
                         matchResult["orgType"] = matchObj.signalp.orgType
                 }
                 seqMatches.add(matchResult)

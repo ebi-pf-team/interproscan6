@@ -51,6 +51,7 @@ process XREFS {
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, matches ->
             [(seqId): matches.collectEntries { modelAccession, match ->
                 Match matchObject = Match.fromMap(match)
+                // null check needed for cases that signature still not created on match object (e.g. hmmer3 members)
                 def entrySignatureKey = matchObject.signature?.accession ?: matchObject.modelAccession.split("\\.")[0]
                 Map signatureInfo = entries['entries'][entrySignatureKey] ?: entries['entries'][modelAccession]
                 try {
