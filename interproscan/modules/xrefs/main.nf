@@ -51,8 +51,8 @@ process XREFS {
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, matches ->
             [(seqId): matches.collectEntries { modelAccession, match ->
                 Match matchObject = Match.fromMap(match)
-                def sigAccession = matchObject.signature?.accession ?: matchObject.modelAccession.split("\\.")[0]
-                Map signatureInfo = entries['entries'][sigAccession] ?: entries['entries'][modelAccession]
+                def entrySignatureKey = matchObject.signature?.accession ?: matchObject.modelAccession.split("\\.")[0]
+                Map signatureInfo = entries['entries'][entrySignatureKey] ?: entries['entries'][modelAccession]
                 try {
                     String memberDB = matchObject.signature.signatureLibraryRelease.library
                 } catch (java.lang.NullPointerException e) {
@@ -67,6 +67,7 @@ process XREFS {
                     } else {
                         memberDB = null
                         memberRelease = null
+                        println "WARNING: Signature library not found on entries.json file for accession '${modelAccession}'"
                     }
                     SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
                     if (!matchObject.signature) {
