@@ -1,118 +1,146 @@
-nextflow.enable.dsl=2
+import groovy.json.JsonOutput
 
-include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
-include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
+process SEARCH_SUPERFAMILY {
+    label 'hmmer_runner'
 
-include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
-include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
-include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
-include { XREFS                         } from "./interproscan/modules/xrefs"
-include { AGGREGATE_SEQS_MATCHES;
-          AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_matches"
-include { REPRESENTATIVE_DOMAINS        } from "./interproscan/modules/representative_domains"
-include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
-include { WRITE_XML_OUTPUT } from "./interproscan/modules/output/xml"
+    input:
+    tuple val(meta), path(fasta)
+    path hmmdb
+    path selfhits
+    path cla
+    path model
+    path pdbj95d
 
-workflow {
-    println "# ${workflow.manifest.name} ${workflow.manifest.version}"
-    println "# ${workflow.manifest.description}\n"
+    output:
+    tuple val(meta), path("superfamily.out")
 
-    if (params.keySet().any { it.equalsIgnoreCase("help") }) {
-        InterProScan.printHelp(params.appsConfig)
-        exit 0
-    }
+    script:
+    """
+    /opt/hmmer3/bin/hmmpress ${hmmdb}
 
-    INIT_PIPELINE()
+    /opt/hmmer3/bin/hmmscan \
+        -E 10 -Z 15438 \
+        --cpu ${task.cpus} \
+        ${hmmdb} ${fasta} > hmmscan.out
 
-    fasta_file      = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
-    data_dir        = INIT_PIPELINE.out.datadir.val
-    outut_dir       = INIT_PIPELINE.out.outdir.val
-    apps            = INIT_PIPELINE.out.apps.val
-    signalpMode     = INIT_PIPELINE.out.signalpMode.val
-
-    // Chunk input file in smaller files
-    fasta_file
-        .splitFasta( by: params.batchSize, file: true )
-        .set { ch_fasta }
-
-    if (params.nucleic) {
-        // Translate DNA/RNA sequences to protein sequences
-        ch_translated = ESL_TRANSLATE(ch_fasta)
-
-        // Split again
-        ch_translated
-            .splitFasta( by: params.batchSize, file: true )
-            .map { split_pt_file, orig_nt_file -> tuple ( orig_nt_file, split_pt_file ) }
-            .set { ch_translated_split }
-
-        // Store sequences as JSON objects
-        ch_seqs = PREPARE_NUCLEIC_SEQUENCES(ch_translated_split)
-    } else {
-        // Store sequences as JSON objects
-        ch_seqs = PREPARE_PROTEIN_SEQUENCES(ch_fasta)
-    }
-
-    // TODO: add new match lookup
-
-    SCAN_SEQUENCES(
-        ch_seqs,
-        apps,
-        params.appsConfig,
-        data_dir
-    )
-
-    // AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
-    // This is to concat MLS with scan sequences result
-    // all_results = parsed_matches.concat(parsed_analysis)
-
-    /* XREFS:
-    Add signature and entry desc and names
-    Add PAINT annotations (if panther is enabled)
-    Add go terms (if enabled)
-    Add pathways (if enabled)
-    */
-    XREFS(
-        SCAN_SEQUENCES.out,
-        apps,
-        data_dir,
-        params.xRefsConfig.entries,
-        params.xRefsConfig.goterms,
-        params.xRefsConfig.pathways,
-        params.goterms,
-        params.pathways,
-        "${data_dir}/${params.appsConfig.paint}"
-    )
-
-    ch_seqs.join(XREFS.out, by: 0)
-    .map { batchnumber, fasta, sequences, matches ->
-        [batchnumber, sequences, matches]
-    }.set { ch_seq_matches }
-
-    AGGREGATE_SEQS_MATCHES(ch_seq_matches, params.nucleic)
-    AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
-
-    REPRESENTATIVE_DOMAINS(AGGREGATE_ALL_MATCHES.out)
-
-    Channel.from(params.formats.toLowerCase().split(','))
-    .set { ch_format }
-
-    def formats = params.formats.toUpperCase().split(',') as Set
-    def fileName = params.input.split('/').last()
-    def outFileName = "${params.outdir}/${fileName}"
-    if (formats.contains("TSV")) {
-        WRITE_TSV_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic)
-    }
-    if (formats.contains("XML")) {
-        WRITE_XML_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", workflow.manifest.version)
-    }
+    perl ${projectDir}/bin/superfamily/ass3_single_threaded.pl \
+        -e 0.0001 -t n -f 1 \
+        -s ${selfhits} \
+        -r ${cla} \
+        -m ${model} \
+        -p ${pdbj95d} \
+        ${fasta} \
+        hmmscan.out \
+        superfamily.out
+    """
 }
 
-workflow.onComplete = {
-    def input_file = file(params.input)
-    def outputFileName = input_file.getName()
-    def outputDir = params.outdir.endsWith('/') ? params.outdir[0..-2] : params.outdir
+process PARSE_SUPERFAMILY {
+    input:
+    tuple val(meta), val(superfamily_out)
+    val model_tsv
+    val hmmdb
 
-    println "InterProScan workflow completed successfully: $workflow.success."
-    println "Any results are located at ${outputDir}/${outputFileName}.ips6.*"
-    println "Duration: $workflow.duration"
+    output:
+    tuple val(meta), path("superfamily.json")
+
+    exec:
+    def model2sf = [:]
+    file(model_tsv.toString()).eachLine { line ->
+        def fields = line.trim().split(/\t/)
+        String modelId = fields[0]
+        String superfamilyAccession = fields[1]
+        assert !model2sf.containsKey(modelId)
+        model2sf[modelId] = "SSF${superfamilyAccession}"
+    }
+
+    def model2length = [:]
+    String modelAc = null
+    Integer length = null
+    new File(hmmdb).eachLine { line ->
+        line = line.trim()
+        if (line.startsWith('//')) {
+            assert modelAc != null && length != null
+            model2length[modelAc] = length
+            modelAc = length = null
+        } else if (line.startsWith('N') && !modelAc) {
+            def match = (line =~ ~/^NAME\s+(.+)$/)
+            if (match) modelAc = match[0][1]
+        } else if (line.startsWith('L') && !length) {
+            def match = (line =~ ~/^LENG\s+([0-9]+)$/)
+            if (match) length = match[0][1].toInteger()
+        }
+    }
+
+    def matches = [:].withDefault { [:] }
+    file(superfamily_out.toString()).eachLine { line ->
+        line = line.trim()
+        if (line) {
+            def fields = line.split(/\s+/)
+            assert fields.size() == 9
+            String seqId = fields[0]
+            String modelId = fields[1]
+            if (modelId != "-") {
+                String superfamilyAccession = model2sf[modelId]
+                assert superfamilyAccession != null
+
+                String regionsAsString = fields[2]
+                Double evalue = Double.parseDouble(fields[3])
+
+                def regions = []
+                regionsAsString.split(",").each { region ->
+                    def boundaries = region.split("-")
+                    assert boundaries.size() == 2
+                    int start = boundaries[0].toInteger()
+                    int end = boundaries[1].toInteger()
+                    regions.add([start, end])
+                }
+
+                assert regions.size() >= 1
+
+                // Sort by start/end
+                regions = regions.sort { a, b ->
+                    a[0] <=> b[0] ?: a[1] <=> b[1]
+                }
+
+                int start = regions[0][0]
+                int end = regions.collect { it[1] }.max()
+                Integer hmmLength = model2length[modelId]
+                List<LocationFragment> fragments = []
+                if (regions.size() > 1) {
+                    regions.eachWithIndex { obj, idx ->
+                        def (fragStart, fragEnd) = obj
+                        String dcStatus
+                        if (idx == 0) {
+                            dcStatus = "C_TERMINAL_DISC"
+                        } else if (idx == regions.size() - 1) {
+                            dcStatus = "N_TERMINAL_DISC"
+                        } else {
+                            dcStatus = "NC_TERMINAL_DISC"
+                        }
+                        fragments.add(new LocationFragment(fragStart, fragEnd, dcStatus))
+                    }
+
+                } else {
+                    def (fragStart, fragEnd) = regions[0]
+                    fragments.add(new LocationFragment(fragStart, fragEnd, "CONTINUOUS"))
+                }
+
+                Location location = new Location(start, end, hmmLength, evalue, fragments)
+                Match match = matches[seqId][modelId]
+                if (match == null) {
+                    match = new Match(modelId)
+                    match.addLocation(location)
+                    match.signature = new Signature(superfamilyAccession)
+                    matches[seqId][modelId] = match
+                } else {
+                    match.addLocation(location)
+                }
+            }
+        }
+    }
+
+    def json = JsonOutput.toJson(matches)
+    def outputFilePath = task.workDir.resolve("superfamily.json")
+    new File(outputFilePath.toString()).write(json)
 }
