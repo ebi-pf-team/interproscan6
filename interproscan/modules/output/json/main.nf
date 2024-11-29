@@ -8,6 +8,7 @@ process WRITE_JSON_OUTPUT {
     val seqMatches
     val outputPath
     val ips6Version
+    val nucleic
 
     exec:
     def jsonSlurper = new JsonSlurper()
@@ -37,6 +38,37 @@ process WRITE_JSON_OUTPUT {
 
     jsonSlurper.parse(seqMatches).each { sequence ->
         def seqMatches = []
+        println "sequence xrefs: ${sequence["xref"]}"
+        sequence["xref"].each { xrefData ->
+            String seqId = nucleic ? "${sequence.translatedFrom.id}_${xrefData.id}" : xrefData.id
+            xrefData.id = seqId
+            println "xrefData: ${xrefData}"
+        }
+
+//                 if (!seqMatches.containsKey(nucleicSeqId)) {
+//                     results[nucleicSeqId] = [
+//                         sequence: data.sequences.nt_sequence,
+//                         md5: data.sequences.nt_md5,
+//                         crossReferences: [
+//                             [name: data.sequences.nt_seq_id, id: nucleicSeqId]
+//                         ],
+//                         openReadingFrames: []
+//                     ]
+//                 }
+//                 def NT_SEQ_ID_PATTERN = ~/^orf\d+\s+source=(.*)\s+coords=(\d+\.+\d+)\s+.+frame=(\d+)\s+desc=(.*)$/
+//                 def NT_KEY_PATTERN = ~/^(.*)_orf\d+$/
+//                 def ntMatch = NT_SEQ_ID_PATTERN.matcher(sequence.id)
+//                 seqMatches[nucleicSeqId].openReadingFrames << [
+//                     start: ntMatch.group(2).split("\\.\\.")[0] as Integer,
+//                     end: ntMatch.group(2).split("\\.\\.")[1] as Integer,
+//                     strand: (ntMatch.group(3) as Integer) < 4 ? "SENSE" : "ANTISENSE",
+//                     protein: [
+//                         sequence: sequence.sequence,
+//                         md5: sequence.md5,
+//                         xref: [[name: sequence.id, id: sequence.id.tokenize()[0]]]
+//                     ]
+//                 ]
+
         sequence["matches"].each { matchId, match ->
             Match matchObj = Match.fromMap(match)
             String memberDB = matchObj.signature.signatureLibraryRelease.library ?: ""
