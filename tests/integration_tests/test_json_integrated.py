@@ -16,7 +16,7 @@ def get_current_output(test_output_dir: str,
     disable_precalc = "--disable_precalc" if disable_precalc else ""
     command = f"nextflow run main.nf --input {input_path} --applications {applications} " \
               f"--formats json --outdir {test_output_dir} -profile docker \
-              --datadir {data_dir} -resume"
+              --datadir {data_dir}"
     if os.path.exists(str(current_output_path) + ".json"):
         os.remove(str(current_output_path) + ".json")
     subprocess.run(command, shell=True)
@@ -56,7 +56,7 @@ def json2dict(data, ignore_fields):
 
     site_single_fields = ["description", "numLocations", "label", "group", "hmmStart", "hmmEnd", "start", "end"]
     site_location_fields = ["residue", "start", "end"]
-    location_fragment_fields = ["start", "end", "dcStatus"]
+    location_fragment_fields = ["start", "end", "dcStatus", "dc-status"]
     tree_grafter_fields = ["ancestralNodeID", "graftPoint", "subfamilyAccession", "subfamilyName", "subfamilyDescription", "proteinClass"]
 
     result = {}
@@ -83,6 +83,12 @@ def json2dict(data, ignore_fields):
                     if field in match:
                         result[library][memberDB][accession][field] = match[field]
 
+                # Tree grafter fields
+                if "treeGrafter" in match and "treeGrafter" not in ignore_fields:
+                    result[library][memberDB][accession]["treeGrafter"] = OrderedDict(
+                        (k, match["treeGrafter"][k]) for k in match["treeGrafter"] if k in tree_grafter_fields
+                    )
+
                 # Signature fields
                 result[library][memberDB][accession]["signature"] = signature_sorted
                 # Entry fields
@@ -96,6 +102,34 @@ def json2dict(data, ignore_fields):
                 for loc in match.get("locations", []):
                     location_key = f"{loc.get('start')}-{loc.get('end')}"
                     result[library][memberDB][accession]["locations"][location_key] = OrderedDict((k, loc[k]) for k in loc if k in locations_fields_filtered)
+                    if "sites" in loc and "sites" not in ignore_fields:
+                        result[library][memberDB][accession]["locations"][location_key]["sites"] = []
+                        for site in loc["sites"]:
+                            site_sorted = OrderedDict((k, site[k]) for k in site if k in site_single_fields)
+                            if "locations" in site:
+                                site_sorted["locations"] = []
+                                for site_location in site["locations"]:
+                                    site_location_sorted = OrderedDict(
+                                        (k, site_location[k]) for k in site_location if k in site_location_fields
+                                    )
+                                    site_sorted["locations"].append(site_location_sorted)
+                            result[library][memberDB][accession]["locations"][location_key]["sites"].append(site_sorted)
+                        result[library][memberDB][accession]["locations"][location_key]["sites"] = sorted(
+                            result[library][memberDB][accession]["locations"][location_key]["sites"],
+                            key=lambda x: x.get("description", "") or ""
+                        )
+
+                    # location-fragments fields
+                    if "location-fragments" in loc and "location-fragments" not in ignore_fields:
+                        result[library][memberDB][accession]["locations"][location_key]["location-fragments"] = []
+                        for location_fragment in loc["location-fragments"]:
+                            location_fragment_sorted = OrderedDict(
+                                (k, location_fragment[k]) for k in location_fragment if
+                                k in location_fragment_fields
+                            )
+                            result[library][memberDB][accession]["locations"][location_key][
+                                "location-fragments"].append(location_fragment_sorted)
+
                 sorted_locations = OrderedDict(
                     sorted(
                         result[library][memberDB][accession]["locations"].items(),
@@ -103,6 +137,7 @@ def json2dict(data, ignore_fields):
                     )
                 )
                 result[library][memberDB][accession]["locations"] = sorted_locations
+
     return OrderedDict(sorted(result.items()))
 
 
@@ -141,7 +176,7 @@ def test_json_output(test_output_dir, input_path, expected_result_path, output_p
     expected_result = get_expected_result(expected_result_path)
     current_result = get_current_output(test_output_dir, output_path, input_path, applications, data_dir, disable_precalc)
 
-    ignore_fields = ["description", "name", "representative", "sites", "location-fragments"]
+    ignore_fields = ["description", "name", "representative", "evalue"]
     expected = json2dict(expected_result, ignore_fields)
     current = json2dict(current_result, ignore_fields)
 
