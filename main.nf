@@ -101,7 +101,7 @@ workflow {
     def fileName = params.input.split('/').last()
     def outFileName = "${params.outdir}/${fileName}"
     if (formats.contains("JSON")) {
-        JSON_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}", workflow.manifest.version)
+        WRITE_JSON_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}", workflow.manifest.version)
     }
     if (formats.contains("TSV")) {
         WRITE_TSV_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}")
