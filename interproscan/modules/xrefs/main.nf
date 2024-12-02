@@ -59,7 +59,7 @@ process XREFS {
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, matches ->
             [(seqId): matches.collectEntries { rawModelAccession, match ->
                 Match matchObject = Match.fromMap(match)
-                def modelAccession = matchObject.modelAccession.split("\\.")[0]
+                def modelAccession = matchObject.modelAccession
                 if (memberDB in ["cathgene3d", "cathfunfam"]) {
                     modelAccession = matchObject.signature.accession
                 }
