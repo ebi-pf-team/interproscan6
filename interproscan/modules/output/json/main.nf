@@ -179,7 +179,7 @@ process WRITE_JSON_OUTPUT {
                     sequence          : sequence.translatedFrom.sequence,
                     md5               : sequence.translatedFrom.md5,
                     crossReferences   : [[
-                        name: sequence.translatedFrom.description,
+                        name: "${nucleicSeqId} ${sequence.translatedFrom.description}",
                         id  : nucleicSeqId
                     ]],
                     openReadingFrames : []
@@ -188,7 +188,7 @@ process WRITE_JSON_OUTPUT {
 
             def ntMatch = NT_SEQ_ID_PATTERN.matcher(sequence.xref[0].name)
             if (ntMatch.matches()) {
-                nucleicResults.openReadingFrames << [
+                nucleicResults[nucleicSeqId].openReadingFrames << [
                     start   : ntMatch.group(2).split("\\.\\.")[0] as int,
                     end     : ntMatch.group(2).split("\\.\\.")[1] as int,
                     strand  : (ntMatch.group(3) as int) < 4 ? "SENSE" : "ANTISENSE",
@@ -200,7 +200,7 @@ process WRITE_JSON_OUTPUT {
                     ]
                 ]
             }
-            jsonOutput["results"].add(nucleicResults.values)
+            jsonOutput["results"].add(nucleicResults.values())
         } else {
             jsonOutput["results"].add(sequence)
         }
