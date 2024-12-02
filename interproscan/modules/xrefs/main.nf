@@ -46,32 +46,40 @@ process XREFS {
     }
 
     JsonSlurper jsonSlurper = new JsonSlurper()
-
     Map<String, Map<String, Match>> aggregatedMatches = [:]
-
     matchesEntries = membersMatches.each { matchesPath  ->
-        memberDB = matchesPath.toString().split("/").last().split("\\.")[0]
-        def memberRelease = entries.databases.find { key, value ->
-            key.toLowerCase().replace("-", "").replace(" ", "") == memberDB
-        }?.value
-        SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
-
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, matches ->
-            [(seqId): matches.collectEntries { rawModelAccession, match ->
+            [(seqId): matches.collectEntries { modelAccession, match ->
                 Match matchObject = Match.fromMap(match)
-                def modelAccession = matchObject.modelAccession.split("\\.")[0]
-                if (memberDB in ["cathgene3d", "cathfunfam"]) {
-                    modelAccession = matchObject.signature.accession
+                // null check needed for cases that signature still not created on match object (e.g. hmmer3 members)
+                def entrySignatureKey = matchObject.signature?.accession ?: matchObject.modelAccession.split("\\.")[0]
+                Map signatureInfo = entries['entries'][entrySignatureKey] ?: entries['entries'][modelAccession]
+                try {
+                    String memberDB = matchObject.signature.signatureLibraryRelease.library
+                } catch (java.lang.NullPointerException e) {
+                    if (signatureInfo) {
+                        memberDB = signatureInfo["database"]
+                        memberRelease = entries["databases"][memberDB]
+                    }
+                    // PIRSR is the only memberDB that doesn't have entries associated on entries.json data file
+                    else if (modelAccession.startsWith("PIRSR")) {
+                        memberDB = "PIRSR"
+                        memberRelease = entries["databases"][memberDB]
+                    } else {
+                        memberDB = null
+                        memberRelease = null
+                        println "WARNING: Signature library not found on entries.json file for accession '${modelAccession}'"
+                    }
+                    SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
+                    if (!matchObject.signature) {
+                        matchObject.signature = new Signature(modelAccession, sigLibRelease)
+                        if (memberDB == "mobidb_lite") { matchObject.signature.description = "consensus disorder prediction" }
+                    } else if (!matchObject.signature.signatureLibraryRelease) {
+                        matchObject.signature.signatureLibraryRelease = sigLibRelease
+                    }
                 }
 
-                if (!matchObject.signature) {
-                    matchObject.signature = new Signature(modelAccession, sigLibRelease)
-                    if (memberDB == "mobidb_lite") { matchObject.signature.description = "consensus disorder prediction" }
-                } else if (!matchObject.signature.signatureLibraryRelease) {
-                    matchObject.signature.signatureLibraryRelease = sigLibRelease
-                }
-
-                if (memberDB == "panther" && matchObject.treegrafter.ancestralNodeID != null) {
+                if (memberDB == "PANTHER" && matchObject.treegrafter.ancestralNodeID != null) {
                     String paintAnnPath = "${dataDir}/${paintAnnoDir}/${matchObject.signature.accession}.json"
                     File paintAnnotationFile = new File(paintAnnPath)
                     // not every signature will have a paint annotation file match
@@ -85,20 +93,19 @@ process XREFS {
                     }
                 }
 
-                Map entry = entries['entries'][modelAccession] ?: entries['entries'][rawModelAccession]
-                if (entry) {
-                    matchObject.signature.name = entry["name"]
-                    matchObject.signature.description = entry["description"]
+                if (signatureInfo) {
+                    matchObject.signature.name = signatureInfo["name"]
+                    matchObject.signature.description = signatureInfo["description"]
 
-                    if (entry['representative']) {
+                    if (signatureInfo['representative']) {
                         RepresentativeInfo representativeInfo = new RepresentativeInfo(
-                            entry['representative']["type"],
-                            entry['representative']["index"]
+                            signatureInfo['representative']["type"],
+                            signatureInfo['representative']["index"]
                         )
                         matchObject.representativeInfo = representativeInfo
                     }
 
-                    def interproKey = entry['integrated']
+                    def interproKey = signatureInfo['integrated']
                     def entryInfo = entries['entries'].get(interproKey)
                     if (entryInfo) {
                         Entry entryDataObj = new Entry(
@@ -142,19 +149,19 @@ process XREFS {
                     }
                 }
 
-                if (memberDB == "panther") {
+                if (memberDB == "PANTHER") {
                     accSubfamily = matchObject.signature.accession
                     if (entries['entries'][accSubfamily]) {
                         matchObject.treegrafter.subfamilyName = entries['entries'][accSubfamily]["name"]
                         matchObject.treegrafter.subfamilyDescription = entries['entries'][accSubfamily]["description"]
                     }
                 }
-                return [(rawModelAccession): matchObject]
+                return [(modelAccession): matchObject]
             }]
         }
         matches.each { seqId, seqMatches ->
-            aggregatedMatches[seqId] = aggregatedMatches.get(seqId, [:]) + seqMatches.findAll { rawModelAccession, _ ->
-                !aggregatedMatches[seqId]?.containsKey(rawModelAccession)
+            aggregatedMatches[seqId] = aggregatedMatches.get(seqId, [:]) + seqMatches.findAll { modelAccession, _ ->
+                !aggregatedMatches[seqId]?.containsKey(modelAccession)
             }
         }
     }
