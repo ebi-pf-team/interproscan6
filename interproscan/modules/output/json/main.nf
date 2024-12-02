@@ -1,5 +1,6 @@
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
+import java.util.regex.Pattern
 
 process WRITE_JSON_OUTPUT {
     label 'write_output'
@@ -11,6 +12,7 @@ process WRITE_JSON_OUTPUT {
     val nucleic
 
     exec:
+    def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+source=(.*)\s+coords=(\d+\.+\d+)\s+.+frame=(\d+)\s+desc=(.*)$/)
     def jsonSlurper = new JsonSlurper()
     def jsonOutput = [:]
     jsonOutput["interproscan-version"] = ips6Version
@@ -38,36 +40,6 @@ process WRITE_JSON_OUTPUT {
 
     jsonSlurper.parse(seqMatches).each { sequence ->
         def seqMatches = []
-        println "sequence xrefs: ${sequence["xref"]}"
-        sequence["xref"].each { xrefData ->
-            String seqId = nucleic ? "${sequence.translatedFrom.id}_${xrefData.id}" : xrefData.id
-            xrefData.id = seqId
-            println "xrefData: ${xrefData}"
-        }
-
-//                 if (!seqMatches.containsKey(nucleicSeqId)) {
-//                     results[nucleicSeqId] = [
-//                         sequence: data.sequences.nt_sequence,
-//                         md5: data.sequences.nt_md5,
-//                         crossReferences: [
-//                             [name: data.sequences.nt_seq_id, id: nucleicSeqId]
-//                         ],
-//                         openReadingFrames: []
-//                     ]
-//                 }
-//                 def NT_SEQ_ID_PATTERN = ~/^orf\d+\s+source=(.*)\s+coords=(\d+\.+\d+)\s+.+frame=(\d+)\s+desc=(.*)$/
-//                 def NT_KEY_PATTERN = ~/^(.*)_orf\d+$/
-//                 def ntMatch = NT_SEQ_ID_PATTERN.matcher(sequence.id)
-//                 seqMatches[nucleicSeqId].openReadingFrames << [
-//                     start: ntMatch.group(2).split("\\.\\.")[0] as Integer,
-//                     end: ntMatch.group(2).split("\\.\\.")[1] as Integer,
-//                     strand: (ntMatch.group(3) as Integer) < 4 ? "SENSE" : "ANTISENSE",
-//                     protein: [
-//                         sequence: sequence.sequence,
-//                         md5: sequence.md5,
-//                         xref: [[name: sequence.id, id: sequence.id.tokenize()[0]]]
-//                     ]
-//                 ]
 
         sequence["matches"].each { matchId, match ->
             Match matchObj = Match.fromMap(match)
@@ -198,7 +170,40 @@ process WRITE_JSON_OUTPUT {
             }
         }
         sequence["matches"] = seqMatches
-        jsonOutput["results"].add(sequence)
+
+        if (nucleic) {
+            def nucleicResults = [:]
+            def nucleicSeqId = sequence.translatedFrom.id
+            if (!nucleicResults.containsKey(nucleicSeqId)) {
+                nucleicResults[nucleicSeqId] = [
+                    sequence          : sequence.translatedFrom.sequence,
+                    md5               : sequence.translatedFrom.md5,
+                    crossReferences   : [[
+                        name: sequence.translatedFrom.description,
+                        id  : nucleicSeqId
+                    ]],
+                    openReadingFrames : []
+                ]
+            }
+
+            def ntMatch = NT_SEQ_ID_PATTERN.matcher(sequence.xref[0].name)
+            if (ntMatch.matches()) {
+                nucleicResults.openReadingFrames << [
+                    start   : ntMatch.group(2).split("\\.\\.")[0] as int,
+                    end     : ntMatch.group(2).split("\\.\\.")[1] as int,
+                    strand  : (ntMatch.group(3) as int) < 4 ? "SENSE" : "ANTISENSE",
+                    protein : [
+                        sequence : sequence.sequence,
+                        md5      : sequence.md5,
+                        matches  : sequence.matches,
+                        xref     : sequence.xref
+                    ]
+                ]
+            }
+            jsonOutput["results"].add(nucleicResults.values)
+        } else {
+            jsonOutput["results"].add(sequence)
+        }
     }
 
     def outputFilePath = "${outputPath}.ips6.json"
