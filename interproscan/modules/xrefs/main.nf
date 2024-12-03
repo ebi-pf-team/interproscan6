@@ -46,32 +46,36 @@ process XREFS {
     }
 
     JsonSlurper jsonSlurper = new JsonSlurper()
-
     Map<String, Map<String, Match>> aggregatedMatches = [:]
-
     matchesEntries = membersMatches.each { matchesPath  ->
-        memberDB = matchesPath.toString().split("/").last().split("\\.")[0]
-        def memberRelease = entries.databases.find { key, value ->
-            key.toLowerCase().replace("-", "").replace(" ", "") == memberDB
-        }?.value
-        SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
-
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, matches ->
-            [(seqId): matches.collectEntries { rawModelAccession, match ->
+            [(seqId): matches.collectEntries { modelAccession, match ->
                 Match matchObject = Match.fromMap(match)
-                def modelAccession = matchObject.modelAccession
-                if (memberDB in ["cathgene3d", "cathfunfam"]) {
-                    modelAccession = matchObject.signature.accession
+                // null check needed for cases that signature still not created on match object (e.g. hmmer3 members)
+                String entrySignatureKey = matchObject.signature?.accession ?: matchObject.modelAccession
+                def signatureInfo = entries['entries'][entrySignatureKey] ?: entries['entries'][modelAccession]
+                String memberDB = matchObject.signature?.signatureLibraryRelease?.library
+                String memberRelease = null
+                if (!memberDB) {
+                    if (signatureInfo) {
+                        memberDB = signatureInfo["database"]
+                        memberRelease = entries["databases"][memberDB]
+                    }
+                    // PIRSR is the only memberDB that doesn't have entries associated on entries.json data file
+                    else if (modelAccession.startsWith("PIRSR")) {
+                        memberDB = "PIRSR"
+                        memberRelease = entries["databases"][memberDB]
+                    }
+                    SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
+                    if (!matchObject.signature) {
+                        matchObject.signature = new Signature(modelAccession, sigLibRelease)
+                        if (memberDB == "mobidb_lite") { matchObject.signature.description = "consensus disorder prediction" }
+                    } else if (!matchObject.signature.signatureLibraryRelease) {
+                        matchObject.signature.signatureLibraryRelease = sigLibRelease
+                    }
                 }
 
-                if (!matchObject.signature) {
-                    matchObject.signature = new Signature(modelAccession, sigLibRelease)
-                    if (memberDB == "mobidb_lite") { matchObject.signature.description = "consensus disorder prediction" }
-                } else if (!matchObject.signature.signatureLibraryRelease) {
-                    matchObject.signature.signatureLibraryRelease = sigLibRelease
-                }
-
-                if (memberDB == "panther" && matchObject.treegrafter.ancestralNodeID != null) {
+                if (memberDB == "PANTHER" && matchObject.treegrafter.ancestralNodeID != null) {
                     String paintAnnPath = "${dataDir}/${paintAnnoDir}/${matchObject.signature.accession}.json"
                     File paintAnnotationFile = new File(paintAnnPath)
                     // not every signature will have a paint annotation file match
@@ -85,24 +89,24 @@ process XREFS {
                     }
                 }
 
-                Map entry = entries['entries'][modelAccession] ?: entries['entries'][rawModelAccession]
-                if (entry) {
-                    matchObject.signature.name = entry["name"]
-                    matchObject.signature.description = entry["description"]
+                if (signatureInfo) {
+                    matchObject.signature.name = signatureInfo["name"]
+                    matchObject.signature.description = signatureInfo["description"]
 
-                    if (entry['representative']) {
+                    if (signatureInfo['representative']) {
                         RepresentativeInfo representativeInfo = new RepresentativeInfo(
-                            entry['representative']["type"],
-                            entry['representative']["index"]
+                            signatureInfo['representative']["type"],
+                            signatureInfo['representative']["index"]
                         )
                         matchObject.representativeInfo = representativeInfo
                     }
 
-                    def interproKey = entry['integrated']
-                    def entryInfo = entries['entries'].get(interproKey)
-                    if (entryInfo) {
+                    def interproAcc = signatureInfo['integrated']
+                    if (interproAcc) {
+                        def entryInfo = entries['entries'].get(interproAcc)
+                        assert entryInfo != null
                         Entry entryDataObj = new Entry(
-                            interproKey,
+                            interproAcc,
                             entryInfo["name"],
                             entryInfo["description"],
                             entryInfo["type"]
@@ -110,9 +114,9 @@ process XREFS {
                         matchObject.signature.entry = entryDataObj
                     }
 
-                    if (addGoterms) {
-                        try {
-                            def goIds = ipr2go[interproKey]
+                    if (interproAcc && addGoterms) {
+                        def goIds = ipr2go[interproAcc]
+                        if (goIds) {
                             def goTerms = goIds.collect { goId ->
                                 GoXRefs goXRefObj = new GoXRefs(
                                     goInfo[goId][0],
@@ -122,13 +126,11 @@ process XREFS {
                                 )
                                 matchObject.signature.entry.addGoXRefs(goXRefObj)
                             }
-                        } catch (java.lang.NullPointerException e) {
-                            // pass if no GO Terms found for the current entry
                         }
                     }
-                    if (addPathways) {
-                        try {
-                            def paIds = ipr2pa[interproKey]
+                    if (interproAcc && addPathways) {
+                        def paIds = ipr2pa[interproAcc]
+                        if (paIds) {
                             def paTerms = paIds.collect { paId ->
                                 PathwayXRefs paXRefObj = new PathwayXRefs(
                                     paInfo[paId][1],
@@ -136,26 +138,23 @@ process XREFS {
                                     paId)
                                 matchObject.signature.entry.addPathwayXRefs(paXRefObj)
                             }
-                        } catch (java.lang.NullPointerException e) {
-                            // pass if no Pathways found for the current entry
                         }
                     }
                 }
 
-                if (memberDB == "panther") {
+                if (memberDB == "PANTHER") {
                     accSubfamily = matchObject.signature.accession
                     if (entries['entries'][accSubfamily]) {
                         matchObject.treegrafter.subfamilyName = entries['entries'][accSubfamily]["name"]
                         matchObject.treegrafter.subfamilyDescription = entries['entries'][accSubfamily]["description"]
                     }
                 }
-                return [(rawModelAccession): matchObject]
+                return [(modelAccession): matchObject]
             }]
         }
         matches.each { seqId, seqMatches ->
-            aggregatedMatches[seqId] = aggregatedMatches.get(seqId, [:]) + seqMatches.findAll { rawModelAccession, _ ->
-                !aggregatedMatches[seqId]?.containsKey(rawModelAccession)
-            }
+            aggregatedMatches[seqId] = aggregatedMatches[seqId] ?: [:]
+            aggregatedMatches[seqId].putAll(seqMatches)
         }
     }
     def outputFilePath = task.workDir.resolve("matches2xrefs.json")
@@ -163,7 +162,7 @@ process XREFS {
     new File(outputFilePath.toString()).write(json)
 }
 
-def loadXRefFiles(String xrefType, dataDir, xrefDir) {
+def loadXRefFiles(xrefDir, dataDir) {
     JsonSlurper jsonSlurper = new JsonSlurper()
 
     String iprFilePath = "${dataDir}/${xrefDir}.ipr.json"
@@ -179,6 +178,6 @@ def loadXRefFiles(String xrefType, dataDir, xrefDir) {
         def infoData = jsonSlurper.parse(infoFile)
         return [iprData, infoData]
     } catch (Exception e) {
-        throw new Exception("Error parsing ${xrefType} files: ${e}")
+        throw new Exception("Error parsing goterms/pathways files: ${e}")
     }
 }
