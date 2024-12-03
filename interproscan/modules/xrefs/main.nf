@@ -53,7 +53,7 @@ process XREFS {
                 Match matchObject = Match.fromMap(match)
                 // null check needed for cases that signature still not created on match object (e.g. hmmer3 members)
                 String entrySignatureKey = matchObject.signature?.accession ?: matchObject.modelAccession
-                Map signatureInfo = entries['entries'][entrySignatureKey] ?: entries['entries'][modelAccession]
+                def signatureInfo = entries['entries'][entrySignatureKey] ?: entries['entries'][modelAccession]
                 String memberDB = matchObject.signature?.signatureLibraryRelease?.library
                 String memberRelease = null
                 if (!memberDB) {
