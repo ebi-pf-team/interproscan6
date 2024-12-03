@@ -52,11 +52,11 @@ process XREFS {
             [(seqId): matches.collectEntries { modelAccession, match ->
                 Match matchObject = Match.fromMap(match)
                 // null check needed for cases that signature still not created on match object (e.g. hmmer3 members)
-                def entrySignatureKey = matchObject.signature?.accession ?: matchObject.modelAccession.split("\\.")[0]
+                def entrySignatureKey = matchObject.signature?.accession ?: matchObject.modelAccession
                 Map signatureInfo = entries['entries'][entrySignatureKey] ?: entries['entries'][modelAccession]
-                try {
-                    String memberDB = matchObject.signature.signatureLibraryRelease.library
-                } catch (java.lang.NullPointerException e) {
+                String memberDB = matchObject.signature?.signatureLibraryRelease?.library
+                String memberRelease = null
+                if (!memberDB) {
                     if (signatureInfo) {
                         memberDB = signatureInfo["database"]
                         memberRelease = entries["databases"][memberDB]
@@ -65,10 +65,6 @@ process XREFS {
                     else if (modelAccession.startsWith("PIRSR")) {
                         memberDB = "PIRSR"
                         memberRelease = entries["databases"][memberDB]
-                    } else {
-                        memberDB = null
-                        memberRelease = null
-                        println "WARNING: Signature library not found on entries.json file for accession '${modelAccession}'"
                     }
                     SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
                     if (!matchObject.signature) {
@@ -105,11 +101,12 @@ process XREFS {
                         matchObject.representativeInfo = representativeInfo
                     }
 
-                    def interproKey = signatureInfo['integrated']
-                    def entryInfo = entries['entries'].get(interproKey)
-                    if (entryInfo) {
+                    def interproAcc = signatureInfo['integrated']
+                    if (interproAcc) {
+                        def entryInfo = entries['entries'].get(interproAcc)
+                        assert entryInfo != null
                         Entry entryDataObj = new Entry(
-                            interproKey,
+                            interproAcc,
                             entryInfo["name"],
                             entryInfo["description"],
                             entryInfo["type"]
@@ -117,9 +114,9 @@ process XREFS {
                         matchObject.signature.entry = entryDataObj
                     }
 
-                    if (addGoterms) {
-                        try {
-                            def goIds = ipr2go[interproKey]
+                    if (interproAcc && addGoterms) {
+                        def goIds = ipr2go[interproAcc]
+                        if (goIds) {
                             def goTerms = goIds.collect { goId ->
                                 GoXRefs goXRefObj = new GoXRefs(
                                     goInfo[goId][0],
@@ -129,13 +126,11 @@ process XREFS {
                                 )
                                 matchObject.signature.entry.addGoXRefs(goXRefObj)
                             }
-                        } catch (java.lang.NullPointerException e) {
-                            // pass if no GO Terms found for the current entry
                         }
                     }
-                    if (addPathways) {
-                        try {
-                            def paIds = ipr2pa[interproKey]
+                    if (interproAcc && addPathways) {
+                        def paIds = ipr2pa[interproAcc]
+                        if (paIds) {
                             def paTerms = paIds.collect { paId ->
                                 PathwayXRefs paXRefObj = new PathwayXRefs(
                                     paInfo[paId][1],
@@ -143,8 +138,6 @@ process XREFS {
                                     paId)
                                 matchObject.signature.entry.addPathwayXRefs(paXRefObj)
                             }
-                        } catch (java.lang.NullPointerException e) {
-                            // pass if no Pathways found for the current entry
                         }
                     }
                 }
@@ -160,9 +153,8 @@ process XREFS {
             }]
         }
         matches.each { seqId, seqMatches ->
-            aggregatedMatches[seqId] = aggregatedMatches.get(seqId, [:]) + seqMatches.findAll { modelAccession, _ ->
-                !aggregatedMatches[seqId]?.containsKey(modelAccession)
-            }
+            aggregatedMatches[seqId] = aggregatedMatches[seqId] ?: [:]
+            aggregatedMatches[seqId].putAll(seqMatches)
         }
     }
     def outputFilePath = task.workDir.resolve("matches2xrefs.json")
@@ -170,7 +162,7 @@ process XREFS {
     new File(outputFilePath.toString()).write(json)
 }
 
-def loadXRefFiles(String xrefType, dataDir, xrefDir) {
+def loadXRefFiles(xrefDir, dataDir) {
     JsonSlurper jsonSlurper = new JsonSlurper()
 
     String iprFilePath = "${dataDir}/${xrefDir}.ipr.json"
@@ -186,6 +178,6 @@ def loadXRefFiles(String xrefType, dataDir, xrefDir) {
         def infoData = jsonSlurper.parse(infoFile)
         return [iprData, infoData]
     } catch (Exception e) {
-        throw new Exception("Error parsing ${xrefType} files: ${e}")
+        throw new Exception("Error parsing goterms/pathways files: ${e}")
     }
 }
