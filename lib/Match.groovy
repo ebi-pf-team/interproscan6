@@ -54,6 +54,7 @@ class Match implements Serializable {
         match.included = data.included
         match.locations = data.locations.collect { Location.fromMap(it) }
         match.treegrafter = TreeGrafter.fromMap(data.treegrafter)
+        match.representativeInfo = RepresentativeInfo.fromMap(data.representativeInfo)
         return match
     }
 

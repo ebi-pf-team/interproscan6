@@ -8,6 +8,7 @@ process WRITE_TSV_OUTPUT {
     input:
     val matches
     val outputPath
+    val nucleic
 
     exec:
     def outputFilePath = "${outputPath}.ips6.tsv"
@@ -21,14 +22,19 @@ process WRITE_TSV_OUTPUT {
             Match match = Match.fromMap(matchData)
             String memberDb = match.signature.signatureLibraryRelease.library
             String sigDesc = match.signature.description?: '-'
-            String goterms = match.signature.entry?.goXRefs ? (match.signature.entry.goXRefs.isEmpty() ? '-' : match.signature.entry.goXRefs.join('|')) : '-'
-            String pathways = match.signature.entry?.pathwayXRefs ? (match.signature.entry.pathwayXRefs.isEmpty() ? '-' : match.signature.entry.pathwayXRefs.join('|')) : '-'
+            String goterms = match.signature.entry?.goXRefs ?
+                             (match.signature.entry.goXRefs.isEmpty() ? '-' :
+                             match.signature.entry.goXRefs.collect { goXref -> "${goXref.id}(${goXref.databaseName})" }.join('|')) : '-'
+            String pathways = match.signature.entry?.pathwayXRefs ?
+                             (match.signature.entry.pathwayXRefs.isEmpty() ? '-' :
+                             match.signature.entry.pathwayXRefs.collect { ptXref -> "${ptXref.databaseName}:${ptXref.id}" }.join('|')) : '-'
             String entryAcc = match.signature.entry?.accession ?: '-'
             String entryDesc = match.signature.entry?.description ?: '-'
             char status = 'T'
 
             seqData["xref"].each { xrefData ->
                 match.locations.each { Location loc ->
+                    String seqId = nucleic ? "${seqData.translatedFrom.id}_${xrefData.id}" : xrefData.id
                     int start = loc.start
                     int end = loc.end
                     def scoringValue = "-"
@@ -51,7 +57,7 @@ process WRITE_TSV_OUTPUT {
                     }
 
                     tsvFile.append([
-                        xrefData["id"], seqData["md5"], seqData["sequence"].length(),
+                        seqId, seqData["md5"], seqData["sequence"].length(),
                         memberDb,
                         match.signature.accession, sigDesc,
                         start, end, scoringValue, status,
