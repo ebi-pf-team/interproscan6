@@ -21,7 +21,7 @@ process SEARCH_PANTHER {
 }
 
 process PREPARE_TREEGRAFTER {
-    label 'small'
+    label 'small',
 
     input:
     tuple val(meta), val(hmmseach_out)
@@ -135,7 +135,7 @@ process PREPARE_TREEGRAFTER {
 
 
 process RUN_TREEGRAFTER {
-    label 'small'
+    label 'small', 'ips6_container'
     
     input:
     tuple val(meta), val(sequenceIds), val(familyIds), path(fastas)
