@@ -1,5 +1,5 @@
 process ESL_TRANSLATE {
-    label 'get_orfs'
+    label 'small'
 
     input:
     path fasta

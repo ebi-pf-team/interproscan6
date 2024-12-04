@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process RUN_COILS {
-    label 'coils_runner'
+    label 'small'
 
     input:
     tuple val(meta), path(fasta)
@@ -17,7 +17,7 @@ process RUN_COILS {
 
 
 process PARSE_COILS {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(coils_out)

@@ -2,7 +2,7 @@ import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
 process RUN_SIGNALP {
-    label 'signalp_runner'
+    label 'medium'
 
     input:
     tuple val(meta), path(fasta)
@@ -30,7 +30,7 @@ process RUN_SIGNALP {
 }
 
 process PARSE_SIGNALP {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(organism), val(mode), val(signalp_out)

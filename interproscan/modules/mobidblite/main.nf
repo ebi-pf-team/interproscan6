@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process RUN_MOBIDBLITE {
-    label 'mobidblite_runner'
+    label 'small'
 
     input:
     tuple val(meta), path(fasta)
@@ -17,7 +17,7 @@ process RUN_MOBIDBLITE {
 
 
 process PARSE_MOBIDBLITE {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(mobidblite_output)

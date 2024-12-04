@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process SEARCH_GENE3D {
-    label 'hmmer_runner'
+    label 'medium'
 
     input:
     tuple val(meta), path(fasta)
@@ -20,7 +20,7 @@ process SEARCH_GENE3D {
 }
 
 process RESOLVE_GENE3D {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), path(hmmseach_out)
@@ -40,7 +40,7 @@ process RESOLVE_GENE3D {
 }
 
 process ASSIGN_CATH {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), path(cath_resolve_out)
@@ -61,7 +61,7 @@ process ASSIGN_CATH {
 }
 
 process PARSE_CATHGENE3D {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(hmmseach_out), val(cath_tsv)

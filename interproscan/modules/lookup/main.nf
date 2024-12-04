@@ -1,6 +1,6 @@
 process LOOKUP_CHECK {
     // Checks if protein sequence is included in InterPro
-    label 'mls'
+    label 'small'
     
     input:
     val hash_seq
@@ -32,7 +32,7 @@ process LOOKUP_MATCHES {
     this situation is not detected by LOOKUP_CHECK which only detects that 
     protein sequence has been analysed during an InterPro release.
     */
-    label 'mls'
+    label 'small'
     
     input:
     val checked_md5
@@ -65,7 +65,7 @@ process LOOKUP_MATCHES {
 
 
 process LOOKUP_NO_MATCHES {
-    label 'mls'
+    label 'small'
 
     input:
     val checked_md5

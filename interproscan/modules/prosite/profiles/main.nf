@@ -2,7 +2,7 @@ import groovy.io.FileType
 import groovy.json.JsonOutput
 
 process RUN_PFSEARCH {
-    label 'prosite_pfsearch_runner'
+    label 'small'
 
     input:
         tuple val(meta), path(fasta)
@@ -24,7 +24,7 @@ process RUN_PFSEARCH {
 }
 
 process PARSE_PFSEARCH {
-    label 'analysis_parser'
+    label 'small'
 
     input:
         tuple val(meta), val(pfsearch_out)

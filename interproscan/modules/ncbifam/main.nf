@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process RUN_NCBIFAM {
-    label 'hmmer_runner'
+    label 'small'
 
     input:
     tuple val(meta), path(fasta)
@@ -20,7 +20,7 @@ process RUN_NCBIFAM {
 }
 
 process PARSE_NCBIFAM {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(hmmseach_out)

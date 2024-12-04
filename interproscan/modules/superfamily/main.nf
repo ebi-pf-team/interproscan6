@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process SEARCH_SUPERFAMILY {
-    label 'hmmer_runner'
+    label 'small'
 
     input:
     tuple val(meta), path(fasta)
@@ -36,6 +36,8 @@ process SEARCH_SUPERFAMILY {
 }
 
 process PARSE_SUPERFAMILY {
+    label 'small'
+
     input:
     tuple val(meta), val(superfamily_out)
     val model_tsv

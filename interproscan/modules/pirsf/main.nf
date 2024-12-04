@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process RUN_PIRSF {
-    label 'hmmer_runner'
+    label 'small'
 
     input:
     tuple val(meta), path(fasta)
@@ -21,7 +21,7 @@ process RUN_PIRSF {
 }
 
 process PARSE_PIRSF {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(hmmsearch_dtbl)

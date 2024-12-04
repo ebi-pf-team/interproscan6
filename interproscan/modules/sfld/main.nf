@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process RUN_SFLD {
-    label 'hmmer_runner'
+    label 'small'
 
     input:
     tuple val(meta), path(fasta)
@@ -24,7 +24,7 @@ process RUN_SFLD {
 }
 
 process POST_PROCESS_SFLD {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(hmmsearch_out), val(hmmsearch_dtbl), val(hmmsearch_alignment)
@@ -46,7 +46,7 @@ process POST_PROCESS_SFLD {
 
 
 process PARSE_SFLD {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(postprocess_out)

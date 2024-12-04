@@ -2,7 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 process REPRESENTATIVE_DOMAINS {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     val matchesPath

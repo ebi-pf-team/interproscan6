@@ -3,7 +3,7 @@ import groovy.json.JsonSlurper
 import java.util.regex.Pattern
 
 process RUN_PIRSR {
-    label 'hmmer_runner'
+    label 'small'
 
     input:
     tuple val(meta), path(fasta)
@@ -22,7 +22,7 @@ process RUN_PIRSR {
 }
 
 process PARSE_PIRSR {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(hmmsearch_out)

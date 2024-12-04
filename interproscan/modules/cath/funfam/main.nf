@@ -2,6 +2,8 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 process PREPARE_FUNFAM {
+    label 'small'
+
     input:
     tuple val(meta), val(cathgene3d_json)
     val root_dir
@@ -37,7 +39,7 @@ process PREPARE_FUNFAM {
 }
 
 process SEARCH_FUNFAM {
-    label 'hmmer_runner'
+    label 'medium'
 
     input:
     tuple val(meta), path(fasta), val(supfams)
@@ -63,7 +65,7 @@ process SEARCH_FUNFAM {
 }
 
 process RESOLVE_FUNFAM {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), path(hmmseach_out)
@@ -84,7 +86,7 @@ process RESOLVE_FUNFAM {
 
 
 process PARSE_FUNFAM {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(hmmseach_out), val(resolved_tsv)
