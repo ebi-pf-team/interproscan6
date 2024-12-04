@@ -54,6 +54,7 @@ class Match implements Serializable {
         match.included = data.included
         match.locations = data.locations.collect { Location.fromMap(it) }
         match.treegrafter = TreeGrafter.fromMap(data.treegrafter)
+        match.representativeInfo = RepresentativeInfo.fromMap(data.representativeInfo)
         return match
     }
 
@@ -308,7 +309,7 @@ class Location implements Serializable {
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
     }
-  
+
      Location(int start, int end, Double score, String targetAlignment) { // Used for Hamap, PrositeProfiles
         this.start = start
         this.end = end
@@ -328,9 +329,10 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-    Location(int start, int end, Double evalue, List<LocationFragment> fragments) { // Used for Superfamily
+    Location(int start, int end, Integer hmmLength, Double evalue, List<LocationFragment> fragments) { // Used for Superfamily
         this.start = start
         this.end = end
+        this.hmmLength = hmmLength
         this.evalue = evalue
         this.fragments = fragments
     }
@@ -375,11 +377,21 @@ class Location implements Serializable {
         loc.pvalue = data.pvalue
         return loc
     }
-      
+
+    String getHmmBounds(String hmmBounds) {
+        def boundsMapping = [
+                "[]"  : "COMPLETE",
+                "[."  : "N_TERMINAL_COMPLETE",
+                ".]"  : "C_TERMINAL_COMPLETE",
+                ".."  : "INCOMPLETE"
+        ]
+        return boundsMapping[hmmBounds]
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(start, end, hmmStart, hmmEnd, hmmLength, hmmBounds, 
-                            envelopeStart, envelopeEnd, evalue, score, bias, 
+        return Objects.hash(start, end, hmmStart, hmmEnd, hmmLength, hmmBounds,
+                            envelopeStart, envelopeEnd, evalue, score, bias,
                             queryAlignment, targetAlignment, fragments, sites)
     }
 

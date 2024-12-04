@@ -328,7 +328,8 @@ workflow SCAN_SEQUENCES {
 
         PARSE_SUPERFAMILY(
             SEARCH_SUPERFAMILY.out,
-            "${datadir}/${appsConfig.superfamily.model}"
+            "${datadir}/${appsConfig.superfamily.model}",
+            "${datadir}/${appsConfig.superfamily.hmm}"
         )
         results = results.mix(PARSE_SUPERFAMILY.out)
     }
