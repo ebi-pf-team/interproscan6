@@ -21,7 +21,7 @@ process SEARCH_PANTHER {
 }
 
 process PREPARE_TREEGRAFTER {
-    label 'small',
+    label 'small'
 
     input:
     tuple val(meta), val(hmmseach_out)
