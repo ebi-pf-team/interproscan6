@@ -217,9 +217,9 @@ Nextflow also supports using Charliecloud, Podman, Sarus, and Shifter. However, 
 
 **`--help`** - Display the help message.
 
-**`--maxWorkers`** - Maximum number of workers available for the `InterProScan` when running locally.
+**`--max-workers`** - Maximum number of workers available for the `InterProScan` when running locally.
 > [!IMPORTANT] 
-> - *--maxWorkers* is only applies when using the `local` profile (i.e. `-profile local`) it does **_not_** apply when running on a cluster.
+> - *--max-workers* is only applies when using the `local` profile (i.e. `-profile local`) it does **_not_** apply when running on a cluster.
 > - IPS6 will always use a minimum or 2 CPUs, with at least 1 dedicated to the main workflow and 1 to run processes (exception for PRINTS member, which require 2 CPUs to run processes).
 
 **`--nucleic`** - Instead of providing protein sequences, the input FASTA file contains nucleic sequences. See the '[Using DNA sequences](#using-dna-sequences)' section for more information.
