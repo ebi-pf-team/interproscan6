@@ -24,7 +24,10 @@ process PREPARE_NUCLEIC_SEQUENCES {
         def source = match[0][1]
         def ntSeq = ntSequences[source]
         seq.translatedFrom = ntSeq
-        output[seq.md5] = seq
+        if (!output.containsKey(seq.md5)) {
+            output[seq.md5] = []
+        }
+        output[seq.md5] << seq
     }
     def outputPath = task.workDir.resolve("sequences.json")
     def json = JsonOutput.toJson(output)
