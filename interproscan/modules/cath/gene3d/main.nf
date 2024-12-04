@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process SEARCH_GENE3D {
-    label 'medium'
+    label 'medium', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -20,7 +20,7 @@ process SEARCH_GENE3D {
 }
 
 process RESOLVE_GENE3D {
-    label 'small'
+    label 'small', 'ips6_container'
 
     input:
     tuple val(meta), path(hmmseach_out)

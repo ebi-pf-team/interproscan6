@@ -1,5 +1,5 @@
 process ESL_TRANSLATE {
-    label 'small'
+    label 'small', 'ips6_container'
 
     input:
     path fasta

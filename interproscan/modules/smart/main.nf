@@ -2,7 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 process SEARCH_SMART {
-    label 'medium'
+    label 'medium', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)

@@ -3,7 +3,7 @@ import groovy.json.JsonSlurper
 import java.util.regex.Pattern
 
 process RUN_PIRSR {
-    label 'small'
+    label 'small', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)

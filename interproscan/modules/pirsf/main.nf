@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process RUN_PIRSF {
-    label 'small'
+    label 'small', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)

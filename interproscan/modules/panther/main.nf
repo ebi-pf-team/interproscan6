@@ -2,7 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 process SEARCH_PANTHER {
-    label 'small'
+    label 'small', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)

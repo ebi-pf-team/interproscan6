@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process SEARCH_PFAM {
-    label 'small'
+    label 'small', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
