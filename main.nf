@@ -9,6 +9,7 @@ include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_s
 include { XREFS                         } from "./interproscan/modules/xrefs"
 include { AGGREGATE_SEQS_MATCHES;
           AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_matches"
+include { REPRESENTATIVE_DOMAINS        } from "./interproscan/modules/representative_domains"
 include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
 include { WRITE_XML_OUTPUT } from "./interproscan/modules/output/xml"
 
@@ -90,7 +91,7 @@ workflow {
     AGGREGATE_SEQS_MATCHES(ch_seq_matches, params.nucleic)
     AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
 
-    // REPRESENTATIVE_DOMAINS(XREFS.out.collect())
+    REPRESENTATIVE_DOMAINS(AGGREGATE_ALL_MATCHES.out)
 
     Channel.from(params.formats.toLowerCase().split(','))
     .set { ch_format }
@@ -99,10 +100,10 @@ workflow {
     def fileName = params.input.split('/').last()
     def outFileName = "${params.outdir}/${fileName}"
     if (formats.contains("TSV")) {
-        WRITE_TSV_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}")
+        WRITE_TSV_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}")
     }
     if (formats.contains("XML")) {
-        WRITE_XML_OUTPUT(AGGREGATE_ALL_MATCHES.out, "${outFileName}", workflow.manifest.version)
+        WRITE_XML_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", workflow.manifest.version)
     }
 }
 
