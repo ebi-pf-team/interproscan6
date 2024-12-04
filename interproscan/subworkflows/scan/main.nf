@@ -220,7 +220,7 @@ workflow SCAN_SEQUENCES {
             "${datadir}/${appsConfig.pirsf.hmm}"
         )
         PARSE_PIRSF(RUN_PIRSF.out,
-            "${datadir}/${appsConfig.pirsf.postprocess.data}")
+            "${datadir}/${appsConfig.pirsf.data}")
 
         results = results.mix(PARSE_PIRSF.out)
     }
