@@ -152,10 +152,16 @@ class InterProScan {
     }
 
     static validateApplications(String applications, Map appsConfig) {
+        List<String> licensedSoftware = ["phobius", "signalp_euk", "signalp_prok", "tmhmm"]
         if (!applications) {
             // Run all applications
             def appsToRun = appsConfig.findAll{ it ->
-                !(it.value.disabled)
+                def appName = it.key
+                def appConfig = it.value
+                if (licensedSoftware.contains(appName)) {
+                    return !(appConfig.disabled) && appConfig?.dir && !appConfig?.dir.isAllWhitespace()
+                }
+                return !(it.value.disabled)
             }.keySet().toList()
             return [appsToRun, null]
         }
@@ -171,7 +177,6 @@ class InterProScan {
                 allApps[stdAlias] = label
             }
         }
-
         def appsToRun = []
         def appsParam = applications.replaceAll("[- ]", "").split(",").collect { it.trim() }.toSet()
         for (appName in appsParam) {
@@ -183,7 +188,6 @@ class InterProScan {
                 return [null, error]
             }
         }
-
         return [appsToRun.toSet().toList(), null]
     }
 
