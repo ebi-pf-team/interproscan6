@@ -191,6 +191,31 @@ class InterProScan {
         return [appsToRun.toSet().toList(), null]
     }
 
+    static validateAppData(List<String> apps, Path datadir, Map appsConfig) {
+        /* Include the datadir in the file path
+        Use resolve dir for "dir"
+        and make sure only the correct values for the correct keys are being checked
+         */
+        Map<String, Map<String, String>> missingFiles = [:]
+        def nonPathKeys = ["name", "runner", "aliases", "invalid_chars", "chunkSize", "organism", "mode"]
+        apps.each { app ->
+            appsConfig."$app".findAll { key, value ->
+                !nonPathKeys.contains(key) && !resolveFile("${datadir}/${value}")
+            }.each { key, value ->
+                missingFiles.computeIfAbsent(app) { [:] }[key] = value
+            }
+        }
+        def error = null
+        if (missingFiles) {
+            String errorMsg = appsConfig.collect {appName, filesMap ->
+                filesMap.collect { fileName, filePath -> "${appName}: ${fileName}: ${filePath}" }.join('\n') }.join('\n')
+            error = "Could not find the following data files\n${errorMsg}"
+        }
+        println(" ${error} ---")
+        System.exit(1)
+        return error
+    }
+
     static List<String> validateSignalpMode(String signalpMode) {
         if (signalpMode.toLowerCase() !in ['fast', 'slow', 'slow-sequential']) {
             def error = "Unrecognised SignalP mode: '${signalpMode}'. Accepted modes: 'fast', 'slow', 'slow-sequential'"

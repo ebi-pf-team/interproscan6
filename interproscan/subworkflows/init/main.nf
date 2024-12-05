@@ -25,6 +25,13 @@ workflow INIT_PIPELINE {
         exit 1
     }
 
+    // Application data file validation
+    error = InterProScan.validateAppData(apps, datadir, params.appsConfig)
+    if (error) {
+        log.error error
+        exit 1
+    }
+
     // SignalP mode validation
     (signalpMode, error) = InterProScan.validateSignalpMode(params.signalpMode)
     if (!signalpMode) {
