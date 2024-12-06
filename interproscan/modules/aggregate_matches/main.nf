@@ -36,7 +36,10 @@ process AGGREGATE_SEQS_MATCHES {
                 seqMatchesAggreg[md5].sequence = sequence.sequence
                 seqMatchesAggreg[md5].md5 = md5
                 seqMatchesAggreg[md5].xref << ["name": "${orf.id} ${orf.description}", "id": orf.id]
-                seqMatchesAggreg[md5].translatedFrom = orf.translatedFrom // add nucleic seq metadata
+                if (seqMatchesAggreg[md5].translatedFrom == null) {
+                    seqMatchesAggreg[md5].translatedFrom = []
+                }
+                seqMatchesAggreg[md5].translatedFrom << orf.translatedFrom // add nucleic seq metadata
             }
         } else {
             FastaSequence sequence = FastaSequence.fromMap(info)
