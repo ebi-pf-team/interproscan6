@@ -5,8 +5,8 @@ import subprocess
 
 def get_current_output(test_output_dir: str, current_output_path: str, input_path: str, applications: str, disable_precalc: bool) -> dict:
     disable_precalc = "--disable_precalc" if disable_precalc else ""
-    command = f"nextflow run main.nf --input {input_path} --applications {applications} {disable_precalc} " \
-              f"--formats json --outdir {test_output_dir} --goterms --pathways -profile docker --datadir data"
+    command = f"nextflow run interproscan.nf --input {input_path} --applications {applications} {disable_precalc} " \
+              f"--formats json,tsv-pro --outdir {test_output_dir} --goterms --pathways -profile docker"
     if os.path.exists(str(current_output_path) + ".json"):
         os.remove(str(current_output_path) + ".json")
     subprocess.run(command, shell=True)
@@ -36,20 +36,23 @@ def json2dict(obj):
         return obj
 
 
-def compare(expected, current, ignore_elements: list, print_seq_info: bool):
+def compare(expected, current, ignore_elements: list, print_md5: bool, print_acc: bool):
     for key in expected:
-        if key == "id" and print_seq_info:
-            print(f"seqId: {expected[key]}")
-        if key == "accession" and print_seq_info:
+        if key == "md5" and print_md5:
+            print(f"md5: {expected[key]}")
+            print_md5 = False
+        if key == "accession" and print_acc:
             print(f"accession: {expected[key]}")
+            print_acc = False
         if key in ignore_elements:
             continue
         if key not in current:
             print(f"MISMATCH: Key '{key}' missing in current dict")
-            print_seq_info = True
+            print_md5 = True
+            print_acc = True
             continue
         if isinstance(expected[key], dict):
-            compare(expected[key], current[key], ignore_elements, print_seq_info)
+            compare(expected[key], current[key], ignore_elements, print_md5, print_acc)
         elif isinstance(expected[key], list):
             if len(expected[key]) != len(current[key]):
                 print((
@@ -59,12 +62,14 @@ def compare(expected, current, ignore_elements: list, print_seq_info: bool):
                 ))
             else:
                 for i in range(len(expected[key])):
-                    compare(expected[key][i], current[key][i], ignore_elements, print_seq_info)
+                    compare(expected[key][i], current[key][i], ignore_elements, print_md5, print_acc)
         else:
-            if str(expected[key]).lower().strip() != str(current[key]).lower().strip():
+            if str(expected[key]).lower() != str(current[key]).lower():
                 print(f"MISMATCH: for key '{key}'")
                 print(f"  expected: {expected[key]}")
                 print(f"  current: {current[key]}")
+                print_md5 = True
+                print_acc = True
 
 
 def test_json_output(test_output_dir, input_path, expected_output_path, output_path, applications, disable_precalc):
@@ -80,7 +85,7 @@ def test_json_output(test_output_dir, input_path, expected_output_path, output_p
         json.dump(current, file, indent=2)
 
     ignore_elements = []
-    compare(expected, current, ignore_elements, True)
-    # compare(current, expected, ignore_elements, False)
+    compare(expected, current, ignore_elements, False, False)
+    # compare(current, expected, ignore_elements, False, False)
 
     assert expected == current
