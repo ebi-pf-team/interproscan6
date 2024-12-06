@@ -172,37 +172,36 @@ process WRITE_JSON_OUTPUT {
         sequence["matches"] = seqMatches
 
         if (nucleic) {
-            def nucleicSeqMd5 = sequence.translatedFrom.md5
+            def nucleicSeqMd5 = sequence.translatedFrom[0].md5  // nucleic sequence md5 - same for all ORFs
             if (!nucleicResults.containsKey(nucleicSeqMd5)) {
                 nucleicResults[nucleicSeqMd5] = [
                     sequence          : sequence.translatedFrom[0].sequence,
-                    md5               : sequence.translatedFrom[0].md5,
+                    md5               : nucleicSeqMd5,
                     crossReferences   : [],
                     openReadingFrames : []
                 ]
-                sequence.translatedFrom.each { translatedFrom ->
+                sequence.translatedFrom.each { seq ->
                     nucleicResults[nucleicSeqMd5].crossReferences << [
-                        name: "${translatedFrom.id} ${translatedFrom.description}",
-                        id  : translatedFrom.id
+                        name: "${seq.id} ${seq.description}",
+                        id  : seq.id
                     ]
                 }
             }
 
             def ntMatch = NT_SEQ_ID_PATTERN.matcher(sequence.xref[0].name)
-            if (ntMatch.matches()) {
-                nucleicResults[nucleicSeqMd5].openReadingFrames << [
-                    start   : ntMatch.group(2).split("\\.\\.")[1] as int,
-                    end     : ntMatch.group(2).split("\\.\\.")[0] as int,
-                    strand  : (ntMatch.group(3) as int) < 4 ? "SENSE" : "ANTISENSE",
-                    protein : [
-                        sequence : sequence.sequence,
-                        md5      : sequence.md5,
-                        matches  : sequence.matches,
-                        xref     : sequence.xref
-                    ]
+            assert ntMatch.matches()
+            nucleicResults[nucleicSeqMd5].openReadingFrames << [
+                start   : ntMatch.group(2).split("\\.\\.")[1] as int,
+                end     : ntMatch.group(2).split("\\.\\.")[0] as int,
+                strand  : (ntMatch.group(3) as int) < 4 ? "SENSE" : "ANTISENSE",
+                protein : [
+                    sequence : sequence.sequence,
+                    md5      : sequence.md5,
+                    matches  : sequence.matches,
+                    xref     : sequence.xref
                 ]
-            }
-            jsonOutput["results"].add(nucleicResults.values())
+            ]
+            jsonOutput["results"] = nucleicResults.values()
         } else {
             jsonOutput["results"].add(sequence)
         }
