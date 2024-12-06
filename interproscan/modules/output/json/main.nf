@@ -41,7 +41,6 @@ process WRITE_JSON_OUTPUT {
 
     jsonSlurper.parse(seqMatches).each { sequence ->
         def seqMatches = []
-
         sequence["matches"].each { matchId, match ->
             Match matchObj = Match.fromMap(match)
             String memberDB = matchObj.signature.signatureLibraryRelease.library ?: ""

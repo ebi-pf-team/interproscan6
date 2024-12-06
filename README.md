@@ -217,6 +217,11 @@ Nextflow also supports using Charliecloud, Podman, Sarus, and Shifter. However, 
 
 **`--help`** - Display the help message.
 
+**`--max-workers`** - Maximum number of workers available for the `InterProScan` when running locally.
+> [!IMPORTANT] 
+> - *--max-workers* is only applies when using the `local` profile (i.e. `-profile local`) it does **_not_** apply when running on a cluster.
+> - IPS6 will always use a minimum or 2 CPUs, with at least 1 dedicated to the main workflow and 1 to run processes (exception for PRINTS member, which require 2 CPUs to run processes).
+
 **`--nucleic`** - Instead of providing protein sequences, the input FASTA file contains nucleic sequences. See the '[Using DNA sequences](#using-dna-sequences)' section for more information.
 
 **`--outdir`** - Output directory. By default, the output files are written to the current working directory. Use `--outdir` to define the relative or abosolute path to the output directory. `InterProScan` will build all necessary directories.
