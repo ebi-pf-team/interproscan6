@@ -31,24 +31,30 @@ process WRITE_XML_OUTPUT {
         jsonData.each { seqData ->
             if (nucleic) {
                 def ntSequenceMD5 = seqData.translatedFrom[0]["md5"]
-                if (!processedNT.contains(ntSequenceMD5)) {
-                    processedNT << ntSequenceMD5
-                    nucleotideSequence {
+                nucleotideSequence {
+                    if (!processedNT.contains(ntSequenceMD5)) {
+                        processedNT << ntSequenceMD5
                         sequence(md5: ntSequenceMD5, seqData.translatedFrom[0]["sequence"])
                         seqData.translatedFrom.each { crossRef ->
                             xref(id: crossRef.id, name: "${crossRef.id} ${crossRef.description}")
                         }
-                        def ntMatch = NT_SEQ_ID_PATTERN.matcher(seqData.xref[0].name)
-                        assert ntMatch.matches()
-                        def end = ntMatch.group(2).split("\\.\\.")[0] as int
-                        def start = ntMatch.group(2).split("\\.\\.")[1] as int
-                        def strand = (ntMatch.group(3) as int) < 4 ? "SENSE" : "ANTISENSE"
-                        orf (end: end, start: start, strand: strand) {
-                            protein {
-                                sequence(md5: seqData["md5"], seqData["sequence"])
-                                if (seqData["matches"]) {
-                                    matches {
-                                        processMatches(seqData["matches"], xml)
+                    }
+                    def ntMatch = NT_SEQ_ID_PATTERN.matcher(seqData.xref[0].name)
+                    assert ntMatch.matches()
+                    def end = ntMatch.group(2).split("\\.\\.")[0] as int
+                    def start = ntMatch.group(2).split("\\.\\.")[1] as int
+                    def strand = (ntMatch.group(3) as int) < 4 ? "SENSE" : "ANTISENSE"
+                    orf (end: end, start: start, strand: strand) {
+                        protein {
+                            sequence(md5: seqData["md5"], seqData["sequence"])
+                            matches {
+                                processMatches(seqData["matches"], xml)
+                            }
+                            xrefs {
+                                seqData.xref.each { ref ->
+                                    xref {
+                                        name(ref["name"])
+                                        id(ref["id"])
                                     }
                                 }
                             }
@@ -58,17 +64,15 @@ process WRITE_XML_OUTPUT {
             } else {
                 protein {
                     sequence(md5: seqData["md5"], seqData["sequence"])
-                    if (seqData["matches"]) {
-                        matches {
-                            processMatches(seqData["matches"], xml)
-                        }
+                    matches {
+                        processMatches(seqData["matches"], xml)
                     }
-                }
-                xrefs {
-                    seqData.xref.each { ref ->
-                        xref {
-                            name(ref["name"])
-                            id(ref["id"])
+                    xrefs {
+                        seqData.xref.each { ref ->
+                            xref {
+                                name(ref["name"])
+                                id(ref["id"])
+                            }
                         }
                     }
                 }
@@ -125,7 +129,8 @@ def processMatches(matches, xml) {
             matchAttributes.evalue = matchObj.evalue
             matchAttributes.graftscan = matchObj.graphScan
         }
-        "$matchNodeName-match"(matchAttributes) {
+
+        xml."$matchNodeName-match"(matchAttributes) {
             def signatureAttributes = [ac: matchObj.signature.accession]
             if (matchObj.signature.name){
                 signatureAttributes.name = matchObj.signature.name
