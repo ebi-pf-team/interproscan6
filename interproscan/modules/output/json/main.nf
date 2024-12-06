@@ -17,6 +17,7 @@ process WRITE_JSON_OUTPUT {
     def jsonOutput = [:]
     jsonOutput["interproscan-version"] = ips6Version
     jsonOutput["results"] = []
+    def nucleicResults = [:]
 
     Map<String, List<String>> membersLocationFields = [
         "CDD": ["evalue-match", "score-match"],
@@ -172,23 +173,25 @@ process WRITE_JSON_OUTPUT {
         sequence["matches"] = seqMatches
 
         if (nucleic) {
-            def nucleicResults = [:]
-            def nucleicSeqId = sequence.translatedFrom.id
-            if (!nucleicResults.containsKey(nucleicSeqId)) {
-                nucleicResults[nucleicSeqId] = [
-                    sequence          : sequence.translatedFrom.sequence,
-                    md5               : sequence.translatedFrom.md5,
-                    crossReferences   : [[
-                        name: "${nucleicSeqId} ${sequence.translatedFrom.description}",
-                        id  : nucleicSeqId
-                    ]],
+            def nucleicSeqMd5 = sequence.translatedFrom.md5
+            if (!nucleicResults.containsKey(nucleicSeqMd5)) {
+                nucleicResults[nucleicSeqMd5] = [
+                    sequence          : sequence.translatedFrom[0].sequence,
+                    md5               : sequence.translatedFrom[0].md5,
+                    crossReferences   : [],
                     openReadingFrames : []
                 ]
+                sequence.translatedFrom.each { translatedFrom ->
+                    nucleicResults[nucleicSeqMd5].crossReferences << [
+                        name: "${translatedFrom.id} ${translatedFrom.description}",
+                        id  : translatedFrom.id
+                    ]
+                }
             }
 
             def ntMatch = NT_SEQ_ID_PATTERN.matcher(sequence.xref[0].name)
             if (ntMatch.matches()) {
-                nucleicResults[nucleicSeqId].openReadingFrames << [
+                nucleicResults[nucleicSeqMd5].openReadingFrames << [
                     start   : ntMatch.group(2).split("\\.\\.")[0] as int,
                     end     : ntMatch.group(2).split("\\.\\.")[1] as int,
                     strand  : (ntMatch.group(3) as int) < 4 ? "SENSE" : "ANTISENSE",
