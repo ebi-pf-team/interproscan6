@@ -158,10 +158,8 @@ class InterProScan {
         if (!applications) {
             // Run all applications
             def appsToRun = appsConfig.findAll{ it ->
-                def appName = it.key
-                def appConfig = it.value
-                if (licensedSoftware.contains(appName)) {
-                    return !(appConfig.disabled) && appConfig?.dir
+                if (licensedSoftware.contains(it.key)) {
+                    return !(it.value.disabled) && it.value?.dir
                 }
                 return !(it.value.disabled)
             }.keySet().toList()
