@@ -8,8 +8,8 @@ process WRITE_JSON_OUTPUT {
     input:
     val seqMatches
     val outputPath
-    val ips6Version
     val nucleic
+    val ips6Version
 
     exec:
     def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+source=(.*)\s+coords=(\d+\.+\d+)\s+.+frame=(\d+)\s+desc=(.*)$/)
