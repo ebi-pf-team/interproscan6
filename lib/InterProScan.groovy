@@ -11,8 +11,7 @@ class InterProScan {
             description: "path to FASTA file of sequences to be analysed."
         ],
         [
-            name: "datadir",
-            required: true,
+            name: "datadir",  // only required when using members with datafiles
             metavar: "<DATA-DIR>",
             description: "path to data directory."
         ],
@@ -130,6 +129,9 @@ class InterProScan {
     }
 
     static resolveDirectory(String dirPath, boolean mustExist = false, boolean mustBeWritable = false) {
+        if (!dirPath && mustExist) { // triggered when data dir is needed but --datadir not used
+            return [null, "'--datadir <DATA-DIR>' is required for the selected applications."]
+        }
         Path path = Paths.get(dirPath)
 
         if (Files.exists(path)) {
@@ -159,7 +161,7 @@ class InterProScan {
                 def appName = it.key
                 def appConfig = it.value
                 if (licensedSoftware.contains(appName)) {
-                    return !(appConfig.disabled) && appConfig?.dir && !appConfig?.dir.isAllWhitespace()
+                    return !(appConfig.disabled) && appConfig?.dir
                 }
                 return !(it.value.disabled)
             }.keySet().toList()
@@ -192,7 +194,7 @@ class InterProScan {
     }
 
     static validateAppData(List<String> appsToRun, Path datadir, Map appsConfig) {
-        def nonFileKeys = ["name", "runner", "aliases", "invalid_chars", "chunkSize", "organism", "mode", "dir"]
+        def nonFileKeys = ["name", "runner", "aliases", "invalid_chars", "chunkSize", "organism", "mode", "dir", "has_data"]
         def errorMsg = appsToRun.collectMany { appName ->
             appsConfig[appName].collect { key, value ->
                 if (!nonFileKeys.contains(key) && !resolveFile(datadir.resolve(value).toString())) {
