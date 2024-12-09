@@ -19,7 +19,7 @@ include { SEARCH_SMART; PARSE_SMART                                             
 include { RUN_SIGNALP as RUN_SIGNALP_EUK; PARSE_SIGNALP as PARSE_SIGNALP_EUK      } from  "../../modules/signalp"
 include { RUN_SIGNALP as RUN_SIGNALP_PROK; PARSE_SIGNALP as PARSE_SIGNALP_PROK    } from  "../../modules/signalp"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
-include { RUN_TMHMM                                                               } from  "../../modules/tmhmm"
+include { RUN_TMHMM; PARSE_TMHMM                                                  } from  "../../modules/tmhmm"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -340,6 +340,7 @@ workflow SCAN_SEQUENCES {
             ch_fasta,
             appsConfig.tmhmm.dir
         )
+        PARSE_TMHMM(RUN_TMHMM.out)
     }
 
     results
