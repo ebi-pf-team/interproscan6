@@ -38,19 +38,19 @@ process PARSE_PHOBIUS {
 
     SignatureLibraryRelease library = new SignatureLibraryRelease("PHOBIUS", "1.0.1")
     def signatures = [
-        "CYTOPLASMIC_DOMAIN": new Signature("CYTOPLASMIC_DOMAIN", "Cytoplasmic domain", 
-                                            "Region of a membrane-bound protein predicted to be outside the membrane, in the cytoplasm", library, null),
-        "NON_CYTOPLASMIC_DOMAIN": new Signature("NON_CYTOPLASMIC_DOMAIN", "Non cytoplasmic domain", 
-                                                "Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region", library, null),
-        "SIGNAL_PEPTIDE": new Signature("SIGNAL_PEPTIDE", "Signal Peptide", "Signal Peptide region", library, null),
+        "CYTOPLASMIC_DOMAIN"     : new Signature("CYTOPLASMIC_DOMAIN", "Cytoplasmic domain", 
+                                                 "Region of a membrane-bound protein predicted to be outside the membrane, in the cytoplasm", library, null),
+        "NON_CYTOPLASMIC_DOMAIN" : new Signature("NON_CYTOPLASMIC_DOMAIN", "Non cytoplasmic domain", 
+                                                 "Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region", library, null),
+        "SIGNAL_PEPTIDE"         : new Signature("SIGNAL_PEPTIDE", "Signal Peptide", "Signal Peptide region", library, null),
         "SIGNAL_PEPTIDE_C_REGION": new Signature("SIGNAL_PEPTIDE_C_REGION", "Signal peptide C-region", 
                                                  "C-terminal region of a signal peptide", library, null),
         "SIGNAL_PEPTIDE_H_REGION": new Signature("SIGNAL_PEPTIDE_H_REGION", "Signal peptide H-region", 
                                                  "Hydrophobic region of a signal peptide", library, null),
         "SIGNAL_PEPTIDE_N_REGION": new Signature("SIGNAL_PEPTIDE_N_REGION", "Signal peptide N-region", 
                                                  "N-terminal region of a signal peptide", library, null),
-        "TRANSMEMBRANE": new Signature("TRANSMEMBRANE", "Transmembrane region", 
-                                       "Region of a membrane-bound protein predicted to be embedded in the membrane", library, null),
+        "TRANSMEMBRANE"          : new Signature("TRANSMEMBRANE", "Transmembrane region", 
+                                                 "Region of a membrane-bound protein predicted to be embedded in the membrane", library, null),
     ]
 
     file(phobius_out.toString()).eachLine { line ->
