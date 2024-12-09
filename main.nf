@@ -6,6 +6,7 @@ include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan
 include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
 include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
+include { LOOKUP_MATCHES                } from "./interproscan/modules/lookup"
 include { XREFS                         } from "./interproscan/modules/xrefs"
 include { AGGREGATE_SEQS_MATCHES;
           AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_matches"
@@ -54,18 +55,36 @@ workflow {
         ch_seqs = PREPARE_PROTEIN_SEQUENCES(ch_fasta)
     }
 
-    // TODO: add new match lookup
-
-    SCAN_SEQUENCES(
-        ch_seqs,
-        apps,
-        params.appsConfig,
-        data_dir
-    )
-
-    // AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
-    // This is to concat MLS with scan sequences result
-    // all_results = parsed_matches.concat(parsed_analysis)
+    matchResults = [:]
+    if (params.disablePrecalc) {
+        SCAN_SEQUENCES(
+            ch_seqs,
+            apps,
+            params.appsConfig,
+            data_dir
+        )
+        matchResults = SCAN_SEQUENCES.out
+    } else {
+        log.info "Using precalculated match lookup service"
+        LOOKUP_MATCHES(
+            ch_seqs,
+            apps,
+            params.lookupService.apiChunkSize,
+            params.lookupService.host
+        )
+        calculatedMatches = LOOKUP_MATCHES.out[0]
+        noLookupSeq = LOOKUP_MATCHES.out[1]
+        scanMatches = [:]
+        if (noLookupSeq) {
+            scanMatches = SCAN_SEQUENCES(
+                noLookupSeq,
+                apps,
+                params.appsConfig,
+                data_dir
+            )
+        }
+        matchResults = scanMatches.concat(calculatedMatches)
+    }
 
     /* XREFS:
     Add signature and entry desc and names
@@ -74,7 +93,7 @@ workflow {
     Add pathways (if enabled)
     */
     XREFS(
-        SCAN_SEQUENCES.out,
+        matchResults,
         apps,
         data_dir,
         params.xRefsConfig.entries,

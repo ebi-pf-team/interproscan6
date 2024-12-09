@@ -60,6 +60,10 @@ class InterProScan {
             name: "max-workers",
             description: "define maximum number of workers available for the InterProScan when running locally."
         ],
+        [
+            name: "lookup-host",
+            description: "define host to lookup service, just change in case of using a local MLS database."
+        ],
         // No description -> not displayed in the help message
         [
             name: "batch-size",
@@ -80,7 +84,15 @@ class InterProScan {
         [
             name: "x-refs-config",
             description: null
-        ]
+        ],
+        [
+            name: "lookup-service",
+            description: null
+        ],
+        [
+            name: "api-chunk-size",
+            description: null
+        ],
     ]
 
     static void validateParams(params, log) {

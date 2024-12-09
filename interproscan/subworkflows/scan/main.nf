@@ -283,8 +283,8 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("signalp_euk")) {
         RUN_SIGNALP_EUK(
-            ch_fasta, 
-            appsConfig.signalp_euk.organism, 
+            ch_fasta,
+            appsConfig.signalp_euk.organism,
             appsConfig.signalp_euk.mode,
             appsConfig.signalp_euk.dir
         )
@@ -294,8 +294,8 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("signalp_prok")) {
         RUN_SIGNALP_PROK(
-            ch_fasta, 
-            appsConfig.signalp_prok.organism, 
+            ch_fasta,
+            appsConfig.signalp_prok.organism,
             appsConfig.signalp_prok.mode,
             appsConfig.signalp_prok.dir
         )

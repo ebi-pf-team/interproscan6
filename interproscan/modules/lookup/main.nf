@@ -1,84 +1,59 @@
-process LOOKUP_CHECK {
-    // Checks if protein sequence is included in InterPro
-    label 'mls'
-    
-    input:
-    val hash_seq
-    val is_test
-
-    output:
-    path "checked_md5"
-
-    script:
-    if ( is_test )
-        """
-        cat $projectDir/tests/unit_tests/test_outputs/precalc_match_lookup/lookup_check_out > checked_md5
-        """
-    else
-        """
-        python3 $projectDir/interproscan/scripts/lookup/lookup_check.py \\
-            ${hash_seq} \\
-            ${params.url_precalc}${params.check_precalc} \\
-            ${params.lookup_retries} \\
-            checked_md5
-        """
-}
-
+import groovy.json.JsonSlurper
+import java.net.URL
+import groovy.json.JsonOutput
 
 process LOOKUP_MATCHES {
-    /*
-    Retrieves precalculated matches from the Match Lookup Service (MLS).
-    A protein sequence can be in the MLS but have no matches associated with it,
-    this situation is not detected by LOOKUP_CHECK which only detects that 
-    protein sequence has been analysed during an InterPro release.
-    */
     label 'mls'
-    
+
     input:
-    val checked_md5
+    tuple val(index), val(fasta), val(json)
     val appl
-    val is_test
+    val chunkSize
+    val host
 
     output:
-    path("parsed_match_lookup"), optional: true
+    path("calculatedMatches.json")
+    path("noLookupSeq.json")
 
-    /*
-    'parsed_match_lookup' will only be generated if any matches are returned from
-    the MLS. If no matches are retrieved from the MLS, 'parsed_match_lookup'
-    will not be created.
-    */
-    script:
-    if ( is_test )
-        """
-        cat $projectDir/tests/unit_tests/test_outputs/precalc_match_lookup/lookup_matches_out > parsed_match_lookup
-        """
-    else
-        """
-        python3 $projectDir/interproscan/scripts/lookup/lookup_matches.py \\
-            ${checked_md5} \\
-            '${appl}' \\
-            ${params.url_precalc}${params.matches} \\
-            ${params.lookup_retries} \\
-            parsed_match_lookup
-        """
-}
+    exec:
+    def calculatedMatchesPath = task.workDir.resolve("calculatedMatches.json")
+    def noLookupSeqPath = task.workDir.resolve("noLookupSeq.json")
 
+    def jsonSlurper = new JsonSlurper()
+    def jsonFile = new File(json.toString())
+    sequences = jsonSlurper.parse(jsonFile)
 
-process LOOKUP_NO_MATCHES {
-    label 'mls'
-
-    input:
-    val checked_md5
-
-    output:
-    path "no_match_lookup_fasta.fasta", optional: true
-
-    script:
-    """
-    output=\$(python3 $projectDir/interproscan/scripts/lookup/lookup_no_matches.py "${checked_md5}")
-    
-    if [ -n "\$output" ]; then
-        echo "\$output" > no_match_lookup_fasta.fasta
-    fi
-    """
+    def md5List = []
+    sequences.each { md5, seq_info ->
+        md5List << md5
+    }
+    def matchesResult = [:]
+    def noLookupSeq = [:]
+    def chunks = md5List.collate(chunkSize)
+    chunks.each { chunk ->
+        def url = "${host}"
+        def requestBody = JsonOutput.toJson([md5: chunk])
+        def connection = new URL(url).openConnection()
+        connection.requestMethod = 'POST'
+        connection.doOutput = true
+        connection.setRequestProperty('Content-Type', 'application/json')
+        connection.outputStream.withWriter('UTF-8') { writer ->
+            writer << requestBody
+        }
+        def response = connection.inputStream.text
+        def jsonResponse = new JsonSlurper().parseText(response)
+        jsonResponse.each { entry ->
+            if (entry.value != null) {
+                matchesResult[entry.key] = entry.value
+            } else {
+                noLookupSeq = sequences.findAll { md5, seq_info ->
+                    md5 == entry.key
+                }
+            }
+        }
+    }
+    def jsonMatches = JsonOutput.toJson(matchesResult)
+    def jsonSequences = JsonOutput.toJson(noLookupSeq)
+    new File(calculatedMatchesPath.toString()).write(jsonMatches)
+    new File(noLookupSeqPath.toString()).write(jsonSequences)
 }
