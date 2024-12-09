@@ -1,5 +1,5 @@
 process RUN_TMHMM {
-    label 'tmhmm_runner'
+    label 'medium', 'tmhmm_runner'
     stageInMode 'copy'
 
     input:
