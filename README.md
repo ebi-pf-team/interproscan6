@@ -176,7 +176,8 @@ nextflow run ebi-pf-team/interproscan6 \
 
 > [!NOTE]
 > The `--datadir` flag is not needed when only running member databases that do not require additional data files.
-> This only applies to `mobidblite` and `coils`.
+> This only applies to `mobidblite` and `coils` (which do not require additional datafiles) and the licsensed software
+> (`SignalP`, `Phobius`, and `TMHMM`).
 
 > [!NOTE]  
 > Note that `-profile` has a single dash because this is a Nextflow argument, but `--input` and `--datadir` have two dashes because these are `InterProScan6` argument.
