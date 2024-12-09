@@ -48,6 +48,6 @@ process PARSE_COILS {
         }
     }
 
-    def json = JsonOutput.toJson(matches)
+    def json = JsonOutput.toJson(matches.findAll { it.value["Coil"].locations.size() > 0 })
     new File(outputFilePath.toString()).write(json)
 }
