@@ -174,6 +174,10 @@ nextflow run ebi-pf-team/interproscan6 \
 
 **`--datadir` must** be included, and is used to define the path to the directory containing the downloaded InterPro data.
 
+> [!NOTE]
+> The `--datadir` flag is not needed when only running member databases that do not require additional data files.
+> This only applies to `mobidblite` and `coils`.
+
 > [!NOTE]  
 > Note that `-profile` has a single dash because this is a Nextflow argument, but `--input` and `--datadir` have two dashes because these are `InterProScan6` argument.
 
@@ -288,118 +292,12 @@ The `easel` application itself and all of its dependencies are already integrate
 **To run anlyses with nucleic acid sequences, run `InterProScan6` with the `--nucleic` flag**
 
     nextflow run ebi-pf-team/interproscan6 \
-        --input <path to fasta file> \
         -profile <executor,container runtime> \
+        --input <path to fasta file> \
+        --data <data-dir> \
         --nucleic
 
 By default `InterProScan6` will assume the input FASTA file contains protein sequences. The `--nucleic` flag instructs `InterProScan6` to retrieve possible ORFs using the `easel` tool suite.
-
-> [!WARNING]  
-> The input FASTA file must contain sequences of the same type, i.e. _all_ protein sequences or _all_ nucleic acid sequences.
-
-You can configure the prediction of ORFs by updating the relevant `translate` parameters in `nextflow.config`:
-
-```groovy
-    translate { 
-        strand = 'both'  
-        methionine = false  
-        min_len = 20
-        genetic_code = 1
-    }
-```
-
-* `strand` - DNA strand(s) to be translated
-    - `'both'`
-    - `'plus'`
-    - `'minus'`
-* `methionine` - predicted ORFs start with M (methionine)
-    - `false` - use initation codon
-    - `true` - all ORFs start with M
-* `min_len` - minimum length of predicted ORFs [any interger]
-* `genetic_code` - ID of the genetic code to use
-
-<table>
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>1</td>
-      <td>Standard</td>
-    </tr>
-    <tr>
-      <td>2</td>
-      <td>Vertebrate mitochondrial</td>
-    </tr>
-    <tr>
-      <td>3</td>
-      <td>Yeast mitochondrial</td>
-    </tr>
-    <tr>
-      <td>4</td>
-      <td>Mold, protozoan, coelenterate mitochondrial; Mycoplasma/Spiroplasma</td>
-    </tr>
-    <tr>
-      <td>5</td>
-      <td>Invertebrate mitochondrial</td>
-    </tr>
-    <tr>
-      <td>6</td>
-      <td>Ciliate, dasycladacean, Hexamita nuclear</td>
-    </tr>
-    <tr>
-      <td>9</td>
-      <td>Echinoderm and flatworm mitochondrial</td>
-    </tr>
-    <tr>
-      <td>10</td>
-      <td>Euplotid nuclear</td>
-    </tr>
-    <tr>
-      <td>11</td>
-      <td>Bacterial, archaeal; and plant plastid</td>
-    </tr>
-    <tr>
-      <td>12</td>
-      <td>Alternative yeast</td>
-    </tr>
-    <tr>
-      <td>13</td>
-      <td>Ascidian mitochondrial</td>
-    </tr>
-    <tr>
-      <td>14</td>
-      <td>Alternative flatworm mitochondrial</td>
-    </tr>
-    <tr>
-      <td>16</td>
-      <td>Chlorophycean mitochondrial</td>
-    </tr>
-    <tr>
-      <td>21</td>
-      <td>Trematode mitochondrial</td>
-    </tr>
-    <tr>
-      <td>22</td>
-      <td>Scenedesmus obliquus mitochondrial</td>
-    </tr>
-    <tr>
-      <td>23</td>
-      <td>Thraustochytrium mitochondrial</td>
-    </tr>
-    <tr>
-      <td>24</td>
-      <td>Pterobranchia mitochondrial</td>
-    </tr>
-    <tr>
-      <td>25</td>
-      <td>Candidate Division SR1 and Gracilibacteria</td>
-    </tr>
-  </tbody>
-</table>
 
 ## Input sequences
 
@@ -615,62 +513,48 @@ Files can be placed in any location.
 > The instructions below presume `InterProScan6` is being run with the Docker. If an alternative 
 > container runtime is used the methods below will need to be adapated accordingly.
 > As above, if using Singularity and Apptainer, the images should be kept in the root of the 
-> `InterProScan6` directory. Otherwise please update the container paths in the respective `utilities/profiles/` config files.
+> `InterProScan6` directory. Otherwise, please update the container paths in the respective `utilities/profiles/` config files.
 
 ## DeepTMHMM
 
-1. Contact the DeepTMHMM help desk and request a stand-alone licensed copy of DeepTMHMM.
-2. Download the DeepTMHMM `zip` file provided by DeepTMHMM.
-3. Unpack the `zip` file
+1. Contact the DeepTMHMM help desk and request a stand-alone licensed copy of DeepTMHMM, and then download the DeepTMHMM `zip` file provided by DeepTMHMM.
+2. Unpack the `zip` file
 ```bash
 unzip DeepTMHMM-Academic-License-v1.0.zip -d <TMHMM-DIR>
 ```
-4. Copy the docker file at `utilities/docker/tmhmm/Dockerfile` from `InterProScan` repo to your local `DeepTMHMM` directory
-```bash
-# with the terminal pointed at the root of this repo
-cp utilities/docker/tmhmm/Dockerfile <TMHMM-DIR>/Dockerfile
-```
-5. Build a docker image
-```bash
-docker image build -t tmhmm .
-```
-6. Check the `conf/applications.config` file to make sure the `Phobius` dir path
+3. Update the TMHMM dir path the `conf/applications.config` file
 ```groovy
 tmhmm {
     name = "tmhmm"
     dir = ""   <--- update the dir path
 }
 ```
-7. (Optional) Convert the Docker image to an image of your container runtime.
+4. Run `InterProScan6` with `(Deep)TMHMM`:
 
-For example, to build a singularity image:
+With the `dir` field populated in `conf/applications.config`, `TMHMM` will be included as a default application
+when the `--application` flag is not used, else include `tmhmm` in the list of applications defined using the `--applications` flag.
+
+For example, when running `InterProScan` locally, using Docker and with the InterPro data dir located at `./data`:
 ```bash
-docker save tmhmm > tmhmm.tar
-singularity build tmhmm.sif docker-archive://tmhmm.tar
+nextflow run ebi-pf-team/interproscan6 \
+  -profile local,docker
+    --input tests/data/test_prof.fa \
+    --datadir data \
+    --applications tmhmm
 ```
 
 ## `Phobius`
 
 1. Download Phobius from the [Phobius server](https://software.sbc.su.se/phobius.html)
-
 2. Unpack the `tar` file
 ```bash
 tar -xzf phobius101_linux.tgz -C <PHOBIUS-DIR>
 ```
-
-3. Copy the docker file at `./utilities/docker/phobius/Dockerfile` from the `InterProScan` repo to your local `Phobius` directory
+3. Build a Docker image using the Dockerfile provided at `utilities/docker/tmhmm/Dockerfile` in the `InterProScan6` repo
 ```bash
-# with the terminal pointed at the root of this repo
-cp utilities/docker/phobius/Dockerfile <PHOBIUS-DIR>/Dockerfile
+docker image build -t tmhmm utilites/docker/tmhmm
 ```
-
-4. Build a docker image
-```bash
-# with the terminal pointed at your local phobius dir
-docker image build -t phobius .
-```
-
-5. Check the `conf/applications.config` file to make sure the `Phobius` dir path
+4. Update the `Phobius` dir path in the `conf/applications.config` file
 ```groovy
 phobius {
     name = "Phobius"
@@ -678,24 +562,16 @@ phobius {
     dir = ""   <--- update the dir path
 }
 ```
+5. Run `InterProScan6` with `Phobius`:
 
-6. (Optional) Convert the Docker image to an image of your container runtime.
-
-For example, to build a singularity image:
-```bash
-docker save phobius > phobius.tar
-singularity build phobius.sif docker-archive://phobius.tar
-```
-
-7. Running `InterProScan6` with `Phobius`
-
-Include `phobius` in the list of applications defined using the `--applications` flag.
+With the `dir` field populated in `conf/applications.config`, `Phobius` will be included as a default application 
+when the `--application` flag is not used, else include `phobius` in the list of applications defined using the `--applications` flag.
 
 For example, when running `InterProScan` locally, using Docker and with the InterPro data dir located at `./data`:
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
   -profile local,docker
-    --input utilities/test_files/best_to_test.fasta \
+    --input tests/data/test_prof.fa \
     --datadir data \
     --applications phobius
 ```
@@ -705,55 +581,40 @@ nextflow run ebi-pf-team/interproscan6 \
 1. Obtain a license and download `SignalP6` (`SignalP` version 6) from the [SignalP6 server](https://services.healthtech.dtu.dk/services/SignalP-6.0/) (under 'Downloads').
     * Either fast or slow models can be implemented
     * To change the implemented mode please see the [Changing mode](#changing-mode) documentation
-
 2. Unpackage the `SignalP6` `tar` file
-
 ```bash
 tar -xzf signalp-6.0h.fast.tar.gz -C <SIGNALP-DIR>
 ```
-
-3Build a docker image - _the Nextflow pipeline needs all third party tools to be stored within linux containers_. 
-
-```bash
-# with the terminal pointed at your signalp dir
-# copy the dockerfile to here before building the image
-docker build -t signalp6 .
-```
-
-4. Check the version number in `conf/applications.config` is correct:
-
+4. Update the dir path in `conf/applications.config`
 ```groovy
-signalp {
-    name = "SignalP"
-    aliases = ["signalp_euk"]
-    release = "6.0h"    <----- update if necessary
-    threshold = 0.95
+signalp_euk {
+    name = "SignalP-Euk"
+    organism = "eukarya"
+    dir = ""    <-------- update with <SIGNALP-DIR>
+    mode = "fast"
+}
+signalp_prok {
+    name = "SignalP-Prok"
+    organism = "other"
+    dir = ""    <-------- update with <SIGNALP-DIR>
+    mode = "fast"
 }
 ```
+5. Running `InterProScan6` with `SignalP6`
 
-5. (Optional) Convert the Docker image to an image of your container runtime.
-
-For example, to build a singularity image:
-```bash
-docker save signalp6 > signalp6.tar
-singularity build signalp6.sif docker-archive://signalp6.tar
-```
-
-6. Running `InterProScan6` with `SignalP6`
-
-Include `signalp` or `signalp_euk` in the list of applications defined using the `--applications` flag.
+With the `dir` field populated in `conf/applications.config`, `SignalP` will be included as a default application
+when the `--application` flag is not used, else include `signalp_prok` (to set the `SignalP` `--organism` 
+argument to `"other"`) and `signalp_euk` (to set the `SignalP` `--organism` argument to `"eukaryote"`) 
+in the list of applications defined using the `--applications` flag.
 
 For example, when running `InterProScan` locally, using Docker and with the InterPro data dir located at `./data`:
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
   -profile local,docker
-    --input utilities/test_files/best_to_test.fasta \
+    --input tests/data/test_prof.fa \
     --datadir data \
-    --applications signalp
+    --applications signalp_euk,signalp_prok
 ```
-
-> [!NOTE]  
-> `InterProScan6` only supports implementing one `SignalP` mode at a time.
 
 > [!NOTE]
 > Quoting the SignalP documentation:  
@@ -761,7 +622,7 @@ nextflow run ebi-pf-team/interproscan6 \
 
 ### Changing the mode of `Signalp6` in `InterProScan6`
 
-`SignalP6` supports 3 modes: `fast`, `slow` and `slow-sequential`. The mode can be set using the `--signalp_mode` flag. The default mode is `fast`.
+`SignalP6` supports 3 modes: `fast`, `slow` and `slow-sequential`. The mode can be set using the `--signalpMode` flag. The default mode is `fast`.
 
 > [!WARNING]
 > The slow mode can take 6x longer to compute. Use when accurate region borders are needed.
@@ -773,47 +634,28 @@ For example, to run `InterProScan` with the input file `best_to_test.fasta`, usi
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
   -profile docker,local \
-  --input utilities/test_files/best_to_test.fasta \
+  --input tests/data/test_prof.fa \
   --datadir data \
   --applications signalp_euk \
   --disable_precalc \
-  --signalp_mode slow
+  --signalpMode slow
 ```
 
-### Converting from CPU to GPU, and back again
+### Run SignalP with GPU acceleration
 
-By default, `SignalP` runs on your CPU. If you have a GPU available, you can convert the `SignalP` models so that your installation can use GPU-acceleration.
-
-You will need to install `SignalP` in order to convert to GPU models.
+By default, `SignalP` runs on your CPU. If you have a GPU available, you can convert the `SignalP` models so that 
+your installation can use GPU-acceleration. You will need to install `SignalP` in order to convert to GPU models.
 
 1. Convert the ``SignalP`` installation to GPU by following the [SignalP documentation](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md#converting-to-gpu)
-
-2. Build a docker image for `SignalP` with GPU using the Dockerfile located at `./utilities/docker/signalp/Dockerfile` in the `InterProScan` repo
-
-```bash
-# with the terminal pointed at your signalp dir
-# copy the dockerfile to here before building the image
-docker image build -t signalp6_gpu .
-```
-
-3. (Optional) Convert the image to your container runtime of choice
-
-For example, to build a singularity image:
-```bash
-docker save signalp6_gpuu > signalp6_gpu.tar
-singularity build signalp6_gpu.sif docker-archive://signalp6_gpu.tar
-```
-
-To run `SignalP` with GPU acceleration with `InterProScan6` use the flag `--signalp_gpu`.
+2. Run `InterProScan` with the `--signalpGPU` flag.
 
 For example, to run ``InterProScan`` with only ``SignalP`` enabled, using GPU acceleration on a SLURM cluster with Singularity support:
-
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
+  -profile singularity,slurm
   --input <fasta file> \
   --applications signalp \
-  --signalp_gpu \
-  -profile singularity,slurm
+  --signalpGPU \
 ```
 
 # Benchmarking and troubleshooting the performance
