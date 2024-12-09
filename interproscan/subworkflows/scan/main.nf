@@ -341,6 +341,7 @@ workflow SCAN_SEQUENCES {
             appsConfig.tmhmm.dir
         )
         PARSE_TMHMM(RUN_TMHMM.out)
+        results = results.mix(PARSE_TMHMM.out)
     }
 
     results
