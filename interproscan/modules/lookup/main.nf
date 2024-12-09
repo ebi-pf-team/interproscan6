@@ -13,7 +13,7 @@ process LOOKUP_MATCHES {
 
     output:
     path("calculatedMatches.json")
-    path("noLookupSeq.json")
+    tuple val(index), val(fasta), path("noLookupSeq.json")
 
     exec:
     def calculatedMatchesPath = task.workDir.resolve("calculatedMatches.json")
