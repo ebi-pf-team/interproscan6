@@ -619,7 +619,35 @@ Files can be placed in any location.
 
 ## DeepTMHMM
 
-Coming soon...
+1. Contact the DeepTMHMM help desk and request a stand-alone licensed copy of DeepTMHMM.
+2. Download the DeepTMHMM `zip` file provided by DeepTMHMM.
+3. Unpack the `zip` file
+```bash
+unzip DeepTMHMM-Academic-License-v1.0.zip -d <TMHMM-DIR>
+```
+4. Copy the docker file at `utilities/docker/tmhmm/Dockerfile` from `InterProScan` repo to your local `DeepTMHMM` directory
+```bash
+# with the terminal pointed at the root of this repo
+cp utilities/docker/tmhmm/Dockerfile <TMHMM-DIR>/Dockerfile
+```
+5. Build a docker image
+```bash
+docker image build -t tmhmm .
+```
+6. Check the `conf/applications.config` file to make sure the `Phobius` dir path
+```groovy
+tmhmm {
+    name = "tmhmm"
+    dir = ""   <--- update the dir path
+}
+```
+7. (Optional) Convert the Docker image to an image of your container runtime.
+
+For example, to build a singularity image:
+```bash
+docker save tmhmm > tmhmm.tar
+singularity build tmhmm.sif docker-archive://tmhmm.tar
+```
 
 ## `Phobius`
 
@@ -633,21 +661,22 @@ tar -xzf phobius101_linux.tgz -C <PHOBIUS-DIR>
 3. Copy the docker file at `./utilities/docker/phobius/Dockerfile` from the `InterProScan` repo to your local `Phobius` directory
 ```bash
 # with the terminal pointed at the root of this repo
-cp docker_files/phobius/Dockerfile <PHOBIUS-DIR>/Dockerfile
+cp utilities/docker/phobius/Dockerfile <PHOBIUS-DIR>/Dockerfile
 ```
 
-4. Build a docker image -
+4. Build a docker image
 ```bash
 # with the terminal pointed at your local phobius dir
 docker image build -t phobius .
 ```
 
-5. Check the `conf/applications.config` file to make sure the `Phobius` version is correct.
+5. Check the `conf/applications.config` file to make sure the `Phobius` dir path
 ```groovy
-    phobius {
-            release = "1.01" <---- update if necessary
-            runner = "phobius"
-        }
+phobius {
+    name = "Phobius"
+    invalid_chars = "-*.OXUZJ"
+    dir = ""   <--- update the dir path
+}
 ```
 
 6. (Optional) Convert the Docker image to an image of your container runtime.
