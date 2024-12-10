@@ -48,11 +48,11 @@ process PARSE_SIGNALP {
     String modelAcc = "SignalP_${mode}_${organism}"
     SignatureLibraryRelease library = new SignatureLibraryRelease("SignalP", "6.0h")
     def signatures = [
-        "Sec signal peptide (Sec/SPI)"             : new Signature("SignalP-Sec-SPI", "Sec/SPI", "Sec signal peptide", library, null),
-        "Lipoprotein signal peptide (Sec/SPII)"    : new Signature("SignalP-Sec-SPII", "Sec/SPII", "Lipoprotein signal peptide", library, null),
-        "Tat signal peptide (Tat/SPI)"             : new Signature("SignalP-Tat-SPI", "Tat/SPI", "Tat signal peptide", library, null),
-        "Tat lipoprotein signal peptide (Tat/SPII)": new Signature("SignalP-Tat-SPII", "Tat/SPII", "Tat lipoprotein signal peptide", library, null),
-        "Pilin signal peptide (Sec/SPIII)"         : new Signature("SignalP-Sec-SPIII", "Sec/SPIII", "Pilin signal peptide", library, null),
+        "Sec/SPI"  : new Signature("SignalP-Sec-SPI", "Sec/SPI", "Sec signal peptide", library, null),
+        "Sec/SPII" : new Signature("SignalP-Sec-SPII", "Sec/SPII", "Lipoprotein signal peptide", library, null),
+        "Tat/SPI"  : new Signature("SignalP-Tat-SPI", "Tat/SPI", "Tat signal peptide", library, null),
+        "Tat/SPII" : new Signature("SignalP-Tat-SPII", "Tat/SPII", "Tat lipoprotein signal peptide", library, null),
+        "Sec/SPIII": new Signature("SignalP-Sec-SPIII", "Sec/SPIII", "Pilin signal peptide", library, null),
     ]
 
     def hits = [:]
@@ -69,16 +69,17 @@ process PARSE_SIGNALP {
         int end = fields[4].toInteger()
         Double score = Double.parseDouble(fields[5])
         String prediction = jsonOutput["SEQUENCES"][seqHeader]["Prediction"]
-        Signature signature = signatures.get(prediction)
 
-        if (signature != null) {
-            Match match = new Match(modelAcc)    
-            match.signature = signature
-            Location location = new Location(start, end)
-            location.score = score
-            match.addLocation(location)
-            hits[seqId] = [(modelAcc) : match]            
-        }
+        def matcher = prediction =~ /\(([a-zA-Z]+\/[a-zA-Z]+)\)/
+        String spType = matcher.find() ? matcher.group(1) : null
+        Signature signature = signatures.get(spType)
+        assert signature != null
+        Match match = new Match(modelAcc)    
+        match.signature = signature
+        Location location = new Location(start, end)
+        location.score = score
+        match.addLocation(location)
+        hits[seqId] = [(modelAcc) : match]
     }
 
     def outputFilePath = task.workDir.resolve("signalp.json")
