@@ -31,7 +31,8 @@ process WRITE_JSON_OUTPUT {
         "SignalP_Euk": ["pvalue", "cleavageStart", "cleavageEnd"],
         "SignalP-Prok": ["pvalue", "cleavageStart", "cleavageEnd"],
         "SMART": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
-        "SUPERFAMILY": ["hmmLength", "evalue"]
+        "SUPERFAMILY": ["hmmLength", "evalue"],
+        "TMHMM": []
     ]
     List<String> otherMembersLocationFields = ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
 
