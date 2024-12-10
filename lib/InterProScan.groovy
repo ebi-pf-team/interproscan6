@@ -84,6 +84,13 @@ class InterProScan {
 
     static final def LICENSED_SOFTWARE = ["phobius", "signalp_euk", "signal_prok", "tmhmm"]
 
+    static final def DATA_TYPE = [
+            "FILE": ["cla", "clan", "dat", "disc_regs", "evaluator", "hierarchy", "hmm", "hmmbin",
+                     "model", "model2sfs", "pdbj95d", "rules", "seed", "selfhits", "site_annotations",
+                     "skip_flagged_profiles"],
+            "DIR": ["dir", "msf", "paint", "rpsblast_db", "rpsproc_db"]
+    ]
+
     static void validateParams(params, log) {
         def allowedParams = this.PARAMS.collect { it.name.toLowerCase() }
 
@@ -193,15 +200,20 @@ class InterProScan {
     }
 
     static validateAppData(List<String> appsToRun, Path datadir, Map appsConfig) {
-        def nonFileKeys = ["name", "runner", "aliases", "invalid_chars", "chunkSize", "organism", "mode", "dir", "has_data"]
         def errorMsg = appsToRun.collectMany { appName ->
             appsConfig[appName].collect { key, value ->
-                if (!nonFileKeys.contains(key) && !resolveFile(datadir.resolve(value).toString())) {
-                    "${appName}: ${key}: ${value ?: 'null'}"
-                } else if (key == "dir" && (!value || !Files.exists(datadir.resolve(value)) || !Files.isDirectory(datadir.resolve(value)))) {
-                    "${appName}: ${key}: ${value ?: 'null'}"
-                } else { null }
-            }.findAll { it } }.join('\n')
+                if (this.DATA_TYPE["FILE"].contains(key)) {
+                    if (!resolveFile(datadir.resolve(value).toString())) {
+                        return "${appName}: file: ${key}: ${value ?: 'null'}"
+                    }
+                } else if (this.DATA_TYPE["DIR"].contains(key)) {
+                    if (!Files.exists(datadir.resolve(value)) || !Files.isDirectory(datadir.resolve(value))) {
+                        return "${appName}: dir: ${key}: ${value ?: 'null'}"
+                    }
+                }
+                return null
+            }.findAll { it }
+        }.join('\n')
         return errorMsg ? "Could not find the following data files\n${errorMsg}" : null
     }
 
