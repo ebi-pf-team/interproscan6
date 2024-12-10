@@ -33,6 +33,11 @@ workflow INIT_PIPELINE {
             log.error error
             exit 1
         }
+        error = InterProScan.validateXrefFiles(datadir, params.xRefsConfig, params.goterms, params.pathways)
+        if (error) {
+            log.error error
+            exit 1
+        }
     } else {
         datadir = ""
     }

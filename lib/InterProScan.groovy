@@ -217,6 +217,27 @@ class InterProScan {
         return errorMsg ? "Could not find the following data files\n${errorMsg}" : null
     }
 
+    static validateXrefFiles(Path datadir, Map xRefsConfig, boolean goterms, boolean pathways) {
+        def errorMsg = []
+        def addError = { type, suffix ->
+            String path = datadir.resolve("${xRefsConfig[type]}${suffix}")
+            if (!resolveFile(path)) {
+                errorMsg << "${type}${suffix}: ${path}"
+            }
+        }
+        addError('entries', '')  // we hard code file ext in xrefsconfig so no suffice here
+        if (goterms) {
+            addError('goterms', '.ipr.json')
+            addError('goterms', '.json')
+        }
+        if (pathways) {
+            addError('pathways', '.ipr.json')
+            addError('pathways', '.json')
+        }
+        return errorMsg ? "Could not find the following XREF data files\n${errorMsg.join('\n')}" : null
+    }
+
+
     static List<String> validateSignalpMode(String signalpMode) {
         if (signalpMode.toLowerCase() !in ['fast', 'slow', 'slow-sequential']) {
             def error = "Unrecognised SignalP mode: '${signalpMode}'. Accepted modes: 'fast', 'slow', 'slow-sequential'"
