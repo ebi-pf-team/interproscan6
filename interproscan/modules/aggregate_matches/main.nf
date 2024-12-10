@@ -34,7 +34,7 @@ process AGGREGATE_SEQS_MATCHES {
                 if (seqMatchesAggreg[protMD5].translatedFrom == null) {
                     seqMatchesAggreg[protMD5].translatedFrom = []
                 }
-                seqMatchesAggreg[protSequence].translatedFrom << orf.translatedFrom // add nucleic seq metadata
+                seqMatchesAggreg[protMD5].translatedFrom << orf.translatedFrom // add nucleic seq metadata
                 if (matchesInfo[orf.id]) {
                     seqMatchesAggreg[protMD5].matches = matchesInfo[orf.id]
                 }
