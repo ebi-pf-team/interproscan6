@@ -82,6 +82,8 @@ class InterProScan {
         ]
     ]
 
+    static final def LICENSED_SOFTWARE = ["phobius", "signalp_euk", "signal_prok", "tmhmm"]
+
     static void validateParams(params, log) {
         def allowedParams = this.PARAMS.collect { it.name.toLowerCase() }
 
@@ -154,14 +156,13 @@ class InterProScan {
     }
 
     static validateApplications(String applications, Map appsConfig) {
-        List<String> licensedSoftware = ["phobius", "signalp_euk", "signalp_prok", "tmhmm"]
         if (!applications) {
-            // Run all applications
+            // Run all applications, except licensed packages with an unpopulated dir field
             def appsToRun = appsConfig.findAll{ it ->
-                if (licensedSoftware.contains(it.key)) {
-                    return !(it.value.disabled) && it.value?.dir
+                if (this.LICENSED_SOFTWARE.contains(it.key)) {
+                    return it.value?.dir
                 }
-                return !(it.value.disabled)
+                return true
             }.keySet().toList()
             return [appsToRun, null]
         }
