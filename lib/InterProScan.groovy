@@ -225,7 +225,7 @@ class InterProScan {
                 errorMsg << "${type}${suffix}: ${path}"
             }
         }
-        addError('entries', '')  // we hard code file ext in xrefsconfig so no suffice here
+        addError('entries', '')  // we hard code the file ext in xrefsconfig so no suffix needed here
         if (goterms) {
             addError('goterms', '.ipr.json')
             addError('goterms', '.json')
