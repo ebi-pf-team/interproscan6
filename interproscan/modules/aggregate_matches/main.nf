@@ -23,35 +23,31 @@ process AGGREGATE_SEQS_MATCHES {
         xref: []
     ] }
 
-    seqsInfo.each { seqKey, info ->
-        /* seqKey = seq ID when input consists of protein seqs
-           seqKey = md5 of ORF protein seq when input consists of nucleic seqs */
-
-        String md5
+    seqsInfo.each { seqId, info ->
         if (nucleic) {
             info.each { orf ->
-                seqId = orf.id
-                FastaSequence sequence = FastaSequence.fromMap(orf)
-                md5 = sequence.md5
-                seqMatchesAggreg[md5].sequence = sequence.sequence
-                seqMatchesAggreg[md5].md5 = md5
-                seqMatchesAggreg[md5].xref << ["name": "${orf.id} ${orf.description}", "id": orf.id]
-                if (seqMatchesAggreg[md5].translatedFrom == null) {
-                    seqMatchesAggreg[md5].translatedFrom = []
+                FastaSequence protSequence = FastaSequence.fromMap(orf)
+                protMD5 = protSequence.md5
+                seqMatchesAggreg[protMD5].sequence = protSequence.sequence
+                seqMatchesAggreg[protMD5].md5 = protMD5
+                seqMatchesAggreg[protMD5].xref << ["name": "${orf.id} ${orf.description}", "id": orf.id]
+                if (seqMatchesAggreg[protMD5].translatedFrom == null) {
+                    seqMatchesAggreg[protMD5].translatedFrom = []
                 }
-                seqMatchesAggreg[md5].translatedFrom << orf.translatedFrom // add nucleic seq metadata
+                seqMatchesAggreg[protSequence].translatedFrom << orf.translatedFrom // add nucleic seq metadata
+                if (matchesInfo[orf.id]) {
+                    seqMatchesAggreg[protMD5].matches = matchesInfo[orf.id]
+                }
             }
         } else {
             FastaSequence sequence = FastaSequence.fromMap(info)
             md5 = sequence.md5
-            seqId = seqKey
             seqMatchesAggreg[md5].sequence = sequence.sequence
             seqMatchesAggreg[md5].md5 = md5
             seqMatchesAggreg[md5].xref << ["name": "${sequence.id} ${sequence.description}", "id": sequence.id]
-        }
-
-        if (matchesInfo[seqId]) {  // the nucleic seq matches Map is keyed by the OrfId
-            seqMatchesAggreg[md5].matches = matchesInfo[seqId]
+            if (matchesInfo[seqId]) {
+                seqMatchesAggreg[md5].matches = matchesInfo[seqId]
+            }
         }
     }
     def outputFilePath = task.workDir.resolve("seq_matches_aggreg.json")

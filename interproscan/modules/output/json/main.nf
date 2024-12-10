@@ -19,7 +19,7 @@ process WRITE_JSON_OUTPUT {
         "CDD": ["evalue-match", "score-match"],
         "COILS": [],
         "HAMAP": ["score", "targetAlignment"],
-        "MobiDB Lite": ["sequence-feature"],
+        "MobiDB-lite": ["sequence-feature"],
         "PANTHER": ["hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
         "Phobius": [],
         "PIRSF": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
