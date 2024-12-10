@@ -15,7 +15,7 @@ process RUN_RPSBLAST {
     export LD_LIBRARY_PATH="/opt/blast/lib"
     /opt/blast/rpsblast \
         -query ${fasta} \
-        -db ${library} \
+        -db "${library}/Cdd_NCBI" \
         -out rpsblast.out \
         -evalue 0.01 -seg no -outfmt 11
     """
