@@ -1,3 +1,4 @@
+# This image contains only dependencies for DeepTMHMM. It does not include a copy of DeepTMHMM
 FROM python:3.8-slim
 ENV TZ=Europe/London
 WORKDIR /opt/tmhmm
