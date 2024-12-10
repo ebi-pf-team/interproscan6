@@ -538,7 +538,7 @@ when the `--application` flag is not used, else include `tmhmm` in the list of a
 For example, when running `InterProScan` locally, using Docker and with the InterPro data dir located at `./data`:
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
-  -profile local,docker
+  -profile local,docker \
     --input tests/data/test_prof.fa \
     --datadir data \
     --applications tmhmm
@@ -571,7 +571,7 @@ when the `--application` flag is not used, else include `phobius` in the list of
 For example, when running `InterProScan` locally, using Docker and with the InterPro data dir located at `./data`:
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
-  -profile local,docker
+  -profile local,docker \
     --input tests/data/test_prof.fa \
     --datadir data \
     --applications phobius
@@ -611,7 +611,7 @@ in the list of applications defined using the `--applications` flag.
 For example, when running `InterProScan` locally, using Docker and with the InterPro data dir located at `./data`:
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
-  -profile local,docker
+  -profile local,docker \
     --input tests/data/test_prof.fa \
     --datadir data \
     --applications signalp_euk,signalp_prok
