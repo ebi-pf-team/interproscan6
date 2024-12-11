@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process SEARCH_PFAM {
-    label 'hmmer_runner'
+    label 'small', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -20,7 +20,7 @@ process SEARCH_PFAM {
 }
 
 process PARSE_PFAM {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(hmmsearch_out)

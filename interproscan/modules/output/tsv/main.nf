@@ -3,7 +3,7 @@ import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 
 process WRITE_TSV_OUTPUT {
-    label 'write_output'
+    label 'small'
 
     input:
     val matches

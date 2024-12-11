@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process RUN_ANTIFAM {
-    label 'hmmer_runner'
+    label 'small', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -20,7 +20,7 @@ process RUN_ANTIFAM {
 }
 
 process PARSE_ANTIFAM {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(hmmseach_out)

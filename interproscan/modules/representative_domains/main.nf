@@ -2,7 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 process REPRESENTATIVE_DOMAINS {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     val matchesPath
@@ -25,7 +25,7 @@ process REPRESENTATIVE_DOMAINS {
         // Gather relevant locations
         def seqDomains = []
         seqData["matches"].each { String modelAccession, Match match ->
-            if (match.representativeInfo.type) {
+            if (match.representativeInfo?.type) {
                 match.locations.each { Location loc ->
                     CandidateDomain candidate = new CandidateDomain(loc, match.representativeInfo.rank)
                     candidate.sortFragments()

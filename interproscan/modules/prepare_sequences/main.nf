@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process PREPARE_NUCLEIC_SEQUENCES {
-    label 'io'
+    label 'small'
 
     input:
     tuple val(n_fasta), val(p_fasta)
@@ -33,7 +33,7 @@ process PREPARE_NUCLEIC_SEQUENCES {
 
 
 process PREPARE_PROTEIN_SEQUENCES {
-    label 'io'
+    label 'small'
 
     input:
     val fasta

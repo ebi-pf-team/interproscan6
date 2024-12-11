@@ -16,7 +16,7 @@ def PA_PATTERN = [
 ]
 
 process XREFS {
-    label 'xrefs'
+    label 'small'
 
     input:
     tuple val(meta), val(membersMatches)
