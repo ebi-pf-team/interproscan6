@@ -7,7 +7,7 @@ process RUN_PFSCAN {
     pftools developers. It automates running pfscan for all provided patterns and
     includes post-processing of the hits.
     */
-    label 'prosite_pfscan_runner'
+    label 'small', 'ips6_container'
 
     input:
         tuple val(meta), path(fasta)
@@ -30,7 +30,7 @@ process RUN_PFSCAN {
 
 
 process PARSE_PFSCAN {
-    label 'analysis_parser'
+    label 'small'
 
     input:
         tuple val(meta), val(pfscan_out)

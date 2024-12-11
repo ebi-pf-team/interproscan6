@@ -1,6 +1,8 @@
 # Linting
 
-The `nf-core` suite includes its own linter. However, only `nf-core` packages can use the `nf-core` linter. While `InterProScan6` is not integrated into `nf-core` we use the `linter-rules-for-nextflow` linter from [AWSlabs](https://github.com/awslabs/linter-rules-for-nextflow).
+The `nf-core` suite includes its own linter. However, only `nf-core` packages 
+can use the `nf-core` linter. While `InterProScan6` is not integrated into `nf-core` we use 
+the `linter-rules-for-nextflow` linter from [AWSlabs](https://github.com/awslabs/linter-rules-for-nextflow).
 
 ## Setup
 
