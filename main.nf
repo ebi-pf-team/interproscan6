@@ -70,20 +70,13 @@ workflow {
             ch_seqs,
             apps,
             params.lookupService.apiChunkSize,
-            params.lookupService.host
-        )
-        calculatedMatches = LOOKUP_MATCHES.out[0]
-        noLookupSeq = LOOKUP_MATCHES.out[1]
-        scanMatches = [:]
-        if (noLookupSeq) {
-            scanMatches = SCAN_SEQUENCES(
-                noLookupSeq,
-                apps,
-                params.appsConfig,
-                data_dir
-            )
-        }
-        matchResults = scanMatches.concat(calculatedMatches)
+            params.lookupService.lookupHost)
+        SCAN_SEQUENCES(
+            LOOKUP_MATCHES.out[1],
+            apps,
+            params.appsConfig,
+            data_dir)
+        matchResults = SCAN_SEQUENCES.out.concat(LOOKUP_MATCHES.out[0])
     }
 
     /* XREFS:

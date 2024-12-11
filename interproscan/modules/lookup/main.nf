@@ -13,27 +13,35 @@ process LOOKUP_MATCHES {
 
     output:
     path("calculatedMatches.json")
-    tuple val(index), val(fasta), path("noLookupSeq.json")
+    tuple val(index), path("noLookup.fasta"), path("noLookup.json")
 
     exec:
     def calculatedMatchesPath = task.workDir.resolve("calculatedMatches.json")
-    def noLookupSeqPath = task.workDir.resolve("noLookupSeq.json")
+    def noLookupFasta = task.workDir.resolve("noLookup.fasta")
+    def noLookupSeqPath = task.workDir.resolve("noLookup.json")
 
     def jsonSlurper = new JsonSlurper()
     def jsonFile = new File(json.toString())
-    sequences = jsonSlurper.parse(jsonFile)
+    def sequences = jsonSlurper.parse(jsonFile)
+        .collectEntries{ seqId, obj ->
+            if (obj instanceof List) { // nucleotide sequences case
+                obj.collectEntries { orf ->
+                    [(orf.md5): FastaSequence.fromMap(orf)]
+                }
+            } else {
+                [(obj.md5): FastaSequence.fromMap(obj)]
+            }
+        }
 
-    def md5List = []
-    sequences.each { md5, seq_info ->
-        md5List << md5
-    }
+    def md5List = sequences.keySet().toList()
+//     md5List << "5FE1059FDE57D6E61C5343CAB0C502C8"
     def matchesResult = [:]
     def noLookupSeq = [:]
+    noLookupMD5 = []
     def chunks = md5List.collate(chunkSize)
     chunks.each { chunk ->
-        def url = "${host}"
         def requestBody = JsonOutput.toJson([md5: chunk])
-        def connection = new URL(url).openConnection()
+        def connection = new URL("${host}").openConnection()
         connection.requestMethod = 'POST'
         connection.doOutput = true
         connection.setRequestProperty('Content-Type', 'application/json')
@@ -46,10 +54,18 @@ process LOOKUP_MATCHES {
             if (entry.value != null) {
                 matchesResult[entry.key] = entry.value
             } else {
-                noLookupSeq = sequences.findAll { md5, seq_info ->
-                    md5 == entry.key
-                }
+                noLookupMD5 << entry.key
             }
+        }
+    }
+
+    noLookupSeq = sequences.findAll { seqId, seq_info ->
+        noLookupMD5.contains(seq_info.md5)
+    }
+    new File(noLookupFasta.toString()).withWriter { writer ->
+        noLookupSeq.each { seqId, seq ->
+            writer.writeLine(">${seq.id} ${seq.description}")
+            writer.writeLine(seq.sequence)
         }
     }
     def jsonMatches = JsonOutput.toJson(matchesResult)
