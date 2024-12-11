@@ -34,7 +34,13 @@ process PARSE_SMART {
     def jsonSlurper = new JsonSlurper()
     def sequences = jsonSlurper.parse(jsonFile)
         .collectEntries{ seqId, obj ->
-            [ (seqId): FastaSequence.fromMap(obj) ]
+            if (obj instanceof List) { // nucleotide sequences case
+                obj.collectEntries { seq ->
+                    [(seq.id): FastaSequence.fromMap(seq)]
+                }
+            } else {
+                [(seqId): FastaSequence.fromMap(obj)]
+            }
         }
 
     def hmmLengths = HMMER2.parseHMM(hmmtxtdb.toString())
@@ -57,9 +63,9 @@ process PARSE_SMART {
             String sequence = sequences[seqId].sequence
             boolean tyrKinaseOK = (sequence ==~ tyrKinasePattern)
             boolean serThrKinaseOK = (sequence ==~ serThrKinasePattern)
-            
+
             models.each { modelAccession, match ->
-                if (modelAccession != tyrKinaseAccession && 
+                if (modelAccession != tyrKinaseAccession &&
                     modelAccession != serThrKinaseAccession) {
                     filteredModels[modelAccession] = match
                 } else if (modelAccession == tyrKinaseAccession && tyrKinaseOK) {

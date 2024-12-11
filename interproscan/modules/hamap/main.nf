@@ -36,7 +36,13 @@ process PREPARE_HAMAP {
     def jsonSlurper = new JsonSlurper()
     def sequences = jsonSlurper.parse(jsonFile)
         .collectEntries{ seqId, obj ->
-            [ (seqId): FastaSequence.fromMap(obj) ]
+            if (obj instanceof List) { // nucleotide sequences case
+                obj.collectEntries { seq ->
+                    [(seq.id): FastaSequence.fromMap(seq)]
+                }
+            } else {
+                [(seqId): FastaSequence.fromMap(obj)]
+            }
         }
 
     // Find profiles with matches
