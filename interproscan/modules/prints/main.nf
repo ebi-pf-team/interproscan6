@@ -3,7 +3,7 @@ import Prints
 import HierarchyEntry
 
 process RUN_PRINTS {
-    label 'prints_runner'
+    label 'large'
 
     input:
     tuple val(meta), path(fasta)
@@ -22,7 +22,7 @@ process RUN_PRINTS {
 }
 
 process PARSE_PRINTS {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(prints_output)
