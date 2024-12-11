@@ -35,8 +35,8 @@ process PARSE_SMART {
     def sequences = jsonSlurper.parse(jsonFile)
         .collectEntries{ seqId, obj ->
             if (obj instanceof List) { // nucleotide sequences case
-                obj.collectEntries { orf ->
-                    [(orf.id): FastaSequence.fromMap(orf)]
+                obj.collectEntries { seq ->
+                    [(seq.id): FastaSequence.fromMap(seq)]
                 }
             } else {
                 [(seqId): FastaSequence.fromMap(obj)]
