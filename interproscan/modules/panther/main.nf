@@ -2,7 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 process SEARCH_PANTHER {
-    label 'hmmer_runner'
+    label 'small', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -21,6 +21,8 @@ process SEARCH_PANTHER {
 }
 
 process PREPARE_TREEGRAFTER {
+    label 'small'
+
     input:
     tuple val(meta), val(hmmseach_out)
     val msf_dir
@@ -133,7 +135,7 @@ process PREPARE_TREEGRAFTER {
 
 
 process RUN_TREEGRAFTER {
-    label 'analysis_parser'
+    label 'small', 'ips6_container'
     
     input:
     tuple val(meta), val(sequenceIds), val(familyIds), path(fastas)
@@ -180,7 +182,7 @@ process RUN_TREEGRAFTER {
 }
 
 process PARSE_PANTHER {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(hmmseach_json), val(epagn_tsv)
