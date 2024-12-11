@@ -19,7 +19,7 @@ process RUN_TMHMM {
     python3 predict.py \
         --fasta ../${fasta} \
         --output-dir ../outdir
-    chmod -R 777 outdir
+    chmod -R 777 ../outdir
     """
 }
 
@@ -62,7 +62,6 @@ process PARSE_TMHMM {
             int start = lineData[-2].toInteger()
             int end = lineData[-1].toInteger()
             Location location = new Location(start, end)
-            location.fragments.add(new LocationFragment(start, end, "CONTINUOUS"))
             hits[seqId][modelAcc].addLocation(location)
         }
     }
