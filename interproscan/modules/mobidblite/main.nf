@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process RUN_MOBIDBLITE {
-    label 'mobidblite_runner'
+    label 'small', 'mobidblite_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -17,7 +17,7 @@ process RUN_MOBIDBLITE {
 
 
 process PARSE_MOBIDBLITE {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(mobidblite_output)
@@ -37,11 +37,13 @@ process PARSE_MOBIDBLITE {
         def feature = lineData[3] != "-" ? lineData[3] : null
 
         if (matches.containsKey(sequenceId)) {
-            match = matches[sequenceId]["mobidb_lite"]
+            match = matches[sequenceId]["mobidb-lite"]
         } else {
-            match = new Match("mobidb_lite")
+            match = new Match("mobidb-lite")
+            SignatureLibraryRelease library = new SignatureLibraryRelease("MobiDB-lite", "4.0")
+            match.signature = new Signature("mobidb-lite", "disorder_prediction", "consensus disorder prediction", library, null)
             matches[sequenceId] = [:]
-            matches[sequenceId]["mobidb_lite"] = match
+            matches[sequenceId]["mobidb-lite"] = match
         }
 
         match.addLocation(new Location(start, end, feature))

@@ -2,7 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 process PREPROCESS_HAMAP {
-    label 'hmmer_runner'
+    label 'small', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -22,7 +22,7 @@ process PREPROCESS_HAMAP {
 }
 
 process PREPARE_HAMAP {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(hmmsearch_tab), val(seq_json)
@@ -36,7 +36,13 @@ process PREPARE_HAMAP {
     def jsonSlurper = new JsonSlurper()
     def sequences = jsonSlurper.parse(jsonFile)
         .collectEntries{ seqId, obj ->
-            [ (seqId): FastaSequence.fromMap(obj) ]
+            if (obj instanceof List) { // nucleotide sequences case
+                obj.collectEntries { seq ->
+                    [(seq.id): FastaSequence.fromMap(seq)]
+                }
+            } else {
+                [(seqId): FastaSequence.fromMap(obj)]
+            }
         }
 
     // Find profiles with matches
@@ -81,7 +87,7 @@ process PREPARE_HAMAP {
 }
 
 process RUN_HAMAP {
-    label 'analysis_parser'
+    label 'small', 'ips6_container'
 
     input:
     tuple val(meta), val(profiles), path(fasta_files)
@@ -106,7 +112,7 @@ process RUN_HAMAP {
 }
 
 process PARSE_HAMAP {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(pfsearch_out)

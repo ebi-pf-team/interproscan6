@@ -2,7 +2,7 @@ import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
 process RUN_SIGNALP {
-    label 'signalp_runner'
+    label 'medium', 'signalp_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -30,7 +30,7 @@ process RUN_SIGNALP {
 }
 
 process PARSE_SIGNALP {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(organism), val(mode), val(signalp_out)
@@ -46,6 +46,14 @@ process PARSE_SIGNALP {
     def jsonOutput = jsonSlurper.parse(jsonFile)
 
     String modelAcc = "SignalP_${mode}_${organism}"
+    SignatureLibraryRelease library = new SignatureLibraryRelease("SignalP", "6.0h")
+    def signatures = [
+        "Sec/SPI"  : new Signature("SignalP-Sec-SPI", "Sec/SPI", "Sec signal peptide", library, null),
+        "Sec/SPII" : new Signature("SignalP-Sec-SPII", "Sec/SPII", "Lipoprotein signal peptide", library, null),
+        "Tat/SPI"  : new Signature("SignalP-Tat-SPI", "Tat/SPI", "Tat signal peptide", library, null),
+        "Tat/SPII" : new Signature("SignalP-Tat-SPII", "Tat/SPII", "Tat lipoprotein signal peptide", library, null),
+        "Sec/SPIII": new Signature("SignalP-Sec-SPIII", "Sec/SPIII", "Pilin signal peptide", library, null),
+    ]
 
     def hits = [:]
     new File(signalDir, "output.gff3").eachLine { line ->
@@ -62,10 +70,13 @@ process PARSE_SIGNALP {
         Double score = Double.parseDouble(fields[5])
         String prediction = jsonOutput["SEQUENCES"][seqHeader]["Prediction"]
 
-        SignatureLibraryRelease library = new SignatureLibraryRelease("SignalP", "6.0h")
-        Match match = new Match(modelAcc)       
-        match.signature = new Signature("SignalP", library)
-        Location location = new Location(start, end, prediction)
+        def matcher = prediction =~ /\(([a-zA-Z]+\/[a-zA-Z]+)\)/
+        String spType = matcher.find() ? matcher.group(1) : null
+        Signature signature = signatures.get(spType)
+        assert signature != null
+        Match match = new Match(modelAcc)    
+        match.signature = signature
+        Location location = new Location(start, end)
         location.score = score
         match.addLocation(location)
         hits[seqId] = [(modelAcc) : match]

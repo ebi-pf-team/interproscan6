@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process SEARCH_PHOBIUS {
-    label       'phobius_runner'
+    label       'small'
     stageInMode 'copy'
 
     input:
@@ -20,7 +20,7 @@ process SEARCH_PHOBIUS {
 }
 
 process PARSE_PHOBIUS {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(phobius_out)
@@ -35,6 +35,23 @@ process PARSE_PHOBIUS {
     def sequenceId = null
     boolean isSignalPeptide = false
     boolean isTransmembrane = false
+
+    SignatureLibraryRelease library = new SignatureLibraryRelease("Phobius", "1.0.1")
+    def signatures = [
+        "CYTOPLASMIC_DOMAIN"     : new Signature("CYTOPLASMIC_DOMAIN", "Cytoplasmic domain", 
+                                                 "Region of a membrane-bound protein predicted to be outside the membrane, in the cytoplasm", library, null),
+        "NON_CYTOPLASMIC_DOMAIN" : new Signature("NON_CYTOPLASMIC_DOMAIN", "Non cytoplasmic domain", 
+                                                 "Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region", library, null),
+        "SIGNAL_PEPTIDE"         : new Signature("SIGNAL_PEPTIDE", "Signal Peptide", "Signal Peptide region", library, null),
+        "SIGNAL_PEPTIDE_C_REGION": new Signature("SIGNAL_PEPTIDE_C_REGION", "Signal peptide C-region", 
+                                                 "C-terminal region of a signal peptide", library, null),
+        "SIGNAL_PEPTIDE_H_REGION": new Signature("SIGNAL_PEPTIDE_H_REGION", "Signal peptide H-region", 
+                                                 "Hydrophobic region of a signal peptide", library, null),
+        "SIGNAL_PEPTIDE_N_REGION": new Signature("SIGNAL_PEPTIDE_N_REGION", "Signal peptide N-region", 
+                                                 "N-terminal region of a signal peptide", library, null),
+        "TRANSMEMBRANE"          : new Signature("TRANSMEMBRANE", "Transmembrane region", 
+                                                 "Region of a membrane-bound protein predicted to be embedded in the membrane", library, null),
+    ]
 
     file(phobius_out.toString()).eachLine { line ->
         line = line.trim()
@@ -69,7 +86,7 @@ process PARSE_PHOBIUS {
                 qualifier = fields[4].trim()
             }
 
-            String modelAccession = null            
+            String modelAccession = null
             if (type == "SIGNAL") {
                 modelAccession = "SIGNAL_PEPTIDE"
                 isSignalPeptide = true
@@ -104,11 +121,15 @@ process PARSE_PHOBIUS {
                 return
             }
 
-            if (!tmpMatches.containsKey(modelAccession)) {
-                tmpMatches[modelAccession] = new Match(modelAccession)
+            Match match
+            if (tmpMatches.containsKey(modelAccession)) {
+                match = tmpMatches[modelAccession]
+            } else {
+                match = new Match(modelAccession)
+                match.signature = signatures[modelAccession]
+                tmpMatches[modelAccession] = match
             }
 
-            Match match = tmpMatches.computeIfAbsent(modelAccession, k -> new Match(modelAccession))
             match.addLocation(new Location(start, end))            
         }
     }
