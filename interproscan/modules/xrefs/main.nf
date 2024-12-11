@@ -53,7 +53,7 @@ process XREFS {
                 Match matchObject = Match.fromMap(match)
                 // null check needed for cases that signature still not created on match object (e.g. hmmer3 members)
                 String entrySignatureKey = matchObject.signature?.accession ?: matchObject.modelAccession
-                def signatureInfo = entries['entries'][entrySignatureKey] ?: entries['entries'][modelAccession]
+                def signatureInfo = entries["entries"][entrySignatureKey] ?: entries["entries"][modelAccession]
                 String memberDB = matchObject.signature?.signatureLibraryRelease?.library
                 String memberRelease = null
                 if (!memberDB) {
@@ -69,7 +69,6 @@ process XREFS {
                     SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
                     if (!matchObject.signature) {
                         matchObject.signature = new Signature(modelAccession, sigLibRelease)
-                        if (memberDB == "mobidb_lite") { matchObject.signature.description = "consensus disorder prediction" }
                     } else if (!matchObject.signature.signatureLibraryRelease) {
                         matchObject.signature.signatureLibraryRelease = sigLibRelease
                     }
@@ -93,17 +92,17 @@ process XREFS {
                     matchObject.signature.name = signatureInfo["name"]
                     matchObject.signature.description = signatureInfo["description"]
 
-                    if (signatureInfo['representative']) {
+                    if (signatureInfo["representative"]) {
                         RepresentativeInfo representativeInfo = new RepresentativeInfo(
-                            signatureInfo['representative']["type"],
-                            signatureInfo['representative']["index"]
+                            signatureInfo["representative"]["type"],
+                            signatureInfo["representative"]["index"]
                         )
                         matchObject.representativeInfo = representativeInfo
                     }
 
-                    def interproAcc = signatureInfo['integrated']
+                    def interproAcc = signatureInfo["integrated"]
                     if (interproAcc) {
-                        def entryInfo = entries['entries'].get(interproAcc)
+                        def entryInfo = entries["entries"].get(interproAcc)
                         assert entryInfo != null
                         Entry entryDataObj = new Entry(
                             interproAcc,
@@ -144,9 +143,9 @@ process XREFS {
 
                 if (memberDB == "PANTHER") {
                     accSubfamily = matchObject.signature.accession
-                    if (entries['entries'][accSubfamily]) {
-                        matchObject.treegrafter.subfamilyName = entries['entries'][accSubfamily]["name"]
-                        matchObject.treegrafter.subfamilyDescription = entries['entries'][accSubfamily]["description"]
+                    if (entries["entries"][accSubfamily]) {
+                        matchObject.treegrafter.subfamilyName = entries["entries"][accSubfamily]["name"]
+                        matchObject.treegrafter.subfamilyDescription = entries["entries"][accSubfamily]["description"]
                     }
                 }
                 return [(modelAccession): matchObject]
