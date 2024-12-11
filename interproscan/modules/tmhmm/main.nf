@@ -11,7 +11,6 @@ process RUN_TMHMM {
 
     output:
     tuple val(meta), path("outdir")
-    val tmhmmVersion
 
     script:
     """
