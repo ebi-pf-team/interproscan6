@@ -55,7 +55,7 @@ process PARSE_TMHMM {
             String modelAcc = MODEL_TYPES.get(lineData[1], lineData[1].toUpperCase().replace(" ", "_"))
             hits[seqId].computeIfAbsent(modelAcc) {
                 Match match = new Match(modelAcc)
-                SignatureLibraryRelease library = new SignatureLibraryRelease("tmhmm", "1.0")
+                SignatureLibraryRelease library = new SignatureLibraryRelease("DeepTMHMM", "1.0")
                 match.signature = new Signature(modelAcc, library)
                 match
             }

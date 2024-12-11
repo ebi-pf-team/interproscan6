@@ -38,7 +38,7 @@ process WRITE_XML_OUTPUT {
         "signalp-euk": ["score"],
         "smart": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
         "superfamily": ["evalue", "hmmLength"],
-        "tmhmm": []
+        "DeepTMHMM": []
     ]
 
     xml."protein-matches"("interproscan-version": ips6Version){
