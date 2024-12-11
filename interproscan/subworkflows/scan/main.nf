@@ -12,12 +12,12 @@ include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                         
 include { RUN_PIRSR; PARSE_PIRSR                                                  } from  "../../modules/pirsr"
 include { RUN_PIRSF; PARSE_PIRSF                                                  } from  "../../modules/pirsf"
 include { RUN_PRINTS; PARSE_PRINTS                                                } from  "../../modules/prints"
-include { RUN_SFLD; POST_PROCESS_SFLD; PARSE_SFLD                                 } from  "../../modules/sfld"
 include { RUN_PFSCAN ; PARSE_PFSCAN                                               } from  "../../modules/prosite/patterns"
 include { RUN_PFSEARCH ; PARSE_PFSEARCH                                           } from  "../../modules/prosite/profiles"
-include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
+include { RUN_SFLD; POST_PROCESS_SFLD; PARSE_SFLD                                 } from  "../../modules/sfld"
 include { RUN_SIGNALP as RUN_SIGNALP_EUK; PARSE_SIGNALP as PARSE_SIGNALP_EUK      } from  "../../modules/signalp"
 include { RUN_SIGNALP as RUN_SIGNALP_PROK; PARSE_SIGNALP as PARSE_SIGNALP_PROK    } from  "../../modules/signalp"
+include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
 
 workflow SCAN_SEQUENCES {
@@ -220,7 +220,7 @@ workflow SCAN_SEQUENCES {
             "${datadir}/${appsConfig.pirsf.hmm}"
         )
         PARSE_PIRSF(RUN_PIRSF.out,
-            "${datadir}/${appsConfig.pirsf.postprocess.data}")
+            "${datadir}/${appsConfig.pirsf.data}")
 
         results = results.mix(PARSE_PIRSF.out)
     }

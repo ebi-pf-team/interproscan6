@@ -1,7 +1,5 @@
 # Testing
 
-# Unit and integration tests
-
 Unit tests and integration tests are created using [`nf-test`](https://github.com/askimed/nf-test) [Patel et al., 2024].
 
 > Yash Patel, Chenghao Zhu, Takafumi N Yamaguchi, Yuan Zhe Bugh, Mao Tian, Aaron Holmes, Sorel T Fitz-Gibbon, Paul C Boutros, NFTest: automated testing of Nextflow pipelines, Bioinformatics, Volume 40, Issue 2, February 2024, btae081, https://doi.org/10.1093/bioinformatics/btae081

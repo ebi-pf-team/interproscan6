@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.io.StringWriter
 
 process WRITE_XML_OUTPUT {
-    label 'write_output'
+    label 'small'
 
     input:
     val matches

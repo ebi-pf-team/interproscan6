@@ -56,6 +56,10 @@ class InterProScan {
             name: "help",
             description: "print the help message and exit."
         ],
+        [
+            name: "max-workers",
+            description: "define maximum number of workers available for the InterProScan when running locally."
+        ],
         // No description -> not displayed in the help message
         [
             name: "batch-size",
@@ -76,7 +80,7 @@ class InterProScan {
         [
             name: "x-refs-config",
             description: null
-        ],
+        ]
     ]
 
     static void validateParams(params, log) {

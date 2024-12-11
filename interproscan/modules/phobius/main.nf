@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process SEARCH_PHOBIUS {
-    label       'phobius_runner'
+    label       'small'
     stageInMode 'copy'
 
     input:
@@ -20,7 +20,7 @@ process SEARCH_PHOBIUS {
 }
 
 process PARSE_PHOBIUS {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(phobius_out)
