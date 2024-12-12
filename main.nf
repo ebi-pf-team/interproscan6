@@ -55,7 +55,7 @@ workflow {
         ch_seqs = PREPARE_PROTEIN_SEQUENCES(ch_fasta)
     }
 
-    matchResults = [:]
+    matchResults = Channel.empty()
     if (params.disablePrecalc) {
         SCAN_SEQUENCES(
             ch_seqs,
@@ -76,7 +76,12 @@ workflow {
             apps,
             params.appsConfig,
             data_dir)
-        matchResults = SCAN_SEQUENCES.out.concat(LOOKUP_MATCHES.out[0])
+
+        def expandedScan = SCAN_SEQUENCES.out.flatMap { scan ->
+            scan[1].collect { path -> [scan[0], path] }
+        }
+        def combined = LOOKUP_MATCHES.out[0].concat(expandedScan)
+        matchResults = combined.groupTuple()
     }
 
     /* XREFS:
