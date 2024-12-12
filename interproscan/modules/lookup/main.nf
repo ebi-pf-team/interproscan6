@@ -34,9 +34,6 @@ process LOOKUP_MATCHES {
         }
 
     def md5List = sequences.keySet().toList()
-    md5List << "5FE1059FDE57D6E61C5343CAB0C502C8"
-    md5List << "706475FD3508BACF05958AC1D6C7B9BD"
-    md5List << "B5437FBB59FED6ED5A1A0F7B3409A5D0"
     def matchesResult = [:]
     def noLookupSeq = [:]
     noLookupMD5 = []
@@ -52,20 +49,21 @@ process LOOKUP_MATCHES {
         }
         def response = connection.inputStream.text
         def jsonResponse = new JsonSlurper().parseText(response)
-        jsonResponse.each { key, matches ->
+        jsonResponse.each { md5, matches ->
+            seqId = sequences[md5].id
             if (matches != null) {
-                matches.each { signature ->
-                    Match matchObj = Match.fromMap(signature)
+                matchesResult[seqId] = [:]
+                matches.each { match ->
+                    Match matchObj = Match.fromMap(match)
                     memberDB = normaliseMemberDB(matchObj.signature.signatureLibraryRelease.library)
                     if (appl.contains(memberDB)) {
-                        if (!matchesResult.containsKey(key)) {
-                            matchesResult[key] = []
-                        }
-                        matchesResult[key] << matchObj
+                        modelAccession = matchObj.signature.accession
+                        matchObj.modelAccession = modelAccession
+                        matchesResult[seqId][modelAccession] = matchObj
                     }
                 }
             } else {
-                noLookupMD5 << key
+                noLookupMD5 << md5
             }
         }
     }
