@@ -85,22 +85,22 @@ process WRITE_XML_OUTPUT {
 }
 
 def processMatches(matches, xml) {
-    List<String> hmmer3Members = ["antifam", "cathgene3d", "cathfunfam", "hamap", "ncbifam", "pfam", "pirsf", "pirsr", "sfld", "superfamily"]
+    List<String> hmmer3Members = ["AntiFam", "CATH-Gene3D", "FunFam", "HAMAP", "NCBIfam", "Pfam", "PIRSF", "PIRSR", "SFLD", "SUPERFAMILY"]
     List<String> hmmer3LocationFields = ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
     Map<String, List<String>> memberLocationFields = [
-        "cdd": ["match-evalue", "match-score"],
-        "coils": [],
-        "hamap": ["score"],
-        "mobidblite": ["sequence-feature"],
-        "panther": ["hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
-        "phobius": [],
-        "prints": ["motifNumber", "pvalue", "score"],
-        "prositepatterns": ["level"],
-        "prositeprofiles": ["score"],
-        "signalp": ["score"],
-        "signalp-euk": ["score"],
-        "smart": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
-        "superfamily": ["evalue", "hmmLength"]
+        "CDD": ["match-evalue", "match-score"],
+        "COILS": [],
+        "HAMAP": ["score"],
+        "MobiDB Lite": ["sequence-feature"],
+        "PANTHER": ["hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
+        "Phobius": [],
+        "PRINTS": ["motifNumber", "pvalue", "score"],
+        "PROSITE patterns": ["level"],
+        "PROSITE profiles": ["score"],
+        "SignalP-Prok": ["score"],
+        "SignalP_Euk": ["score"],
+        "SMART": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
+        "SUPERFAMILY": ["evalue", "hmmLength"]
     ]
 
     matches.each { modelAcc, matchMap ->
@@ -109,23 +109,23 @@ def processMatches(matches, xml) {
         def memberDb = matchObj.signature.signatureLibraryRelease.library
         if (hmmer3Members.contains(memberDb)) {
             matchNodeName = "hmmer3"
-        } else if (memberDb == "smart") {
+        } else if (memberDb == "SMART") {
             matchNodeName = "hmmer2"
         } else {
             matchNodeName = memberDb
         }
 
         def matchAttributes = [:]
-        if (hmmer3Members.findAll { it != "superfamily"}.contains(memberDb) || memberDb == "smart") {
+        if (hmmer3Members.findAll { it != "SUPERFAMILY"}.contains(memberDb) || memberDb == "SMART") {
             matchAttributes.evalue = matchObj.evalue
             matchAttributes.score = matchObj.score
-        } else if (memberDb == "panther") {
+        } else if (memberDb == "PANTHER") {
             matchAttributes.ac = matchObj.treegrafter.subfamilyAccession
             matchAttributes.evalue = matchObj.evalue
             matchAttributes."graft-point" = matchObj.treegrafter.graftPoint
             matchAttributes.name = matchObj.signature.name
             matchAttributes.score = matchObj.score
-        } else if (memberDb == "prints") {
+        } else if (memberDb == "PRINTS") {
             matchAttributes.evalue = matchObj.evalue
             matchAttributes.graftscan = matchObj.graphScan
         }
@@ -175,7 +175,7 @@ def processMatches(matches, xml) {
                 }
             }
 
-            "model-ac"(memberDb == "panther" ? matchObj.treegrafter.subfamilyAccession : matchObj.modelAccession)
+            "model-ac"(memberDb == "PANTHER" ? matchObj.treegrafter.subfamilyAccession : matchObj.modelAccession)
 
             if (matchObj.locations) {
                 def fields = memberLocationFields.get(memberDb, hmmer3LocationFields)
@@ -192,7 +192,7 @@ def processMatches(matches, xml) {
                                     }
                                 }
                             }
-                            if (memberDb in ["hamap", "prositepatterns", "prositeprofiles"]) {
+                            if (memberDb in ["HAMAP", "PROSITE patterns", "PROSITE profiles"]) {
                                 alignment(loc.targetAlignment ?: "")
                             }
                             if (loc.sites) {
@@ -201,7 +201,7 @@ def processMatches(matches, xml) {
                                         "$matchNodeName-site"(description: siteObj.description, numLocations: siteObj.numLocations) {
                                             if(siteObj.group){ group(siteObj.group) }
                                             if(siteObj.label){ label(siteObj.label) }
-                                            if (memberDb != "cdd") {
+                                            if (memberDb != "CDD") {
                                                 hmmStart(siteObj.hmmStart)
                                                 hmmEnd(siteObj.hmmEnd)
                                             }
