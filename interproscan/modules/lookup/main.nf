@@ -12,7 +12,7 @@ process LOOKUP_MATCHES {
     val host
 
     output:
-    path("calculatedMatches.json")
+    tuple val(index), path("calculatedMatches.json")
     tuple val(index), path("noLookup.fasta"), path("noLookup.json")
 
     exec:
@@ -34,7 +34,9 @@ process LOOKUP_MATCHES {
         }
 
     def md5List = sequences.keySet().toList()
-//     md5List << "5FE1059FDE57D6E61C5343CAB0C502C8"
+    md5List << "5FE1059FDE57D6E61C5343CAB0C502C8"
+    md5List << "706475FD3508BACF05958AC1D6C7B9BD"
+    md5List << "B5437FBB59FED6ED5A1A0F7B3409A5D0"
     def matchesResult = [:]
     def noLookupSeq = [:]
     noLookupMD5 = []
@@ -50,11 +52,20 @@ process LOOKUP_MATCHES {
         }
         def response = connection.inputStream.text
         def jsonResponse = new JsonSlurper().parseText(response)
-        jsonResponse.each { entry ->
-            if (entry.value != null) {
-                matchesResult[entry.key] = entry.value
+        jsonResponse.each { key, matches ->
+            if (matches != null) {
+                matches.each { signature ->
+                    Match matchObj = Match.fromMap(signature)
+                    memberDB = normaliseMemberDB(matchObj.signature.signatureLibraryRelease.library)
+                    if (appl.contains(memberDB)) {
+                        if (!matchesResult.containsKey(key)) {
+                            matchesResult[key] = []
+                        }
+                        matchesResult[key] << matchObj
+                    }
+                }
             } else {
-                noLookupMD5 << entry.key
+                noLookupMD5 << key
             }
         }
     }
@@ -72,4 +83,9 @@ process LOOKUP_MATCHES {
     def jsonSequences = JsonOutput.toJson(noLookupSeq)
     new File(calculatedMatchesPath.toString()).write(jsonMatches)
     new File(noLookupSeqPath.toString()).write(jsonSequences)
+}
+
+
+def normaliseMemberDB(String memberDB){
+    return memberDB.toLowerCase().replace("-", "").replace(" ", "").replace("CATH-", "")
 }
