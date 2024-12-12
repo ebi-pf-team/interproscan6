@@ -82,7 +82,7 @@ class InterProScan {
         ]
     ]
 
-    static final def LICENSED_SOFTWARE = ["phobius", "signalp_euk", "signal_prok", "tmhmm"]
+    static final def LICENSED_SOFTWARE = ["phobius", "signalp_euk", "signalp_prok", "deeptmhmm"]
 
     static final def DATA_TYPE = [
             "FILE": ["cla", "clan", "dat", "disc_regs", "evaluator", "hierarchy", "hmm", "hmmbin",
