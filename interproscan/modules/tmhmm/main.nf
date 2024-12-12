@@ -19,6 +19,8 @@ process RUN_TMHMM {
     python3 predict.py \
         --fasta ../${fasta} \
         --output-dir ../outdir
+    cd ..
+    rm -r ${tmhmm_dir}
     chmod -R 777 ../outdir
     """
 }
