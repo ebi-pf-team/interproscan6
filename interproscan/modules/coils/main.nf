@@ -36,7 +36,10 @@ process PARSE_COILS {
             // Coils report the full sequence header (ID + description)
             sequenceId = line.substring(1).split()[0]
             matches[sequenceId] = [:]
-            matches[sequenceId]["Coil"] = new Match("coils")
+            SignatureLibraryRelease library = new SignatureLibraryRelease("COILS", "2.2.1")
+            Match match = new Match("Coil")
+            match.signature = new Signature("Coil", "Coil", null, library, null)
+            matches[sequenceId]["Coil"] = match
         } else if (line != "//" && sequenceId) {
             def fields = line.split(/\s+/)
             def start = fields[0].toInteger()
@@ -45,6 +48,6 @@ process PARSE_COILS {
         }
     }
 
-    def json = JsonOutput.toJson(matches)
+    def json = JsonOutput.toJson(matches.findAll { it.value["Coil"].locations.size() > 0 })
     new File(outputFilePath.toString()).write(json)
 }
