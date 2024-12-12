@@ -19,7 +19,7 @@ include { RUN_SIGNALP as RUN_SIGNALP_EUK; PARSE_SIGNALP as PARSE_SIGNALP_EUK    
 include { RUN_SIGNALP as RUN_SIGNALP_PROK; PARSE_SIGNALP as PARSE_SIGNALP_PROK    } from  "../../modules/signalp"
 include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
-include { RUN_TMHMM; PARSE_TMHMM                                                  } from  "../../modules/tmhmm"
+include { RUN_DEEPTMHMM; PARSE_DEEPTMHMM                                          } from  "../../modules/tmhmm"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -129,6 +129,15 @@ workflow SCAN_SEQUENCES {
         RUN_COILS(ch_fasta)
         PARSE_COILS(RUN_COILS.out)
         results = results.mix(PARSE_COILS.out)
+    }
+
+    if (applications.contains("deeptmhmm")) {
+        RUN_DEEPTMHMM(
+            ch_fasta,
+            appsConfig.deeptmhmm.dir
+        )
+        PARSE_DEEPTMHMM(RUN_DEEPTMHMM.out)
+        results = results.mix(PARSE_DEEPTMHMM.out)
     }
 
     if (applications.contains("hamap")) {
@@ -333,15 +342,6 @@ workflow SCAN_SEQUENCES {
             "${datadir}/${appsConfig.superfamily.hmm}"
         )
         results = results.mix(PARSE_SUPERFAMILY.out)
-    }
-
-    if (applications.contains("tmhmm")) {
-        RUN_TMHMM(
-            ch_fasta,
-            appsConfig.tmhmm.dir
-        )
-        PARSE_TMHMM(RUN_TMHMM.out)
-        results = results.mix(PARSE_TMHMM.out)
     }
 
     results

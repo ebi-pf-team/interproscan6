@@ -1,8 +1,8 @@
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
-process RUN_TMHMM {
-    label 'medium', 'tmhmm_runner'
+process RUN_DEEPTMHMM {
+    label 'medium', 'deeptmhmm_runner'
     stageInMode 'copy'
 
     input:
@@ -21,12 +21,12 @@ process RUN_TMHMM {
         --output-dir ../outdir
     cd ..
     rm -r ${tmhmm_dir}
-    chmod -R 777 ../outdir
+    chmod -R 777 outdir
     """
 }
 
-process PARSE_TMHMM {
-    label 'analysis_parser'
+process PARSE_DEEPTMHMM {
+    label 'deeptmhmm_runner'
 
     input:
     tuple val(meta), val(tmhmm_output)
