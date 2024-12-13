@@ -31,7 +31,7 @@ process WRITE_XML_OUTPUT {
         jsonData.each { seqData ->
             if (nucleic) {
                 def ntSequenceMD5 = seqData.translatedFrom[0]["md5"]
-                nucleotideSequence {
+                "nucleotide-sequence" {
                     if (!processedNT.contains(ntSequenceMD5)) {
                         processedNT << ntSequenceMD5
                         sequence(md5: ntSequenceMD5, seqData.translatedFrom[0]["sequence"])
