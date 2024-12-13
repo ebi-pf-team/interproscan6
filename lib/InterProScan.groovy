@@ -204,11 +204,15 @@ class InterProScan {
             appsConfig[appName].collect { key, value ->
                 if (this.DATA_TYPE["FILE"].contains(key)) {
                     if (!resolveFile(datadir.resolve(value).toString())) {
-                        return "${appName}: file: ${key}: ${value ?: 'null'}"
+                        return "${appName}: file: '${key}': ${value ?: 'null'}"
                     }
                 } else if (this.DATA_TYPE["DIR"].contains(key)) {
-                    if (!Files.exists(datadir.resolve(value)) || !Files.isDirectory(datadir.resolve(value))) {
-                        return "${appName}: dir: ${key}: ${value ?: 'null'}"
+                    if (!value) {
+                        return "${appName}: dir: '${key}': 'null'"
+                    }
+                    Path dirPath = this.LICENSED_SOFTWARE.contains(appName) ? Paths.get(value) : datadir.resolve(value)
+                    if (!Files.exists(dirPath) || !Files.isDirectory(dirPath)) {
+                        return "${appName}: dir: '${key}': ${value ?: 'null'}"
                     }
                 }
                 return null

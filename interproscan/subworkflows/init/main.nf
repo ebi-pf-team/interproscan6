@@ -20,10 +20,12 @@ workflow INIT_PIPELINE {
     // Validate the data dir and application data files if needed by any members
     // e.g. mobidblite and coils do no need additional data files
     need_data = apps.any { String appName ->
-        params.appsConfig.get(appName)?.has_data
+        params.appsConfig.get(appName)?.has_data || InterProScan.LICENSED_SOFTWARE.contains(appName)
     }
     if (need_data) {
-        (datadir, error) = InterProScan.resolveDirectory(params.datadir, true, false)
+        // If --datadir is called and no path is given it converts to a boolean
+        def dirPath = params.datadir instanceof Boolean ? null : params.datadir
+        (datadir, error) = InterProScan.resolveDirectory(dirPath, true, false)
         if (!datadir) {
             log.error error
             exit 1
