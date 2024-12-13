@@ -58,7 +58,7 @@ process LOOKUP_MATCHES {
                 matches.each { match ->
                     Match matchObj = Match.fromMap(match)
                     memberDB = matchObj.signature.signatureLibraryRelease.library
-                    stdMemberDB = memberDB.toLowerCase().replaceAll("[-\\sCATH]", "")
+                    stdMemberDB = memberDB.replace("CATH", "").toLowerCase().replaceAll("[-\\s]", "")
                     if (applications.contains(stdMemberDB)) {
                         modelAccession = matchObj.signature.accession
                         matchObj.modelAccession = modelAccession
