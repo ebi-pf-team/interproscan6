@@ -30,11 +30,12 @@ process PARSE_MOBIDBLITE {
     Match match = null
     def matches = [:]
     file(mobidblite_output.toString()).eachLine { line ->
-        def lineData = line.split(/\s+/)
-        def sequenceId = lineData[0]
-        def start = lineData[1].toInteger()
-        def end = lineData[2].toInteger()
-        def feature = lineData[3] != "-" ? lineData[3] : null
+        def fields = line.split(/\t/)
+        assert fields.size() == 4
+        def sequenceId = fields[0]
+        def start = fields[1].toInteger()
+        def end = fields[2].toInteger()
+        def feature = fields[3] != "-" ? fields[3] : null
 
         if (matches.containsKey(sequenceId)) {
             match = matches[sequenceId]["mobidb-lite"]
