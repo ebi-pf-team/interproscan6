@@ -172,24 +172,24 @@ default application (i.e. when `--application` is not used).
 ```groovy
 deeptmhmm {
     name = "DeepTMHMM"
-    dir = ""   <--- update the dir path
+    dir = ""      <--- update the dir path
 }
 phobius {
   name = "Phobius"
   invalid_chars = "-*.OXUZJ"
-  dir = ""   <--- update the dir path
+  dir = ""        <--- update the dir path
 }
 signalp_euk {
   name = "SignalP-Euk"
   organism = "eukarya"
-  dir = ""    <-------- update with <SIGNALP-DIR>
-          mode = "fast"
+  dir = ""        <--- update the dir path
+  mode = "fast"
 }
 signalp_prok {
   name = "SignalP-Prok"
   organism = "other"
-  dir = ""    <-------- update with <SIGNALP-DIR>
-          mode = "fast"
+  dir = ""        <--- update the dir path
+  mode = "fast"
 }
 ```
 
