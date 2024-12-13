@@ -42,7 +42,7 @@ curl -OJ https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/102.0/interproscan-da
 tar -pxzf interproscan-data-102.0.tar.gz
 ```
 
-2. (Optional) Install licensed software (`Phobius`, `SignalP`, `DeepTMHMM`) - See the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
+2. (Optional) Install licensed software (`Phobius`, `SignalP`, `DeepTMHMM`) - See the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-deeptmhmm) documentation.
 
 3. **Run `InterProScan`**
 ```bash
@@ -76,7 +76,7 @@ Or build the Docker image locally (then optionally convert to an alternative con
 docker build -t interproscan6 utilities/docker/interproscan
 ```
 
-4. (Optional) Install licensed software (`Phobius`, `SignalP`, `DeepTMHMM`) - See the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-tmhmm) documentation.
+4. (Optional) Install licensed software (`Phobius`, `SignalP`, `DeepTMHMM`) - See the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-deeptmhmm) documentation.
 
 5. **Run `InterProScan`**
 ```bash
@@ -107,7 +107,7 @@ nextflow run ebi-pf-team/interproscan6 \
 > [!NOTE]
 > The `--datadir` flag is not needed when only running member databases that do not require additional data files.
 > This only applies to `mobidblite` and `coils` (which do not require additional datafiles) and the licensed software
-> (`SignalP`, `Phobius`, and `TMHMM`).
+> (`SignalP`, `Phobius`, and `DeepTMHMM`).
 
 **Optional arguments:**
 
@@ -155,7 +155,7 @@ nextflow run ebi-pf-team/interproscan6 \
     --nucleic
 ```
 
-# Installing licensed applications (`Phobius`, `SignalP`, `TMHMM`)
+# Installing licensed applications (`Phobius`, `SignalP`, `DeepTMHMM`)
 
 By default `Phobius`, `SignalP`, and `DeepTMHMM` analyses are deactivated in 
 `InterProScan6` because they contain licensed components.
