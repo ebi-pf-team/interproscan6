@@ -57,8 +57,9 @@ process LOOKUP_MATCHES {
                 calculatedMatches[seqId] = [:]
                 matches.each { match ->
                     Match matchObj = Match.fromMap(match)
-                    memberDB = normaliseMemberDB(matchObj.signature.signatureLibraryRelease.library)
-                    if (applications.contains(memberDB)) {
+                    memberDB = matchObj.signature.signatureLibraryRelease.library
+                    stdMemberDB = memberDB.toLowerCase().replaceAll("[-\\sCATH]", "")
+                    if (applications.contains(stdMemberDB)) {
                         modelAccession = matchObj.signature.accession
                         matchObj.modelAccession = modelAccession
                         calculatedMatches[seqId][modelAccession] = matchObj
@@ -78,8 +79,4 @@ process LOOKUP_MATCHES {
     new File(calculatedMatchesPath.toString()).write(jsonMatches)
     new File(noLookupMapPath.toString()).write(jsonSequences)
     new File(noLookupFastaPath.toString()).write(noLookupFasta.toString())
-}
-
-def normaliseMemberDB(String memberDB){
-    return memberDB.toLowerCase().replace("-", "").replace(" ", "").replace("CATH-", "")
 }
