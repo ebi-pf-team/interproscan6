@@ -19,7 +19,7 @@ process WRITE_JSON_OUTPUT {
         "CDD": ["evalue-match", "score-match"],
         "COILS": [],
         "HAMAP": ["score", "targetAlignment"],
-        "MobiDB Lite": ["sequence-feature"],
+        "MobiDB-lite": ["sequence-feature"],
         "PANTHER": ["hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
         "Phobius": [],
         "PIRSF": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
@@ -28,7 +28,7 @@ process WRITE_JSON_OUTPUT {
         "PROSITE profiles": ["score", "targetAlignment"],
         "PROSITE patterns": ["cigarAlignment", "targetAlignment", "level"],
         "SFLD": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "envelopeStart", "envelopeEnd"],
-        "SignalP_Euk": ["pvalue", "cleavageStart", "cleavageEnd"],
+        "SignalP-Euk": ["pvalue", "cleavageStart", "cleavageEnd"],
         "SignalP-Prok": ["pvalue", "cleavageStart", "cleavageEnd"],
         "SMART": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
         "SUPERFAMILY": ["hmmLength", "evalue"]
@@ -137,7 +137,7 @@ process WRITE_JSON_OUTPUT {
 
             if (matchResult["locations"]) {
                 // Match level fields
-                if (memberDB in ["AntiFam", "FunFam", "CATH-Gene3D", "NCBIfam", "PANTHER", "Pfam", "PIRSF", "PIRSR", "SFLD", "SMART", "TMHMM"]) {
+                if (memberDB in ["AntiFam", "CATH-FunFam", "CATH-Gene3D", "NCBIFAM", "PANTHER", "Pfam", "PIRSF", "PIRSR", "SFLD", "SMART", "TMHMM"]) {
                     matchResult["evalue"] = matchObj.evalue
                     matchResult["score"] = matchObj.score
                 }
@@ -159,7 +159,7 @@ process WRITE_JSON_OUTPUT {
                         matchResult["evalue"] = matchObj.evalue
                         matchResult["graphscan"] = matchObj.graphScan
                         break
-                    case ["SignalP_Euk", "SignalP-Prok"]:
+                    case ["SignalP-Euk", "SignalP-Prok"]:
                         matchResult["orgType"] = matchObj.signalp.orgType
                 }
                 seqMatches.add(matchResult)

@@ -85,20 +85,20 @@ process WRITE_XML_OUTPUT {
 }
 
 def processMatches(matches, xml) {
-    List<String> hmmer3Members = ["AntiFam", "CATH-Gene3D", "FunFam", "HAMAP", "NCBIfam", "Pfam", "PIRSF", "PIRSR", "SFLD", "SUPERFAMILY"]
+    List<String> hmmer3Members = ["AntiFam", "CATH-Gene3D", "CATH-FunFam", "HAMAP", "NCBIFAM", "Pfam", "PIRSF", "PIRSR", "SFLD", "SUPERFAMILY"]
     List<String> hmmer3LocationFields = ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
     Map<String, List<String>> memberLocationFields = [
         "CDD": ["match-evalue", "match-score"],
         "COILS": [],
         "HAMAP": ["score"],
-        "MobiDB Lite": ["sequence-feature"],
+        "MobiDB-lite": ["sequence-feature"],
         "PANTHER": ["hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
         "Phobius": [],
         "PRINTS": ["motifNumber", "pvalue", "score"],
         "PROSITE patterns": ["level"],
         "PROSITE profiles": ["score"],
         "SignalP-Prok": ["score"],
-        "SignalP_Euk": ["score"],
+        "SignalP-Euk": ["score"],
         "SMART": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
         "SUPERFAMILY": ["evalue", "hmmLength"]
     ]

@@ -48,7 +48,7 @@ process WRITE_TSV_OUTPUT {
                         case ["HAMAP", "PROSITE profiles"]:
                             scoringValue = loc.score
                             break
-                        case ["COILS", "MobiDB Lite", "Phobius", "PROSITE patterns"]:
+                        case ["COILS", "MobiDB-lite", "Phobius", "PROSITE patterns"]:
                             scoringValue = "-"
                             break
                         default:
