@@ -35,41 +35,30 @@ process PARSE_DEEPTMHMM {
     tuple val(meta), path("tmhmm.json")
 
     exec:
-    Map<String, String> MODEL_TYPES = [
-        "signal": "Signalp Peptide",
-        "TMhelix": "Transmembrane Helix",
-        "periplasm": "Periplasmic Domain",
-        "Beta": "Beta Sheet"
-    ]
     SignatureLibraryRelease library = new SignatureLibraryRelease("DeepTMHMM", "1.0")
-    Signature betaSheetSig = new Signature("Beta Sheet", library)
-    Signature periplasmSig = new Signature("Periplasmic Domain", library)
-    Signature signalPeptideSig = new Signature("Signal Peptide", library)
-    Signature tmHelixSig = new Signature("Transmembrane Helix", library)
-
+    def MODEL_TYPES = [
+        "Beta": ["Beta Sheet", new Signature("Beta Sheet", library)],
+        "periplasm": ["Periplasmic Domain", new Signature("Periplasmic Domain", library)],
+        "signal": ["Signalp Peptide", new Signature("Signal Peptide", library)],
+        "TMhelix": ["Transmembrane Helix", new Signature("Transmembrane Helix", library)],
+    ]
     String tmhmmDir = tmhmm_output.toString()
     Map<String, Match> hits = [:]
     String seqId
     file("${tmhmm_output}/TMRs.gff3").eachLine { line ->
         def lineData = line.split("\\s+")
-        if (line.startsWith("//") || line.startsWith("##")) {  // MODEL_TYPES.con(lineData[1]) will crash on these linse
+        if (line.startsWith("//") || line.startsWith("#")) {  // MODEL_TYPES.con(lineData[1]) will crash on these lines
             return
-        } else if (line.startsWith("# ")) { // e.g. # tr_A0A009GMU8_A0A009GMU8_9GAMM Number of predicted TMRs: 22
-            seqId = lineData[1]
         } else if (MODEL_TYPES.containsKey(lineData[1])) { // e.g. tr_A0A009GMU8_A0A009GMU8_9GAMM periplasm 30 184
+            seqId = lineData[0]
             hits.computeIfAbsent(seqId) { [:] }
-            String modelAcc = MODEL_TYPES[lineData[1]]
+            (modelAcc, modelSig) = MODEL_TYPES[lineData[1]]
             hits[seqId].computeIfAbsent(modelAcc) {
-                new Match(modelAcc).with {
-                    signature = switch (modelAcc) {
-                        case "Beta Sheet" -> betaSheetSig
-                        case "Periplasmic Domain" -> periplasmSig
-                        case "Signal Peptide" -> signalPeptideSig
-                        case "Transmembrane Helix" -> tmHelixSig
-                    }
-                    it
-                }
+                Match match = new Match(modelAcc)
+                match.signature = modelSig
+                match
             }
+            // retrieve from rhs becausse the domain desc can vary in length e.g. 'TMhelix' versus 'beta sheet'
             int start = lineData[-2].toInteger()
             int end = lineData[-1].toInteger()
             hits[seqId][modelAcc].addLocation(new Location(start, end))
