@@ -15,7 +15,7 @@ process WRITE_XML_OUTPUT {
     val ips6Version
 
     exec:
-    def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+source=(.*)\s+coords=(\d+\.+\d+)\s+.+frame=(\d+)\s+desc=(.*)$/)
+    def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+source=(.*)\s+coords=(\d+)\.\.(\d+)\s+.+frame=(\d+)\s+desc=(.*)$/)
     def writer = new StringWriter()
     def xml = new MarkupBuilder(writer)
     // set the correct encoding so symbols are formatted correctly in the final output
@@ -41,9 +41,9 @@ process WRITE_XML_OUTPUT {
                     }
                     def ntMatch = NT_SEQ_ID_PATTERN.matcher(seqData.xref[0].name)
                     assert ntMatch.matches()
-                    def end = ntMatch.group(2).split("\\.\\.")[0] as int
-                    def start = ntMatch.group(2).split("\\.\\.")[1] as int
-                    def strand = (ntMatch.group(3) as int) < 4 ? "SENSE" : "ANTISENSE"
+                    start   : ntMatch.group(2) as int,
+                    end     : ntMatch.group(3) as int,
+                    strand  : (ntMatch.group(4) as int) < 4 ? "SENSE" : "ANTISENSE",
                     orf (end: end, start: start, strand: strand) {
                         protein {
                             sequence(md5: seqData["md5"], seqData["sequence"])
