@@ -75,7 +75,6 @@ workflow {
     */
     XREFS(
         SCAN_SEQUENCES.out,
-        apps,
         data_dir,
         params.xRefsConfig.entries,
         params.xRefsConfig.goterms,

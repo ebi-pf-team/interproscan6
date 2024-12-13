@@ -20,7 +20,6 @@ process XREFS {
 
     input:
     tuple val(meta), val(membersMatches)
-    val apps
     val dataDir
     val entriesFile
     val gotermFilePrefix
@@ -69,7 +68,6 @@ process XREFS {
                     SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
                     if (!matchObject.signature) {
                         matchObject.signature = new Signature(modelAccession, sigLibRelease)
-                        if (memberDB == "mobidb_lite") { matchObject.signature.description = "consensus disorder prediction" }
                     } else if (!matchObject.signature.signatureLibraryRelease) {
                         matchObject.signature.signatureLibraryRelease = sigLibRelease
                     }
