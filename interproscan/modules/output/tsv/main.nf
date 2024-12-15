@@ -39,16 +39,16 @@ process WRITE_TSV_OUTPUT {
                     int end = loc.end
                     def scoringValue = "-"
                     switch (memberDb) {
-                        case ["CDD", "PRINTS"]:
+                        case ["cdd", "prints"]:
                             scoringValue = match.evalue
                             break
-                        case ["SignalP-Prok", "SignalP-Euk"]:
+                        case ["signalp", "signalp_euk"]:
                             scoringValue = loc.pvalue
                             break
-                        case ["HAMAP", "PROSITE profiles"]:
+                        case ["hamap", "prositeprofiles"]:
                             scoringValue = loc.score
                             break
-                        case ["COILS", "MobiDB Lite", "Phobius", "PROSITE patterns"]:
+                        case ["coils", "mobidblite", "phobius", "prositepatterns"]:
                             scoringValue = "-"
                             break
                         default:
