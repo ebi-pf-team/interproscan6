@@ -230,7 +230,7 @@ workflow SCAN_SEQUENCES {
             "${datadir}/${appsConfig.pirsf.hmm}"
         )
         PARSE_PIRSF(RUN_PIRSF.out,
-            "${datadir}/${appsConfig.pirsf.data}")
+            "${datadir}/${appsConfig.pirsf.dat}")
 
         results = results.mix(PARSE_PIRSF.out)
     }
@@ -261,7 +261,7 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("prositepatterns")) {
         RUN_PFSCAN(
             ch_fasta,
-            "${datadir}/${appsConfig.prositepatterns.data}",
+            "${datadir}/${appsConfig.prositepatterns.dat}",
             "${datadir}/${appsConfig.prositepatterns.evaluator}")
 
         PARSE_PFSCAN(RUN_PFSCAN.out)
@@ -271,7 +271,7 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("prositeprofiles")) {
         RUN_PFSEARCH(
             ch_fasta,
-            "${datadir}/${appsConfig.prositeprofiles.data}")
+            "${datadir}/${appsConfig.prositeprofiles.dir}")
         PARSE_PFSEARCH(
             RUN_PFSEARCH.out,
             "${datadir}/${appsConfig.prositeprofiles.skip_flagged_profiles}")
