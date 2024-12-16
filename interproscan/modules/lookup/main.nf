@@ -13,7 +13,7 @@ process LOOKUP_MATCHES {
 
     output:
     tuple val(index), path("calculatedMatches.json")
-    tuple val(index), path("noLookup.fasta"), path("noLookup.json")
+    tuple val(index), path("noLookup.fasta"), path("noLookup.json"), optional: true
 
     exec:
     def calculatedMatchesPath = task.workDir.resolve("calculatedMatches.json")
@@ -75,8 +75,11 @@ process LOOKUP_MATCHES {
     }
 
     def jsonMatches = JsonOutput.toJson(calculatedMatches)
-    def jsonSequences = JsonOutput.toJson(noLookupMap)
     new File(calculatedMatchesPath.toString()).write(jsonMatches)
-    new File(noLookupMapPath.toString()).write(jsonSequences)
-    new File(noLookupFastaPath.toString()).write(noLookupFasta.toString())
+
+    if (!noLookupMap.isEmpty()) {
+        def jsonSequences = JsonOutput.toJson(noLookupMap)
+        new File(noLookupMapPath.toString()).write(jsonSequences)
+        new File(noLookupFastaPath.toString()).write(noLookupFasta.toString())
+    }
 }

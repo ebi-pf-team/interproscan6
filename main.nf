@@ -71,6 +71,7 @@ workflow {
             apps,
             params.lookupService.apiChunkSize,
             params.lookupService.lookupHost)
+
         SCAN_SEQUENCES(
             LOOKUP_MATCHES.out[1],
             apps,
@@ -80,6 +81,7 @@ workflow {
         def expandedScan = SCAN_SEQUENCES.out.flatMap { scan ->
             scan[1].collect { path -> [scan[0], path] }
         }
+
         def combined = LOOKUP_MATCHES.out[0].concat(expandedScan)
         matchResults = combined.groupTuple()
     }
