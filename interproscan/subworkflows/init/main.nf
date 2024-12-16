@@ -2,25 +2,51 @@ workflow INIT_PIPELINE {
     main:
     // Params validation
     InterProScan.validateParams(params, log)
+
+    // Check the input
     fasta = InterProScan.resolveFile(params.input)
     if (!fasta) {
         log.error "No such file: ${params.input}"
         exit 1
     }
-    (datadir, error) = InterProScan.resolveDirectory(params.datadir, true, false)
-    if (!datadir) {
-        log.error error
-        exit 1
-    }
-    (outdir, error) = InterProScan.resolveDirectory(params.outdir, false, true)
-    if (!outdir) {
-        log.error error
-        exit 1
-    }
-    
+
     // Applications validation
     (apps, error) = InterProScan.validateApplications(params.applications, params.appsConfig)
     if (!apps) {
+        log.error error
+        exit 1
+    }
+
+    // Validate the data dir and application data files if needed by any members
+    // e.g. mobidblite and coils do no need additional data files
+    need_data = apps.any { String appName ->
+        params.appsConfig.get(appName)?.has_data || InterProScan.LICENSED_SOFTWARE.contains(appName)
+    }
+    if (need_data) {
+        // If --datadir is called and no path is given it converts to a boolean
+        def dirPath = params.datadir instanceof Boolean ? null : params.datadir
+        (datadir, error) = InterProScan.resolveDirectory(dirPath, true, false)
+        if (!datadir) {
+            log.error error
+            exit 1
+        }
+        error = InterProScan.validateAppData(apps, datadir, params.appsConfig)
+        if (error) {
+            log.error error
+            exit 1
+        }
+        error = InterProScan.validateXrefFiles(datadir, params.xRefsConfig, params.goterms, params.pathways)
+        if (error) {
+            log.error error
+            exit 1
+        }
+    } else {
+        datadir = ""
+    }
+
+    // Build output dir if needed
+    (outdir, error) = InterProScan.resolveDirectory(params.outdir, false, true)
+    if (!outdir) {
         log.error error
         exit 1
     }
