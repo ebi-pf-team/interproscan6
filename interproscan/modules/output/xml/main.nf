@@ -24,15 +24,16 @@ process WRITE_XML_OUTPUT {
 
     def jsonSlurper = new JsonSlurper()
     def jsonData = jsonSlurper.parse(matches)
-
-    def groupedByNT = nucleic ? jsonData.findAll { it.translatedFrom }.groupBy { it.translatedFrom[0].md5 } : [:]
     String matchType = nucleic ? "nucleotide-sequence-matches" : "protein-matches"
-    xml."$matchType"("interproscan-version": ips6Version){
-        def groupedSequences = [:]
-        jsonData.each { seqData ->
-            if (nucleic) {
-                groupedByNT.each { ntSequenceMD5, proteins ->
-                    def firstNT = proteins[0].translatedFrom[0] // Use the first entry for shared nucleotide-sequence data
+
+    xml."$matchType"("interproscan-version": ips6Version) {
+        if (nucleic) {
+            def processedNT = []
+            def groupedByNT = jsonData.findAll { it.translatedFrom }.groupBy { it.translatedFrom[0].md5 }
+            groupedByNT.each { ntSequenceMD5, proteins ->
+                if (!processedNT.contains(ntSequenceMD5)) {
+                    processedNT << ntSequenceMD5
+                    def firstNT = proteins[0].translatedFrom[0]  // Use the first entry for shared nucleic seq
                     "nucleotide-sequence" {
                         sequence(md5: ntSequenceMD5, firstNT.sequence)
                         firstNT.xrefs.each { crossRef ->
@@ -41,43 +42,33 @@ process WRITE_XML_OUTPUT {
                         proteins.each { proteinData ->
                             def ntMatch = NT_SEQ_ID_PATTERN.matcher(proteinData.xref[0].name)
                             assert ntMatch.matches()
-
                             def start = ntMatch.group(2) as int
                             def end = ntMatch.group(3) as int
                             def strand = (ntMatch.group(4) as int) < 4 ? "SENSE" : "ANTISENSE"
-
                             orf(start: start, end: end, strand: strand) {
                                 protein {
                                     sequence(md5: proteinData.md5, proteinData.sequence)
                                     matches {
                                         processMatches(proteinData.matches, xml)
                                     }
-                                    xrefs {
-                                        proteinData.xref.each { ref ->
-                                            xref {
-                                                name(ref.name)
-                                                id(ref.id)
-                                            }
-                                        }
+                                    proteinData.xref.each { ref ->
+                                        xref(id: ref.id, name: ref.name)
                                     }
                                 }
                             }
                         }
                     }
                 }
-            } else {
+            }
+        } else {
+            jsonData.each { seqData ->
                 protein {
-                    sequence(md5: seqData["md5"], seqData["sequence"])
+                    sequence(md5: seqData.md5, seqData.sequence)
                     matches {
-                        processMatches(seqData["matches"], xml)
+                        processMatches(seqData.matches, xml)
                     }
-                    xrefs {
-                        seqData.xref.each { ref ->
-                            xref {
-                                name(ref["name"])
-                                id(ref["id"])
-                            }
-                        }
+                    seqData.xref.each { ref ->
+                        xref(id: ref.id, name: ref.name)
                     }
                 }
             }
