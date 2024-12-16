@@ -41,7 +41,7 @@ process LOOKUP_MATCHES {
     def chunks = md5List.collate(chunkSize)
     chunks.each { chunk ->
         def requestBody = JsonOutput.toJson([md5: chunk])
-        def connection = new URL("${host}").openConnection()
+        def connection = new URL(host).openConnection()
         connection.requestMethod = 'POST'
         connection.doOutput = true
         connection.setRequestProperty('Content-Type', 'application/json')
