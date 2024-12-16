@@ -24,37 +24,41 @@ process WRITE_XML_OUTPUT {
 
     def jsonSlurper = new JsonSlurper()
     def jsonData = jsonSlurper.parse(matches)
-    def processedNT = []
 
+    def groupedByNT = nucleic ? jsonData.findAll { it.translatedFrom }.groupBy { it.translatedFrom[0].md5 } : [:]
     String matchType = nucleic ? "nucleotide-sequence-matches" : "protein-matches"
     xml."$matchType"("interproscan-version": ips6Version){
+        def groupedSequences = [:]
         jsonData.each { seqData ->
             if (nucleic) {
-                def ntSequenceMD5 = seqData.translatedFrom[0]["md5"]
-                "nucleotide-sequence" {
-                    if (!processedNT.contains(ntSequenceMD5)) {
-                        processedNT << ntSequenceMD5
-                        sequence(md5: ntSequenceMD5, seqData.translatedFrom[0]["sequence"])
-                        seqData.translatedFrom.each { crossRef ->
+                groupedByNT.each { ntSequenceMD5, proteins ->
+                    def firstNT = proteins[0].translatedFrom[0] // Use the first entry for shared nucleotide-sequence data
+                    "nucleotide-sequence" {
+                        sequence(md5: ntSequenceMD5, firstNT.sequence)
+                        firstNT.xrefs.each { crossRef ->
                             xref(id: crossRef.id, name: "${crossRef.id} ${crossRef.description}")
                         }
-                    }
-                    def ntMatch = NT_SEQ_ID_PATTERN.matcher(seqData.xref[0].name)
-                    assert ntMatch.matches()
-                    start   : ntMatch.group(2) as int,
-                    end     : ntMatch.group(3) as int,
-                    strand  : (ntMatch.group(4) as int) < 4 ? "SENSE" : "ANTISENSE",
-                    orf (end: end, start: start, strand: strand) {
-                        protein {
-                            sequence(md5: seqData["md5"], seqData["sequence"])
-                            matches {
-                                processMatches(seqData["matches"], xml)
-                            }
-                            xrefs {
-                                seqData.xref.each { ref ->
-                                    xref {
-                                        name(ref["name"])
-                                        id(ref["id"])
+                        proteins.each { proteinData ->
+                            def ntMatch = NT_SEQ_ID_PATTERN.matcher(proteinData.xref[0].name)
+                            assert ntMatch.matches()
+
+                            def start = ntMatch.group(2) as int
+                            def end = ntMatch.group(3) as int
+                            def strand = (ntMatch.group(4) as int) < 4 ? "SENSE" : "ANTISENSE"
+
+                            orf(start: start, end: end, strand: strand) {
+                                protein {
+                                    sequence(md5: proteinData.md5, proteinData.sequence)
+                                    matches {
+                                        processMatches(proteinData.matches, xml)
+                                    }
+                                    xrefs {
+                                        proteinData.xref.each { ref ->
+                                            xref {
+                                                name(ref.name)
+                                                id(ref.id)
+                                            }
+                                        }
                                     }
                                 }
                             }
