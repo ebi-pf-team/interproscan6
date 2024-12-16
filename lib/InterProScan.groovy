@@ -11,8 +11,7 @@ class InterProScan {
             description: "path to FASTA file of sequences to be analysed."
         ],
         [
-            name: "datadir",
-            required: true,
+            name: "datadir",  // only required when using members with datafiles
             metavar: "<DATA-DIR>",
             description: "path to data directory."
         ],
@@ -83,6 +82,15 @@ class InterProScan {
         ]
     ]
 
+    static final def LICENSED_SOFTWARE = ["phobius", "signalp_euk", "signalp_prok", "deeptmhmm"]
+
+    static final def DATA_TYPE = [
+            "FILE": ["cla", "clan", "dat", "disc_regs", "evaluator", "hierarchy", "hmm", "hmmbin",
+                     "model", "model2sfs", "pdbj95d", "rules", "seed", "selfhits", "site_annotations",
+                     "skip_flagged_profiles"],
+            "DIR": ["dir", "msf", "paint", "rpsblast_db", "rpsproc_db"]
+    ]
+
     static void validateParams(params, log) {
         def allowedParams = this.PARAMS.collect { it.name.toLowerCase() }
 
@@ -130,6 +138,9 @@ class InterProScan {
     }
 
     static resolveDirectory(String dirPath, boolean mustExist = false, boolean mustBeWritable = false) {
+        if (!dirPath && mustExist) { // triggered when data dir is needed but --datadir not used
+            return [null, "'--datadir <DATA-DIR>' is required for the selected applications."]
+        }
         Path path = Paths.get(dirPath)
 
         if (Files.exists(path)) {
@@ -153,9 +164,12 @@ class InterProScan {
 
     static validateApplications(String applications, Map appsConfig) {
         if (!applications) {
-            // Run all applications
+            // Run all applications, except licensed packages with an unpopulated dir field
             def appsToRun = appsConfig.findAll{ it ->
-                !(it.value.disabled)
+                if (this.LICENSED_SOFTWARE.contains(it.key)) {
+                    return it.value?.dir
+                }
+                return true
             }.keySet().toList()
             return [appsToRun, null]
         }
@@ -171,7 +185,6 @@ class InterProScan {
                 allApps[stdAlias] = label
             }
         }
-
         def appsToRun = []
         def appsParam = applications.replaceAll("[- ]", "").split(",").collect { it.trim() }.toSet()
         for (appName in appsParam) {
@@ -183,9 +196,51 @@ class InterProScan {
                 return [null, error]
             }
         }
-
         return [appsToRun.toSet().toList(), null]
     }
+
+    static validateAppData(List<String> appsToRun, Path datadir, Map appsConfig) {
+        def errorMsg = appsToRun.collectMany { appName ->
+            appsConfig[appName].collect { key, value ->
+                if (this.DATA_TYPE["FILE"].contains(key)) {
+                    if (!resolveFile(datadir.resolve(value).toString())) {
+                        return "${appName}: file: '${key}': ${value ?: 'null'}"
+                    }
+                } else if (this.DATA_TYPE["DIR"].contains(key)) {
+                    if (!value) {
+                        return "${appName}: dir: '${key}': 'null'"
+                    }
+                    Path dirPath = this.LICENSED_SOFTWARE.contains(appName) ? Paths.get(value) : datadir.resolve(value)
+                    if (!Files.exists(dirPath) || !Files.isDirectory(dirPath)) {
+                        return "${appName}: dir: '${key}': ${value ?: 'null'}"
+                    }
+                }
+                return null
+            }.findAll { it }
+        }.join('\n')
+        return errorMsg ? "Could not find the following data files\n${errorMsg}" : null
+    }
+
+    static validateXrefFiles(Path datadir, Map xRefsConfig, boolean goterms, boolean pathways) {
+        def errorMsg = []
+        def addError = { type, suffix ->
+            String path = datadir.resolve("${xRefsConfig[type]}${suffix}")
+            if (!resolveFile(path)) {
+                errorMsg << "${type}${suffix}: ${path}"
+            }
+        }
+        addError('entries', '')  // we hard code the file ext in xrefsconfig so no suffix needed here
+        if (goterms) {
+            addError('goterms', '.ipr.json')
+            addError('goterms', '.json')
+        }
+        if (pathways) {
+            addError('pathways', '.ipr.json')
+            addError('pathways', '.json')
+        }
+        return errorMsg ? "Could not find the following XREF data files\n${errorMsg.join('\n')}" : null
+    }
+
 
     static List<String> validateSignalpMode(String signalpMode) {
         if (signalpMode.toLowerCase() !in ['fast', 'slow', 'slow-sequential']) {

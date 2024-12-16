@@ -34,15 +34,16 @@ process XREFS {
 
     exec:
     String entriesPath = "${dataDir}/${entriesFile}"
-    File entriesJson = new File(entriesPath.toString())
-    def entries = new ObjectMapper().readValue(entriesJson, Map)
-
-    def (ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null]
-    if (addGoterms) {
-        (ipr2go, goInfo) = loadXRefFiles(gotermFilePrefix, dataDir)
-    }
-    if (addPathways) {
-        (ipr2pa, paInfo) = loadXRefFiles(pathwaysFilePrefix, dataDir)
+    def (entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null]
+    if (!dataDir.toString().trim().isEmpty()) { // datadir doesn't need to be provided when only running members with no InterPro data
+        File entriesJson = new File(entriesPath.toString())
+        entries = new ObjectMapper().readValue(entriesJson, Map)
+        if (addGoterms) {
+            (ipr2go, goInfo) = loadXRefFiles(gotermFilePrefix, dataDir)
+        }
+        if (addPathways) {
+            (ipr2pa, paInfo) = loadXRefFiles(pathwaysFilePrefix, dataDir)
+        }
     }
 
     JsonSlurper jsonSlurper = new JsonSlurper()
@@ -51,6 +52,9 @@ process XREFS {
         def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, matches ->
             [(seqId): matches.collectEntries { modelAccession, match ->
                 Match matchObject = Match.fromMap(match)
+                if (!entries) {
+                    return [(modelAccession): matchObject]
+                }
                 // null check needed for cases that signature still not created on match object (e.g. hmmer3 members)
                 String entrySignatureKey = matchObject.signature?.accession ?: matchObject.modelAccession
                 def signatureInfo = entries["entries"][entrySignatureKey] ?: entries["entries"][modelAccession]
