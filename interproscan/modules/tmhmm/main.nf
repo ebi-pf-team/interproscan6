@@ -20,7 +20,7 @@ process RUN_DEEPTMHMM {
         --fasta ../${fasta} \
         --output-dir ../outdir
     cd ..
-    rm -r ${tmhmm_dir}
+    rm -r ${tmhmm_dir} outdir/embeddings
     chmod -R 777 outdir
     """
 }
@@ -37,7 +37,7 @@ process PARSE_DEEPTMHMM {
     exec:
     SignatureLibraryRelease library = new SignatureLibraryRelease("DeepTMHMM", "1.0")
     def MODEL_TYPES = [
-        "Beta": ["Beta Sheet", new Signature("Beta Sheet", library)],
+        "Beta sheet": ["Beta Sheet", new Signature("Beta Sheet", library)],
         "periplasm": ["Periplasmic Domain", new Signature("Periplasmic Domain", library)],
         "signal": ["Signalp Peptide", new Signature("Signal Peptide", library)],
         "TMhelix": ["Transmembrane Helix", new Signature("Transmembrane Helix", library)],
@@ -46,10 +46,12 @@ process PARSE_DEEPTMHMM {
     Map<String, Match> hits = [:]
     String seqId
     file("${tmhmm_output}/TMRs.gff3").eachLine { line ->
-        def lineData = line.split("\\s+")
-        if (line.startsWith("//") || line.startsWith("#")) {  // MODEL_TYPES.con(lineData[1]) will crash on these lines
+        def lineData = line.split("\t")
+        if (line.startsWith("//") || line.startsWith("#")) {  // stops '##gff-version 3' line breaking assert
             return
-        } else if (MODEL_TYPES.containsKey(lineData[1])) { // e.g. tr_A0A009GMU8_A0A009GMU8_9GAMM periplasm 30 184
+        }
+        assert lineData.size() == 4
+        if (MODEL_TYPES.containsKey(lineData[1])) { // e.g. tr_A0A009GMU8_A0A009GMU8_9GAMM periplasm 30 184
             seqId = lineData[0]
             hits.computeIfAbsent(seqId) { [:] }
             (modelAcc, modelSig) = MODEL_TYPES[lineData[1]]
@@ -58,9 +60,8 @@ process PARSE_DEEPTMHMM {
                 match.signature = modelSig
                 match
             }
-            // retrieve from rhs becausse the domain desc can vary in length e.g. 'TMhelix' versus 'beta sheet'
-            int start = lineData[-2].toInteger()
-            int end = lineData[-1].toInteger()
+            int start = lineData[2].toInteger()
+            int end = lineData[3].toInteger()
             hits[seqId][modelAcc].addLocation(new Location(start, end))
         }
     }
