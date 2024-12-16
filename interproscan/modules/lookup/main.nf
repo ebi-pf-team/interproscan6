@@ -16,6 +16,8 @@ process LOOKUP_MATCHES {
     tuple val(index), path("noLookup.fasta"), path("noLookup.json"), optional: true
 
     exec:
+    applications = applications.collect { it.replace("cath", "") }
+
     def calculatedMatchesPath = task.workDir.resolve("calculatedMatches.json")
     def noLookupFastaPath = task.workDir.resolve("noLookup.fasta")
     def noLookupMapPath = task.workDir.resolve("noLookup.json")
