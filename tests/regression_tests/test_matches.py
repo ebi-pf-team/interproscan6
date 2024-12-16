@@ -20,13 +20,17 @@ def main():
 
     diff = difflib.ndiff(expected, observed)
     for line in diff:
-        tab_separated = '\t'.join(map(str, ast.literal_eval(line[2:])))  # Safely eval str and convert to tab-sep str
-        if line.startswith("-"):
-            print(f"< {tab_separated}")  # Only in expected
-        elif line.startswith("+"):
-            print(f"> {tab_separated}")  # Only in observed
-        else:
-            print(f"- {tab_separated}")  # In both
+        if line.startswith(("-", "+", " ")):  # skip summary lines such as "?    ^^^^  -    ^^  ^ ^"
+            try:
+                tab_separated = '\t'.join(map(str, ast.literal_eval(line[2:])))  # Safely eval str and convert to tab-sep str
+                if line.startswith("-"):
+                    print(f"< {tab_separated}")  # Only in expected
+                elif line.startswith("+"):
+                    print(f"> {tab_separated}")  # Only in observed
+                elif line.startswith(" "):
+                    print(f"- {tab_separated}")  # In both
+            except (SyntaxError, ValueError):
+                print(f"Could not parse line {line}")
 
 
 def flattern_dict(iprsn_dict: dict):
