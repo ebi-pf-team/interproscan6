@@ -37,7 +37,7 @@ process PARSE_DEEPTMHMM {
     exec:
     SignatureLibraryRelease library = new SignatureLibraryRelease("DeepTMHMM", "1.0")
     def MODEL_TYPES = [
-        "Beta sheet": ["Beta Sheet", new Signature("Beta Sheet", library)],
+        "Beta sheet": ["Transmembrane beta barrel", new Signature("Transmembrane beta barrel", library)],
         "periplasm": ["Periplasmic Domain", new Signature("Periplasmic Domain", library)],
         "signal": ["Signalp Peptide", new Signature("Signal Peptide", library)],
         "TMhelix": ["Transmembrane alpha helix", new Signature("Transmembrane alpha helix", library)],
