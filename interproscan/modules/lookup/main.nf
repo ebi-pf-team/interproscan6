@@ -16,8 +16,6 @@ process LOOKUP_MATCHES {
     tuple val(index), path("noLookup.fasta"), path("noLookup.json"), optional: true
 
     exec:
-    applications = applications.collect { it.replace("cath", "") }
-
     def calculatedMatchesPath = task.workDir.resolve("calculatedMatches.json")
     def noLookupFastaPath = task.workDir.resolve("noLookup.fasta")
     def noLookupMapPath = task.workDir.resolve("noLookup.json")
@@ -60,7 +58,7 @@ process LOOKUP_MATCHES {
                 matches.each { match ->
                     Match matchObj = Match.fromMap(match)
                     memberDB = matchObj.signature.signatureLibraryRelease.library
-                    stdMemberDB = memberDB.replace("CATH", "").toLowerCase().replaceAll("[-\\s]", "")
+                    stdMemberDB = memberDB.toLowerCase().replaceAll("[-\\s]", "")
                     if (applications.contains(stdMemberDB)) {
                         modelAccession = matchObj.signature.accession
                         matchObj.modelAccession = modelAccession
