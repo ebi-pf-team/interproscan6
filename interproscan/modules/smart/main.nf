@@ -2,7 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 process SEARCH_SMART {
-    label 'hmmer_2_runner'
+    label 'medium', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -20,7 +20,7 @@ process SEARCH_SMART {
 }
 
 process PARSE_SMART {
-    label 'analysis_parser'
+    label 'small'
 
     input:
     tuple val(meta), val(hmmpfam_out), val(seq_json)
@@ -34,7 +34,13 @@ process PARSE_SMART {
     def jsonSlurper = new JsonSlurper()
     def sequences = jsonSlurper.parse(jsonFile)
         .collectEntries{ seqId, obj ->
-            [ (seqId): FastaSequence.fromMap(obj) ]
+            if (obj instanceof List) { // nucleotide sequences case
+                obj.collectEntries { seq ->
+                    [(seq.id): FastaSequence.fromMap(seq)]
+                }
+            } else {
+                [(seqId): FastaSequence.fromMap(obj)]
+            }
         }
 
     def hmmLengths = HMMER2.parseHMM(hmmtxtdb.toString())
@@ -57,9 +63,9 @@ process PARSE_SMART {
             String sequence = sequences[seqId].sequence
             boolean tyrKinaseOK = (sequence ==~ tyrKinasePattern)
             boolean serThrKinaseOK = (sequence ==~ serThrKinasePattern)
-            
+
             models.each { modelAccession, match ->
-                if (modelAccession != tyrKinaseAccession && 
+                if (modelAccession != tyrKinaseAccession &&
                     modelAccession != serThrKinaseAccession) {
                     filteredModels[modelAccession] = match
                 } else if (modelAccession == tyrKinaseAccession && tyrKinaseOK) {

@@ -6,7 +6,7 @@ import java.io.StringWriter
 import java.util.regex.Pattern
 
 process WRITE_XML_OUTPUT {
-    label 'write_output'
+    label 'small'
 
     input:
     val matches
@@ -24,56 +24,51 @@ process WRITE_XML_OUTPUT {
 
     def jsonSlurper = new JsonSlurper()
     def jsonData = jsonSlurper.parse(matches)
-    def processedNT = []
-
     String matchType = nucleic ? "nucleotide-sequence-matches" : "protein-matches"
-    xml."$matchType"("interproscan-version": ips6Version){
-        jsonData.each { seqData ->
-            if (nucleic) {
-                def ntSequenceMD5 = seqData.translatedFrom[0]["md5"]
-                "nucleotide-sequence" {
-                    if (!processedNT.contains(ntSequenceMD5)) {
-                        processedNT << ntSequenceMD5
-                        sequence(md5: ntSequenceMD5, seqData.translatedFrom[0]["sequence"])
-                        seqData.translatedFrom.each { crossRef ->
+
+    xml."$matchType"("interproscan-version": ips6Version) {
+        if (nucleic) {
+            def processedNT = []
+            def groupedByNT = jsonData.findAll { it.translatedFrom }.groupBy { it.translatedFrom[0].md5 }
+            groupedByNT.each { ntSequenceMD5, proteins ->
+                if (!processedNT.contains(ntSequenceMD5)) {
+                    processedNT << ntSequenceMD5
+                    def firstNT = proteins[0].translatedFrom[0]  // Use the first entry for shared nucleic seq
+                    "nucleotide-sequence" {
+                        sequence(md5: ntSequenceMD5, firstNT.sequence)
+                        firstNT.xrefs.each { crossRef ->
                             xref(id: crossRef.id, name: "${crossRef.id} ${crossRef.description}")
                         }
-                    }
-                    def ntMatch = NT_SEQ_ID_PATTERN.matcher(seqData.xref[0].name)
-                    assert ntMatch.matches()
-                    start   : ntMatch.group(2) as int,
-                    end     : ntMatch.group(3) as int,
-                    strand  : (ntMatch.group(4) as int) < 4 ? "SENSE" : "ANTISENSE",
-                    orf (end: end, start: start, strand: strand) {
-                        protein {
-                            sequence(md5: seqData["md5"], seqData["sequence"])
-                            matches {
-                                processMatches(seqData["matches"], xml)
-                            }
-                            xrefs {
-                                seqData.xref.each { ref ->
-                                    xref {
-                                        name(ref["name"])
-                                        id(ref["id"])
+                        proteins.each { proteinData ->
+                            def ntMatch = NT_SEQ_ID_PATTERN.matcher(proteinData.xref[0].name)
+                            assert ntMatch.matches()
+                            def start = ntMatch.group(2) as int
+                            def end = ntMatch.group(3) as int
+                            def strand = (ntMatch.group(4) as int) < 4 ? "SENSE" : "ANTISENSE"
+                            orf(start: start, end: end, strand: strand) {
+                                protein {
+                                    sequence(md5: proteinData.md5, proteinData.sequence)
+                                    matches {
+                                        processMatches(proteinData.matches, xml)
+                                    }
+                                    proteinData.xref.each { ref ->
+                                        xref(id: ref.id, name: ref.name)
                                     }
                                 }
                             }
                         }
                     }
                 }
-            } else {
+            }
+        } else {
+            jsonData.each { seqData ->
                 protein {
-                    sequence(md5: seqData["md5"], seqData["sequence"])
+                    sequence(md5: seqData.md5, seqData.sequence)
                     matches {
-                        processMatches(seqData["matches"], xml)
+                        processMatches(seqData.matches, xml)
                     }
-                    xrefs {
-                        seqData.xref.each { ref ->
-                            xref {
-                                name(ref["name"])
-                                id(ref["id"])
-                            }
-                        }
+                    seqData.xref.each { ref ->
+                        xref(id: ref.id, name: ref.name)
                     }
                 }
             }
@@ -85,7 +80,7 @@ process WRITE_XML_OUTPUT {
 }
 
 def processMatches(matches, xml) {
-    List<String> hmmer3Members = ["AntiFam", "CATH-Gene3D", "FunFam", "HAMAP", "NCBIfam", "Pfam", "PIRSF", "PIRSR", "SFLD", "SUPERFAMILY"]
+    List<String> hmmer3Members = ["antifam", "cathgene3d", "cathfunfam", "hamap", "ncbifam", "pfam", "pirsf", "pirsr", "sfld", "superfamily"]
     List<String> hmmer3LocationFields = ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
     Map<String, List<String>> memberLocationFields = [
         "CDD": ["match-evalue", "match-score"],
@@ -100,6 +95,7 @@ def processMatches(matches, xml) {
         "SignalP": ["score"],
         "SMART": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
         "SUPERFAMILY": ["evalue", "hmmLength"]
+        "DeepTMHMM": []
     ]
 
     matches.each { modelAcc, matchMap ->
@@ -108,23 +104,23 @@ def processMatches(matches, xml) {
         def memberDb = matchObj.signature.signatureLibraryRelease.library
         if (hmmer3Members.contains(memberDb)) {
             matchNodeName = "hmmer3"
-        } else if (memberDb == "SMART") {
+        } else if (memberDb == "smart") {
             matchNodeName = "hmmer2"
         } else {
             matchNodeName = memberDb
         }
 
         def matchAttributes = [:]
-        if (hmmer3Members.findAll { it != "SUPERFAMILY"}.contains(memberDb) || memberDb == "SMART") {
+        if (hmmer3Members.findAll { it != "superfamily"}.contains(memberDb) || memberDb == "smart") {
             matchAttributes.evalue = matchObj.evalue
             matchAttributes.score = matchObj.score
-        } else if (memberDb == "PANTHER") {
+        } else if (memberDb == "panther") {
             matchAttributes.ac = matchObj.treegrafter.subfamilyAccession
             matchAttributes.evalue = matchObj.evalue
             matchAttributes."graft-point" = matchObj.treegrafter.graftPoint
             matchAttributes.name = matchObj.signature.name
             matchAttributes.score = matchObj.score
-        } else if (memberDb == "PRINTS") {
+        } else if (memberDb == "prints") {
             matchAttributes.evalue = matchObj.evalue
             matchAttributes.graftscan = matchObj.graphScan
         }
@@ -174,7 +170,7 @@ def processMatches(matches, xml) {
                 }
             }
 
-            "model-ac"(memberDb == "PANTHER" ? matchObj.treegrafter.subfamilyAccession : matchObj.modelAccession)
+            "model-ac"(memberDb == "panther" ? matchObj.treegrafter.subfamilyAccession : matchObj.modelAccession)
 
             if (matchObj.locations) {
                 def fields = memberLocationFields.get(memberDb, hmmer3LocationFields)
@@ -191,7 +187,7 @@ def processMatches(matches, xml) {
                                     }
                                 }
                             }
-                            if (memberDb in ["HAMAP", "PROSITE patterns", "PROSITE profiles"]) {
+                            if (memberDb in ["hamap", "prositepatterns", "prositeprofiles"]) {
                                 alignment(loc.targetAlignment ?: "")
                             }
                             if (loc.sites) {
@@ -200,7 +196,7 @@ def processMatches(matches, xml) {
                                         "$matchNodeName-site"(description: siteObj.description, numLocations: siteObj.numLocations) {
                                             if(siteObj.group){ group(siteObj.group) }
                                             if(siteObj.label){ label(siteObj.label) }
-                                            if (memberDb != "CDD") {
+                                            if (memberDb != "cdd") {
                                                 hmmStart(siteObj.hmmStart)
                                                 hmmEnd(siteObj.hmmEnd)
                                             }

@@ -1,5 +1,6 @@
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
+import java.util.regex.Pattern
 
 process WRITE_JSON_OUTPUT {
     label 'write_output'
@@ -7,13 +8,16 @@ process WRITE_JSON_OUTPUT {
     input:
     val seqMatches
     val outputPath
+    val nucleic
     val ips6Version
 
     exec:
+    def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+source=(.*)\s+coords=(\d+)\.\.(\d+)\s+.+frame=(\d+)\s+desc=(.*)$/)
     def jsonSlurper = new JsonSlurper()
     def jsonOutput = [:]
     jsonOutput["interproscan-version"] = ips6Version
     jsonOutput["results"] = []
+    def nucleicResults = [:]
 
     Map<String, List<String>> membersLocationFields = [
         "CDD": ["evalue-match", "score-match"],
@@ -30,7 +34,8 @@ process WRITE_JSON_OUTPUT {
         "SFLD": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "envelopeStart", "envelopeEnd"],
         "SignalP": ["pvalue", "cleavageStart", "cleavageEnd"],
         "SMART": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
-        "SUPERFAMILY": ["hmmLength", "evalue"]
+        "SUPERFAMILY": ["hmmLength", "evalue"],
+        "DeepTMHMM": []
     ]
     List<String> otherMembersLocationFields = ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
 
@@ -165,7 +170,41 @@ process WRITE_JSON_OUTPUT {
             }
         }
         sequence["matches"] = seqMatches
-        jsonOutput["results"].add(sequence)
+
+        if (nucleic) {
+            def nucleicSeqMd5 = sequence.translatedFrom[0].md5  // nucleic sequence md5 - same for all ORFs
+            if (!nucleicResults.containsKey(nucleicSeqMd5)) {
+                nucleicResults[nucleicSeqMd5] = [
+                    sequence          : sequence.translatedFrom[0].sequence,
+                    md5               : nucleicSeqMd5,
+                    crossReferences   : [],
+                    openReadingFrames : []
+                ]
+                sequence.translatedFrom.each { seq ->
+                    nucleicResults[nucleicSeqMd5].crossReferences << [
+                        name: "${seq.id} ${seq.description}",
+                        id  : seq.id
+                    ]
+                }
+            }
+
+            def ntMatch = NT_SEQ_ID_PATTERN.matcher(sequence.xref[0].name)
+            assert ntMatch.matches()
+            nucleicResults[nucleicSeqMd5].openReadingFrames << [
+                start   : ntMatch.group(2) as int,
+                end     : ntMatch.group(3) as int,
+                strand  : (ntMatch.group(4) as int) < 4 ? "SENSE" : "ANTISENSE",
+                protein : [
+                    sequence : sequence.sequence,
+                    md5      : sequence.md5,
+                    matches  : sequence.matches,
+                    xref     : sequence.xref
+                ]
+            ]
+            jsonOutput["results"] = nucleicResults.values()
+        } else {
+            jsonOutput["results"].add(sequence)
+        }
     }
 
     def outputFilePath = "${outputPath}.ips6.json"

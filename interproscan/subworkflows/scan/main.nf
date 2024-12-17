@@ -12,13 +12,14 @@ include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                         
 include { RUN_PIRSR; PARSE_PIRSR                                                  } from  "../../modules/pirsr"
 include { RUN_PIRSF; PARSE_PIRSF                                                  } from  "../../modules/pirsf"
 include { RUN_PRINTS; PARSE_PRINTS                                                } from  "../../modules/prints"
-include { RUN_SFLD; POST_PROCESS_SFLD; PARSE_SFLD                                 } from  "../../modules/sfld"
 include { RUN_PFSCAN ; PARSE_PFSCAN                                               } from  "../../modules/prosite/patterns"
 include { RUN_PFSEARCH ; PARSE_PFSEARCH                                           } from  "../../modules/prosite/profiles"
-include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
+include { RUN_SFLD; POST_PROCESS_SFLD; PARSE_SFLD                                 } from  "../../modules/sfld"
 include { RUN_SIGNALP as RUN_SIGNALP_EUK; PARSE_SIGNALP as PARSE_SIGNALP_EUK      } from  "../../modules/signalp"
 include { RUN_SIGNALP as RUN_SIGNALP_PROK; PARSE_SIGNALP as PARSE_SIGNALP_PROK    } from  "../../modules/signalp"
+include { SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
+include { RUN_DEEPTMHMM; PARSE_DEEPTMHMM                                          } from  "../../modules/tmhmm"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -130,6 +131,15 @@ workflow SCAN_SEQUENCES {
         results = results.mix(PARSE_COILS.out)
     }
 
+    if (applications.contains("deeptmhmm")) {
+        RUN_DEEPTMHMM(
+            ch_fasta,
+            appsConfig.deeptmhmm.dir
+        )
+        PARSE_DEEPTMHMM(RUN_DEEPTMHMM.out)
+        results = results.mix(PARSE_DEEPTMHMM.out)
+    }
+
     if (applications.contains("hamap")) {
         PREPROCESS_HAMAP(
             ch_fasta,
@@ -220,7 +230,7 @@ workflow SCAN_SEQUENCES {
             "${datadir}/${appsConfig.pirsf.hmm}"
         )
         PARSE_PIRSF(RUN_PIRSF.out,
-            "${datadir}/${appsConfig.pirsf.postprocess.data}")
+            "${datadir}/${appsConfig.pirsf.dat}")
 
         results = results.mix(PARSE_PIRSF.out)
     }
@@ -251,7 +261,7 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("prositepatterns")) {
         RUN_PFSCAN(
             ch_fasta,
-            "${datadir}/${appsConfig.prositepatterns.data}",
+            "${datadir}/${appsConfig.prositepatterns.dat}",
             "${datadir}/${appsConfig.prositepatterns.evaluator}")
 
         PARSE_PFSCAN(RUN_PFSCAN.out)
@@ -261,7 +271,7 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("prositeprofiles")) {
         RUN_PFSEARCH(
             ch_fasta,
-            "${datadir}/${appsConfig.prositeprofiles.data}")
+            "${datadir}/${appsConfig.prositeprofiles.dir}")
         PARSE_PFSEARCH(
             RUN_PFSEARCH.out,
             "${datadir}/${appsConfig.prositeprofiles.skip_flagged_profiles}")
@@ -332,10 +342,6 @@ workflow SCAN_SEQUENCES {
             "${datadir}/${appsConfig.superfamily.hmm}"
         )
         results = results.mix(PARSE_SUPERFAMILY.out)
-    }
-
-    if (applications.contains("tmhmm")) {
-        // TODO
     }
 
     results

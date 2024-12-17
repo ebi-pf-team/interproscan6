@@ -3,7 +3,7 @@ import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 
 process WRITE_TSV_OUTPUT {
-    label 'write_output'
+    label 'small'
 
     input:
     val matches
@@ -39,13 +39,13 @@ process WRITE_TSV_OUTPUT {
                     int end = loc.end
                     def scoringValue = "-"
                     switch (memberDb) {
-                        case ["CDD", "PRINTS"]:
+                        case ["cdd", "prints"]:
                             scoringValue = match.evalue
                             break
                         case ["SignalP"]:
                             scoringValue = loc.pvalue
                             break
-                        case ["HAMAP", "PROSITE profiles"]:
+                        case ["hamap", "prositeprofiles"]:
                             scoringValue = loc.score
                             break
                         case ["COILS", "MobiDB-lite", "Phobius", "PROSITE patterns"]:
