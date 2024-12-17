@@ -108,7 +108,7 @@ workflow {
         WRITE_TSV_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic)
     }
     if (formats.contains("XML")) {
-        WRITE_XML_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", workflow.manifest.version)
+        WRITE_XML_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
     }
 }
 
