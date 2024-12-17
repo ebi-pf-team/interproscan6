@@ -40,7 +40,7 @@ process PARSE_DEEPTMHMM {
         "Beta sheet": ["Beta Sheet", new Signature("Beta Sheet", library)],
         "periplasm": ["Periplasmic Domain", new Signature("Periplasmic Domain", library)],
         "signal": ["Signalp Peptide", new Signature("Signal Peptide", library)],
-        "TMhelix": ["Transmembrane Helix", new Signature("Transmembrane Helix", library)],
+        "TMhelix": ["Transmembrane alpha helix", new Signature("Transmembrane alpha helix", library)],
     ]
     String tmhmmDir = tmhmm_output.toString()
     Map<String, Match> hits = [:]
