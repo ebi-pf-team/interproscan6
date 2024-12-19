@@ -72,7 +72,6 @@ process LOOKUP_MATCHES {
                                 calculatedMatches[seqId][modelAccession] = matchObj
                             }
                         }
-                        success = true
                     } else {
                         def seq = sequences[md5]
                         noLookupMap[seqId] = seq
@@ -81,6 +80,7 @@ process LOOKUP_MATCHES {
                     }
                 }
             }
+            success = true
         } catch (Exception e) {
             attempt++
             if (attempt >= maxRetries) {
