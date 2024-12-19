@@ -45,7 +45,7 @@ process WRITE_TSV_OUTPUT {
                         case ["CDD", "PRINT"]:
                             scoringValue = match.evalue
                             break
-                        case ["SignalP-Prok", "SignalP-Euk"]:
+                        case ["SignalP-Euk", "SignalP-Prok"]:
                             scoringValue = loc.pvalue
                             break
                         case ["HAMAP", "PROSITE profiles"]:

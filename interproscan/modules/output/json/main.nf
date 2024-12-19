@@ -38,7 +38,8 @@ process WRITE_JSON_OUTPUT {
         "PROSITE profiles": ["score", "targetAlignment"],
         "PROSITE patterns": ["cigarAlignment", "targetAlignment", "level"],
         "SFLD": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "envelopeStart", "envelopeEnd"],
-        "SignalP": ["pvalue", "cleavageStart", "cleavageEnd"],
+        "SignalP-Euk": ["pvalue", "cleavageStart", "cleavageEnd"],
+        "SignalP-Prok": ["pvalue", "cleavageStart", "cleavageEnd"],
         "SMART": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
         "SUPERFAMILY": ["hmmLength", "evalue"],
         "DeepTMHMM": []
