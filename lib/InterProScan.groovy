@@ -93,6 +93,10 @@ class InterProScan {
             name: "api-chunk-size",
             description: null
         ],
+        [
+            name: "max-retries",
+            description: null
+        ],
     ]
 
     static void validateParams(params, log) {

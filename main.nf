@@ -70,7 +70,8 @@ workflow {
             ch_seqs,
             apps,
             params.lookupService.apiChunkSize,
-            params.lookupService.lookupHost)
+            params.lookupService.lookupHost,
+            params.lookupService.maxRetries)
 
         SCAN_SEQUENCES(
             LOOKUP_MATCHES.out[1],
