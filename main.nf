@@ -6,6 +6,7 @@ include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan
 include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
 include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
+include { LOOKUP_MATCHES                } from "./interproscan/modules/lookup"
 include { XREFS                         } from "./interproscan/modules/xrefs"
 include { AGGREGATE_SEQS_MATCHES;
           AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_matches"
@@ -54,18 +55,37 @@ workflow {
         ch_seqs = PREPARE_PROTEIN_SEQUENCES(ch_fasta)
     }
 
-    // TODO: add new match lookup
+    matchResults = Channel.empty()
+    if (params.disablePrecalc) {
+        SCAN_SEQUENCES(
+            ch_seqs,
+            apps,
+            params.appsConfig,
+            data_dir
+        )
+        matchResults = SCAN_SEQUENCES.out
+    } else {
+        log.info "Using precalculated match lookup service"
+        LOOKUP_MATCHES(
+            ch_seqs,
+            apps,
+            params.lookupService.apiChunkSize,
+            params.lookupService.lookupHost,
+            params.lookupService.maxRetries)
 
-    SCAN_SEQUENCES(
-        ch_seqs,
-        apps,
-        params.appsConfig,
-        data_dir
-    )
+        SCAN_SEQUENCES(
+            LOOKUP_MATCHES.out[1],
+            apps,
+            params.appsConfig,
+            data_dir)
 
-    // AGGREGATE_PARSED_SEQS(PARSE_SEQUENCE.out.collect())
-    // This is to concat MLS with scan sequences result
-    // all_results = parsed_matches.concat(parsed_analysis)
+        def expandedScan = SCAN_SEQUENCES.out.flatMap { scan ->
+            scan[1].collect { path -> [scan[0], path] }
+        }
+
+        def combined = LOOKUP_MATCHES.out[0].concat(expandedScan)
+        matchResults = combined.groupTuple()
+    }
 
     /* XREFS:
     Add signature and entry desc and names
@@ -74,7 +94,7 @@ workflow {
     Add pathways (if enabled)
     */
     XREFS(
-        SCAN_SEQUENCES.out,
+        matchResults,
         data_dir,
         params.xRefsConfig.entries,
         params.xRefsConfig.goterms,
