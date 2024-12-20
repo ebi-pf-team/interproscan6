@@ -84,11 +84,11 @@ process LOOKUP_MATCHES {
         } catch (Exception e) {
             attempt++
             if (attempt >= maxRetries) {
-                log.info "ERROR: unable to connect to match lookup service. Max retries reached. Running analysis locally..."
+                log.error "Unable to connect to the match lookup service. Max retries reached. Running analysis locally"
                 exceededRetries = true
                 break
             }
-            log.info "Retrying connection (attempt ${attempt})..."
+            log.warn "Could not connect to the match lookup service. Retrying connection."
         }
     }
 
