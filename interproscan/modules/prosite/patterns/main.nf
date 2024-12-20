@@ -40,6 +40,7 @@ process PARSE_PFSCAN {
 
     exec:
     Map<String, Map<String, Match>> patternsMatches = [:]
+    SignatureLibraryRelease library = new SignatureLibraryRelease("PROSITE patterns", null)
     pfscan_out.eachLine { line ->
         line = line.trim()
         if (!line || line.startsWith("pfscanV3 is not meant to be used with a single profile")) {
@@ -65,12 +66,9 @@ process PARSE_PFSCAN {
         String alignment = matchDetails[2].replaceAll('Sequence ', '').replaceAll('"', '').replaceAll('\\.', '').trim()
         String cigarAlignment = parseCigarAlignment(alignment)
         cigarAlignment = encodeCigarAlignment(cigarAlignment)
-        patternsMatches[seqId] = patternsMatches[seqId] ?: [:]
-        if (patternsMatches[seqId][modelAccession]) {
-            matchObj = patternsMatches[seqId][modelAccession]
-        } else {
-            matchObj = new Match(modelAccession)
-            patternsMatches[seqId][modelAccession] = matchObj
+        patternsMatches.computeIfAbsent(seqId) { [:] }
+        Match matchObj = patternsMatches[seqId].computeIfAbsent(modelAccession) {
+            new Match(modelAccession, new Signature(modelAccession, library))
         }
         Location location = new Location(start, end, level, alignment, cigarAlignment)
         matchObj.addLocation(location)

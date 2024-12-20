@@ -19,10 +19,16 @@ class Match implements Serializable {
         this.modelAccession = modelAccession
     }
 
-    Match(String modelAccession, Double evalue, String graphScan) {
+    Match(String modelAccession, Signature signature) {
+        this.modelAccession = modelAccession
+        this.signature = signature
+    }
+
+    Match(String modelAccession, Double evalue, String graphScan, Signature signature) {
         this.modelAccession = modelAccession
         this.evalue = evalue
         this.graphScan = graphScan
+        this.signature = signature
     }
 
     Match(String modelAccession, Double evalue, Double score) {
@@ -31,11 +37,12 @@ class Match implements Serializable {
         this.score = score
     }
 
-    Match(String modelAccession, Double evalue, Double score, Double bias) {
+    Match(String modelAccession, Double evalue, Double score, Double bias, Signature signature) {
         this.modelAccession = modelAccession
         this.evalue = evalue
         this.score = score
         this.bias = bias
+        this.signature = Signature
     }
 
     void addSite(Site site) {

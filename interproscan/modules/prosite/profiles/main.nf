@@ -35,6 +35,8 @@ process PARSE_PFSEARCH {
 
     exec:
     Map matches = [:]
+    SignatureLibraryRelease library = new SignatureLibraryRelease("PROSITE profiles", null)
+    Signature signature = new Signature("PROSITE profiles", library)
     def toSkip = new File(skip_flagged_profiles).readLines()
 
     new File(pfsearch_out.toString()).eachLine { line ->
@@ -45,16 +47,13 @@ process PARSE_PFSEARCH {
             if (modelAccession in toSkip) {
                 return // skip flagged accessions
             }
-            def match = createPrositeMatch(line)
-            seqId = match.sequenceId
-            matches[seqId] = matches[seqId] ?: [:]
-            if (matches[seqId][modelAccession]) {
-                matchObj = matches[seqId][modelAccession]
-            } else {
-                matchObj = new Match(match.profile)
-                matches[seqId][modelAccession] = matchObj
+            def matchData = getMatchData(line)
+            seqId = matchData.sequenceId
+            matches.computeIfAbsent(seqId) { [:] }
+            Match matchObj = matches[seqId].computeIfAbsent(modelAccession) {
+                new Match(matchData.profile, new Signature(modelAccession, library))
             }
-            Location location = new Location(match.start, match.end, match.normScore, match.alignment)
+            Location location = new Location(matchData.start, matchData.end, matchData.normScore, matchData.alignment)
             matchObj.addLocation(location)
         }
     }
@@ -63,7 +62,7 @@ process PARSE_PFSEARCH {
     new File(outputFilePath.toString()).write(json)
 }
 
-def createPrositeMatch(line) {
+Map<String, Object> getMatchData(line) {
     def profile = line[0].split("\\|")
     return [
         profile     : profile[0],

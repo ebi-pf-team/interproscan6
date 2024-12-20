@@ -70,7 +70,7 @@ process PARSE_CATHGENE3D {
     tuple val(meta), path("cathgene3d.json")
 
     exec:
-    def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString())
+    def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString(), "GENE3D")
     def cathDomains = CATH.parseAssignedFile(cath_tsv.toString())
     def matches = CATH.mergeWithHmmerMatches(cathDomains, hmmerMatches)
     def outputFilePath = task.workDir.resolve("cathgene3d.json")

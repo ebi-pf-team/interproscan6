@@ -236,6 +236,7 @@ Map<String, Map<String, Match>> parseOutput(String outputFilePath) {
 }
 
 Map<String, Match> parseBlock(Reader reader) {
+    SignatureLibraryRelease library = new SignatureLibraryRelease("SFLD", null)
     boolean inDomains = false
     def domains = [:]
     while (true) {
@@ -281,6 +282,7 @@ Map<String, Match> parseBlock(Reader reader) {
             String description = fields.length == 3 ? fields[2] : null
 
             Match match = domains.get(modelAccession)
+            match.signature = new Signature(modelAccession, library)
             if (match != null) {
                 Site site = new Site(description, residues)
                 match.addSite(site)                        

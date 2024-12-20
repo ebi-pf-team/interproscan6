@@ -32,6 +32,7 @@ process PARSE_PIRSF {
 
     exec:
     def datData = PirsfDatEntry.parsePirsfDatFile(pirsf_dat_file.toString())  // [datEntries, datChildren]
+    SignatureLibraryRelease library = new SignatureLibraryRelease("PIRSF", null)
 
     /* Retrieve the matches from the dtbl file because we need the tlen
     for the hmmLength, and PIRSF does not assign the same hmmer start/ends
@@ -93,7 +94,7 @@ process PARSE_PIRSF {
     rawMatches.each { proteinAccession, modelMatches ->
         modelMatches.each { modelAccession, rawMatch ->
             // Merge match locations together
-            match = processMatchLocations(rawMatch)
+            match = processMatchLocations(rawMatch, library)
 
             // Calculate ratios
             // Overall length
@@ -173,7 +174,7 @@ process PARSE_PIRSF {
     new File(outputFilePath.toString()).write(json)
 }
 
-def processMatchLocations(Match match) {
+def processMatchLocations(Match match, SignatureLibraryRelease library) {
     /* Combine multiple overlapping or related matches into a single consolidated match region,
     but only when both the sequence and HMM model agree on the extensions.
     Sequence:  1....5....10...15...20...25...30...35...40
@@ -203,7 +204,8 @@ def processMatchLocations(Match match) {
         match.modelAccession,
         match.evalue,
         match.score,
-        match.bias
+        match.bias,
+        new Signature(match.modelAccession, library)
     )
     processedMatch.sequenceLength = match.sequenceLength
     String hmmBoundStart = hmmStart == 1 ? "[" : "."
