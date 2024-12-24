@@ -95,9 +95,10 @@ process PARSE_FUNFAM {
     tuple val(meta), path("cathfunfam.json")
 
     exec:
-    def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString(), "FunFam")
+    def memberDb = "FunFam"
+    def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString(), memberDb)
     def funfamDomains = CATH.parseResolvedFile(resolved_tsv.toString())
-    def matches = CATH.mergeWithHmmerMatches(funfamDomains, hmmerMatches)
+    def matches = CATH.mergeWithHmmerMatches(funfamDomains, hmmerMatches, memberDb)
     def outputFilePath = task.workDir.resolve("cathfunfam.json")
     def json = JsonOutput.toJson(matches)
     new File(outputFilePath.toString()).write(json)

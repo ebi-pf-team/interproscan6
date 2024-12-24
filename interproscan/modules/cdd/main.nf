@@ -111,10 +111,10 @@ process PARSE_RPSPROC {
                     if (pssmHits.containsKey(pssmId)) {
                         match = pssmHits[pssmId]
                     } else {
-                        match = new Match(modelAccession, evalue, bitscore, new Sigature(modelAccession, library))
+                        Signature signature = new Signature(modelAccession, library)
+                        match = new Match(modelAccession, evalue, bitscore, signature)
                         pssmHits[pssmId] = match
                     }
-
                     match.addLocation(new Location(start, end))
                 }
             } else {

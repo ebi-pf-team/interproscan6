@@ -121,7 +121,7 @@ process PARSE_HAMAP {
     tuple val(meta), path("hamap.json")
 
     exec:
-    SignatureReleaseLibrary library = new SignatureReleaseLibrary("HAMAP", null)
+    SignatureLibraryRelease library = new SignatureLibraryRelease("HAMAP", null)
     def matches = [:]
     pfsearch_out.eachLine { line ->
         def fields = line.split()

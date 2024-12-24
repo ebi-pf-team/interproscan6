@@ -36,7 +36,6 @@ process PARSE_PFSEARCH {
     exec:
     Map matches = [:]
     SignatureLibraryRelease library = new SignatureLibraryRelease("PROSITE profiles", null)
-    Signature signature = new Signature("PROSITE profiles", library)
     def toSkip = new File(skip_flagged_profiles).readLines()
 
     new File(pfsearch_out.toString()).eachLine { line ->
