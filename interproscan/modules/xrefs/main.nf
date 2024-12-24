@@ -61,13 +61,9 @@ process XREFS {
                 String memberDB = matchObject.signature.signatureLibraryRelease.library
                 String memberRelease = matchObject.signature.signatureLibraryRelease.version
                 // update the library version if the sig/model is found in the JSON
-                println("BEFORE: member: ${memberDB} mr: ${memberRelease} - entries: ${entries['databases'][memberDB]}")
                 if (!memberRelease && signatureInfo) {
-                    println(entries["databases"][signatureInfo["database"]])
                     matchObject.signature.signatureLibraryRelease.version = entries["databases"][signatureInfo["database"]]
                 }
-                println("AFTER: member: ${memberDB} mr: ${matchObject.signature.signatureLibraryRelease.version}")
-
                 if (memberDB == "PANTHER" && matchObject.treegrafter.ancestralNodeID != null) {
                     String paintAnnPath = "${dataDir}/${paintAnnoDir}/${matchObject.signature.accession}.json"
                     File paintAnnotationFile = new File(paintAnnPath)
