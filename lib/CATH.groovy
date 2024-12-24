@@ -57,8 +57,8 @@ class CATH {
         return results
     }
 
-    static mergeWithHmmerMatches(resolvedDomains, hmmerMatches) {
-        def hmmerDomains = HMMER3.splitByLocation(hmmerMatches)
+    static mergeWithHmmerMatches(resolvedDomains, hmmerMatches, memberDb) {
+        def hmmerDomains = HMMER3.splitByLocation(hmmerMatches, memberDb)
         def results = [:].withDefault { [:] }
         resolvedDomains.each { sequenceId, domains ->
             def thiSeqHmmerDomains = hmmerDomains.get(sequenceId)

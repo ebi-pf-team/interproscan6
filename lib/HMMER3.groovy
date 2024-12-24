@@ -7,8 +7,6 @@ class HMMER3 {
         String queryAccession
         String targetId
         def hits = [:].withDefault { [:] }
-        SignatureLibraryRelease library = new SignatureLibraryRelease(memberDb, null)
-
         file.withReader { reader ->
             while (true) {
                 // Move to the next Query block
@@ -63,8 +61,9 @@ class HMMER3 {
                         Double.parseDouble(fields[0]),
                         Double.parseDouble(fields[1]),
                         Double.parseDouble(fields[2]),
-                        new Signature(queryAccession, library)
+                        new Signature(queryAccession)
                     )
+                    match.signature.signatureLibraryRelease.library = memberDb
                     match.included = isIncluded
                     targetId = fields[8].trim()
                     hits[targetId][queryAccession] = match
@@ -207,7 +206,7 @@ class HMMER3 {
     }
 
     static splitByLocation(hmmerMatches, memberDb) {
-        // This methid is used by CATH-Gene3D and CATH-FunFam
+        // This method is used by CATH-Gene3D and CATH-FunFam
         def results = [:].withDefault { [:] }
         hmmerMatches.each { sequenceId, matches ->
             matches.values().each { m1 ->
@@ -217,8 +216,9 @@ class HMMER3 {
                         m1.evalue,
                         m1.score, 
                         m1.bias,
-                        new Signature(m1.modelAccession, library)
+                        new Signature(m1.modelAccession)
                     )
+                    m2.signature.signatureLibraryRelease.library = memberDb
                     m2.addLocation(loc)
                     String key = "${m2.modelAccession}-${loc.envelopeStart}-${loc.envelopeEnd}"
                     results[sequenceId][key] = m2

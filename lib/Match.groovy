@@ -37,12 +37,19 @@ class Match implements Serializable {
         this.score = score
     }
 
+    Match(String modelAccession, Double evalue, Double score, Double bias) {
+        this.modelAccession = modelAccession
+        this.evalue = evalue
+        this.score = score
+        this.bias = bias
+    }
+
     Match(String modelAccession, Double evalue, Double score, Double bias, Signature signature) {
         this.modelAccession = modelAccession
         this.evalue = evalue
         this.score = score
         this.bias = bias
-        this.signature = Signature
+        this.signature = signature
     }
 
     void addSite(Site site) {
@@ -101,8 +108,8 @@ class Signature implements Serializable {
     String accession
     String name
     String description
-    SignatureLibraryRelease signatureLibraryRelease
     Entry entry
+    SignatureLibraryRelease signatureLibraryRelease = new SignatureLibraryRelease(null, null)
 
     Signature(String accession) {
         this.accession = accession
