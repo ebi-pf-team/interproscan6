@@ -18,7 +18,8 @@ def main():
     with open(args.observed, "r") as fh:
         observed = flattern_dict(json.load(fh))
 
-    diff = difflib.ndiff(expected, observed)
+    
+    diff = difflib.ndiff(sorted(expected), sorted(observed))
     for line in diff:
         if line.startswith(("-", "+", " ")):  # skip summary lines such as "?    ^^^^  -    ^^  ^ ^"
             try:

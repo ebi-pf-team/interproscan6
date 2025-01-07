@@ -1,5 +1,6 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import com.fasterxml.jackson.databind.ObjectMapper
 
 
 process AGGREGATE_SEQS_MATCHES {
@@ -68,6 +69,8 @@ process AGGREGATE_ALL_MATCHES {
     exec:
     def aggregatedResults = []
     JsonSlurper jsonSlurper = new JsonSlurper()
+    def mapper = new ObjectMapper()
+
     seqMatches.each { file ->
         def jsonContent = jsonSlurper.parse(file)
         jsonContent.each { md5, info ->
@@ -76,6 +79,5 @@ process AGGREGATE_ALL_MATCHES {
     }
 
     def outputFilePath = task.workDir.resolve("aggregated_results.json")
-    def json = JsonOutput.toJson(aggregatedResults)
-    new File(outputFilePath.toString()).write(json)
+    mapper.writeValue(new File(outputFilePath.toString()), aggregatedResults)    
 }

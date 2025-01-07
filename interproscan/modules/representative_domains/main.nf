@@ -1,5 +1,6 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import com.fasterxml.jackson.databind.ObjectMapper
 
 process REPRESENTATIVE_DOMAINS {
     label 'small'
@@ -15,6 +16,7 @@ process REPRESENTATIVE_DOMAINS {
     float DOM_OVERLAP_THRESHOLD = 0.3
 
     def allMatches = []
+    def mapper = new ObjectMapper()
     JsonSlurper jsonSlurper = new JsonSlurper()
     def matchesMap = jsonSlurper.parse(matchesPath.toFile())
     matchesMap.each { seqData ->  // keys in seqData: sequence, md5, matches, xref, id
@@ -122,8 +124,7 @@ process REPRESENTATIVE_DOMAINS {
     }
 
     def outputFilePath = task.workDir.resolve("matches_repr_domains.json")
-    def json = JsonOutput.toJson(allMatches)
-    new File(outputFilePath.toString()).write(json)
+    mapper.writeValue(new File(outputFilePath.toString()), allMatches)    
 }
 
 boolean locationsOverlap(Set<Integer> loc1Residues, Set<Integer> loc2Residues, float threshold) {

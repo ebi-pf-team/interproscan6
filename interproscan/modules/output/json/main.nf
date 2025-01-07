@@ -1,6 +1,7 @@
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 import java.util.regex.Pattern
+import com.fasterxml.jackson.databind.ObjectMapper
 
 process WRITE_JSON_OUTPUT {
     label 'write_output'
@@ -18,6 +19,7 @@ process WRITE_JSON_OUTPUT {
     jsonOutput["interproscan-version"] = ips6Version
     jsonOutput["results"] = []
     def nucleicResults = [:]
+    def mapper = new ObjectMapper()
 
     Map<String, List<String>> membersLocationFields = [
         "CDD": ["evalue-match", "score-match"],
@@ -209,6 +211,5 @@ process WRITE_JSON_OUTPUT {
     }
 
     def outputFilePath = "${outputPath}.ips6.json"
-    def json = JsonOutput.prettyPrint(JsonOutput.toJson(jsonOutput))
-    new File(outputFilePath.toString()).write(json)
+    mapper.writerWithDefaultPrettyPrinter().writeValue(new File(outputFilePath), jsonOutput)
 }
