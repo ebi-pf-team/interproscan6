@@ -42,7 +42,7 @@ process WRITE_JSON_OUTPUT {
     ]
     List<String> otherMembersLocationFields = ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
 
-    jsonSlurper.parse(seqMatches).each { sequence ->
+    mapper.readValue(new File(seqMatches.toString()), List).each { sequence ->        
         def seqMatches = []
         sequence["matches"].each { matchId, match ->
             Match matchObj = Match.fromMap(match)
