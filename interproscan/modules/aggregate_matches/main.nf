@@ -1,4 +1,3 @@
-import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import com.fasterxml.jackson.databind.ObjectMapper
 
@@ -15,6 +14,7 @@ process AGGREGATE_SEQS_MATCHES {
 
     exec:
     JsonSlurper jsonSlurper = new JsonSlurper()
+    def mapper = new ObjectMapper()
     def seqsInfo = jsonSlurper.parse(seqsPath)
     def matchesInfo = jsonSlurper.parse(matchesPath)
 
@@ -53,8 +53,7 @@ process AGGREGATE_SEQS_MATCHES {
         }
     }
     def outputFilePath = task.workDir.resolve("seq_matches_aggreg.json")
-    def json = JsonOutput.toJson(seqMatchesAggreg)
-    new File(outputFilePath.toString()).write(json)
+    mapper.writeValue(new File(outputFilePath.toString()), seqMatchesAggreg)    
 }
 
 process AGGREGATE_ALL_MATCHES {

@@ -1,6 +1,9 @@
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.core.JsonToken
+import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.core.JsonEncoding
 
 def GO_PATTERN = [
     "P": "BIOLOGICAL_PROCESS",
@@ -33,11 +36,18 @@ process XREFS {
     tuple val(meta), path("matches2xrefs.json")
 
     exec:
+    def outputFilePath = task.workDir.resolve("matches2xrefs.json")
     String entriesPath = "${dataDir}/${entriesFile}"
     def (entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null]
+
+    ObjectMapper mapper = new ObjectMapper()
+    JsonFactory factory = new JsonFactory()
+    JsonGenerator generator = factory.createGenerator(new File(outputFilePath.toString()), JsonEncoding.UTF8)
+    generator.writeStartObject()
+
     if (!dataDir.toString().trim().isEmpty()) { // datadir doesn't need to be provided when only running members with no InterPro data
         File entriesJson = new File(entriesPath.toString())
-        entries = new ObjectMapper().readValue(entriesJson, Map)
+        entries = mapper.readValue(entriesJson, Map)
         if (addGoterms) {
             (ipr2go, goInfo) = loadXRefFiles(gotermFilePrefix, dataDir)
         }
@@ -46,20 +56,34 @@ process XREFS {
         }
     }
 
-    JsonSlurper jsonSlurper = new JsonSlurper()
-    Map<String, Map<String, Match>> aggregatedMatches = [:]
     matchesEntries = membersMatches.each { matchesPath  ->
-        def matches = jsonSlurper.parse(matchesPath).collectEntries { seqId, matches ->
-            [(seqId): matches.collectEntries { modelAccession, match ->
+        File matchFile = new File(matchesPath.toString())
+        JsonParser parser = factory.createParser(matchFile)
+        assert parser.nextToken() == JsonToken.START_OBJECT
+
+        while (parser.nextToken() != JsonToken.END_OBJECT) {
+            String seqId = parser.getCurrentName()
+            parser.nextToken()
+            generator.writeFieldName(seqId)
+            generator.writeStartObject()
+
+            while (parser.nextToken() != JsonToken.END_OBJECT) {
+                String modelAccession = parser.getCurrentName()
+                parser.nextToken()
+                def match = mapper.readValue(parser, Map)
                 Match matchObject = Match.fromMap(match)
+
                 if (!entries) {
-                    return [(modelAccession): matchObject]
+                    generator.writeFieldName(modelAccession)
+                    generator.writeObject(matchObject)
+                    continue
                 }
                 // null check needed for cases that signature still not created on match object (e.g. hmmer3 members)
                 String entrySignatureKey = matchObject.signature?.accession ?: matchObject.modelAccession
                 def signatureInfo = entries["entries"][entrySignatureKey] ?: entries["entries"][modelAccession]
                 String memberDB = matchObject.signature?.signatureLibraryRelease?.library
                 String memberRelease = null
+
                 if (!memberDB) {
                     if (signatureInfo) {
                         memberDB = signatureInfo["database"]
@@ -83,7 +107,7 @@ process XREFS {
                     File paintAnnotationFile = new File(paintAnnPath)
                     // not every signature will have a paint annotation file match
                     if (paintAnnotationFile.exists()) {
-                        def paintAnnotationsContent = jsonSlurper.parse(paintAnnotationFile)
+                        def paintAnnotationsContent = mapper.readValue(paintAnnotationFile, Map)
                         String nodeId = matchObject.treegrafter.ancestralNodeID
                         def nodeData = paintAnnotationsContent[nodeId]
                         matchObject.treegrafter.subfamilyAccession = nodeData[0]
@@ -152,35 +176,37 @@ process XREFS {
                         matchObject.treegrafter.subfamilyDescription = entries["entries"][accSubfamily]["description"]
                     }
                 }
-                return [(modelAccession): matchObject]
-            }]
+
+                generator.writeFieldName(modelAccession)
+                mapper.writeValue(generator, matchObject)            
+            }
+
+            generator.writeEndObject()
         }
-        matches.each { seqId, seqMatches ->
-            aggregatedMatches[seqId] = aggregatedMatches[seqId] ?: [:]
-            aggregatedMatches[seqId].putAll(seqMatches)
-        }
+
+        parser.close()
     }
-    def outputFilePath = task.workDir.resolve("matches2xrefs.json")
-    def json = JsonOutput.toJson(aggregatedMatches)
-    new File(outputFilePath.toString()).write(json)
+
+    generator.writeEndObject()
+    generator.close()
 }
 
 def loadXRefFiles(xrefDir, dataDir) {
-    JsonSlurper jsonSlurper = new JsonSlurper()
-
     String iprFilePath = "${dataDir}/${xrefDir}.ipr.json"
     String infoFilePath = "${dataDir}/${xrefDir}.json"
     File iprFile = new File(iprFilePath.toString())
     File infoFile = new File(infoFilePath.toString())
+    ObjectMapper mapper = new ObjectMapper()
 
     if (!iprFile.exists()) { throw new FileNotFoundException("${iprFilePath} file not found") }
     if (!infoFile.exists()) { throw new FileNotFoundException("${infoFile} file not found") }
 
     try {
-        def iprData = jsonSlurper.parse(iprFile)
-        def infoData = jsonSlurper.parse(infoFile)
+        def iprData = mapper.readValue(iprFile, Map)
+        def infoData = mapper.readValue(infoFile, Map)
         return [iprData, infoData]
     } catch (Exception e) {
         throw new Exception("Error parsing goterms/pathways files: ${e}")
     }
 }
+
