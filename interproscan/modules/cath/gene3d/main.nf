@@ -40,7 +40,7 @@ process RESOLVE_GENE3D {
 }
 
 process ASSIGN_CATH {
-    label 'small'
+    label 'small', 'ips6_container'
 
     input:
     tuple val(meta), path(cath_resolve_out)
