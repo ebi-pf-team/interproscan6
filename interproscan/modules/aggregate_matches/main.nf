@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.core.JsonEncoding
 import com.fasterxml.jackson.core.JsonToken
 
-
 process AGGREGATE_SEQS_MATCHES {
     label 'small'
     // Aggregates sequence meta data with the corresponding match data
@@ -32,11 +31,11 @@ process AGGREGATE_SEQS_MATCHES {
         String seqId = seqParser.getCurrentName()
         seqParser.nextToken()
         def seqInfo = mapper.readValue(seqParser, Map)
+
         if (nucleic) {
             seqInfo.each { orf ->
                 FastaSequence protSequence = FastaSequence.fromMap(orf)
                 String protMD5 = protSequence.md5
-
                 generator.writeFieldName(protMD5)
                 generator.writeStartObject()
                 generator.writeStringField("sequence", protSequence.sequence)
@@ -61,11 +60,11 @@ process AGGREGATE_SEQS_MATCHES {
                     generator.writeObject(value)
                 }
                 generator.writeEndObject()
+                generator.writeEndObject()
             }
         } else {
             FastaSequence sequence = FastaSequence.fromMap(seqInfo)
             String md5 = sequence.md5
-
             generator.writeFieldName(md5)
             generator.writeStartObject()
             generator.writeStringField("sequence", sequence.sequence)
@@ -83,6 +82,7 @@ process AGGREGATE_SEQS_MATCHES {
                 generator.writeFieldName(key)
                 generator.writeObject(value)
             }
+            generator.writeEndObject()
             generator.writeEndObject()
         }
     }

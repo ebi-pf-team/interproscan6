@@ -1,25 +1,28 @@
-import groovy.json.JsonSlurper
-import groovy.json.JsonOutput
-import java.util.regex.Pattern
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.JsonEncoding
+import com.fasterxml.jackson.databind.SerializationFeature
+import java.util.regex.Pattern
 
 process WRITE_JSON_OUTPUT {
     label 'write_output'
 
     input:
-    val seqMatches
+    val sequenceMatches
     val outputPath
     val nucleic
     val ips6Version
 
     exec:
     def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+source=(.*)\s+coords=(\d+)\.\.(\d+)\s+.+frame=(\d+)\s+desc=(.*)$/)
-    def jsonSlurper = new JsonSlurper()
-    def jsonOutput = [:]
-    jsonOutput["interproscan-version"] = ips6Version
-    jsonOutput["results"] = []
-    def nucleicResults = [:]
     def mapper = new ObjectMapper()
+    mapper.enable(SerializationFeature.INDENT_OUTPUT)
+    def jsonOutput = [
+        "interproscan-version": ips6Version,
+        "results": []
+    ]
+    def nucleicResults = [:]
 
     Map<String, List<String>> membersLocationFields = [
         "CDD": ["evalue-match", "score-match"],
@@ -42,7 +45,10 @@ process WRITE_JSON_OUTPUT {
     ]
     List<String> otherMembersLocationFields = ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
 
-    mapper.readValue(new File(seqMatches.toString()), List).each { sequence ->        
+    def parser = mapper.createParser(new File(sequenceMatches.toString()))
+    def seqData = parser.readValueAs(List)
+
+    seqData.each { sequence ->
         def seqMatches = []
         sequence["matches"].each { matchId, match ->
             Match matchObj = Match.fromMap(match)
@@ -211,5 +217,7 @@ process WRITE_JSON_OUTPUT {
     }
 
     def outputFilePath = "${outputPath}.ips6.json"
-    mapper.writerWithDefaultPrettyPrinter().writeValue(new File(outputFilePath), jsonOutput)
+    def generator = mapper.getFactory().createGenerator(new File(outputFilePath), JsonEncoding.UTF8)
+    generator.writeObject(jsonOutput)
+    generator.close()
 }
