@@ -55,9 +55,11 @@ process AGGREGATE_SEQS_MATCHES {
                 }
 
                 def matchData = matchesMap[orf.id] ?: []
-                generator.writeArrayFieldStart("matches")
-                matchData.each { match -> generator.writeObject(match) }
-                generator.writeEndArray()
+                generator.writeObjectFieldStart("matches")
+                matchData.each { key, value ->
+                    generator.writeFieldName(key)
+                    generator.writeObject(value)
+                }
                 generator.writeEndObject()
             }
         } else {
@@ -76,9 +78,11 @@ process AGGREGATE_SEQS_MATCHES {
             generator.writeEndArray()
 
             def matchData = matchesMap[seqId] ?: []
-            generator.writeArrayFieldStart("matches")
-            matchData.each { match -> generator.writeObject(match) }
-            generator.writeEndArray()
+            generator.writeObjectFieldStart("matches")
+            matchData.each { key, value ->
+                generator.writeFieldName(key)
+                generator.writeObject(value)
+            }
             generator.writeEndObject()
         }
     }
