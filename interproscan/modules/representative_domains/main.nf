@@ -23,10 +23,11 @@ process REPRESENTATIVE_DOMAINS {
     ObjectMapper mapper = new ObjectMapper()
     def outputFilePath = task.workDir.resolve("matches_repr_domains.json")
     JsonGenerator generator = factory.createGenerator(new File(outputFilePath.toString()), JsonEncoding.UTF8)
+    generator.setCodec(mapper)
     generator.writeStartArray()
     JsonParser parser = factory.createParser(matchesPath.toFile())
-
     assert parser.nextToken() == JsonToken.START_ARRAY
+
     while (parser.nextToken() != JsonToken.END_ARRAY) {
         Map seqData = mapper.readValue(parser, Map)  // keys in seqData: sequence, md5, matches, xref, id
 
@@ -34,7 +35,6 @@ process REPRESENTATIVE_DOMAINS {
         seqData["matches"] = seqData["matches"].collectEntries { modelAccession, matchMap ->
             [(modelAccession): Match.fromMap(matchMap)]
         }
-
         // Gather relevant locations
         def seqDomains = []
         seqData["matches"].each { String modelAccession, Match match ->

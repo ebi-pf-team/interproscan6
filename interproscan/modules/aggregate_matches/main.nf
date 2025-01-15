@@ -21,7 +21,7 @@ process AGGREGATE_SEQS_MATCHES {
     ObjectMapper mapper = new ObjectMapper()
     def outputFilePath = task.workDir.resolve("seq_matches_aggreg.json")
     JsonGenerator generator = factory.createGenerator(new File(outputFilePath.toString()), JsonEncoding.UTF8)
-    generator.setCodec(new ObjectMapper())
+    generator.setCodec(mapper)
     generator.writeStartObject()
     JsonParser seqParser = factory.createParser(new File(seqsPath.toString()))
     JsonParser matchesParser = factory.createParser(new File(matchesPath.toString()))
@@ -101,7 +101,7 @@ process AGGREGATE_ALL_MATCHES {
     JsonFactory factory = new JsonFactory()
     def outputFilePath = task.workDir.resolve("aggregated_results.json")
     JsonGenerator generator = factory.createGenerator(new File(outputFilePath.toString()), JsonEncoding.UTF8)
-    generator.setCodec(new ObjectMapper())
+    generator.setCodec(mapper)
     generator.writeStartArray()
 
     seqMatches.each { file ->
