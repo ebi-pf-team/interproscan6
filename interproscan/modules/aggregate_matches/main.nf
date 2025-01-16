@@ -1,4 +1,3 @@
-import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -16,10 +15,9 @@ process AGGREGATE_SEQS_MATCHES {
     path("seq_matches_aggreg.json")
 
     exec:
-    JsonFactory factory = new JsonFactory()
     ObjectMapper mapper = new ObjectMapper()
-    JsonParser seqParser = factory.createParser(new File(seqsPath.toString()))
-    JsonParser matchesParser = factory.createParser(new File(matchesPath.toString()))
+    JsonParser seqParser = mapper.getFactory().createParser(new File(seqsPath.toString()))
+    JsonParser matchesParser = mapper.getFactory().createParser(new File(matchesPath.toString()))
 
     def seqMatchesAggreg = [:].withDefault { [
         sequence: '',
@@ -41,7 +39,7 @@ process AGGREGATE_SEQS_MATCHES {
                 String protMD5 = protSequence.md5
                 seqMatchesAggreg[protMD5].sequence = protSequence.sequence
                 seqMatchesAggreg[protMD5].md5 = protMD5
-                seqMatchesAggreg[protMD5].xref << ["name": orf.id + " " orf.description", "id": orf.id]
+                seqMatchesAggreg[protMD5].xref << ["name": orf.id + " " + orf.description, "id": orf.id]
                 if (seqMatchesAggreg[protMD5].translatedFrom == null) {
                     seqMatchesAggreg[protMD5].translatedFrom = []
                 }
@@ -77,15 +75,13 @@ process AGGREGATE_ALL_MATCHES {
     path("aggregated_results.json")
 
     exec:
-    JsonFactory factory = new JsonFactory()
     ObjectMapper mapper = new ObjectMapper()
     def outputFilePath = task.workDir.resolve("aggregated_results.json")
-    JsonGenerator generator = factory.createGenerator(new File(outputFilePath.toString()), JsonEncoding.UTF8)
-    generator.setCodec(mapper)
+    JsonGenerator generator = mapper.getFactory().createGenerator(new File(outputFilePath.toString()), JsonEncoding.UTF8)
     generator.writeStartArray()
 
     seqMatches.each { file ->
-        JsonParser parser = factory.createParser(new File(file.toString()))
+        JsonParser parser = mapper.getFactory().createParser(new File(file.toString()))
         assert parser.nextToken() == JsonToken.START_OBJECT
         while (parser.nextToken() != JsonToken.END_OBJECT) {
             parser.nextToken()

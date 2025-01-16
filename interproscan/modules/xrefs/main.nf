@@ -1,8 +1,7 @@
-import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.core.JsonEncoding
 
 def GO_PATTERN = [
@@ -36,14 +35,13 @@ process XREFS {
     tuple val(meta), path("matches2xrefs.json")
 
     exec:
+    ObjectMapper mapper = new ObjectMapper()
     def outputFilePath = task.workDir.resolve("matches2xrefs.json")
+    JsonGenerator generator = mapper.getFactory().createGenerator(new File(outputFilePath.toString()), JsonEncoding.UTF8)
+    generator.writeStartObject()
+
     String entriesPath = "${dataDir}/${entriesFile}"
     def (entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null]
-
-    ObjectMapper mapper = new ObjectMapper()
-    JsonFactory factory = new JsonFactory()
-    JsonGenerator generator = factory.createGenerator(new File(outputFilePath.toString()), JsonEncoding.UTF8)
-    generator.writeStartObject()
 
     if (!dataDir.toString().trim().isEmpty()) { // datadir doesn't need to be provided when only running members with no InterPro data
         File entriesJson = new File(entriesPath.toString())
@@ -58,9 +56,8 @@ process XREFS {
 
     matchesEntries = membersMatches.each { matchesPath  ->
         File matchFile = new File(matchesPath.toString())
-        JsonParser parser = factory.createParser(matchFile)
+        JsonParser parser = mapper.getFactory().createParser(matchFile)
         assert parser.nextToken() == JsonToken.START_OBJECT
-
         while (parser.nextToken() != JsonToken.END_OBJECT) {
             String seqId = parser.getCurrentName()
             parser.nextToken()
@@ -176,17 +173,13 @@ process XREFS {
                         matchObject.treegrafter.subfamilyDescription = entries["entries"][accSubfamily]["description"]
                     }
                 }
-
                 generator.writeFieldName(modelAccession)
-                mapper.writeValue(generator, matchObject)            
+                mapper.writeValue(generator, matchObject)
             }
-
             generator.writeEndObject()
         }
-
         parser.close()
     }
-
     generator.writeEndObject()
     generator.close()
 }
@@ -209,4 +202,3 @@ def loadXRefFiles(xrefDir, dataDir) {
         throw new Exception("Error parsing goterms/pathways files: ${e}")
     }
 }
-

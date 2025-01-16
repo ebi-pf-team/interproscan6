@@ -1,4 +1,3 @@
-import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -19,13 +18,11 @@ process REPRESENTATIVE_DOMAINS {
     int MAX_DOMS_PER_GROUP = 20 // only consider N "best" domains otherwise there are too many comparisons (2^domains)
     float DOM_OVERLAP_THRESHOLD = 0.3
 
-    JsonFactory factory = new JsonFactory()
     ObjectMapper mapper = new ObjectMapper()
     def outputFilePath = task.workDir.resolve("matches_repr_domains.json")
-    JsonGenerator generator = factory.createGenerator(new File(outputFilePath.toString()), JsonEncoding.UTF8)
-    generator.setCodec(mapper)
+    JsonGenerator generator = mapper.getFactory().createGenerator(new File(outputFilePath.toString()), JsonEncoding.UTF8)
     generator.writeStartArray()
-    JsonParser parser = factory.createParser(matchesPath.toFile())
+    JsonParser parser = mapper.getFactory().createParser(matchesPath.toFile())
     assert parser.nextToken() == JsonToken.START_ARRAY
 
     while (parser.nextToken() != JsonToken.END_ARRAY) {
