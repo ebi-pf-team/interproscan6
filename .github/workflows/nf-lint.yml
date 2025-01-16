@@ -18,7 +18,7 @@ on:
     paths:
       - interproscan/subworkflows/**
       - interproscan/modules/**
-      - interproscan.nf
+      - main.nf
       - .github/workflows/nf-lint.yml
 
 jobs:
