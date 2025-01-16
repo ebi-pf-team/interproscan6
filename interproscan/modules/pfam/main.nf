@@ -20,7 +20,7 @@ process SEARCH_PFAM {
 }
 
 process PARSE_PFAM {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(hmmsearch_out)

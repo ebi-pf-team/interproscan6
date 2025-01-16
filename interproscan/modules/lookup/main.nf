@@ -3,7 +3,7 @@ import java.net.URL
 import groovy.json.JsonOutput
 
 process LOOKUP_MATCHES {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(index), val(fasta), val(json)
