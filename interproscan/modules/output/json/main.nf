@@ -2,6 +2,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonEncoding
+import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.SerializationFeature
 import java.util.regex.Pattern
 
@@ -15,13 +16,20 @@ process WRITE_JSON_OUTPUT {
     val ips6Version
 
     exec:
-    def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+source=(.*)\s+coords=(\d+)\.\.(\d+)\s+.+frame=(\d+)\s+desc=(.*)$/)
-    def mapper = new ObjectMapper()
+    ObjectMapper mapper = new ObjectMapper()
     mapper.enable(SerializationFeature.INDENT_OUTPUT)
-    def jsonOutput = [
-        "interproscan-version": ips6Version,
-        "results": []
-    ]
+
+    def outputFilePath = "${outputPath}.ips6.json"
+    JsonGenerator generator = mapper.getFactory().createGenerator(new File(outputFilePath.toString()), JsonEncoding.UTF8)
+    generator.writeStartObject()
+    generator.writeStringField("interproscan-version", ips6Version)
+    generator.writeFieldName("results")
+    generator.writeStartArray()
+
+    def parser = mapper.getFactory().createParser(new File(sequenceMatches.toString()))
+    parser.nextToken()
+
+    def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+source=(.*)\s+coords=(\d+)\.\.(\d+)\s+.+frame=(\d+)\s+desc=(.*)$/)
     def nucleicResults = [:]
 
     Map<String, List<String>> membersLocationFields = [
@@ -45,10 +53,8 @@ process WRITE_JSON_OUTPUT {
     ]
     List<String> otherMembersLocationFields = ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
 
-    def parser = mapper.createParser(new File(sequenceMatches.toString()))
-    def seqData = parser.readValueAs(List)
-
-    seqData.each { sequence ->
+    while (parser.nextToken() != JsonToken.END_ARRAY) {
+        def sequence = parser.readValueAs(Map)
         def seqMatches = []
         sequence["matches"].each { matchId, match ->
             Match matchObj = Match.fromMap(match)
@@ -210,14 +216,19 @@ process WRITE_JSON_OUTPUT {
                     xref     : sequence.xref
                 ]
             ]
-            jsonOutput["results"] = nucleicResults.values()
+        }
+
+        if (nucleic) {
+            nucleicResults.values().each { result ->
+                generator.writeObject(result)
+            }
         } else {
-            jsonOutput["results"].add(sequence)
+            generator.writeObject(sequence)
         }
     }
 
-    def outputFilePath = "${outputPath}.ips6.json"
-    def generator = mapper.getFactory().createGenerator(new File(outputFilePath), JsonEncoding.UTF8)
-    generator.writeObject(jsonOutput)
+    generator.writeEndArray()
+    generator.writeEndObject()
+    parser.close()
     generator.close()
 }

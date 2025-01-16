@@ -18,15 +18,18 @@ process AGGREGATE_SEQS_MATCHES {
     exec:
     JsonFactory factory = new JsonFactory()
     ObjectMapper mapper = new ObjectMapper()
-    def outputFilePath = task.workDir.resolve("seq_matches_aggreg.json")
-    JsonGenerator generator = factory.createGenerator(new File(outputFilePath.toString()), JsonEncoding.UTF8)
-    generator.setCodec(mapper)
-    generator.writeStartObject()
     JsonParser seqParser = factory.createParser(new File(seqsPath.toString()))
     JsonParser matchesParser = factory.createParser(new File(matchesPath.toString()))
-    assert seqParser.nextToken() == JsonToken.START_OBJECT
-    def matchesMap = mapper.readValue(matchesParser, Map)
 
+    def seqMatchesAggreg = [:].withDefault { [
+        sequence: '',
+        md5: '',
+        matches: [],
+        xref: []
+    ] }
+
+    assert seqParser.nextToken() == JsonToken.START_OBJECT
+    def matchesInfo = mapper.readValue(matchesParser, Map)
     while (seqParser.nextToken() != JsonToken.END_OBJECT) {
         String seqId = seqParser.getCurrentName()
         seqParser.nextToken()
@@ -36,59 +39,32 @@ process AGGREGATE_SEQS_MATCHES {
             seqInfo.each { orf ->
                 FastaSequence protSequence = FastaSequence.fromMap(orf)
                 String protMD5 = protSequence.md5
-                generator.writeFieldName(protMD5)
-                generator.writeStartObject()
-                generator.writeStringField("sequence", protSequence.sequence)
-                generator.writeStringField("md5", protMD5)
-                generator.writeArrayFieldStart("xref")
-                generator.writeStartObject()
-                generator.writeStringField("name", "${orf.id} ${orf.description}")
-                generator.writeStringField("id", orf.id)
-                generator.writeEndObject()
-                generator.writeEndArray()
-
-                if (orf.translatedFrom != null) {
-                    generator.writeArrayFieldStart("translatedFrom")
-                    generator.writeString(orf.translatedFrom)
-                    generator.writeEndArray()
+                seqMatchesAggreg[protMD5].sequence = protSequence.sequence
+                seqMatchesAggreg[protMD5].md5 = protMD5
+                seqMatchesAggreg[protMD5].xref << ["name": orf.id + " " orf.description", "id": orf.id]
+                if (seqMatchesAggreg[protMD5].translatedFrom == null) {
+                    seqMatchesAggreg[protMD5].translatedFrom = []
                 }
-
-                def matchData = matchesMap[orf.id] ?: []
-                generator.writeObjectFieldStart("matches")
-                matchData.each { key, value ->
-                    generator.writeFieldName(key)
-                    generator.writeObject(value)
+                seqMatchesAggreg[protMD5].translatedFrom << orf.translatedFrom // add nucleic seq metadata
+                if (matchesInfo[orf.id]) {
+                    seqMatchesAggreg[protMD5].matches = matchesInfo[orf.id]
                 }
-                generator.writeEndObject()
-                generator.writeEndObject()
             }
         } else {
             FastaSequence sequence = FastaSequence.fromMap(seqInfo)
             String md5 = sequence.md5
-            generator.writeFieldName(md5)
-            generator.writeStartObject()
-            generator.writeStringField("sequence", sequence.sequence)
-            generator.writeStringField("md5", md5)
-            generator.writeArrayFieldStart("xref")
-            generator.writeStartObject()
-            generator.writeStringField("name", "${sequence.id} ${sequence.description}")
-            generator.writeStringField("id", sequence.id)
-            generator.writeEndObject()
-            generator.writeEndArray()
-
-            def matchData = matchesMap[seqId] ?: []
-            generator.writeObjectFieldStart("matches")
-            matchData.each { key, value ->
-                generator.writeFieldName(key)
-                generator.writeObject(value)
+            seqMatchesAggreg[md5].sequence = sequence.sequence
+            seqMatchesAggreg[md5].md5 = md5
+            seqMatchesAggreg[md5].xref << ["name": sequence.id + " " + sequence.description, "id": sequence.id]
+            if (matchesInfo[seqId]) {
+                seqMatchesAggreg[md5].matches = matchesInfo[seqId]
             }
-            generator.writeEndObject()
-            generator.writeEndObject()
         }
     }
+
     seqParser.close()
-    generator.writeEndObject()
-    generator.close()
+    def outputFilePath = task.workDir.resolve("seq_matches_aggreg.json")
+    mapper.writeValue(new File(outputFilePath.toString()), seqMatchesAggreg)
 }
 
 process AGGREGATE_ALL_MATCHES {
@@ -101,8 +77,8 @@ process AGGREGATE_ALL_MATCHES {
     path("aggregated_results.json")
 
     exec:
-    ObjectMapper mapper = new ObjectMapper()
     JsonFactory factory = new JsonFactory()
+    ObjectMapper mapper = new ObjectMapper()
     def outputFilePath = task.workDir.resolve("aggregated_results.json")
     JsonGenerator generator = factory.createGenerator(new File(outputFilePath.toString()), JsonEncoding.UTF8)
     generator.setCodec(mapper)
@@ -121,4 +97,3 @@ process AGGREGATE_ALL_MATCHES {
     generator.writeEndArray()
     generator.close()
 }
-
