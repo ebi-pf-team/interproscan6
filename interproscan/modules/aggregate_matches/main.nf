@@ -31,9 +31,9 @@ process AGGREGATE_SEQS_MATCHES {
     while (seqParser.nextToken() != JsonToken.END_OBJECT) {
         String seqId = seqParser.getCurrentName()
         seqParser.nextToken()
-        def seqInfo = mapper.readValue(seqParser, Map)
 
         if (nucleic) {
+            def seqInfo = mapper.readValue(seqParser, List)
             seqInfo.each { orf ->
                 FastaSequence protSequence = FastaSequence.fromMap(orf)
                 String protMD5 = protSequence.md5
@@ -49,6 +49,7 @@ process AGGREGATE_SEQS_MATCHES {
                 }
             }
         } else {
+            def seqInfo = mapper.readValue(seqParser, Map)
             FastaSequence sequence = FastaSequence.fromMap(seqInfo)
             String md5 = sequence.md5
             seqMatchesAggreg[md5].sequence = sequence.sequence
