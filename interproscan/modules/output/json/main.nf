@@ -26,7 +26,7 @@ process WRITE_JSON_OUTPUT {
     generator.writeFieldName("results")
     generator.writeStartArray()
 
-    def parser = mapper.getFactory().createParser(new File(sequenceMatches.toString()))
+    JsonParser parser = mapper.getFactory().createParser(new File(sequenceMatches.toString()))
     parser.nextToken()
 
     def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+source=(.*)\s+coords=(\d+)\.\.(\d+)\s+.+frame=(\d+)\s+desc=(.*)$/)
