@@ -1,10 +1,10 @@
 class HMMER2 {
-    static parseOutput(String filePath, Map<String, Integer> hmmLengths) {
+    static parseOutput(String filePath, Map<String, Integer> hmmLengths, String memberDb) {
         File file = new File(filePath)
         String line
         String querySequence
         def hits = [:].withDefault { [:] }
-        SignatureLibraryRelease library = new SignatureLibraryRelease("SUPERFAMILY", null)
+        SignatureLibraryRelease library = new SignatureLibraryRelease(memberDb, null)
 
         file.withReader { reader ->
             while (true) {
