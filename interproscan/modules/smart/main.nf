@@ -20,7 +20,7 @@ process SEARCH_SMART {
 }
 
 process PARSE_SMART {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(hmmpfam_out), val(seq_json)

@@ -46,7 +46,7 @@ process POST_PROCESS_SFLD {
 
 
 process PARSE_SFLD {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(postprocess_out)
@@ -239,7 +239,8 @@ Map<String, Match> parseBlock(Reader reader) {
     boolean inDomains = false
     def domains = [:]
     while (true) {
-        String line = reader.readLine().trim()
+        String line = reader.readLine()?.trim()
+        if (!line) break
         if (line == "Domains:") {
             inDomains = true
         } else if (line == "Sites:") {

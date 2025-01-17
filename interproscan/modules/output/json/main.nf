@@ -3,7 +3,7 @@ import groovy.json.JsonOutput
 import java.util.regex.Pattern
 
 process WRITE_JSON_OUTPUT {
-    label 'write_output'
+    label 'local'
 
     input:
     val seqMatches

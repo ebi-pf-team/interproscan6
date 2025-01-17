@@ -22,7 +22,7 @@ process PREPROCESS_HAMAP {
 }
 
 process PREPARE_HAMAP {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(hmmsearch_tab), val(seq_json)
@@ -112,7 +112,7 @@ process RUN_HAMAP {
 }
 
 process PARSE_HAMAP {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(pfsearch_out)
