@@ -18,7 +18,7 @@ on:
     paths:
       - interproscan/subworkflows/**
       - interproscan/modules/**
-      - interproscan.nf
+      - main.nf
       - .github/workflows/nf-lint.yml
 
 jobs:
@@ -79,7 +79,7 @@ jobs:
         run: |
           rm -rf tests
 
-      - name: Run Docker linter
+      - name: Run NF linter
         id: linter
         run: |
           cd interproscan

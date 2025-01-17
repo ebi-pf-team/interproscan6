@@ -40,7 +40,7 @@ process RESOLVE_GENE3D {
 }
 
 process ASSIGN_CATH {
-    label 'small'
+    label 'small', 'ips6_container'
 
     input:
     tuple val(meta), path(cath_resolve_out)
@@ -61,7 +61,7 @@ process ASSIGN_CATH {
 }
 
 process PARSE_CATHGENE3D {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(hmmseach_out), val(cath_tsv)

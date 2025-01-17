@@ -24,7 +24,7 @@ process RUN_PFSEARCH {
 }
 
 process PARSE_PFSEARCH {
-    label 'small'
+    label 'local'
 
     input:
         tuple val(meta), val(pfsearch_out)

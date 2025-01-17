@@ -6,7 +6,7 @@ import java.io.StringWriter
 import java.util.regex.Pattern
 
 process WRITE_XML_OUTPUT {
-    label 'small'
+    label 'local'
 
     input:
     val matches

@@ -1,7 +1,5 @@
 # Linting
 
-For detailed docs see the `docs/devs/linting` documentation.
-
 ## Set up
 
 Install using Git clone and the docker image from the `linter-rules-for-nextflow` repo
