@@ -3,8 +3,6 @@ import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 import java.io.StringWriter
 import java.util.regex.Pattern
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonToken
 
 process WRITE_XML_OUTPUT {
@@ -24,9 +22,8 @@ process WRITE_XML_OUTPUT {
     xml.setEscapeAttributes(false) // Prevent escaping attributes
     xml.setEscapeText(false)       // Prevent escaping text
 
-    ObjectMapper mapper = new ObjectMapper()
-    JsonParser parser = mapper.getFactory().createParser(new File(matches.toString()))
-    parser.nextToken()
+    JsonProcessor processor = new JsonProcessor()
+    def parser = processor.createParser(matches.toString())
 
     String matchType = nucleic ? "nucleotide-sequence-matches" : "protein-matches"
     xml."$matchType"("interproscan-version": ips6Version) {

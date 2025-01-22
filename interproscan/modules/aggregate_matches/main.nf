@@ -1,7 +1,3 @@
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.core.JsonEncoding
 import com.fasterxml.jackson.core.JsonToken
 
 process AGGREGATE_SEQS_MATCHES {
@@ -15,9 +11,9 @@ process AGGREGATE_SEQS_MATCHES {
     path("seq_matches_aggreg.json")
 
     exec:
-    ObjectMapper mapper = new ObjectMapper()
-    JsonParser seqParser = mapper.getFactory().createParser(new File(seqsPath.toString()))
-    JsonParser matchesParser = mapper.getFactory().createParser(new File(matchesPath.toString()))
+    JsonProcessor processor = new JsonProcessor()
+    def seqParser = processor.createParser(seqsPath.toString())
+    def matchesParser = processor.createParser(matchesPath.toString())
 
     def seqMatchesAggreg = [:].withDefault { [
         sequence: '',
@@ -26,14 +22,12 @@ process AGGREGATE_SEQS_MATCHES {
         xref: []
     ] }
 
-    assert seqParser.nextToken() == JsonToken.START_OBJECT
-    def matchesInfo = mapper.readValue(matchesParser, Map)
+    def matchesInfo = processor.jsonToMap(matchesParser)
     while (seqParser.nextToken() != JsonToken.END_OBJECT) {
         String seqId = seqParser.getCurrentName()
         seqParser.nextToken()
-
         if (nucleic) {
-            def seqInfo = mapper.readValue(seqParser, List)
+            def seqInfo = processor.jsonToList(seqParser)
             seqInfo.each { orf ->
                 FastaSequence protSequence = FastaSequence.fromMap(orf)
                 String protMD5 = protSequence.md5
@@ -49,7 +43,7 @@ process AGGREGATE_SEQS_MATCHES {
                 }
             }
         } else {
-            def seqInfo = mapper.readValue(seqParser, Map)
+            def seqInfo = processor.jsonToMap(seqParser)
             FastaSequence sequence = FastaSequence.fromMap(seqInfo)
             String md5 = sequence.md5
             seqMatchesAggreg[md5].sequence = sequence.sequence
@@ -63,7 +57,7 @@ process AGGREGATE_SEQS_MATCHES {
 
     seqParser.close()
     def outputFilePath = task.workDir.resolve("seq_matches_aggreg.json")
-    mapper.writeValue(new File(outputFilePath.toString()), seqMatchesAggreg)
+    processor.write(outputFilePath.toString(), seqMatchesAggreg)
 }
 
 process AGGREGATE_ALL_MATCHES {
@@ -76,17 +70,16 @@ process AGGREGATE_ALL_MATCHES {
     path("aggregated_results.json")
 
     exec:
-    ObjectMapper mapper = new ObjectMapper()
+    JsonProcessor processor = new JsonProcessor()
     def outputFilePath = task.workDir.resolve("aggregated_results.json")
-    JsonGenerator generator = mapper.getFactory().createGenerator(new File(outputFilePath.toString()), JsonEncoding.UTF8)
-    generator.writeStartArray()
+    def generator = processor.createGenerator(outputFilePath.toString())
 
+    generator.writeStartArray()
     seqMatches.each { file ->
-        JsonParser parser = mapper.getFactory().createParser(new File(file.toString()))
-        assert parser.nextToken() == JsonToken.START_OBJECT
+        def parser = processor.createParser(file.toString())
         while (parser.nextToken() != JsonToken.END_OBJECT) {
             parser.nextToken()
-            def info = mapper.readValue(parser, Map)
+            def info = processor.jsonToMap(parser)
             generator.writeObject(info)
         }
         parser.close()

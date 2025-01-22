@@ -1,7 +1,3 @@
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.JsonEncoding
 import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.SerializationFeature
 import java.util.regex.Pattern
@@ -16,18 +12,15 @@ process WRITE_JSON_OUTPUT {
     val ips6Version
 
     exec:
-    ObjectMapper mapper = new ObjectMapper()
-    mapper.enable(SerializationFeature.INDENT_OUTPUT)
+    JsonProcessor processor = new JsonProcessor()
 
+    def parser = processor.createParser(sequenceMatches.toString())
     def outputFilePath = "${outputPath}.ips6.json"
-    JsonGenerator generator = mapper.getFactory().createGenerator(new File(outputFilePath.toString()), JsonEncoding.UTF8)
+    def generator = processor.createGenerator(outputFilePath)
     generator.writeStartObject()
     generator.writeStringField("interproscan-version", ips6Version)
     generator.writeFieldName("results")
     generator.writeStartArray()
-
-    JsonParser parser = mapper.getFactory().createParser(new File(sequenceMatches.toString()))
-    parser.nextToken()
 
     def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+source=(.*)\s+coords=(\d+)\.\.(\d+)\s+.+frame=(\d+)\s+desc=(.*)$/)
     def nucleicResults = [:]

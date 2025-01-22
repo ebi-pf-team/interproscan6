@@ -1,7 +1,3 @@
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.core.JsonEncoding
 import com.fasterxml.jackson.core.JsonToken
 
 
@@ -18,15 +14,14 @@ process REPRESENTATIVE_DOMAINS {
     int MAX_DOMS_PER_GROUP = 20 // only consider N "best" domains otherwise there are too many comparisons (2^domains)
     float DOM_OVERLAP_THRESHOLD = 0.3
 
-    ObjectMapper mapper = new ObjectMapper()
+    JsonProcessor processor = new JsonProcessor()
     def outputFilePath = task.workDir.resolve("matches_repr_domains.json")
-    JsonGenerator generator = mapper.getFactory().createGenerator(new File(outputFilePath.toString()), JsonEncoding.UTF8)
-    generator.writeStartArray()
-    JsonParser parser = mapper.getFactory().createParser(matchesPath.toFile())
-    assert parser.nextToken() == JsonToken.START_ARRAY
+    def generator = processor.createGenerator(outputFilePath.toString())
+    def parser = processor.createParser(matchesPath.toString())
 
+    generator.writeStartArray()
     while (parser.nextToken() != JsonToken.END_ARRAY) {
-        Map seqData = mapper.readValue(parser, Map)  // keys in seqData: sequence, md5, matches, xref, id
+        Map seqData = processor.jsonToMap(parser)  // keys in seqData: sequence, md5, matches, xref, id
 
         // Serialise the matches so we don't need to edit the map later
         seqData["matches"] = seqData["matches"].collectEntries { modelAccession, matchMap ->

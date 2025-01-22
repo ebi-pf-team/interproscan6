@@ -1,8 +1,4 @@
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.core.JsonToken
-import com.fasterxml.jackson.core.JsonEncoding
 
 def GO_PATTERN = [
     "P": "BIOLOGICAL_PROCESS",
@@ -35,9 +31,9 @@ process XREFS {
     tuple val(meta), path("matches2xrefs.json")
 
     exec:
-    ObjectMapper mapper = new ObjectMapper()
+    JsonProcessor processor = new JsonProcessor()
     def outputFilePath = task.workDir.resolve("matches2xrefs.json")
-    JsonGenerator generator = mapper.getFactory().createGenerator(new File(outputFilePath.toString()), JsonEncoding.UTF8)
+    def generator = processor.createGenerator(outputFilePath.toString())
     generator.writeStartObject()
 
     String entriesPath = "${dataDir}/${entriesFile}"
@@ -45,7 +41,7 @@ process XREFS {
 
     if (!dataDir.toString().trim().isEmpty()) { // datadir doesn't need to be provided when only running members with no InterPro data
         File entriesJson = new File(entriesPath.toString())
-        entries = mapper.readValue(entriesJson, Map)
+        entries = processor.jsonToMap(entriesJson)
         if (addGoterms) {
             (ipr2go, goInfo) = loadXRefFiles(gotermFilePrefix, dataDir)
         }
@@ -55,9 +51,7 @@ process XREFS {
     }
 
     matchesEntries = membersMatches.each { matchesPath  ->
-        File matchFile = new File(matchesPath.toString())
-        JsonParser parser = mapper.getFactory().createParser(matchFile)
-        assert parser.nextToken() == JsonToken.START_OBJECT
+        def parser = processor.createParser(matchesPath.toString())
         while (parser.nextToken() != JsonToken.END_OBJECT) {
             String seqId = parser.getCurrentName()
             parser.nextToken()
@@ -67,7 +61,7 @@ process XREFS {
             while (parser.nextToken() != JsonToken.END_OBJECT) {
                 String modelAccession = parser.getCurrentName()
                 parser.nextToken()
-                def match = mapper.readValue(parser, Map)
+                def match = processor.jsonToMap(parser)
                 Match matchObject = Match.fromMap(match)
 
                 if (!entries) {
@@ -104,7 +98,7 @@ process XREFS {
                     File paintAnnotationFile = new File(paintAnnPath)
                     // not every signature will have a paint annotation file match
                     if (paintAnnotationFile.exists()) {
-                        def paintAnnotationsContent = mapper.readValue(paintAnnotationFile, Map)
+                        def paintAnnotationsContent = processor.jsonToMap(paintAnnotationFile)
                         String nodeId = matchObject.treegrafter.ancestralNodeID
                         def nodeData = paintAnnotationsContent[nodeId]
                         matchObject.treegrafter.subfamilyAccession = nodeData[0]
@@ -174,7 +168,7 @@ process XREFS {
                     }
                 }
                 generator.writeFieldName(modelAccession)
-                mapper.writeValue(generator, matchObject)
+                processor.write(generator, matchObject)
             }
             generator.writeEndObject()
         }
@@ -189,14 +183,14 @@ def loadXRefFiles(xrefDir, dataDir) {
     String infoFilePath = "${dataDir}/${xrefDir}.json"
     File iprFile = new File(iprFilePath.toString())
     File infoFile = new File(infoFilePath.toString())
-    ObjectMapper mapper = new ObjectMapper()
+    JsonProcessor processor = new JsonProcessor()
 
     if (!iprFile.exists()) { throw new FileNotFoundException("${iprFilePath} file not found") }
     if (!infoFile.exists()) { throw new FileNotFoundException("${infoFile} file not found") }
 
     try {
-        def iprData = mapper.readValue(iprFile, Map)
-        def infoData = mapper.readValue(infoFile, Map)
+        def iprData = processor.jsonToMap(iprFile)
+        def infoData = processor.jsonToMap(infoFile)
         return [iprData, infoData]
     } catch (Exception e) {
         throw new Exception("Error parsing goterms/pathways files: ${e}")
