@@ -57,7 +57,7 @@ class CATH {
         return results
     }
 
-    static mergeWithHmmerMatches(resolvedDomains, hmmerMatches) {
+    static mergeWithHmmerMatches(resolvedDomains, hmmerMatches, memberDb) {
         def hmmerDomains = HMMER3.splitByLocation(hmmerMatches)
         def results = [:].withDefault { [:] }
         resolvedDomains.each { sequenceId, domains ->
@@ -115,6 +115,7 @@ class CATH {
                         hmmerDomain.bias
                     )
                     domain.signature = new Signature(cathDomain.accession)
+                    domain.signature.signatureLibraryRelease.library = memberDb
                     domain.addLocation(location)
                     sequenceDomains[domId] = domain
                 }

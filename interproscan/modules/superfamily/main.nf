@@ -47,6 +47,7 @@ process PARSE_SUPERFAMILY {
     tuple val(meta), path("superfamily.json")
 
     exec:
+    SignatureLibraryRelease library = new SignatureLibraryRelease("SUPERFAMILY", null)
     def model2sf = [:]
     file(model_tsv.toString()).eachLine { line ->
         def fields = line.trim().split(/\t/)
@@ -131,9 +132,8 @@ process PARSE_SUPERFAMILY {
                 Location location = new Location(start, end, hmmLength, evalue, fragments)
                 Match match = matches[seqId][modelId]
                 if (match == null) {
-                    match = new Match(modelId)
+                    match = new Match(modelId, new Signature(superfamilyAccession, library))
                     match.addLocation(location)
-                    match.signature = new Signature(superfamilyAccession)
                     matches[seqId][modelId] = match
                 } else {
                     match.addLocation(location)

@@ -121,6 +121,7 @@ process PARSE_HAMAP {
     tuple val(meta), path("hamap.json")
 
     exec:
+    SignatureLibraryRelease library = new SignatureLibraryRelease("HAMAP", null)
     def matches = [:]
     pfsearch_out.eachLine { line ->
         def fields = line.split()
@@ -135,7 +136,7 @@ process PARSE_HAMAP {
         if (matches.containsKey(sequenceId)) {
             match = matches[sequenceId]
         } else {
-            match = new Match(modelAccession)
+            match = new Match(modelAccession, new Signature(modelAccession, library))
             matches.computeIfAbsent(sequenceId, { [:] })
             matches[sequenceId][modelAccession] = match
         }

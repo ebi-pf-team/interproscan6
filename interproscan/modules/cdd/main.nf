@@ -64,6 +64,7 @@ process PARSE_RPSPROC {
     tuple val(meta), path("cdd.json")
 
     exec:
+    SignatureLibraryRelease library = new SignatureLibraryRelease("CDD", null)
     String sessionId = null
     String sequenceId = null
     boolean inDomains = false
@@ -110,10 +111,10 @@ process PARSE_RPSPROC {
                     if (pssmHits.containsKey(pssmId)) {
                         match = pssmHits[pssmId]
                     } else {
-                        match = new Match(modelAccession, evalue, bitscore)
+                        Signature signature = new Signature(modelAccession, library)
+                        match = new Match(modelAccession, evalue, bitscore, signature)
                         pssmHits[pssmId] = match
                     }
-
                     match.addLocation(new Location(start, end))
                 }
             } else {

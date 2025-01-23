@@ -55,29 +55,15 @@ process XREFS {
                 if (!entries) {
                     return [(modelAccession): matchObject]
                 }
-                // null check needed for cases that signature still not created on match object (e.g. hmmer3 members)
-                String entrySignatureKey = matchObject.signature?.accession ?: matchObject.modelAccession
+                // matchObject.signature is defined in all parsers
+                String entrySignatureKey = matchObject.signature.accession
                 def signatureInfo = entries["entries"][entrySignatureKey] ?: entries["entries"][modelAccession]
-                String memberDB = matchObject.signature?.signatureLibraryRelease?.library
-                String memberRelease = null
-                if (!memberDB) {
-                    if (signatureInfo) {
-                        memberDB = signatureInfo["database"]
-                        memberRelease = entries["databases"][memberDB]
-                    }
-                    // PIRSR is the only memberDB that doesn't have entries associated on entries.json data file
-                    else if (modelAccession.startsWith("PIRSR")) {
-                        memberDB = "PIRSR"
-                        memberRelease = entries["databases"][memberDB]
-                    }
-                    SignatureLibraryRelease sigLibRelease = new SignatureLibraryRelease(memberDB, memberRelease)
-                    if (!matchObject.signature) {
-                        matchObject.signature = new Signature(modelAccession, sigLibRelease)
-                    } else if (!matchObject.signature.signatureLibraryRelease) {
-                        matchObject.signature.signatureLibraryRelease = sigLibRelease
-                    }
+                String memberDB = matchObject.signature.signatureLibraryRelease.library
+                String memberRelease = matchObject.signature.signatureLibraryRelease.version
+                // update the library version if the sig/model is found in the JSON
+                if (!memberRelease && signatureInfo) {
+                    matchObject.signature.signatureLibraryRelease.version = entries["databases"][signatureInfo["database"]]
                 }
-
                 if (memberDB == "PANTHER" && matchObject.treegrafter.ancestralNodeID != null) {
                     String paintAnnPath = "${dataDir}/${paintAnnoDir}/${matchObject.signature.accession}.json"
                     File paintAnnotationFile = new File(paintAnnPath)
