@@ -1,5 +1,5 @@
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
+import com.fasterxml.jackson.core.JsonToken
+
 
 process REPRESENTATIVE_DOMAINS {
     label 'local'
@@ -14,10 +14,15 @@ process REPRESENTATIVE_DOMAINS {
     int MAX_DOMS_PER_GROUP = 20 // only consider N "best" domains otherwise there are too many comparisons (2^domains)
     float DOM_OVERLAP_THRESHOLD = 0.3
 
-    def allMatches = []
-    JsonSlurper jsonSlurper = new JsonSlurper()
-    def matchesMap = jsonSlurper.parse(matchesPath.toFile())
-    matchesMap.each { seqData ->  // keys in seqData: sequence, md5, matches, xref, id
+    JsonProcessor processor = new JsonProcessor()
+    def outputFilePath = task.workDir.resolve("matches_repr_domains.json")
+    def generator = processor.createGenerator(outputFilePath.toString())
+    def parser = processor.createParser(matchesPath.toString())
+
+    generator.writeStartArray()
+    while (parser.nextToken() != JsonToken.END_ARRAY) {
+        Map seqData = processor.jsonToMap(parser)  // keys in seqData: sequence, md5, matches, xref, id
+
         // Serialise the matches so we don't need to edit the map later
         seqData["matches"] = seqData["matches"].collectEntries { modelAccession, matchMap ->
             [(modelAccession): Match.fromMap(matchMap)]
@@ -118,12 +123,11 @@ process REPRESENTATIVE_DOMAINS {
                 }
             }
         }
-        allMatches.add(seqData)
+        generator.writeObject(seqData)
     }
-
-    def outputFilePath = task.workDir.resolve("matches_repr_domains.json")
-    def json = JsonOutput.toJson(allMatches)
-    new File(outputFilePath.toString()).write(json)
+    parser.close()
+    generator.writeEndArray()
+    generator.close()
 }
 
 boolean locationsOverlap(Set<Integer> loc1Residues, Set<Integer> loc2Residues, float threshold) {

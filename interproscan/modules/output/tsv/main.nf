@@ -1,4 +1,4 @@
-import groovy.json.JsonSlurper
+import com.fasterxml.jackson.core.JsonToken
 import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 
@@ -16,8 +16,11 @@ process WRITE_TSV_OUTPUT {
     tsvFile.text = "" // clear the file if it already exists
     // Each line contains: seqId md5 seqLength memberDb modelAcc sigDesc start end evalue status date entryAcc entryDesc xrefs
     def currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
-    def jsonSlurper = new JsonSlurper()
-    jsonSlurper.parse(matches).each { seqData ->
+    JsonProcessor processor = new JsonProcessor()
+    def parser = processor.createParser(matches.toString())
+
+    while (parser.nextToken() != JsonToken.END_ARRAY) {
+        def seqData = processor.jsonToMap(parser)
         seqData["matches"].each { modelAccession, matchData ->
             Match match = Match.fromMap(matchData)
             String memberDb = match.signature.signatureLibraryRelease.library
@@ -68,4 +71,5 @@ process WRITE_TSV_OUTPUT {
             }
         }
     }
+    parser.close()
 }

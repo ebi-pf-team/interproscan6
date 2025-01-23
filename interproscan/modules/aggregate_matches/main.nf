@@ -1,6 +1,4 @@
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
-
+import com.fasterxml.jackson.core.JsonToken
 
 process AGGREGATE_SEQS_MATCHES {
     label 'local'
@@ -13,9 +11,9 @@ process AGGREGATE_SEQS_MATCHES {
     path("seq_matches_aggreg.json")
 
     exec:
-    JsonSlurper jsonSlurper = new JsonSlurper()
-    def seqsInfo = jsonSlurper.parse(seqsPath)
-    def matchesInfo = jsonSlurper.parse(matchesPath)
+    JsonProcessor processor = new JsonProcessor()
+    def seqParser = processor.createParser(seqsPath.toString())
+    def matchesParser = processor.createParser(matchesPath.toString())
 
     def seqMatchesAggreg = [:].withDefault { [
         sequence: '',
@@ -24,14 +22,18 @@ process AGGREGATE_SEQS_MATCHES {
         xref: []
     ] }
 
-    seqsInfo.each { seqId, info ->
+    def matchesInfo = processor.jsonToMap(matchesParser)
+    while (seqParser.nextToken() != JsonToken.END_OBJECT) {
+        String seqId = seqParser.getCurrentName()
+        seqParser.nextToken()
         if (nucleic) {
-            info.each { orf ->
+            def seqInfo = processor.jsonToList(seqParser)
+            seqInfo.each { orf ->
                 FastaSequence protSequence = FastaSequence.fromMap(orf)
-                protMD5 = protSequence.md5
+                String protMD5 = protSequence.md5
                 seqMatchesAggreg[protMD5].sequence = protSequence.sequence
                 seqMatchesAggreg[protMD5].md5 = protMD5
-                seqMatchesAggreg[protMD5].xref << ["name": "${orf.id} ${orf.description}", "id": orf.id]
+                seqMatchesAggreg[protMD5].xref << ["name": orf.id + " " + orf.description, "id": orf.id]
                 if (seqMatchesAggreg[protMD5].translatedFrom == null) {
                     seqMatchesAggreg[protMD5].translatedFrom = []
                 }
@@ -41,19 +43,21 @@ process AGGREGATE_SEQS_MATCHES {
                 }
             }
         } else {
-            FastaSequence sequence = FastaSequence.fromMap(info)
-            md5 = sequence.md5
+            def seqInfo = processor.jsonToMap(seqParser)
+            FastaSequence sequence = FastaSequence.fromMap(seqInfo)
+            String md5 = sequence.md5
             seqMatchesAggreg[md5].sequence = sequence.sequence
             seqMatchesAggreg[md5].md5 = md5
-            seqMatchesAggreg[md5].xref << ["name": "${sequence.id} ${sequence.description}", "id": sequence.id]
+            seqMatchesAggreg[md5].xref << ["name": sequence.id + " " + sequence.description, "id": sequence.id]
             if (matchesInfo[seqId]) {
                 seqMatchesAggreg[md5].matches = matchesInfo[seqId]
             }
         }
     }
+
+    seqParser.close()
     def outputFilePath = task.workDir.resolve("seq_matches_aggreg.json")
-    def json = JsonOutput.toJson(seqMatchesAggreg)
-    new File(outputFilePath.toString()).write(json)
+    processor.write(outputFilePath.toString(), seqMatchesAggreg)
 }
 
 process AGGREGATE_ALL_MATCHES {
@@ -66,16 +70,20 @@ process AGGREGATE_ALL_MATCHES {
     path("aggregated_results.json")
 
     exec:
-    def aggregatedResults = []
-    JsonSlurper jsonSlurper = new JsonSlurper()
-    seqMatches.each { file ->
-        def jsonContent = jsonSlurper.parse(file)
-        jsonContent.each { md5, info ->
-            aggregatedResults << info
-        }
-    }
-
+    JsonProcessor processor = new JsonProcessor()
     def outputFilePath = task.workDir.resolve("aggregated_results.json")
-    def json = JsonOutput.toJson(aggregatedResults)
-    new File(outputFilePath.toString()).write(json)
+    def generator = processor.createGenerator(outputFilePath.toString())
+
+    generator.writeStartArray()
+    seqMatches.each { file ->
+        def parser = processor.createParser(file.toString())
+        while (parser.nextToken() != JsonToken.END_OBJECT) {
+            parser.nextToken()
+            def info = processor.jsonToMap(parser)
+            generator.writeObject(info)
+        }
+        parser.close()
+    }
+    generator.writeEndArray()
+    generator.close()
 }

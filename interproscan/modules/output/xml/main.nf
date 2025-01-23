@@ -1,9 +1,9 @@
-import groovy.json.JsonSlurper
 import groovy.xml.MarkupBuilder
 import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 import java.io.StringWriter
 import java.util.regex.Pattern
+import com.fasterxml.jackson.core.JsonToken
 
 process WRITE_XML_OUTPUT {
     label 'local'
@@ -22,14 +22,23 @@ process WRITE_XML_OUTPUT {
     xml.setEscapeAttributes(false) // Prevent escaping attributes
     xml.setEscapeText(false)       // Prevent escaping text
 
-    def jsonSlurper = new JsonSlurper()
-    def jsonData = jsonSlurper.parse(matches)
-    String matchType = nucleic ? "nucleotide-sequence-matches" : "protein-matches"
+    JsonProcessor processor = new JsonProcessor()
+    def parser = processor.createParser(matches.toString())
 
+    String matchType = nucleic ? "nucleotide-sequence-matches" : "protein-matches"
     xml."$matchType"("interproscan-version": ips6Version) {
         if (nucleic) {
             def processedNT = []
-            def groupedByNT = jsonData.findAll { it.translatedFrom }.groupBy { it.translatedFrom[0].md5 }
+            def groupedByNT = [:]
+
+            while (parser.nextToken() != JsonToken.END_ARRAY) {
+                Map seqData = parser.readValueAs(Map)
+                if (seqData.translatedFrom) {
+                    def ntSequenceMD5 = seqData.translatedFrom[0].md5
+                    groupedByNT.computeIfAbsent(ntSequenceMD5) { [] }.add(seqData)
+                }
+            }
+
             groupedByNT.each { ntSequenceMD5, proteins ->
                 if (!processedNT.contains(ntSequenceMD5)) {
                     processedNT << ntSequenceMD5
@@ -61,7 +70,8 @@ process WRITE_XML_OUTPUT {
                 }
             }
         } else {
-            jsonData.each { seqData ->
+            while (parser.nextToken() != JsonToken.END_ARRAY) {
+                Map seqData = parser.readValueAs(Map)
                 protein {
                     sequence(md5: seqData.md5, seqData.sequence)
                     matches {

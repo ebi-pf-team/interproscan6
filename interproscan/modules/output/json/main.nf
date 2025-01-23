@@ -1,22 +1,28 @@
-import groovy.json.JsonSlurper
-import groovy.json.JsonOutput
+import com.fasterxml.jackson.core.JsonToken
+import com.fasterxml.jackson.databind.SerializationFeature
 import java.util.regex.Pattern
 
 process WRITE_JSON_OUTPUT {
     label 'local'
 
     input:
-    val seqMatches
+    val sequenceMatches
     val outputPath
     val nucleic
     val ips6Version
 
     exec:
+    JsonProcessor processor = new JsonProcessor()
+
+    def parser = processor.createParser(sequenceMatches.toString())
+    def outputFilePath = "${outputPath}.ips6.json"
+    def generator = processor.createGenerator(outputFilePath)
+    generator.writeStartObject()
+    generator.writeStringField("interproscan-version", ips6Version)
+    generator.writeFieldName("results")
+    generator.writeStartArray()
+
     def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+source=(.*)\s+coords=(\d+)\.\.(\d+)\s+.+frame=(\d+)\s+desc=(.*)$/)
-    def jsonSlurper = new JsonSlurper()
-    def jsonOutput = [:]
-    jsonOutput["interproscan-version"] = ips6Version
-    jsonOutput["results"] = []
     def nucleicResults = [:]
 
     Map<String, List<String>> membersLocationFields = [
@@ -40,7 +46,8 @@ process WRITE_JSON_OUTPUT {
     ]
     List<String> otherMembersLocationFields = ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
 
-    jsonSlurper.parse(seqMatches).each { sequence ->
+    while (parser.nextToken() != JsonToken.END_ARRAY) {
+        def sequence = parser.readValueAs(Map)
         def seqMatches = []
         sequence["matches"].each { matchId, match ->
             Match matchObj = Match.fromMap(match)
@@ -202,13 +209,19 @@ process WRITE_JSON_OUTPUT {
                     xref     : sequence.xref
                 ]
             ]
-            jsonOutput["results"] = nucleicResults.values()
+        }
+
+        if (nucleic) {
+            nucleicResults.values().each { result ->
+                generator.writeObject(result)
+            }
         } else {
-            jsonOutput["results"].add(sequence)
+            generator.writeObject(sequence)
         }
     }
 
-    def outputFilePath = "${outputPath}.ips6.json"
-    def json = JsonOutput.prettyPrint(JsonOutput.toJson(jsonOutput))
-    new File(outputFilePath.toString()).write(json)
+    generator.writeEndArray()
+    generator.writeEndObject()
+    parser.close()
+    generator.close()
 }
