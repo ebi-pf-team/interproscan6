@@ -17,7 +17,7 @@ process RUN_COILS {
 
 
 process PARSE_COILS {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(coils_out)
@@ -29,6 +29,7 @@ process PARSE_COILS {
     def outputFilePath = task.workDir.resolve("coils.json")
     def matches = [:]
     def sequenceId = null
+    SignatureLibraryRelease library = new SignatureLibraryRelease("COILS", "2.2.1")
 
     file(coils_out.toString()).eachLine { line ->
         line = line.trim()
@@ -36,9 +37,8 @@ process PARSE_COILS {
             // Coils report the full sequence header (ID + description)
             sequenceId = line.substring(1).split()[0]
             matches[sequenceId] = [:]
-            SignatureLibraryRelease library = new SignatureLibraryRelease("COILS", "2.2.1")
-            Match match = new Match("Coil")
-            match.signature = new Signature("Coil", "Coil", null, library, null)
+
+            Match match = new Match("Coil", new Signature("Coil", "Coil", null, library, null))
             matches[sequenceId]["Coil"] = match
         } else if (line != "//" && sequenceId) {
             def fields = line.split(/\s+/)

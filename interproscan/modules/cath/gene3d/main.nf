@@ -40,7 +40,7 @@ process RESOLVE_GENE3D {
 }
 
 process ASSIGN_CATH {
-    label 'small'
+    label 'small', 'ips6_container'
 
     input:
     tuple val(meta), path(cath_resolve_out)
@@ -61,7 +61,7 @@ process ASSIGN_CATH {
 }
 
 process PARSE_CATHGENE3D {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(hmmseach_out), val(cath_tsv)
@@ -70,9 +70,10 @@ process PARSE_CATHGENE3D {
     tuple val(meta), path("cathgene3d.json")
 
     exec:
-    def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString())
+    def memberDb = "CATH-Gene3D"
+    def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString(), memberDb)
     def cathDomains = CATH.parseAssignedFile(cath_tsv.toString())
-    def matches = CATH.mergeWithHmmerMatches(cathDomains, hmmerMatches)
+    def matches = CATH.mergeWithHmmerMatches(cathDomains, hmmerMatches, memberDb)
     def outputFilePath = task.workDir.resolve("cathgene3d.json")
     def json = JsonOutput.toJson(matches)
     new File(outputFilePath.toString()).write(json)

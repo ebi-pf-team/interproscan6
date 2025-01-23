@@ -1,7 +1,7 @@
 import com.fasterxml.jackson.core.JsonToken
 
 process AGGREGATE_SEQS_MATCHES {
-    label 'small'
+    label 'local'
     // Aggregates sequence meta data with the corresponding match data
     input:
     tuple val(meta), val(seqsPath), val(matchesPath)
@@ -61,7 +61,7 @@ process AGGREGATE_SEQS_MATCHES {
 }
 
 process AGGREGATE_ALL_MATCHES {
-    label 'small'
+    label 'local'
 
     input:
     val seqMatches

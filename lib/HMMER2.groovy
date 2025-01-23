@@ -1,9 +1,10 @@
 class HMMER2 {
-    static parseOutput(String filePath, Map<String, Integer> hmmLengths) {
+    static parseOutput(String filePath, Map<String, Integer> hmmLengths, String memberDb) {
         File file = new File(filePath)
         String line
         String querySequence
         def hits = [:].withDefault { [:] }
+        SignatureLibraryRelease library = new SignatureLibraryRelease(memberDb, null)
 
         file.withReader { reader ->
             while (true) {
@@ -25,7 +26,7 @@ class HMMER2 {
                     break
                 }
 
-                // Move the the beginning of the table of sequence hits
+                // Move the beginning of the table of sequence hits
                 while (!line.startsWith("Scores for sequence family")) {
                     line = reader.readLine()
                 }
@@ -66,6 +67,7 @@ class HMMER2 {
                     int numDomains = tail[2].toInteger()
 
                     Match match = new Match(modelAccession, evalue, score)
+                    match.signature = new Signature(modelAccession, library)
                     sequenceHits[modelAccession] = match
                     domainsPerHit[modelAccession] = numDomains
                 }

@@ -21,7 +21,7 @@ process SEARCH_PANTHER {
 }
 
 process PREPARE_TREEGRAFTER {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(hmmseach_out)
@@ -32,7 +32,7 @@ process PREPARE_TREEGRAFTER {
     tuple val(meta), val(sequenceIds), val(familyIds), path(fastas),   emit: fasta
     
     exec:
-    def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString())
+    def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString(), "PANTHER")
 
     hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
         // Filter matches to only those with locations that have a score > 100
@@ -182,7 +182,7 @@ process RUN_TREEGRAFTER {
 }
 
 process PARSE_PANTHER {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(hmmseach_json), val(epagn_tsv)

@@ -3,7 +3,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import java.util.regex.Pattern
 
 process WRITE_JSON_OUTPUT {
-    label 'write_output'
+    label 'local'
 
     input:
     val sequenceMatches

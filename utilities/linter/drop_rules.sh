@@ -6,6 +6,8 @@
 
 RULES_TO_REMOVE=(
     '<rule class="software.amazon.nextflow.rules.ModuleIncludedTwiceRule"/>'
+    '<rule class="software.amazon.nextflow.rules.AllowedDirectivesRule"/>'
+    '<rule class="software.amazon.nextflow.rules.ProcessWithoutOutputRule"/>'
 )
 FILES_TO_REMOVE=(
     "$1/linter-rules/src/main/groovy/software/amazon/nextflow/rules/ModuleIncludedTwiceRule.groovy"

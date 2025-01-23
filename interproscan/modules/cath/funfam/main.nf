@@ -2,7 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 process PREPARE_FUNFAM {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(cathgene3d_json)
@@ -86,7 +86,7 @@ process RESOLVE_FUNFAM {
 
 
 process PARSE_FUNFAM {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(hmmseach_out), val(resolved_tsv)
@@ -95,9 +95,10 @@ process PARSE_FUNFAM {
     tuple val(meta), path("cathfunfam.json")
 
     exec:
-    def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString())
+    def memberDb = "CATH-FunFam"
+    def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString(), memberDb)
     def funfamDomains = CATH.parseResolvedFile(resolved_tsv.toString())
-    def matches = CATH.mergeWithHmmerMatches(funfamDomains, hmmerMatches)
+    def matches = CATH.mergeWithHmmerMatches(funfamDomains, hmmerMatches, memberDb)
     def outputFilePath = task.workDir.resolve("cathfunfam.json")
     def json = JsonOutput.toJson(matches)
     new File(outputFilePath.toString()).write(json)

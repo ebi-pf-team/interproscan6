@@ -20,7 +20,7 @@ process SEARCH_SMART {
 }
 
 process PARSE_SMART {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(hmmpfam_out), val(seq_json)
@@ -44,7 +44,7 @@ process PARSE_SMART {
         }
 
     def hmmLengths = HMMER2.parseHMM(hmmtxtdb.toString())
-    def matches = HMMER2.parseOutput(hmmpfam_out.toString(), hmmLengths)
+    def matches = HMMER2.parseOutput(hmmpfam_out.toString(), hmmLengths, "SMART")
 
     String tyrKinaseAccession = "SM00219"
     def tyrKinasePattern = ~/.*HRD[LIV][AR]\w\wN.*/

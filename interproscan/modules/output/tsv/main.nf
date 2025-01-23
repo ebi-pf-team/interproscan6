@@ -3,7 +3,7 @@ import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 
 process WRITE_TSV_OUTPUT {
-    label 'small'
+    label 'local'
 
     input:
     val matches
@@ -42,16 +42,16 @@ process WRITE_TSV_OUTPUT {
                     int end = loc.end
                     def scoringValue = "-"
                     switch (memberDb) {
-                        case ["cdd", "prints"]:
+                        case ["CDD", "PRINT"]:
                             scoringValue = match.evalue
                             break
-                        case ["signalp", "signalp_euk"]:
+                        case ["SignalP-Prok", "SignalP-Euk"]:
                             scoringValue = loc.pvalue
                             break
-                        case ["hamap", "prositeprofiles"]:
+                        case ["HAMAP", "PROSITE profiles"]:
                             scoringValue = loc.score
                             break
-                        case ["coils", "mobidblite", "phobius", "prositepatterns", "DeepTMHMM"]:
+                        case ["COILS", "MobiDB-lite", "Phobius", "PROSITE patterns", "DeepTMHMM"]:
                             scoringValue = "-"
                             break
                         default:

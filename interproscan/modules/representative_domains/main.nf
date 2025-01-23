@@ -2,7 +2,7 @@ import com.fasterxml.jackson.core.JsonToken
 
 
 process REPRESENTATIVE_DOMAINS {
-    label 'small'
+    label 'local'
 
     input:
     val matchesPath

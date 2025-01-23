@@ -90,22 +90,22 @@ process WRITE_XML_OUTPUT {
 }
 
 def processMatches(matches, xml) {
-    List<String> hmmer3Members = ["antifam", "cathgene3d", "cathfunfam", "hamap", "ncbifam", "pfam", "pirsf", "pirsr", "sfld", "superfamily"]
+    List<String> hmmer3Members = ["AntiFam", "CATH-Gene3D", "FunFam", "hamap", "NCBIfam", "Pfam", "PIRSF", "PIRSR", "SFLD", "SUPERFAMILY"]
     List<String> hmmer3LocationFields = ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
     Map<String, List<String>> memberLocationFields = [
-        "cdd": ["match-evalue", "match-score"],
-        "coils": [],
-        "hamap": ["score"],
-        "mobidblite": ["sequence-feature"],
-        "panther": ["hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
-        "phobius": [],
-        "prints": ["motifNumber", "pvalue", "score"],
-        "prositepatterns": ["level"],
-        "prositeprofiles": ["score"],
-        "signalp": ["score"],
-        "signalp-euk": ["score"],
-        "smart": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
-        "superfamily": ["evalue", "hmmLength"],
+        "CDD": ["match-evalue", "match-score"],
+        "COILS": [],
+        "HAMAP": ["score"],
+        "MobiDB-lite": ["sequence-feature"],
+        "PANTHER": ["hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"],
+        "Phobius": [],
+        "PRINTS": ["motifNumber", "pvalue", "score"],
+        "PROSITE patterns": ["level"],
+        "PROSITE profiles": ["score"],
+        "SignalP-Prok": ["score"],
+        "SignalP-Euk": ["score"],
+        "SMART": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
+        "SUPERFAMILY": ["evalue", "hmmLength"],
         "DeepTMHMM": []
     ]
 
@@ -198,7 +198,7 @@ def processMatches(matches, xml) {
                                     }
                                 }
                             }
-                            if (memberDb in ["hamap", "prositepatterns", "prositeprofiles"]) {
+                            if (memberDb in ["HAMAP", "PROSITE patterns", "PROSITE profiles"]) {
                                 alignment(loc.targetAlignment ?: "")
                             }
                             if (loc.sites) {

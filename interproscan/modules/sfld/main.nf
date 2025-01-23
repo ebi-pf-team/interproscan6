@@ -46,7 +46,7 @@ process POST_PROCESS_SFLD {
 
 
 process PARSE_SFLD {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(postprocess_out)
@@ -236,10 +236,12 @@ Map<String, Map<String, Match>> parseOutput(String outputFilePath) {
 }
 
 Map<String, Match> parseBlock(Reader reader) {
+    SignatureLibraryRelease library = new SignatureLibraryRelease("SFLD", null)
     boolean inDomains = false
     def domains = [:]
     while (true) {
-        String line = reader.readLine().trim()
+        String line = reader.readLine()?.trim()
+        if (!line) break
         if (line == "Domains:") {
             inDomains = true
         } else if (line == "Sites:") {
@@ -281,6 +283,7 @@ Map<String, Match> parseBlock(Reader reader) {
             String description = fields.length == 3 ? fields[2] : null
 
             Match match = domains.get(modelAccession)
+            match.signature = new Signature(modelAccession, library)
             if (match != null) {
                 Site site = new Site(description, residues)
                 match.addSite(site)                        
