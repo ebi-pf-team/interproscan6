@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 ubuntu:latest AS interproscan-base
+FROM ubuntu:latest AS interproscan-base
 LABEL authors="Laise Florentino (lcf@ebi.ac.uk), Emma Hobbs (ehobbs@ebi.ac.uk), Matthias Blum (mblum@ebi.ac.uk)"
 ENV TZ=Europe/London
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
