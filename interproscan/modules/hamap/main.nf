@@ -133,9 +133,13 @@ process PARSE_HAMAP {
         Double score = Double.parseDouble(fields[7])
         String alignment = fields[9]
 
-        match = new Match(modelAccession, new Signature(modelAccession, library))
-        matches.computeIfAbsent(sequenceId, { [:] })
-        matches[sequenceId][modelAccession] = match
+        if (matches.containsKey(sequenceId) && matches[sequenceId].containsKey(modelAccession)) {
+            match = matches[sequenceId][modelAccession]
+        } else {
+            match = new Match(modelAccession, new Signature(modelAccession, library))
+            matches.computeIfAbsent(sequenceId, { [:] })
+            matches[sequenceId][modelAccession] = match
+        }
 
         Location location = new Location(start, end, score, alignment)
         match.addLocation(location)
