@@ -133,8 +133,8 @@ process PARSE_HAMAP {
         Double score = Double.parseDouble(fields[7])
         String alignment = fields[9]
 
-        if (matches.containsKey(sequenceId)) {
-            match = matches[sequenceId]
+        if (matches.containsKey(sequenceId) && matches[sequenceId].containsKey(modelAccession)) {
+            match = matches[sequenceId][modelAccession]
         } else {
             match = new Match(modelAccession, new Signature(modelAccession, library))
             matches.computeIfAbsent(sequenceId, { [:] })
