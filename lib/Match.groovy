@@ -44,6 +44,14 @@ class Match implements Serializable {
         this.bias = bias
     }
 
+    Match(String modelAccession, Double evalue, Double score, Signature signature) {
+        this.modelAccession = modelAccession
+        this.evalue = evalue
+        this.score = score
+        this.bias = bias
+        this.signature = signature
+    }
+
     Match(String modelAccession, Double evalue, Double score, Double bias, Signature signature) {
         this.modelAccession = modelAccession
         this.evalue = evalue

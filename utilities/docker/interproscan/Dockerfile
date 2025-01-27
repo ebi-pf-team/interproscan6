@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 ubuntu:latest AS interproscan-base
+FROM ubuntu:latest AS interproscan-base
 LABEL authors="Laise Florentino (lcf@ebi.ac.uk), Emma Hobbs (ehobbs@ebi.ac.uk), Matthias Blum (mblum@ebi.ac.uk)"
 ENV TZ=Europe/London
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
@@ -37,11 +37,11 @@ RUN coils_url="https://raw.githubusercontent.com/ebi-pf-team/interproscan/master
 # Install NCBI BLAST, only rpsblast (for CDD)
 # Don't pull the NCBI BLAST image as its BIG! - Just get the bits we need
 WORKDIR /opt/blast
-RUN curl -L -O https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.15.0/ncbi-blast-2.15.0+-x64-linux.tar.gz && \
-    tar -zxpf ncbi-blast-2.15.0+-x64-linux.tar.gz && \
-    rm ncbi-blast-2.15.0+-x64-linux.tar.gz && \
-    mv ncbi-blast-2.15.0+/bin/rpsblast rpsblast && \
-    rm -rf ncbi-blast-2.15.0+
+RUN curl -L -O https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.13.0/ncbi-blast-2.13.0+-x64-linux.tar.gz && \
+    tar -zxpf ncbi-blast-2.13.0+-x64-linux.tar.gz && \
+    rm ncbi-blast-2.13.0+-x64-linux.tar.gz && \
+    mv ncbi-blast-2.13.0+/bin/rpsblast rpsblast && \
+    rm -rf ncbi-blast-2.13.0+
 
 # Install RpsbProc for CDD post-processing
 WORKDIR /opt/rpsbproc
