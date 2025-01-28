@@ -51,7 +51,7 @@ process PREPARE_TREEGRAFTER {
                 // Rename model accession (PTHR23076.orig.30.pir -> PTHR23076)
                 String familyId = (m1.modelAccession =~ /^(PTHR\d+)/)[0][1]
 
-                Match m2 = new Match(familyId, m1.evalue, m1.score, m1.bias)
+                Match m2 = new Match(familyId, m1.evalue, m1.score, m1.bias, m1.signature)
                 m2.included = m1.included
                 // Only keep the domain with the highest score
                 m2.locations = [locations.max { it.score }]
