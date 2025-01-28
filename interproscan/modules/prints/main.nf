@@ -191,7 +191,7 @@ process PARSE_PRINTS {
                 Match match = finalMatches.computeIfAbsent(
                     filteredMatch.modelId,
                     {
-                        new Match(filteredMatch.modelId, filteredMatch.evalue, filteredMatch.graphScan, new Signature(modelId, library))
+                        new Match(filteredMatch.modelId, filteredMatch.evalue, filteredMatch.graphScan, new Signature(filteredMatch.modelId, library))
                     }
                 )
                 Location location = new Location(
