@@ -1,4 +1,8 @@
 import com.fasterxml.jackson.core.JsonToken
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.SerializationFeature
 
 process AGGREGATE_SEQS_MATCHES {
     label 'local'
@@ -11,9 +15,9 @@ process AGGREGATE_SEQS_MATCHES {
     path("seq_matches_aggreg.json")
 
     exec:
-    JsonProcessor processor = new JsonProcessor()
-    def seqParser = processor.createParser(seqsPath.toString())
-    def matchesParser = processor.createParser(matchesPath.toString())
+    JsonProcessor jsonProcessor =
+    def seqParser = JsonProcessor.createParser(seqsPath.toString())
+    def matchesParser = JsonProcessor.createParser(matchesPath.toString())
 
     def seqMatchesAggreg = [:].withDefault { [
         sequence: '',
@@ -22,12 +26,12 @@ process AGGREGATE_SEQS_MATCHES {
         xref: []
     ] }
 
-    def matchesInfo = processor.jsonToMap(matchesParser)
+    def matchesInfo = JsonProcessor.jsonToMap(matchesParser)
     while (seqParser.nextToken() != JsonToken.END_OBJECT) {
         String seqId = seqParser.getCurrentName()
         seqParser.nextToken()
         if (nucleic) {
-            def seqInfo = processor.jsonToList(seqParser)
+            def seqInfo = JsonProcessor.jsonToList(seqParser)
             seqInfo.each { orf ->
                 FastaSequence protSequence = FastaSequence.fromMap(orf)
                 String protMD5 = protSequence.md5
@@ -43,7 +47,7 @@ process AGGREGATE_SEQS_MATCHES {
                 }
             }
         } else {
-            def seqInfo = processor.jsonToMap(seqParser)
+            def seqInfo = JsonProcessor.jsonToMap(seqParser)
             FastaSequence sequence = FastaSequence.fromMap(seqInfo)
             String md5 = sequence.md5
             seqMatchesAggreg[md5].sequence = sequence.sequence
@@ -57,7 +61,7 @@ process AGGREGATE_SEQS_MATCHES {
 
     seqParser.close()
     def outputFilePath = task.workDir.resolve("seq_matches_aggreg.json")
-    processor.write(outputFilePath.toString(), seqMatchesAggreg)
+    JsonProcessor.write(outputFilePath.toString(), seqMatchesAggreg)
 }
 
 process AGGREGATE_ALL_MATCHES {
@@ -70,20 +74,32 @@ process AGGREGATE_ALL_MATCHES {
     path("aggregated_results.json")
 
     exec:
-    JsonProcessor processor = new JsonProcessor()
-    def outputFilePath = task.workDir.resolve("aggregated_results.json")
-    def generator = processor.createGenerator(outputFilePath.toString())
-
-    generator.writeStartArray()
+    ObjectMapper jacksonMapper = new ObjectMapper().enabled(SerializationFeature.INDENT_OUTPUT)
+    // Gather seqs by md5 to check for md5s with identical seqs and differing seq ids
+    def allAggregatedData = [:]  // [md5: matches]
     seqMatches.each { file ->
-        def parser = processor.createParser(file.toString())
-        while (parser.nextToken() != JsonToken.END_OBJECT) {
-            parser.nextToken()
-            def info = processor.jsonToMap(parser)
-            generator.writeObject(info)
+        JsonReader.stream(file.toString(), jacksonMapper) { JsonNode node ->
+            md5 = node.get("md5").asText()
+            if (allAggregatedData.containsKey(md5)) {
+                // merge existing and new matches
+                ObjectNode existingNode = (ObjectNode) allAggregatedData.get(md5)          // mutable
+                JsonNode newMatches = node.get("matches")                                  // immutable
+                ((ObjectNode) existingNode.get("matches")).setAll((ObjectNode) newMatches)
+                // merge existing and new xrefs - setAll is not applicable for ArrayNodes
+                ArrayNode existingXref = (ArrayNode) existingNode.get("xref")
+                ArrayNode newXref = (ArrayNode) node.get("xref")
+                existingXref.addAll(newXref)
+            } else {
+                allAggregatedData[md5] = node
+            }
         }
-        parser.close()
     }
-    generator.writeEndArray()
-    generator.close()
+
+    // write the output [{Seq}, {Seq}, {Seq}]
+    def outputFilePath = task.workDir.resolve("aggregated_results.json")
+    JsonWriter.stream("${file_path}", mapper) { generator ->
+        allAggregatedData.each { md5, jsonNode ->
+            generator.writeTree(jsonNode)
+        }
+    }
 }
