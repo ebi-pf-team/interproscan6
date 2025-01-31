@@ -33,12 +33,12 @@ process AGGREGATE_SEQS_MATCHES {
     def seqMatchesAggreg = [:].withDefault { [sequence: '', md5: '', matches: [], xref: []] }
 
     JsonReader.stream(seqsPath.toString(), jacksonMapper) { JsonNode node ->
-        if (nucleic) {  // node = [protMd5: [{orf}, {orf}, {orf}]]
+        if (nucleic) {  // node = [protMd5: [{protein}, {protein}, {protein}]]
             node.fields().each { entry ->
                 JsonNode proteins = entry.value  // array of proteins from the predicted ORFs
                 proteins.forEach { protein ->
-                    md5 = protein.get("md5").asText()
                     processProteinData(protein, seqMatchesAggreg, matchesMap)
+                    md5 = protein.get("md5").asText()
                     seqMatchesAggreg[md5].translatedFrom = seqMatchesAggreg[md5].translatedFrom ?: []
                     seqMatchesAggreg[md5].translatedFrom << protein.get("translatedFrom")
                 }
@@ -49,7 +49,7 @@ process AGGREGATE_SEQS_MATCHES {
     }
 
     def outputFilePath = task.workDir.resolve("seq_matches_aggreg.json")
-    JsonProcessor.write(outputFilePath.toString(), seqMatchesAggreg)
+    JsonWriter.writeMap(outputFilePath.toString(), jacksonMapper, seqMatchesAggreg)
 }
 
 def processProteinData(JsonNode protein, def seqMatchesAggreg, def matchesMap) {

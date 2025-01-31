@@ -30,4 +30,33 @@ class JsonWriter {
             }
         }
     }
+
+
+    static void writeMap(String filePath, ObjectMapper mapper, Map data) {
+        // Method to write a map or object (like seqMatchesAggreg) to a file
+        FileWriter fileWriter = null
+        JsonGenerator generator = null
+        try {
+            JsonFactory factory = mapper.getFactory()
+            fileWriter = new FileWriter(new File(filePath))
+            generator = factory.createGenerator(fileWriter)
+            generator.writeStartObject()
+
+            data.each { key, value ->
+                generator.writeFieldName(key)
+                mapper.writeValue(generator, value)
+            }
+
+            generator.writeEndObject()
+        } catch (IOException e) {
+            throw new JsonException("IO error writing file: $filePath", e)
+        } finally {
+            if (generator != null) {
+                generator.close()
+            }
+            if (fileWriter != null) {
+                fileWriter.close()
+            }
+        }
+    }
 }
