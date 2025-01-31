@@ -30,12 +30,7 @@ process AGGREGATE_SEQS_MATCHES {
     // Load the entire JSON file of matches to retrieve matches by the md5 of the seq
     def matchesMap = JsonReader.load(matchesPath.toString(), jacksonMapper)  // [seqId: matches]
 
-    def seqMatchesAggreg = [:].withDefault { [
-        sequence: '',
-        md5: '',
-        matches: [],
-        xref: []
-    ] }
+    def seqMatchesAggreg = [:].withDefault { [sequence: '', md5: '', matches: [], xref: []] }
 
     JsonReader.stream(seqsPath.toString(), jacksonMapper) { JsonNode node ->
         if (nucleic) {  // node = [protMd5: [{orf}, {orf}, {orf}]]
@@ -63,15 +58,7 @@ def processProteinData(JsonNode protein, def seqMatchesAggreg, def matchesMap) {
     seqMatchesAggreg[md5].sequence = protein.get("sequence").asText()
     seqMatchesAggreg[md5].md5 = md5
     seqMatchesAggreg[md5].xref << ["name": seqId + " " + protein.get("description"), "id": seqId]
-
-    if (matchesMap[seqId]) {
-        seqMatchesAggreg[md5].matches = matchesMap[seqId]
-    }
-
-    if (!seqMatchesAggreg[md5].translatedFrom) {
-        seqMatchesAggreg[md5].translatedFrom = []
-    }
-    seqMatchesAggreg[md5].translatedFrom << protein.get("translatedFrom")
+    seqMatchesAggreg[md5].matches = matchesMap[seqId] ?: seqMatchesAggreg[md5].matches
 }
 
 process AGGREGATE_ALL_MATCHES {
