@@ -16,10 +16,14 @@ process AGGREGATE_SEQS_MATCHES {
 
     exec:
     /*
-    seqsPath when input is nucleic seqs
-
-    seqsPath when input is protein seqs
-
+    Content of seqsPath when input is nucleic seqs:
+      {prot seq md5: [{id: str, description: str, sequence: protein, md5: str, translatedFrom: {id, desc, seq (nucleic), md5, translatedFrom: null}]
+    Content seqsPath when input is protein seqs:
+      {seqId: {id: str, description: str, sequence: str, md5: str, translatedFrom: null}
+    Content of matchesPath:
+      {seqId: {sigAcc: {Match object represented as a Map}}
+    Final output of this process:
+      {prot seq md5: {Match object represented as a Map}}
     */
     // Build a single mapper for all readers and writers to save memory
     ObjectMapper jacksonMapper = new ObjectMapper().enabled(SerializationFeature.INDENT_OUTPUT)
@@ -34,44 +38,40 @@ process AGGREGATE_SEQS_MATCHES {
     ] }
 
     JsonReader.stream(seqsPath.toString(), jacksonMapper) { JsonNode node ->
-        seqId = node.get
-    }
-
-    while (seqParser.nextToken() != JsonToken.END_OBJECT) {
-        String seqId = seqParser.getCurrentName()
-        seqParser.nextToken()
-        if (nucleic) {
-            def seqInfo = JsonProcessor.jsonToList(seqParser)
-            seqInfo.each { orf ->
-                FastaSequence protSequence = FastaSequence.fromMap(orf)
-                String protMD5 = protSequence.md5
-                seqMatchesAggreg[protMD5].sequence = protSequence.sequence
-                seqMatchesAggreg[protMD5].md5 = protMD5
-                seqMatchesAggreg[protMD5].xref << ["name": orf.id + " " + orf.description, "id": orf.id]
-                if (seqMatchesAggreg[protMD5].translatedFrom == null) {
-                    seqMatchesAggreg[protMD5].translatedFrom = []
-                }
-                seqMatchesAggreg[protMD5].translatedFrom << orf.translatedFrom // add nucleic seq metadata
-                if (matchesInfo[orf.id]) {
-                    seqMatchesAggreg[protMD5].matches = matchesInfo[orf.id]
+        if (nucleic) {  // node = [protMd5: [{orf}, {orf}, {orf}]]
+            node.fields().each { entry ->
+                JsonNode proteins = entry.value  // array of proteins from the predicted ORFs
+                proteins.forEach { protein ->
+                    md5 = protein.get("md5").asText()
+                    processProteinData(protein, seqMatchesAggreg, matchesMap)
+                    seqMatchesAggreg[md5].translatedFrom = seqMatchesAggreg[md5].translatedFrom ?: []
+                    seqMatchesAggreg[md5].translatedFrom << protein.get("translatedFrom")
                 }
             }
-        } else {
-            def seqInfo = JsonProcessor.jsonToMap(seqParser)
-            FastaSequence sequence = FastaSequence.fromMap(seqInfo)
-            String md5 = sequence.md5
-            seqMatchesAggreg[md5].sequence = sequence.sequence
-            seqMatchesAggreg[md5].md5 = md5
-            seqMatchesAggreg[md5].xref << ["name": sequence.id + " " + sequence.description, "id": sequence.id]
-            if (matchesInfo[seqId]) {
-                seqMatchesAggreg[md5].matches = matchesInfo[seqId]
-            }
+        } else {  // node = [protSeqId: {Seq}]
+           processProteinData(node, seqMatchesAggreg, matchesMap)
         }
     }
 
-    seqParser.close()
     def outputFilePath = task.workDir.resolve("seq_matches_aggreg.json")
     JsonProcessor.write(outputFilePath.toString(), seqMatchesAggreg)
+}
+
+def processProteinData(JsonNode protein, def seqMatchesAggreg, def matchesMap) {
+    md5 = protein.get("md5").asText()
+    seqId = protein.get("id").asText()
+    seqMatchesAggreg[md5].sequence = protein.get("sequence").asText()
+    seqMatchesAggreg[md5].md5 = md5
+    seqMatchesAggreg[md5].xref << ["name": seqId + " " + protein.get("description"), "id": seqId]
+
+    if (matchesMap[seqId]) {
+        seqMatchesAggreg[md5].matches = matchesMap[seqId]
+    }
+
+    if (!seqMatchesAggreg[md5].translatedFrom) {
+        seqMatchesAggreg[md5].translatedFrom = []
+    }
+    seqMatchesAggreg[md5].translatedFrom << protein.get("translatedFrom")
 }
 
 process AGGREGATE_ALL_MATCHES {
