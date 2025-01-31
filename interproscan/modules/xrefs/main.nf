@@ -31,9 +31,8 @@ process XREFS {
     tuple val(meta), path("matches2xrefs.json")
 
     exec:
-    JsonProcessor processor = new JsonProcessor()
-    def outputFilePath = task.workDir.resolve("matches2xrefs.json")
-    def generator = processor.createGenerator(outputFilePath.toString())
+    String outputFilePath = task.workDir.resolve("matches2xrefs.json")
+    def generator = JsonProcessor.createGenerator(outputFilePath.toString())
     generator.writeStartObject()
 
     String entriesPath = "${dataDir}/${entriesFile}"
@@ -41,7 +40,7 @@ process XREFS {
 
     if (!dataDir.toString().trim().isEmpty()) { // datadir doesn't need to be provided when only running members with no InterPro data
         File entriesJson = new File(entriesPath.toString())
-        entries = processor.jsonToMap(entriesJson)
+        entries = JsonProcessor.jsonFileToMap(entriesJson)
         if (addGoterms) {
             (ipr2go, goInfo) = loadXRefFiles(gotermFilePrefix, dataDir)
         }
@@ -51,7 +50,7 @@ process XREFS {
     }
 
     matchesEntries = membersMatches.each { matchesPath  ->
-        def parser = processor.createParser(matchesPath.toString())
+        def parser = JsonProcessor.createParser(matchesPath.toString())
         while (parser.nextToken() != JsonToken.END_OBJECT) {
             String seqId = parser.getCurrentName()
             parser.nextToken()
@@ -61,7 +60,7 @@ process XREFS {
             while (parser.nextToken() != JsonToken.END_OBJECT) {
                 String modelAccession = parser.getCurrentName()
                 parser.nextToken()
-                def match = processor.jsonToMap(parser)
+                def match = JsonProcessor.jsonToMap(parser)
                 Match matchObject = Match.fromMap(match)
 
                 if (!entries) {
@@ -85,7 +84,7 @@ process XREFS {
                     File paintAnnotationFile = new File(paintAnnPath)
                     // not every signature will have a paint annotation file match
                     if (paintAnnotationFile.exists()) {
-                        def paintAnnotationsContent = processor.jsonToMap(paintAnnotationFile)
+                        def paintAnnotationsContent = JsonProcessor.jsonToMap(paintAnnotationFile)
                         String nodeId = matchObject.treegrafter.ancestralNodeID
                         def nodeData = paintAnnotationsContent[nodeId]
                         matchObject.treegrafter.subfamilyAccession = nodeData[0]
@@ -155,7 +154,7 @@ process XREFS {
                     }
                 }
                 generator.writeFieldName(modelAccession)
-                processor.write(generator, matchObject)
+                JsonProcessor.generatorWrite(generator, matchObject)
             }
             generator.writeEndObject()
         }
@@ -170,14 +169,13 @@ def loadXRefFiles(xrefDir, dataDir) {
     String infoFilePath = "${dataDir}/${xrefDir}.json"
     File iprFile = new File(iprFilePath.toString())
     File infoFile = new File(infoFilePath.toString())
-    JsonProcessor processor = new JsonProcessor()
 
     if (!iprFile.exists()) { throw new FileNotFoundException("${iprFilePath} file not found") }
     if (!infoFile.exists()) { throw new FileNotFoundException("${infoFile} file not found") }
 
     try {
-        def iprData = processor.jsonToMap(iprFile)
-        def infoData = processor.jsonToMap(infoFile)
+        def iprData = JsonProcessor.jsonToMap(iprFile)
+        def infoData = JsonProcessor.jsonToMap(infoFile)
         return [iprData, infoData]
     } catch (Exception e) {
         throw new Exception("Error parsing goterms/pathways files: ${e}")
