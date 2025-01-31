@@ -15,9 +15,16 @@ process AGGREGATE_SEQS_MATCHES {
     path("seq_matches_aggreg.json")
 
     exec:
-    JsonProcessor jsonProcessor =
-    def seqParser = JsonProcessor.createParser(seqsPath.toString())
-    def matchesParser = JsonProcessor.createParser(matchesPath.toString())
+    /*
+    seqsPath when input is nucleic seqs
+
+    seqsPath when input is protein seqs
+
+    */
+    // Build a single mapper for all readers and writers to save memory
+    ObjectMapper jacksonMapper = new ObjectMapper().enabled(SerializationFeature.INDENT_OUTPUT)
+    // Load the entire JSON file of matches to retrieve matches by the md5 of the seq
+    def matchesMap = JsonReader.load(matchesPath.toString(), jacksonMapper)  // [seqId: matches]
 
     def seqMatchesAggreg = [:].withDefault { [
         sequence: '',
@@ -26,7 +33,10 @@ process AGGREGATE_SEQS_MATCHES {
         xref: []
     ] }
 
-    def matchesInfo = JsonProcessor.jsonToMap(matchesParser)
+    JsonReader.stream(seqsPath.toString(), jacksonMapper) { JsonNode node ->
+        seqId = node.get
+    }
+
     while (seqParser.nextToken() != JsonToken.END_OBJECT) {
         String seqId = seqParser.getCurrentName()
         seqParser.nextToken()
@@ -74,6 +84,7 @@ process AGGREGATE_ALL_MATCHES {
     path("aggregated_results.json")
 
     exec:
+    // Build a single mapper for all readers and writers to save memory
     ObjectMapper jacksonMapper = new ObjectMapper().enabled(SerializationFeature.INDENT_OUTPUT)
     // Gather seqs by md5 to check for md5s with identical seqs and differing seq ids
     def allAggregatedData = [:]  // [md5: matches]
@@ -95,7 +106,7 @@ process AGGREGATE_ALL_MATCHES {
         }
     }
 
-    // write the output [{Seq}, {Seq}, {Seq}]
+    // write the output as an array of seq objects [{Seq}, {Seq}, {Seq}]
     def outputFilePath = task.workDir.resolve("aggregated_results.json")
     JsonWriter.stream("${file_path}", mapper) { generator ->
         allAggregatedData.each { md5, jsonNode ->
