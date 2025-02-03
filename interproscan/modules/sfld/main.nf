@@ -46,7 +46,7 @@ process POST_PROCESS_SFLD {
 
 
 process PARSE_SFLD {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(postprocess_out)
@@ -59,12 +59,14 @@ process PARSE_SFLD {
     def outputFilePath = task.workDir.resolve("sfld.json")
     def sequences = parseOutput(postprocess_out.toString())
     def hierarchy = parseHierarchy(hierarchy_db.toString())
+    SignatureLibraryRelease library = new SignatureLibraryRelease("SFLD", null)
 
     sequences = sequences.collectEntries { seqId, matches -> 
         // Flatten matches (one location per match)
         matches = matches.collectMany { key, match ->
             return match.locations.collect { location ->
-                Match newMatch = new Match(match.modelAccession, match.evalue, match.score, match.bias)
+                Signature signature = new Signature(match.modelAccession, library)
+                Match newMatch = new Match(match.modelAccession, match.evalue, match.score, match.bias, signature)
                 newMatch.addLocation(location.clone())
                 return newMatch
             }
@@ -129,7 +131,8 @@ process PARSE_SFLD {
                 def promotedMatches = parents
                     .findAll { it != match.modelAccession }
                     .collect {
-                        Match promotedMatch = new Match(it, match.evalue, match.score, match.bias)
+                        Signature signature = new Signature(match.modelAccession, library)
+                        Match promotedMatch = new Match(it, match.evalue, match.score, match.bias, signature)
                         promotedMatch.addLocation(match.locations[0].clone())
                         return promotedMatch
                     }
@@ -236,10 +239,12 @@ Map<String, Map<String, Match>> parseOutput(String outputFilePath) {
 }
 
 Map<String, Match> parseBlock(Reader reader) {
+    SignatureLibraryRelease library = new SignatureLibraryRelease("SFLD", null)
     boolean inDomains = false
     def domains = [:]
     while (true) {
-        String line = reader.readLine().trim()
+        String line = reader.readLine()?.trim()
+        if (!line) break
         if (line == "Domains:") {
             inDomains = true
         } else if (line == "Sites:") {
@@ -267,7 +272,8 @@ Map<String, Match> parseBlock(Reader reader) {
 
             if (aliStart <= aliEnd && hmmStart <= hmmEnd && envStart <= envEnd) {
                 Match match = domains.computeIfAbsent(modelAccession, k -> {
-                    return new Match(modelAccession, seqEvalue, seqScore, seqBias)
+                    Signature signature = new Signature(modelAccession, library)
+                    return new Match(modelAccession, seqEvalue, seqScore, seqBias, signature)
                 });
                 Location location = new Location(aliStart, aliEnd, hmmStart, hmmEnd, null, null,
                         envStart, envEnd, domIEvalue, domScore, domBias)

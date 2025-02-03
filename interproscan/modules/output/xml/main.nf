@@ -1,12 +1,12 @@
-import groovy.json.JsonSlurper
 import groovy.xml.MarkupBuilder
 import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 import java.io.StringWriter
 import java.util.regex.Pattern
+import com.fasterxml.jackson.core.JsonToken
 
 process WRITE_XML_OUTPUT {
-    label 'small'
+    label 'local'
 
     input:
     val matches
@@ -22,14 +22,23 @@ process WRITE_XML_OUTPUT {
     xml.setEscapeAttributes(false) // Prevent escaping attributes
     xml.setEscapeText(false)       // Prevent escaping text
 
-    def jsonSlurper = new JsonSlurper()
-    def jsonData = jsonSlurper.parse(matches)
-    String matchType = nucleic ? "nucleotide-sequence-matches" : "protein-matches"
+    JsonProcessor processor = new JsonProcessor()
+    def parser = processor.createParser(matches.toString())
 
+    String matchType = nucleic ? "nucleotide-sequence-matches" : "protein-matches"
     xml."$matchType"("interproscan-version": ips6Version) {
         if (nucleic) {
             def processedNT = []
-            def groupedByNT = jsonData.findAll { it.translatedFrom }.groupBy { it.translatedFrom[0].md5 }
+            def groupedByNT = [:]
+
+            while (parser.nextToken() != JsonToken.END_ARRAY) {
+                Map seqData = parser.readValueAs(Map)
+                if (seqData.translatedFrom) {
+                    def ntSequenceMD5 = seqData.translatedFrom[0].md5
+                    groupedByNT.computeIfAbsent(ntSequenceMD5) { [] }.add(seqData)
+                }
+            }
+
             groupedByNT.each { ntSequenceMD5, proteins ->
                 if (!processedNT.contains(ntSequenceMD5)) {
                     processedNT << ntSequenceMD5
@@ -61,7 +70,8 @@ process WRITE_XML_OUTPUT {
                 }
             }
         } else {
-            jsonData.each { seqData ->
+            while (parser.nextToken() != JsonToken.END_ARRAY) {
+                Map seqData = parser.readValueAs(Map)
                 protein {
                     sequence(md5: seqData.md5, seqData.sequence)
                     matches {
@@ -80,7 +90,7 @@ process WRITE_XML_OUTPUT {
 }
 
 def processMatches(matches, xml) {
-    List<String> hmmer3Members = ["antifam", "cathgene3d", "cathfunfam", "hamap", "ncbifam", "pfam", "pirsf", "pirsr", "sfld", "superfamily"]
+    List<String> hmmer3Members = ["AntiFam", "CATH-Gene3D", "FunFam", "hamap", "NCBIfam", "Pfam", "PIRSF", "PIRSR", "SFLD", "SUPERFAMILY"]
     List<String> hmmer3LocationFields = ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
     Map<String, List<String>> memberLocationFields = [
         "CDD": ["match-evalue", "match-score"],
@@ -92,9 +102,10 @@ def processMatches(matches, xml) {
         "PRINTS": ["motifNumber", "pvalue", "score"],
         "PROSITE patterns": ["level"],
         "PROSITE profiles": ["score"],
-        "SignalP": ["score"],
+        "SignalP-Prok": ["score"],
+        "SignalP-Euk": ["score"],
         "SMART": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
-        "SUPERFAMILY": ["evalue", "hmmLength"]
+        "SUPERFAMILY": ["evalue", "hmmLength"],
         "DeepTMHMM": []
     ]
 
@@ -187,7 +198,7 @@ def processMatches(matches, xml) {
                                     }
                                 }
                             }
-                            if (memberDb in ["hamap", "prositepatterns", "prositeprofiles"]) {
+                            if (memberDb in ["HAMAP", "PROSITE patterns", "PROSITE profiles"]) {
                                 alignment(loc.targetAlignment ?: "")
                             }
                             if (loc.sites) {

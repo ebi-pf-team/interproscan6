@@ -17,7 +17,7 @@ process RUN_MOBIDBLITE {
 
 
 process PARSE_MOBIDBLITE {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(mobidblite_output)

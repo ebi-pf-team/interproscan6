@@ -20,7 +20,7 @@ process SEARCH_PFAM {
 }
 
 process PARSE_PFAM {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(hmmsearch_out)
@@ -33,12 +33,11 @@ process PARSE_PFAM {
 
     exec:
     def outputFilePath = task.workDir.resolve("pfam.json")
-    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString())
+    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "Pfam")
 
     seeds = stockholmSeedParser(seedPath)
     nestedInfo = stockholmClansParser(clanPath, seeds)
     dat = stockholmDatParser(datPath)
-
     Map<String, Map<String, Match>> filteredMatches = [:]
 
     // filter matches

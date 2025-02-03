@@ -20,7 +20,7 @@ process RUN_NCBIFAM {
 }
 
 process PARSE_NCBIFAM {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(hmmseach_out)
@@ -30,7 +30,7 @@ process PARSE_NCBIFAM {
 
     exec:
     def outputFilePath = task.workDir.resolve("ncbifam.json")
-    def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString())
+    def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString(), "NCBIFAM")
 
     def processedMatches = hmmerMatches.collectEntries { seqId, matches ->
         [seqId, matches.collectEntries { modelAccession, match ->

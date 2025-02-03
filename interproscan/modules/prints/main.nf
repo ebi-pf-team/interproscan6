@@ -22,7 +22,7 @@ process RUN_PRINTS {
 }
 
 process PARSE_PRINTS {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(prints_output)
@@ -32,6 +32,7 @@ process PARSE_PRINTS {
     tuple val(meta), path("prints.json")
 
     exec:
+    SignatureLibraryRelease library = new SignatureLibraryRelease("PRINTS", null)
     // Build up a map of the Model ID to fingerprint hierarchies
     Map<String, HierarchyEntry> hierarchyMap = HierarchyEntry.parseHierarchyDbFile(hierarchyDb)
 
@@ -189,7 +190,9 @@ process PARSE_PRINTS {
                 // the modelName has been used up to this point, but we need to convert to the model ID
                 Match match = finalMatches.computeIfAbsent(
                     filteredMatch.modelId,
-                    { new Match(filteredMatch.modelId, filteredMatch.evalue, filteredMatch.graphScan) }
+                    {
+                        new Match(filteredMatch.modelId, filteredMatch.evalue, filteredMatch.graphScan, new Signature(modelId, library))
+                    }
                 )
                 Location location = new Location(
                     filteredMatch.locationStart,

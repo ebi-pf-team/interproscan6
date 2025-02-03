@@ -22,7 +22,7 @@ process RUN_PIRSR {
 }
 
 process PARSE_PIRSR {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(hmmsearch_out)
@@ -33,7 +33,7 @@ process PARSE_PIRSR {
 
     exec:
     def outputFilePath = task.workDir.resolve("pirsr.json")
-    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString())
+    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "PIRSR")
 
     JsonSlurper jsonSlurper = new JsonSlurper()
     def rules = jsonSlurper.parse(new File(rulesPath.toString()))

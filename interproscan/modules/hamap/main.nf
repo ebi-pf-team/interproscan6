@@ -22,7 +22,7 @@ process PREPROCESS_HAMAP {
 }
 
 process PREPARE_HAMAP {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(hmmsearch_tab), val(seq_json)
@@ -112,7 +112,7 @@ process RUN_HAMAP {
 }
 
 process PARSE_HAMAP {
-    label 'small'
+    label 'local'
 
     input:
     tuple val(meta), val(pfsearch_out)
@@ -121,6 +121,7 @@ process PARSE_HAMAP {
     tuple val(meta), path("hamap.json")
 
     exec:
+    SignatureLibraryRelease library = new SignatureLibraryRelease("HAMAP", null)
     def matches = [:]
     pfsearch_out.eachLine { line ->
         def fields = line.split()
@@ -132,10 +133,10 @@ process PARSE_HAMAP {
         Double score = Double.parseDouble(fields[7])
         String alignment = fields[9]
 
-        if (matches.containsKey(sequenceId)) {
-            match = matches[sequenceId]
+        if (matches.containsKey(sequenceId) && matches[sequenceId].containsKey(modelAccession)) {
+            match = matches[sequenceId][modelAccession]
         } else {
-            match = new Match(modelAccession)
+            match = new Match(modelAccession, new Signature(modelAccession, library))
             matches.computeIfAbsent(sequenceId, { [:] })
             matches[sequenceId][modelAccession] = match
         }
