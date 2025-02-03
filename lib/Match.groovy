@@ -1,3 +1,5 @@
+import com.fasterxml.jackson.databind.JsonNode
+
 class Match implements Serializable {
     String modelAccession
     Integer sequenceLength
@@ -80,6 +82,31 @@ class Match implements Serializable {
         return match
     }
 
+    static Match fromJsonNode(JsonNode node) {
+        Match match = new Match(node.get("modelAccession").asText())
+        match.sequenceLength = node.has("sequenceLength") ? node.get("sequenceLength").asInt() : null
+        match.evalue = node.has("evalue") ? node.get("evalue").asDouble() : null
+        match.score = node.has("score") ? node.get("score").asDouble() : null
+        match.bias = node.has("bias") ? node.get("bias").asDouble() : null
+        if (node.has("signature")) {
+            match.signature = Signature.fromJsonNode(node.get("signature"))
+        }
+        if (node.has("locations") && node.get("locations").isArray()) {
+            match.locations = node.get("locations").collect { Location.fromJsonNode(it) }
+        }
+        if (node.has("treegrafter")) {
+            match.treegrafter = TreeGrafter.fromJsonNode(node.get("treegrafter"))
+        }
+        if (node.has("representativeInfo")) {
+            match.representativeInfo = RepresentativeInfo.fromJsonNode(node.get("representativeInfo"))
+        }
+        if (node.has("graphScan")) {
+            match.graphScan = node.get("graphScan").asText()
+        }
+        match.included = node.has("included") ? node.get("included").asBoolean() : true
+        return match
+    }
+
     void addLocation(Location location) {
         this.locations.add(location)
     }
@@ -151,6 +178,14 @@ class Signature implements Serializable {
                 SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
                 Entry.fromMap(data.entry)
         )
+    }
+
+    static Signature fromJsonNode(JsonNode node) {
+        Signature signature = new Signature()
+        signature.accession = node.get("accession").asText()
+        signature.name = node.get("name")?.asText()
+        signature.description = node.get("description")?.asText()
+        return signature
     }
 }
 
@@ -398,6 +433,28 @@ class Location implements Serializable {
         loc.cigarAlignment = data.cigarAlignment
         loc.pvalue = data.pvalue
         return loc
+    }
+
+    static Location fromJsonNode(JsonNode node) {
+        Location location = new Location()
+        location.start = node.has("start") ? node.get("start").asInt() : null
+        location.end = node.has("end") ? node.get("end").asInt() : null
+        location.hmmStart = node.has("hmmStart") ? node.get("hmmStart").asInt() : null
+        location.hmmEnd = node.has("hmmEnd") ? node.get("hmmEnd").asInt() : null
+        location.hmmLength = node.has("hmmLength") ? node.get("hmmLength").asInt() : null
+        location.hmmBounds = node.has("hmmBounds") ? node.get("hmmBounds").asText() : null
+        location.envelopeStart = node.has("envelopeStart") ? node.get("envelopeStart").asInt() : null
+        location.envelopeEnd = node.has("envelopeEnd") ? node.get("envelopeEnd").asInt() : null
+        location.evalue = node.has("evalue") ? node.get("evalue").asDouble() : null
+        location.score = node.has("score") ? node.get("score").asDouble() : null
+        location.bias = node.has("bias") ? node.get("bias").asDouble() : null
+        location.queryAlignment = node.has("queryAlignment") ? node.get("queryAlignment").asText() : null
+        location.targetAlignment = node.has("targetAlignment") ? node.get("targetAlignment").asText() : null
+        location.cigarAlignment = node.has("cigarAlignment") ? node.get("cigarAlignment").asText() : null
+        if (node.has("sites") && node.get("sites").isArray()) {
+            location.sites = node.get("sites").collect { Site.fromJsonNode(it) }
+        }
+        return location
     }
 
     String getHmmBounds(String hmmBounds) {
