@@ -38,8 +38,8 @@ process WRITE_JSON_OUTPUT {
         "PROSITE profiles": ["score", "targetAlignment"],
         "PROSITE patterns": ["cigarAlignment", "targetAlignment", "level"],
         "SFLD": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "envelopeStart", "envelopeEnd"],
-        "SignalP-Euk": ["pvalue", "cleavageStart", "cleavageEnd"],
-        "SignalP-Prok": ["pvalue", "cleavageStart", "cleavageEnd"],
+        "SignalP-Euk": ["score"],
+        "SignalP-Prok": ["score"],
         "SMART": ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds"],
         "SUPERFAMILY": ["hmmLength", "evalue"],
         "DeepTMHMM": []
@@ -75,12 +75,6 @@ process WRITE_JSON_OUTPUT {
                                 break
                             case "cigarAlignment":
                                 locationResult["cigarAlignment"] = location.cigarAlignment
-                                break
-                            case "cleavageStart":
-                                locationResult["cleavageStart"] = matchObj.signalp.cleavageSiteStart
-                                break
-                            case "cleavageEnd":
-                                locationResult["cleavageEnd"] = matchObj.signalp.cleavageSiteEnd
                                 break
                             case "envelopeStart":
                                 locationResult["envelopeStart"] = location.envelopeStart
@@ -171,8 +165,6 @@ process WRITE_JSON_OUTPUT {
                         matchResult["evalue"] = matchObj.evalue
                         matchResult["graphscan"] = matchObj.graphScan
                         break
-                    case ["SignalP-Euk", "SignalP-Prok"]:
-                        matchResult["orgType"] = matchObj.signalp.orgType
                 }
                 seqMatches.add(matchResult)
             }

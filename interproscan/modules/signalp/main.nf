@@ -46,7 +46,8 @@ process PARSE_SIGNALP {
     def jsonOutput = jsonSlurper.parse(jsonFile)
 
     String modelAcc = "SignalP_${mode}_${organism}"
-    SignatureLibraryRelease library = new SignatureLibraryRelease("SignalP", "6.0h")
+    String libraryName = organism == "eukarya" ? "SignalP-Euk" : "SignalP-Prok"
+    SignatureLibraryRelease library = new SignatureLibraryRelease(libraryName, "6.0h")
     def signatures = [
         "Sec/SPI"  : new Signature("SignalP-Sec-SPI", "Sec/SPI", "Sec signal peptide", library, null),
         "Sec/SPII" : new Signature("SignalP-Sec-SPII", "Sec/SPII", "Lipoprotein signal peptide", library, null),
