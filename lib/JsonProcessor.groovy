@@ -6,19 +6,13 @@ import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.SerializationFeature
 
 class JsonProcessor {
-    ObjectMapper mapper
-    /*
-    Use a single mapper object for all readers and writers to reduce memory requirements.
-    Use JsonParser instead of ObjectReader which may perform more internal buffering, thus
-    increasing memory requirements.
-    */
+    private ObjectMapper mapper
+
     JsonProcessor() {
-        // Build the main factory class for Jackson
         this.mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
     }
 
-    static createParser(String jsonFilePath) {
-        // Construct a reader object from the main factory class
+    JsonParser createParser(String jsonFilePath) {
         try {
             JsonParser parser = mapper.getFactory().createParser(new File(jsonFilePath))
             assert parser.nextToken() in [JsonToken.START_OBJECT, JsonToken.START_ARRAY]  // ensure it starts from the beginning of the JSON object/array
@@ -28,8 +22,31 @@ class JsonProcessor {
         }
     }
 
-    static createGenerator(String outputFilePath) {
-        // Construct a writer object from the main factory class
+    Map jsonToMap(JsonParser parser) {
+        try {
+            return mapper.readValue(parser, Map)
+        } catch (Exception e) {
+            throw new Exception("Error reading JSON as Map: ${e}")
+        }
+    }
+
+    Map jsonToMap(File file) {
+        try {
+            return mapper.readValue(file, Map)
+        } catch (Exception e) {
+            throw new Exception("Error reading JSON file as Map: ${e}")
+        }
+    }
+
+    List jsonToList(JsonParser parser) {
+        try {
+            return mapper.readValue(parser, List)
+        } catch (Exception e) {
+            throw new Exception("Error reading JSON as List: ${e}")
+        }
+    }
+
+    JsonGenerator createGenerator(String outputFilePath) {
         try {
             JsonGenerator generator = mapper.getFactory().createGenerator(new File(outputFilePath), JsonEncoding.UTF8)
             return generator
@@ -38,45 +55,16 @@ class JsonProcessor {
         }
     }
 
-    static jsonToMap(JsonParser parser) {
+    void write(JsonGenerator generator, Object values) {
         try {
-            def mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-            return mapper.readValue(parser, Map)
-        } catch (Exception e) {
-            throw new Exception("Error reading JSON as Map: ${e}")
-        }
-    }
-
-    static jsonFileToMap(File file) {
-        try {
-            def mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-            return mapper.readValue(file, Map)
-        } catch (Exception e) {
-            throw new Exception("Error reading JSON file as Map: ${e}")
-        }
-    }
-
-    static jsonToList(JsonParser parser) {
-        try {
-            def mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-            return mapper.readValue(parser, List)
-        } catch (Exception e) {
-            throw new Exception("Error reading JSON as List: ${e}")
-        }
-    }
-
-    static generatorWrite(JsonGenerator generator, Object values) {
-        try {
-            def mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
             mapper.writeValue(generator, values)
         } catch (Exception e) {
             throw new Exception("Error writing JSON: ${e}")
         }
     }
 
-    static write(String outputFilePath, values) {
+    void write(String outputFilePath, values) {
         try {
-            def mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
             mapper.writeValue(new File(outputFilePath), values)
         } catch (Exception e) {
             throw new Exception("Error writing JSON for file $outputFilePath: ${e}")

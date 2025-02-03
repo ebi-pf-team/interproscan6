@@ -1,4 +1,6 @@
+import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 
 def GO_PATTERN = [
@@ -33,7 +35,7 @@ process XREFS {
 
     exec:
     // Build a single mapper for all readers and writers to save memory
-    ObjectMapper jacksonMapper = new ObjectMapper().enabled(SerializationFeature.INDENT_OUTPUT)
+    ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
 
     // Load entries data
     String entriesPath = "${dataDir}/${entriesFile}"
@@ -66,104 +68,102 @@ process XREFS {
                         String modelAcc = match.key
                         Match matchObject = Match.fromJsonNode(match.value)
 
-                        // if there are no entries data, write out the match and skip to the next
                         if (!entries) {
                             jsonGenerator.writeFieldName(modelAcc)
                             JsonWriter.writeMap(jsonGenerator, matchObject)
-                            continue
-                        }
+                        } else {
+                            // Retrieve the relevant signature info from the match and entries
+                            String signatureAcc = matchObject.signature.accession
+                            def signatureInfo = entries["entries"][signatureAcc] ?: entries["entries"][modelAcc]
 
-                        // Retrieve the relevant signature info from the match and entries
-                        String signatureAcc = matchObject.signature.accession
-                        def signatureInfo = entries["entries"][signatureAcc] ?: entries["entries"][modelAcc]
-
-                        // Update the library version if the sig/model is found in the JSON
-                        String memberRelease = matchObject.signature.signatureLibraryRelease.version
-                        if (!memberRelease && signatureInfo) {
-                            matchObject.signature.signatureLibraryRelease.version = entries["databases"][signatureInfo["database"]]
-                        }
-
-                        // PANTHER: Add PAINT annotation data and subfamily name and description
-                        if (matchObject.signature.signatureLibraryRelease.library == "PANTHER") {
-                            if (matchObject.treegrafter.ancestralNodeID != null) {
-                                String paintAnnPath = "${dataDir}/${paintAnnoDir}/${signatureAcc}.json"
-                                File paintAnnotationFile = new File(paintAnnPath)
-                                // not every signature will have a PAINT annotation file match
-                                if (paintAnnotationFile.exists()) {
-                                    def paintAnnotationsContent = JsonProcessor.jsonToMap(paintAnnotationFile)
-                                    String nodeId = matchObject.treegrafter.ancestralNodeID
-                                    def nodeData = paintAnnotationsContent[nodeId]
-                                    matchObject.treegrafter.subfamilyAccession = nodeData[0]
-                                    matchObject.treegrafter.proteinClass = nodeData[2]
-                                    matchObject.treegrafter.graftPoint = nodeData[3]
-                                }
+                            // Update the library version if the sig/model is found in the JSON
+                            String memberRelease = matchObject.signature.signatureLibraryRelease.version
+                            if (!memberRelease && signatureInfo) {
+                                matchObject.signature.signatureLibraryRelease.version = entries["databases"][signatureInfo["database"]]
                             }
 
-                            if (entries["entries"][signatureAcc]) {
-                                matchObject.treegrafter.subfamilyName = entries["entries"][signatureAcc]["name"]
-                                matchObject.treegrafter.subfamilyDescription = entries["entries"][signatureAcc]["description"]
-                            }
-                        }
-
-                        // Update signature info if there is any
-                        if (signatureInfo) {
-                            matchObject.signature.name = signatureInfo["name"]
-                            matchObject.signature.description = signatureInfo["description"]
-
-                            if (signatureInfo["representative"]) {
-                                RepresentativeInfo representativeInfo = new RepresentativeInfo(
-                                    signatureInfo["representative"]["type"],
-                                    signatureInfo["representative"]["index"]
-                                )
-                                matchObject.representativeInfo = representativeInfo
-                            }
-
-                            // add InterPro data if there match is intergrated into any InterPro entries
-                            def interproAcc = signatureInfo["integrated"]
-                            if (interproAcc) {
-                                def entryInfo = entries["entries"].get(interproAcc)
-                                assert entryInfo != null
-                                Entry entryDataObj = new Entry(
-                                    interproAcc,
-                                    entryInfo["name"],
-                                    entryInfo["description"],
-                                    entryInfo["type"]
-                                )
-                                matchObject.signature.entry = entryDataObj
-
-                                if (addGoterms) {
-                                    def goIds = ipr2go[interproAcc]
-                                    if (goIds) {
-                                        def goTerms = goIds.collect { goId ->
-                                            GoXRefs goXRefObj = new GoXRefs(
-                                                goInfo[goId][0],
-                                                "GO",
-                                                GO_PATTERN[goInfo[goId][1]],
-                                                goId
-                                            )
-                                            matchObject.signature.entry.addGoXRefs(goXRefObj)
-                                        }
+                            // PANTHER: Add PAINT annotation data and subfamily name and description
+                            if (matchObject.signature.signatureLibraryRelease.library == "PANTHER") {
+                                if (matchObject.treegrafter.ancestralNodeID != null) {
+                                    String paintAnnPath = "${dataDir}/${paintAnnoDir}/${signatureAcc}.json"
+                                    File paintAnnotationFile = new File(paintAnnPath)
+                                    // not every signature will have a PAINT annotation file match
+                                    if (paintAnnotationFile.exists()) {
+                                        def paintAnnotationsContent = JsonProcessor.jsonToMap(paintAnnotationFile)
+                                        String nodeId = matchObject.treegrafter.ancestralNodeID
+                                        def nodeData = paintAnnotationsContent[nodeId]
+                                        matchObject.treegrafter.subfamilyAccession = nodeData[0]
+                                        matchObject.treegrafter.proteinClass = nodeData[2]
+                                        matchObject.treegrafter.graftPoint = nodeData[3]
                                     }
                                 }
 
-                                if (addPathways) {
-                                    def paIds = ipr2pa[interproAcc]
-                                    if (paIds) {
-                                        def paTerms = paIds.collect { paId ->
-                                            PathwayXRefs paXRefObj = new PathwayXRefs(
-                                                paInfo[paId][1],
-                                                PA_PATTERN[paInfo[paId][0]],
-                                                paId)
-                                            matchObject.signature.entry.addPathwayXRefs(paXRefObj)
+                                if (entries["entries"][signatureAcc]) {
+                                    matchObject.treegrafter.subfamilyName = entries["entries"][signatureAcc]["name"]
+                                    matchObject.treegrafter.subfamilyDescription = entries["entries"][signatureAcc]["description"]
+                                }
+                            }
+
+                            // Update signature info if there is any
+                            if (signatureInfo) {
+                                matchObject.signature.name = signatureInfo["name"]
+                                matchObject.signature.description = signatureInfo["description"]
+
+                                if (signatureInfo["representative"]) {
+                                    RepresentativeInfo representativeInfo = new RepresentativeInfo(
+                                        signatureInfo["representative"]["type"],
+                                        signatureInfo["representative"]["index"]
+                                    )
+                                    matchObject.representativeInfo = representativeInfo
+                                }
+
+                                // add InterPro data if there match is intergrated into any InterPro entries
+                                def interproAcc = signatureInfo["integrated"]
+                                if (interproAcc) {
+                                    def entryInfo = entries["entries"].get(interproAcc)
+                                    assert entryInfo != null
+                                    Entry entryDataObj = new Entry(
+                                        interproAcc,
+                                        entryInfo["name"],
+                                        entryInfo["description"],
+                                        entryInfo["type"]
+                                    )
+                                    matchObject.signature.entry = entryDataObj
+
+                                    if (addGoterms) {
+                                        def goIds = ipr2go[interproAcc]
+                                        if (goIds) {
+                                            def goTerms = goIds.collect { goId ->
+                                                GoXRefs goXRefObj = new GoXRefs(
+                                                    goInfo[goId][0],
+                                                    "GO",
+                                                    GO_PATTERN[goInfo[goId][1]],
+                                                    goId
+                                                )
+                                                matchObject.signature.entry.addGoXRefs(goXRefObj)
+                                            }
+                                        }
+                                    }
+
+                                    if (addPathways) {
+                                        def paIds = ipr2pa[interproAcc]
+                                        if (paIds) {
+                                            def paTerms = paIds.collect { paId ->
+                                                PathwayXRefs paXRefObj = new PathwayXRefs(
+                                                    paInfo[paId][1],
+                                                    PA_PATTERN[paInfo[paId][0]],
+                                                    paId)
+                                                matchObject.signature.entry.addPathwayXRefs(paXRefObj)
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
 
-                        // Write out the model Acc and updated Match object
-                        jsonGenerator.writeFieldName(modelAcc)
-                        JsonWriter.writeMap(jsonGenerator, matchObject)
+                            // Write out the model Acc and updated Match object
+                            jsonGenerator.writeFieldName(modelAcc)
+                            JsonWriter.writeMap(jsonGenerator, matchObject)
+                        }
                     }
                     jsonGenerator.writeEndObject()  // end of seqId
                 }
