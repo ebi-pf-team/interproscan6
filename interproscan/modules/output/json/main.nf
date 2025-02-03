@@ -171,7 +171,7 @@ process WRITE_JSON_OUTPUT {
                         matchResult["evalue"] = matchObj.evalue
                         matchResult["graphscan"] = matchObj.graphScan
                         break
-                    case ["SignalP"]:
+                    case ["SignalP-Euk", "SignalP-Prok"]:
                         matchResult["orgType"] = matchObj.signalp.orgType
                 }
                 seqMatches.add(matchResult)
