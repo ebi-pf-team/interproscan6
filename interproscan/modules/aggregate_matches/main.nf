@@ -1,5 +1,5 @@
-import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -26,7 +26,7 @@ process AGGREGATE_SEQS_MATCHES {
       {prot seq md5: {Match object represented as a Map}}
     */
     // Build a single mapper for all readers and writers to save memory
-    ObjectMapper jacksonMapper = new ObjectMapper().enabled(SerializationFeature.INDENT_OUTPUT)
+    ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
     // Load the entire JSON file of matches to retrieve matches by the md5 of the seq
     def matchesMap = JsonReader.load(matchesPath.toString(), jacksonMapper)  // [seqId: matches]
 
@@ -72,7 +72,7 @@ process AGGREGATE_ALL_MATCHES {
 
     exec:
     // Build a single mapper for all readers and writers to save memory
-    ObjectMapper jacksonMapper = new ObjectMapper().enabled(SerializationFeature.INDENT_OUTPUT)
+    ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
     // Gather seqs by md5 to check for md5s with identical seqs and differing seq ids
     def allAggregatedData = [:]  // [md5: matches]
     seqMatches.each { file ->
