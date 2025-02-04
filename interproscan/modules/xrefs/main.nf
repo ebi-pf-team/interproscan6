@@ -53,7 +53,7 @@ process XREFS {
                     
                         if (!entries) {
                             jsonGenerator.writeFieldName(modelAcc)
-                            JsonWriter.writeMap(jsonGenerator, match)
+                            JsonWriter.writeMap(jsonGenerator, jacksonMapper, match)
                         } else {
                             String signatureAcc = match.signature.accession
                             def signatureInfo = entries["entries"][signatureAcc] ?: entries["entries"][modelAcc]
@@ -92,7 +92,7 @@ process XREFS {
                             }
                             // Write out the model Acc and updated Match object
                             jsonGenerator.writeFieldName(modelAcc)
-                            JsonWriter.writeMap(jsonGenerator, match)
+                            JsonWriter.writeMap(jsonGenerator, jacksonMapper, match)
                         }  // end of if/else
                     jsonGenerator.writeEndObject()
                 } // end of matches
