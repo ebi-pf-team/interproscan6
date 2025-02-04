@@ -54,6 +54,7 @@ process XREFS {
                     if (!entries) {  // no data to update, write out model and the match object as is
                         jsonGenerator.writeObjectFieldStart(modelAcc)
                         JsonWriter.writeMap(jsonGenerator, jacksonMapper, Match.asMap(match))
+                        jsonGenerator.writeEndObject()
                     } else {
                         String signatureAcc = match.signature.accession
                         def signatureInfo = entries["entries"][signatureAcc] ?: entries["entries"][modelAcc]
@@ -94,8 +95,10 @@ process XREFS {
                         // Write out the model Acc and updated Match object
                         jsonGenerator.writeObjectFieldStart(modelAcc)
                         JsonWriter.writeMap(jsonGenerator, jacksonMapper, Match.asMap(match))
+                        jsonGenerator.writeEndObject()
                     }  // end of if/else
                 } // end of matches
+                jsonGenerator.writeEndObject()
             }  // end of Json reader / seq Id
         } // end of members matches
     }  // end of Json writer stream
