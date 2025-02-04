@@ -181,11 +181,14 @@ class Signature implements Serializable {
     }
 
     static Signature fromJsonNode(JsonNode node) {
-        Signature signature = new Signature()
-        signature.accession = node.get("accession").asText()
-        signature.name = node.get("name")?.asText()
-        signature.description = node.get("description")?.asText()
-        return signature
+        String accession = node.has("accession") ? node.get("accession").asText() : null
+        String name = node.has("name") ? node.get("name").asText() : null
+        String description = node.has("description") ? node.get("description").asText() : null
+        SignatureLibraryRelease library = node.has("signatureLibraryRelease") ?
+                SignatureLibraryRelease.fromJsonNode(node.get("signatureLibraryRelease")) :
+                new SignatureLibraryRelease(null, null)
+        Entry entry = node.has("entry") ? Entry.fromJsonNode(node.get("entry")) : null
+        return new Signature(accession, name, description, library, entry)
     }
 }
 
@@ -203,6 +206,15 @@ class SignatureLibraryRelease implements Serializable {
             return null
         }
         return new SignatureLibraryRelease(data.library, data.version)
+    }
+
+    static SignatureLibraryRelease fromJsonNode(JsonNode node) {
+        if (node == null || node.isNull()) {
+            return null
+        }
+        String library = node.has("library") ? node.get("library").asText() : null
+        String version = node.has("version") ? node.get("version").asText() : null
+        return new SignatureLibraryRelease(library, version)
     }
 }
 
@@ -252,6 +264,25 @@ class Entry implements Serializable {
         )
     }
 
+    static Entry fromJsonNode(JsonNode node) {
+        if (node == null || node.isNull()) {
+            return null
+        }
+        String accession = node.has("accession") ? node.get("accession").asText() : null
+        String name = node.has("name") ? node.get("name").asText() : null
+        String description = node.has("description") ? node.get("description").asText() : null
+        String type = node.has("type") ? node.get("type").asText() : null
+        List<GoXRefs> goXRefs = []
+        if (node.has("goXRefs") && node.get("goXRefs").isArray()) {
+            node.get("goXRefs").forEach { goXRefs.add(GoXRefs.fromJsonNode(it)) }
+        }
+        List<PathwayXRefs> pathwayXRefs = []
+        if (node.has("pathwayXRefs") && node.get("pathwayXRefs").isArray()) {
+            node.get("pathwayXRefs").forEach { pathwayXRefs.add(PathwayXRefs.fromJsonNode(it)) }
+        }
+        return new Entry(accession, name, description, type, goXRefs, pathwayXRefs)
+    }
+
     void addGoXRefs(GoXRefs go) {
         this.goXRefs.add(go)
     }
@@ -284,6 +315,8 @@ class Location implements Serializable {
     List<Site> sites = []
     boolean representative = false
     boolean included = true  // for HMMER3 matches (inclusion threshold)
+
+    Location() {}
 
     Location(int start,
              int end,
@@ -621,6 +654,22 @@ class Site implements Serializable {
                 data.siteLocations.collect { SiteLocation.fromMap(it) })
     }
 
+    static Site fromJsonNode(JsonNode node) {
+        String description = node.has("description") ? node.get("description").asText() : ""
+        String label = node.has("label") && !node.get("label").isNull() ? node.get("label").asText() : null
+        String group = node.has("group") && !node.get("group").isNull() ? node.get("group").asText() : null
+        int hmmStart = node.has("hmmStart") ? node.get("hmmStart").asInt() : 0
+        int hmmEnd = node.has("hmmEnd") ? node.get("hmmEnd").asInt() : 0
+        List<SiteLocation> siteLocations = node.has("siteLocations") && node.get("siteLocations").isArray() ?
+                node.get("siteLocations").collect { SiteLocation.fromJsonNode(it) } : []
+        return new Site(description, siteLocations).tap {
+            it.label = label
+            it.group = group
+            it.hmmStart = hmmStart
+            it.hmmEnd = hmmEnd
+        }
+    }
+
     boolean isInRange(int start, int end) {
         return start <= this.start && this.end <= end
     }
@@ -706,6 +755,19 @@ class TreeGrafter implements Serializable {
         tg.proteinClass = data.proteinClass
         return tg
     }
+
+    static TreeGrafter fromJsonNode(JsonNode jsonNode) {
+        if (jsonNode == null || jsonNode.isNull()) {
+            return null
+        }
+        TreeGrafter tg = new TreeGrafter(jsonNode.get("ancestralNodeID").asText())
+        tg.graftPoint = jsonNode.has("graftPoint") ? jsonNode.get("graftPoint").asText(null) : null
+        tg.subfamilyAccession = jsonNode.has("subfamilyAccession") ? jsonNode.get("subfamilyAccession").asText(null) : null
+        tg.subfamilyName = jsonNode.has("subfamilyName") ? jsonNode.get("subfamilyName").asText(null) : null
+        tg.subfamilyDescription = jsonNode.has("subfamilyDescription") ? jsonNode.get("subfamilyDescription").asText(null) : null
+        tg.proteinClass = jsonNode.has("proteinClass") ? jsonNode.get("proteinClass").asText(null) : null
+        return tg
+    }
 }
 
 class RepresentativeInfo implements Serializable {
@@ -722,6 +784,16 @@ class RepresentativeInfo implements Serializable {
             return null
         }
         return new RepresentativeInfo(data.type, data.rank)
+    }
+
+    static RepresentativeInfo fromJsonNode(JsonNode jsonNode) {
+        if (jsonNode == null || jsonNode.isNull()) {
+            return null
+        }
+        String type = jsonNode.has("type") && !jsonNode.get("type").isNull() ? jsonNode.get("type").asText() : null
+        int rank = jsonNode.has("rank") && jsonNode.get("rank").isNumber() ? jsonNode.get("rank").asInt() : 0
+
+        return new RepresentativeInfo(type, rank)
     }
 }
 

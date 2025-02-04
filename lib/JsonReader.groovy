@@ -7,14 +7,49 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 
 class JsonReader {
-    static stream(String filePath, ObjectMapper mapper, Closure closure) {
+    static streamJson(String filePath, ObjectMapper mapper, Closure closure) {
+        /*
+        Stream through the data in a Json file and pass the field names and values to the closure.
+        Streams data as JsonNodes to reduce memory requirements.
+        To use:
+        ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+        JsonReader.streamJson(filePath, mapper) { key, value ->
+            println("Processed: $key -> $value")
+        }
+         */
+        JsonFactory factory = mapper.getFactory()
+        try {
+            JsonParser parser = factory.createParser(new File(filePath))
+            while (!parser.isClosed()) {
+                JsonToken token = parser.nextToken()
+                if (token == null) {
+                    break
+                }
+
+                // Process field names and values
+                if (token == JsonToken.FIELD_NAME) {
+                    String fieldName = parser.getCurrentName()
+                    parser.nextToken()  // Move to the value
+                    JsonNode value = mapper.readTree(parser)
+
+                    // Call the closure with the key (field name) and value (JsonNode)
+                    closure.call(fieldName, value)
+                }
+            }
+            parser.close()
+        } catch (IOException e) {
+            e.printStackTrace()
+        }
+    }
+
+    static streamArray(String filePath, ObjectMapper mapper, Closure closure) {
         /*
         Stream the data, one jsonNode at a time from a Json file containing a JsonArray.
         It requires less memory to store maps as JsonNodes than as Maps,
         especially when the maps contain nested maps.
         To use:
         ObjectMapper mapper = new ObjectMapper().enabled(SerializationFeature.INDENT_OUTPUT)
-        JsonReader.stream(filePath, mapper) { JsonNode node ->
+        JsonReader.streamArray(filePath, mapper) { JsonNode node ->
             md5 = node.get("md5").asText()
         }
          */
