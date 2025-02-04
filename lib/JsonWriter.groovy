@@ -7,7 +7,7 @@ import java.io.FileWriter
 import java.io.IOException
 
 class JsonWriter {
-    static void streamMap(String filePath, ObjectMapper mapper, Closure closure) {
+    static void streamJson(String filePath, ObjectMapper mapper, Closure closure) {
         /* Write out json objects, e.g. at the end of XREFS
         To use:
         ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)

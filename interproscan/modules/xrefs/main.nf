@@ -39,7 +39,7 @@ process XREFS {
 
     // Stream writing the output JSON file
     String outputFilePath = task.workDir.resolve("matches2xrefs.json")
-    JsonWriter.streamMap(outputFilePath.toString(), jacksonMapper) { JsonGenerator jsonGenerator ->
+    JsonWriter.streamJson(outputFilePath.toString(), jacksonMapper) { JsonGenerator jsonGenerator ->
 
         membersMatches.each { matchesPath ->
             File file = new File(matchesPath.toString())

@@ -84,7 +84,7 @@ class JsonReader {
         /*
         Load all contents of a json file into the memory, storing internal nodes as JsonNodes
         to reduce memory requirements compared to storing the data in memory as maps.
-        If can handel json files keyed by a string and valued with a Map.
+        It can handel json files keyed by a string and valued with a Map.
         To use:
         ObjectMapper mapper = new ObjectMapper().enabled(SerializationFeature.INDENT_OUTPUT)
         def matchesMap = JsonReader.load(filePath, mapper)
