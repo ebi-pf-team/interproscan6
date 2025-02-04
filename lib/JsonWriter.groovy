@@ -31,7 +31,11 @@ class JsonWriter {
         }
     }
 
-    static void writeMap(String filePath, ObjectMapper mapper, Map data) {
+    static void writeMap(JsonGenerator generator, ObjectMapper mapper, Object data) throws IOException {
+        mapper.writeValue(generator, data);
+    }
+
+    static void writeMaptoFile(String filePath, ObjectMapper mapper, Map data) {
         // Method to write a map or object (like seqMatchesAggreg) to a file
         FileWriter fileWriter = null
         JsonGenerator generator = null
