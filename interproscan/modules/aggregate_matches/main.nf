@@ -28,37 +28,39 @@ process AGGREGATE_SEQS_MATCHES {
     // Build a single mapper for all readers and writers to save memory
     ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
     // Load the entire JSON file of matches to retrieve matches by the md5 of the seq
-    def matchesMap = JsonReader.load(matchesPath.toString(), jacksonMapper)  // [seqId: matches]
-
+    def matchesMap = JsonReader.load(matchesPath.toString(), jacksonMapper)  // [seqId: [modelAcc: [Match]]
     def seqMatchesAggreg = [:].withDefault { [sequence: '', md5: '', matches: [], xref: []] }
 
-    JsonReader.stream(seqsPath.toString(), jacksonMapper) { JsonNode node ->
+    JsonReader.streamJson(seqsPath.toString(), jacksonMapper) { String seqId, JsonNode node ->
         if (nucleic) {  // node = [protMd5: [{protein}, {protein}, {protein}]]
             node.fields().each { entry ->
                 JsonNode proteins = entry.value  // array of proteins from the predicted ORFs
                 proteins.forEach { protein ->
-                    processProteinData(protein, seqMatchesAggreg, matchesMap)
+                    processProteinData(protein, seqMatchesAggreg, matchesMap, seqId)
                     md5 = protein.get("md5").asText()
                     seqMatchesAggreg[md5].translatedFrom = seqMatchesAggreg[md5].translatedFrom ?: []
                     seqMatchesAggreg[md5].translatedFrom << protein.get("translatedFrom")
                 }
             }
-        } else {  // node = [protSeqId: {Seq}]
-           processProteinData(node, seqMatchesAggreg, matchesMap)
+        } else {  // node = [protSeqId: {protein}]
+           processProteinData(node, seqMatchesAggreg, matchesMap, seqId)
         }
     }
 
     def outputFilePath = task.workDir.resolve("seq_matches_aggreg.json")
-    JsonWriter.writeMap(outputFilePath.toString(), jacksonMapper, seqMatchesAggreg)
+    JsonWriter.writeMaptoFile(outputFilePath.toString(), jacksonMapper, seqMatchesAggreg)
 }
 
-def processProteinData(JsonNode protein, def seqMatchesAggreg, def matchesMap) {
+def processProteinData(JsonNode protein, Map seqMatchesAggreg,  Map<String, JsonNode> matchesMap, String seqId) {
     md5 = protein.get("md5").asText()
-    seqId = protein.get("id").asText()
     seqMatchesAggreg[md5].sequence = protein.get("sequence").asText()
     seqMatchesAggreg[md5].md5 = md5
     seqMatchesAggreg[md5].xref << ["name": seqId + " " + protein.get("description"), "id": seqId]
-    seqMatchesAggreg[md5].matches = matchesMap[seqId] ?: seqMatchesAggreg[md5].matches
+    def Data = matchesMap[seqId]
+    if (matchesMap.containsKey(seqId)) {
+        seqMatchesAggreg[md5].matches.addAll(matchesMap[seqId])
+        println("found matches: $Data")
+    }
 }
 
 process AGGREGATE_ALL_MATCHES {
@@ -76,7 +78,7 @@ process AGGREGATE_ALL_MATCHES {
     // Gather seqs by md5 to check for md5s with identical seqs and differing seq ids
     def allAggregatedData = [:]  // [md5: matches]
     seqMatches.each { file ->
-        JsonReader.stream(file.toString(), jacksonMapper) { JsonNode node ->
+        JsonReader.streamArray(file.toString(), jacksonMapper) { JsonNode node ->
             md5 = node.get("md5").asText()
             if (allAggregatedData.containsKey(md5)) {
                 // merge existing and new matches
@@ -95,7 +97,7 @@ process AGGREGATE_ALL_MATCHES {
 
     // write the output as an array of seq objects [{Seq}, {Seq}, {Seq}]
     def outputFilePath = task.workDir.resolve("aggregated_results.json")
-    JsonWriter.stream("${file_path}", mapper) { generator ->
+    JsonWriter.streamArray(outputFilePath.toString(), jacksonMapper) { generator ->
         allAggregatedData.each { md5, jsonNode ->
             generator.writeTree(jsonNode)
         }
