@@ -37,8 +37,14 @@ class JsonReader {
                 }
             }
             parser.close()
+        } catch (FileNotFoundException e) {
+            throw new Exception("File not found: $filePath", e)
+        } catch (JsonParseException e) {
+            throw new Exception("Error parsing JSON file: $filePath", e)
+        } catch (JsonMappingException e) {
+            throw new Exception("Error mapping JSON content for file: $filePath", e)
         } catch (IOException e) {
-            e.printStackTrace()
+            throw new Exception("IO error reading file: $filePath", e)
         }
     }
 

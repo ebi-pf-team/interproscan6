@@ -71,6 +71,22 @@ class Match implements Serializable {
         }
     }
 
+    static Map asMap(Match match) {
+        Map matchMap = [
+                "modelAccession": match.modelAccession,
+                "sequenceLength": match.sequenceLength,
+                "evalue": match.evalue,
+                "score": match.score,
+                "signature": match.signature ? Signature.asMap(match.signature) : null,
+                "locations": match.locations.collect { Location.asMap(it) },
+                "included": match.included,
+                "representativeInfo": RepresentativeInfo.asMap(match.representativeInfo),
+                "treeGrafter": match.treegrafter ? TreeGrafter.asMap(match.treegrafter) : null,
+                "graphScan": match.graphScan,
+        ]
+        return matchMap
+    }
+
     static Match fromMap(Map data) {
         Match match = new Match(data.modelAccession, data.evalue, data.score, data.bias)
         match.sequenceLength = data.sequenceLength
@@ -167,6 +183,17 @@ class Signature implements Serializable {
         this.entry = entry
     }
 
+    static Map asMap(Signature sig) {
+        if (!sig) { return [:] }
+        Map sigMap = [:]
+        if (sig.accession) {               sigMap["accession"] = sig.accession }
+        if (sig.name) {                    sigMap["name"] = sig.name }
+        if (sig.description) {             sigMap["description"] = sig.description }
+        if (sig.signatureLibraryRelease) { sigMap["signatureLibraryRelease"] = SignatureLibraryRelease.asMap(sig.signatureLibraryRelease) }
+        if (sig.entry) {                   sigMap["entry"] = Entry.asMap(sig.entry) }
+        return sigMap
+    }
+
     static Signature fromMap(Map data) {
         if (data == null) {
             return null
@@ -199,6 +226,10 @@ class SignatureLibraryRelease implements Serializable {
     SignatureLibraryRelease(String library, String version) {
         this.library = library
         this.version = version
+    }
+
+    static Map asMap(SignatureLibraryRelease library) {
+        return library ? ["library": library.library, "version": library.version] : null
     }
 
     static SignatureLibraryRelease fromMap(Map data) {
@@ -248,6 +279,17 @@ class Entry implements Serializable {
         this.type = type
         this.goXRefs = goXRefs
         this.pathwayXRefs = pathwayXRefs
+    }
+
+    static Map asMap(Entry entry) {
+        return entry ? [
+                "accession"    : entry.accession,
+                "name"         : entry.name,
+                "description"  : entry.description,
+                "type"         : entry.type,
+                "goXRefs"      : entry.goXRefs.collect { GoXRefs.asMap(it) },
+                "pathwayXRefs" : entry.pathwayXRefs.collect { PathwayXRefs.asMap(it) },
+        ] : null
     }
 
     static Entry fromMap(Map data) {
@@ -441,6 +483,35 @@ class Location implements Serializable {
         this.sites.add(site)
     }
 
+    static Map asMap(Location loc) {
+        if (!loc) return [:]
+
+        def mapLocation = [ "start": loc.start, "end": loc.end ]
+        if (loc.hmmStart != null) mapLocation["hmmStart"] = loc.hmmStart
+        if (loc.hmmEnd != null) mapLocation["hmmEnd"] = loc.hmmEnd
+        if (loc.hmmLength != null) mapLocation["hmmLength"] = loc.hmmLength
+        if (loc.hmmBounds != null) mapLocation["hmmBounds"] = loc.hmmBounds
+        if (loc.envelopeStart != null) mapLocation["envelopeStart"] = loc.envelopeStart
+        if (loc.envelopeEnd != null) mapLocation["envelopeEnd"] = loc.envelopeEnd
+        if (loc.evalue != null) mapLocation["evalue"] = loc.evalue
+        if (loc.score != null) mapLocation["score"] = loc.score
+        if (loc.bias != null) mapLocation["bias"] = loc.bias
+        if (loc.queryAlignment != null) mapLocation["queryAlignment"] = loc.queryAlignment
+        if (loc.targetAlignment != null) mapLocation["targetAlignment"] = loc.targetAlignment
+        if (loc.sequenceFeature != null) mapLocation["sequenceFeature"] = loc.sequenceFeature
+        if (loc.pvalue != null) mapLocation["pvalue"] = loc.pvalue
+        if (loc.motifNumber != null) mapLocation["motifNumber"] = loc.motifNumber
+        if (loc.level != null) mapLocation["level"] = loc.level
+        if (loc.cigarAlignment != null) mapLocation["cigarAlignment"] = loc.cigarAlignment
+        if (loc.fragments) mapLocation["fragments"] = loc.fragments.collect { LocationFragment.asMap(it) }
+        if (loc.sites) mapLocation["sites"] = loc.sites.collect { Site.asMap(it) }
+        mapLocation["representative"] = loc.representative
+        mapLocation["included"] = loc.included
+        return mapLocation
+    }
+
+
+
     static Location fromMap(data) {
         Location loc = new Location(
                 data.start,
@@ -565,6 +636,14 @@ class LocationFragment implements Serializable {
         this.dcStatus = dcStatus
     }
 
+    static Map asMap(LocationFragment locFrag) {
+        locFrag ? [
+                "start"   : locFrag.start,
+                "end"     : locFrag.end,
+                "dbStatus": locFrag.dcStatus
+        ] : [:]
+    }
+
     static LocationFragment fromMap(Map data) {
         return new LocationFragment(data.start, data.end, data.dcStatus)
     }
@@ -607,11 +686,11 @@ class Site implements Serializable {
         this.numLocations = siteLocations.size()
 
         for (SiteLocation loc: siteLocations) {
-            if (this.start == -1 || loc.start < this.start) {
+            if (loc.start == -1 || loc.start < this.start) {
                 this.start = loc.start
             }
 
-            if (this.end == -1 || loc.end > this.end) {
+            if (loc.end == -1 || loc.end > this.end) {
                 this.end = loc.end
             }
         }
@@ -648,10 +727,25 @@ class Site implements Serializable {
         return siteLocations
     }
 
+    static Map asMap(Site site) {
+        if (!site) { return [:] }
+        Map siteMap = [
+            "description"   : site.description,
+            "numLocations"  : site.numLocations ?: null,
+            "siteLocations" : site.siteLocations.collect { SiteLocation.asMap(it) }
+        ]
+        if (site.label) {    siteMap["label"]    = site.label }
+        if (site.group) {    siteMap["group"]    = site.group }
+        if (site.hmmStart) { siteMap["hmmStart"] = site.hmmStart }
+        if (site.hmmEnd) {   siteMap["hmmEnd"]   = site.hmmEnd }
+        return siteMap
+    }
+
     static Site fromMap(Map data) {
         return new Site(
                 data.description,
-                data.siteLocations.collect { SiteLocation.fromMap(it) })
+                data.siteLocations.collect { SiteLocation.fromMap(it) }
+        )
     }
 
     static Site fromJsonNode(JsonNode node) {
@@ -706,6 +800,10 @@ class SiteLocation implements Serializable {
         this.residue = residue
     }
 
+    static Map asMap(SiteLocation siteLoc ) {
+        return siteLoc ? [ "start": siteLoc.start, "end": siteLoc.end, "residue": siteLoc.residue ] : [:]
+    }
+
     static SiteLocation fromMap(Map data) {
         return new SiteLocation(data.start, data.end, data.residue)
     }
@@ -741,6 +839,17 @@ class TreeGrafter implements Serializable {
 
     TreeGrafter(String ancestralNodeID) {
         this.ancestralNodeID = ancestralNodeID
+    }
+
+    static Map asMap(TreeGrafter tg) {
+        return [
+            "ancestralNodeID":      tg.ancestralNodeID ? tg.ancestralNodeID : null,
+            "graftPoint":           tg.graftPoint,
+            "subfamilyAccession":   tg.subfamilyAccession,
+            "subfamilyName":        tg.subfamilyName,
+            "subfamilyDescription": tg.subfamilyDescription,
+            "proteinClass":         tg.proteinClass,
+        ]
     }
 
     static TreeGrafter fromMap(Map data) {
@@ -779,6 +888,10 @@ class RepresentativeInfo implements Serializable {
         this.rank = rank
     }
 
+    static Map asMap(RepresentativeInfo ri) {
+        return ri ? ["type": ri.type, "rank": ri.rank] : null
+    }
+
     static RepresentativeInfo fromMap(Map data) {
         if (data == null) {
             return null
@@ -810,6 +923,10 @@ class GoXRefs implements Serializable {
         this.id = id
     }
 
+    static Map asMap(GoXRefs go) {
+        return go ? ["name": go.name, "databaseName": go.databaseName, "category": go.category, "id": go.id] : null
+    }
+
     static GoXRefs fromMap(Map data) {
         if (data == null) {
             return null
@@ -827,6 +944,10 @@ class PathwayXRefs implements Serializable {
         this.name = name
         this.databaseName = databaseName
         this.id = id
+    }
+
+    static Map asMap(PathwayXRefs pthwy) {
+        return pthwy ? ["name": pthwy.name, "databaseName": pthwy.databaseName, "id": pthwy.id] : null
     }
 
     static PathwayXRefs fromMap(Map data) {
