@@ -90,14 +90,13 @@ process XREFS {
                                     addXRefs(match, interproAcc, ipr2go, goInfo, ipr2pa, paInfo)
                                 }
                             }
-
                             // Write out the model Acc and updated Match object
                             jsonGenerator.writeFieldName(modelAcc)
                             JsonWriter.writeMap(jsonGenerator, match)
-                    
+                        }  // end of if/else
                     jsonGenerator.writeEndObject()
                 } // end of matches
-             }  // end of Json reader / seq Id
+            }  // end of Json reader / seq Id
         } // end of members matches
         jsonGenerator.writeEndObject()
     }  // end of Json writer stream
