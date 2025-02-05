@@ -1,10 +1,10 @@
-class CandidateDomain {
-    // Used during selection of representative domains
+class CandidateLocation {
+    // Used during selection of representative locations
     Location location
     Set<Integer> residues = new HashSet<>()
     Integer representativeRank
 
-    CandidateDomain(Location location, Integer representativeRank) {
+    CandidateLocation(Location location, Integer representativeRank) {
         this.location = location
         this.representativeRank = representativeRank
     }
