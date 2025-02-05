@@ -58,8 +58,7 @@ def processProteinData(JsonNode protein, Map seqMatchesAggreg,  Map<String, Json
     seqMatchesAggreg[md5].xref << ["name": seqId + " " + protein.get("description"), "id": seqId]
     def Data = matchesMap[seqId]
     if (matchesMap.containsKey(seqId)) {
-        seqMatchesAggreg[md5].matches.addAll(matchesMap[seqId])
-        println("found matches: $Data")
+        seqMatchesAggreg[md5].matches.add(matchesMap[seqId])
     }
 }
 
@@ -77,14 +76,13 @@ process AGGREGATE_ALL_MATCHES {
     ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
     // Gather seqs by md5 to check for md5s with identical seqs and differing seq ids
     def allAggregatedData = [:]  // [md5: matches]
-    seqMatches.each { file ->
-        JsonReader.streamArray(file.toString(), jacksonMapper) { JsonNode node ->
-            md5 = node.get("md5").asText()
+    seqMatches.each { file ->    // seqMatches = [md5: Map<seq: str, md5: str, matches: {}, xref: []>]]
+        JsonReader.streamJson(file.toString(), jacksonMapper) { String md5, JsonNode node ->
             if (allAggregatedData.containsKey(md5)) {
                 // merge existing and new matches
-                ObjectNode existingNode = (ObjectNode) allAggregatedData.get(md5)          // mutable
+                ObjectNode existingMatches = (ObjectNode) allAggregatedData.get("matches")          // mutable
                 JsonNode newMatches = node.get("matches")                                  // immutable
-                ((ObjectNode) existingNode.get("matches")).setAll((ObjectNode) newMatches)
+                ((ObjectNode) existingMatches.get("matches")).setAll((ObjectNode) newMatches)
                 // merge existing and new xrefs - setAll is not applicable for ArrayNodes
                 ArrayNode existingXref = (ArrayNode) existingNode.get("xref")
                 ArrayNode newXref = (ArrayNode) node.get("xref")
@@ -99,7 +97,7 @@ process AGGREGATE_ALL_MATCHES {
     def outputFilePath = task.workDir.resolve("aggregated_results.json")
     JsonWriter.streamArray(outputFilePath.toString(), jacksonMapper) { generator ->
         allAggregatedData.each { md5, jsonNode ->
-            generator.writeTree(jsonNode)
+            JsonWriter.writeMap(generator, jacksonMapper, jsonNode)
         }
     }
 }
