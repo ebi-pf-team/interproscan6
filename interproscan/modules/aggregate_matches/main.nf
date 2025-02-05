@@ -75,13 +75,13 @@ process AGGREGATE_ALL_MATCHES {
     // Build a single mapper for all readers and writers to save memory
     ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
     // Gather seqs by md5 to check for md5s with identical seqs and differing seq ids
-    def allAggregatedData = [:]  // [md5: matches]
-    seqMatches.each { file ->    // seqMatches = [md5: Map<seq: str, md5: str, matches: {}, xref: []>]]
+    def allAggregatedData = [:]
+    seqMatches.each { file ->    // seqMatches = [md5: Map<seq: str, md5: str, matches: {obj}|[], xref: [{obj}]>]]
         JsonReader.streamJson(file.toString(), jacksonMapper) { String md5, JsonNode node ->
             if (allAggregatedData.containsKey(md5)) {
                 // merge existing and new matches
-                ObjectNode existingMatches = (ObjectNode) allAggregatedData.get("matches")          // mutable
-                JsonNode newMatches = node.get("matches")                                  // immutable
+                ObjectNode existingMatches = (ObjectNode) allAggregatedData.get("matches")  // mutable
+                JsonNode newMatches = node.get("matches")                                   // immutable
                 ((ObjectNode) existingMatches.get("matches")).setAll((ObjectNode) newMatches)
                 // merge existing and new xrefs - setAll is not applicable for ArrayNodes
                 ArrayNode existingXref = (ArrayNode) existingNode.get("xref")
