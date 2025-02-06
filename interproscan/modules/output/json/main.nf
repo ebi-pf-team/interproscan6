@@ -174,6 +174,7 @@ process WRITE_JSON_OUTPUT {
                     case ["SignalP_Euk", "SignalP-Prok"]:
                         matchResult["orgType"] = matchObj.signalp.orgType
                 }
+
                 seqMatches.add(matchResult)
             }
         }

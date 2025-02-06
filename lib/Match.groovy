@@ -116,6 +116,7 @@ class Signature implements Serializable {
     String accession
     String name
     String description
+    String type
     Entry entry
     SignatureLibraryRelease signatureLibraryRelease = new SignatureLibraryRelease(null, null)
 
@@ -140,17 +141,49 @@ class Signature implements Serializable {
         this.entry = entry
     }
 
+    Signature(String accession,
+              String name,
+              String description,
+              String type,
+              SignatureLibraryRelease library,
+              Entry entry) {
+        this.accession = accession
+        this.name = name
+        this.description = description
+        this.type = type ? type[0].toUpperCase() + type[1..-1].toLowerCase() : null
+        this.signatureLibraryRelease = library
+        this.entry = entry
+    }
+
+    void addType(String signatureType) {
+        if (signatureType) {
+            this.type = signatureType
+        }
+    }
+
     static Signature fromMap(Map data) {
         if (data == null) {
             return null
         }
-        return new Signature(
-                data.accession,
-                data.name,
-                data.description,
-                SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
-                Entry.fromMap(data.entry)
-        )
+        if (data.containsKey("type") | data.type != null) {
+            return new Signature(
+                    data.accession,
+                    data.name,
+                    data.description,
+                    data.type,
+                    SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
+                    Entry.fromMap(data.entry)
+            )
+        } else {
+            return new Signature(
+                    data.accession,
+                    data.name,
+                    data.description,
+                    data.type,
+                    SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
+                    Entry.fromMap(data.entry)
+            )
+        }
     }
 }
 

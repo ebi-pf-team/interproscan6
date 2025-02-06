@@ -103,6 +103,11 @@ process XREFS {
                             signatureInfo["representative"]["type"],
                             signatureInfo["representative"]["index"]
                         )
+                        if (signatureInfo["representative"]["type"]) {
+                            String sigType = signatureInfo["representative"]["type"]
+                            sigType = sigType[0].toUpperCase() + sigType[1..-1].toLowerCase()
+                            matchObject.signature.addType(sigType)
+                        }
                         matchObject.representativeInfo = representativeInfo
                     }
 
