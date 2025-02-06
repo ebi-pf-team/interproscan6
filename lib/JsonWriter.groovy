@@ -49,9 +49,7 @@ class JsonWriter {
             fileWriter = new FileWriter(new File(filePath))
             generator = factory.createGenerator(fileWriter)
             generator.writeStartArray()
-
             closure.call(generator)
-
             generator.writeEndArray()
         } catch (IOException e) {
             throw new JsonException("IO error writing file: $filePath -- $e", e)
