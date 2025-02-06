@@ -65,7 +65,6 @@ workflow {
         )
         matchResults = SCAN_SEQUENCES.out
     } else {
-        log.info "Using precalculated match lookup service"
         LOOKUP_MATCHES(
             ch_seqs,
             apps,
