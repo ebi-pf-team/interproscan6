@@ -43,12 +43,26 @@ process PARSE_PFAM {
     // filter matches
     hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
         // sorting matches by evalue ASC, score DESC to keep the best matches
-        Map<String, Match> sortedMatches = matches.sort { a, b ->
-            (a.value.evalue <=> b.value.evalue) ?: -(a.value.score <=> b.value.score)
+        def allMatches = matches.collectMany { modelAccession, match ->
+            Match matchInfo = new Match(
+                match.modelAccession,
+                match.evalue,
+                match.score,
+                match.bias,
+                match.signature
+            )
+            match.locations.collect { location ->
+                [accession: modelAccession, match: matchInfo, location: location]
+            }
         }
+        allMatches.sort { a, b ->
+            (a.location.evalue <=> b.location.evalue) ?: -(a.location.score <=> b.location.score)
+        }
+
         filteredMatches[seqId] = [:]
-        sortedMatches.each { modelAccession, match ->
-            modelAccession = modelAccession.split("\\.")[0]
+        allMatches.each { info ->
+            def match = info.match
+            modelAccession = info.accession.split("\\.")[0]
             match.modelAccession = modelAccession
             match.signature.accession = modelAccession
             boolean keep = true
@@ -59,28 +73,25 @@ process PARSE_PFAM {
                 Map<String, List<String>> filteredMatchInfo = nestedInfo[filteredAcc] ?: [:]
                 String filteredMatchClan = filteredMatchInfo?.get("clan", null)
                 if (candidateClan && candidateClan == filteredMatchClan) {  // check if both are on the same clan
-                    List<Location> notOverlappingLocations = match.locations.findAll { candidateLocation ->
-                        boolean isOverlapping = filteredMatch.locations.any { filteredLocation ->
-                            isOverlapping(candidateLocation, filteredLocation)
-                        }
-                        if (isOverlapping) {
-                            List<String> candidateNested = candidateMatch.get("nested", [])
-                            List<String> filteredNested = filteredMatchInfo.get("nested", [])
-                            boolean matchesAreNested = candidateNested && filteredNested && candidateNested.intersect(filteredNested)
-                            matchesAreNested  // if they are nested, keep both
-                        } else {
-                            true  // keep if not overlapping
-                        }
+                    boolean isOverlapping = filteredMatch.locations.any { filteredLocation ->
+                        isOverlapping(info.location, filteredLocation)
                     }
-                    if (!notOverlappingLocations) {
-                        keep = false
-                    } else {
-                        match.locations = notOverlappingLocations
+                    if (isOverlapping) {
+                        List<String> candidateNested = candidateMatch.get("nested", [])
+                        List<String> filteredNested = filteredMatchInfo.get("nested", [])
+                        boolean matchesAreNested = candidateNested && filteredNested && candidateNested.intersect(filteredNested)
+                        matchesAreNested  // if they are nested, keep both
+                        if (!matchesAreNested) {
+                            keep = false
+                        }
                     }
                 }
             }
             if (keep) {
-                filteredMatches[seqId][modelAccession] = match
+                if (!filteredMatches[seqId].containsKey(modelAccession)) {
+                    filteredMatches[seqId][modelAccession] = match
+                }
+                filteredMatches[seqId][modelAccession].locations << info.location
             }
         }
     }
