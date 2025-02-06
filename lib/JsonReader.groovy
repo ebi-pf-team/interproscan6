@@ -113,48 +113,4 @@ class JsonReader {
             throw new Exception("IO error reading file: $filePath", e)
         }
     }
-
-    static Map<String, List<JsonNode>> loadMapsWithArrays(String filePath, ObjectMapper mapper) {
-        /*
-        Load all contents of a JSON file (which is keyed by strings and valued by arrays of JSON objects) into memory,
-        storing internal nodes as JsonNodes to reduce memory requirements compared to storing the data as maps.
-        Each key in the JSON object maps to an array of JSON objects.
-        To use:
-        ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-        def matchesMap = JsonReader.loadMapWithArrayValues(filePath, mapper)
-        def arrayNodes = matchesMap.get("EE3D0CF36BFC1CD0F54575DBD337E3AD")
-        */
-        try {
-            File file = new File(filePath)
-            JsonNode rootNode = mapper.readTree(file)
-            if (!rootNode.isObject()) {
-                throw new JsonMappingException("Expected JSON object at root level")
-            }
-
-            Map<String, List<JsonNode>> dataMap = new HashMap<>()
-            rootNode.fields().each { entry ->
-                // If the value is an array, we store the list of JSON nodes
-                if (entry.value.isArray()) {
-                    List<JsonNode> nodeList = new ArrayList<>()
-                    entry.value.each { JsonNode node ->
-                        nodeList.add(node)
-                    }
-                    dataMap.put(entry.key, nodeList)
-                } else {
-                    // In case the value is not an array, we store it as a single element
-                    dataMap.put(entry.key, [entry.value])
-                }
-            }
-
-            return dataMap
-        } catch (FileNotFoundException e) {
-            throw new Exception("File not found: $filePath", e)
-        } catch (JsonParseException e) {
-            throw new Exception("Error parsing JSON file: $filePath", e)
-        } catch (JsonMappingException e) {
-            throw new Exception("Error mapping JSON content for file: $filePath", e)
-        } catch (IOException e) {
-            throw new Exception("IO error reading file: $filePath", e)
-        }
-    }
 }
