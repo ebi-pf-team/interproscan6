@@ -29,8 +29,8 @@ process AGGREGATE_SEQS_MATCHES {
     ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
     // Load the entire JSON file of matches to retrieve matches by the md5 of the seq
     def matchesMap = JsonReader.load(matchesPath.toString(), jacksonMapper)  // [seqId: [modelAcc: [Match]]
-    def seqMatchesAggreg = [:].withDefault { [sequence: '', md5: '', matches: [], xref: []] }
 
+    def seqMatchesAggreg = [:]
     JsonReader.streamJson(seqsPath.toString(), jacksonMapper) { String seqId, JsonNode node ->
         if (nucleic) {  // node = [protMd5: [{protein}, {protein}, {protein}]]
             node.fields().each { entry ->
@@ -53,12 +53,12 @@ process AGGREGATE_SEQS_MATCHES {
 
 def processProteinData(JsonNode protein, Map seqMatchesAggreg,  Map<String, JsonNode> matchesMap, String seqId) {
     md5 = protein.get("md5").asText()
-    seqMatchesAggreg[md5].sequence = protein.get("sequence").asText()
-    seqMatchesAggreg[md5].md5 = md5
-    seqMatchesAggreg[md5].xref << ["name": seqId + " " + protein.get("description"), "id": seqId]
-    def Data = matchesMap[seqId]
-    if (matchesMap.containsKey(seqId)) {
-        seqMatchesAggreg[md5].matches.add(matchesMap[seqId])
+    def entry = seqMatchesAggreg.computeIfAbsent(md5, { [sequence: protein.get("sequence").asText(), md5: md5, matches: [:], xref: []] })
+    entry.xref << ["name": seqId + " " + protein.get("description"), "id": seqId]
+    if (matchesMap.containsKey(seqId)) { // matchesMap[seqId] is an ObjectNode, keyed by modelAcc and valued by ObjectNode repr of Matches
+        matchesMap[seqId].fields().each { matchNode ->
+            seqMatchesAggreg[md5]["matches"][matchNode.key] = Match.fromJsonNode((JsonNode) matchNode.value)
+        }
     }
 }
 
