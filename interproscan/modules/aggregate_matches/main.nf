@@ -32,18 +32,15 @@ process AGGREGATE_SEQS_MATCHES {
 
     def seqMatchesAggreg = [:]
     JsonReader.streamJson(seqsPath.toString(), jacksonMapper) { String seqId, JsonNode node ->
-        if (nucleic) {  // node = [protMd5: [{protein}, {protein}, {protein}]]
-            node.fields().each { entry ->
-                JsonNode proteins = entry.value  // array of proteins from the predicted ORFs
-                proteins.forEach { protein ->
-                    processProteinData(protein, seqMatchesAggreg, matchesMap, seqId)
-                    md5 = protein.get("md5").asText()
-                    seqMatchesAggreg[md5].translatedFrom = seqMatchesAggreg[md5].translatedFrom ?: []
-                    seqMatchesAggreg[md5].translatedFrom << protein.get("translatedFrom")
-                }
+        if (nucleic) { // seqId = Protein Seq MD5, node = [{prot}, {prot}]
+            node.forEach { protein ->
+                protSeqId = protein.get("id").asText()
+                processProteinData(protein, seqMatchesAggreg, matchesMap, protSeqId)
+                seqMatchesAggreg[seqId].translatedFrom = seqMatchesAggreg[seqId].translatedFrom ?: []
+                seqMatchesAggreg[seqId].translatedFrom << protein.get("translatedFrom")
             }
-        } else {  // node = [protSeqId: {protein}]
-           processProteinData(node, seqMatchesAggreg, matchesMap, seqId)
+        } else {  // node = [Protein Seq Id: {protein}]
+            processProteinData(node, seqMatchesAggreg, matchesMap, seqId)
         }
     }
 
