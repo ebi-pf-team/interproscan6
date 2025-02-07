@@ -132,7 +132,7 @@ class InterProScan {
             // Convert to kebab-case
             def kebabParamName = this.camelToKebab(paramName)
             if (!allowedParams.contains(kebabParamName.toLowerCase())) {
-                log.warn "Unrecognised option: --${kebabParamName}. Try '--help' for more information."
+                log.warn "Unrecognised option: '--${paramName}'. Try '--help' for more information."
             }
         }
 
