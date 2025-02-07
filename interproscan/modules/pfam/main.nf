@@ -44,13 +44,15 @@ process PARSE_PFAM {
     hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
         // sorting matches by evalue ASC, score DESC to keep the best matches
         def allMatches = matches.collectMany { modelAccession, match ->
+            modelAccession = modelAccession.split("\\.")[0]
             Match matchInfo = new Match(
-                match.modelAccession.split("\\.")[0],
+                modelAccession,
                 match.evalue,
                 match.score,
                 match.bias,
                 match.signature
             )
+            matchInfo.signature.accession = modelAccession
             match.locations.collect { location ->
                 [accession: modelAccession, match: matchInfo, location: location]
             }
@@ -62,7 +64,7 @@ process PARSE_PFAM {
         filteredMatches[seqId] = [:]
         allMatches.each { info ->
             def match = info.match
-            modelAccession = info.accession.split("\\.")[0]
+            modelAccession = info.accession
             boolean keep = true
             Map<String, List<String>> candidateMatch = nestedInfo[modelAccession] ?: [:]
             String candidateClan = candidateMatch?.get("clan", null)
