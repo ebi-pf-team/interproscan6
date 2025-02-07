@@ -45,7 +45,7 @@ process PARSE_PFAM {
         // sorting matches by evalue ASC, score DESC to keep the best matches
         def allMatches = matches.collectMany { modelAccession, match ->
             Match matchInfo = new Match(
-                match.modelAccession,
+                match.modelAccession.split("\\.")[0],
                 match.evalue,
                 match.score,
                 match.bias,
@@ -63,8 +63,6 @@ process PARSE_PFAM {
         allMatches.each { info ->
             def match = info.match
             modelAccession = info.accession.split("\\.")[0]
-            match.modelAccession = modelAccession
-            match.signature.accession = modelAccession
             boolean keep = true
             Map<String, List<String>> candidateMatch = nestedInfo[modelAccession] ?: [:]
             String candidateClan = candidateMatch?.get("clan", null)
