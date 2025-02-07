@@ -37,39 +37,49 @@ process WRITE_TSV_OUTPUT {
 
             seqNode.get("xref").each { xrefData ->
                 match.locations.each { Location loc ->
-                    String seqId = nucleic ? "${seqNode.get('translatedFrom').get('id').asText()}_${xrefData.get('id').asText()}"
-                                           : xrefData.get("id").asText()
-                    int start = loc.start
-                    int end = loc.end
-                    def scoringValue = "-"
-                    switch (memberDb) {
-                        case ["CDD", "PRINT"]:
-                            scoringValue = match.evalue
-                            break
-                        case ["SignalP-Prok", "SignalP-Euk"]:
-                            scoringValue = loc.pvalue
-                            break
-                        case ["HAMAP", "PROSITE profiles"]:
-                            scoringValue = loc.score
-                            break
-                        case ["COILS", "MobiDB-lite", "Phobius", "PROSITE patterns", "DeepTMHMM"]:
-                            scoringValue = "-"
-                            break
-                        default:
-                            scoringValue = loc.evalue
-                            break
+                    if ( nucleic ) {
+                        seqNode.get("translatedFrom").forEach { translatedFromNode ->
+                            seqId = "${translatedFromNode.get('id').asText()}_${xrefData.get('id').asText()}"
+                            writeToTsv(tsvFile, match, currentDate, memberDb, sigDesc, goterms, pathways, entryAcc, entryDesc, status, seqNode, xrefData, loc, seqId)
+                        }
+                    } else {
+                        String seqId = xrefData.get("id").asText()
+                        writeToTsv(tsvFile, match, currentDate, memberDb, sigDesc, goterms, pathways, entryAcc, entryDesc, status, seqNode, xrefData, loc, seqId)
                     }
-
-                    tsvFile.append([
-                        seqId, seqNode.get("md5").asText(), seqNode.get("sequence").asText().length(),
-                        memberDb,
-                        match.signature.accession, sigDesc,
-                        start, end, scoringValue, status,
-                        currentDate,
-                        entryAcc, entryDesc, goterms, "${pathways}\n"
-                    ].join('\t'))
                 }
             }
         }
     }
+}
+
+def writeToTsv(tsvFile, match, currentDate, memberDb,  sigDesc, goterms, pathways, entryAcc, entryDesc, status, seqNode, xrefData, loc, seqId) {
+    int start = loc.start
+    int end = loc.end
+    def scoringValue = "-"
+    switch (memberDb) {
+        case ["CDD", "PRINT"]:
+            scoringValue = match.evalue
+            break
+        case ["SignalP-Prok", "SignalP-Euk"]:
+            scoringValue = loc.pvalue
+            break
+        case ["HAMAP", "PROSITE profiles"]:
+            scoringValue = loc.score
+            break
+        case ["COILS", "MobiDB-lite", "Phobius", "PROSITE patterns", "DeepTMHMM"]:
+            scoringValue = "-"
+            break
+        default:
+            scoringValue = loc.evalue
+            break
+    }
+
+    tsvFile.append([
+        seqId, seqNode.get("md5").asText(), seqNode.get("sequence").asText().length(),
+        memberDb,
+        match.signature.accession, sigDesc,
+        start, end, scoringValue, status,
+        currentDate,
+        entryAcc, entryDesc, goterms, "${pathways}\n"
+    ].join('\t'))
 }
