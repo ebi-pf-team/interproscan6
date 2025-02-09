@@ -18,7 +18,7 @@ process WRITE_XML_OUTPUT {
     val ips6Version
 
     exec:
-    def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+source=(.*)\s+coords=(\d+)\.\.(\d+)\s+.+frame=(\d+)\s+desc=(.*)$/)
+    def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+"?source=(.*?)"?\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=(.*)$/)
     def writer = new StringWriter()
     def xml = new MarkupBuilder(writer)
     // set the correct encoding so symbols are formatted correctly in the final output
@@ -36,34 +36,43 @@ process WRITE_XML_OUTPUT {
             def processedNT = []
             def groupedByNT = [:]  // ntSeqMd5 : [ObjectNode protein]
             JsonReader.streamArray(matches.toString(), jacksonMapper) { ObjectNode seqNode ->
+                // The seq node contains an translatedFrom for each identical nucleotide seq. The seqs are the same but id/desc differ
                 if (seqNode.get("translatedFrom") != null) {
                     String ntSequenceMD5 = seqNode.get("translatedFrom").get(0).get("md5").asText()
-                    groupedByNT.computeIfAbsent(ntSequenceMD5) { [] }.add(seqNode)
+                    if (groupedByNT.containsKey(ntSequenceMD5)) {
+                        groupedByNT[ntSequenceMD5].add(seqNode)
+                    } else {
+                        groupedByNT[ntSequenceMD5] = [seqNode]
+                    }
                 }
             } // end of nucleotide JsonReader
 
-            groupedByNT.each { ntSequenceMD5, proteins ->
+            groupedByNT.each { String ntSequenceMD5, List<ObjectNode> seqNodes ->
+                /* Multiple ORFs can be found in each input nucleotide sequence, and there can be multiple
+                identical nucleotide sequences with different sequence ids. */
                 if (!processedNT.contains(ntSequenceMD5)) {
                     processedNT << ntSequenceMD5
-                    ObjectNode firstNT = proteins.get(0).get("translatedFrom").get(0)  // Use the first entry for shared nucleic seq
+                    String ntSequence = seqNodes.get(0).get("translatedFrom").get(0).get("sequence").asText()
                     "nucleotide-sequence" {
-                        sequence(md5: ntSequenceMD5, firstNT.get("sequence").asText())
-                        firstNT.get("xrefs").forEach { crossRef ->
-                            xref(id: crossRef.get("id").asText(), name: "${crossRef.get('id').asText()} ${crossRef.get('description').asText()}")
+                        sequence(md5: ntSequenceMD5, ntSequence)
+                        // list all identical nucleotide seqs in the input file
+                        seqNodes.get(0).get("translatedFrom").forEach { ntRef ->
+                            xref(id: ntRef.get("id").asText(), name: "${ntRef.get('id').asText()} ${ntRef.get('description').asText()}")
                         }
-                        proteins.forEach { ObjectNode proteinData ->
-                            def ntMatch = NT_SEQ_ID_PATTERN.matcher(proteinData.get("xref").get(0).get("name").asText())
+                        seqNodes.forEach { ObjectNode proteinNode ->
+                            def x = proteinNode.get("xref").get(0).get("name").asText().replaceAll(/^"|"$/, "")
+                            def ntMatch = NT_SEQ_ID_PATTERN.matcher(proteinNode.get("xref").get(0).get("name").asText().replaceAll(/^"|"$/, ""))
                             assert ntMatch.matches()
                             def start = ntMatch.group(2) as int
                             def end = ntMatch.group(3) as int
                             def strand = (ntMatch.group(4) as int) < 4 ? "SENSE" : "ANTISENSE"
                             orf(start: start, end: end, strand: strand) {
                                 protein {
-                                    sequence(md5: proteinData.get("md5").asText(), proteinData.get("sequence").asText())
+                                    sequence(md5: proteinNode.get("md5").asText(), proteinNode.get("sequence").asText())
                                     matches {
-                                        processMatches(proteinData.get("matches"), xml)
+                                        processMatches(proteinNode.get("matches"), xml)
                                     }
-                                    proteinData.get("xref").forEach { ref ->
+                                    proteinNode.get("xref").forEach { ref ->
                                         xref(id: ref.get("id"), name: ref.get("name"))
                                     }
                                 }
