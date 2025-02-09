@@ -1,9 +1,12 @@
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.SerializationFeature
 import groovy.xml.MarkupBuilder
 import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 import java.io.StringWriter
 import java.util.regex.Pattern
-import com.fasterxml.jackson.core.JsonToken
 
 process WRITE_XML_OUTPUT {
     label 'local'
@@ -22,46 +25,46 @@ process WRITE_XML_OUTPUT {
     xml.setEscapeAttributes(false) // Prevent escaping attributes
     xml.setEscapeText(false)       // Prevent escaping text
 
-    JsonProcessor processor = new JsonProcessor()
-    def parser = processor.createParser(matches.toString())
-
+    ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+    // matches = [{sequence: str, md5: str, matches: {modelAcc: Match}, xref:[], translatedFrom: {}]
     String matchType = nucleic ? "nucleotide-sequence-matches" : "protein-matches"
     xml."$matchType"("interproscan-version": ips6Version) {
         if (nucleic) {
+            /* Group by their parent NT seq first then write out to file.
+            This will take a lot of memory but no longer will have the later standardisation of
+            the sequence storage. Until then we can reduce memory requirements by storing data as Json/ObjectNodes */
             def processedNT = []
-            def groupedByNT = [:]
-
-            while (parser.nextToken() != JsonToken.END_ARRAY) {
-                Map seqData = parser.readValueAs(Map)
-                if (seqData.translatedFrom) {
-                    def ntSequenceMD5 = seqData.translatedFrom[0].md5
-                    groupedByNT.computeIfAbsent(ntSequenceMD5) { [] }.add(seqData)
+            def groupedByNT = [:]  // ntSeqMd5 : [ObjectNode protein]
+            JsonReader.streamArray(matches.toString(), jacksonMapper) { ObjectNode seqNode ->
+                if (seqNode.get("translatedFrom") != null) {
+                    String ntSequenceMD5 = seqNode.get("translatedFrom").get(0).get("md5").asText()
+                    groupedByNT.computeIfAbsent(ntSequenceMD5) { [] }.add(seqNode)
                 }
-            }
+            } // end of nucleotide JsonReader
 
             groupedByNT.each { ntSequenceMD5, proteins ->
                 if (!processedNT.contains(ntSequenceMD5)) {
                     processedNT << ntSequenceMD5
-                    def firstNT = proteins[0].translatedFrom[0]  // Use the first entry for shared nucleic seq
+                    ObjectNode firstNT = proteins.get(0).get("translatedFrom").get(0)  // Use the first entry for shared nucleic seq
                     "nucleotide-sequence" {
-                        sequence(md5: ntSequenceMD5, firstNT.sequence)
-                        firstNT.xrefs.each { crossRef ->
-                            xref(id: crossRef.id, name: "${crossRef.id} ${crossRef.description}")
+                        sequence(md5: ntSequenceMD5, firstNT.get("sequence").asText())
+                        firstNT.get("xrefs").forEach { crossRef ->
+                            xref(id: crossRef.get("id").asText(), name: "${crossRef.get('id').asText()} ${crossRef.get('description').asText()}")
                         }
-                        proteins.each { proteinData ->
-                            def ntMatch = NT_SEQ_ID_PATTERN.matcher(proteinData.xref[0].name)
+                        proteins.forEach { ObjectNode proteinData ->
+                            def ntMatch = NT_SEQ_ID_PATTERN.matcher(proteinData.get("xref").get(0).get("name").asText())
                             assert ntMatch.matches()
                             def start = ntMatch.group(2) as int
                             def end = ntMatch.group(3) as int
                             def strand = (ntMatch.group(4) as int) < 4 ? "SENSE" : "ANTISENSE"
                             orf(start: start, end: end, strand: strand) {
                                 protein {
-                                    sequence(md5: proteinData.md5, proteinData.sequence)
+                                    sequence(md5: proteinData.get("md5").asText(), proteinData.get("sequence").asText())
                                     matches {
-                                        processMatches(proteinData.matches, xml)
+                                        processMatches(proteinData.get("matches"), xml)
                                     }
-                                    proteinData.xref.each { ref ->
-                                        xref(id: ref.id, name: ref.name)
+                                    proteinData.get("xref").forEach { ref ->
+                                        xref(id: ref.get("id"), name: ref.get("name"))
                                     }
                                 }
                             }
@@ -70,15 +73,12 @@ process WRITE_XML_OUTPUT {
                 }
             }
         } else {
-            while (parser.nextToken() != JsonToken.END_ARRAY) {
-                Map seqData = parser.readValueAs(Map)
+            JsonReader.streamArray(matches.toString(), jacksonMapper) { ObjectNode seqNode ->
                 protein {
-                    sequence(md5: seqData.md5, seqData.sequence)
-                    matches {
-                        processMatches(seqData.matches, xml)
-                    }
-                    seqData.xref.each { ref ->
-                        xref(id: ref.id, name: ref.name)
+                    sequence(md5: seqNode.get("md5").asText(), seqNode.get("sequence").asText())
+                    matches { processMatches(seqNode.get("matches"), xml) }
+                    seqNode.get("xref").each { xrefData ->
+                        xref(id: xrefData.get("id").asText(), name: xrefData.get("name").asText())
                     }
                 }
             }
@@ -109,8 +109,8 @@ def processMatches(matches, xml) {
         "DeepTMHMM": []
     ]
 
-    matches.each { modelAcc, matchMap ->
-        Match matchObj = Match.fromMap(matchMap)
+    matches.fields().each { entry ->
+        Match matchObj = Match.fromJsonNode(entry.value)
         def matchNodeName
         def memberDb = matchObj.signature.signatureLibraryRelease.library
         if (hmmer3Members.contains(memberDb)) {
