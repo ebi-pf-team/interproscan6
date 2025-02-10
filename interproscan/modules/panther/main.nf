@@ -29,7 +29,7 @@ process PREPARE_TREEGRAFTER {
 
     output:
     tuple val(meta), path("panther.json"),                             emit: json
-    tuple val(meta), val(sequenceIds), val(familyIds), path(fastas),   emit: fasta
+    tuple val(meta), val(sequenceIds), val(familyIds), val(fastas),    emit: fasta
     
     exec:
     def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString(), "PANTHER")
@@ -138,7 +138,7 @@ process RUN_TREEGRAFTER {
     label 'small', 'ips6_container'
     
     input:
-    tuple val(meta), val(sequenceIds), val(familyIds), path(fastas)
+    tuple val(meta), val(sequenceIds), val(familyIds), val(fastas)
     path msf_dir
 
     output:
