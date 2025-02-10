@@ -121,7 +121,6 @@ process PARSE_SFLD {
         def selectedMatches = [] as Set
         matches.each { match ->
             def parents = hierarchy.get(match.modelAccession)
-
             if (parents) {
                 /*
                     Propagate match up through it hierarchy.
@@ -131,7 +130,7 @@ process PARSE_SFLD {
                 def promotedMatches = parents
                     .findAll { it != match.modelAccession }
                     .collect {
-                        Signature signature = new Signature(match.modelAccession, library)
+                        Signature signature = new Signature(it, library)
                         Match promotedMatch = new Match(it, match.evalue, match.score, match.bias, signature)
                         promotedMatch.addLocation(match.locations[0].clone())
                         return promotedMatch
@@ -202,8 +201,8 @@ Map<String, Set<String>> parseHierarchy(String filePath) {
     file.withReader{ reader ->
         for (String line = reader.readLine(); line != null; line = reader.readLine()) {
             def accessions = line.split(/\t/).toList()
-            def childAccession = accessions[-1].split(/\s/).first()  // removing the description
-            def parents = accessions.subList(0, accessions.size() - 1)
+            def childAccession = accessions[-2]  // the last one is the description
+            def parents = accessions.subList(0, accessions.size() - 2)
             hierarchy[childAccession] = parents as Set
             for (parent in parents) {  // making sure all the ancestors are in the hierarchy
                 ancestors = hierarchy.get(parent)
