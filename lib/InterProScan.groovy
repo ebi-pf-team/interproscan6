@@ -259,10 +259,10 @@ class InterProScan {
         return errorMsg ? "Could not find the following XREF data files\n${errorMsg.join('\n')}" : null
     }
 
-    static String validateFormats(String userFormats) {
+    static Set<String> validateFormats(String userFormats) {
         Set<String> formats = userFormats.toUpperCase().split(',') as Set
         def invalidFormats = formats - VALID_FORMATS
-        return invalidFormats ? "Invalid output file format provided:\n${invalidFormats.join('\n')}" : null
+        return invalidFormats ? [null, "Invalid output file format provided:\n${invalidFormats.join('\n')}"] : [formats, null]
     }
 
     static List<String> validateSignalpMode(String signalpMode) {
