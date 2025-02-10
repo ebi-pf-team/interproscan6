@@ -201,14 +201,18 @@ Map<String, Set<String>> parseHierarchy(String filePath) {
     File file = new File(filePath)
     file.withReader{ reader ->
         for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-            def fields = line.split(":")
-            assert fields.size() == 2
-            String childAccession = fields[0]
-            def parents = fields[1].trim().split(/\s+/)
-            hierarchy[childAccession] = (parents*.trim()) as Set
-        }
+            def accessions = line.split(/\t/).toList()
+            def childAccession = accessions[-1].split(/\s/).first()  // removing the description
+            def parents = accessions.subList(0, accessions.size() - 1)
+            hierarchy[childAccession] = parents as Set
+            for (parent in parents) {  // making sure all the ancestors are in the hierarchy
+                ancestors = hierarchy.get(parent)
+                if (ancestors.size() > 0) {
+                    hierarchy[childAccession].addAll(ancestors)
+                }
+            }
+	}
     }
-
     return hierarchy
 }
 
