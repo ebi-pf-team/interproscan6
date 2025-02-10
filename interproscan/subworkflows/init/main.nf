@@ -44,6 +44,13 @@ workflow INIT_PIPELINE {
         datadir = ""
     }
 
+    // Check valid output file formats were provided
+    error = InterProScan.validateFormats(params.formats)
+    if (error) {
+        log.error error
+        exit 1
+    }
+
     // Build output dir if needed
     (outdir, error) = InterProScan.resolveDirectory(params.outdir, false, true)
     if (!outdir) {
