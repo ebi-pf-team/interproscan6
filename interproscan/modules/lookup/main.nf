@@ -58,11 +58,11 @@ process LOOKUP_MATCHES {
                 def response = connection.inputStream.text
 
                 def jsonResponse = new JsonSlurper().parseText(response)
-                jsonResponse.each { md5, matches ->
-                    seqId = sequences[md5].id
-                    if (matches != null) {
+                jsonResponse.results.each {
+                    seqId = sequences[it.md5].id
+                    if (it.found) {
                         calculatedMatches[seqId] = [:]
-                        matches.each { match ->
+                        it.matches.each { match ->
                             Match matchObj = Match.fromMap(match)
                             memberDB = matchObj.signature.signatureLibraryRelease.library
                             stdMemberDB = memberDB.toLowerCase().replaceAll("[-\\s]", "")
@@ -73,7 +73,7 @@ process LOOKUP_MATCHES {
                             }
                         }
                     } else {
-                        def seq = sequences[md5]
+                        def seq = sequences[it.md5]
                         noLookupMap[seqId] = seq
                         noLookupFasta.append(">${seqId} ${seq.description}\n")
                         noLookupFasta.append("${seq.sequence}\n")
@@ -84,11 +84,11 @@ process LOOKUP_MATCHES {
         } catch (Exception e) {
             attempt++
             if (attempt >= maxRetries) {
-                log.error "Unable to connect to the match lookup service. Max retries reached. Running analysis locally"
+                log.error "Unable to retrieve pre-calculated matches. Running analyses locally."
                 exceededRetries = true
                 break
             }
-            log.warn "Could not connect to the match lookup service. Retrying connection."
+            log.warn "An error occurred when retrieving pre-calculated matches. Retrying."
         }
     }
 
