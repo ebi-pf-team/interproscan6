@@ -16,7 +16,7 @@ process WRITE_JSON_OUTPUT {
 
     exec:
     ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-    def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+source=(.*)\s+coords=(\d+)\.\.(\d+)\s+.+frame=(\d+)\s+desc=(.*)$/)
+    def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+"source=([^"]+)\s+coords=(\d+)\.\.(\d+)\s+length=(\d+)\s+frame=(\d+)\s+desc=(.*)"$/)
     Map<String, List<String>> membersLocationFields = [
         "CDD": ["evalue-match", "score-match"],
         "COILS": [],
@@ -195,8 +195,7 @@ process WRITE_JSON_OUTPUT {
                         ]
                     }
                 }
-
-                def ntMatch = NT_SEQ_ID_PATTERN.matcher(seqNode.get("xref").get(0).get("name").asText().replaceAll(/^"|"$/, ""))
+                def ntMatch = NT_SEQ_ID_PATTERN.matcher(seqNode.get("xref").get(0).get("name").asText())
                 assert ntMatch.matches()
                 nucleicResults[nucleicSeqMd5].openReadingFrames << [
                     start   : ntMatch.group(2) as int,
@@ -210,7 +209,6 @@ process WRITE_JSON_OUTPUT {
                     ]
                 ]
             }
-
             if (nucleic) {
                 nucleicResults.values().each { result ->
                     jsonWriter.writeObject(result)
