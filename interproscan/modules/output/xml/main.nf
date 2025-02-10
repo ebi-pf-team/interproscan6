@@ -60,7 +60,6 @@ process WRITE_XML_OUTPUT {
                             xref(id: ntRef.get("id").asText(), name: "${ntRef.get('id').asText()} ${ntRef.get('description').asText()}")
                         }
                         seqNodes.forEach { ObjectNode proteinNode ->
-                            def x = proteinNode.get("xref").get(0).get("name").asText().replaceAll(/^"|"$/, "")
                             def ntMatch = NT_SEQ_ID_PATTERN.matcher(proteinNode.get("xref").get(0).get("name").asText().replaceAll(/^"|"$/, ""))
                             assert ntMatch.matches()
                             def start = ntMatch.group(2) as int
