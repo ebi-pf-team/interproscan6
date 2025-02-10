@@ -38,8 +38,8 @@ process WRITE_JSON_OUTPUT {
     ]
     List<String> otherMembersLocationFields = ["evalue", "score", "hmmStart", "hmmEnd", "hmmLength", "hmmBounds", "envelopeStart", "envelopeEnd"]
 
-    def nucleicResults = [:]    
-    
+    def nucleicResults = [:]
+
     def outputFilePath = "${outputPath}.ips6.json"
     JsonWriter.streamJson(outputFilePath.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
         // {"interproscan-version": str, "results": []}
@@ -49,7 +49,7 @@ process WRITE_JSON_OUTPUT {
 
         JsonReader.streamArray(matches.toString(), jacksonMapper) { ObjectNode seqNode ->
             List seqMatches = []
-            sequence.get("matches").fields().each { matchNode ->
+            seqNode.get("matches").fields().each { matchNode ->
                 Match matchObj = Match.fromJsonNode((JsonNode) matchNode.value)
                 String memberDB = matchObj.signature.signatureLibraryRelease.library ?: ""
                 matchResult = [
@@ -177,18 +177,18 @@ process WRITE_JSON_OUTPUT {
                     seqMatches.add(matchResult)
                 }
             }
-            sequence["matches"] = seqMatches
+            seqNode.set("matches", jacksonMapper.valueToTree(seqMatches))
 
             if (nucleic) {
-                def nucleicSeqMd5 = sequence.get("translatedFrom").get(0).get("md5")  // nucleic sequence md5 - same for all ORFs
+                def nucleicSeqMd5 = seqNode.get("translatedFrom").get(0).get("md5")  // nucleic sequence md5 - same for all ORFs
                 if (!nucleicResults.containsKey(nucleicSeqMd5)) {
                     nucleicResults[nucleicSeqMd5] = [
-                        sequence          : sequence.get("translatedFrom").get(0).get("sequence").asText(),
+                        sequence          : seqNode.get("translatedFrom").get(0).get("sequence").asText(),
                         md5               : nucleicSeqMd5,
                         crossReferences   : [],
                         openReadingFrames : []
                     ]
-                    sequence.get("translatedFrom").forEach { ntSeq ->
+                    seqNode.get("translatedFrom").forEach { ntSeq ->
                         nucleicResults[nucleicSeqMd5].crossReferences << [
                             name: "${ntSeq.get('id').asText()} ${ntSeq.get('description').asText()}",
                             id  : ntSeq.get('id').asText()
@@ -196,17 +196,17 @@ process WRITE_JSON_OUTPUT {
                     }
                 }
 
-                def ntMatch = NT_SEQ_ID_PATTERN.matcher(sequence.get("xref").get(0).get("name").asText().replaceAll(/^"|"$/, ""))
+                def ntMatch = NT_SEQ_ID_PATTERN.matcher(seqNode.get("xref").get(0).get("name").asText().replaceAll(/^"|"$/, ""))
                 assert ntMatch.matches()
                 nucleicResults[nucleicSeqMd5].openReadingFrames << [
                     start   : ntMatch.group(2) as int,
                     end     : ntMatch.group(3) as int,
                     strand  : (ntMatch.group(4) as int) < 4 ? "SENSE" : "ANTISENSE",
                     protein : [
-                        sequence : sequence.get("sequence").asText(),
-                        md5      : sequence.get("md5").asText(),
-                        matches  : sequence.get("matches"),
-                        xref     : sequence.get("xref")
+                        sequence : seqNode.get("sequence").asText(),
+                        md5      : seqNode.get("md5").asText(),
+                        matches  : seqNode.get("matches"),
+                        xref     : seqNode.get("xref")
                     ]
                 ]
             }
@@ -216,9 +216,9 @@ process WRITE_JSON_OUTPUT {
                     jsonWriter.writeObject(result)
                 }
             } else {
-                jsonWriter.writeObject(sequence)
+                jsonWriter.writeObject(seqNode)
             }
         }  // end of json reader
-        jsonWriter.writeEndObject()
+        jsonWriter.writeEndArray()
     }  // end of json writer
 }
