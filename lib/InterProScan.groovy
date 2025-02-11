@@ -98,6 +98,8 @@ class InterProScan {
         ],
     ]
 
+    static final def VALID_FORMATS = ["JSON", "TSV", "XML"]
+
     static final def LICENSED_SOFTWARE = ["phobius", "signalp_euk", "signalp_prok", "deeptmhmm"]
 
     static final def DATA_TYPE = [
@@ -257,6 +259,11 @@ class InterProScan {
         return errorMsg ? "Could not find the following XREF data files\n${errorMsg.join('\n')}" : null
     }
 
+    static Set<String> validateFormats(String userFormats) {
+        Set<String> formats = userFormats.toUpperCase().split(',') as Set
+        def invalidFormats = formats - VALID_FORMATS
+        return invalidFormats ? [null, "Invalid output file format provided:\n${invalidFormats.join('\n')}"] : [formats, null]
+    }
 
     static List<String> validateSignalpMode(String signalpMode) {
         if (signalpMode.toLowerCase() !in ['fast', 'slow', 'slow-sequential']) {

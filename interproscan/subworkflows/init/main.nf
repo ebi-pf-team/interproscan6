@@ -44,6 +44,13 @@ workflow INIT_PIPELINE {
         datadir = ""
     }
 
+    // Check valid output file formats were provided
+    (formats, error) = InterProScan.validateFormats(params.formats)
+    if (error) {
+        log.error error
+        exit 1
+    }
+
     // Build output dir if needed
     (outdir, error) = InterProScan.resolveDirectory(params.outdir, false, true)
     if (!outdir) {
@@ -73,5 +80,6 @@ workflow INIT_PIPELINE {
     datadir      // str: path to data directory
     apps         // list: list of application to
     outdir       // str: path to output directory
+    formats      // set<String>: output file formats
     signalpMode  // str: Models to be used with SignalP
 }
