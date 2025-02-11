@@ -131,7 +131,7 @@ process PARSE_SFLD {
                 def promotedMatches = parents
                     .findAll { it != match.modelAccession }
                     .collect {
-                        Signature signature = new Signature(match.modelAccession, library)
+                        Signature signature = new Signature(it, library)
                         Match promotedMatch = new Match(it, match.evalue, match.score, match.bias, signature)
                         promotedMatch.addLocation(match.locations[0].clone())
                         return promotedMatch
