@@ -316,11 +316,11 @@ class Entry implements Serializable {
         String type = node.has("type") ? node.get("type").asText() : null
         List<GoXRefs> goXRefs = []
         if (node.has("goXRefs") && node.get("goXRefs").isArray()) {
-            node.get("goXRefs").forEach { goXRefs.add(GoXRefs.fromJsonNode(it)) }
+            goXRefs = node.get("goXRefs").collect { GoXRefs.fromJsonNode(it) }
         }
         List<PathwayXRefs> pathwayXRefs = []
         if (node.has("pathwayXRefs") && node.get("pathwayXRefs").isArray()) {
-            node.get("pathwayXRefs").forEach { pathwayXRefs.add(PathwayXRefs.fromJsonNode(it)) }
+            pathwayXRefs = node.get("pathwayXRefs").collect { PathwayXRefs.fromJsonNode(it) }
         }
         return new Entry(accession, name, description, type, goXRefs, pathwayXRefs)
     }
@@ -933,6 +933,18 @@ class GoXRefs implements Serializable {
         }
         return new GoXRefs(data.name, data.databaseName, data.category, data.id)
     }
+
+    static GoXRefs fromJsonNode(JsonNode node) {
+        if (node == null || node.isNull()) {
+            return null
+        }
+        return new GoXRefs(
+                node.get("name").asText(),
+                node.get("databaseName").asText(),
+                node.get("category").asText(),
+                node.get("id").asText()
+        )
+    }
 }
 
 class PathwayXRefs implements Serializable {
@@ -955,5 +967,16 @@ class PathwayXRefs implements Serializable {
             return null
         }
         return new PathwayXRefs(data.name, data.databaseName, data.id)
+    }
+
+    static PathwayXRefs fromJsonNode(JsonNode node) {
+        if (node == null || node.isNull()) {
+            return null
+        }
+        return new PathwayXRefs(
+                node.get("name").asText(),
+                node.get("databaseName").asText(),
+                node.get("id").asText()
+        )
     }
 }
