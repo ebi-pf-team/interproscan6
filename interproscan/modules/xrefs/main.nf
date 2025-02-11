@@ -3,14 +3,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 
-/*
-TODO: include entry, go tersm and pathways in the output file of this process
-*/
-
-// Define mapping patterns
-def GO_PATTERN = ["P": "BIOLOGICAL_PROCESS", "C": "CELLULAR_COMPONENT", "F": "MOLECULAR_FUNCTION"]
-def PA_PATTERN = ["t": "MetaCyc", "w": "UniPathway", "k": "KEGG", "r": "Reactome"]
-
 process XREFS {
     label 'local'
 
@@ -74,7 +66,7 @@ process XREFS {
                         }
 
                         // Update signature info
-                        if (signatureInfo) {
+                        if (signatureInfo != null) {
                             match.signature.name = signatureInfo["name"]
                             match.signature.description = signatureInfo["description"]
                             if (signatureInfo["representative"]) {
@@ -85,17 +77,16 @@ process XREFS {
                             }
 
                             // Handle InterPro data
-                            def interproAcc = signatureInfo["integrated"]
-
-                             if (interproAcc) {
-                                         def entryInfo = entries["entries"].get(interproAcc)
-                                         assert entryInfo != null
-                                         match.signature.entry = new Entry(
-                                             interproAcc, entryInfo["name"], entryInfo["description"], entryInfo["type"]
-                                         )
-                                         addXRefs(match, interproAcc, ipr2go, goInfo, ipr2pa, paInfo)
-                                     }
-                                 }
+                            String interproAcc = signatureInfo["integrated"].asText()  // defaults to a TextNode, convert to String
+                            if (interproAcc != "null") {
+                                 def entryInfo = entries["entries"][interproAcc]
+                                 assert entryInfo != null
+                                 match.signature.entry = new Entry(
+                                     interproAcc, entryInfo.get("name").asText(), entryInfo.get("description").asText(), entryInfo.get("type").asText()
+                                 )
+                                 addXRefs(match, interproAcc, ipr2go, goInfo, ipr2pa, paInfo)
+                            }
+                        }
                         // Write out the model Acc and updated Match object
                         jsonGenerator.writeObjectFieldStart(modelAcc)
                         JsonWriter.writeMap(jsonGenerator, jacksonMapper, Match.asMap(match))
@@ -137,14 +128,22 @@ def updatePantherData(Match match, String dataDir, String paintAnnoDir, String s
 }
 
 def addXRefs(Match match, String interproAcc, def ipr2go, def goInfo, def ipr2pa, def paInfo) {
-    if (ipr2go && goInfo && ipr2go[interproAcc]) {
+    Map<String,String> GO_PATTERN = ["P": "BIOLOGICAL_PROCESS", "C": "CELLULAR_COMPONENT", "F": "MOLECULAR_FUNCTION"]
+    Map<String,String> PA_PATTERN = ["t": "MetaCyc", "w": "UniPathway", "k": "KEGG", "r": "Reactome"]
+    if (ipr2go != null && goInfo != null && ipr2go[interproAcc] != null) {
         ipr2go[interproAcc].each { goId ->
-            match.signature.entry.addGoXRefs(new GoXRefs(goInfo[goId][0], "GO", GO_PATTERN[goInfo[goId][1]], goId))
+            goId = goId.asText().replaceAll('"', '')
+            match.signature.entry.addGoXRefs(
+                new GoXRefs(goInfo.get("terms").get(goId).get(0).asText(), "GO", GO_PATTERN[goInfo.get("terms").get(goId).get(1).asText()], goId)
+            )
         }
     }
-    if (ipr2pa && paInfo && ipr2pa[interproAcc]) {
+    if (ipr2pa != null && paInfo != null && ipr2pa[interproAcc] != null) {
         ipr2pa[interproAcc].each { paId ->
-            match.signature.entry.addPathwayXRefs(new PathwayXRefs(paInfo[paId][1], PA_PATTERN[paInfo[paId][0]], paId))
+            paId = paId.asText().replaceAll('"', '')
+            match.signature.entry.addPathwayXRefs(new PathwayXRefs(
+                paInfo.get(paId).get(1).asText(), PA_PATTERN[paInfo.get(paId).get(0).asText()], paId
+            ))
         }
     }
 }
