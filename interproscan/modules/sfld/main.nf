@@ -135,33 +135,7 @@ process PARSE_SFLD {
                         promotedMatch.addLocation(match.locations[0].clone())
                         return promotedMatch
                     }
-
-                /*
-                    Check newly promoted matches against previously selected matches:
-                        - promoted fully contains other match: keep promoted and remove other
-                        - promoted fully within other match: skip promoted
-                        - partial or no overlap: keep promoted
-                */
-                boolean keepPromoted = true
-                Set<Match> toRemove = [] as Set
-                promotedMatches.each { promotedMatch ->
-                    for (Match selectedMatch: selectedMatches) {
-                        if (promotedMatch.locations[0].start <= selectedMatch.locations[0].start &&
-                            promotedMatch.locations[0].end >= selectedMatch.locations[0].end) {
-                            toRemove.add(selectedMatch)
-                        } else if (promotedMatch.locations[0].start >= selectedMatch.locations[0].start &&
-                                  promotedMatch.locations[0].end <= selectedMatch.locations[0].end) {
-                            keepPromoted = false
-                            break
-                        }
-                    }
-
-                    toRemove.each { selectedMatches.remove(it) }
-
-                    if (keepPromoted) {
-                        selectedMatches.add(promotedMatch)
-                    }
-                }
+                selectedMatches.addAll(promotedMatches)
             }
         }
         
