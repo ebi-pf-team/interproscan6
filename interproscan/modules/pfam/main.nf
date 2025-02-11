@@ -39,6 +39,7 @@ process PARSE_PFAM {
     nestedInfo = stockholmClansParser(clanPath, seeds)
     dat = stockholmDatParser(datPath)
     Map<String, Map<String, Match>> filteredMatches = [:]
+    minLength = 8
 
     // filter matches
     hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
@@ -87,7 +88,7 @@ process PARSE_PFAM {
                     }
                 }
             }
-            if (keep) {
+            if (keep && info.location.end - info.location.start + 1 >= minLength) {
                 if (!filteredMatches[seqId].containsKey(modelAccession)) {
                     filteredMatches[seqId][modelAccession] = match
                 }
@@ -97,7 +98,6 @@ process PARSE_PFAM {
     }
 
     // build fragments
-    minResiduesLength = 8
     processedMatches = filteredMatches.collectEntries { seqId, matches ->
         [(seqId): matches.findAll { modelAccession, match -> match.locations }
         .collectEntries { modelAccession, match ->
@@ -123,7 +123,7 @@ process PARSE_PFAM {
                 }
             }
             List<Location> validLocations = match.locations.findAll { loc ->
-                loc.end - loc.start + 1 >= minResiduesLength // filter out locations with less than 8 residues
+                loc.end - loc.start + 1 >= minLength // filter out locations with less than 8 residues
             }
             validLocations ? [(modelAccession): match] : null
         }.findAll { it != null }]
