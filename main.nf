@@ -3,9 +3,10 @@ nextflow.enable.dsl=2
 include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
 include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
 
+include { POPULATE_DATABASE,
+          UPDATE_DATABASE,
+          BUILD_BATCHES                 } from "./interproscan/modules/prepare_sequences"
 include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
-include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
-include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { LOOKUP_MATCHES                } from "./interproscan/modules/lookup"
 include { XREFS                         } from "./interproscan/modules/xrefs"
 include { AGGREGATE_SEQS_MATCHES;
@@ -34,6 +35,9 @@ workflow {
     apps            = INIT_PIPELINE.out.apps.val
     signalpMode     = INIT_PIPELINE.out.signalpMode.val
 
+    // store the input seqs in the internal ips6 db
+    POPULATE_DATABASE(fasta_file, db_path, nucleic)
+
     if (params.nucleic) {
         // Chunk input file in smaller files for translation
         fasta_file
@@ -42,19 +46,18 @@ workflow {
 
         // Translate DNA/RNA sequences to protein sequences
         ch_translated = ESL_TRANSLATE(ch_fasta)
-
-        // Split again
-        ch_translated
-            .splitFasta( by: params.batchSize, file: true )
-            .map { split_pt_file, orig_nt_file -> tuple ( orig_nt_file, split_pt_file ) }
-            .set { ch_translated_split }
-
-        // Store sequences as JSON objects
-        ch_seqs = PREPARE_NUCLEIC_SEQUENCES(ch_translated_split)
-    } else {
-        // Store sequences as JSON objects
-        ch_seqs = PREPARE_PROTEIN_SEQUENCES(ch_fasta)
+//
+//         // Split again
+//         ch_translated
+//             .splitFasta( by: params.batchSize, file: true )
+//             .map { split_pt_file, orig_nt_file -> tuple ( orig_nt_file, split_pt_file ) }
+//             .set { ch_translated_split }
+//
+//         // Store sequences as JSON objects
+//         ch_seqs = PREPARE_NUCLEIC_SEQUENCES(ch_translated_split)
     }
+
+    BUILD_BATCHES(db_path, params.batchSize)
 
     matchResults = Channel.empty()
     if (params.disablePrecalc) {
