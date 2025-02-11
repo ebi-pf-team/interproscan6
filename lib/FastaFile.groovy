@@ -1,34 +1,6 @@
 import FastaSequence
 
 class FastaFile {
-    static List<FastaSequence> parse(String fastaFilePath) {
-        def sequences = []
-        FastaSequence currentSequence = null
-        new File(fastaFilePath).eachLine { line ->
-            if (line.startsWith(">")) {
-                if (currentSequence) {
-                    currentSequence.updateMD5()
-                    sequences.add(currentSequence)
-                }
-
-                def header = line.substring(1).split(" ", 2).collect { it.trim() }
-                currentSequence = new FastaSequence(
-                    header[0], 
-                    header.size() > 1 ? header[1] : ""
-                )
-            } else {
-                currentSequence.sequence += line.trim()
-            }
-        }
-
-        if (currentSequence) {
-            currentSequence.updateMD5()
-            sequences.add(currentSequence)
-        }
-
-        return sequences
-    }
-
     static validate(String fastaFilePath, boolean isNucleic, Map appsConfig, List<String> appsToRun) {
         // Add application-specific forbidden characters
         String forbiddenChars = ""
