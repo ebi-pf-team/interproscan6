@@ -28,17 +28,18 @@ workflow {
     INIT_PIPELINE()
 
     fasta_file      = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
+    db_path         = INIT_PIPELINE.out.dbPath.val
     data_dir        = INIT_PIPELINE.out.datadir.val
     outut_dir       = INIT_PIPELINE.out.outdir.val
     apps            = INIT_PIPELINE.out.apps.val
     signalpMode     = INIT_PIPELINE.out.signalpMode.val
 
-    // Chunk input file in smaller files
-    fasta_file
-        .splitFasta( by: params.batchSize, file: true )
-        .set { ch_fasta }
-
     if (params.nucleic) {
+        // Chunk input file in smaller files for translation
+        fasta_file
+            .splitFasta( by: params.batchSize, file: true )
+            .set { ch_fasta }
+
         // Translate DNA/RNA sequences to protein sequences
         ch_translated = ESL_TRANSLATE(ch_fasta)
 
@@ -71,13 +72,15 @@ workflow {
             apps,
             params.lookupService.apiChunkSize,
             params.lookupService.lookupHost,
-            params.lookupService.maxRetries)
+            params.lookupService.maxRetries
+        )
 
         SCAN_SEQUENCES(
             LOOKUP_MATCHES.out[1],
             apps,
             params.appsConfig,
-            data_dir)
+            data_dir
+        )
 
         def expandedScan = SCAN_SEQUENCES.out.flatMap { scan ->
             scan[1].collect { path -> [scan[0], path] }
