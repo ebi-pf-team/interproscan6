@@ -80,7 +80,7 @@ process PARSE_PFAM {
                     if (isOverlapping) {
                         List<String> candidateNested = candidateMatch.get("nested", [])
                         List<String> filteredNested = filteredMatchInfo.get("nested", [])
-                        boolean matchesAreNested = candidateNested && filteredNested && candidateNested.intersect(filteredNested)
+                        boolean matchesAreNested = (candidateNested.contains(filteredAcc) || filteredNested.contains(modelAccession))
                         matchesAreNested  // if they are nested, keep both
                         if (!matchesAreNested) {
                             keep = false
