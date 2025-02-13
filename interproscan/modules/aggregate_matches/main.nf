@@ -53,9 +53,8 @@ process AGGREGATE_SEQS_MATCHES {
                 processProteinData(protein, seqMatchesAggreg, matchesMap, protSeqId)
                 seqMatchesAggreg[seqId].translatedFrom = seqMatchesAggreg[seqId].translatedFrom ?: []
                 def translatedFromValue = protein.get("translatedFrom")
-                if (translatedFromValue) {
-                    seqMatchesAggreg[seqId].translatedFrom << translatedFromValue
-                }
+                // println "TranslatedFrom: $translatedFromValue"
+                seqMatchesAggreg[seqId].translatedFrom << translatedFromValue
             }
         } else {  // node = [Protein Seq Id: {protein}]
             processProteinData(node, seqMatchesAggreg, matchesMap, seqId)
