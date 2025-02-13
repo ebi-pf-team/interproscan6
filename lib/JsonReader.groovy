@@ -38,13 +38,15 @@ class JsonReader {
             }
             parser.close()
         } catch (FileNotFoundException e) {
-            throw new Exception("File not found: $filePath", e)
+            throw new Exception("File not found: $filePath-- $e\n${e.printStackTrace()}", e)
         } catch (JsonParseException e) {
-            throw new Exception("Error parsing JSON file: $filePath", e)
+            throw new Exception("Error parsing JSON file: $filePath-- $e\n${e.printStackTrace()}", e)
         } catch (JsonMappingException e) {
-            throw new Exception("Error mapping JSON content for file: $filePath", e)
+            throw new Exception("Error mapping JSON content for file: $filePath-- $e\n${e.printStackTrace()}", e)
         } catch (IOException e) {
-            throw new Exception("IO error reading file: $filePath", e)
+            throw new Exception("IO error reading file: $filePath-- $e\n${e.printStackTrace()}", e)
+        } catch (Exception e) {
+            throw new Exception("Error parsing JSON file $filePath -- $e\n${e.printStackTrace()}", e)
         }
     }
 
@@ -70,13 +72,15 @@ class JsonReader {
             }
             parser.close()
         } catch (FileNotFoundException e) {
-            throw new Exception("File not found: $filePath", e)
+            throw new Exception("File not found: $filePath-- $e\n${e.printStackTrace()}", e)
         } catch (JsonParseException e) {
-            throw new Exception("Error parsing JSON file: $filePath", e)
+            throw new Exception("Error parsing JSON file: $filePath-- $e\n${e.printStackTrace()}", e)
         } catch (JsonMappingException e) {
-            throw new Exception("Error mapping JSON content for file: $filePath", e)
+            throw new Exception("Error mapping JSON content for file: $filePath-- $e\n${e.printStackTrace()}", e)
         } catch (IOException e) {
-            throw new Exception("IO error reading file: $filePath", e)
+            throw new Exception("IO error reading file: $filePath-- $e\n${e.printStackTrace()}", e)
+        } catch (Exception e) {
+            throw new Exception("Error parsing JSON file $filePath-- $e\n${e.printStackTrace()}", e)
         }
     }
 
@@ -104,13 +108,15 @@ class JsonReader {
 
             return dataMap
         } catch (FileNotFoundException e) {
-            throw new Exception("File not found: $filePath", e)
+            throw new Exception("File not found: $filePath-- $e\n${e.printStackTrace()}", e)
         } catch (JsonParseException e) {
-            throw new Exception("Error parsing JSON file: $filePath", e)
+            throw new Exception("Error parsing JSON file: $filePath-- $e\n${e.printStackTrace()}", e)
         } catch (JsonMappingException e) {
-            throw new Exception("Error mapping JSON content for file: $filePath", e)
+            throw new Exception("Error mapping JSON content for file: $filePath-- $e\n${e.printStackTrace()}", e)
         } catch (IOException e) {
-            throw new Exception("IO error reading file: $filePath", e)
+            throw new Exception("IO error reading file: $filePath-- $e\n${e.printStackTrace()}", e)
+        } catch (Exception e) {
+            throw new Exception("Error parsing JSON file $filePath-- $e\n${e.printStackTrace()}", e)
         }
     }
 }
