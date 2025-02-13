@@ -116,8 +116,10 @@ process PARSE_PFAM {
 
                     match.locations.each { loc ->
                         loc.fragments = [new LocationFragment(newLocationStart, newLocationEnd, updatedStatus)]
+                        loc.start = newLocationStart
                         if (twoActualRegions) {
                             loc.fragments << new LocationFragment(fragment['end'] + 1, finalLocationEnd, "N_TERMINAL_DISC")
+                            loc.end = finalLocationEnd;
                         }
                     }
                 }
