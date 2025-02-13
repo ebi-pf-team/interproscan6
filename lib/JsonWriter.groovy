@@ -27,9 +27,9 @@ class JsonWriter {
 
             generator.writeEndObject()
         } catch (IOException e) {
-            throw new JsonException("IO error writing file: $filePath-- $e\n${e.printStackTrace()}", e)
+            throw new JsonException("IO error writing file: $filePath -- $e\n${e.printStackTrace()}", e)
         } catch (Exception e) {
-            throw new Exception("Error occured when writing Json file $filePath-- $e\n${e.printStackTrace()}", e)
+            throw new Exception("Error occured when writing Json file $filePath -- $e\n${e.printStackTrace()}", e)
         } finally {
             if (generator != null) {
                 generator.close()
@@ -110,7 +110,7 @@ class JsonWriter {
 
             generator.writeEndObject()
         } catch (IOException e) {
-            throw new JsonException("IO error writing file: $filePath-- $e\n${e.printStackTrace()}", e)
+            throw new JsonException("IO error writing file: $filePath -- $e\n${e.printStackTrace()}", e)
         } finally {
             if (generator != null) {
                 generator.close()

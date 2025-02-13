@@ -28,16 +28,34 @@ process AGGREGATE_SEQS_MATCHES {
     // Build a single mapper for all readers and writers to save memory
     ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
     // Load the entire JSON file of matches to retrieve matches by the md5 of the seq
-    def matchesMap = JsonReader.load(matchesPath.toString(), jacksonMapper)  // [seqId: [modelAcc: [Match]]
+    def matchesMap = JsonReader.load(matchesPath.toString(), jacksonMapper) ?: [:]
 
     def seqMatchesAggreg = [:]
     JsonReader.streamJson(seqsPath.toString(), jacksonMapper) { String seqId, JsonNode node ->
+        /*
+        SEQ ID B24EF43902A9B40CC7E57C1C93D366DF
+        NODE [{
+        "id":"orf2",
+        "description":"source=ENA|EXB00152|EXB00152.1 coords=306..374 length=23 frame=3 desc=Acinetobacter sp. 1295259 hypothetical protein",
+        "sequence":"KTRNCPSCCSQNFKTLSLSRWAS",
+        "md5":"B24EF43902A9B40CC7E57C1C93D366DF",
+        "translatedFrom":
+            {"id":"ENA|EXB00152|EXB00152.1","description":"Acinetobacter sp. 1295259 hypothetical protein",
+            "sequence":"ATGAAAATTAAGTTATTGTTTATGAGTTTAGCTATATTGTTACCTTTAAATAGTAATGCTTTTACAATATATAGTTTTGTTCCTTTTAGGTATCATGTTGATAAGTATGGAAAAAAAGTGGATGGTTATTCACGAGCACAACAAGCTCTTTATGAGGTTGGAACTAAACAAATAAAAGTTTTGTATGAAAATCAATTTTTGACCAATAAACAGCCAGACGTAGAAAAGATAAAGAAAATTGTTGAAGATACAAAGAAAAATCCAGAAATACCAATTTCTTTTGATATAGAGGTTGGCAATGATAGAAAACCAGAAACTGTCCTTCCTGTTGTTCTCAAAACTTTAAAACTTTATCATTATCTAGGTGGGCAAGCTAAAGTAGGCGTTTATTCTCTATTACCTGTTAGTACGGAAGGTGAAATGCTTTCAGATGCTAGAATACCAGGTTATCAACTTCTTAATAAGAAGTATGAACCAATTGCTGAATTGGTAGATTTTTTAAGTCCTGTAATCTATAACTATAATATTCGAGATCCCAAAATTTGGAAAAAAATAATTGATATTAATATGGCAGAAAGTCATAAGTATGCTAACAAATATAATCTAAAAATATATCCTTATATAACAGCTAGTTATTATTTCCCGGAAAAAGATCCTAAAACAGGCATGCGTTATGTGGAAGCCTTAACAGATGTAGAGATGCGTGACCGACTGCTTTATTTCAAGCAGAAAGGAGCGGATGGGGTTATTCTATGGGAAAGTTCTGAAACTAGGCAAAAGGATGGGTCAAAGCCTTTAATGGATTTCAAGTCTAATTGGGCGAAAGGAGTGTCTGATTTTATTCAGAAAAATAGTTTAAAATAG",
+            "md5":"621AC61E48B498FF1E98F2C3A3ED79C2",
+            "translatedFrom":null}
+        }]
+        */
+        // println "Parsed JSON entry: seqId=$seqId, node=$node"
         if (nucleic) { // seqId = Protein Seq MD5, node = [{prot}, {prot}]
             node.forEach { protein ->
                 protSeqId = protein.get("id").asText()
                 processProteinData(protein, seqMatchesAggreg, matchesMap, protSeqId)
                 seqMatchesAggreg[seqId].translatedFrom = seqMatchesAggreg[seqId].translatedFrom ?: []
-                seqMatchesAggreg[seqId].translatedFrom << protein.get("translatedFrom")
+                def translatedFromValue = protein.get("translatedFrom")
+                if (translatedFromValue) {
+                    seqMatchesAggreg[seqId].translatedFrom << translatedFromValue
+                }
             }
         } else {  // node = [Protein Seq Id: {protein}]
             processProteinData(node, seqMatchesAggreg, matchesMap, seqId)
