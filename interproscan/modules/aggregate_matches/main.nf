@@ -46,14 +46,12 @@ process AGGREGATE_SEQS_MATCHES {
             "translatedFrom":null}
         }]
         */
-        // println "Parsed JSON entry: seqId=$seqId, node=$node"
         if (nucleic) { // seqId = Protein Seq MD5, node = [{prot}, {prot}]
             node.forEach { protein ->
                 protSeqId = protein.get("id").asText()
                 processProteinData(protein, seqMatchesAggreg, matchesMap, protSeqId)
                 seqMatchesAggreg[seqId].translatedFrom = seqMatchesAggreg[seqId].translatedFrom ?: []
                 def translatedFromValue = protein.get("translatedFrom")
-                // println "TranslatedFrom: $translatedFromValue"
                 seqMatchesAggreg[seqId].translatedFrom << translatedFromValue
             }
         } else {  // node = [Protein Seq Id: {protein}]
@@ -68,7 +66,7 @@ process AGGREGATE_SEQS_MATCHES {
 def processProteinData(JsonNode protein, Map seqMatchesAggreg,  Map<String, JsonNode> matchesMap, String seqId) {
     md5 = protein.get("md5").asText()
     def entry = seqMatchesAggreg.computeIfAbsent(md5, { [sequence: protein.get("sequence").asText(), md5: md5, matches: [:], xref: []] })
-    entry.xref << ["name": seqId + " " + protein.get("description"), "id": seqId]
+    entry.xref << ["name": seqId + " " + protein.get("description").asText().replaceAll('["\\\\"]', ''), "id": seqId]
     if (matchesMap.containsKey(seqId)) { // matchesMap[seqId] is an ObjectNode, keyed by modelAcc and valued by ObjectNode repr of Matches
         matchesMap[seqId].fields().each { matchNode ->
             seqMatchesAggreg[md5]["matches"][matchNode.key] = Match.fromJsonNode((JsonNode) matchNode.value)

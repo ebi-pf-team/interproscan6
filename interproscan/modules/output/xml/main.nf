@@ -57,7 +57,7 @@ process WRITE_XML_OUTPUT {
                         sequence(md5: ntSequenceMD5, ntSequence)
                         // list all identical nucleotide seqs in the input file
                         seqNodes.get(0).get("translatedFrom").forEach { ntRef ->
-                            xref(id: ntRef.get("id").asText(), name: "${ntRef.get('id').asText()} ${ntRef.get('description').asText()}")
+                            xref(id: ntRef.get("id").asText(), name: "${ntRef.get('id').asText()} ${ntRef.get('description').asText().replaceAll('"', '')}")
                         }
                         seqNodes.forEach { ObjectNode proteinNode ->
                             def ntMatch = NT_SEQ_ID_PATTERN.matcher(proteinNode.get("xref").get(0).get("name").asText().replaceAll('"', ""))
@@ -127,15 +127,8 @@ def processMatches(matches, xml) {
 
     matches.fields().each { entry ->
         Match matchObj = Match.fromJsonNode(entry.value)
-        def matchNodeName
         def memberDb = matchObj.signature.signatureLibraryRelease.library
-        if (hmmer3Members.contains(memberDb)) {
-            matchNodeName = "hmmer3"
-        } else if (memberDb == "smart") {
-            matchNodeName = "hmmer2"
-        } else {
-            matchNodeName = memberDb
-        }
+        def matchNodeName = hmmer3Members.contains(memberDb) ? "hmmer3" : (memberDb == "smart" ? "hmmer2" : memberDb)
 
         def matchAttributes = [:]
         if (hmmer3Members.findAll { it != "superfamily"}.contains(memberDb) || memberDb == "smart") {
@@ -165,7 +158,7 @@ def processMatches(matches, xml) {
                     xml.library(matchObj.signature.signatureLibraryRelease.library)
                     xml.version(matchObj.signature.signatureLibraryRelease.version)
                 }
-                if (matchObj.signature.entry) {=
+                if (matchObj.signature.entry) {
                     Entry entryObj = matchObj.signature.entry
                     xml."entry"(
                         ac: entryObj.accession,
@@ -194,7 +187,7 @@ def processMatches(matches, xml) {
                         }
                     }
                 }  // end of matchObj.signature.entry
-            }
+            } // end of signature
 
             xml."model-ac"(memberDb == "panther" ? matchObj.treegrafter.subfamilyAccession : matchObj.modelAccession)
 
