@@ -72,7 +72,7 @@ process WRITE_XML_OUTPUT {
                                         try {
                                             processMatches(proteinNode.get("matches"), xml)
                                         } catch (Exception e) {
-                                            throw new Exception("Error when processing Match in XML:\n$e\n${e.printStackTrace()}\n${e.getCause()}", e)
+                                            throw new Exception("Error processing XML:\n$e\n${e.printStackTrace()}\n${e.getCause()}", e)
                                         }
                                     }
                                     proteinNode.get("xref").forEach { ref ->
@@ -94,7 +94,7 @@ process WRITE_XML_OUTPUT {
                             xref(id: xrefData.get("id").asText(), name: xrefData.get("name").asText())
                         }
                     } catch (Exception e) {
-                        println "ERROR ERROR ERROR:\n$e\n${e.printStackTrace()}\n${e.getCause()}"
+                        println "Error processing XML:\n$e\n${e.printStackTrace()}\n${e.getCause()}"
                     }
                 }
             }
