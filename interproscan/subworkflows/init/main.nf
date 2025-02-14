@@ -75,15 +75,12 @@ workflow INIT_PIPELINE {
         exit 1
     }
 
-   // Build (but not populate) the internal sequence db
-   String dbPath = "${workflow.workDir}/ips6.seq.db"
-   conn = SequenceDatabase(dbPath)
-   conn.buildTables()
-   conn.close()
+    // Create the path to the database. The database must be built in a process running
+    // within the ips6 container, thus the database is built in populate_database
+    // String dbPath = "${workflow.workDir}/ips6.seq.db"
 
     emit:
     fasta        // str: path to input fasta file
-    dbPath       // str: path to the ips6 interal seq db
     datadir      // str: path to data directory
     apps         // list: list of application to
     outdir       // str: path to output directory
