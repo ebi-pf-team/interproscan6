@@ -18,7 +18,7 @@ process WRITE_XML_OUTPUT {
     val ips6Version
 
     exec:
-    def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+"?source=(.*?)"?\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=(.*)$/)
+    def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+?source=(.*?)?\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=(.*)$/)
     def writer = new StringWriter()
     def xml = new MarkupBuilder(writer)
     // set the correct encoding so symbols are formatted correctly in the final output
@@ -60,7 +60,7 @@ process WRITE_XML_OUTPUT {
                             xref(id: ntRef.get("id").asText(), name: "${ntRef.get('id').asText()} ${ntRef.get('description').asText()}")
                         }
                         seqNodes.forEach { ObjectNode proteinNode ->
-                            def ntMatch = NT_SEQ_ID_PATTERN.matcher(proteinNode.get("xref").get(0).get("name").asText().replaceAll(/^"|"$/, ""))
+                            def ntMatch = NT_SEQ_ID_PATTERN.matcher(proteinNode.get("xref").get(0).get("name").asText().replaceAll('"', ""))
                             assert ntMatch.matches()
                             def start = ntMatch.group(2) as int
                             def end = ntMatch.group(3) as int
@@ -69,7 +69,11 @@ process WRITE_XML_OUTPUT {
                                 protein {
                                     sequence(md5: proteinNode.get("md5").asText(), proteinNode.get("sequence").asText())
                                     matches {
-                                        processMatches(proteinNode.get("matches"), xml)
+                                        try {
+                                            processMatches(proteinNode.get("matches"), xml)
+                                        } catch (Exception e) {
+                                            throw new Exception("Error when processing Match in XML:\n$e\n${e.printStackTrace()}\n${e.getCause()}", e)
+                                        }
                                     }
                                     proteinNode.get("xref").forEach { ref ->
                                         xref(id: ref.get("id"), name: ref.get("name"))
@@ -83,10 +87,14 @@ process WRITE_XML_OUTPUT {
         } else {
             JsonReader.streamArray(matches.toString(), jacksonMapper) { ObjectNode seqNode ->
                 protein {
-                    sequence(md5: seqNode.get("md5").asText(), seqNode.get("sequence").asText())
-                    matches { processMatches(seqNode.get("matches"), xml) }
-                    seqNode.get("xref").each { xrefData ->
-                        xref(id: xrefData.get("id").asText(), name: xrefData.get("name").asText())
+                    try {
+                        sequence(md5: seqNode.get("md5").asText(), seqNode.get("sequence").asText())
+                        matches { processMatches(seqNode.get("matches"), xml) }
+                        seqNode.get("xref").each { xrefData ->
+                            xref(id: xrefData.get("id").asText(), name: xrefData.get("name").asText())
+                        }
+                    } catch (Exception e) {
+                        println "ERROR ERROR ERROR:\n$e\n${e.printStackTrace()}\n${e.getCause()}"
                     }
                 }
             }
@@ -152,51 +160,50 @@ def processMatches(matches, xml) {
             if (matchObj.signature.description) {
                 signatureAttributes.desc = matchObj.signature.description
             }
-            signature(signatureAttributes) {
-                signatureLibraryRelease {
-                    library(matchObj.signature.signatureLibraryRelease.library)
-                    version(matchObj.signature.signatureLibraryRelease.version)
+            xml.signature(signatureAttributes) {
+                xml.signatureLibraryRelease {
+                    xml.library(matchObj.signature.signatureLibraryRelease.library)
+                    xml.version(matchObj.signature.signatureLibraryRelease.version)
                 }
-                if (matchObj.signature.entry) {
-                    matchObj.signature.entry.each { entryObj ->
-                        entry(
-                            ac: entryObj.accession,
-                            desc: entryObj.description ?: "-",
-                            name: entryObj.name ?: "-",
-                            type: entryObj.type ?: "-"
-                        ) {
-                            if (entryObj.goXRefs) {
-                                entryObj.goXRefs.each { goXrefObj ->
-                                    "go-xref"(
-                                        category: goXrefObj.category,
-                                        db: goXrefObj.databaseName,
-                                        id: goXrefObj.id,
-                                        name: goXrefObj.name
-                                    )
-                                }
+                if (matchObj.signature.entry) {=
+                    Entry entryObj = matchObj.signature.entry
+                    xml."entry"(
+                        ac: entryObj.accession,
+                        desc: entryObj.description ?: "-",
+                        name: entryObj.name ?: "-",
+                        type: entryObj.type ?: "-"
+                    ) {
+                        if (!entryObj.goXRefs.isEmpty()) {
+                            entryObj.goXRefs.each { goXrefObj ->
+                                xml."go-xref"(
+                                    category: goXrefObj.category,
+                                    db: goXrefObj.databaseName,
+                                    id: goXrefObj.id,
+                                    name: goXrefObj.name
+                                )
                             }
-                            if (entryObj.pathwayXRefs) {
-                                entryObj.pathwayXRefs.each { pathwayObj ->
-                                    "pathway-xref"(
-                                        db: pathwayObj.databaseName,
-                                        id: pathwayObj.id,
-                                        name: pathwayObj.name
-                                    )
-                                }
+                        }
+                        if (!entryObj.pathwayXRefs.isEmpty()) {
+                            entryObj.pathwayXRefs.each { pathwayObj ->
+                                xml."pathway-xref"(
+                                    db: pathwayObj.databaseName,
+                                    id: pathwayObj.id,
+                                    name: pathwayObj.name
+                                )
                             }
                         }
                     }
-                }
+                }  // end of matchObj.signature.entry
             }
 
-            "model-ac"(memberDb == "panther" ? matchObj.treegrafter.subfamilyAccession : matchObj.modelAccession)
+            xml."model-ac"(memberDb == "panther" ? matchObj.treegrafter.subfamilyAccession : matchObj.modelAccession)
 
             if (matchObj.locations) {
                 def fields = memberLocationFields.get(memberDb, hmmer3LocationFields)
                 locations {
                     matchObj.locations.each { loc ->
                         def locationAttributes = getLocationAttributes(loc, fields, matchObj)
-                        location(locationAttributes) {
+                        xml.location(locationAttributes) {
                             if (loc.fragments) {
                                 "$matchNodeName-fragment" {
                                     loc.fragments.each { frag ->
@@ -219,9 +226,9 @@ def processMatches(matches, xml) {
                                                 hmmStart(siteObj.hmmStart)
                                                 hmmEnd(siteObj.hmmEnd)
                                             }
-                                            "site-locations" {
+                                            xml."site-locations" {
                                                 siteObj.siteLocations.each { siteLoc ->
-                                                    "site-location"(
+                                                    xml."site-location"(
                                                         residue: siteLoc.residue,
                                                         start: siteLoc.start,
                                                         end: siteLoc.end
