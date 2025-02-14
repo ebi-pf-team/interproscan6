@@ -3,14 +3,12 @@ nextflow.enable.dsl=2
 include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
 include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
 
-include { POPULATE_DATABASE,
-          UPDATE_DATABASE,
+include { POPULATE_SEQ_DATABASE;
+          UPDATE_ORFS;
           BUILD_BATCHES                 } from "./interproscan/modules/prepare_sequences"
 include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
 include { LOOKUP_MATCHES                } from "./interproscan/modules/lookup"
 include { XREFS                         } from "./interproscan/modules/xrefs"
-include { AGGREGATE_SEQS_MATCHES;
-          AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_matches"
 include { REPRESENTATIVE_DOMAINS        } from "./interproscan/modules/representative_domains"
 include { WRITE_JSON_OUTPUT             } from "./interproscan/modules/output/json"
 include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
@@ -29,47 +27,36 @@ workflow {
     INIT_PIPELINE()
 
     fasta_file      = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
-    db_path         = INIT_PIPELINE.out.dbPath.val
     data_dir        = INIT_PIPELINE.out.datadir.val
     outut_dir       = INIT_PIPELINE.out.outdir.val
     formats         = INIT_PIPELINE.out.formats.val
     apps            = INIT_PIPELINE.out.apps.val
     signalpMode     = INIT_PIPELINE.out.signalpMode.val
 
-    // store the input seqs in the internal ips6 db
-    POPULATE_DATABASE(fasta_file, db_path, nucleic)
-
     if (params.nucleic) {
+        // Store the input seqs in the internal ips6 seq db
+        POPULATE_SEQ_DATABASE(fasta_file, params.nucleic)
+
         // Chunk input file in smaller files for translation
         fasta_file
             .splitFasta( by: params.batchSize, file: true )
             .set { ch_fasta }
 
         // Translate DNA/RNA sequences to protein sequences
-        ch_translated = ESL_TRANSLATE(ch_fasta)
-//
-//         // Split again
-//         ch_translated
-//             .splitFasta( by: params.batchSize, file: true )
-//             .map { split_pt_file, orig_nt_file -> tuple ( orig_nt_file, split_pt_file ) }
-//             .set { ch_translated_split }
-//
-//         // Store sequences as JSON objects
-//         ch_seqs = PREPARE_NUCLEIC_SEQUENCES(ch_translated_split)
+        ESL_TRANSLATE(ch_fasta)
+
+        // Store sequences in the sequence database
+        UPDATE_ORFS(ESL_TRANSLATE.out, POPULATE_SEQ_DATABASE.out)
+
+        BUILD_BATCHES(UPDATE_ORFS.out, params.batchSize )
+    } else {
+        // Store the input seqs in the internal ips6 seq db
+        POPULATE_SEQ_DATABASE(fasta_file, params.nucleic)
+
+        BUILD_BATCHES(POPULATE_SEQ_DATABASE.out, params.batchSize)
     }
 
-    BUILD_BATCHES(db_path, params.batchSize)
-
-    matchResults = Channel.empty()
-    if (params.disablePrecalc) {
-        SCAN_SEQUENCES(
-            ch_seqs,
-            apps,
-            params.appsConfig,
-            data_dir
-        )
-        matchResults = SCAN_SEQUENCES.out
-    } else {
+<<<<<<< HEAD
         LOOKUP_MATCHES(
             ch_seqs,
             apps,
@@ -93,50 +80,82 @@ workflow {
         matchResults = combined.groupTuple()
     } // matchResults = [[meta, [member.json, member.json, member.json]]
 
-    /* XREFS:
-    Aggregate matches across all members for each sequence
-    Add signature and entry desc and names
-    Add PAINT annotations (if panther is enabled)
-    Add go terms (if enabled)
-    Add pathways (if enabled)
-    */
-    XREFS(
-        matchResults,
-        apps,
-        data_dir,
-        params.xRefsConfig.entries,
-        params.xRefsConfig.goterms,
-        params.xRefsConfig.pathways,
-        params.goterms,
-        params.pathways,
-        "${data_dir}/${params.appsConfig.paint}"
-    )
-
-    ch_seqs.join(XREFS.out, by: 0)
-    .map { batchnumber, fasta, sequences, matches ->
-        [batchnumber, sequences, matches]
-    }.set { ch_seq_matches }
-
-    // Aggregate seq meta data with the matches
-    AGGREGATE_SEQS_MATCHES(ch_seq_matches, params.nucleic)
-
-    // Aggregate all data into a single JSON file
-    AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
-
-    // Identify representative domains for the applicable member databases
-    REPRESENTATIVE_DOMAINS(AGGREGATE_ALL_MATCHES.out)
-
-    def fileName = params.input.split('/').last()
-    def outFileName = "${params.outdir}/${fileName}"
-    if (formats.contains("JSON")) {
-        WRITE_JSON_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
-    }
-    if (formats.contains("TSV")) {
-        WRITE_TSV_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic)
-    }
-    if (formats.contains("XML")) {
-        WRITE_XML_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
-    }
+//
+//     matchResults = Channel.empty()
+//     if (params.disablePrecalc) {
+//         SCAN_SEQUENCES(
+//             BUILD_BATCHES.out,
+//             apps,
+//             params.appsConfig,
+//             data_dir
+//         )
+//         matchResults = SCAN_SEQUENCES.out
+//     } else {
+//         LOOKUP_MATCHES(
+//             BUILD_BATCHES.out,
+//             apps,
+//             params.lookupService.apiChunkSize,
+//             params.lookupService.lookupHost,
+//             params.lookupService.maxRetries
+//         )
+//
+//         SCAN_SEQUENCES(
+//             LOOKUP_MATCHES.out[1],  // [index, fasta of seqs not in the MLS]
+//             apps,
+//             params.appsConfig,
+//             data_dir
+//         )
+//
+//         def expandedScan = SCAN_SEQUENCES.out.flatMap { scan ->
+//             scan[1].collect { path -> [scan[0], path] }
+//         }
+//
+//         def combined = LOOKUP_MATCHES.out[0].concat(expandedScan)
+//         matchResults = combined.groupTuple()
+//     }
+//
+//     /* XREFS:
+//     Add signature and entry desc and names
+//     Add PAINT annotations (if panther is enabled)
+//     Add go terms (if enabled)
+//     Add pathways (if enabled)
+//     */
+//     XREFS(
+//         matchResults,
+//         apps,
+//         data_dir,
+//         params.xRefsConfig.entries,
+//         params.xRefsConfig.goterms,
+//         params.xRefsConfig.pathways,
+//         params.goterms,
+//         params.pathways,
+//         "${data_dir}/${params.appsConfig.paint}"
+//     )
+//
+//     ch_seqs.join(XREFS.out, by: 0)
+//     .map { batchnumber, fasta, sequences, matches ->
+//         [batchnumber, sequences, matches]
+//     }.set { ch_seq_matches }
+//
+//     AGGREGATE_MATCHES(ch_seq_matches, params.nucleic)
+//
+//     REPRESENTATIVE_DOMAINS(AGGREGATE_MATCHES.out)
+//
+// //     Channel.from(params.formats.toLowerCase().split(','))
+// //     .set { ch_format }
+// //
+// //     def formats = params.formats.toUpperCase().split(',') as Set
+// //     def fileName = params.input.split('/').last()
+// //     def outFileName = "${params.outdir}/${fileName}"
+// //     if (formats.contains("JSON")) {
+// //         WRITE_JSON_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
+// //     }
+// //     if (formats.contains("TSV")) {
+// //         WRITE_TSV_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic)
+// //     }
+// //     if (formats.contains("XML")) {
+// //         WRITE_XML_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
+// //     }
 }
 
 workflow.onComplete = {
