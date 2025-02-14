@@ -1,4 +1,4 @@
-process POPULATE_DATABASE {
+process POPULATE_SEQ_DATABASE {
     // Populate a local sqlite3 database with sequences from the pipeline's input FASTA file.
     label 'local', 'ips6_container'
 
@@ -12,17 +12,26 @@ process POPULATE_DATABASE {
     script:
     """
     python3 $projectDir/interproscan/scripts/database.py ips6.seq.db $fasta populate_sequences $nucleic
+    chmod 777 ips6.seq.db
     """
 }
 
-process INSERT_ORFS {
+process UPDATE_ORFS {
     // add protein seqs translated from nt seqs to the database
-    input:
-    val dbPath
-    val fasta
+    maxForks 1  // Ensure that only one instance runs at a time to avoid concurrent writing to the db
+    label 'local', 'ips6_container'
 
-    exec:
-    println "TODO"
+    input:
+    val translated_fasta  // one FASTA per ESL_TRANSLATE batch
+    val db_path
+
+    output:
+    val ""  // to pass linting
+
+    script:
+    """
+    python3 $projectDir/interproscan/scripts/database.py $db_path $translated_fasta update_orfs true > debug
+    """
 }
 
 process BUILD_BATCHES {
@@ -33,7 +42,7 @@ process BUILD_BATCHES {
     val batchSize
 
     output:
-    tuple each tuple(val(meta), path(fasta))
+    val ""
 
     exec:
     // SequenceDatabase conn = new SequenceDatabase(dbPath)
