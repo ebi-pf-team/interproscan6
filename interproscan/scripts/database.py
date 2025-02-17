@@ -1,3 +1,4 @@
+import argparse
 import hashlib
 import re
 import sqlite3
@@ -81,8 +82,8 @@ def add_sequence(conn, current_sequence, nucleic):
         if nucleic:
             cur.execute("INSERT INTO NUCLEOTIDE_SEQUENCE (nt_md5, sequence) VALUES (?, ?)",
                         (md5, current_sequence['sequence']))
-            cur.execute("INSERT INTO NUCLEOTIDE (protein_md5, nt_md5, id, description) VALUES (?, ?, ?, ?)",
-                        (None, md5, current_sequence['id'], current_sequence['description']))
+            cur.execute("INSERT INTO NUCLEOTIDE (nt_md5, id, description) VALUES (?, ?, ?)",
+                        (md5, current_sequence['id'], current_sequence['description']))
         else:
             cur.execute("INSERT INTO PROTEIN_SEQUENCE (protein_md5, sequence) VALUES (?, ?)",
                         (md5, current_sequence['sequence']))
@@ -109,7 +110,7 @@ def relate_orf_to_nucleotide(conn, current_sequence):
 
     # get the nt seq md5
     nt_md5 = ""
-    cur.execute("SELECT nt_md5 FROM NUCLEOTIDE WHERE id = ?", (current_sequence["source"]))
+    cur.execute("SELECT nt_md5 FROM NUCLEOTIDE WHERE id = ?", (current_sequence["source"],))
     cur.fetchone()
 
     # add the nt seq md5 to the Protein table
@@ -163,24 +164,91 @@ def build_tables(conn):
         sys.exit(1)
 
 
-if __name__ == "__main__":
-    """
-    Sys.argv:
-    [1] Path to local sequence db
-    [2] Path to fasta file
-    [3] Method to run
-    [4] Pipeline input is nucleic sequences
-    """
-    if len(sys.argv) != 5:
-        print(f"Expected 4 arguments but received {len(sys.argv) - 1}.")
-        sys.exit(1)
-    db_path, fasta, method, nucleic = sys.argv[1:5]
-    nucleic = nucleic.lower() == "true"
+def build_batches(db_path, batch_size):
+    """Build batches of FASTA file for the IPS6 sequence analysis."""
+    def write_fasta(batch, batch_index, line_length=60):
+        fasta = f"sequences.{batch_index}.fasta"
+        print(f"fasta: {fasta}")
+        with open(fasta, "w") as fh:
+            for row in batch:
+                md5 = row[0]
+                sequence = '\n'.join([row[1][i:i+line_length] for i in range(0, len(row[1]), line_length)])
+                fh.write(f">{md5}\n{sequence}\n")
 
-    if method == "populate_sequences":
-        populate_sequences(db_path, fasta, nucleic)
-    elif method == "update_orfs":
-        insert_translated_seqs(db_path, fasta)
-    else:
-        print(f"Method not recognised: {method}")
-        sys.exit(1)
+    conn = create_connection(db_path)
+    cur = conn.cursor()
+    offset, batch_index = 0, 0
+    print(f"dbPath: {db_path} -- batchSize: ${batch_size}")
+    while True:
+        cur.execute("SELECT protein_md5, sequence FROM PROTEIN_SEQUENCE LIMIT ? OFFSET ?", (batch_size, offset))
+        batch = cur.fetchall()
+
+        if not batch:
+            print("No batch")
+            break
+
+        print(f"Batch: {batch}")
+        write_fasta(batch, batch_index)
+        offset += batch_size
+        batch_index += 1
+
+    conn.close()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        prog='ips6.database.py',
+        description='Handle interactions with the ISP6 internal seq database',
+    )
+    parser.add_argument(
+        "db_path",
+        type=str,
+        help="Path to local sqlite db"
+    )
+    parser.add_argument(
+        "method",
+        choices=["populate_sequences", "update_orfs", "build_batches"],
+        help=(
+            "Select one method.\n"
+            "populate_sequences: Insert sequences from a --fasta file to the db\n"
+            "update_orfs: Insert translated ORFs from the --fasta esl.translate output to the db\n"
+            "build_batches: Build sequence analysis FASTA batch files of --batch_size sequences per file"
+        )
+    )
+    parser.add_argument(
+        "--fasta",
+        type=str,
+        default=None,
+        help="Str repr of the path to the FASTA files of seqs to be inserted into the db"
+    )
+    parser.add_argument(
+        "--nucleic",
+        action="store_true",
+        help="Inserting nucleotide sequences into the db. Used with --populate_sequences"
+    )
+    parser.add_argument(
+        "--batch_size",
+        type=int,
+        default=None,
+        help="Number of seqs per FASTA batch file"
+    )
+    args = parser.parse_args()
+
+    if args.method == "populate_sequences":
+        if args.fasta:
+            populate_sequences(args.db_path, args.fasta, args.nucleic)
+        else:
+            print("The --fasta flag must be used with the populate_sequences method to provide the FASTA file of sequences")
+            sys.exit(1)
+    elif args.method == "update_orfs":
+        if args.fasta:
+            insert_translated_seqs(args.db_path, args.fasta)
+        else:
+            print("The --fasta flag must be used with the update_orfs method to provide the FASTA file of sequences")
+            sys.exit(1)
+    elif args.method == "build_batches":
+        if args.batch_size:
+            build_batches(args.db_path, args.batch_size)
+        else:
+            print("The --batch_size flag must be used with the build_batches method")
+            sys.exit(1)
