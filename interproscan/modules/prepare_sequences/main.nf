@@ -71,7 +71,9 @@ process INDEX_FASTA_FILES {
     exec:
     indexedFiles = []
     int index = 1
-    for (fasta: fastaFiles) {
+    // handle when a single fasta file path is provided
+    def fastaList = fastaFiles instanceof List ? fastaFiles : [fastaFiles]
+    for (fasta: fastaList) {
         indexedFiles << [index, fasta]
         index += 1
     }
