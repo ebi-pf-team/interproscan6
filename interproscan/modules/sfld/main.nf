@@ -144,12 +144,13 @@ process PARSE_SFLD {
             Set<String> seenKeys = [] as Set
             // sorting matches by location evalue ASC, location score DESC to keep the best matches
             List<Match> sortedMatches = selectedMatches.sort { a, b ->
-                (a.locations[0].ievalue <=> b.locations[0].ievalue) ?: -(a.locations[0].score <=> b.locations[0].score)
+                (a.locations[0].evalue <=> b.locations[0].evalue) ?: -(a.locations[0].score <=> b.locations[0].score)
             }
             sortedMatches.each { match ->
                 String key = "${match.modelAccession}:${match.locations[0].start}:${match.locations[0].end}"
                 if (seenKeys.contains(key)) {
                     return
+                }
                 uniqueMatches.add(match)
                 seenKeys.add(key)
             }
