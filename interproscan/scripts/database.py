@@ -64,7 +64,6 @@ def insert_translated_seqs(db_path, esl_output):
                     "sequence": "",
                     "source": header.group(1)  # id of the parent nt sequence
                 }
-                print(current_sequence)
             else:
                 current_sequence["sequence"] += line.strip()
 
@@ -168,7 +167,6 @@ def build_batches(db_path, batch_size):
     """Build batches of FASTA file for the IPS6 sequence analysis."""
     def write_fasta(batch, batch_index, line_length=60):
         fasta = f"sequences.{batch_index}.fasta"
-        print(f"fasta: {fasta}")
         with open(fasta, "w") as fh:
             for row in batch:
                 md5 = row[0]
@@ -177,17 +175,14 @@ def build_batches(db_path, batch_size):
 
     conn = create_connection(db_path)
     cur = conn.cursor()
-    offset, batch_index = 0, 0
-    print(f"dbPath: {db_path} -- batchSize: ${batch_size}")
+    offset, batch_index = 0, 1
     while True:
         cur.execute("SELECT protein_md5, sequence FROM PROTEIN_SEQUENCE LIMIT ? OFFSET ?", (batch_size, offset))
         batch = cur.fetchall()
 
         if not batch:
-            print("No batch")
             break
 
-        print(f"Batch: {batch}")
         write_fasta(batch, batch_index)
         offset += batch_size
         batch_index += 1

@@ -5,7 +5,8 @@ include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan
 
 include { POPULATE_SEQ_DATABASE;
           UPDATE_ORFS;
-          BUILD_BATCHES                 } from "./interproscan/modules/prepare_sequences"
+          BUILD_BATCHES;
+          INDEX_FASTA_FILES             } from "./interproscan/modules/prepare_sequences"
 include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
 include { LOOKUP_MATCHES                } from "./interproscan/modules/lookup"
 include { XREFS                         } from "./interproscan/modules/xrefs"
@@ -46,24 +47,30 @@ workflow {
         ch_translated = ESL_TRANSLATE(ch_fasta)
 
         // Store sequences in the sequence database
-        UPDATE_ORFS(
-            ch_translated,
-            POPULATE_SEQ_DATABASE.out
-        )
+        UPDATE_ORFS(ch_translated, POPULATE_SEQ_DATABASE.out)
 
-        ch_seqs = BUILD_BATCHES(
-            UPDATE_ORFS.out,
-            params.batchSize
-        )
+        // Build batches of unique protein seqs for the analysis
+        fasta_files = BUILD_BATCHES(UPDATE_ORFS.out, params.batchSize)
     } else {
         // Store the input seqs in the internal ips6 seq db
         POPULATE_SEQ_DATABASE(fasta_file, params.nucleic)
 
-        ch_seqs = BUILD_BATCHES(
-            POPULATE_SEQ_DATABASE.out,
-            params.batchSize
-        )
+        // Build batches of unique protein seqs for the analysis
+        fasta_files = BUILD_BATCHES(POPULATE_SEQ_DATABASE.out, params.batchSize)
     }
+
+    // Index fasta files [fasta, fasta, fasta] --> [[index, fasta], [index, fasta]]
+    // This aids aggregating matches from all member databases for each batch file
+    ch_seqs = INDEX_FASTA_FILES(BUILD_BATCHES.out)
+    ch_seqs.view()
+//     ch_seqs.view()
+//     LOOKUP_MATCHES(
+//         ch_seqs,
+//         apps,
+//         params.lookupService.apiChunkSize,
+//         params.lookupService.lookupHost,
+//         params.lookupService.maxRetries
+//     )
 
 //
 //     matchResults = Channel.empty()
