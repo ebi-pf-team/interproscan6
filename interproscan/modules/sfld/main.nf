@@ -148,12 +148,10 @@ process PARSE_SFLD {
             }
             sortedMatches.each { match ->
                 String key = "${match.modelAccession}:${match.locations[0].start}:${match.locations[0].end}"
-                if (!seenKeys.contains(key)) {
-                    uniqueMatches.add(match)
-                    seenKeys.add(key)
-                } else {
-                    continue
-                }
+                if (seenKeys.contains(key)) {
+                    return
+                uniqueMatches.add(match)
+                seenKeys.add(key)
             }
             selectedMatches = uniqueMatches
         }
