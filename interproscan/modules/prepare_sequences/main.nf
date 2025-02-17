@@ -50,7 +50,7 @@ process BUILD_BATCHES {
     val batchSize
 
     output:
-    file("*.fasta")
+    path("*.fasta")
 
     script:
     """
@@ -59,4 +59,20 @@ process BUILD_BATCHES {
         build_batches \
         --batch_size $batchSize
     """
+}
+
+process INDEX_FASTA_FILES {
+    input:
+    val fastaFiles
+
+    output:
+    val indexedFiles
+
+    exec:
+    indexedFiles = []
+    int index = 1
+    for (fasta: fastaFiles) {
+        indexedFiles << [index, fasta]
+        index += 1
+    }
 }
