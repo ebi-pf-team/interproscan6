@@ -16,7 +16,7 @@ process WRITE_JSON_OUTPUT {
 
     exec:
     ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-    def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+"source=([^"]+)\s+coords=(\d+)\.\.(\d+)\s+length=(\d+)\s+frame=(\d+)\s+desc=(.*)"$/)
+    def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+source=([^"]+)\s+coords=(\d+)\.\.(\d+)\s+length=(\d+)\s+frame=(\d+)\s+desc=(.*)$/)
     Map<String, List<String>> membersLocationFields = [
         "CDD": ["evalue-match", "score-match"],
         "COILS": [],
@@ -65,7 +65,6 @@ process WRITE_JSON_OUTPUT {
                             "representative": location.representative,
                             "location-fragments": location.fragments
                         ]
-
                         hmmBounds = location.getHmmBounds(location.hmmBounds)
                         def fields = membersLocationFields.get(memberDB, otherMembersLocationFields)
                         fields.each { field ->
@@ -129,7 +128,6 @@ process WRITE_JSON_OUTPUT {
                                     break
                             }
                         }
-
                         // Sites
                         if (memberDB in ["PIRSR", "SFLD"]) {
                             locationResult["sites"] = location.sites ?: []
@@ -154,7 +152,6 @@ process WRITE_JSON_OUTPUT {
                         matchResult["score"] = matchObj.score
                     }
                     matchResult["model-ac"] = matchObj.modelAccession
-
                     switch (memberDB) {
                         case "SFLD":
                             matchResult["scope"] = null
@@ -195,6 +192,7 @@ process WRITE_JSON_OUTPUT {
                         ]
                     }
                 }
+                def data = seqNode.get("xref").get(0).get("name").asText()
                 def ntMatch = NT_SEQ_ID_PATTERN.matcher(seqNode.get("xref").get(0).get("name").asText())
                 assert ntMatch.matches()
                 nucleicResults[nucleicSeqMd5].openReadingFrames << [

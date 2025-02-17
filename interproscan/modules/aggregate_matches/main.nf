@@ -52,7 +52,7 @@ process AGGREGATE_SEQS_MATCHES {
                 processProteinData(protein, seqMatchesAggreg, matchesMap, protSeqId)
                 seqMatchesAggreg[seqId].translatedFrom = seqMatchesAggreg[seqId].translatedFrom ?: []
                 def translatedFromValue = protein.get("translatedFrom")
-                if (translatedFromValue) {
+                if (translatedFromValue != null) {  // if (var) does not work on jsonNodes, need a formal null check
                     seqMatchesAggreg[seqId].translatedFrom << translatedFromValue
                 }
             }
