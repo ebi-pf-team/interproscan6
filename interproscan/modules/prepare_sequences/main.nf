@@ -11,30 +11,38 @@ process POPULATE_SEQ_DATABASE {
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/database.py ips6.seq.db $fasta populate_sequences $nucleic
+    python3 $projectDir/interproscan/scripts/database.py \
+        ips6.seq.db \
+        populate_sequences \
+        --fasta $fasta \
+         ${nucleic ? '--nucleic' : ''}
     chmod 777 ips6.seq.db
     """
 }
 
 process UPDATE_ORFS {
-    // add protein seqs translated from nt seqs to the database
+    // add protein seqs translated from ORFS in the nt seqs to the database
     maxForks 1  // Ensure that only one instance runs at a time to avoid concurrent writing to the db
     label 'local', 'ips6_container'
 
     input:
-    val translated_fasta  // one FASTA per ESL_TRANSLATE batch
-    val db_path
+    val translatedFasta  // one FASTA per ESL_TRANSLATE batch
+    val dbPath
 
     output:
-    val ""  // to pass linting
+    val dbPath
 
     script:
     """
-    python3 $projectDir/interproscan/scripts/database.py $db_path $translated_fasta update_orfs true > debug
+    python3 $projectDir/interproscan/scripts/database.py \
+        $dbPath \
+        update_orfs \
+        --fasta $translatedFasta
     """
 }
 
 process BUILD_BATCHES {
+    // Build the FASTA file batches of unique protein sequences for the sequence analysis
     label 'local', 'ips6_container'
 
     input:
@@ -42,34 +50,13 @@ process BUILD_BATCHES {
     val batchSize
 
     output:
-    val ""
+    file("*.fasta")
 
-    exec:
-    // SequenceDatabase conn = new SequenceDatabase(dbPath)
-    def offset = 0
-    def meta = 1
-    def files = []  // list to store results
-//
-//     while (true) {
-//         def fasta = file("sequence.$meta.fasta")
-//         fasta.text = ""
-//
-//         String query = """
-//             SELECT protein_md5, sequence FROM PROTEIN_SEQUENCE
-//             LIMIT $batchSize OFFSET $offset
-//         """.toString()
-//
-//         def rows = conn.rows(query)
-//         if (rows.isEmpty()) {
-//             break
-//         }
-//         rows.each { row ->
-//             fasta.append("> ${row.protein_md5}\n${row.sequence.replaceAll(/(.{1,60})/, '$1\n')}\n")
-//         }
-//         files << tuple(meta, fasta) // store the batch
-//         offset += batchSize
-//         meta += 1
-//     }
-//
-//     return files
+    script:
+    """
+    python3 $projectDir/interproscan/scripts/database.py \
+        $dbPath \
+        build_batches \
+        --batch_size $batchSize
+    """
 }
