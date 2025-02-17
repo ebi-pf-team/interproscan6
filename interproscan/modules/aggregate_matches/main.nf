@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -92,15 +93,11 @@ process AGGREGATE_ALL_MATCHES {
     def allAggregatedData = [:]
     seqMatches.each { file ->    // seqMatches = [md5: Map<seq: str, md5: str, matches: {obj}|[], xref: [{obj}]>]]
         JsonReader.streamJson(file.toString(), jacksonMapper) { String md5, JsonNode node ->
-            if (allAggregatedData.containsKey(md5)) {
-                // merge existing and new matches
-                ObjectNode existingMatches = (ObjectNode) allAggregatedData.get("matches")  // mutable
-                JsonNode newMatches = node.get("matches")                                   // immutable
-                ((ObjectNode) existingMatches.get("matches")).setAll((ObjectNode) newMatches)
-                // merge existing and new xrefs - setAll is not applicable for ArrayNodes
-                ArrayNode existingXref = (ArrayNode) existingNode.get("xref")
-                ArrayNode newXref = (ArrayNode) node.get("xref")
-                existingXref.addAll(newXref)
+
+            if (allAggregatedData.containsKey(md5)) {  // merge existing and new matches
+                ObjectNode existingMatches = (ObjectNode) allAggregatedData[md5].get("matches")  // mutable
+                JsonNode newMatches = node.get("matches")
+                ((ObjectNode) existingMatches).setAll((ObjectNode) newMatches)
             } else {
                 allAggregatedData[md5] = node
             }
