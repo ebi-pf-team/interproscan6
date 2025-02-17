@@ -140,12 +140,22 @@ process PARSE_SFLD {
         }
         
         if (selectedMatches.size() > 0) {
-            /*
-            KEEP THIS BLOCK
-            I5 has a "remove duplicates" step, but it seems bugged,
-            and I couldn't even find one case where it had consequence.
-            We'll implement the same thing here if we want such a case.
-            */
+            Set<Match> uniqueMatches = [] as Set
+            Set<String> seenKeys = [] as Set
+            // sorting matches by location evalue ASC, location score DESC to keep the best matches
+            List<Match> sortedMatches = selectedMatches.sort { a, b ->
+                (a.locations[0].ievalue <=> b.locations[0].ievalue) ?: -(a.locations[0].score <=> b.locations[0].score)
+            }
+            sortedMatches.each { match ->
+                String key = "${match.modelAccession}:${match.locations[0].start}:${match.locations[0].end}"
+                if (!seenKeys.contains(key)) {
+                    uniqueMatches.add(match)
+                    seenKeys.add(key)
+                } else {
+                    continue
+                }
+            }
+            selectedMatches = uniqueMatches
         }
 
         // Add initial matches (the ones used for promotion)
