@@ -61,50 +61,40 @@ workflow {
 
     // Index fasta files [fasta, fasta, fasta] --> [[index, fasta], [index, fasta]]
     // This aids aggregating matches from all member databases for each batch file
-    ch_seqs = INDEX_FASTA_FILES(BUILD_BATCHES.out)
-    ch_seqs.view()
-//     ch_seqs.view()
-//     LOOKUP_MATCHES(
-//         ch_seqs,
-//         apps,
-//         params.lookupService.apiChunkSize,
-//         params.lookupService.lookupHost,
-//         params.lookupService.maxRetries
-//     )
+    ch_seqs = INDEX_FASTA_FILES(BUILD_BATCHES.out).flatMap { it }  // ensure ch_seqs receives individual tuples
 
-//
-//     matchResults = Channel.empty()
-//     if (params.disablePrecalc) {
-//         SCAN_SEQUENCES(
-//             BUILD_BATCHES.out,
-//             apps,
-//             params.appsConfig,
-//             data_dir
-//         )
-//         matchResults = SCAN_SEQUENCES.out
-//     } else {
-//         LOOKUP_MATCHES(
-//             BUILD_BATCHES.out,
-//             apps,
-//             params.lookupService.apiChunkSize,
-//             params.lookupService.lookupHost,
-//             params.lookupService.maxRetries
-//         )
-//
-//         SCAN_SEQUENCES(
-//             LOOKUP_MATCHES.out[1],  // [index, fasta of seqs not in the MLS]
-//             apps,
-//             params.appsConfig,
-//             data_dir
-//         )
-//
-//         def expandedScan = SCAN_SEQUENCES.out.flatMap { scan ->
-//             scan[1].collect { path -> [scan[0], path] }
-//         }
-//
-//         def combined = LOOKUP_MATCHES.out[0].concat(expandedScan)
-//         matchResults = combined.groupTuple()
-//     }
+    matchResults = Channel.empty()
+    if (params.disablePrecalc) {
+        SCAN_SEQUENCES(
+            ch_seqs,
+            apps,
+            params.appsConfig,
+            data_dir
+        )
+        matchResults = SCAN_SEQUENCES.out
+    } else {
+        LOOKUP_MATCHES(
+            ch_seqs,
+            apps,
+            params.lookupService.apiChunkSize,
+            params.lookupService.lookupHost,
+            params.lookupService.maxRetries
+        )
+
+        SCAN_SEQUENCES(
+            LOOKUP_MATCHES.out[1],  // [index, fasta of seqs not in the MLS]
+            apps,
+            params.appsConfig,
+            data_dir
+        )
+
+        def expandedScan = SCAN_SEQUENCES.out.flatMap { scan ->
+            scan[1].collect { path -> [scan[0], path] }
+        }
+
+        def combined = LOOKUP_MATCHES.out[0].concat(expandedScan)
+        matchResults = combined.groupTuple()
+    }
 //
 //     /* XREFS:
 //     Add signature and entry desc and names

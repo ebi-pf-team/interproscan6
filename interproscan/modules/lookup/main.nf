@@ -23,7 +23,7 @@ process LOOKUP_MATCHES {
     def noLookupFastaPath = task.workDir.resolve("noLookup.fasta")
     def noLookupFasta = new StringBuilder()
 
-    Map<String, String> sequences = FastaFile.parse(fasta)  // [md5: sequence]
+    Map<String, String> sequences = FastaFile.parse(fasta.toString())  // [md5: sequence]
     def md5List = sequences.keySet().toList()
     def chunks = md5List.collate(chunkSize)
 
@@ -82,6 +82,5 @@ process LOOKUP_MATCHES {
         // when the connection fails, write out all sequences to "noLookup.fasta"
         new File(calculatedMatchesPath.toString()).write(JsonOutput.toJson([:]))
         new File(fasta.toString()).copyTo(new File(noLookupFastaPath.toString()))
-        jsonFile.copyTo(new File(noLookupMapPath.toString()))
     }
 }
