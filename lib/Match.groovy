@@ -1,6 +1,5 @@
 class Match implements Serializable {
     String modelAccession
-    Integer sequenceLength
     Double evalue
     Double score
     Double bias
@@ -11,6 +10,9 @@ class Match implements Serializable {
 
     // PANTHER
     TreeGrafter treegrafter = null
+
+    // PIRSF
+    Integer sequenceLength = null
 
     // PRINTS
     String graphScan = null
@@ -400,14 +402,22 @@ class Location implements Serializable {
         return loc
     }
 
-    String getHmmBounds(String hmmBounds) {
-        def boundsMapping = [
-                "[]"  : "COMPLETE",
-                "[."  : "N_TERMINAL_COMPLETE",
-                ".]"  : "C_TERMINAL_COMPLETE",
-                ".."  : "INCOMPLETE"
-        ]
-        return boundsMapping[hmmBounds]
+    static String getHmmBounds(String hmmBounds) {
+        return [
+            "[]" : "COMPLETE",
+            "[." : "N_TERMINAL_COMPLETE",
+            ".]" : "C_TERMINAL_COMPLETE",
+            ".." : "INCOMPLETE"
+        ][hmmBounds]
+    }
+
+    static String getReverseHmmBounds(String hmmBounds) {
+        return [
+            "COMPLETE"           : "[]",
+            "N_TERMINAL_COMPLETE": "[.",
+            "C_TERMINAL_COMPLETE": ".]",
+            "INCOMPLETE"         : ".."
+        ][hmmBounds]
     }
 
     @Override
