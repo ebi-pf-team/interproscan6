@@ -140,7 +140,12 @@ process PARSE_SFLD {
         }
         
         if (selectedMatches.size() > 0) {
-            Set<Match> uniqueMatches = [] as Set
+            /*
+                Cases where matches have the same locations and the same ancestor (e.g., SFLDF00273
+                and SFLDF00413 have the same ali location and the same ancestor — SFLDS00029 —
+                so SFLDS00029 is duplicated when promoted).
+            */
+            List<Match> uniqueMatches = []
             Set<String> seenKeys = [] as Set
             // sorting matches by location evalue ASC, location score DESC to keep the best matches
             List<Match> sortedMatches = selectedMatches.sort { a, b ->
