@@ -8,8 +8,8 @@ process LOOKUP_MATCHES {
     input:
     tuple val(index), val(fasta), val(json)
     val applications
+    val url
     val chunkSize
-    val host
     val maxRetries
 
     output:
@@ -41,55 +41,39 @@ process LOOKUP_MATCHES {
     def md5List = sequences.keySet().toList()
     def chunks = md5List.collate(chunkSize)
 
-    int attempt = 0
-    boolean success = false
-    boolean exceededRetries = false
-    while (attempt < maxRetries && !success) {
-        try {
-            chunks.each { chunk ->
-                def requestBody = JsonOutput.toJson([md5: chunk])
-                def connection = new URL(host).openConnection()
-                connection.requestMethod = 'POST'
-                connection.doOutput = true
-                connection.setRequestProperty('Content-Type', 'application/json')
-                connection.outputStream.withWriter('UTF-8') { writer ->
-                    writer << requestBody
-                }
-                def response = connection.inputStream.text
+    String baseUrl = url.toString().replaceAll(/\/+$/, '')
+    def info = httpRequest("${baseUrl}/info", null, 0)
 
-                def jsonResponse = new JsonSlurper().parseText(response)
-                jsonResponse.results.each {
-                    seqId = sequences[it.md5].id
-                    if (it.found) {
-                        calculatedMatches[seqId] = [:]
-                        it.matches.each { match ->
-                            Match matchObj = Match.fromMap(match)
-                            memberDB = matchObj.signature.signatureLibraryRelease.library
-                            stdMemberDB = memberDB.toLowerCase().replaceAll("[-\\s]", "")
-                            if (applications.contains(stdMemberDB)) {
-                                modelAccession = matchObj.signature.accession
-                                matchObj.modelAccession = modelAccession
-                                calculatedMatches[seqId][modelAccession] = matchObj
-                            }
+    boolean success = true
+    chunks.each { chunk ->
+        String data = JsonOutput.toJson([md5: chunk])
+        def response = httpRequest("${baseUrl}/matches", data, maxRetries)
+
+        if (response != null) {
+            response.results.each {
+                seqId = sequences[it.md5].id
+                if (it.found) {
+                    calculatedMatches[seqId] = [:]
+                    it.matches.each { matchObj ->
+                        String library = matchObj.signature.signatureLibraryRelease.library
+                        String appName = library.toLowerCase().replaceAll("[-\\s]", "")
+
+                        if (applications.contains(appName)) {
+                            matchObj = transformMatch(matchObj)
+                            calculatedMatches[seqId][matchObj.modelAccession] = matchObj
                         }
-                    } else {
-                        def seq = sequences[it.md5]
-                        noLookupMap[seqId] = seq
-                        noLookupFasta.append(">${seqId} ${seq.description}\n")
-                        noLookupFasta.append("${seq.sequence}\n")
                     }
+                } else {
+                    def seq = sequences[it.md5]
+                    noLookupMap[seqId] = seq
+                    noLookupFasta.append(">${seqId} ${seq.description}\n")
+                    noLookupFasta.append("${seq.sequence}\n")
                 }
             }
-            success = true
-        } catch (Exception e) {
-            attempt++
-            if (attempt >= maxRetries) {
-                log.error "Unable to retrieve pre-calculated matches. Running analyses locally."
-                exceededRetries = true
-                break
-            }
-            log.warn "An error occurred when retrieving pre-calculated matches. Retrying."
+        } else {
+            success = false
         }
+        
     }
 
     if (success) {
@@ -106,4 +90,75 @@ process LOOKUP_MATCHES {
         new File(fasta.toString()).copyTo(new File(noLookupFastaPath.toString()))
         jsonFile.copyTo(new File(noLookupMapPath.toString()))
     }
+}
+
+def httpRequest(String urlString, String data, int maxRetries) {
+    int attempts = 0
+    boolean isPost = data != null && data.length() > 0
+    HttpURLConnection connection = null
+    while (attempts < maxRetries + 1) {
+        attempts++
+
+        try {
+            URL url = new URL(urlString)
+            connection = (HttpURLConnection) url.openConnection()
+            connection.connectTimeout = 5000
+            connection.readTimeout = 5000
+            if (isPost) {
+                connection.doOutput = true
+                connection.requestMethod = "POST"
+                connection.setRequestProperty("Content-Type", "application/json")
+                connection.setRequestProperty("Accept", "application/json")
+                connection.outputStream.withWriter("UTF-8") { writer ->
+                    writer << data
+                }
+                connection.outputStream.flush()
+            } else {
+                connection.requestMethod = "GET"
+            }
+
+            int responseCode = connection.responseCode
+            if (responseCode >= 200 && responseCode < 300) {
+                String responseText = connection.inputStream.getText("UTF-8")
+                return new JsonSlurper().parseText(responseText)
+            } else {
+                def errorMsg = connection.errorStream ? connection.errorStream.getText("UTF-8") : ""
+                log.error "Received HTTP ${responseCode} for ${urlString}"
+                return null
+            }
+        } catch (java.net.ConnectException | java.net.UnknownHostException e) {
+            log.error "Connection error for ${urlString}: ${e.message}"
+            return null
+        } catch (java.net.SocketTimeoutException e) {
+            log.error "Timeout error for ${urlString}; attempt ${attempts} / ${maxRetries + 1}"
+        } catch (Exception e) {
+            log.error "Unexpected error for ${urlString}: ${e.message}"
+            return null
+        } finally {
+            connection?.disconnect()
+        }
+    }
+}
+
+def Map transformMatch(Map match) {
+    return [
+        *            : match,
+        "treegrafter": ["ancestralNodeID": match["annotationNode"]],
+        "locations"  : match["locations"].collect { loc ->
+            return [
+                *          : loc,
+                "hmmBounds": loc["hmmBounds"] ? Location.getReverseHmmBounds(loc["hmmBounds"]) : null,
+                "fragments": loc["fragments"].collect { tranformFragment(it) },
+                "sites"    : loc["sites"] ?: []
+            ]
+        },
+    ]
+}
+
+def Map tranformFragment(Map fragment) {
+    return [
+        "start"   : fragment["start"],
+        "end"     : fragment["end"],
+        "dcStatus": fragment["type"]
+    ]
 }
