@@ -1,9 +1,10 @@
 process POPULATE_SEQ_DATABASE {
     // Populate a local sqlite3 database with sequences from the pipeline's input FASTA file.
-    label 'local', 'ips6_container'
+    label         'local', 'ips6_container'
+    errorStrategy 'terminate'
 
     input:
-    val fasta
+    file fasta
     val nucleic
 
     output:
@@ -24,6 +25,7 @@ process UPDATE_ORFS {
     // add protein seqs translated from ORFS in the nt seqs to the database
     maxForks 1  // Ensure that only one instance runs at a time to avoid concurrent writing to the db
     label 'local', 'ips6_container'
+    errorStrategy 'terminate'
 
     input:
     val translatedFasta  // one FASTA per ESL_TRANSLATE batch
@@ -44,6 +46,7 @@ process UPDATE_ORFS {
 process BUILD_BATCHES {
     // Build the FASTA file batches of unique protein sequences for the sequence analysis
     label 'local', 'ips6_container'
+    errorStrategy 'terminate'
 
     input:
     val dbPath
