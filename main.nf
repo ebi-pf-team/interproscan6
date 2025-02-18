@@ -95,34 +95,29 @@ workflow {
         def combined = LOOKUP_MATCHES.out[0].concat(expandedScan)
         matchResults = combined.groupTuple()
     }
-//
-//     /* XREFS:
-//     Add signature and entry desc and names
-//     Add PAINT annotations (if panther is enabled)
-//     Add go terms (if enabled)
-//     Add pathways (if enabled)
-//     */
-//     XREFS(
-//         matchResults,
-//         apps,
-//         data_dir,
-//         params.xRefsConfig.entries,
-//         params.xRefsConfig.goterms,
-//         params.xRefsConfig.pathways,
-//         params.goterms,
-//         params.pathways,
-//         "${data_dir}/${params.appsConfig.paint}"
-//     )
-//
-//     ch_seqs.join(XREFS.out, by: 0)
-//     .map { batchnumber, fasta, sequences, matches ->
-//         [batchnumber, sequences, matches]
-//     }.set { ch_seq_matches }
-//
-//     AGGREGATE_MATCHES(ch_seq_matches, params.nucleic)
-//
-//     REPRESENTATIVE_DOMAINS(AGGREGATE_MATCHES.out)
-//
+
+    /* XREFS:
+    Add signature and entry desc and names
+    Add PAINT annotations (if panther is enabled)
+    Add go terms (if enabled)
+    Add pathways (if enabled)
+    */
+    XREFS(
+        matchResults,
+        apps,
+        data_dir,
+        params.xRefsConfig.entries,
+        params.xRefsConfig.goterms,
+        params.xRefsConfig.pathways,
+        params.goterms,
+        params.pathways,
+        "${data_dir}/${params.appsConfig.paint}"
+    )
+
+    AGGREGATE_MATCHES(ch_seq_matches, params.nucleic)
+
+    REPRESENTATIVE_DOMAINS(AGGREGATE_MATCHES.out)
+
 // //     Channel.from(params.formats.toLowerCase().split(','))
 // //     .set { ch_format }
 // //
