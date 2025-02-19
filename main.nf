@@ -33,6 +33,7 @@ workflow {
     formats         = INIT_PIPELINE.out.formats.val
     apps            = INIT_PIPELINE.out.apps.val
     signalpMode     = INIT_PIPELINE.out.signalpMode.val
+    matchesApiUrl   = INIT_PIPELINE.out.matchesApiUrl.val
 
     // Chunk input file in smaller files
     fasta_file
@@ -57,19 +58,11 @@ workflow {
     }
 
     matchResults = Channel.empty()
-    if (params.disablePrecalc) {
-        SCAN_SEQUENCES(
-            ch_seqs,
-            apps,
-            params.appsConfig,
-            data_dir
-        )
-        matchResults = SCAN_SEQUENCES.out
-    } else {
+    if (matchesApiUrl != null) {
         LOOKUP_MATCHES(
             ch_seqs,
             apps,
-            params.lookupService.url,
+            matchesApiUrl,
             params.lookupService.chunkSize,
             params.lookupService.maxRetries)
 
@@ -85,6 +78,14 @@ workflow {
 
         def combined = LOOKUP_MATCHES.out[0].concat(expandedScan)
         matchResults = combined.groupTuple()
+    } else {
+        SCAN_SEQUENCES(
+            ch_seqs,
+            apps,
+            params.appsConfig,
+            data_dir
+        )
+        matchResults = SCAN_SEQUENCES.out
     }
 
     /* XREFS:
