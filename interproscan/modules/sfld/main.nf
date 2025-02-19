@@ -121,7 +121,6 @@ process PARSE_SFLD {
         def selectedMatches = [] as Set
         matches.each { match ->
             def parents = hierarchy.get(match.modelAccession)
-
             if (parents) {
                 /*
                     Propagate match up through it hierarchy.
@@ -136,43 +135,31 @@ process PARSE_SFLD {
                         promotedMatch.addLocation(match.locations[0].clone())
                         return promotedMatch
                     }
-
-                /*
-                    Check newly promoted matches against previously selected matches:
-                        - promoted fully contains other match: keep promoted and remove other
-                        - promoted fully within other match: skip promoted
-                        - partial or no overlap: keep promoted
-                */
-                boolean keepPromoted = true
-                Set<Match> toRemove = [] as Set
-                promotedMatches.each { promotedMatch ->
-                    for (Match selectedMatch: selectedMatches) {
-                        if (promotedMatch.locations[0].start <= selectedMatch.locations[0].start &&
-                            promotedMatch.locations[0].end >= selectedMatch.locations[0].end) {
-                            toRemove.add(selectedMatch)
-                        } else if (promotedMatch.locations[0].start >= selectedMatch.locations[0].start &&
-                                  promotedMatch.locations[0].end <= selectedMatch.locations[0].end) {
-                            keepPromoted = false
-                            break
-                        }
-                    }
-
-                    toRemove.each { selectedMatches.remove(it) }
-
-                    if (keepPromoted) {
-                        selectedMatches.add(promotedMatch)
-                    }
-                }
+                selectedMatches.addAll(promotedMatches)
             }
         }
         
         if (selectedMatches.size() > 0) {
             /*
-            KEEP THIS BLOCK
-            I5 has a "remove duplicates" step, but it seems bugged,
-            and I couldn't even find one case where it had consequence.
-            We'll implement the same thing here if we want such a case.
+                Cases where matches have the same locations and the same ancestor (e.g., SFLDF00273
+                and SFLDF00413 have the same ali location and the same ancestor — SFLDS00029 —
+                so SFLDS00029 is duplicated when promoted).
             */
+            List<Match> uniqueMatches = []
+            Set<String> seenKeys = [] as Set
+            // sorting matches by location evalue ASC, location score DESC to keep the best matches
+            List<Match> sortedMatches = selectedMatches.sort { a, b ->
+                (a.locations[0].evalue <=> b.locations[0].evalue) ?: -(a.locations[0].score <=> b.locations[0].score)
+            }
+            sortedMatches.each { match ->
+                String key = "${match.modelAccession}:${match.locations[0].start}:${match.locations[0].end}"
+                if (seenKeys.contains(key)) {
+                    return
+                }
+                uniqueMatches.add(match)
+                seenKeys.add(key)
+            }
+            selectedMatches = uniqueMatches
         }
 
         // Add initial matches (the ones used for promotion)
@@ -201,14 +188,18 @@ Map<String, Set<String>> parseHierarchy(String filePath) {
     File file = new File(filePath)
     file.withReader{ reader ->
         for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-            def fields = line.split(":")
-            assert fields.size() == 2
-            String childAccession = fields[0]
-            def parents = fields[1].trim().split(/\s+/)
-            hierarchy[childAccession] = (parents*.trim()) as Set
-        }
+            def accessions = line.split(/\t/).toList()
+            def childAccession = accessions[-2]  // the last one is the description
+            def parents = accessions.subList(0, accessions.size() - 2)
+            hierarchy[childAccession] = parents as Set
+            for (parent in parents) {  // making sure all the ancestors are in the hierarchy
+                ancestors = hierarchy.get(parent)
+                if (ancestors.size() > 0) {
+                    hierarchy[childAccession].addAll(ancestors)
+                }
+            }
+	}
     }
-
     return hierarchy
 }
 
