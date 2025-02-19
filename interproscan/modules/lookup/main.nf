@@ -41,13 +41,11 @@ process LOOKUP_MATCHES {
     def md5List = sequences.keySet().toList()
     def chunks = md5List.collate(chunkSize)
 
-    String baseUrl = url.toString().replaceAll(/\/+$/, '')
-    def info = httpRequest("${baseUrl}/info", null, 0)
-
+    String baseUrl = sanitizeURL(url.toString())
     boolean success = true
-    chunks.each { chunk ->
+    for (chunk in chunks) {
         String data = JsonOutput.toJson([md5: chunk])
-        def response = httpRequest("${baseUrl}/matches", data, maxRetries)
+        def response = httpRequest("${baseUrl}/matches", data, maxRetries, true)
 
         if (response != null) {
             response.results.each {
@@ -72,8 +70,8 @@ process LOOKUP_MATCHES {
             }
         } else {
             success = false
+            break
         }
-        
     }
 
     if (success) {
@@ -86,13 +84,22 @@ process LOOKUP_MATCHES {
             new File(noLookupFastaPath.toString()).write(noLookupFasta.toString())
         }
     } else {
+        log.warn "An error occurred while querying the Matches API, analyses will be run locally"
         new File(calculatedMatchesPath.toString()).write(JsonOutput.toJson([:]))
         new File(fasta.toString()).copyTo(new File(noLookupFastaPath.toString()))
         jsonFile.copyTo(new File(noLookupMapPath.toString()))
     }
 }
 
-def httpRequest(String urlString, String data, int maxRetries) {
+def String sanitizeURL(String url) {
+    return url.replaceAll(/\/+$/, '')
+}
+
+def Map getInfo(String baseUrl) {
+    return httpRequest("${sanitizeURL(baseUrl)}/info", null, 0, true)
+}
+
+def httpRequest(String urlString, String data, int maxRetries, boolean verbose) {
     int attempts = 0
     boolean isPost = data != null && data.length() > 0
     HttpURLConnection connection = null
@@ -122,17 +129,25 @@ def httpRequest(String urlString, String data, int maxRetries) {
                 String responseText = connection.inputStream.getText("UTF-8")
                 return new JsonSlurper().parseText(responseText)
             } else {
-                def errorMsg = connection.errorStream ? connection.errorStream.getText("UTF-8") : ""
-                log.error "Received HTTP ${responseCode} for ${urlString}"
+                if (verbose) {
+                    def errorMsg = connection.errorStream ? connection.errorStream.getText("UTF-8") : ""
+                    log.warn "Received HTTP ${responseCode} for ${urlString}"
+                }
                 return null
             }
         } catch (java.net.ConnectException | java.net.UnknownHostException e) {
-            log.error "Connection error for ${urlString}: ${e.message}"
+            if (verbose) {
+                log.warn "Connection error for ${urlString}: ${e.message}"
+            }
             return null
         } catch (java.net.SocketTimeoutException e) {
-            log.error "Timeout error for ${urlString}; attempt ${attempts} / ${maxRetries + 1}"
+            if (verbose) {
+                log.warn "Timeout error for ${urlString}; attempt ${attempts} / ${maxRetries + 1}"
+            }
         } catch (Exception e) {
-            log.error "Unexpected error for ${urlString}: ${e.message}"
+            if (verbose) {
+                log.warn "Unexpected error for ${urlString}: ${e.message}"
+            }
             return null
         } finally {
             connection?.disconnect()
