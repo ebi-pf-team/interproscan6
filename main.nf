@@ -5,8 +5,7 @@ include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan
 
 include { POPULATE_SEQ_DATABASE;
           UPDATE_ORFS;
-          BUILD_BATCHES;
-          INDEX_FASTA_FILES             } from "./interproscan/modules/prepare_sequences"
+          BUILD_BATCHES                 } from "./interproscan/modules/prepare_sequences"
 include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
 include { LOOKUP_MATCHES                } from "./interproscan/modules/lookup"
 include { XREFS                         } from "./interproscan/modules/xrefs"
@@ -59,64 +58,73 @@ workflow {
         BUILD_BATCHES(POPULATE_SEQ_DATABASE.out, params.batchSize)
     }
 
-    // Index fasta files [fasta, fasta, fasta] --> [[index, fasta], [index, fasta]]
-    // This aids aggregating matches from all member databases for each batch file
-    ch_seqs = INDEX_FASTA_FILES(BUILD_BATCHES.out).flatMap { it }  // ensure ch_seqs receives individual tuples
-
-    matchResults = Channel.empty()
-    if (params.disablePrecalc) {
-        SCAN_SEQUENCES(
-            ch_seqs,
-            apps,
-            params.appsConfig,
-            data_dir
-        )
-        matchResults = SCAN_SEQUENCES.out
-    } else {
-        LOOKUP_MATCHES(
-            ch_seqs,
-            apps,
-            params.lookupService.apiChunkSize,
-            params.lookupService.lookupHost,
-            params.lookupService.maxRetries
-        )
-
-        SCAN_SEQUENCES(
-            LOOKUP_MATCHES.out[1],  // [index, fasta of seqs not in the MLS]
-            apps,
-            params.appsConfig,
-            data_dir
-        )
-
-        def expandedScan = SCAN_SEQUENCES.out.flatMap { scan ->
-            scan[1].collect { path -> [scan[0], path] }
-        }
-
-        def combined = LOOKUP_MATCHES.out[0].concat(expandedScan)
-        matchResults = combined.groupTuple()
-    }
-
-    /* XREFS:
-    Add signature and entry desc and names
-    Add PAINT annotations (if panther is enabled)
-    Add go terms (if enabled)
-    Add pathways (if enabled)
-    */
-    XREFS(
-        matchResults,
+    LOOKUP_MATCHES(
+        BUILD_BATCHES.out.flatten(),  // emit each fasta individually to multiprocess the fasta files
         apps,
-        data_dir,
-        params.xRefsConfig.entries,
-        params.xRefsConfig.goterms,
-        params.xRefsConfig.pathways,
-        params.goterms,
-        params.pathways,
-        "${data_dir}/${params.appsConfig.paint}"
+        params.lookupService.apiChunkSize,
+        params.lookupService.lookupHost,
+        params.lookupService.maxRetries
     )
+    // LOOKUP_MATCHES.out.view()
 
-    AGGREGATE_MATCHES(ch_seq_matches, params.nucleic)
+//
+//     matchResults = Channel.empty()
+//     if (params.disablePrecalc) {
+//         SCAN_SEQUENCES(
+//             ch_seqs,
+//             apps,
+//             params.appsConfig,
+//             data_dir
+//         )
+//         matchResults = SCAN_SEQUENCES.out
+//     } else {
+//         LOOKUP_MATCHES(
+//             ch_seqs,
+//             apps,
+//             params.lookupService.apiChunkSize,
+//             params.lookupService.lookupHost,
+//             params.lookupService.maxRetries
+//         )
+//
+//         SCAN_SEQUENCES(
+//             LOOKUP_MATCHES.out[1],
+//             apps,
+//             params.appsConfig,
+//             data_dir
+//         )
+//
+//         def expandedScan = SCAN_SEQUENCES.out.flatMap { scan ->
+//             scan[1].collect { path -> [scan[0], path] }
+//         }
+//
+//         def combined = LOOKUP_MATCHES.out[0].concat(expandedScan)
+//         matchResults = combined.groupTuple()
+//     }
+//     /* The results exit SCAN_SEQUENCES, or LOOKUP_MATCHES if no seqs to scan, with all matches
+//     from all members databases in a single JSON file for each batch */
+//
+//     /* XREFS:
+//     Add signature and entry desc and names
+//     Add PAINT annotations (if panther is enabled)
+//     Add go terms (if enabled)
+//     Add pathways (if enabled)
+//     */
+//     XREFS(
+//         matchResults,
+//         apps,
+//         data_dir,
+//         params.xRefsConfig.entries,
+//         params.xRefsConfig.goterms,
+//         params.xRefsConfig.pathways,
+//         params.goterms,
+//         params.pathways,
+//         "${data_dir}/${params.appsConfig.paint}"
+//     )
+//
+//     REPRESENTATIVE_DOMAINS(XREFS.out)
+//     REPRESENTATIVE_DOMAINS.out.view()
 
-    REPRESENTATIVE_DOMAINS(AGGREGATE_MATCHES.out)
+
 
 // //     Channel.from(params.formats.toLowerCase().split(','))
 // //     .set { ch_format }
