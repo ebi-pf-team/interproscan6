@@ -183,3 +183,10 @@ def loadXRefFiles(xrefDir, dataDir) {
         throw new Exception("Error parsing goterms/pathways files: ${e}")
     }
 }
+
+def String getInterProVersion(Path directory) {
+    File file = new File(new File(directory.toString(), "xrefs"), "entries.json")
+    JsonProcessor processor = new JsonProcessor()
+    def metadata = processor.jsonToMap(file)
+    return metadata.databases["InterPro"]
+}
