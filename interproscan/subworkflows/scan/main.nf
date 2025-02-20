@@ -23,7 +23,7 @@ include { RUN_DEEPTMHMM; PARSE_DEEPTMHMM                                        
 
 workflow SCAN_SEQUENCES {
     take:
-    ch_seqs             // channel of tuples (index, fasta file, json file)
+    ch_seqs             // channel of tuples (index, fasta file)
     applications        // list of applications to run
     appsConfig          // map of applications
     datadir             // path to data directory
@@ -31,17 +31,9 @@ workflow SCAN_SEQUENCES {
     main:
     results = Channel.empty()
 
-    ch_seqs
-        .map { index, fasta, json -> tuple( index, fasta ) }
-        .set { ch_fasta }
-
-    ch_seqs
-        .map { index, fasta, json -> tuple( index, json ) }
-        .set { ch_json }
-
     if (applications.contains("antifam")) {
         RUN_ANTIFAM(
-            ch_fasta,
+            ch_seqs,
             "${datadir}/${appsConfig.antifam.hmm}"
         )
 
@@ -52,7 +44,7 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("cathgene3d") || applications.contains("cathfunfam")) {
         // Search Gene3D profiles
         SEARCH_GENE3D(
-            ch_fasta,
+            ch_seqs,
             "${datadir}/${appsConfig.cathgene3d.hmm}")
         ch_gene3d = SEARCH_GENE3D.out
 
@@ -85,7 +77,7 @@ workflow SCAN_SEQUENCES {
                 Join input fasta file with superfamilies.
                 We split in smaller chunks to parallelize searching FunFam profiles
             */
-            ch_fasta
+            ch_seqs
                 .join(PREPARE_FUNFAM.out)
                 .flatMap { id, file, supfams ->
                     supfams
@@ -112,7 +104,7 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("cdd")) {
         RUN_RPSBLAST(
-            ch_fasta,
+            ch_seqs,
             "${datadir}/${appsConfig.cdd.rpsblast_db}"
         )
 
@@ -126,14 +118,14 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("coils")) {
-        RUN_COILS(ch_fasta)
+        RUN_COILS(ch_seqs)
         PARSE_COILS(RUN_COILS.out)
         results = results.mix(PARSE_COILS.out)
     }
 
     if (applications.contains("deeptmhmm")) {
         RUN_DEEPTMHMM(
-            ch_fasta,
+            ch_seqs,
             appsConfig.deeptmhmm.dir
         )
         PARSE_DEEPTMHMM(RUN_DEEPTMHMM.out)
@@ -142,7 +134,7 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("hamap")) {
         PREPROCESS_HAMAP(
-            ch_fasta,
+            ch_seqs,
             "${datadir}/${appsConfig.hamap.hmm}"
         )
 
@@ -161,7 +153,7 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("mobidblite")) {
-        RUN_MOBIDBLITE(ch_fasta)
+        RUN_MOBIDBLITE(ch_seqs)
 
         PARSE_MOBIDBLITE(RUN_MOBIDBLITE.out)
         results = results.mix(PARSE_MOBIDBLITE.out)
@@ -169,7 +161,7 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("ncbifam")) {
         RUN_NCBIFAM(
-            ch_fasta,
+            ch_seqs,
             "${datadir}/${appsConfig.ncbifam.hmm}"
         )
 
@@ -179,7 +171,7 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("panther")) {
         SEARCH_PANTHER(
-            ch_fasta,
+            ch_seqs,
             "${datadir}/${appsConfig.panther.hmm}"
         )
         ch_panther = SEARCH_PANTHER.out
@@ -202,7 +194,7 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("phobius")) {
         SEARCH_PHOBIUS(
-            ch_fasta,
+            ch_seqs,
             appsConfig.phobius.dir
         )
 
@@ -212,7 +204,7 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("pfam")) {
         SEARCH_PFAM(
-            ch_fasta,
+            ch_seqs,
             "${datadir}/${appsConfig.pfam.hmm}"
         )
 
@@ -226,7 +218,7 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("pirsf")) {
-        RUN_PIRSF(ch_fasta,
+        RUN_PIRSF(ch_seqs,
             "${datadir}/${appsConfig.pirsf.hmm}"
         )
         PARSE_PIRSF(RUN_PIRSF.out,
@@ -236,7 +228,7 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("pirsr")) {
-        RUN_PIRSR(ch_fasta,
+        RUN_PIRSR(ch_seqs,
             "${datadir}/${appsConfig.pirsr.hmm}")
 
         PARSE_PIRSR(RUN_PIRSR.out,
@@ -247,7 +239,7 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("prints")) {
         RUN_PRINTS(
-            ch_fasta,
+            ch_seqs,
             "${datadir}/${appsConfig.prints.pval}"
         )
 
@@ -260,7 +252,7 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("prositepatterns")) {
         RUN_PFSCAN(
-            ch_fasta,
+            ch_seqs,
             "${datadir}/${appsConfig.prositepatterns.dat}",
             "${datadir}/${appsConfig.prositepatterns.evaluator}")
 
@@ -270,7 +262,7 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("prositeprofiles")) {
         RUN_PFSEARCH(
-            ch_fasta,
+            ch_seqs,
             "${datadir}/${appsConfig.prositeprofiles.dir}")
         PARSE_PFSEARCH(
             RUN_PFSEARCH.out,
@@ -279,7 +271,7 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("sfld")) {
-        RUN_SFLD(ch_fasta,
+        RUN_SFLD(ch_seqs,
             "${datadir}/${appsConfig.sfld.hmm}")
 
         POST_PROCESS_SFLD(RUN_SFLD.out,
@@ -293,7 +285,7 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("signalp_euk")) {
         RUN_SIGNALP_EUK(
-            ch_fasta,
+            ch_seqs,
             appsConfig.signalp_euk.organism,
             appsConfig.signalp_euk.mode,
             appsConfig.signalp_euk.dir
@@ -304,7 +296,7 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("signalp_prok")) {
         RUN_SIGNALP_PROK(
-            ch_fasta,
+            ch_seqs,
             appsConfig.signalp_prok.organism,
             appsConfig.signalp_prok.mode,
             appsConfig.signalp_prok.dir
@@ -315,7 +307,7 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("smart")) {
         SEARCH_SMART(
-            ch_fasta,
+            ch_seqs,
             "${datadir}/${appsConfig.smart.hmmbin}"
         )
 
@@ -328,7 +320,7 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("superfamily")) {
         SEARCH_SUPERFAMILY(
-            ch_fasta,
+            ch_seqs,
             "${datadir}/${appsConfig.superfamily.hmm}",
             "${datadir}/${appsConfig.superfamily.selfhits}",
             "${datadir}/${appsConfig.superfamily.cla}",

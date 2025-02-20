@@ -95,31 +95,29 @@ workflow {
         def combined = LOOKUP_MATCHES.out[0].concat(expandedScan)
         matchResults = combined.groupTuple()
     }
-//     /* The results exit SCAN_SEQUENCES, or LOOKUP_MATCHES if no seqs to scan, with all matches
-//     from all members databases in a single JSON file for each batch */
-//
-//     /* XREFS:
-//     Add signature and entry desc and names
-//     Add PAINT annotations (if panther is enabled)
-//     Add go terms (if enabled)
-//     Add pathways (if enabled)
-//     */
-//     XREFS(
-//         matchResults,
-//         apps,
-//         data_dir,
-//         params.xRefsConfig.entries,
-//         params.xRefsConfig.goterms,
-//         params.xRefsConfig.pathways,
-//         params.goterms,
-//         params.pathways,
-//         "${data_dir}/${params.appsConfig.paint}"
-//     )
-//
-//     REPRESENTATIVE_DOMAINS(XREFS.out)
-//     REPRESENTATIVE_DOMAINS.out.view()
+    // matchResults = [[meta, [member.json, member.json, member.json]]
 
+    /* XREFS:
+    Aggregate matches across all members for each sequence --> single JSON will all matches for the batch
+    Add signature and entry desc and names
+    Add PAINT annotations (if panther is enabled)
+    Add go terms (if enabled)
+    Add pathways (if enabled)
+    */
+    XREFS(
+        matchResults,
+        apps,
+        data_dir,
+        params.xRefsConfig.entries,
+        params.xRefsConfig.goterms,
+        params.xRefsConfig.pathways,
+        params.goterms,
+        params.pathways,
+        "${data_dir}/${params.appsConfig.paint}"
+    )
 
+    REPRESENTATIVE_DOMAINS(XREFS.out)
+    REPRESENTATIVE_DOMAINS.out.view()
 
 // //     Channel.from(params.formats.toLowerCase().split(','))
 // //     .set { ch_format }
