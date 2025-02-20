@@ -98,7 +98,6 @@ process PARSE_PFAM {
     processedMatches = filteredMatches.collectEntries { seqId, matches ->
         def matchesAggregated = [:]
         matches.each { match ->
-
             List<String> nestedModels = dat.get(match.modelAccession, [])
             if (nestedModels && nestedModels.size() > 0) {
                 List<Map<String, Integer>> locationFragments = matches.findAll { otherMatch ->
@@ -151,17 +150,23 @@ process PARSE_PFAM {
                             fragmentDcStatus = "C_TERMINAL_DISC"
                         }
 
-                        rawDiscontinuousMatch.locations[0].start = newLocationStart
-                        rawDiscontinuousMatch.locations[0].end = newLocationEnd
-                        fragments.add(new LocationFragment(newLocationStart, newLocationEnd, fragmentDcStatus))
-                        rawDiscontinuousMatch.locations[0].fragments = fragments
+                        if (newLocationEnd - newLocationStart + 1 >= minLength) {
+                            fragments.add(new LocationFragment(newLocationStart, newLocationEnd, fragmentDcStatus))
+                            rawDiscontinuousMatch.locations[0].fragments = fragments
+                        }
                         newLocationStart = fragment.end + 1
                         if (twoActualRegions) {
                             //deal with final region
                             fragmentDcStatus = "N_TERMINAL_DISC"
                             rawDiscontinuousMatch.locations[0].end = finalLocationEnd
-                            fragments.add(new LocationFragment(newLocationStart, finalLocationEnd, fragmentDcStatus))
-                            rawDiscontinuousMatch.locations[0].fragments = fragments
+                            if (finalLocationEnd - newLocationStart + 1 >= minLength) {
+                                fragments.add(new LocationFragment(newLocationStart, finalLocationEnd, fragmentDcStatus))
+                                rawDiscontinuousMatch.locations[0].fragments = fragments
+                            }
+                        }
+                        if (rawDiscontinuousMatch.locations[0].fragments.size() == 1) {
+                            rawDiscontinuousMatch.locations[0].start = rawDiscontinuousMatch.locations[0].fragments[0].start
+                            rawDiscontinuousMatch.locations[0].end = rawDiscontinuousMatch.locations[0].fragments[0].end
                         }
                         newMatchesFromFragment << rawDiscontinuousMatch
                     }
