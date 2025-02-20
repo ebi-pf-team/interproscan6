@@ -9,20 +9,23 @@ process WRITE_TSV_OUTPUT {
     label 'local'
 
     input:
-    val matches
+    val matchesFiles
     val outputPath
     val nucleic
 
     exec:
     ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+
     def tsvFile = new File("${outputPath}.ips6.tsv".toString())
     tsvFile.text = "" // clear the file if it already exists
-    // Each line contains: seqId md5 seqLength memberDb modelAcc sigDesc start end evalue status date entryAcc entryDesc xrefs
+
+    // Each line contains: seqId md5 seqLength memberDb modelAcc sigDesc start end evalue status date entryAcc entryDesc goterms pathways
     def currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
 
-    JsonReader.streamArray(matches.toString(), jacksonMapper) { ObjectNode seqNode ->
-        seqNode.get("matches").fields().each { matchNode ->
-            Match match = Match.fromJsonNode((JsonNode) matchNode.value)
+    matchesFiles.each { matchFile ->
+        JsonReader.streamJson(matchFile.toString(), jacksonMapper) { String proteinMd5, JsonNode matchNode ->
+
+            Match match = Match.fromJsonNode((JsonNode) matchNode)
             String memberDb = match.signature.signatureLibraryRelease.library
             String sigDesc = (match.signature.description == null || match.signature.description == "null") ? '-' : match.signature.description
             String goterms = match.signature.entry?.goXRefs ?
@@ -37,7 +40,8 @@ process WRITE_TSV_OUTPUT {
             String entryDesc = (match.signature.entry?.description == null || match.signature.entry?.description == "null") ? '-' : match.signature.entry?.description
             char status = 'T'
 
-            seqNode.get("xref").each { xrefData ->
+            seqIds = getSequenceData(proteinMd5, nucleic)
+            seqIds.each { String seqId ->
                 match.locations.each { Location loc ->
                     if ( nucleic ) {
                         seqNode.get("translatedFrom").forEach { translatedFromNode ->
@@ -45,12 +49,19 @@ process WRITE_TSV_OUTPUT {
                             writeToTsv(tsvFile, match, currentDate, memberDb, sigDesc, goterms, pathways, entryAcc, entryDesc, status, seqNode, xrefData, loc, seqId)
                         }
                     } else {
-                        String seqId = xrefData.get("id").asText()
                         writeToTsv(tsvFile, match, currentDate, memberDb, sigDesc, goterms, pathways, entryAcc, entryDesc, status, seqNode, xrefData, loc, seqId)
                     }
                 }
             }
         }
+    }
+}
+
+def getSequenceData(proteinMd5, nucleic) {
+    if ( nucleic ) {
+        return
+    } else {
+        return
     }
 }
 

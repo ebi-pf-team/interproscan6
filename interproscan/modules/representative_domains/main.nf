@@ -8,10 +8,10 @@ process REPRESENTATIVE_DOMAINS {
     label 'local'
 
     input:
-    val matchesPath
+    tuple val(meta), val(matchesPath)
 
     output:
-    path("matches_repr_domains.json")
+    tuple val(meta), path("matches_repr_domains.json")
 
     exec:
     int MAX_DOMS_PER_GROUP = 20 // only consider N "best" domains otherwise there are too many comparisons (2^domains)
