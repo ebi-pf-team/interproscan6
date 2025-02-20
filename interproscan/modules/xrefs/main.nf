@@ -33,71 +33,66 @@ process XREFS {
         if (addPathways) (ipr2pa, paInfo) = loadXRefFiles(pathwaysFilePrefix, dataDir, jacksonMapper)
     }
 
+    def aggregatedMatches = [:]  // seqId: {modelAcc: Match} -- otherwise a seqId will appear multiple times in the output
+    membersMatches.each { matchesPath ->
+        File file = new File(matchesPath.toString())
+        JsonReader.streamJson(matchesPath.toString(), jacksonMapper) { String seqId, JsonNode matches ->
+            assert seqId != null : "Error: seqId is null in $matchesPath"
+            seqEntry = aggregatedMatches.computeIfAbsent(seqId, { [:] } )
+
+            matches.fields().each { Map.Entry<String, JsonNode> entry ->
+                String modelAcc = entry.key   // Extract the modelAcc (key)
+                Match match = Match.fromJsonNode(entry.value)
+
+                if (!entries) {  // no data to update, update match in aggregatedMatches
+                    seqEntry[modelAcc] = match
+                } else {
+                    String signatureAcc = match.signature.accession
+                    def signatureInfo = entries["entries"][signatureAcc] ?: entries["entries"][modelAcc]
+
+                    // Update library version
+                    def version = (match.signature.signatureLibraryRelease.version == "null") ? null : version
+                    if (!version && signatureInfo != null) {
+                        match.signature.signatureLibraryRelease.version = entries["databases"][signatureInfo["database"].asText()].asText()
+                    }
+
+                    // Handle PANTHER data
+                    if (match.signature.signatureLibraryRelease.library == "PANTHER") {
+                        updatePantherData(match, dataDir, paintAnnoDir, signatureAcc, entries)
+                    }
+
+                    // Update signature info
+                    if (signatureInfo != null) {
+                        match.signature.name = signatureInfo["name"].asText().replace('\"',"")
+                        match.signature.description = signatureInfo["description"].asText().replace('\"',"")
+                        if (signatureInfo["representative"]) {
+                            match.representativeInfo = new RepresentativeInfo(
+                                signatureInfo["representative"]["type"],
+                                signatureInfo["representative"]["index"]
+                            )
+                        }
+
+                        // Handle InterPro data
+                        String interproAcc = signatureInfo["integrated"].asText()  // defaults to a TextNode, convert to String
+                        if (interproAcc != "null") {
+                             def entryInfo = entries["entries"][interproAcc]
+                             assert entryInfo != null
+                             match.signature.entry = new Entry(
+                                 interproAcc, entryInfo.get("name").asText(), entryInfo.get("description").asText(), entryInfo.get("type").asText()
+                             )
+                             addXRefs(match, interproAcc, ipr2go, goInfo, ipr2pa, paInfo)
+                        }
+                    }
+                    // Update the in aggregatedMatches Match object
+                    seqEntry[modelAcc] = match
+                }  // end of if/else
+            } // end of matches
+        }  // end of Json reader / seq Id
+    } // end of members matches
+
     // Stream writing the output JSON file
     String outputFilePath = task.workDir.resolve("matches2xrefs.json")
-    JsonWriter.streamJson(outputFilePath.toString(), jacksonMapper) { JsonGenerator jsonGenerator ->
-
-        membersMatches.each { matchesPath ->
-            File file = new File(matchesPath.toString())
-            JsonReader.streamJson(matchesPath.toString(), jacksonMapper) { String seqId, JsonNode matches ->
-                assert seqId != null : "Error: seqId is null in $matchesPath"
-                jsonGenerator.writeObjectFieldStart(seqId)
-
-                matches.fields().each { Map.Entry<String, JsonNode> entry ->
-                    String modelAcc = entry.key   // Extract the modelAcc (key)
-                    Match match = Match.fromJsonNode(entry.value)
-
-                    if (!entries) {  // no data to update, write out model and the match object as is
-                        jsonGenerator.writeObjectFieldStart(modelAcc)
-                        JsonWriter.writeMap(jsonGenerator, jacksonMapper, Match.asMap(match))
-                        jsonGenerator.writeEndObject()
-                    } else {
-                        String signatureAcc = match.signature.accession
-                        def signatureInfo = entries["entries"][signatureAcc] ?: entries["entries"][modelAcc]
-
-                        // Update library version
-                        def version = (match.signature.signatureLibraryRelease.version == "null") ? null : version
-                        if (!version && signatureInfo != null) {
-                            match.signature.signatureLibraryRelease.version = entries["databases"][signatureInfo["database"].asText()].asText()
-                        }
-
-                        // Handle PANTHER data
-                        if (match.signature.signatureLibraryRelease.library == "PANTHER") {
-                            updatePantherData(match, dataDir, paintAnnoDir, signatureAcc, entries)
-                        }
-
-                        // Update signature info
-                        if (signatureInfo != null) {
-                            match.signature.name = signatureInfo["name"].asText().replace('\"',"")
-                            match.signature.description = signatureInfo["description"].asText().replace('\"',"")
-                            if (signatureInfo["representative"]) {
-                                match.representativeInfo = new RepresentativeInfo(
-                                    signatureInfo["representative"]["type"],
-                                    signatureInfo["representative"]["index"]
-                                )
-                            }
-
-                            // Handle InterPro data
-                            String interproAcc = signatureInfo["integrated"].asText()  // defaults to a TextNode, convert to String
-                            if (interproAcc != "null") {
-                                 def entryInfo = entries["entries"][interproAcc]
-                                 assert entryInfo != null
-                                 match.signature.entry = new Entry(
-                                     interproAcc, entryInfo.get("name").asText(), entryInfo.get("description").asText(), entryInfo.get("type").asText()
-                                 )
-                                 addXRefs(match, interproAcc, ipr2go, goInfo, ipr2pa, paInfo)
-                            }
-                        }
-                        // Write out the model Acc and updated Match object
-                        jsonGenerator.writeObjectFieldStart(modelAcc)
-                        JsonWriter.writeMap(jsonGenerator, jacksonMapper, Match.asMap(match))
-                        jsonGenerator.writeEndObject()
-                    }  // end of if/else
-                } // end of matches
-                jsonGenerator.writeEndObject()
-            }  // end of Json reader / seq Id
-        } // end of members matches
-    }  // end of Json writer stream
+    JsonWriter.writeMaptoFile(outputFilePath.toString(), jacksonMapper, aggregatedMatches)
 }
 
 def loadXRefFiles(xrefDir, dataDir, jacksonMapper) {
