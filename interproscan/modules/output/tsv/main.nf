@@ -24,15 +24,17 @@ process WRITE_TSV_OUTPUT {
         seqNode.get("matches").fields().each { matchNode ->
             Match match = Match.fromJsonNode((JsonNode) matchNode.value)
             String memberDb = match.signature.signatureLibraryRelease.library
-            String sigDesc = match.signature.description?: '-'
+            String sigDesc = (match.signature.description == null || match.signature.description == "null") ? '-' : match.signature.description
             String goterms = match.signature.entry?.goXRefs ?
                              (match.signature.entry.goXRefs.isEmpty() ? '-' :
                              match.signature.entry.goXRefs.collect { goXref -> "${goXref.id}(${goXref.databaseName})" }.join('|')) : '-'
+            goterms = (goterms == "null") ? '-' : goterms
             String pathways = match.signature.entry?.pathwayXRefs ?
                              (match.signature.entry.pathwayXRefs.isEmpty() ? '-' :
                              match.signature.entry.pathwayXRefs.collect { ptXref -> "${ptXref.databaseName}:${ptXref.id}" }.join('|')) : '-'
-            String entryAcc = match.signature.entry?.accession ?: '-'
-            String entryDesc = match.signature.entry?.description ?: '-'
+            pathways = (pathways == "null") ? '-' : pathways
+            String entryAcc = (match.signature.entry?.accession == null || match.signature.entry?.accession == "null") ? '-' : match.signature.entry?.accession
+            String entryDesc = (match.signature.entry?.description == null || match.signature.entry?.description == "null") ? '-' : match.signature.entry?.description
             char status = 'T'
 
             seqNode.get("xref").each { xrefData ->
