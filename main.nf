@@ -85,9 +85,10 @@ workflow {
 
         def combined = LOOKUP_MATCHES.out[0].concat(expandedScan)
         matchResults = combined.groupTuple()
-    }
+    } // matchResults = [[meta, [member.json, member.json, member.json]]
 
     /* XREFS:
+    Aggregate matches across all members for each sequence
     Add signature and entry desc and names
     Add PAINT annotations (if panther is enabled)
     Add go terms (if enabled)
@@ -110,9 +111,13 @@ workflow {
         [batchnumber, sequences, matches]
     }.set { ch_seq_matches }
 
+    // Aggregate seq meta data with the matches
     AGGREGATE_SEQS_MATCHES(ch_seq_matches, params.nucleic)
+
+    // Aggregate all data into a single JSON file
     AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
 
+    // Identify representative domains for the applicable member databases
     REPRESENTATIVE_DOMAINS(AGGREGATE_ALL_MATCHES.out)
 
     def fileName = params.input.split('/').last()
