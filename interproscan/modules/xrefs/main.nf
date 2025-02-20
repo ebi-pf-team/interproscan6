@@ -56,8 +56,9 @@ process XREFS {
                         def signatureInfo = entries["entries"][signatureAcc] ?: entries["entries"][modelAcc]
 
                         // Update library version
-                        if (!match.signature.signatureLibraryRelease.version && signatureInfo) {
-                            match.signature.signatureLibraryRelease.version = entries["databases"][signatureInfo["database"]]
+                        def version = (match.signature.signatureLibraryRelease.version == "null") ? null : version
+                        if (!version && signatureInfo != null) {
+                            match.signature.signatureLibraryRelease.version = entries["databases"][signatureInfo["database"].asText()].asText()
                         }
 
                         // Handle PANTHER data
@@ -67,8 +68,8 @@ process XREFS {
 
                         // Update signature info
                         if (signatureInfo != null) {
-                            match.signature.name = signatureInfo["name"]
-                            match.signature.description = signatureInfo["description"]
+                            match.signature.name = signatureInfo["name"].asText().replace('\"',"")
+                            match.signature.description = signatureInfo["description"].asText().replace('\"',"")
                             if (signatureInfo["representative"]) {
                                 match.representativeInfo = new RepresentativeInfo(
                                     signatureInfo["representative"]["type"],
