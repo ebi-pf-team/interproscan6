@@ -63,3 +63,21 @@ process BUILD_BATCHES {
         --batch_size $batchSize
     """
 }
+
+process INDEX_BATCHES {
+    input:
+    val fastaFiles
+
+    output:
+    val indexedFiles
+
+    exec:
+    indexedFiles = []
+    int index = 1
+    // handle when a single fasta file path is provided
+    def fastaList = fastaFiles instanceof List ? fastaFiles : [fastaFiles]
+    for (fasta: fastaList) {
+        indexedFiles << [index, fasta]
+        index += 1
+    }
+}
