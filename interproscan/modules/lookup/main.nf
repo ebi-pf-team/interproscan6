@@ -23,7 +23,7 @@ process LOOKUP_MATCHES {
     def noLookupFastaPath = task.workDir.resolve("noLookup.fasta")
     def noLookupFasta = new StringBuilder()
 
-    Map<String, String> sequences = FastaFile.parse(fasta.toString())  // [md5: sequence]
+    Map<String, String> sequences = FastaFile.parse(inputFastaFile.toString())  // [md5: sequence]
     def md5List = sequences.keySet().toList()
     def chunks = md5List.collate(chunkSize)
 
