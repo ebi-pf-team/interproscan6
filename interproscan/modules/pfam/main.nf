@@ -80,7 +80,6 @@ process PARSE_PFAM {
                         List<String> candidateNested = candidateMatch.get("nested", [])
                         List<String> filteredNested = filteredMatchInfo.get("nested", [])
                         boolean matchesAreNested = (candidateNested.contains(filteredMatch.modelAccession) || filteredNested.contains(match.modelAccession))
-                        matchesAreNested  // if they are nested, keep both
                         if (!matchesAreNested) {
                             keep = false
                         }
@@ -99,7 +98,7 @@ process PARSE_PFAM {
         def matchesAggregated = [:]
         matches.each { match ->
             List<String> nestedModels = dat.get(match.modelAccession, [])
-            if (nestedModels && nestedModels.size() > 0) {
+            if (nestedModels && !nestedModels.isEmpty()) {
                 List<Map<String, Integer>> locationFragments = matches.findAll { otherMatch ->
                     otherMatch.modelAccession in nestedModels &&
                     isOverlapping(otherMatch.locations[0].start, otherMatch.locations[0].end,
