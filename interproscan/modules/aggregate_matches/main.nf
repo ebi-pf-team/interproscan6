@@ -68,7 +68,7 @@ process AGGREGATE_SEQS_MATCHES {
 
 def processProteinData(JsonNode protein, Map seqMatchesAggreg,  Map<String, JsonNode> matchesMap, String seqId) {
     md5 = protein.get("md5").asText()
-    def entry = seqMatchesAggreg.computeIfAbsent(md5, { [sequence: protein.get("sequence").asText(), md5: md5, matches: [:], xref: []] })
+    entry = seqMatchesAggreg.computeIfAbsent(md5, { [sequence: protein.get("sequence").asText(), md5: md5, matches: [:], xref: []] })
     entry.xref << ["name": seqId + " " + protein.get("description").asText().replaceAll('["\\\\"]', ''), "id": seqId]
     if (matchesMap.containsKey(seqId)) { // matchesMap[seqId] is an ObjectNode, keyed by modelAcc and valued by ObjectNode repr of Matches
         matchesMap[seqId].fields().each { matchNode ->

@@ -147,12 +147,10 @@ def processMatches(matches, xml) {
 
         xml."$matchNodeName-match"(matchAttributes) {
             def signatureAttributes = [ac: matchObj.signature.accession]
-            if (matchObj.signature.name){
-                signatureAttributes.name = matchObj.signature.name
-            }
-            if (matchObj.signature.description) {
-                signatureAttributes.desc = matchObj.signature.description
-            }
+            def sigName = (matchObj.signature.name == "null") ? null : matchObj.signature.name
+            def sigDesc = (matchObj.signature.description == "null") ? null : matchObj.signature.description
+            if (sigName) { signatureAttributes.name = sigName }
+            if (sigDesc) { signatureAttributes.desc = sigDesc }
             xml.signature(signatureAttributes) {
                 xml.signatureLibraryRelease {
                     xml.library(matchObj.signature.signatureLibraryRelease.library)
@@ -162,9 +160,9 @@ def processMatches(matches, xml) {
                     Entry entryObj = matchObj.signature.entry
                     xml."entry"(
                         ac: entryObj.accession,
-                        desc: entryObj.description ?: "-",
-                        name: entryObj.name ?: "-",
-                        type: entryObj.type ?: "-"
+                        desc: (entryObj.description == null || entryObj.description == "null") ? "-" : entryObj.description,
+                        name: (entryObj.name == null || entryObj.name == "null") ? "-" : entryObj.name,
+                        type: (entryObj.type == null || entryObj.type == "null") ? "-" : entryObj.type,
                     ) {
                         if (!entryObj.goXRefs.isEmpty()) {
                             entryObj.goXRefs.each { goXrefObj ->
