@@ -51,7 +51,7 @@ process XREFS {
                     def signatureInfo = entries["entries"][signatureAcc] ?: entries["entries"][modelAcc]
 
                     // Update library version
-                    def version = (match.signature.signatureLibraryRelease.version == "null") ? null : version
+                    def version = (match.signature.signatureLibraryRelease.version == "null") ? null : match.signature.signatureLibraryRelease.version
                     if (!version && signatureInfo != null) {
                         match.signature.signatureLibraryRelease.version = entries["databases"][signatureInfo["database"].asText()].asText()
                     }
