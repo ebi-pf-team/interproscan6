@@ -61,7 +61,7 @@ process AGGREGATE_SEQS_MATCHES {
                     if (translatedFromValue != null) {  // if (var) does not work on jsonNodes, need a formal null check
                         seqMatchesAggreg[seqId].translatedFrom << translatedFromValue
                     }
-                } catch (Exception e)
+                } catch (Exception e) {
                     throw new Exception("Error while aggregating nucleotide sequence and match data: $e -- ${e.getCause()}", e)
                 }
             }
