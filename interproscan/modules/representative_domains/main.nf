@@ -32,7 +32,7 @@ process REPRESENTATIVE_DOMAINS {
             // Gather relevant locations
             def seqDomains = []
             matches.each { String modelAccession, Match match ->
-                if (match.representativeInfo?.type) {
+                if (match.representativeInfo?.type) {  // <- this is wrong but will be fixed on the repr-fams PR
                     match.locations.each { Location loc ->
                         CandidateDomain candidate = new CandidateDomain(loc, match.representativeInfo.rank)
                         candidate.sortFragments()

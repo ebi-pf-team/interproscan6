@@ -510,8 +510,6 @@ class Location implements Serializable {
         return mapLocation
     }
 
-
-
     static Location fromMap(data) {
         Location loc = new Location(
                 data.start,
@@ -555,9 +553,20 @@ class Location implements Serializable {
         location.queryAlignment = node.has("queryAlignment") ? node.get("queryAlignment").asText().replaceAll('["\\\\"]', '') : null
         location.targetAlignment = node.has("targetAlignment") ? node.get("targetAlignment").asText().replaceAll('["\\\\"]', '') : null
         location.cigarAlignment = node.has("cigarAlignment") ? node.get("cigarAlignment").asText().replaceAll('["\\\\"]', '') : null
+        if (node.has("pvalue") && !node.get("pvalue").isNull()) {
+            location.pvalue = node.get("pvalue").numberValue()
+        }
+        if (node.has("motifNumber") && !node.get("motifNumber").isNull()) {
+            location.motifNumber = node.get("motifNumber").intValue()
+        }
+        if (node.has("level") && !node.get("level").isNull()) {
+            location.level = node.get("level").asInt() // Assuming level is an integer
+        }
         if (node.has("sites") && node.get("sites").isArray()) {
             location.sites = node.get("sites").collect { Site.fromJsonNode(it) }
         }
+        location.representative = node.has("representative") ? Boolean.parseBoolean(node.get("representative").asText()) : false
+        location.included = node.has("included") ? node.get("included").asBoolean() : true
         return location
     }
 
