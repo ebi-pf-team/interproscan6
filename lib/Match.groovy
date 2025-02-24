@@ -817,6 +817,16 @@ class SiteLocation implements Serializable {
         return new SiteLocation(data.start, data.end, data.residue)
     }
 
+    static SiteLocation fromJsonNode(JsonNode node) {
+        if (node == null || node.isNull()) {
+            return null
+        }
+        String residue = node.has("residue") ? node.get("residue").asText().replaceAll('["\\\\"]', '') : null
+        int start = node.has("start") ? node.get("start").asInt() : -1
+        int end = node.has("end") ? node.get("end").asInt() : -1
+        return new SiteLocation(residue, start, end)
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(residue, start, end)

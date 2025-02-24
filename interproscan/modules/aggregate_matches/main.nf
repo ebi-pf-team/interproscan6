@@ -53,10 +53,6 @@ process AGGREGATE_SEQS_MATCHES {
                     protSeqId = protein.get("id").asText()
                     processProteinData(protein, seqMatchesAggreg, matchesMap, protSeqId)
                     seqMatchesAggreg[seqId].translatedFrom = seqMatchesAggreg[seqId].translatedFrom ?: []
-                } catch (Exception e) {
-                    throw new Exception("Error while aggregating sequence and match data: $e -- ${e.getCause()}", e)
-                }
-                try {
                     def translatedFromValue = protein.get("translatedFrom")
                     if (translatedFromValue != null) {  // if (var) does not work on jsonNodes, need a formal null check
                         seqMatchesAggreg[seqId].translatedFrom << translatedFromValue
@@ -66,7 +62,11 @@ process AGGREGATE_SEQS_MATCHES {
                 }
             }
         } else {  // node = [Protein Seq Id: {protein}]
-            processProteinData(node, seqMatchesAggreg, matchesMap, seqId)
+            try {
+                processProteinData(node, seqMatchesAggreg, matchesMap, seqId)
+            } catch (Exception e) {
+                throw new Exception("Error while aggregating sequence and match data")
+            }
         }
     }
 
@@ -78,10 +78,15 @@ def processProteinData(JsonNode protein, Map seqMatchesAggreg,  Map<String, Json
     md5 = protein.get("md5").asText()
     def entry = seqMatchesAggreg.computeIfAbsent(md5, { [sequence: protein.get("sequence").asText(), md5: md5, matches: [:], xref: []] })
     entry.xref << ["name": seqId + " " + protein.get("description").asText().replaceAll('["\\\\"]', ''), "id": seqId]
-    if (matchesMap.containsKey(seqId)) { // matchesMap[seqId] is an ObjectNode, keyed by modelAcc and valued by ObjectNode repr of Matches
-        matchesMap[seqId].fields().each { matchNode ->
-            seqMatchesAggreg[md5]["matches"][matchNode.key] = Match.fromJsonNode((JsonNode) matchNode.value)
+    try {
+        if (matchesMap.containsKey(seqId)) { // matchesMap[seqId] is an ObjectNode, keyed by modelAcc and valued by ObjectNode repr of Matches
+            matchesMap[seqId].fields().each { matchNode ->
+                seqMatchesAggreg[md5]["matches"][matchNode.key] = Match.fromJsonNode((JsonNode) matchNode.value)
+            }
         }
+    } catch (Exception e) {
+        println "Error Error - error getting matches: ${matchNode} -- ${matchNode.getClass()}\n--${seqMatchesAggreg[md5]}\n"
+        throw new Exception("Error getting matches", e)
     }
 }
 
