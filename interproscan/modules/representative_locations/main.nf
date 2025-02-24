@@ -8,7 +8,7 @@ process REPRESENTATIVE_LOCATIONS {
     val matchesPath
 
     output:
-    path("matches_repr_domains.json")
+    path("matches_with_representative.json")
 
     exec:
     int MAX_REPR_LOCS_PER_GRP = 20 // only consider N "best" domains otherwise there are too many comparisons (2^domains)
@@ -16,7 +16,7 @@ process REPRESENTATIVE_LOCATIONS {
     List<String> REPR_TYPE = ["family", "domain"]
 
     JsonProcessor processor = new JsonProcessor()
-    def outputFilePath = task.workDir.resolve("matches_repr_domains.json")
+    def outputFilePath = task.workDir.resolve("matches_with_representative.json")
     def generator = processor.createGenerator(outputFilePath.toString())
     def parser = processor.createParser(matchesPath.toString())
 
