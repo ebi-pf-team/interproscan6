@@ -155,10 +155,8 @@ class Signature implements Serializable {
         this.entry = entry
     }
 
-    void addType(String signatureType) {
-        if (signatureType) {
-            this.type = signatureType
-        }
+    void setType(String type) {
+        this.type = type
     }
 
     static Signature fromMap(Map data) {
