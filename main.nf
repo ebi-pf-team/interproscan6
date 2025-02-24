@@ -30,6 +30,7 @@ workflow {
     fasta_file      = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
     data_dir        = INIT_PIPELINE.out.datadir.val
     outut_dir       = INIT_PIPELINE.out.outdir.val
+    formats         = INIT_PIPELINE.out.formats.val
     apps            = INIT_PIPELINE.out.apps.val
     signalpMode     = INIT_PIPELINE.out.signalpMode.val
 
@@ -65,7 +66,6 @@ workflow {
         )
         matchResults = SCAN_SEQUENCES.out
     } else {
-        log.info "Using precalculated match lookup service"
         LOOKUP_MATCHES(
             ch_seqs,
             apps,
@@ -115,10 +115,6 @@ workflow {
 
     REPRESENTATIVE_LOCATIONS(AGGREGATE_ALL_MATCHES.out)
 
-    Channel.from(params.formats.toLowerCase().split(','))
-    .set { ch_format }
-
-    def formats = params.formats.toUpperCase().split(',') as Set
     def fileName = params.input.split('/').last()
     def outFileName = "${params.outdir}/${fileName}"
     if (formats.contains("JSON")) {

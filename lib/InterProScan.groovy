@@ -98,6 +98,8 @@ class InterProScan {
         ],
     ]
 
+    static final def VALID_FORMATS = ["JSON", "TSV", "XML"]
+
     static final def LICENSED_SOFTWARE = ["phobius", "signalp_euk", "signalp_prok", "deeptmhmm"]
 
     static final def DATA_TYPE = [
@@ -131,8 +133,15 @@ class InterProScan {
 
             // Convert to kebab-case
             def kebabParamName = this.camelToKebab(paramName)
-            if (!allowedParams.contains(kebabParamName.toLowerCase())) {
-                log.warn "Unrecognised option: --${kebabParamName}. Try '--help' for more information."
+            if (allowedParams.contains(kebabParamName.toLowerCase())) {
+                def paramObj = this.PARAMS.find { it.name.toLowerCase() == kebabParamName.toLowerCase() }
+                assert paramObj != null
+                if (paramObj?.metavar != null && !(paramValue instanceof String)) {
+                    log.error "'--${paramObj.name} ${paramObj.metavar}' is mandatory and cannot be empty."
+                    System.exit(1)
+                }
+            } else {
+                log.warn "Unrecognised option: '--${paramName}'. Try '--help' for more information."
             }
         }
 
@@ -257,6 +266,11 @@ class InterProScan {
         return errorMsg ? "Could not find the following XREF data files\n${errorMsg.join('\n')}" : null
     }
 
+    static Set<String> validateFormats(String userFormats) {
+        Set<String> formats = userFormats.toUpperCase().split(',') as Set
+        def invalidFormats = formats - VALID_FORMATS
+        return invalidFormats ? [null, "Invalid output file format provided:\n${invalidFormats.join('\n')}"] : [formats, null]
+    }
 
     static List<String> validateSignalpMode(String signalpMode) {
         if (signalpMode.toLowerCase() !in ['fast', 'slow', 'slow-sequential']) {
