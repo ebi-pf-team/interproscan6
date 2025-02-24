@@ -165,25 +165,14 @@ class Signature implements Serializable {
         if (data == null) {
             return null
         }
-        if (data.containsKey("type") | data.type != null) {
-            return new Signature(
-                    data.accession,
-                    data.name,
-                    data.description,
-                    data.type,
-                    SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
-                    Entry.fromMap(data.entry)
-            )
-        } else {
-            return new Signature(
-                    data.accession,
-                    data.name,
-                    data.description,
-                    data.type,
-                    SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
-                    Entry.fromMap(data.entry)
-            )
-        }
+        return new Signature(
+                data.accession,
+                data.name,
+                data.description,
+                data.containsKey("type") ? data.type : null,  // Provide a default value (null) if 'type' is missing
+                SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
+                Entry.fromMap(data.entry)
+        )
     }
 }
 
