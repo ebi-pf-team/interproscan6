@@ -37,7 +37,6 @@ process XREFS {
     membersMatches.each { matchesPath ->
         File file = new File(matchesPath.toString())
         JsonReader.streamJson(matchesPath.toString(), jacksonMapper) { String seqMd5, JsonNode matches ->
-            assert seqMd5 != null : "Error: seqMd5 is null in $matchesPath"
             seqEntry = aggregatedMatches.computeIfAbsent(seqMd5, { [:] } )
 
             matches.fields().each { Map.Entry<String, JsonNode> entry ->
