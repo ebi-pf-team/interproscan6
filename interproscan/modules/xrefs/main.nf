@@ -89,7 +89,6 @@ process XREFS {
         }  // end of Json reader / seq Id
     } // end of members matches
 
-    // Stream writing the output JSON file
     String outputFilePath = task.workDir.resolve("matches2xrefs.json")
     JsonWriter.writeMaptoFile(outputFilePath.toString(), jacksonMapper, aggregatedMatches)
 }
@@ -107,7 +106,7 @@ def updatePantherData(Match match, String dataDir, String paintAnnoDir, String s
     String paintAnnPath = "${dataDir}/${paintAnnoDir}/${signatureAcc}.json"
     File paintAnnotationFile = new File(paintAnnPath)
     if (paintAnnotationFile.exists()) {
-        def paintAnnotationsContent = JsonProcessor.jsonToMap(paintAnnotationFile)
+        def paintAnnotationsContent = JsonReader.load(paintAnnotationFile)
         String nodeId = match.treegrafter.ancestralNodeID
         def nodeData = paintAnnotationsContent[nodeId]
         if (nodeData) {

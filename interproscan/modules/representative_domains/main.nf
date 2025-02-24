@@ -21,8 +21,7 @@ process REPRESENTATIVE_DOMAINS {
     tuple val(meta), path("matches_repr_domains.json")
 
     exec:
-    // matchesPath = JsonObject, structure: {prot seq md5: {modelAcc: Match}}
-
+    // matchesPath = JsonObject structure: {prot seq md5: {modelAcc: Match}}
     int MAX_DOMS_PER_GROUP = 20 // only consider N "best" domains otherwise there are too many comparisons (2^domains)
     float DOM_OVERLAP_THRESHOLD = 0.3
 
@@ -31,10 +30,10 @@ process REPRESENTATIVE_DOMAINS {
     def outputFilePath = task.workDir.resolve("matches_repr_domains.json")
 
     JsonWriter.streamJson(outputFilePath.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
-        JsonReader.streamJson(matchesPath.toString(), jacksonMapper) { String md5, JsonNode matches ->
+        JsonReader.streamJson(matchesPath.toString(), jacksonMapper) { String md5, JsonNode matchNodes ->
             // Serialise the matches so we don't need to edit the map manually later
             Map<String, Match> matches = [:]
-            seqNode.get("matches").fields().each { Map.Entry<String, JsonNode> matchNode ->
+            matchNodes.fields().each { Map.Entry<String, JsonNode> matchNode ->
                 matches[matchNode.key] = Match.fromJsonNode(matchNode.value)
             }
 
@@ -134,8 +133,8 @@ process REPRESENTATIVE_DOMAINS {
                     }
                 }
             }
-            seqNode.set("matches", jacksonMapper.valueToTree(matches))
-            jsonWriter.writeObject(seqNode)
+            jsonWriter.writeFieldName(md5)
+            jsonWriter.writeObject(matches)
         }  // end of JsonReader
     }  // end of JsonWriter
 }

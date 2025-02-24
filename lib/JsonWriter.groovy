@@ -64,8 +64,8 @@ class JsonWriter {
     }
 
     static void writeMap(JsonGenerator generator, ObjectMapper mapper, Object data) throws IOException {
-        /* Used for writing out a Map object in the middle of a Json writer stream.
-        For example during XREFS it is used to write out each Match to the XREFs output JSON file.
+        /* Used for writing out a Map object in the middle of a Json writer stream, i.e. add a map to
+        streaming JSON file.
         To use:
         ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
         JsonWriter.streamMap(outputFilePath.toString(), jacksonMapper) { JsonGenerator jsonGenerator ->
@@ -92,9 +92,7 @@ class JsonWriter {
     }
 
     static void writeMaptoFile(String filePath, ObjectMapper mapper, Map data) {
-        /* Method to write (i.e. dump) a map or object (like seqMatchesAggreg) to a file as a whole, i.e.
-        when not streaming.
-        */
+        // Method to write (i.e. dump) a map to be the entire file content.
         FileWriter fileWriter = null
         JsonGenerator generator = null
         try {
@@ -110,7 +108,7 @@ class JsonWriter {
 
             generator.writeEndObject()
         } catch (IOException e) {
-            throw new JsonException("IO error writing file: $filePath -- $e\n${e.printStackTrace()}", e)
+            throw new JsonException("IO error writing file: $filePath -- $e\n${e.getCause()}", e)
         } finally {
             if (generator != null) {
                 generator.close()
