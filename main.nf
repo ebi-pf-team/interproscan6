@@ -98,7 +98,7 @@ workflow {
     // matchResults = [[meta, [member.json, member.json, member.json]]
 
     /* XREFS:
-    Aggregate matches across all members for each sequence --> single JSON will all matches for the batch
+    Aggregate matches across all members for each sequence --> single JSON with all matches for the batch
     Add signature and entry desc and names
     Add PAINT annotations (if panther is enabled)
     Add go terms (if enabled)

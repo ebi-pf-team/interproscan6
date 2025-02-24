@@ -4,6 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.SerializationFeature
 
+/*
+TODO: Fix repr_domains writing output so it produces a JsonObject,
+keyed by the query protein seqs md5 hash and valued by
+a JsonObjected, keyed by model Accessions and valued by
+Match objects
+*/
+
 process REPRESENTATIVE_DOMAINS {
     label 'local'
 
@@ -14,6 +21,8 @@ process REPRESENTATIVE_DOMAINS {
     tuple val(meta), path("matches_repr_domains.json")
 
     exec:
+    // matchesPath = JsonObject, structure: {prot seq md5: {modelAcc: Match}}
+
     int MAX_DOMS_PER_GROUP = 20 // only consider N "best" domains otherwise there are too many comparisons (2^domains)
     float DOM_OVERLAP_THRESHOLD = 0.3
 
@@ -21,12 +30,12 @@ process REPRESENTATIVE_DOMAINS {
     ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
     def outputFilePath = task.workDir.resolve("matches_repr_domains.json")
 
-    JsonWriter.streamArray(outputFilePath.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
-        JsonReader.streamArray(matchesPath.toString(), jacksonMapper) { ObjectNode seqNode ->
+    JsonWriter.streamJson(outputFilePath.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
+        JsonReader.streamJson(matchesPath.toString(), jacksonMapper) { String md5, JsonNode matches ->
             // Serialise the matches so we don't need to edit the map manually later
             Map<String, Match> matches = [:]
-            seqNode.get("matches").fields().each { matchNode ->
-                matches[matchNode.key] = Match.fromJsonNode((JsonNode) matchNode.value)
+            seqNode.get("matches").fields().each { Map.Entry<String, JsonNode> matchNode ->
+                matches[matchNode.key] = Match.fromJsonNode(matchNode.value)
             }
 
             // Gather relevant locations
