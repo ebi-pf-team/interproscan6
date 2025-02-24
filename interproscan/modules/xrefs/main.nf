@@ -33,12 +33,12 @@ process XREFS {
         if (addPathways) (ipr2pa, paInfo) = loadXRefFiles(pathwaysFilePrefix, dataDir, jacksonMapper)
     }
 
-    def aggregatedMatches = [:]  // seqId: {modelAcc: Match} -- otherwise a seqId will appear multiple times in the output
+    def aggregatedMatches = [:]  // seqMd5: {modelAcc: Match} -- otherwise a seqMd5 will appear multiple times in the output
     membersMatches.each { matchesPath ->
         File file = new File(matchesPath.toString())
-        JsonReader.streamJson(matchesPath.toString(), jacksonMapper) { String seqId, JsonNode matches ->
-            assert seqId != null : "Error: seqId is null in $matchesPath"
-            seqEntry = aggregatedMatches.computeIfAbsent(seqId, { [:] } )
+        JsonReader.streamJson(matchesPath.toString(), jacksonMapper) { String seqMd5, JsonNode matches ->
+            assert seqMd5 != null : "Error: seqMd5 is null in $matchesPath"
+            seqEntry = aggregatedMatches.computeIfAbsent(seqMd5, { [:] } )
 
             matches.fields().each { Map.Entry<String, JsonNode> entry ->
                 String modelAcc = entry.key   // Extract the modelAcc (key)
