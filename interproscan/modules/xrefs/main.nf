@@ -28,7 +28,8 @@ process XREFS {
     def (entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null]
     if (dataDir.toString().trim()) {  // datadir is not needed when exclusively running members with no interpro data
         File entriesJson = new File(entriesPath)
-        entries = JsonReader.load(entriesPath, jacksonMapper)
+        entries = JsonReader.load(entriesPath, jacksonMapper) // returns
+        println "entries class = ${entries.getClass()}"
         if (addGoterms) (ipr2go, goInfo) = loadXRefFiles(gotermFilePrefix, dataDir, jacksonMapper)
         if (addPathways) (ipr2pa, paInfo) = loadXRefFiles(pathwaysFilePrefix, dataDir, jacksonMapper)
     }
@@ -44,7 +45,7 @@ process XREFS {
                 String modelAcc = entry.key   // Extract the modelAcc (key)
                 Match match = Match.fromJsonNode(entry.value)
 
-                if (!entries) {  // no data to update, update match in aggregatedMatches
+                if (entries != null) {  // no data to update, update match in aggregatedMatches
                     seqEntry[modelAcc] = match
                 } else {
                     String signatureAcc = match.signature.accession
