@@ -107,11 +107,14 @@ workflow {
     XREFS(
         matchResults,
         apps,
-        params.lookupService.apiChunkSize,
-        params.lookupService.lookupHost,
-        params.lookupService.maxRetries
+        data_dir,
+        params.xRefsConfig.entries,
+        params.xRefsConfig.goterms,
+        params.xRefsConfig.pathways,
+        params.goterms,
+        params.pathways,
+        "${data_dir}/${params.appsConfig.paint}"
     )
-    // LOOKUP_MATCHES.out.view()
 
     REPRESENTATIVE_DOMAINS(XREFS.out)
     REPRESENTATIVE_DOMAINS.out.view()
