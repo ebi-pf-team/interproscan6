@@ -36,7 +36,7 @@ workflow {
 
     if (params.nucleic) {
         // Store the input seqs in the internal ips6 seq db
-        POPULATE_SEQ_DATABASE(fasta_file, params.nucleic)
+        db_path = POPULATE_SEQ_DATABASE(fasta_file, params.nucleic)
 
         // Chunk input file in smaller files for translation
         fasta_file
@@ -47,16 +47,16 @@ workflow {
         ESL_TRANSLATE(ch_fasta)
 
         // Store sequences in the sequence database
-        UPDATE_ORFS(ESL_TRANSLATE.out, POPULATE_SEQ_DATABASE.out)
+        UPDATE_ORFS(ESL_TRANSLATE.out, db_path)
 
         // Build batches of unique protein seqs for the analysis
         BUILD_BATCHES(UPDATE_ORFS.out, params.batchSize )
     } else {
         // Store the input seqs in the internal ips6 seq db
-        POPULATE_SEQ_DATABASE(fasta_file, params.nucleic)
+        db_path = POPULATE_SEQ_DATABASE(fasta_file, params.nucleic)
 
         // Build batches of unique protein seqs for the analysis
-        BUILD_BATCHES(POPULATE_SEQ_DATABASE.out, params.batchSize)
+        BUILD_BATCHES(db_path, params.batchSize)
     }
 
     // [fasta, fasta, fasta] --> [[index, fasta], [index, fasta], [index, fasta]] - to help gather matches for each batch
@@ -117,22 +117,22 @@ workflow {
     )
 
     REPRESENTATIVE_DOMAINS(XREFS.out)
-    REPRESENTATIVE_DOMAINS.out.view()
+    // Collect all JSON files into a single channel so we don't have cocurrent writing to the output files
+    ch_results = REPRESENTATIVE_DOMAINS.out
+        .map { meta, json -> json }
+        .collect()
 
-// //     Channel.from(params.formats.toLowerCase().split(','))
-// //     .set { ch_format }
-// //
-// //     def formats = params.formats.toUpperCase().split(',') as Set
-// //     def fileName = params.input.split('/').last()
-// //     def outFileName = "${params.outdir}/${fileName}"
+    def fileName = params.input.split('/').last()
+    def outFileName = "${params.outdir}/${fileName}"
+
 // //     if (formats.contains("JSON")) {
-// //         WRITE_JSON_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
+// //         WRITE_JSON_OUTPUT(Rch_results, "${outFileName}", params.nucleic, workflow.manifest.version)
 // //     }
-// //     if (formats.contains("TSV")) {
-// //         WRITE_TSV_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic)
-// //     }
+    if (formats.contains("TSV")) {
+        WRITE_TSV_OUTPUT(ch_results, "${outFileName}", db_path, params.nucleic)
+    }
 // //     if (formats.contains("XML")) {
-// //         WRITE_XML_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
+// //         WRITE_XML_OUTPUT(ch_results, "${outFileName}", params.nucleic, workflow.manifest.version)
 // //     }
 }
 
