@@ -98,8 +98,8 @@ process XREFS {
                     matchObject.signature.name = signatureInfo["name"]
                     matchObject.signature.description = signatureInfo["description"]
 
-                    def sigType = signatureInfo["type"]?.capitalize()
-                    matchObject.signature.addType(sigType)
+                    String sigType = signatureInfo["type"]
+                    matchObject.signature.setType(sigType)
 
                     if (signatureInfo["representative"]) {
                         RepresentativeInfo representativeInfo = new RepresentativeInfo(
