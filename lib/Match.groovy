@@ -150,7 +150,7 @@ class Signature implements Serializable {
         this.accession = accession
         this.name = name
         this.description = description
-        this.type = type ? type[0].toUpperCase() + type[1..-1].toLowerCase() : null
+        this.type = type
         this.signatureLibraryRelease = library
         this.entry = entry
     }
