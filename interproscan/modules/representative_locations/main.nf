@@ -132,8 +132,6 @@ List<CandidateLocation> getCandidateLocations(Map seqData, String reprType) {
         if (match.representativeInfo?.type == reprType) {
             match.locations.each { Location loc ->
                 CandidateLocation candidate = new CandidateLocation(loc, match.representativeInfo.rank)
-                candidate.sortFragments()
-                candidate.getResidues()
                 candidateLocations.add(candidate)
             }
         }
