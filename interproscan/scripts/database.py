@@ -81,18 +81,27 @@ def add_sequence(conn, current_sequence, nucleic):
         if nucleic:
             cur.execute("INSERT INTO NUCLEOTIDE_SEQUENCE (nt_md5, sequence) VALUES (?, ?)",
                         (md5, current_sequence['sequence']))
-            cur.execute("INSERT INTO NUCLEOTIDE (nt_md5, id, description) VALUES (?, ?, ?)",
-                        (md5, current_sequence['id'], current_sequence['description']))
         else:
             cur.execute("INSERT INTO PROTEIN_SEQUENCE (protein_md5, sequence) VALUES (?, ?)",
                         (md5, current_sequence['sequence']))
+    except sqlite3.Error as e:
+        if str(e).strip().startswith("UNIQUE constraint failed"):
+            pass
+        else:
+            print(f"Error inserting sequence {current_sequence['id']} into the database:\n{e}")
+            sys.exit(1)
+    try:
+        if nucleic:
+            cur.execute("INSERT INTO NUCLEOTIDE (nt_md5, id, description) VALUES (?, ?, ?)",
+                        (md5, current_sequence['id'], current_sequence['description']))
+        else:
             cur.execute("INSERT INTO PROTEIN (protein_md5, id, description) VALUES (?, ?, ?)",
                         (md5, current_sequence['id'], current_sequence['description']))
     except sqlite3.Error as e:
         if str(e).strip().startswith("UNIQUE constraint failed"):
             pass
         else:
-            print(f"Error inserting sequence {current_sequence['id']} into the database:\n{e}")
+            print(f"Error inserting sequence meta data for {current_sequence['id']} into the database:\n{e}")
             sys.exit(1)
     conn.commit()
     cur.close()
