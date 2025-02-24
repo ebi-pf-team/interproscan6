@@ -117,9 +117,8 @@ process REPRESENTATIVE_LOCATIONS {
                     }
                 }
             }
-            generator.writeObject(seqData)
-
-        }
+        } // end of REPR_TYPE.each
+        generator.writeObject(seqData)
     }
     parser.close()
     generator.writeEndArray()
