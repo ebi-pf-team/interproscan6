@@ -43,14 +43,12 @@ workflow {
             .splitFasta( by: params.batchSize, file: true )
             .set { ch_fasta }
 
-        // Translate DNA/RNA sequences to protein sequences
-        ESL_TRANSLATE(ch_fasta)
+        /* Translate DNA/RNA sequences to protein sequences. Only proceed once completed
+        ensuring BUILD_BATCHES only runs once UPDATE_ORFS is completed */
+        ch_translated = ESL_TRANSLATE(ch_fasta).collect()
 
         // Store sequences in the sequence database
-        UPDATE_ORFS(ESL_TRANSLATE.out, db_path)
-
-        // Wait for all UPDATE_ORFS to complete before proceeding
-        UPDATE_ORFS.out.collect().map { db_path }.set { ready_db_path }
+        ready_db_path = UPDATE_ORFS(ch_translated, db_path)
     } else {
         // Store the input seqs in the internal ips6 seq db
         ready_db_path = POPULATE_SEQ_DATABASE(fasta_file, params.nucleic)

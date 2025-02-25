@@ -16,30 +16,29 @@ process POPULATE_SEQ_DATABASE {
         ips6.seq.db \
         populate_sequences \
         --fasta $fasta \
-         ${nucleic ? '--nucleic' : ''} > debug
+         ${nucleic ? '--nucleic' : ''}
     chmod 777 ips6.seq.db
     """
 }
 
 process UPDATE_ORFS {
     // add protein seqs translated from ORFS in the nt seqs to the database
-    maxForks 1  // Ensure that only one instance runs at a time to avoid concurrent writing to the db
     label 'local', 'ips6_container'
     errorStrategy 'terminate'
 
     input:
-    val translatedFasta  // one FASTA per ESL_TRANSLATE batch
+    val translatedFastas  // could be one or multiple paths
     val dbPath
 
     output:
-    val ""  // to pass linting
+    val dbPath // ensure BUILD_BATCHES runs after UPDATE_ORFS
 
     script:
     """
     python3 $projectDir/interproscan/scripts/database.py \
         $dbPath \
         update_orfs \
-        --fasta $translatedFasta
+        --fasta "$translatedFastas"
     """
 }
 
@@ -57,6 +56,7 @@ process BUILD_BATCHES {
 
     script:
     """
+    echo "$dbPath -- $batchSize"
     python3 $projectDir/interproscan/scripts/database.py \
         $dbPath \
         build_batches \

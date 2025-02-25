@@ -242,7 +242,8 @@ if __name__ == "__main__":
             raise ValueError("The --fasta flag must be used with the populate_sequences method to provide the FASTA file of sequences")
     elif args.method == "update_orfs":
         if args.fasta:
-            insert_orfs(args.db_path, args.fasta)
+            for fasta in args.fasta.split(","):
+                insert_orfs(args.db_path, fasta.lstrip("[").rstrip("]").strip())
         else:
             raise ValueError("The --fasta flag must be used with the update_orfs method to provide the FASTA file of sequences")
     elif args.method == "build_batches":
