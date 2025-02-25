@@ -50,9 +50,9 @@ process XREFS {
                     def signatureInfo = entries["entries"][signatureAcc] ?: entries["entries"][modelAcc]
 
                     // Update library version
-                    def version = (match.signature.signatureLibraryRelease.version == "null") ? null : version
+                    def version = (match.signature.signatureLibraryRelease.version == "null") ? null : match.signature.signatureLibraryRelease.version
                     if (!version && signatureInfo != null) {
-                        match.signature.signatureLibraryRelease.version = entries["databases"][signatureInfo["database"].asText()].asText()
+                        match.signature.signatureLibraryRelease.version = JsonReader.asString(entries["databases"][JsonReader.asString(signatureInfo["database"])])
                     }
 
                     // Handle PANTHER data
@@ -62,8 +62,8 @@ process XREFS {
 
                     // Update signature info
                     if (signatureInfo != null) {
-                        match.signature.name = signatureInfo["name"].asText().replace('\"',"")
-                        match.signature.description = signatureInfo["description"].asText().replace('\"',"")
+                        match.signature.name = JsonReader.asString(signatureInfo["name"])
+                        match.signature.description = JsonReader.asString(signatureInfo["description"])
                         if (signatureInfo["representative"]) {
                             match.representativeInfo = new RepresentativeInfo(
                                 signatureInfo["representative"]["type"],
@@ -72,12 +72,12 @@ process XREFS {
                         }
 
                         // Handle InterPro data
-                        String interproAcc = signatureInfo["integrated"].asText()  // defaults to a TextNode, convert to String
-                        if (interproAcc != "null") {
+                        String interproAcc = JsonReader.asString(signatureInfo["integrated"])  // defaults to a TextNode, convert to String
+                        if (interproAcc != null) {
                              def entryInfo = entries["entries"][interproAcc]
                              assert entryInfo != null
                              match.signature.entry = new Entry(
-                                 interproAcc, entryInfo.get("name").asText(), entryInfo.get("description").asText(), entryInfo.get("type").asText()
+                                 interproAcc, JsonReader.asString(entryInfo.get("name")), JsonReader.asString(entryInfo.get("description")), JsonReader.asString(entryInfo.get("type"))
                              )
                              addXRefs(match, interproAcc, ipr2go, goInfo, ipr2pa, paInfo)
                         }
@@ -107,7 +107,7 @@ def updatePantherData(Match match, String dataDir, String paintAnnoDir, String s
     File paintAnnotationFile = new File(paintAnnPath)
     if (paintAnnotationFile.exists()) {
         def paintAnnotationsContent = JsonReader.load(paintAnnotationFile)
-        String nodeId = match.treegrafter.ancestralNodeID
+        def nodeId = match.treegrafter.ancestralNodeID
         def nodeData = paintAnnotationsContent[nodeId]
         if (nodeData) {
             match.treegrafter.subfamilyAccession = nodeData[0]
@@ -126,18 +126,18 @@ def addXRefs(Match match, String interproAcc, def ipr2go, def goInfo, def ipr2pa
     Map<String,String> PA_PATTERN = ["t": "MetaCyc", "w": "UniPathway", "k": "KEGG", "r": "Reactome"]
     if (ipr2go != null && goInfo != null && ipr2go[interproAcc] != null) {
         ipr2go[interproAcc].each { goId ->
-            goId = goId.asText().replaceAll('"', '')
+            goId = JsonReader.asString(goId)
             match.signature.entry.addGoXRefs(
-                new GoXRefs(goInfo.get("terms").get(goId).get(0).asText(), "GO", GO_PATTERN[goInfo.get("terms").get(goId).get(1).asText()], goId)
+                new GoXRefs(JsonReader.asString(goInfo.get("terms").get(goId).get(0)), "GO", GO_PATTERN[JsonReader.asString(goInfo.get("terms").get(goId).get(1))], goId)
             )
         }
     }
     if (ipr2pa != null && paInfo != null && ipr2pa[interproAcc] != null) {
         ipr2pa[interproAcc].each { paId ->
-            paId = paId.asText().replaceAll('"', '')
-            match.signature.entry.addPathwayXRefs(new PathwayXRefs(
-                paInfo.get(paId).get(1).asText(), PA_PATTERN[paInfo.get(paId).get(0).asText()], paId
-            ))
+            paId = JsonReader.asString(paId)
+            match.signature.entry.addPathwayXRefs(
+                new PathwayXRefs(JsonReader.asString(paInfo.get(paId).get(1)), PA_PATTERN[JsonReader.asString(paInfo.get(paId).get(0))], paId)
+            )
         }
     }
 }

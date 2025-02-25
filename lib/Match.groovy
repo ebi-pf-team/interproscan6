@@ -83,7 +83,7 @@ class Match implements Serializable {
     }
 
     static Match fromJsonNode(JsonNode node) {
-        def modelAcc = JsonReader.asString(node.get("modelAccession"))
+        String modelAcc = JsonReader.asString(node.get("modelAccession"))
         Match match = new Match(modelAcc)
         match.sequenceLength = node.has("sequenceLength") ? node.get("sequenceLength").asInt() : null
         match.evalue = node.has("evalue") ? node.get("evalue").asDouble() : null

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.TextNode
+import com.fasterxml.jackson.databind.node.NullNode
 
 class JsonReader {
     static streamJson(String filePath, ObjectMapper mapper, Closure closure) {
@@ -87,9 +87,12 @@ class JsonReader {
         }
     }
 
-    static String asString(TextNode textNode) {
+    static String asString(node) {
         // Convert a textNode to a Groovy string or null without including terminal quotation marks
-        def str = textNode.asText().replace('\"','')
+        if (node instanceof NullNode) {
+            return null
+        }
+        def str = node.asText().replace('\"','')
         return str == "null" ? null : str
     }
 }

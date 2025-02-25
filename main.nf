@@ -36,7 +36,7 @@ workflow {
 
     if (params.nucleic) {
         // Store the input seqs in the internal ips6 seq db
-        db_path = POPULATE_SEQ_DATABASE(fasta_file, params.nucleic)
+        POPULATE_SEQ_DATABASE(fasta_file, params.nucleic)
 
         // Chunk input file in smaller files for translation
         fasta_file
@@ -48,7 +48,7 @@ workflow {
         ch_translated = ESL_TRANSLATE(ch_fasta).collect()
 
         // Store sequences in the sequence database
-        ready_db_path = UPDATE_ORFS(ch_translated, db_path)
+        ready_db_path = UPDATE_ORFS(ch_translated, POPULATE_SEQ_DATABASE.out)
     } else {
         // Store the input seqs in the internal ips6 seq db
         ready_db_path = POPULATE_SEQ_DATABASE(fasta_file, params.nucleic)
@@ -125,7 +125,7 @@ workflow {
 // //         WRITE_JSON_OUTPUT(Rch_results, "${outFileName}", params.nucleic, workflow.manifest.version)
 // //     }
     if (formats.contains("TSV")) {
-        WRITE_TSV_OUTPUT(ch_results, "${outFileName}", db_path, params.nucleic)
+        WRITE_TSV_OUTPUT(ch_results, "${outFileName}", ready_db_path, params.nucleic)
     }
 // //     if (formats.contains("XML")) {
 // //         WRITE_XML_OUTPUT(ch_results, "${outFileName}", params.nucleic, workflow.manifest.version)
