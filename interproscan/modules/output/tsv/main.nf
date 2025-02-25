@@ -42,15 +42,15 @@ process WRITE_TSV_OUTPUT {
                 char status = 'T'
 
                 seqData = getSeqData(seqDbPath, proteinMd5, nucleic)
-                println "seqData: $seqData\n${seqData.getClass()}"
                 seqData.each { row ->  // Protein: [id, sequence]; Nucleic: [] from
                     match.locations.each { Location loc ->
                         if ( nucleic ) {
-                            println "WRITE"
-//                             seqNode.get("translatedFrom").forEach { translatedFromNode ->
-//                                 seqId = "${translatedFromNode.get('id').asText()}_${xrefData.get('id').asText()}"
-//                                 writeToTsv(tsvFile, match, currentDate, memberDb,  sigDesc, goterms, pathways, entryAcc, entryDesc, status, seqNode, xrefData, loc, seqId)
-//                             }
+                            row = row.split('\t')
+                            ntSeqId = row[0]
+                            orfId = row[1]
+                            seqLength = row[2].trim().length()
+                            seqId = "${ntSeqId}_${orfId}"
+                            writeToTsv(tsvFile, seqId, proteinMd5, seqLength, match, loc, memberDb, sigDesc, status, currentDate, entryAcc, entryDesc, goterms, pathways)
                         } else {
                             row = row.split('\t')
                             seqId = row[0]
@@ -68,9 +68,17 @@ def getSeqData(def seqDbPath, String querySeqMd5, boolean nucleic) {  // retriev
     try {
         def query = ""
         if (nucleic) {
-            query = ""
+            query = """SELECT N.id, P.id, S.sequence
+            FROM NUCLEOTIDE AS N
+            LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.nt_md5 = N2P.nt_md5
+            LEFT JOIN PROTEIN AS P ON N2P.protein_md5 = P.protein_md5
+            LEFT JOIN PROTEIN_SEQUENCE AS S ON P.protein_md5 = N2P.protein_md5
+            WHERE N2P.protein_md5 = '$querySeqMd5';"""
         } else {
-            query = "SELECT P.id, S.sequence FROM PROTEIN AS P LEFT JOIN PROTEIN_SEQUENCE AS S ON P.protein_md5 = S.protein_md5 WHERE P.protein_md5 = '$querySeqMd5';"
+            query = """SELECT P.id, S.sequence
+            FROM PROTEIN AS P
+            LEFT JOIN PROTEIN_SEQUENCE AS S ON P.protein_md5 = S.protein_md5
+            WHERE P.protein_md5 = '$querySeqMd5';"""
         }
         def cmd = ["sqlite3", "--tabs", seqDbPath, query]
         def process = cmd.execute()

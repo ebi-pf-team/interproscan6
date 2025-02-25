@@ -16,7 +16,7 @@ process POPULATE_SEQ_DATABASE {
         ips6.seq.db \
         populate_sequences \
         --fasta $fasta \
-         ${nucleic ? '--nucleic' : ''}
+         ${nucleic ? '--nucleic' : ''} > debug
     chmod 777 ips6.seq.db
     """
 }
