@@ -83,7 +83,8 @@ class Match implements Serializable {
     }
 
     static Match fromJsonNode(JsonNode node) {
-        Match match = new Match(node.get("modelAccession").asText().replaceAll('["\\\\"]', ''))
+        def modelAcc = JsonReader.asString(node.get("modelAccession"))
+        Match match = new Match(modelAcc)
         match.sequenceLength = node.has("sequenceLength") ? node.get("sequenceLength").asInt() : null
         match.evalue = node.has("evalue") ? node.get("evalue").asDouble() : null
         match.score = node.has("score") ? node.get("score").asDouble() : null
@@ -101,7 +102,8 @@ class Match implements Serializable {
             match.representativeInfo = RepresentativeInfo.fromJsonNode(node.get("representativeInfo"))
         }
         if (node.has("graphScan")) {
-            match.graphScan = node.get("graphScan").asText().replaceAll('["\\\\"]', '')
+            def graphScan = JsonReader.asString(node.get("graphScan"))
+            if (graphScan) { match.graphScan = graphScan }
         }
         match.included = node.has("included") ? node.get("included").asBoolean() : true
         return match
@@ -181,9 +183,9 @@ class Signature implements Serializable {
     }
 
     static Signature fromJsonNode(JsonNode node) {
-        String accession = node.has("accession") ? node.get("accession").asText().replaceAll('["\\\\"]', '') : null
-        String name = node.has("name") ? node.get("name").asText().replaceAll('["\\\\"]', '') : null
-        String description = node.has("description") ? node.get("description").asText().replaceAll('["\\\\"]', '') : null
+        def accession = node.has("accession") ? JsonReader.asString(node.get("accession")) : null
+        def name = node.has("name") ? JsonReader.asString(node.get("name")) : null
+        def description = node.has("description") ? JsonReader.asString(node.get("description")) : null
         SignatureLibraryRelease library = node.has("signatureLibraryRelease") ?
                 SignatureLibraryRelease.fromJsonNode(node.get("signatureLibraryRelease")) :
                 new SignatureLibraryRelease(null, null)
@@ -212,8 +214,8 @@ class SignatureLibraryRelease implements Serializable {
         if (node == null || node.isNull()) {
             return null
         }
-        String library = node.has("library") ? node.get("library").asText().replaceAll('["\\\\"]', '') : null
-        String version = node.has("version") ? node.get("version").asText().replaceAll('["\\\\"]', '') : null
+        String library = node.has("library") ? JsonReader.asString(node.get("library")) : null
+        String version = node.has("version") ? JsonReader.asString(node.get("version")) : null
         return new SignatureLibraryRelease(library, version)
     }
 }
@@ -268,10 +270,10 @@ class Entry implements Serializable {
         if (node == null || node.isNull()) {
             return null
         }
-        String accession = node.has("accession") ? node.get("accession").asText().replaceAll('["\\\\"]', '') : null
-        String name = node.has("name") ? node.get("name").asText().replaceAll('["\\\\"]', '') : null
-        String description = node.has("description") ? node.get("description").asText().replaceAll('["\\\\"]', '') : null
-        String type = node.has("type") ? node.get("type").asText().replaceAll('["\\\\"]', '') : null
+        String accession = node.has("accession") ? JsonReader.asString(node.get("accession")) : null
+        String name = node.has("name") ? JsonReader.asString(node.get("name")) : null
+        String description = node.has("description") ? JsonReader.asString(node.get("description")) : null
+        String type = node.has("type") ? JsonReader.asString(node.get("type")) : null
         List<GoXRefs> goXRefs = []
         if (node.has("goXRefs") && node.get("goXRefs").isArray()) {
             goXRefs = node.get("goXRefs").collect { GoXRefs.fromJsonNode(it) }
@@ -400,7 +402,7 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-     Location(int start, int end, Double score, String targetAlignment) { // Used for Hamap, PrositeProfiles
+    Location(int start, int end, Double score, String targetAlignment) { // Used for Hamap, PrositeProfiles
         this.start = start
         this.end = end
         this.score = score
@@ -475,15 +477,15 @@ class Location implements Serializable {
         location.hmmStart = node.has("hmmStart") ? node.get("hmmStart").asInt() : null
         location.hmmEnd = node.has("hmmEnd") ? node.get("hmmEnd").asInt() : null
         location.hmmLength = node.has("hmmLength") ? node.get("hmmLength").asInt() : null
-        location.hmmBounds = node.has("hmmBounds") ? node.get("hmmBounds").asText().replaceAll('["\\\\"]', '') : null
+        location.hmmBounds = node.has("hmmBounds") ? JsonReader.asString(node.get("hmmBounds")) : null
         location.envelopeStart = node.has("envelopeStart") ? node.get("envelopeStart").asInt() : null
         location.envelopeEnd = node.has("envelopeEnd") ? node.get("envelopeEnd").asInt() : null
         location.evalue = node.has("evalue") ? node.get("evalue").asDouble() : null
         location.score = node.has("score") ? node.get("score").asDouble() : null
         location.bias = node.has("bias") ? node.get("bias").asDouble() : null
-        location.queryAlignment = node.has("queryAlignment") ? node.get("queryAlignment").asText().replaceAll('["\\\\"]', '') : null
-        location.targetAlignment = node.has("targetAlignment") ? node.get("targetAlignment").asText().replaceAll('["\\\\"]', '') : null
-        location.cigarAlignment = node.has("cigarAlignment") ? node.get("cigarAlignment").asText().replaceAll('["\\\\"]', '') : null
+        location.queryAlignment = node.has("queryAlignment") ? JsonReader.asString(node.get("queryAlignment")) : null
+        location.targetAlignment = node.has("targetAlignment") ? JsonReader.asString(node.get("targetAlignment")) : null
+        location.cigarAlignment = node.has("cigarAlignment") ? JsonReader.asString(node.get("cigarAlignment")) : null
         if (node.has("sites") && node.get("sites").isArray()) {
             location.sites = node.get("sites").collect { Site.fromJsonNode(it) }
         }
@@ -503,8 +505,8 @@ class Location implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(start, end, hmmStart, hmmEnd, hmmLength, hmmBounds,
-                            envelopeStart, envelopeEnd, evalue, score, bias,
-                            queryAlignment, targetAlignment, fragments, sites)
+            envelopeStart, envelopeEnd, evalue, score, bias,
+            queryAlignment, targetAlignment, fragments, sites)
     }
 
     @Override
@@ -656,9 +658,9 @@ class Site implements Serializable {
     }
 
     static Site fromJsonNode(JsonNode node) {
-        String description = node.has("description") ? node.get("description").asText().replaceAll('["\\\\"]', '') : ""
-        String label = node.has("label") && !node.get("label").isNull() ? node.get("label").asText().replaceAll('["\\\\"]', '') : null
-        String group = node.has("group") && !node.get("group").isNull() ? node.get("group").asText().replaceAll('["\\\\"]', '') : null
+        String description = node.has("description") ? JsonReader.asString(node.get("description")) : ""
+        String label = node.has("label") && !node.get("label").isNull() ? JsonReader.asString(node.get("label")) : null
+        String group = node.has("group") && !node.get("group").isNull() ? JsonReader.asString(node.get("group")) : null
         int hmmStart = node.has("hmmStart") ? node.get("hmmStart").asInt() : 0
         int hmmEnd = node.has("hmmEnd") ? node.get("hmmEnd").asInt() : 0
         List<SiteLocation> siteLocations = node.has("siteLocations") && node.get("siteLocations").isArray() ?
@@ -685,9 +687,9 @@ class Site implements Serializable {
         if (this == obj) return true
         if (obj == null || getClass() != obj.getClass()) return false
         return (
-            description == obj.description &&
-            numLocations == obj.numLocations &&
-            Objects.equals(siteLocations, obj.siteLocations)
+                description == obj.description &&
+                        numLocations == obj.numLocations &&
+                        Objects.equals(siteLocations, obj.siteLocations)
         )
     }
 
@@ -761,12 +763,12 @@ class TreeGrafter implements Serializable {
         if (jsonNode == null || jsonNode.isNull()) {
             return null
         }
-        TreeGrafter tg = new TreeGrafter(jsonNode.get("ancestralNodeID").asText().replaceAll('["\\\\"]', ''))
-        tg.graftPoint = jsonNode.has("graftPoint") ? jsonNode.get("graftPoint").asText(null) : null
-        tg.subfamilyAccession = jsonNode.has("subfamilyAccession") ? jsonNode.get("subfamilyAccession").asText(null) : null
-        tg.subfamilyName = jsonNode.has("subfamilyName") ? jsonNode.get("subfamilyName").asText(null) : null
-        tg.subfamilyDescription = jsonNode.has("subfamilyDescription") ? jsonNode.get("subfamilyDescription").asText(null) : null
-        tg.proteinClass = jsonNode.has("proteinClass") ? jsonNode.get("proteinClass").asText(null) : null
+        TreeGrafter tg = new TreeGrafter(JsonReader.asString(jsonNode.get("ancestralNodeID")))
+        tg.graftPoint = jsonNode.has("graftPoint") ? JsonReader.asString(jsonNode.get("graftPoint")) : null
+        tg.subfamilyAccession = jsonNode.has("subfamilyAccession") ? JsonReader.asString(jsonNode.get("subfamilyAccession")) : null
+        tg.subfamilyName = jsonNode.has("subfamilyName") ? JsonReader.asString(jsonNode.get("subfamilyName")) : null
+        tg.subfamilyDescription = jsonNode.has("subfamilyDescription") ? JsonReader.asString(jsonNode.get("subfamilyDescription")) : null
+        tg.proteinClass = jsonNode.has("proteinClass") ? JsonReader.asString(jsonNode.get("proteinClass")) : null
         return tg
     }
 }
@@ -791,9 +793,8 @@ class RepresentativeInfo implements Serializable {
         if (jsonNode == null || jsonNode.isNull()) {
             return null
         }
-        String type = jsonNode.has("type") && !jsonNode.get("type").isNull() ? jsonNode.get("type").asText().replaceAll('["\\\\"]', '') : null
+        String type = jsonNode.has("type") ? JsonReader.asString(jsonNode.get("type")) : null
         int rank = jsonNode.has("rank") && jsonNode.get("rank").isNumber() ? jsonNode.get("rank").asInt() : 0
-
         return new RepresentativeInfo(type, rank)
     }
 }
@@ -823,10 +824,10 @@ class GoXRefs implements Serializable {
             return null
         }
         return new GoXRefs(
-                node.get("name").asText().replaceAll('["\\\\"]', ''),
-                node.get("databaseName").asText().replaceAll('["\\\\"]', ''),
-                node.get("category").asText().replaceAll('["\\\\"]', ''),
-                node.get("id").asText().replaceAll('["\\\\"]', '')
+            JsonReader.asString(node.get("name")),
+            JsonReader.asString(node.get("databaseName")),
+            JsonReader.asString(node.get("category")),
+            JsonReader.asString(node.get("id"))
         )
     }
 }
@@ -854,9 +855,9 @@ class PathwayXRefs implements Serializable {
             return null
         }
         return new PathwayXRefs(
-                node.get("name").asText().replaceAll('["\\\\"]', ''),
-                node.get("databaseName").asText().replaceAll('["\\\\"]', ''),
-                node.get("id").asText().replaceAll('["\\\\"]', '')
+                JsonReader.asString(node.get("name")),
+                JsonReader.asString(node.get("databaseName")),
+                JsonReader.asString(node.get("id"))
         )
     }
 }

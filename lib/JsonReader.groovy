@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.TextNode
 
 class JsonReader {
     static streamJson(String filePath, ObjectMapper mapper, Closure closure) {
@@ -34,40 +35,6 @@ class JsonReader {
 
                     // Call the closure with the key (field name) and value (JsonNode)
                     closure.call(fieldName, value)
-                }
-            }
-            parser.close()
-        } catch (FileNotFoundException e) {
-            throw new Exception("File not found: $filePath -- $e\n${e.printStackTrace()}", e)
-        } catch (JsonParseException e) {
-            throw new Exception("Error parsing JSON file: $filePath -- $e\n${e.printStackTrace()}", e)
-        } catch (JsonMappingException e) {
-            throw new Exception("Error mapping JSON content for file: $filePath -- $e\n${e.printStackTrace()}", e)
-        } catch (IOException e) {
-            throw new Exception("IO error reading file: $filePath -- $e\n${e.printStackTrace()}", e)
-        } catch (Exception e) {
-            throw new Exception("Error parsing JSON file $filePath -- $e\n${e.printStackTrace()}", e)
-        }
-    }
-
-    static streamArray(String filePath, ObjectMapper mapper, Closure closure) {
-        /*
-        Stream the data, one jsonNode at a time from a Json file containing a JsonArray.
-        It requires less memory to store maps as JsonNodes than as Maps,
-        especially when the maps contain nested maps.
-        To use:
-        ObjectMapper mapper = new ObjectMapper().enabled(SerializationFeature.INDENT_OUTPUT)
-        JsonReader.streamArray(filePath, mapper) { JsonNode node ->
-            md5 = node.get("md5").asText()
-        }
-         */
-        try {
-            JsonFactory factory = mapper.getFactory()
-            JsonParser parser = factory.createParser(new File(filePath))
-            if (parser.nextToken() == JsonToken.START_ARRAY) {
-                while (parser.nextToken() != JsonToken.END_ARRAY) {
-                    JsonNode node = mapper.readTree(parser)
-                    closure.call(node)
                 }
             }
             parser.close()
@@ -118,5 +85,11 @@ class JsonReader {
         } catch (Exception e) {
             throw new Exception("Error parsing JSON file $filePath -- $e\n${e.printStackTrace()}", e)
         }
+    }
+
+    static String asString(TextNode textNode) {
+        // Convert a textNode to a Groovy string or null without including terminal quotation marks
+        def str = textNode.asText().replace('\"','')
+        return str == "null" ? null : str
     }
 }
