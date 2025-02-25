@@ -32,7 +32,7 @@ process UPDATE_ORFS {
     val dbPath
 
     output:
-    val dbPath
+    val ""  // to pass linting
 
     script:
     """

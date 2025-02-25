@@ -49,19 +49,17 @@ workflow {
         // Store sequences in the sequence database
         UPDATE_ORFS(ESL_TRANSLATE.out, db_path)
 
-        // Build batches of unique protein seqs for the analysis
-        BUILD_BATCHES(UPDATE_ORFS.out, params.batchSize )
+        // Wait for all UPDATE_ORFS to complete before proceeding
+        UPDATE_ORFS.out.collect().map { db_path }.set { ready_db_path }
     } else {
         // Store the input seqs in the internal ips6 seq db
-        db_path = POPULATE_SEQ_DATABASE(fasta_file, params.nucleic)
-
-        // Build batches of unique protein seqs for the analysis
-        BUILD_BATCHES(db_path, params.batchSize)
+        ready_db_path = POPULATE_SEQ_DATABASE(fasta_file, params.nucleic)
     }
+    // Build batches of unique protein seqs for the analysis
+    BUILD_BATCHES(ready_db_path, params.batchSize)
 
     // [fasta, fasta, fasta] --> [[index, fasta], [index, fasta], [index, fasta]] - to help gather matches for each batch
-    // Otherwise, in rare cases, nextflow can mix up the matches between the batches, assigning the wrong matches to a batch
-    ch_seqs = INDEX_BATCHES(BUILD_BATCHES.out).flatMap { it } // flatMap so tuple emitted one at a time
+    ch_seqs = INDEX_BATCHES(BUILD_BATCHES.out).flatMap { it } // flatMap so tuples are emitted one at a time
 
     matchResults = Channel.empty()
     if (params.disablePrecalc) {
