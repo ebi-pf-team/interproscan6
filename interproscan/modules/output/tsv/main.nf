@@ -42,7 +42,8 @@ process WRITE_TSV_OUTPUT {
                 char status = 'T'
 
                 seqData = getSeqData(seqDbPath, proteinMd5, nucleic)
-                seqData.each { String row ->  // Protein: [id, sequence]; Nucleic: [] from
+                println "seqData: $seqData\n${seqData.getClass()}"
+                seqData.each { row ->  // Protein: [id, sequence]; Nucleic: [] from
                     match.locations.each { Location loc ->
                         if ( nucleic ) {
                             println "WRITE"
@@ -51,10 +52,10 @@ process WRITE_TSV_OUTPUT {
 //                                 writeToTsv(tsvFile, match, currentDate, memberDb,  sigDesc, goterms, pathways, entryAcc, entryDesc, status, seqNode, xrefData, loc, seqId)
 //                             }
                         } else {
-                            row = row.split("\t")
+                            row = row.split('\t')
                             seqId = row[0]
                             seqLength = row[1].trim().length()
-                            writeToTsv(tsvFile, seqId, md5, seqLength, match, loc, memberDb, sigDesc, status, currentDate, entryAcc, entryDesc, goterms, pathways)
+                            writeToTsv(tsvFile, seqId, proteinMd5, seqLength, match, loc, memberDb, sigDesc, status, currentDate, entryAcc, entryDesc, goterms, pathways)
                         }
                     }
                 }
@@ -104,7 +105,8 @@ def writeToTsv(tsvFile, seqId, md5, seqLength, match, loc, memberDb, sigDesc, st
     }
 
     tsvFile.append([
-        seqId, md5, seqLength, memberDb, match.signature.accession, sigDesc, start, end, scoringValue, status,
+        seqId, md5, seqLength, memberDb, match.signature.accession,
+        sigDesc, start, end, scoringValue, status,
         currentDate, entryAcc, entryDesc, goterms, "${pathways}\n"
     ].join('\t'))
 }
