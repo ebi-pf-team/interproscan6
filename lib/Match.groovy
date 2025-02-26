@@ -159,6 +159,7 @@ class Signature implements Serializable {
     String accession
     String name
     String description
+    String type
     Entry entry
     SignatureLibraryRelease signatureLibraryRelease = new SignatureLibraryRelease(null, null)
 
@@ -183,15 +184,48 @@ class Signature implements Serializable {
         this.entry = entry
     }
 
+    Signature(String accession,
+              String name,
+              String description,
+              String type,
+              SignatureLibraryRelease library,
+              Entry entry) {
+        this.accession = accession
+        this.name = name
+        this.description = description
+        this.type = type
+        this.signatureLibraryRelease = library
+        this.entry = entry
+    }
+
     static Map asMap(Signature sig) {
-        if (!sig) { return [:] }
+        if (!sig) {
+            return [:]
+        }
         Map sigMap = [:]
-        if (sig.accession) {               sigMap["accession"] = sig.accession }
-        if (sig.name) {                    sigMap["name"] = sig.name }
-        if (sig.description) {             sigMap["description"] = sig.description }
-        if (sig.signatureLibraryRelease) { sigMap["signatureLibraryRelease"] = SignatureLibraryRelease.asMap(sig.signatureLibraryRelease) }
-        if (sig.entry) {                   sigMap["entry"] = Entry.asMap(sig.entry) }
+        if (sig.accession) {
+            sigMap["accession"] = sig.accession
+        }
+        if (sig.name) {
+            sigMap["name"] = sig.name
+        }
+        if (sig.description) {
+            sigMap["description"] = sig.description
+        }
+        if (sig.type) {
+            sigMap["type"] = sig.type
+        }
+        if (sig.signatureLibraryRelease) {
+            sigMap["signatureLibraryRelease"] = SignatureLibraryRelease.asMap(sig.signatureLibraryRelease)
+        }
+        if (sig.entry) {
+            sigMap["entry"] = Entry.asMap(sig.entry)
+        }
         return sigMap
+    }
+
+    void setType(String type) {
+        this.type = type
     }
 
     static Signature fromMap(Map data) {
@@ -202,6 +236,7 @@ class Signature implements Serializable {
                 data.accession,
                 data.name,
                 data.description,
+                data.containsKey("type") ? data.type : null,  // Provide a default value (null) if 'type' is missing
                 SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
                 Entry.fromMap(data.entry)
         )

@@ -1,20 +1,21 @@
-class CandidateDomain {
-    // Used during selection of representative domains
+class CandidateLocation {
+    // Used during selection of representative locations
     Location location
     Set<Integer> residues = new HashSet<>()
     Integer representativeRank
 
-    CandidateDomain(Location location, Integer representativeRank) {
+    CandidateLocation(Location location, Integer representativeRank) {
         this.location = location
         this.representativeRank = representativeRank
+        populateResidues()
+        sortFragments()
     }
 
-    Set<Integer> getResidues() {
+    private void populateResidues() { // Note: the private kywd is broken in groovy, so it's more an annotation
         // Use this.@residues to access the field directly preventing a StackOverFlow from recursive calls
         this.location.fragments.each { frag ->
             this.@residues.addAll((frag.start..frag.end).toSet())
         }
-        return this.@residues
     }
 
     List<LocationFragment> sortFragments() {

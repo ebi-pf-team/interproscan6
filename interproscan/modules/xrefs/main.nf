@@ -66,6 +66,8 @@ process XREFS {
                     if (signatureInfo != null) {
                         match.signature.name = signatureInfo["name"].asText().replace('\"',"")
                         match.signature.description = signatureInfo["description"].asText().replace('\"',"")
+                        String sigType = signatureInfo["type"].asText().replace('\"',"")
+                        matchObject.signature.setType(sigType)
                         if (signatureInfo["representative"] != null) { // if(var) does not work on JsonNodes, need explicit falsey check
                             match.representativeInfo = new RepresentativeInfo(
                                 signatureInfo["representative"].get("type").asText(),

@@ -10,7 +10,7 @@ include { LOOKUP_MATCHES                } from "./interproscan/modules/lookup"
 include { XREFS                         } from "./interproscan/modules/xrefs"
 include { AGGREGATE_SEQS_MATCHES;
           AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_matches"
-include { REPRESENTATIVE_DOMAINS        } from "./interproscan/modules/representative_domains"
+include { REPRESENTATIVE_LOCATIONS      } from "./interproscan/modules/representative_locations"
 include { WRITE_JSON_OUTPUT             } from "./interproscan/modules/output/json"
 include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
 include { WRITE_XML_OUTPUT              } from "./interproscan/modules/output/xml"
@@ -117,19 +117,19 @@ workflow {
     // Aggregate all data into a single JSON file
     AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
 
-    // Identify representative domains for the applicable member databases
-    REPRESENTATIVE_DOMAINS(AGGREGATE_ALL_MATCHES.out)
+    // Identify representative locations for the applicable member databases
+    REPRESENTATIVE_LOCATIONS(AGGREGATE_ALL_MATCHES.out)
 
     def fileName = params.input.split('/').last()
     def outFileName = "${params.outdir}/${fileName}"
     if (formats.contains("JSON")) {
-        WRITE_JSON_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
+        WRITE_JSON_OUTPUT(REPRESENTATIVE_LOCATIONS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
     }
     if (formats.contains("TSV")) {
-        WRITE_TSV_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic)
+        WRITE_TSV_OUTPUT(REPRESENTATIVE_LOCATIONS.out, "${outFileName}", params.nucleic)
     }
     if (formats.contains("XML")) {
-        WRITE_XML_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
+        WRITE_XML_OUTPUT(REPRESENTATIVE_LOCATIONS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
     }
 }
 
