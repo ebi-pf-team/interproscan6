@@ -121,9 +121,9 @@ workflow {
     def fileName = params.input.split('/').last()
     def outFileName = "${params.outdir}/${fileName}"
 
-// //     if (formats.contains("JSON")) {
-// //         WRITE_JSON_OUTPUT(Rch_results, "${outFileName}", params.nucleic, workflow.manifest.version)
-// //     }
+    if (formats.contains("JSON")) {
+        WRITE_JSON_OUTPUT(ch_results, "${outFileName}", ready_db_path, params.nucleic, workflow.manifest.version)
+    }
     if (formats.contains("TSV")) {
         WRITE_TSV_OUTPUT(ch_results, "${outFileName}", ready_db_path, params.nucleic)
     }

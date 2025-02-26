@@ -18,6 +18,7 @@ process WRITE_JSON_OUTPUT {
     exec:
     ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
     def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+source=([^"]+)\s+coords=(\d+)\.\.(\d+)\s+length=(\d+)\s+frame=(\d+)\s+desc=(.*)$/)
+    def outputFilePath = "${outputPath}.ips6.json"
 
     if (nucleic) {
         nucleicRelationships = groupNucleotides(matchesFiles, seqDbPath)
@@ -27,9 +28,9 @@ process WRITE_JSON_OUTPUT {
             jsonWriter.writeStringField("interproscan-version", ips6Version)
             jsonWriter.writeFieldName("results")
             jsonWriter.writeStartArray()  // start of results [...
-            matchFiles.each { matchFile ->
+            matchesFiles.each { matchFile ->
                 JsonReader.streamJson(matchFile.toString(), jacksonMapper) { String proteinMd5, JsonNode matchesNode ->
-                    writeProtein(proteinMd5, matchesNode, proteinSeqData jsonWriter)
+                    writeProtein(proteinMd5, matchesNode, jsonWriter)
                 }
             }
             jsonWriter.writeEndArray() // end of "results" ...]
@@ -109,7 +110,7 @@ def getProteinSeqData(def seqDbPath, String proteinMd5) {
 
 def writeMatch(String proteinMd5, JsonNode match, JsonGenerator jsonWriter) {
     // Write out an individual match to an array of matches. The structure is dependent on the memberDB.
-    String memberDB = match.get("signature").get("signatureLibraryRelease").get("library").toLowerCase() ?: ""
+    String memberDB = match.get("signature").get("signatureLibraryRelease").get("library").toLowerCase().replace("_","-") ?: ""
     switch (memberDB) {
         case "antifam":
             writeDefault(match, jsonWriter)
@@ -117,7 +118,7 @@ def writeMatch(String proteinMd5, JsonNode match, JsonGenerator jsonWriter) {
         case "cath-gene3d":
             writeDefault(match, jsonWriter)
             break
-        case "cath-funfam" || "funfam":
+        case "cath-funfam":
             writeDefault(match, jsonWriter)
             break
         case "cdd":
@@ -129,7 +130,7 @@ def writeMatch(String proteinMd5, JsonNode match, JsonGenerator jsonWriter) {
         case "hamap":
             writeHAMAP(match, jsonWriter)
             break
-        case "mobidb-lite" || "mobidb_lite":
+        case "mobidb-lite":
             writeMobiDBlite(match, jsonWriter)
             break
         case "panther":
@@ -430,7 +431,7 @@ def writeSUPERFAMILY(JsonNode match, JsonGenerator jsonWriter) {
     ])
 }
 
-def writeProteinXref(def proteinSeqData, JsonGenerator jsonWriter) {
+def writeProteinXref(proteinSeqData, JsonGenerator jsonWriter) {
     /* "xref" : [ {
         "name" : "tr|A0A011PH51|A0A011PH51_9PROT OX=1454000",
         "id" : "tr|A0A011PH51|A0A011PH51_9PROT"
