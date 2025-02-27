@@ -125,9 +125,9 @@ process REPRESENTATIVE_LOCATIONS {
     }  // end of JsonWriter
 }
 
-List<CandidateLocation> getCandidateLocations(Map seqData, String reprType) {
+List<CandidateLocation> getCandidateLocations(Map matches, String reprType) {
     List<CandidateLocation> candidateLocations = []
-    seqData["matches"].each { String modelAccession, Match match ->
+    matches.each { String modelAccession, Match match ->
         if (match.representativeInfo?.type == reprType) {
             match.locations.each { Location loc ->
                 CandidateLocation candidate = new CandidateLocation(loc, match.representativeInfo.rank)
