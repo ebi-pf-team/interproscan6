@@ -105,32 +105,32 @@ workflow {
         params.pathways,
         params.appsConfig.panther.paint
     )
-//
-//     ch_seqs.join(XREFS.out, by: 0)
-//     .map { batchnumber, fasta, sequences, matches ->
-//         [batchnumber, sequences, matches]
-//     }.set { ch_seq_matches }
-//
-//     // Aggregate seq meta data with the matches
-//     AGGREGATE_SEQS_MATCHES(ch_seq_matches, params.nucleic)
-//
-//     // Aggregate all data into a single JSON file
-//     AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
-//
-//     // Identify representative locations for the applicable member databases
-//     REPRESENTATIVE_LOCATIONS(AGGREGATE_ALL_MATCHES.out)
-//
-//     def fileName = params.input.split('/').last()
-//     def outFileName = "${params.outdir}/${fileName}"
-//     if (formats.contains("JSON")) {
-//         WRITE_JSON_OUTPUT(REPRESENTATIVE_LOCATIONS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
-//     }
-//     if (formats.contains("TSV")) {
-//         WRITE_TSV_OUTPUT(REPRESENTATIVE_LOCATIONS.out, "${outFileName}", params.nucleic)
-//     }
-//     if (formats.contains("XML")) {
-//         WRITE_XML_OUTPUT(REPRESENTATIVE_LOCATIONS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
-//     }
+
+    ch_seqs.join(XREFS.out, by: 0)
+    .map { batchnumber, fasta, sequences, matches ->
+        [batchnumber, sequences, matches]
+    }.set { ch_seq_matches }
+
+    // Aggregate seq meta data with the matches
+    AGGREGATE_SEQS_MATCHES(ch_seq_matches, params.nucleic)
+
+    // Aggregate all data into a single JSON file
+    AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
+
+    // Identify representative locations for the applicable member databases
+    REPRESENTATIVE_LOCATIONS(AGGREGATE_ALL_MATCHES.out)
+
+    def fileName = params.input.split('/').last()
+    def outFileName = "${params.outdir}/${fileName}"
+    if (formats.contains("JSON")) {
+        WRITE_JSON_OUTPUT(REPRESENTATIVE_LOCATIONS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
+    }
+    if (formats.contains("TSV")) {
+        WRITE_TSV_OUTPUT(REPRESENTATIVE_LOCATIONS.out, "${outFileName}", params.nucleic)
+    }
+    if (formats.contains("XML")) {
+        WRITE_XML_OUTPUT(REPRESENTATIVE_LOCATIONS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
+    }
 }
 
 workflow.onComplete = {
