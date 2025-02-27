@@ -33,7 +33,7 @@ def populate_sequences(db_path, fasta, nucleic):
             if line.startswith(">"):
                 if current_sequence:
                     add_sequence(conn, current_sequence, nucleic)
-                seq_id, seq_desc = line.lstrip(">").split(" ", maxsplit=1)
+                seq_id, seq_desc = line.lstrip(">").rstrip("\n").split(" ", maxsplit=1)
                 current_sequence = {"id": seq_id, "description": seq_desc, "sequence": ""}
             else:
                 current_sequence["sequence"] += line.strip()
@@ -55,7 +55,7 @@ def insert_orfs(db_path, esl_output):
                 header = re.match(ESL_TRANSLATE, line.strip())
                 if not header: # mv to raise
                     raise ValueError(f"Incorrectly formatted ESL_TRANSLATE output:\nLine: {line}")
-                orf_id, orf_desc = line.lstrip(">").split(" ", maxsplit=1)
+                orf_id, orf_desc = line.lstrip(">").rstrip("\n").split(" ", maxsplit=1)
                 current_sequence = {
                     "id": orf_id,
                     "description": orf_desc, # the ID of the source

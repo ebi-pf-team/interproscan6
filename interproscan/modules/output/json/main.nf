@@ -28,11 +28,15 @@ process WRITE_JSON_OUTPUT {
             jsonWriter.writeStringField("interproscan-version", ips6Version)
             jsonWriter.writeFieldName("results")
             jsonWriter.writeStartArray()  // start of results [...
+
             matchesFiles.each { matchFile ->
+                println "Parsing $matchFile"
                 JsonReader.streamJson(matchFile.toString(), jacksonMapper) { String proteinMd5, JsonNode matchesNode ->
-                    writeProtein(proteinMd5, matchesNode, jsonWriter)
+                    println "Handling $proteinMd5"
+                    writeProtein(proteinMd5, matchesNode, jsonWriter, seqDbPath.toString())
                 }
             }
+
             jsonWriter.writeEndArray() // end of "results" ...]
         }
     }
@@ -62,20 +66,21 @@ def groupNucleotides(matchesFiles, seqDbPath) {
             }
         }
     }
+    return nucleicRelationships
 }
 
-def writeProtein(String proteinMd5, JsonNode matchesNode, JsonGenerator jsonWriter) {
+def writeProtein(String proteinMd5, JsonNode matchesNode, JsonGenerator jsonWriter, String seqDbPath) {
     /* Write data for a query protein sequence and its matches:
     { "sequence": sequence, "md5": proteinMd5, "matches": [], "xrefs": []}
     There may be multiple seqIds and desc for the same sequence/md5, use the first entry to get the seq. */
+    jsonWriter.writeStartObject()
 
     // 1. {"sequence": seq, "md5": proteinMd5}
     proteinSeqData = getProteinSeqData(seqDbPath, proteinMd5)
-    def sequence = proteinSeqData[0].split('\t')[2]
-    jsonWriter.writeFieldName("sequence")
-    jsonWriter.writeObject(sequence)
-    jsonWriter.writeFieldName("md5")
-    jsonWriter.writeObject(proteinMd5)
+    String sequence = proteinSeqData[0].split('\t')[-1]
+
+    jsonWriter.writeStringField("sequence", sequence)
+    jsonWriter.writeStringField("md5", proteinMd5)
 
     // 2. {..., "matches": [{match}, {match}, {match}]}
     jsonWriter.writeFieldName("matches")
@@ -87,10 +92,11 @@ def writeProtein(String proteinMd5, JsonNode matchesNode, JsonGenerator jsonWrit
     jsonWriter.writeEndArray()
 
     // 3. {..., "xref": [{xref}, {xref}, {xref}]}
-    writeProteinXref(proteinSeqData, jsonWriter)
+//     writeProteinXref(proteinSeqData, jsonWriter)
+    jsonWriter.writeEndObject()
 }
 
-def getProteinSeqData(def seqDbPath, String proteinMd5) {
+def getProteinSeqData(String seqDbPath, String proteinMd5) {
     // Retrieve all associated seq IDs and desc for the given protein seq (id'd by it's md5 hash)
     try {
         def query = """
@@ -110,7 +116,7 @@ def getProteinSeqData(def seqDbPath, String proteinMd5) {
 
 def writeMatch(String proteinMd5, JsonNode match, JsonGenerator jsonWriter) {
     // Write out an individual match to an array of matches. The structure is dependent on the memberDB.
-    String memberDB = match.get("signature").get("signatureLibraryRelease").get("library").toLowerCase().replace("_","-") ?: ""
+    String memberDB = match.get("signature").get("signatureLibraryRelease").get("library").toLowerCase() ?: ""
     switch (memberDB) {
         case "antifam":
             writeDefault(match, jsonWriter)
@@ -119,6 +125,7 @@ def writeMatch(String proteinMd5, JsonNode match, JsonGenerator jsonWriter) {
             writeDefault(match, jsonWriter)
             break
         case "cath-funfam":
+        case "funfam":  // use groovy case fall to allow multiple options
             writeDefault(match, jsonWriter)
             break
         case "cdd":
@@ -131,7 +138,11 @@ def writeMatch(String proteinMd5, JsonNode match, JsonGenerator jsonWriter) {
             writeHAMAP(match, jsonWriter)
             break
         case "mobidb-lite":
+        case "mobidb_lite":  // use groovy case fall to allow multiple options
             writeMobiDBlite(match, jsonWriter)
+            break
+        case "ncbifam":
+            writeDefault(match, jsonWriter)
             break
         case "panther":
             writePANTHER(match, jsonWriter)
@@ -156,6 +167,9 @@ def writeMatch(String proteinMd5, JsonNode match, JsonGenerator jsonWriter) {
             break
         case "prosite profiles":
             writePROSITEprofiles(match, jsonWriter)
+            break
+        case "sfld":
+            writeDefaultNoHmmBounds(match, jsonWriter)
             break
         case "signalp":
             writeSignalp(match, jsonWriter)
