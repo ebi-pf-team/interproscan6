@@ -30,9 +30,7 @@ process WRITE_JSON_OUTPUT {
             jsonWriter.writeStartArray()  // start of results [...
 
             matchesFiles.each { matchFile ->
-                println "Parsing $matchFile"
                 JsonReader.streamJson(matchFile.toString(), jacksonMapper) { String proteinMd5, JsonNode matchesNode ->
-                    println "Handling $proteinMd5"
                     writeProtein(proteinMd5, matchesNode, jsonWriter, seqDbPath.toString())
                 }
             }
@@ -116,7 +114,7 @@ def getProteinSeqData(String seqDbPath, String proteinMd5) {
 
 def writeMatch(String proteinMd5, JsonNode match, JsonGenerator jsonWriter) {
     // Write out an individual match to an array of matches. The structure is dependent on the memberDB.
-    String memberDB = match.get("signature").get("signatureLibraryRelease").get("library").toLowerCase() ?: ""
+    String memberDB = JsonReader.asString(match.get("signature").get("signatureLibraryRelease").get("library")).toLowerCase() ?: ""
     switch (memberDB) {
         case "antifam":
             writeDefault(match, jsonWriter)
