@@ -33,8 +33,7 @@ process REPRESENTATIVE_LOCATIONS {
             // Look for representatives for matches of a specific type, e.g. "Domain":
             REPR_TYPE.each { String reprType ->
                 // Gather relevant locations. Only matches from the relevant dbs will have a representativeInfo object
-                List<CandidateLocation> candidateLocations = getCandidateLocations(seqData, reprType)
-
+                List<CandidateLocation> candidateLocations = getCandidateLocations(matches, reprType)
 
                 // Identify/select representative domains
                 if (!candidateLocations.isEmpty()) {
