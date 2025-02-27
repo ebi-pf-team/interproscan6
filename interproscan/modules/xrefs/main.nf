@@ -28,7 +28,7 @@ process XREFS {
     def (entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null]
     if (dataDir.toString().trim()) {  // datadir is not needed when exclusively running members with no interpro data
         File entriesJson = new File(entriesPath)
-        entries = JsonReader.load(entriesPath, jacksonMapper)
+        entries = JsonReader.load(entriesPath, jacksonMapper) // returns
         if (addGoterms) (ipr2go, goInfo) = loadXRefFiles(gotermFilePrefix, dataDir, jacksonMapper)
         if (addPathways) (ipr2pa, paInfo) = loadXRefFiles(pathwaysFilePrefix, dataDir, jacksonMapper)
     }
@@ -43,7 +43,7 @@ process XREFS {
                 String modelAcc = entry.key   // Extract the modelAcc (key)
                 Match match = Match.fromJsonNode(entry.value)
 
-                if (!entries) {  // no data to update, update match in aggregatedMatches
+                if (!entries || entries == null) {  // no data to update, update match in aggregatedMatches
                     seqEntry[modelAcc] = match
                 } else {
                     String signatureAcc = match.signature.accession
@@ -57,17 +57,20 @@ process XREFS {
 
                     // Handle PANTHER data
                     if (match.signature.signatureLibraryRelease.library == "PANTHER") {
-                        updatePantherData(match, dataDir, paintAnnoDir, signatureAcc, entries)
+                        updatePantherData(match, dataDir, paintAnnoDir, signatureAcc, entries, jacksonMapper)
                     }
 
                     // Update signature info
-                    if (signatureInfo != null) {
-                        match.signature.name = JsonReader.asString(signatureInfo["name"])
-                        match.signature.description = JsonReader.asString(signatureInfo["description"])
-                        if (signatureInfo["representative"]) {
+                    if (signatureInfo != null) {  // signatureInfo is an objectNode !var does not work
+                        match.signature.name = signatureInfo["name"].asText().replace('\"',"")
+                        match.signature.description = signatureInfo["description"].asText().replace('\"',"")
+                        String sigType = signatureInfo["type"].asText().replace('\"',"").toString()
+                        match.signature.setType(sigType)
+
+                        if (signatureInfo["representative"] != null) { // if(var) does not work on JsonNodes, need explicit falsey check
                             match.representativeInfo = new RepresentativeInfo(
-                                signatureInfo["representative"]["type"],
-                                signatureInfo["representative"]["index"]
+                                signatureInfo["representative"].get("type").asText(),
+                                signatureInfo["representative"].get("index").intValue()
                             )
                         }
 
@@ -102,17 +105,17 @@ def loadXRefFiles(xrefDir, dataDir, jacksonMapper) {
     return [JsonReader.load(iprFilePath, jacksonMapper), JsonReader.load(infoFilePath, jacksonMapper)]
 }
 
-def updatePantherData(Match match, String dataDir, String paintAnnoDir, String signatureAcc, Map entries) {
+def updatePantherData(def match, def dataDir, def paintAnnoDir, def signatureAcc, def entries, def jacksonMapper) {
     String paintAnnPath = "${dataDir}/${paintAnnoDir}/${signatureAcc}.json"
     File paintAnnotationFile = new File(paintAnnPath)
     if (paintAnnotationFile.exists()) {
-        def paintAnnotationsContent = JsonReader.load(paintAnnotationFile)
-        def nodeId = match.treegrafter.ancestralNodeID
-        def nodeData = paintAnnotationsContent[nodeId]
-        if (nodeData) {
-            match.treegrafter.subfamilyAccession = nodeData[0]
-            match.treegrafter.proteinClass = nodeData[2]
-            match.treegrafter.graftPoint = nodeData[3]
+        def paintAnnotationsContent = JsonReader.load(paintAnnotationFile.toString(), jacksonMapper)
+        String nodeId = match.treegrafter.ancestralNodeID
+        def nodeData = paintAnnotationsContent.get(nodeId)
+        if (nodeData != null) {
+            match.treegrafter.subfamilyAccession = (nodeData[0] == "null") ? null : nodeData[0]
+            match.treegrafter.proteinClass = (nodeData[2] == "null") ? null : nodeData[2]
+            match.treegrafter.graftPoint = (nodeData[3] == "null") ? null : nodeData[3]
         }
     }
     if (entries["entries"][signatureAcc]) {

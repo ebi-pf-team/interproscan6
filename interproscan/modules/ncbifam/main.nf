@@ -36,6 +36,7 @@ process PARSE_NCBIFAM {
         [seqId, matches.collectEntries { modelAccession, match ->
             def updatedModelAccession = modelAccession.split("\\.")[0]
             match.modelAccession = updatedModelAccession
+            match.signature.accession = updatedModelAccession
             [(updatedModelAccession): match]
         }]
     }

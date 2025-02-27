@@ -10,7 +10,7 @@ include { POPULATE_SEQ_DATABASE;
 include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
 include { LOOKUP_MATCHES                } from "./interproscan/modules/lookup"
 include { XREFS                         } from "./interproscan/modules/xrefs"
-include { REPRESENTATIVE_DOMAINS        } from "./interproscan/modules/representative_domains"
+include { REPRESENTATIVE_LOCATIONS      } from "./interproscan/modules/representative_locations"
 include { WRITE_JSON_OUTPUT             } from "./interproscan/modules/output/json"
 include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
 include { WRITE_XML_OUTPUT              } from "./interproscan/modules/output/xml"
@@ -109,12 +109,12 @@ workflow {
         params.xRefsConfig.pathways,
         params.goterms,
         params.pathways,
-        "${data_dir}/${params.appsConfig.paint}"
+        params.appsConfig.panther.paint
     )
 
-    REPRESENTATIVE_DOMAINS(XREFS.out)
+    REPRESENTATIVE_LOCATIONS(XREFS.out)
     // Collect all JSON files into a single channel so we don't have cocurrent writing to the output files
-    ch_results = REPRESENTATIVE_DOMAINS.out
+    ch_results = REPRESENTATIVE_LOCATIONS.out
         .map { meta, json -> json }
         .collect()
 

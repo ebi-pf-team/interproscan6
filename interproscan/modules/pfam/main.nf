@@ -50,6 +50,7 @@ process PARSE_PFAM {
         sortedMatches.each { modelAccession, match ->
             modelAccession = modelAccession.split("\\.")[0]
             match.modelAccession = modelAccession
+            match.signature.accession = modelAccession
             boolean keep = true
             Map<String, List<String>> candidateMatch = nestedInfo[modelAccession] ?: [:]
             String candidateClan = candidateMatch?.get("clan", null)

@@ -459,4 +459,3 @@ def writeProteinXref(proteinSeqData, JsonGenerator jsonWriter) {
     jsonWriter.writeEndArray()
 }
 
-

@@ -145,6 +145,7 @@ class Signature implements Serializable {
     String accession
     String name
     String description
+    String type
     Entry entry
     SignatureLibraryRelease signatureLibraryRelease = new SignatureLibraryRelease(null, null)
 
@@ -169,6 +170,24 @@ class Signature implements Serializable {
         this.entry = entry
     }
 
+    Signature(String accession,
+              String name,
+              String description,
+              String type,
+              SignatureLibraryRelease library,
+              Entry entry) {
+        this.accession = accession
+        this.name = name
+        this.description = description
+        this.type = type
+        this.signatureLibraryRelease = library
+        this.entry = entry
+    }
+
+    void setType(String type) {
+        this.type = type
+    }
+
     static Signature fromMap(Map data) {
         if (data == null) {
             return null
@@ -177,6 +196,7 @@ class Signature implements Serializable {
                 data.accession,
                 data.name,
                 data.description,
+                data.containsKey("type") ? data.type : null,  // Provide a default value (null) if 'type' is missing
                 SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
                 Entry.fromMap(data.entry)
         )
@@ -486,9 +506,20 @@ class Location implements Serializable {
         location.queryAlignment = node.has("queryAlignment") ? JsonReader.asString(node.get("queryAlignment")) : null
         location.targetAlignment = node.has("targetAlignment") ? JsonReader.asString(node.get("targetAlignment")) : null
         location.cigarAlignment = node.has("cigarAlignment") ? JsonReader.asString(node.get("cigarAlignment")) : null
+        if (node.has("pvalue") && !node.get("pvalue").isNull()) {
+            location.pvalue = node.get("pvalue").numberValue()
+        }
+        if (node.has("motifNumber") && !node.get("motifNumber").isNull()) {
+            location.motifNumber = node.get("motifNumber").intValue()
+        }
+        if (node.has("level") && !node.get("level").isNull()) {
+            location.level = node.get("level").asInt() // Assuming level is an integer
+        }
         if (node.has("sites") && node.get("sites").isArray()) {
             location.sites = node.get("sites").collect { Site.fromJsonNode(it) }
         }
+        location.representative = node.has("representative") ? Boolean.parseBoolean(node.get("representative").asText()) : false
+        location.included = node.has("included") ? node.get("included").asBoolean() : true
         return location
     }
 
@@ -711,6 +742,16 @@ class SiteLocation implements Serializable {
 
     static SiteLocation fromMap(Map data) {
         return new SiteLocation(data.start, data.end, data.residue)
+    }
+
+    static SiteLocation fromJsonNode(JsonNode node) {
+        if (node == null || node.isNull()) {
+            return null
+        }
+        String residue = node.has("residue") ? node.get("residue").asText().replaceAll('["\\\\"]', '') : null
+        int start = node.has("start") ? node.get("start").asInt() : -1
+        int end = node.has("end") ? node.get("end").asInt() : -1
+        return new SiteLocation(residue, start, end)
     }
 
     @Override
