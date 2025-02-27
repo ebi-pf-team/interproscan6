@@ -116,6 +116,7 @@ class Signature implements Serializable {
     String accession
     String name
     String description
+    String type
     Entry entry
     SignatureLibraryRelease signatureLibraryRelease = new SignatureLibraryRelease(null, null)
 
@@ -140,6 +141,24 @@ class Signature implements Serializable {
         this.entry = entry
     }
 
+    Signature(String accession,
+              String name,
+              String description,
+              String type,
+              SignatureLibraryRelease library,
+              Entry entry) {
+        this.accession = accession
+        this.name = name
+        this.description = description
+        this.type = type
+        this.signatureLibraryRelease = library
+        this.entry = entry
+    }
+
+    void setType(String type) {
+        this.type = type
+    }
+
     static Signature fromMap(Map data) {
         if (data == null) {
             return null
@@ -148,6 +167,7 @@ class Signature implements Serializable {
                 data.accession,
                 data.name,
                 data.description,
+                data.containsKey("type") ? data.type : null,  // Provide a default value (null) if 'type' is missing
                 SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
                 Entry.fromMap(data.entry)
         )
