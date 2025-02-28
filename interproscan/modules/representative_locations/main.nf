@@ -119,7 +119,7 @@ process REPRESENTATIVE_LOCATIONS {
                     }
                 }
             } // end of REPR_TYPE.each
-            jsonWrite.writeFieldName(md5)
+            jsonWriter.writeFieldName(md5)
             jsonWriter.writeObject(matches)
         }  // end of JsonReader
     }  // end of JsonWriter

@@ -506,6 +506,9 @@ class Location implements Serializable {
         location.queryAlignment = node.has("queryAlignment") ? JsonReader.asString(node.get("queryAlignment")) : null
         location.targetAlignment = node.has("targetAlignment") ? JsonReader.asString(node.get("targetAlignment")) : null
         location.cigarAlignment = node.has("cigarAlignment") ? JsonReader.asString(node.get("cigarAlignment")) : null
+        if (node.has("fragments") && node.get("fragments").isArray()) {
+            location.fragments = node.get("fragments"). collect { LocationFragment.fromJsonNode(it) }
+        }
         if (node.has("pvalue") && !node.get("pvalue").isNull()) {
             location.pvalue = node.get("pvalue").numberValue()
         }
@@ -619,6 +622,13 @@ class LocationFragment implements Serializable {
     }
 
     public Object clone() {
+        return new LocationFragment(start, end, dcStatus)
+    }
+
+    static LocationFragment fromJsonNode(JsonNode node) {
+        int start = node.get("start").asInt()
+        int end = node.get("end").asInt()
+        String dcStatus = JsonReader.asString(node.get("dcStatus"))
         return new LocationFragment(start, end, dcStatus)
     }
 }
