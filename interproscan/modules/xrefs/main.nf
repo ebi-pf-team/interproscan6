@@ -147,8 +147,8 @@ def addXRefs(Match match, String interproAcc, def ipr2go, def goInfo, def ipr2pa
 }
 
 def String getInterProVersion(Path directory) {
+    ObjectMapper objectMapper = new ObjectMapper();
     File file = new File(new File(directory.toString(), "xrefs"), "entries.json")
-    JsonProcessor processor = new JsonProcessor()
-    def metadata = processor.jsonToMap(file)
+    Map<String, Object> metadata = objectMapper.readValue(file, Map.class);
     return metadata.databases["InterPro"]
 }
