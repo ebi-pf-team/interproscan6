@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 
 process WRITE_TSV_OUTPUT {
-    label 'local'
+    label 'local', 'ips6_container'
 
     input:
     val matchesFiles
@@ -28,35 +28,19 @@ process WRITE_TSV_OUTPUT {
             matchesNode.fields().each { Map.Entry<String, JsonNode> entry ->
                 Match match = Match.fromJsonNode((JsonNode) entry.value)
                 String memberDb = match.signature.signatureLibraryRelease.library
-                String sigDesc = (match.signature.description == null || match.signature.description == "null") ? '-' : match.signature.description
-                String goterms = match.signature.entry?.goXRefs ?
-                                 (match.signature.entry.goXRefs.isEmpty() ? '-' :
-                                 match.signature.entry.goXRefs.collect { goXref -> "${goXref.id}(${goXref.databaseName})" }.join('|')) : '-'
-                goterms = (goterms == "null") ? '-' : goterms
-                String pathways = match.signature.entry?.pathwayXRefs ?
-                                 (match.signature.entry.pathwayXRefs.isEmpty() ? '-' :
-                                 match.signature.entry.pathwayXRefs.collect { ptXref -> "${ptXref.databaseName}:${ptXref.id}" }.join('|')) : '-'
-                pathways = (pathways == "null") ? '-' : pathways
-                String entryAcc = (match.signature.entry?.accession == null || match.signature.entry?.accession == "null") ? '-' : match.signature.entry?.accession
-                String entryDesc = (match.signature.entry?.description == null || match.signature.entry?.description == "null") ? '-' : match.signature.entry?.description
+                String sigDesc = match.signature.description ?: '-'
+                String goterms = match.signature.entry?.goXRefs ? match.signature.entry.goXRefs.collect { "${it.id}(${it.databaseName})" }.join('|') : '-'
+                String pathways = match.signature.entry?.pathwayXRefs ? match.signature.entry.pathwayXRefs.collect { "${it.databaseName}:${it.id}" }.join('|') : '-'
+                String entryAcc = match.signature.entry?.accession ?: '-'
+                String entryDesc = match.signature.entry?.description ?: '-'
                 char status = 'T'
-
                 seqData = getSeqData(seqDbPath, proteinMd5, nucleic)
                 seqData.each { row ->  // Protein: [id, sequence]; Nucleic: [] from
+                    row = row.split('\t')
+                    String seqId = nucleic ? "${row[0]}_${row[1]}" : row[0]
+                    int seqLength = row[nucleic ? 2 : 1].trim().length()
                     match.locations.each { Location loc ->
-                        if ( nucleic ) {
-                            row = row.split('\t')
-                            ntSeqId = row[0]
-                            orfId = row[1]
-                            seqLength = row[2].trim().length()
-                            seqId = "${ntSeqId}_${orfId}"
-                            writeToTsv(tsvFile, seqId, proteinMd5, seqLength, match, loc, memberDb, sigDesc, status, currentDate, entryAcc, entryDesc, goterms, pathways)
-                        } else {
-                            row = row.split('\t')
-                            seqId = row[0]
-                            seqLength = row[1].trim().length()
-                            writeToTsv(tsvFile, seqId, proteinMd5, seqLength, match, loc, memberDb, sigDesc, status, currentDate, entryAcc, entryDesc, goterms, pathways)
-                        }
+                        writeToTsv(tsvFile, seqId, proteinMd5, seqLength, match, loc, memberDb, sigDesc, status, currentDate, entryAcc, entryDesc, goterms, pathways)
                     }
                 }
             } // end of matches in matchesNode
@@ -72,7 +56,7 @@ def getSeqData(def seqDbPath, String querySeqMd5, boolean nucleic) {  // retriev
             FROM NUCLEOTIDE AS N
             LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.nt_md5 = N2P.nt_md5
             LEFT JOIN PROTEIN AS P ON N2P.protein_md5 = P.protein_md5
-            LEFT JOIN PROTEIN_SEQUENCE AS S ON P.protein_md5 = N2P.protein_md5
+            LEFT JOIN PROTEIN_SEQUENCE AS S ON P.protein_md5 = S.protein_md5
             WHERE N2P.protein_md5 = '$querySeqMd5';"""
         } else {
             query = """SELECT P.id, S.sequence

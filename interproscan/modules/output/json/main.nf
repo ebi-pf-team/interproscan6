@@ -9,7 +9,7 @@ process WRITE_JSON_OUTPUT {
     label 'local'
 
     input:
-    val matchesFiles
+    val matchesFiles  // {query prot seq md5: {model acc: match}}
     val outputPath
     val seqDbPath
     val nucleic
@@ -21,6 +21,7 @@ process WRITE_JSON_OUTPUT {
     def outputFilePath = "${outputPath}.ips6.json"
 
     if (nucleic) {
+        // all orfs for a given nt seq are collected in the same batch
         nucleicRelationships = groupNucleotides(matchesFiles, seqDbPath)
     } else {
         JsonWriter.streamJson(outputFilePath.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
@@ -90,7 +91,7 @@ def writeProtein(String proteinMd5, JsonNode matchesNode, JsonGenerator jsonWrit
     jsonWriter.writeEndArray()
 
     // 3. {..., "xref": [{xref}, {xref}, {xref}]}
-//     writeProteinXref(proteinSeqData, jsonWriter)
+    writeProteinXref(proteinSeqData, jsonWriter)
     jsonWriter.writeEndObject()
 }
 

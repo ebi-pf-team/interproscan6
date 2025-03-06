@@ -169,29 +169,51 @@ def build_tables(conn):
         raise sqlite3.DatabaseError(f"Error creating tables in the sequence database:\n{e}")
 
 
-def build_batches(db_path, batch_size):
-    """Build batches of FASTA file for the IPS6 sequence analysis."""
-    def write_fasta(batch, batch_index, line_length=60):
-        fasta = f"sequences.{batch_index}.fasta"
-        with open(fasta, "w") as fh:
+def build_batches(db_path, batch_size, nucleic):
+    """Build batches of FASTA files for IPS6 sequence analysis, ensuring that all children protein seqs
+    associated with a parent nt seq are stored within the same batch."""
+
+    def write_fasta(batch, batch_index, nucleic, line_length=60):
+        """Write batch to a FASTA file."""
+        fasta_file = f"sequences.{batch_index}.fasta"
+        with open(fasta_file, "w") as fh:
             for row in batch:
-                md5 = row[0]
-                sequence = '\n'.join([row[1][i:i+line_length] for i in range(0, len(row[1]), line_length)])
-                fh.write(f">{md5}\n{sequence}\n")
+                md5_index = 0 if nucleic else 1
+                md5 = row[md5_index]
+                seq = '\n'.join([row[-1][i:i+line_length] for i in range(0, len(row[-1]), line_length)])
+                fh.write(f">{md5}\n{seq}\n")
 
     conn = create_connection(db_path)
     cur = conn.cursor()
-    offset, batch_index = 0, 1
-    while True:
-        cur.execute("SELECT protein_md5, sequence FROM PROTEIN_SEQUENCE LIMIT ? OFFSET ?", (batch_size, offset))
-        batch = cur.fetchall()
 
-        if not batch:
-            break
+    batch = []
+    current_md5 = None
+    batch_index = 1
 
-        write_fasta(batch, batch_index)
-        offset += batch_size
-        batch_index += 1
+    query = """
+        SELECT P2N.nt_md5, S.protein_md5, S.sequence
+        FROM PROTEIN_SEQUENCE AS S
+        LEFT JOIN PROTEIN AS P ON S.protein_md5 = P.protein_md5
+        LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS P2N ON P.protein_md5 = P2N.protein_md5
+        WHERE P2N.nt_md5 IS NOT NULL
+        ORDER BY P2N.nt_md5
+    """ if nucleic else "SELECT NULL AS nt_md5, protein_md5, sequence FROM PROTEIN_SEQUENCE ORDER BY protein_md5"
+
+    cur.execute(query)
+
+    for nt_md5, protein_md5, sequence in cur:
+        # if we encounter a new nt_md5 and the batch is full --> write to a new batch
+        if current_md5 and current_md5 != nt_md5 and len(batch) >= batch_size:
+            write_fasta(batch, batch_index, nucleic)
+            batch.clear()
+            batch_index += 1
+
+        batch.append((nt_md5, protein_md5, sequence))
+        current_md5 = nt_md5 if nucleic else protein_md5
+
+    # Write remaining batch
+    if batch:
+        write_fasta(batch, batch_index, nucleic)
 
     conn.close()
 
@@ -248,6 +270,6 @@ if __name__ == "__main__":
             raise ValueError("The --fasta flag must be used with the update_orfs method to provide the FASTA file of sequences")
     elif args.method == "build_batches":
         if args.batch_size:
-            build_batches(args.db_path, args.batch_size)
+            build_batches(args.db_path, args.batch_size, args.nucleic)
         else:
             raise ValueError("The --batch_size flag must be used with the build_batches method")

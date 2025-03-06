@@ -54,7 +54,7 @@ workflow {
         ready_db_path = POPULATE_SEQ_DATABASE(fasta_file, params.nucleic)
     }
     // Build batches of unique protein seqs for the analysis
-    BUILD_BATCHES(ready_db_path, params.batchSize)
+    BUILD_BATCHES(ready_db_path, params.batchSize, params.nucleic)
 
     // [fasta, fasta, fasta] --> [[index, fasta], [index, fasta], [index, fasta]] - to help gather matches for each batch
     ch_seqs = INDEX_BATCHES(BUILD_BATCHES.out).flatMap { it } // flatMap so tuples are emitted one at a time

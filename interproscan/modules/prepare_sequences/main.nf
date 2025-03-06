@@ -23,7 +23,7 @@ process POPULATE_SEQ_DATABASE {
 
 process UPDATE_ORFS {
     // add protein seqs translated from ORFS in the nt seqs to the database
-    label 'local', 'ips6_container'
+    label         'local', 'ips6_container'
     errorStrategy 'terminate'
 
     input:
@@ -44,27 +44,31 @@ process UPDATE_ORFS {
 
 process BUILD_BATCHES {
     // Build the FASTA file batches of unique protein sequences for the sequence analysis
-    label 'local', 'ips6_container'
+    label         'local', 'ips6_container'
     errorStrategy 'terminate'
 
     input:
     val dbPath
     val batchSize
+    val nucleic
 
     output:
     path "*.fasta"
 
     script:
     """
-    echo "$dbPath -- $batchSize"
     python3 $projectDir/interproscan/scripts/database.py \
         $dbPath \
         build_batches \
-        --batch_size $batchSize
+        --batch_size $batchSize \
+        ${nucleic ? '--nucleic' : ''}
     """
 }
 
 process INDEX_BATCHES {
+    label         'local', 'ips6_container'
+    errorStrategy 'terminate'
+
     input:
     val fastaFiles
 
