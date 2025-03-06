@@ -1,4 +1,9 @@
-import com.fasterxml.jackson.core.JsonToken
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.JsonNodeFactory
+import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.SerializationFeature
 
 process AGGREGATE_SEQS_MATCHES {
     label 'local'
@@ -11,53 +16,78 @@ process AGGREGATE_SEQS_MATCHES {
     path("seq_matches_aggreg.json")
 
     exec:
-    JsonProcessor processor = new JsonProcessor()
-    def seqParser = processor.createParser(seqsPath.toString())
-    def matchesParser = processor.createParser(matchesPath.toString())
+    /*
+    Content of seqsPath when input is nucleic seqs:
+      {prot seq md5: [{id: str, description: str, sequence: protein, md5: str, translatedFrom: {id, desc, seq (nucleic), md5, translatedFrom: null}]
+    Content seqsPath when input is protein seqs:
+      {seqId: {id: str, description: str, sequence: str, md5: str, translatedFrom: null}
+    Content of matchesPath:
+      {seqId: {sigAcc: {Match object represented as a Map}}
+    Final output of this process:
+      {prot seq md5: {Match object represented as a Map}}
+    */
+    // Build a single mapper for all readers and writers to save memory
+    ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+    // Load the entire JSON file of matches to retrieve matches by the md5 of the seq
+    def matchesMap = JsonReader.load(matchesPath.toString(), jacksonMapper) ?: [:]
 
-    def seqMatchesAggreg = [:].withDefault { [
-        sequence: '',
-        md5: '',
-        matches: [],
-        xref: []
-    ] }
-
-    def matchesInfo = processor.jsonToMap(matchesParser)
-    while (seqParser.nextToken() != JsonToken.END_OBJECT) {
-        String seqId = seqParser.getCurrentName()
-        seqParser.nextToken()
-        if (nucleic) {
-            def seqInfo = processor.jsonToList(seqParser)
-            seqInfo.each { orf ->
-                FastaSequence protSequence = FastaSequence.fromMap(orf)
-                String protMD5 = protSequence.md5
-                seqMatchesAggreg[protMD5].sequence = protSequence.sequence
-                seqMatchesAggreg[protMD5].md5 = protMD5
-                seqMatchesAggreg[protMD5].xref << ["name": orf.id + " " + orf.description, "id": orf.id]
-                if (seqMatchesAggreg[protMD5].translatedFrom == null) {
-                    seqMatchesAggreg[protMD5].translatedFrom = []
-                }
-                seqMatchesAggreg[protMD5].translatedFrom << orf.translatedFrom // add nucleic seq metadata
-                if (matchesInfo[orf.id]) {
-                    seqMatchesAggreg[protMD5].matches = matchesInfo[orf.id]
+    def seqMatchesAggreg = [:]
+    JsonReader.streamJson(seqsPath.toString(), jacksonMapper) { String seqId, JsonNode node ->
+        /*
+        SEQ ID B24EF43902A9B40CC7E57C1C93D366DF
+        NODE [{
+        "id":"orf2",
+        "description":"source=ENA|EXB00152|EXB00152.1 coords=306..374 length=23 frame=3 desc=Acinetobacter sp. 1295259 hypothetical protein",
+        "sequence":"KTRNCPSCCSQNFKTLSLSRWAS",
+        "md5":"B24EF43902A9B40CC7E57C1C93D366DF",
+        "translatedFrom":
+            {"id":"ENA|EXB00152|EXB00152.1","description":"Acinetobacter sp. 1295259 hypothetical protein",
+            "sequence":"ATGAAAATTAAGTTATTGTTTATGAGTTTAGCTATATTGTTACCTTTAAATAGTAATGCTTTTACAATATATAGTTTTGTTCCTTTTAGGTATCATGTTGATAAGTATGGAAAAAAAGTGGATGGTTATTCACGAGCACAACAAGCTCTTTATGAGGTTGGAACTAAACAAATAAAAGTTTTGTATGAAAATCAATTTTTGACCAATAAACAGCCAGACGTAGAAAAGATAAAGAAAATTGTTGAAGATACAAAGAAAAATCCAGAAATACCAATTTCTTTTGATATAGAGGTTGGCAATGATAGAAAACCAGAAACTGTCCTTCCTGTTGTTCTCAAAACTTTAAAACTTTATCATTATCTAGGTGGGCAAGCTAAAGTAGGCGTTTATTCTCTATTACCTGTTAGTACGGAAGGTGAAATGCTTTCAGATGCTAGAATACCAGGTTATCAACTTCTTAATAAGAAGTATGAACCAATTGCTGAATTGGTAGATTTTTTAAGTCCTGTAATCTATAACTATAATATTCGAGATCCCAAAATTTGGAAAAAAATAATTGATATTAATATGGCAGAAAGTCATAAGTATGCTAACAAATATAATCTAAAAATATATCCTTATATAACAGCTAGTTATTATTTCCCGGAAAAAGATCCTAAAACAGGCATGCGTTATGTGGAAGCCTTAACAGATGTAGAGATGCGTGACCGACTGCTTTATTTCAAGCAGAAAGGAGCGGATGGGGTTATTCTATGGGAAAGTTCTGAAACTAGGCAAAAGGATGGGTCAAAGCCTTTAATGGATTTCAAGTCTAATTGGGCGAAAGGAGTGTCTGATTTTATTCAGAAAAATAGTTTAAAATAG",
+            "md5":"621AC61E48B498FF1E98F2C3A3ED79C2",
+            "translatedFrom":null}
+        }]
+        */
+        if (nucleic) { // seqId = Protein Seq MD5, node = [{prot}, {prot}]
+            node.forEach { protein ->
+                try {
+                    protSeqId = protein.get("id").asText()
+                    processProteinData(protein, seqMatchesAggreg, matchesMap, protSeqId)
+                    seqMatchesAggreg[seqId].translatedFrom = seqMatchesAggreg[seqId].translatedFrom ?: []
+                    def translatedFromValue = protein.get("translatedFrom")
+                    if (translatedFromValue != null) {  // if (var) does not work on jsonNodes, need a formal null check
+                        seqMatchesAggreg[seqId].translatedFrom << translatedFromValue
+                    }
+                } catch (Exception e) {
+                    throw new Exception("Error while aggregating nucleotide sequence and match data: $e -- ${e.getCause()}", e)
                 }
             }
-        } else {
-            def seqInfo = processor.jsonToMap(seqParser)
-            FastaSequence sequence = FastaSequence.fromMap(seqInfo)
-            String md5 = sequence.md5
-            seqMatchesAggreg[md5].sequence = sequence.sequence
-            seqMatchesAggreg[md5].md5 = md5
-            seqMatchesAggreg[md5].xref << ["name": sequence.id + " " + sequence.description, "id": sequence.id]
-            if (matchesInfo[seqId]) {
-                seqMatchesAggreg[md5].matches = matchesInfo[seqId]
+        } else {  // node = [Protein Seq Id: {protein}]
+            try {
+                processProteinData(node, seqMatchesAggreg, matchesMap, seqId)
+            } catch (Exception e) {
+                throw new Exception("Error while aggregating sequence and match data")
             }
         }
     }
 
-    seqParser.close()
     def outputFilePath = task.workDir.resolve("seq_matches_aggreg.json")
-    processor.write(outputFilePath.toString(), seqMatchesAggreg)
+    JsonWriter.writeMaptoFile(outputFilePath.toString(), jacksonMapper, seqMatchesAggreg)
+}
+
+def processProteinData(JsonNode protein, Map seqMatchesAggreg,  Map<String, JsonNode> matchesMap, String seqId) {
+    md5 = protein.get("md5").asText()
+    def entry = seqMatchesAggreg.computeIfAbsent(md5, { [sequence: protein.get("sequence").asText(), md5: md5, matches: [:], xref: []] })
+    entry.xref << ["name": seqId + " " + protein.get("description").asText().replaceAll('["\\\\"]', ''), "id": seqId]
+    try {
+        if (matchesMap.containsKey(seqId)) { // matchesMap[seqId] is an ObjectNode, keyed by modelAcc and valued by ObjectNode repr of Matches
+            matchesMap[seqId].fields().each { matchNode ->
+                seqMatchesAggreg[md5]["matches"][matchNode.key] = Match.fromJsonNode((JsonNode) matchNode.value)
+            }
+        }
+    } catch (Exception e) {
+        println "Error Error - error getting matches: ${matchNode} -- ${matchNode.getClass()}\n--${seqMatchesAggreg[md5]}\n"
+        throw new Exception("Error getting matches", e)
+    }
 }
 
 process AGGREGATE_ALL_MATCHES {
@@ -70,20 +100,28 @@ process AGGREGATE_ALL_MATCHES {
     path("aggregated_results.json")
 
     exec:
-    JsonProcessor processor = new JsonProcessor()
-    def outputFilePath = task.workDir.resolve("aggregated_results.json")
-    def generator = processor.createGenerator(outputFilePath.toString())
+    // Build a single mapper for all readers and writers to save memory
+    ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+    // Gather seqs by md5 to check for md5s with identical seqs and differing seq ids
+    def allAggregatedData = [:]
+    seqMatches.each { file ->    // seqMatches = [md5: Map<seq: str, md5: str, matches: {obj}|[], xref: [{obj}]>]]
+        JsonReader.streamJson(file.toString(), jacksonMapper) { String md5, JsonNode node ->
 
-    generator.writeStartArray()
-    seqMatches.each { file ->
-        def parser = processor.createParser(file.toString())
-        while (parser.nextToken() != JsonToken.END_OBJECT) {
-            parser.nextToken()
-            def info = processor.jsonToMap(parser)
-            generator.writeObject(info)
+            if (allAggregatedData.containsKey(md5)) {  // merge existing and new matches
+                ObjectNode existingMatches = (ObjectNode) allAggregatedData[md5].get("matches")  // mutable
+                JsonNode newMatches = node.get("matches")
+                ((ObjectNode) existingMatches).setAll((ObjectNode) newMatches)
+            } else {
+                allAggregatedData[md5] = node
+            }
         }
-        parser.close()
     }
-    generator.writeEndArray()
-    generator.close()
+
+    // write the output as an array of seq objects [{Seq}, {Seq}, {Seq}]
+    def outputFilePath = task.workDir.resolve("aggregated_results.json")
+    JsonWriter.streamArray(outputFilePath.toString(), jacksonMapper) { generator ->
+        allAggregatedData.each { md5, jsonNode ->
+            JsonWriter.writeMap(generator, jacksonMapper, jsonNode)
+        }
+    }
 }

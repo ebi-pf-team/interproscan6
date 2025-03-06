@@ -10,10 +10,10 @@ include { LOOKUP_MATCHES                } from "./interproscan/modules/lookup"
 include { XREFS                         } from "./interproscan/modules/xrefs"
 include { AGGREGATE_SEQS_MATCHES;
           AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_matches"
-include { WRITE_JSON_OUTPUT             } from "./interproscan/modules/output/json"
 include { REPRESENTATIVE_LOCATIONS      } from "./interproscan/modules/representative_locations"
+include { WRITE_JSON_OUTPUT             } from "./interproscan/modules/output/json"
 include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
-include { WRITE_XML_OUTPUT } from "./interproscan/modules/output/xml"
+include { WRITE_XML_OUTPUT              } from "./interproscan/modules/output/xml"
 
 
 workflow {
@@ -85,9 +85,10 @@ workflow {
 
         def combined = LOOKUP_MATCHES.out[0].concat(expandedScan)
         matchResults = combined.groupTuple()
-    }
+    } // matchResults = [[meta, [member.json, member.json, member.json]]
 
     /* XREFS:
+    Aggregate matches across all members for each sequence
     Add signature and entry desc and names
     Add PAINT annotations (if panther is enabled)
     Add go terms (if enabled)
@@ -102,7 +103,7 @@ workflow {
         params.xRefsConfig.pathways,
         params.goterms,
         params.pathways,
-        "${data_dir}/${params.appsConfig.paint}"
+        params.appsConfig.panther.paint
     )
 
     ch_seqs.join(XREFS.out, by: 0)
@@ -110,9 +111,13 @@ workflow {
         [batchnumber, sequences, matches]
     }.set { ch_seq_matches }
 
+    // Aggregate seq meta data with the matches
     AGGREGATE_SEQS_MATCHES(ch_seq_matches, params.nucleic)
+
+    // Aggregate all data into a single JSON file
     AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
 
+    // Identify representative locations for the applicable member databases
     REPRESENTATIVE_LOCATIONS(AGGREGATE_ALL_MATCHES.out)
 
     def fileName = params.input.split('/').last()

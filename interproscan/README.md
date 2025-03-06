@@ -1,10 +1,36 @@
 # `interproscan/`
 
-This `interproscan` dir contains all binaries, modules, subworkflows and scripts that are developed and maintained by EMBL-EBI.
+This `interproscan` dir contains all binaries, modules, subworkflows and scripts that are developed and 
+maintained by EMBL-EBI.
 
-`bin` - Contains all binary files that are maintained and compiled by EMBL-EBI.
-`modules` - Contains all Nextflow processes (`process`).
-`subworkflows` - Contains all Nextflow workflows (`workflow`).
+## Docker image
+
+```bash
+docker image build -t interpro/interproscan:<TAG> utilities/docker/interproscan --no-cache
+docker push interpro/interproscan:<TAG>
+```
+
+## Development Principles
+
+All in-house (i.e. not performed by third party tools) data manipulation should be completed in `exec` blocks, 
+thus running nearly all in-house data processioning in native Groovy.
+
+Groovy can require more memory than may be initially expected to store JSON objects in the memory. 
+Owing to this, the Jackson library and other JAVA classes are used to store working JSON objects as 
+JAVA objects and not as Groovy objects during and after the aggregation of all results. Therefore, 
+be careful of how data is handled to ensure these data are not converted back to Groovy objects and 
+thus significantly limit the scalability of InterProScan.
+
+## Structure
+
+* `bin` - Third party executables that cannot be packaged into the Docker image
+* `interproscan` - In-house code
+  * `bin` - In-house binary files that are maintained and compiled by EMBL-EBI.
+  * `modules` - Contains all Nextflow processes (`process`).
+  * `subworkflows` - Contains all Nextflow workflows (`workflow`).
+* `lib` - Groovy and Java classes
+
+## Copyright
 
 Copyright EMBL-EBI. 2024.
 

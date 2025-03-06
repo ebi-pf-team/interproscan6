@@ -1,7 +1,10 @@
-import com.fasterxml.jackson.core.JsonToken
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.SerializationFeature
 
 process REPRESENTATIVE_LOCATIONS {
-    // Identify representative location matches, for matches of type domain or family
     label 'local'
 
     input:
@@ -11,123 +14,120 @@ process REPRESENTATIVE_LOCATIONS {
     path("matches_with_representative.json")
 
     exec:
-    int MAX_REPR_LOCS_PER_GRP = 20 // only consider N "best" domains otherwise there are too many comparisons (2^domains)
-    float LOC_OVERLAP_THRESHOLD = 0.3
+    int MAX_DOMS_PER_GROUP = 20 // only consider N "best" domains otherwise there are too many comparisons (2^domains)
+    float DOM_OVERLAP_THRESHOLD = 0.3
     List<String> REPR_TYPE = ["family", "domain"]
 
-    JsonProcessor processor = new JsonProcessor()
+    // Build a single mapper for all readers and writers to save memory
+    ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
     def outputFilePath = task.workDir.resolve("matches_with_representative.json")
-    def generator = processor.createGenerator(outputFilePath.toString())
-    def parser = processor.createParser(matchesPath.toString())
 
-    generator.writeStartArray()
-    while (parser.nextToken() != JsonToken.END_ARRAY) {
-        Map seqData = processor.jsonToMap(parser)  // keys in seqData: sequence, md5, matches, xref, id
+    JsonWriter.streamArray(outputFilePath.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
+        JsonReader.streamArray(matchesPath.toString(), jacksonMapper) { ObjectNode seqNode ->
+            // Serialise the matches so we don't need to edit the map manually later
+            Map<String, Match> matches = [:]
+            seqNode.get("matches").fields().each { matchNode ->
+                matches[matchNode.key] = Match.fromJsonNode((JsonNode) matchNode.value)
+            }
 
-        // Serialise the matches so we don't need to edit the map later
-        seqData["matches"] = seqData["matches"].collectEntries { modelAccession, matchMap ->
-            [(modelAccession): Match.fromMap(matchMap)]
-        }
-        
-        // Look for representatives for matches of a specific type, e.g. "Domain":
-        REPR_TYPE.each { String reprType ->
-            // Gather relevant locations. Only matches from the relevant dbs will have a representativeInfo object
-            List<CandidateLocation> candidateLocations = getCandidateLocations(seqData, reprType)
+            // Look for representatives for matches of a specific type, e.g. "Domain":
+            REPR_TYPE.each { String reprType ->
+                // Gather relevant locations. Only matches from the relevant dbs will have a representativeInfo object
+                List<CandidateLocation> candidateLocations = getCandidateLocations(matches, reprType)
 
-            // Identify/select representative domains
-            if (!candidateLocations.isEmpty()) {
-                // Sort based on location position
-                candidateLocations.sort { CandidateLocation loc1, CandidateLocation loc2 ->
-                    int delta = loc1.location.start - loc2.location.start
-                    delta != 0 ? delta : loc1.location.end - loc2.location.end
-                }
-    
-                // Group domains together
-                List<Location> groups = new ArrayList<>()
-                List<Location> group = new ArrayList<>()
-                group.add(candidateLocations[0])
-                int stop = candidateLocations[0].location.end
-                if (candidateLocations.size() > 1) {
-                    for (CandidateLocation candidate : candidateLocations[1..-1]) {
-                        if (candidate.location.start <= stop) {
-                            group.add(candidate)
-                            stop = Math.max(stop, candidate.location.end)
-                        } else {
-                            groups.add(group)
-                            group = [candidate]
-                            stop = candidate.location.end
+                // Identify/select representative domains
+                if (!candidateLocations.isEmpty()) {
+                    // Sort based on location position
+                    candidateLocations.sort { CandidateLocation loc1, CandidateLocation loc2 ->
+                        int delta = loc1.location.start - loc2.location.start
+                        delta != 0 ? delta : loc1.location.end - loc2.location.end
+                    }
+
+                    // Group domains together
+                    List<Location> groups = new ArrayList<>()
+                    List<Location> group = new ArrayList<>()
+                    group.add(candidateLocations[0])
+                    int stop = candidateLocations[0].location.end
+                    if (candidateLocations.size() > 1) {
+                        for (CandidateLocation candidate : candidateLocations[1..-1]) {
+                            if (candidate.location.start <= stop) {
+                                group.add(candidate)
+                                stop = Math.max(stop, candidate.location.end)
+                            } else {
+                                groups.add(group)
+                                group = [candidate]
+                                stop = candidate.location.end
+                            }
                         }
                     }
-                }
-                groups.add(group) // Add the last group
-    
-                // Select representative domain in each group
-                groups.each { grp ->
-                    grp = grp.sort { a, b ->
-                        // compare the number of residues covered by each match
-                        int resComparison = b.residues.size() - a.residues.size()
-                        // if their coverage is the same, use the database rank
-                        resComparison != 0 ? resComparison : a.representativeRank - b.representativeRank
-                    }.take(MAX_REPR_LOCS_PER_GRP)
-    
-                    // Process representative domains in the group
-                    if (grp.size() > 1) {
-                        Map<Integer, Set<Integer>> graph = (0..<grp.size()).collectEntries { i ->
-                            /*
-                            `(0..<x) - y` creates a range from 0 (inclusive) to x (exclusive)
-                            `- i` removes the value represented by `i` in the range
-                            so `(0..<5) - 2`, the result is `[0, 1, 3, 4]`
-                            */
-                            [i, new HashSet<>((0..<grp.size()) - i)]
-                        }
-                        grp.eachWithIndex { loc1, i ->
-                            (i + 1..<grp.size()).each { j ->
-                                if (locationsOverlap(loc1.residues, grp[j].residues, LOC_OVERLAP_THRESHOLD)) {
-                                    graph[i].remove(Integer.valueOf(j))
-                                    graph[j].remove(Integer.valueOf(i))
+                    groups.add(group) // Add the last group
+
+                    // Select representative domain in each group
+                    groups.each { grp ->
+                        grp = grp.sort { a, b ->
+                            // compare the number of residues covered by each match
+                            int resComparison = b.residues.size() - a.residues.size()
+                            // if their coverage is the same, use the database rank
+                            resComparison != 0 ? resComparison : a.representativeRank - b.representativeRank
+                        }.take(MAX_DOMS_PER_GROUP)
+
+                        // Process representative domains in the group
+                        if (grp.size() > 1) {
+                            Map<Integer, Set<Integer>> graph = (0..<grp.size()).collectEntries { i ->
+                                /*
+                                `(0..<x) - y` creates a range from 0 (inclusive) to x (exclusive)
+                                `- i` removes the value represented by `i` in the range
+                                so `(0..<5) - 2`, the result is `[0, 1, 3, 4]`
+                                */
+                                [i, new HashSet<>((0..<grp.size()) - i)]
+                            }
+                            grp.eachWithIndex { loc1, i ->
+                                (i + 1..<grp.size()).each { j ->
+                                    if (locationsOverlap(loc1.residues, grp[j].residues, DOM_OVERLAP_THRESHOLD)) {
+                                        graph[i].remove(Integer.valueOf(j))
+                                        graph[j].remove(Integer.valueOf(i))
+                                    }
                                 }
                             }
-                        }
-    
-                        // Select the best subgroup
-                        Set<Set<Integer>> subgroups = getValidSets(graph)
-                        def bestSubgroup = null
-                        int maxCoverage = 0
-                        int maxPfams = 0
-                        subgroups.each { subgrp ->
-                            Set coverage = new HashSet<>()
-                            int pfams = 0
-                            List currentGrp = []
-                            subgrp.each { i ->
-                                def loc = grp[i]
-                                coverage.addAll(loc.residues)
-                                if (loc.representativeRank == 0) { pfams++ }
-                                currentGrp.add(loc)
+
+                            // Select the best subgroup
+                            Set<Set<Integer>> subgroups = getValidSets(graph)
+                            def bestSubgroup = null
+                            int maxCoverage = 0
+                            int maxPfams = 0
+                            subgroups.each { subgrp ->
+                                Set coverage = new HashSet<>()
+                                int pfams = 0
+                                List currentGrp = []
+                                subgrp.each { i ->
+                                    def loc = grp[i]
+                                    coverage.addAll(loc.residues)
+                                    if (loc.representativeRank == 0) { pfams++ }
+                                    currentGrp.add(loc)
+                                }
+                                int currentCoverage = coverage.size()
+                                if (currentCoverage > maxCoverage || (currentCoverage == maxCoverage && pfams > maxPfams)) {
+                                    maxCoverage = currentCoverage
+                                    maxPfams = pfams
+                                    bestSubgroup = currentGrp
+                                }
                             }
-                            int currentCoverage = coverage.size()
-                            if (currentCoverage > maxCoverage || (currentCoverage == maxCoverage && pfams > maxPfams)) {
-                                maxCoverage = currentCoverage
-                                maxPfams = pfams
-                                bestSubgroup = currentGrp
-                            }
+                            bestSubgroup.each { candidate -> candidate.location.representative = true }
+                        } else {
+                            grp.each { candidate -> candidate.location.representative = true }
                         }
-                        bestSubgroup.each { candidate -> candidate.location.representative = true }
-                    } else {
-                        grp.each { candidate -> candidate.location.representative = true }
                     }
                 }
-            }
-        } // end of REPR_TYPE.each
-        generator.writeObject(seqData)
-    }
-    parser.close()
-    generator.writeEndArray()
-    generator.close()
+            } // end of REPR_TYPE.each
+            seqNode.set("matches", jacksonMapper.valueToTree(matches))
+            jsonWriter.writeObject(seqNode)
+        }  // end of JsonReader
+    }  // end of JsonWriter
 }
 
-List<CandidateLocation> getCandidateLocations(Map seqData, String reprType) {
+List<CandidateLocation> getCandidateLocations(Map matches, String reprType) {
     List<CandidateLocation> candidateLocations = []
-    seqData["matches"].each { String modelAccession, Match match ->
+    matches.each { String modelAccession, Match match ->
         if (match.representativeInfo?.type == reprType) {
             match.locations.each { Location loc ->
                 CandidateLocation candidate = new CandidateLocation(loc, match.representativeInfo.rank)
