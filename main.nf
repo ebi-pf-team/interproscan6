@@ -87,6 +87,7 @@ workflow {
         )
         matchResults = SCAN_SEQUENCES.out
     }
+    // matchResults format: [[meta, [member1.json, member2.json, ..., memberN.json]]
 
     /* XREFS:
     Aggregate matches across all members for each sequence
