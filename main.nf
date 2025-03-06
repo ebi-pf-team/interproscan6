@@ -10,10 +10,10 @@ include { LOOKUP_MATCHES                } from "./interproscan/modules/lookup"
 include { XREFS                         } from "./interproscan/modules/xrefs"
 include { AGGREGATE_SEQS_MATCHES;
           AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_matches"
+include { REPRESENTATIVE_LOCATIONS      } from "./interproscan/modules/representative_locations"
 include { WRITE_JSON_OUTPUT             } from "./interproscan/modules/output/json"
-include { REPRESENTATIVE_DOMAINS        } from "./interproscan/modules/representative_domains"
 include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
-include { WRITE_XML_OUTPUT } from "./interproscan/modules/output/xml"
+include { WRITE_XML_OUTPUT              } from "./interproscan/modules/output/xml"
 
 
 workflow {
@@ -89,6 +89,7 @@ workflow {
     }
 
     /* XREFS:
+    Aggregate matches across all members for each sequence
     Add signature and entry desc and names
     Add PAINT annotations (if panther is enabled)
     Add go terms (if enabled)
@@ -103,7 +104,7 @@ workflow {
         params.xRefsConfig.pathways,
         params.goterms,
         params.pathways,
-        "${data_dir}/${params.appsConfig.paint}"
+        params.appsConfig.panther.paint
     )
 
     ch_seqs.join(XREFS.out, by: 0)
@@ -111,21 +112,25 @@ workflow {
         [batchnumber, sequences, matches]
     }.set { ch_seq_matches }
 
+    // Aggregate seq meta data with the matches
     AGGREGATE_SEQS_MATCHES(ch_seq_matches, params.nucleic)
+
+    // Aggregate all data into a single JSON file
     AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
 
-    REPRESENTATIVE_DOMAINS(AGGREGATE_ALL_MATCHES.out)
+    // Identify representative locations for the applicable member databases
+    REPRESENTATIVE_LOCATIONS(AGGREGATE_ALL_MATCHES.out)
 
     def fileName = params.input.split('/').last()
     def outFileName = "${params.outdir}/${fileName}"
     if (formats.contains("JSON")) {
-        WRITE_JSON_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
+        WRITE_JSON_OUTPUT(REPRESENTATIVE_LOCATIONS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
     }
     if (formats.contains("TSV")) {
-        WRITE_TSV_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic)
+        WRITE_TSV_OUTPUT(REPRESENTATIVE_LOCATIONS.out, "${outFileName}", params.nucleic)
     }
     if (formats.contains("XML")) {
-        WRITE_XML_OUTPUT(REPRESENTATIVE_DOMAINS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
+        WRITE_XML_OUTPUT(REPRESENTATIVE_LOCATIONS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
     }
 }
 
