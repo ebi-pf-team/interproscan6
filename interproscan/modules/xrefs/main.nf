@@ -62,14 +62,14 @@ process XREFS {
 
                     // Update signature info
                     if (signatureInfo != null) {  // signatureInfo is an objectNode !var does not work
-                        match.signature.name = signatureInfo["name"].asText().replace('\"',"")
-                        match.signature.description = signatureInfo["description"].asText().replace('\"',"")
-                        String sigType = signatureInfo["type"].asText().replace('\"',"").toString()
+                        match.signature.name = JsonReader.asString(signatureInfo["name"])
+                        match.signature.description = JsonReader.asString(signatureInfo["description"])
+                        String sigType = JsonReader.asString(signatureInfo["type"])
                         match.signature.setType(sigType)
 
                         if (signatureInfo["representative"] != null) { // if(var) does not work on JsonNodes, need explicit falsey check
                             match.representativeInfo = new RepresentativeInfo(
-                                signatureInfo["representative"].get("type").asText(),
+                                JsonReader.asString(signatureInfo["representative"].get("type"))
                                 signatureInfo["representative"].get("index").intValue()
                             )
                         }
@@ -93,7 +93,8 @@ process XREFS {
     } // end of members matches
 
     String outputFilePath = task.workDir.resolve("matches2xrefs.json")
-    JsonWriter.writeMaptoFile(outputFilePath.toString(), jacksonMapper, aggregatedMatches)
+    def json = JsonOutput.toJson(aggregatedMatches)
+    new File(outputFilePath.toString()).write(json)
 }
 
 def loadXRefFiles(xrefDir, dataDir, jacksonMapper) {

@@ -8,7 +8,7 @@ import java.io.IOException
 
 class JsonWriter {
     static void streamJson(String filePath, ObjectMapper mapper, Closure closure) {
-        /* Write out json objects, e.g. at the end of XREFS
+        /* Write out json objects while streaming the file, e.g. when writing the final JSON file
         To use:
         ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
         JsonWriter.streamMap(outputFilePath.toString(), jacksonMapper) { JsonGenerator jsonGenerator ->
@@ -30,85 +30,6 @@ class JsonWriter {
             throw new JsonException("IO error writing file: $filePath -- $e\n${e.printStackTrace()}\n${e.getCause()}", e)
         } catch (Exception e) {
             throw new Exception("Error occured when writing Json file $filePath -- $e\n${e.printStackTrace()}\n${e.getCause()}", e)
-        } finally {
-            if (generator != null) {
-                generator.close()
-            }
-            if (fileWriter != null) {
-                fileWriter.close()
-            }
-        }
-    }
-
-    static void streamArray(String filePath, ObjectMapper mapper, Closure closure) {
-        // For writing out Json Arrays, e.g. at the end of Aggergage_All_Matches
-        FileWriter fileWriter = null
-        JsonGenerator generator = null
-        try {
-            JsonFactory factory = mapper.getFactory()
-            fileWriter = new FileWriter(new File(filePath))
-            generator = factory.createGenerator(fileWriter)
-            generator.writeStartArray()
-            closure.call(generator)
-            generator.writeEndArray()
-        } catch (IOException e) {
-            throw new JsonException("IO error writing file: $filePath -- $e\n${e.printStackTrace()}\n${e.getCause()}", e)
-        } finally {
-            if (generator != null) {
-                generator.close()
-            }
-            if (fileWriter != null) {
-                fileWriter.close()
-            }
-        }
-    }
-
-    static void writeMap(JsonGenerator generator, ObjectMapper mapper, Object data) throws IOException {
-        /* Used for writing out a Map object in the middle of a Json writer stream, i.e. add a map to
-        streaming JSON file.
-        To use:
-        ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-        JsonWriter.streamMap(outputFilePath.toString(), jacksonMapper) { JsonGenerator jsonGenerator ->
-            JsonWriter.writeMap(jsonGenerator, jacksonMapper, Match.asMap(match))
-         }
-         */
-        if (data instanceof Map) {
-            data.each { key, value ->
-                generator.writeFieldName(key.toString())
-                if (value instanceof Map) {
-                    generator.writeStartObject()
-                    value.each { k, v ->
-                        generator.writeFieldName(k.toString())
-                        mapper.writeValue(generator, v)
-                    }
-                    generator.writeEndObject()
-                } else {
-                    mapper.writeValue(generator, value)
-                }
-            }
-        } else {
-            mapper.writeValue(generator, data)
-        }
-    }
-
-    static void writeMaptoFile(String filePath, ObjectMapper mapper, Map data) {
-        // Method to write (i.e. dump) a map to be the entire file content.
-        FileWriter fileWriter = null
-        JsonGenerator generator = null
-        try {
-            JsonFactory factory = mapper.getFactory()
-            fileWriter = new FileWriter(new File(filePath))
-            generator = factory.createGenerator(fileWriter)
-            generator.writeStartObject()
-
-            data.each { key, value ->
-                generator.writeFieldName(key)
-                mapper.writeValue(generator, value)
-            }
-
-            generator.writeEndObject()
-        } catch (IOException e) {
-            throw new JsonException("IO error writing file: $filePath -- $e\n${e.printStackTrace()}\n${e.getCause()}", e)
         } finally {
             if (generator != null) {
                 generator.close()
