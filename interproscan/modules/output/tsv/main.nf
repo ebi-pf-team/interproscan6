@@ -16,7 +16,7 @@ process WRITE_TSV_OUTPUT {
 
     exec:
     ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-
+    SeqDatabase seqDatabase = new SeqDatabase(seqDbPath.toString())
     def tsvFile = new File("${outputPath}.ips6.tsv".toString())
     tsvFile.text = "" // clear the file if it already exists
 
@@ -34,7 +34,7 @@ process WRITE_TSV_OUTPUT {
                 String entryAcc = match.signature.entry?.accession ?: '-'
                 String entryDesc = match.signature.entry?.description ?: '-'
                 char status = 'T'
-                seqData = getSeqData(seqDbPath, proteinMd5, nucleic)
+                seqData = getSeqData(seqDatabase, proteinMd5, nucleic)
                 seqData.each { row ->  // Protein: [id, sequence]; Nucleic: [] from
                     row = row.split('\t')
                     String seqId = nucleic ? "${row[0]}_${row[1]}" : row[0]
@@ -48,30 +48,23 @@ process WRITE_TSV_OUTPUT {
     } // end of matchesFiles
 }
 
-def getSeqData(def seqDbPath, String querySeqMd5, boolean nucleic) {  // retrieve all seqIds associated with the query protein seq MD5 hash
-    try {
-        def query = ""
-        if (nucleic) {
-            query = """SELECT N.id, P.id, S.sequence
-            FROM NUCLEOTIDE AS N
-            LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.nt_md5 = N2P.nt_md5
-            LEFT JOIN PROTEIN AS P ON N2P.protein_md5 = P.protein_md5
-            LEFT JOIN PROTEIN_SEQUENCE AS S ON P.protein_md5 = S.protein_md5
-            WHERE N2P.protein_md5 = '$querySeqMd5';"""
-        } else {
-            query = """SELECT P.id, S.sequence
-            FROM PROTEIN AS P
-            LEFT JOIN PROTEIN_SEQUENCE AS S ON P.protein_md5 = S.protein_md5
-            WHERE P.protein_md5 = '$querySeqMd5';"""
-        }
-        def cmd = ["sqlite3", "--tabs", seqDbPath, query]
-        def process = cmd.execute()
-        process.waitFor()
-        def output = process.in.text.trim()  // stndout
-        return output.split("\\n")
-    } catch (Exception e) {
-        throw new Exception("Error when querying the internal seq DB: $e -- ${e.getCause()}", e)
+def getSeqData(SeqDatabase seqDatabase, String querySeqMd5, boolean nucleic) {
+    // retrieve all seqIds associated with the query protein seq MD5 hash
+    def query = ""
+    if (nucleic) {
+        query = """SELECT N.id, P.id, S.sequence
+        FROM NUCLEOTIDE AS N
+        LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.nt_md5 = N2P.nt_md5
+        LEFT JOIN PROTEIN AS P ON N2P.protein_md5 = P.protein_md5
+        LEFT JOIN PROTEIN_SEQUENCE AS S ON P.protein_md5 = S.protein_md5
+        WHERE N2P.protein_md5 = '$querySeqMd5';"""
+    } else {
+        query = """SELECT P.id, S.sequence
+        FROM PROTEIN AS P
+        LEFT JOIN PROTEIN_SEQUENCE AS S ON P.protein_md5 = S.protein_md5
+        WHERE P.protein_md5 = '$querySeqMd5';"""
     }
+    return seqDatabase.query(query)
 }
 
 def writeToTsv(tsvFile, seqId, md5, seqLength, match, loc, memberDb, sigDesc, status, currentDate, entryAcc, entryDesc, goterms, pathways) {
