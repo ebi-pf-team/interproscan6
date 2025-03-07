@@ -17,55 +17,104 @@ process WRITE_JSON_OUTPUT {
 
     exec:
     ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-    def NT_SEQ_ID_PATTERN = Pattern.compile(/^orf\d+\s+source=([^"]+)\s+coords=(\d+)\.\.(\d+)\s+length=(\d+)\s+frame=(\d+)\s+desc=(.*)$/)
     def outputFilePath = "${outputPath}.ips6.json"
 
-    if (nucleic) {
-        // all orfs for a given nt seq are collected in the same batch
-        nucleicRelationships = groupNucleotides(matchesFiles, seqDbPath)
-    } else {
-        JsonWriter.streamJson(outputFilePath.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
-            // {"interproscan-version": str, "results": []}
-            jsonWriter.writeStringField("interproscan-version", ips6Version)
-            jsonWriter.writeFieldName("results")
-            jsonWriter.writeStartArray()  // start of results [...
-
-            matchesFiles.each { matchFile ->
+    JsonWriter.streamJson(outputFilePath.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
+        // {"interproscan-version": str, "results": []}
+        jsonWriter.writeStringField("interproscan-version", ips6Version)
+        jsonWriter.writeFieldName("results")
+        jsonWriter.writeStartArray()  // start of results [...
+        matchesFiles.each { matchFile ->
+            if (nucleic) {  // input was nucleic acid sequence
+                proteinMatches = JsonReader.load(matchFile.toString(), jacksonMapper)
+                // associate each parent nt md5 with all it's children protein md5s.
+                nucleicToProteinMd5 = groupNucleotides(proteinMatches, seqDbPath.toString())
+                nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
+                    writeNucleic(nucleicMd5, proteinMd5s, proteinMatches, jsonWriter, seqDbPath.toString())
+                }
+            } else {  // input was protein sequences
                 JsonReader.streamJson(matchFile.toString(), jacksonMapper) { String proteinMd5, JsonNode matchesNode ->
                     writeProtein(proteinMd5, matchesNode, jsonWriter, seqDbPath.toString())
                 }
             }
-
-            jsonWriter.writeEndArray() // end of "results" ...]
         }
+        jsonWriter.writeEndArray() // end of "results" ...]
     }
 }
 
-def groupNucleotides(matchesFiles, seqDbPath) {
+def groupNucleotides(Map proteinMatches, String seqDbPath) {
     /* Gather nucleotide Seq IDs and child protein MD5s so we can gather all ORFs from the same
     parent NT seq together in the final output. */
-    def nucleicRelationships = [:]  // [ntSeqId: [batchFilePath: [proteinMd5]]
-    matchesFiles.each { matchFile ->
-        JsonReader.streamJson(matchFile.toString(), jacksonMapper) { String proteinMd5, JsonNode matchesNode ->
-            // get all parent NT seq Ids
-            def query = """SELECT N.id
-            FROM NUCLEOTIDE AS N
-            LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.nt_md5 = N2P.nt_md5
-            WHERE N2P.protein_md5 = '$proteinMd5'
-            """
-            def cmd = ["sqlite3", seqDbPath, query]
-            def process = cmd.execute()
-            process.waitFor()
-            def output = process.in.text.trim() // stndout
-            output = output.split("\\n")
-            output.each { ntSeqId ->
-                ntEntry = nucleicRelationships.computeIfAbsent(ntSeqId, { [:] } )
-                relatedProteins = ntEntry.computeIfAbsent(matchFile.toString(), { [] as Set } )
-                relatedProteins.add(proteinMd5)
-            }
+    def nucleicRelationships = [:]  // [ntSeqId: [proteinMd5]]
+    proteinMatches.each { String proteinMd5, JsonNode matchesNode ->
+        // get all parent NT seq Ids
+        def query = """SELECT N.nt_md5
+        FROM NUCLEOTIDE AS N
+        LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.nt_md5 = N2P.nt_md5
+        WHERE N2P.protein_md5 = '$proteinMd5'
+        """
+        def cmd = ["sqlite3", seqDbPath, query]
+        def process = cmd.execute()
+        process.waitFor()
+        if (process.exitValue() != 0) {
+            throw new Exception("SQLite query failed: ${process.err.text.trim()}")
+        }
+        def output = process.in.text.trim() // stndout
+        output = output.split("\\n")
+        output.each { ntSeqId ->
+            nucleicRelationships.computeIfAbsent(ntSeqId, { [] as Set } )
+            nucleicRelationships[ntSeqId].add(proteinMd5)
         }
     }
     return nucleicRelationships
+}
+
+def writeNucleic(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, JsonGenerator jsonWriter, String seqDbPath) {
+    /* Write data for an input nucleic acid sequence, and then the matches for its associated ORFs
+    {"sequence: nt seq, "md5": nt md5,
+    "crossReferences": [{ntSeqData}, {ntSeqData}],
+    "openReadingFrames": [{protein}, {protein}, {protein}]}
+    There may be multiple nt seq Ids associated with the same nt seq, use the first entry to get the seq. */
+    jsonWriter.writeStartObject()
+
+    // 1. {"sequence": seq, "md5": ntMd5}
+    ntSeqData = getSeqData(seqDbPath, nucleicMd5, true)
+    String sequence = ntSeqData[0].split('\t')[-1]
+    jsonWriter.writeStringField("sequence", sequence)
+    jsonWriter.writeStringField("md5", nucleicMd5)
+    
+    // 2. {..., "crossReferences": [{ntSeqXref}, {ntSeqXref}]}
+    jsonWriter.writeFieldName("crossReferences")
+    writeXref(ntSeqData, jsonWriter)
+
+    // 3. {..., "openReadingFrames": [{protein}, {protein}]}
+    jsonWriter.writeFieldName("openReadingFrames")
+    writeOpenReadingFrames(nucleicMd5, proteinMd5s, proteinMatches, jsonWriter, seqDbPath)
+
+    jsonWriter.writeEndObject()
+}
+
+def writeOpenReadingFrames(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, JsonGenerator jsonWriter, String seqDbPath){
+    def SOURCE_NT_PATTERN = Pattern.compile(/^source=[^"]+\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=.*$/)
+
+    jsonWriter.writeStartArray()
+    proteinMd5s.each { String proteinMd5 ->
+        // a proteinSeq/Md5 may be associated with multiple nt md5s/seq, only pull the data where the nt md5/seq is relevant
+        proteinSeqData = getSeqData(seqDbPath, proteinMd5, false, nucleicMd5)
+        proteinSeqData.each { row ->
+            proteinDesc = row.split("\t")[1]
+            def proteinSource = SOURCE_NT_PATTERN.matcher(proteinDesc)
+            assert proteinSource.matches()
+            jsonWriter.writeStartObject()
+            jsonWriter.writeNumberField("start", proteinSource.group(1) as int)
+            jsonWriter.writeNumberField("end", proteinSource.group(2) as int)
+            jsonWriter.writeStringField("strand", (proteinSource.group(3) as int) < 4 ? "SENSE" : "ANTISENSE")
+            jsonWriter.writeFieldName("protein")
+            writeProtein(proteinMd5, proteinMatches[proteinMd5], jsonWriter, seqDbPath)
+            jsonWriter.writeEndObject()
+        }
+    }
+    jsonWriter.writeEndArray()
 }
 
 def writeProtein(String proteinMd5, JsonNode matchesNode, JsonGenerator jsonWriter, String seqDbPath) {
@@ -75,9 +124,8 @@ def writeProtein(String proteinMd5, JsonNode matchesNode, JsonGenerator jsonWrit
     jsonWriter.writeStartObject()
 
     // 1. {"sequence": seq, "md5": proteinMd5}
-    proteinSeqData = getProteinSeqData(seqDbPath, proteinMd5)
+    proteinSeqData = getSeqData(seqDbPath, proteinMd5, false)
     String sequence = proteinSeqData[0].split('\t')[-1]
-
     jsonWriter.writeStringField("sequence", sequence)
     jsonWriter.writeStringField("md5", proteinMd5)
 
@@ -91,25 +139,43 @@ def writeProtein(String proteinMd5, JsonNode matchesNode, JsonGenerator jsonWrit
     jsonWriter.writeEndArray()
 
     // 3. {..., "xref": [{xref}, {xref}, {xref}]}
-    writeProteinXref(proteinSeqData, jsonWriter)
+    jsonWriter.writeFieldName("xref")
+    writeXref(proteinSeqData, jsonWriter)
     jsonWriter.writeEndObject()
 }
 
-def getProteinSeqData(String seqDbPath, String proteinMd5) {
+def getSeqData(String seqDbPath, String md5, Boolean nucleic, String nucleicMd5 = null) {
+    /* TODO: change so can be used for nucleic and protein sequences */
     // Retrieve all associated seq IDs and desc for the given protein seq (id'd by it's md5 hash)
     try {
-        def query = """
-            SELECT P.id, P.description, S.sequence
-            FROM PROTEIN AS P
-            LEFT JOIN PROTEIN_SEQUENCE AS S ON P.protein_md5 = S.protein_md5
-            WHERE P.protein_md5 = '$proteinMd5';"""
+        if (nucleic) { // retrieve data for a nucleic sequence
+            query = """SELECT N.id, N.description, S.sequence
+                       FROM NUCLEOTIDE AS N
+                       LEFT JOIN NUCLEOTIDE_SEQUENCE AS S ON N.nt_md5 = S.nt_md5
+                       WHERE N.nt_md5 = '$md5';"""
+        } else if (nucleic && nucleicMd5) {  // retrieve the open reading frame for the current nucleic seq
+            // a protein may be associated with multiple unique nucleotide sequences
+            query = """SELECT P.id, P.description, S.sequence
+                       FROM PROTEIN AS P
+                       LEFT JOIN PROTEIN_SEQUENCE AS S ON P.protein_md5 = S.protein_md5
+                       WHERE P.protein_md5 = '$nucleicmd5' AND P.description REGEXP 'source=${nucleicmd5}*'
+                       """
+        } else {  // retrieve data for a protein
+            query = """SELECT P.id, P.description, S.sequence
+                       FROM PROTEIN AS P
+                       LEFT JOIN PROTEIN_SEQUENCE AS S ON P.protein_md5 = S.protein_md5
+                       WHERE P.protein_md5 = '$md5';"""
+        }
         def cmd = ["sqlite3", "--tabs", seqDbPath, query]
         def process = cmd.execute()
         process.waitFor()
+        if (process.exitValue() != 0) {
+            throw new Exception("SQLite query failed: ${process.err.text.trim()}")
+        }
         def output = process.in.text.trim()  // stndout
         return output.split("\\n")  // a protein seq may be associated with multiple seq IDs
     } catch (Exception e) {
-        throw new Exception("Error when retrieving seq data for protein $proteinMd5: $e -- ${e.getCause()}")
+        throw new Exception("Error when retrieving seq data for md5 $md5: $e -- ${e.getCause()}")
     }
 }
 
@@ -444,19 +510,21 @@ def writeSUPERFAMILY(JsonNode match, JsonGenerator jsonWriter) {
     ])
 }
 
-def writeProteinXref(proteinSeqData, JsonGenerator jsonWriter) {
-    /* "xref" : [ {
+def writeXref(seqData, JsonGenerator jsonWriter) {
+    /* "xref"/"crossReferences" : [ {
         "name" : "tr|A0A011PH51|A0A011PH51_9PROT OX=1454000",
         "id" : "tr|A0A011PH51|A0A011PH51_9PROT"
     } ] */
-    jsonWriter.writeFieldName("xref")
     jsonWriter.writeStartArray()
-    proteinSeqData.each { row ->
+    seqData.each { row ->
         row = row.split('\t')
         seqId = row[0]
         seqDesc = row[1]
-        jsonWriter.writeObject(["name": "$seqId $seqDesc", "id": seqId])
+        // jsonWrite.writeObject([name: "$seqId $seqDesc"]) does not correctly handle the formatted str
+        jsonWriter.writeStartObject()
+        jsonWriter.writeStringField("name", "$seqId $seqDesc")
+        jsonWriter.writeStringField("id", seqId)
+        jsonWriter.writeEndObject()
     }
     jsonWriter.writeEndArray()
 }
-

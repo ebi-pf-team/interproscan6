@@ -178,8 +178,7 @@ def build_batches(db_path, batch_size, nucleic):
         fasta_file = f"sequences.{batch_index}.fasta"
         with open(fasta_file, "w") as fh:
             for row in batch:
-                md5_index = 0 if nucleic else 1
-                md5 = row[md5_index]
+                md5 = row[1]
                 seq = '\n'.join([row[-1][i:i+line_length] for i in range(0, len(row[-1]), line_length)])
                 fh.write(f">{md5}\n{seq}\n")
 
