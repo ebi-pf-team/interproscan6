@@ -740,11 +740,11 @@ class Site implements Serializable {
         this.numLocations = siteLocations.size()
 
         for (SiteLocation loc: siteLocations) {
-            if (loc.start == -1 || loc.start < this.start) {
+            if (this.start == -1 || loc.start < this.start) {
                 this.start = loc.start
             }
 
-            if (loc.end == -1 || loc.end > this.end) {
+            if (this.end == -1 || loc.end > this.end) {
                 this.end = loc.end
             }
         }
@@ -781,17 +781,19 @@ class Site implements Serializable {
         return siteLocations
     }
 
-    static Map asMap(Site site) {
+    static Map asMap(Site site, String memberDB = null) {
         if (!site) { return [:] }
         Map siteMap = [
-            "description"   : site.description,
-            "numLocations"  : site.numLocations ?: null,
-            "siteLocations" : site.siteLocations.collect { SiteLocation.asMap(it) }
+                "description"   : site.description,
+                "numLocations"  : site.numLocations ?: null,
+                "siteLocations" : site.siteLocations.collect { SiteLocation.asMap(it) }
         ]
-        if (site.label) {    siteMap["label"]    = site.label }
-        if (site.group) {    siteMap["group"]    = site.group }
-        if (site.hmmStart) { siteMap["hmmStart"] = site.hmmStart }
-        if (site.hmmEnd) {   siteMap["hmmEnd"]   = site.hmmEnd }
+        if (memberDB != "CDD") {
+            if (site.label) { siteMap["label"] = site.label }
+            if (site.group) { siteMap["group"] = site.group }
+            if (site.hmmStart) { siteMap["hmmStart"] = site.hmmStart }
+            if (site.hmmEnd) { siteMap["hmmEnd"] = site.hmmEnd }
+        }
         return siteMap
     }
 

@@ -134,11 +134,8 @@ process WRITE_JSON_OUTPUT {
                         }
                         if (memberDB == "CDD") {
                             locationResult["sites"] = location.sites?.collect { site ->
-                                site.remove("label")
-                                site.remove("group")
-                                site.remove("hmmStart")
-                                site.remove("hmmEnd")
-                                return site
+                                cddSite = new Site(site.description, site.siteLocations)
+                                return Site.asMap(cddSite, memberDB)
                             } ?: []
                         }
                         matchResult["locations"].add(locationResult)
