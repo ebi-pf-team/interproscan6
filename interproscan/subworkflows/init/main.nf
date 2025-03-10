@@ -75,10 +75,6 @@ workflow INIT_PIPELINE {
         exit 1
     }
 
-    // Create the path to the database. The database must be built in a process running
-    // within the ips6 container, thus the database is built in populate_database
-    // String dbPath = "${workflow.workDir}/ips6.seq.db"
-
     emit:
     fasta        // str: path to input fasta file
     datadir      // str: path to data directory

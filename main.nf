@@ -48,13 +48,13 @@ workflow {
         ch_translated = ESL_TRANSLATE(ch_fasta).collect()
 
         // Store sequences in the sequence database
-        ready_db_path = UPDATE_ORFS(ch_translated, POPULATE_SEQ_DATABASE.out)
+        seq_db_path = UPDATE_ORFS(ch_translated, POPULATE_SEQ_DATABASE.out)
     } else {
         // Store the input seqs in the internal ips6 seq db
-        ready_db_path = POPULATE_SEQ_DATABASE(fasta_file, params.nucleic)
+        seq_db_path = POPULATE_SEQ_DATABASE(fasta_file, params.nucleic)
     }
     // Build batches of unique protein seqs for the analysis
-    BUILD_BATCHES(ready_db_path, params.batchSize, params.nucleic)
+    BUILD_BATCHES(seq_db_path, params.batchSize, params.nucleic)
 
     // [fasta, fasta, fasta] --> [[index, fasta], [index, fasta], [index, fasta]] - to help gather matches for each batch
     ch_seqs = INDEX_BATCHES(BUILD_BATCHES.out).flatMap { it } // flatMap so tuples are emitted one at a time
@@ -122,13 +122,13 @@ workflow {
     def outFileName = "${params.outdir}/${fileName}"
 
     if (formats.contains("JSON")) {
-        WRITE_JSON_OUTPUT(ch_results, "${outFileName}", ready_db_path, params.nucleic, workflow.manifest.version)
+        WRITE_JSON_OUTPUT(ch_results, "${outFileName}", seq_db_path, params.nucleic, workflow.manifest.version)
     }
     if (formats.contains("TSV")) {
-        WRITE_TSV_OUTPUT(ch_results, "${outFileName}", ready_db_path, params.nucleic)
+        WRITE_TSV_OUTPUT(ch_results, "${outFileName}", seq_db_path, params.nucleic)
     }
     if (formats.contains("XML")) {
-        WRITE_XML_OUTPUT(ch_results, "${outFileName}", ready_db_path, params.nucleic, workflow.manifest.version)
+        WRITE_XML_OUTPUT(ch_results, "${outFileName}", seq_db_path, params.nucleic, workflow.manifest.version)
     }
 }
 
