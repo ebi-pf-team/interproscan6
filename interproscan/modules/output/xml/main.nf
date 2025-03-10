@@ -1,10 +1,6 @@
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import groovy.xml.MarkupBuilder
-import java.time.format.DateTimeFormatter
-import java.time.LocalDate
 import java.io.StringWriter
 import java.util.regex.Pattern
 
@@ -31,14 +27,15 @@ process WRITE_XML_OUTPUT {
     xml."$analysisType"("interproscan-version": ips6Version) {
         matchesFiles.each { matchFile ->
             if (nucleic) {
-                proteinMatches = JsonReader.load(matchFile.toString(), jacksonMapper)
-                nucleicToProteinMd5 = seqDatabase.groupProteins(proteinMatches)
+                matchFile = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
+                nucleicToProteinMd5 = seqDatabase.groupProteins(matchFile)
                 nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
-                    addNucleotideNode(nucleicMd5, proteinMd5s, proteinMatches, xml)
+                    addNucleotideNode(nucleicMd5, proteinMd5s, matchFile, xml)
                 }
             } else {
-                JsonReader.streamJson(matchFile.toString(), jacksonMapper) { String proteinMd5, JsonNode matchesNode ->
-                    addProteinNodes(proteinMd5, matchesNode, xml, seqDatabase)
+                matchFile = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
+                matchFile.each { String proteinMd5, Map proteinMatches ->
+                    addProteinNodes(proteinMd5, proteinMatches, xml, seqDatabase)
                 }
             }
         }
@@ -93,7 +90,7 @@ def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMat
     }
 }
 
-def addProteinNodes (String proteinMd5, JsonNode matchesNode, def xml, SeqDatabase seqDatabase) {
+def addProteinNodes (String proteinMd5, Map proteinMatches, def xml, SeqDatabase seqDatabase) {
     /* Write data for a query protein sequence and its matches:
     <protein>
         <sequence md5="" sequence </sequence>
@@ -112,17 +109,16 @@ def addProteinNodes (String proteinMd5, JsonNode matchesNode, def xml, SeqDataba
 
         // 3. <matches> <m> <m> <m> </matches>
         matches {
-            matchesNode.fields().each { Map.Entry<String, JsonNode> entry ->
-                JsonNode match = entry.value
+            proteinMatches.each { String modelAcc, Map match ->
                 addMatchNode(proteinMd5, match, xml)
             }
         }
     }
 }
 
-def addMatchNode(String proteinMd5, JsonNode match, def xml) {
+def addMatchNode(String proteinMd5, Map match, def xml) {
     // Write an individual node representing a match. The structure is dependent on the memberDB.
-    String memberDB = JsonReader.asString(match.get("signature").get("signatureLibraryRelease").get("library")).toLowerCase() ?: ""
+    String memberDB = match.signature.signatureLibraryRelease.library.toLowerCase() ?: ""
     switch (memberDB) {
         case "antifam":
             matchNodeName = "hmmer3"
@@ -215,8 +211,8 @@ def addMatchNode(String proteinMd5, JsonNode match, def xml) {
     xml."$matchNodeName-match"(matchNodeAttributes) {
         xml.signature(signatureNodeAttributes) {
             xml.signatureLibraryRelease {
-                xml.library(match.get("signature").get("signatureLibraryRelease").get("library"))
-                xml.version(match.get("signature").get("signatureLibraryRelease").get("version"))
+                xml.library(match.signature.signatureLibraryRelease.library)
+                xml.version(match.signature.signatureLibraryRelease.version)
             }
             // GO TERMS AND PATHWAYS
         }
@@ -228,42 +224,42 @@ def addMatchNode(String proteinMd5, JsonNode match, def xml) {
 
 // Formating the Match node
 
-def fmtDefaultMatchNode(JsonNode source) {
+def fmtDefaultMatchNode(Map match) {
     return [
-        evalue : source.get("evalue"),
-        score  : source.get("score")
+        evalue : match.evalue,
+        score  : match.score
     ]
 }
 
-def fmtPantherMatchNode(JsonNode source) {
+def fmtPantherMatchNode(Map match) {
     return [
-        ac            : JsonReader.asString(source.get("treegrafter").get("subfamilyAccession")),
-        evalue        : source.get("evalue"),
-        "graft-point" : JsonReader.asString(source.get("treegrafter").get("graftPoint")),
-        name          : JsonReader.asString(source.get("signature").get("name")),
-        score         : source.get("score")
+        ac            : match.treegrafter.subfamilyAccession,
+        evalue        : match.evalue,
+        "graft-point" : match.treegrafter.graftPoint,
+        name          : match.signature.name,
+        score         : match.score
     ]
 }
 
-def fmtPrintsMatchNode(JsonNode source) {
+def fmtPrintsMatchNode(Map match) {
     return [
-        evalue    : source.get("evalue"),
-        graphscan : JsonReader.asString(source.get("graphScan")),
+        evalue    : match.evalue,
+        graphscan : match.graphScan,
     ]
 }
 
-def fmtSuperfamilyMatchNode(JsonNode source) {
+def fmtSuperfamilyMatchNode(Map match) {
     return [
-        evalue : source.get("evalue"),
+        evalue : match.evalue
     ]
 }
 
 // Formating the Signature node
 
-def fmtSignatureNode(JsonNode match) {
-    def name = JsonReader.asString(match.get("signature").get("name"))
-    def desc = JsonReader.asString(match.get("signature").get("description"))
-    return [ac: JsonReader.asString(match.get("signature").get("accession"))].with {
+def fmtSignatureNode(Map match) {
+    def name = match.signature.name
+    def desc = match.signature.description
+    return [ac: match.signature.accession].with {
        if (name) name = name
        if (desc) desc = desc
        it
@@ -272,9 +268,9 @@ def fmtSignatureNode(JsonNode match) {
 
 // Formating and add Location nodes
 
-def addLocationNodes(String matchNodeName, String memberDB, String proteinMd5, JsonNode match, def xml) {
+def addLocationNodes(String matchNodeName, String memberDB, String proteinMd5, Map match, def xml) {
     xml.locations {
-        match.get("locations").each { loc ->
+        match.locations.each { loc ->
             def locationAttributes
             switch (memberDB) {
                 case "antifam":
@@ -285,7 +281,7 @@ def addLocationNodes(String matchNodeName, String memberDB, String proteinMd5, J
                     locationAttributes = fmtDefaultLocationNode(loc)
                     break
                 case "cdd":
-                    locationAttributes = fmtCddLocationNode(loc, match)
+                    locationAttributes = fmtCddLocationNode(match, loc)
                     break
                 case "coils":
                     locationAttributes = []
@@ -344,23 +340,21 @@ def addLocationNodes(String matchNodeName, String memberDB, String proteinMd5, J
             }
 
             xml.location(locationAttributes) {
-                if (loc.has("location-fragments") && loc.get("location-fragments").size() > 0) {
+                if (loc.containsKey("location-fragments") && loc["location-fragments"].size() > 0) {
                     xml."$matchNodeName-fragment" {
-                        loc.get("location-fragments").each { frag ->
-                            start(frag.get("start"))
-                            end(frag.get("end"))
-                            dcStatus(frag.get("dcStatus"))
+                        loc["location-fragments"].each { frag ->
+                            start(frag.start)
+                            end(frag.end)
+                            dcStatus(frag.dcStatus)
                         }
                     }
                 }
 
                 if (memberDB in ["hamap", "prosite patterns", "prosite profiles"]) {
-                    xml.alignment(JsonReader.asString(loc.get("targetAlignment") ?: ""))
+                    xml.alignment(loc.targetAlignment ?: ""))
                 }
-                if (loc.has("sites")) {
-                    if (loc.get('sites').size() > 0) {
-                        xml.addSiteNodes(loc.get("sites"), memberDB, xml)
-                    }
+                if (loc.containsKey("sites") && loc.sites.size() > 0) {
+                    xml.addSiteNodes(loc.sites, memberDB, xml)
                 }
             }
         }
@@ -371,125 +365,124 @@ def addLocationNodes(String matchNodeName, String memberDB, String proteinMd5, J
 
 def fmtDefaultLocationNode(Map loc) {
     return [
-        start          : loc.get("start"),
-        end            : loc.get("end"),
-        representative : loc.get("representative"),
-        hmmStart       : loc.get("hmmStart"),
-        hmmEnd         : loc.get("hmmEnd"),
-        hmmLength      : loc.get("hmmLength"),
-        hmmBounds      : loc.get("hmmBounds"),
-        evalue         : loc.get("evalue"),
-        score          : loc.get("score"),
-        envelopeStart  : loc.get("envelopeStart"),
-        envelopeEnd    : loc.get("envelopeEnd")
+        start          : loc.start,
+        end            : loc.end,
+        representative : loc.representative,
+        hmmStart       : loc.hmmStart,
+        hmmEnd         : loc.hmmEnd,
+        hmmLength      : loc.hmmLength,
+        hmmBounds      : loc.hmmBounds,
+        evalue         : loc.evalue,
+        score          : loc.score,
+        envelopeStart  : loc.envelopeStart,
+        envelopeEnd    : loc.envelopeEnd
     ]
 }
 
 def fmtMinimalistLocationNode(Map loc) {
     return [
-        start          : loc.get("start"),
-        end            : loc.get("end"),
-        representative : loc.get("representative"),
-        score          : loc.get("score"),
+        start          : loc.start,
+        end            : loc.end,
+        representative : loc.representative,
+        score          : loc.score
     ]
 }
 
-def fmtCddLocationNode(match, loc) {
+def fmtCddLocationNode(Map match, Map loc) {
     return [
-        start          : loc.get("start"),
-        end            : loc.get("end"),
-        representative : loc.get("representative"),
-        evalue         : match.get("evalue"),
-        score          : match.get("score"),
+        start          : loc.start,
+        end            : loc.end,
+        representative : loc.representative,
+        evalue         : match.evalue,
+        score          : match.score,
     ]
 }
 
 def fmtMobidbLiteLocationNode(Map loc) {
     return [
-        start              : loc.get("start"),
-        end                : loc.get("end"),
-        representative     : loc.get("representative"),
-        "sequence-feature" : loc.get("sequenceFeature"),
+        start              : loc.start,
+        end                : loc.end,
+        representative     : loc.representative,
+        "sequence-feature" : loc.sequenceFeature,
     ]
 }
 
 def fmtPantherLocationNode(Map loc) {
     return [
-        start          : loc.get("start"),
-        end            : loc.get("end"),
-        representative : loc.get("representative"),
-        hmmStart       : loc.get("hmmStart"),
-        hmmEnd         : loc.get("hmmEnd"),
-        hmmLength      : loc.get("hmmLength"),
-        hmmBounds      : loc.get("hmmBounds"),
-        envelopeStart  : loc.get("envelopeStart"),
-        envelopeEnd    : loc.get("envelopeEnd")
+        start          : loc.start,
+        end            : loc.end,
+        representative : loc.representative,
+        hmmStart       : loc.hmmStart,
+        hmmEnd         : loc.hmmEnd,
+        hmmLength      : loc.hmmLength,
+        hmmBounds      : loc.hmmBounds,
+        envelopeStart  : loc.envelopeStart,
+        envelopeEnd    : loc.envelopeEnd
     ]
 }
 
 def fmtPrintsLocationNode(Map loc) {
     return [
-        start          : loc.get("start"),
-        end            : loc.get("end"),
-        representative : loc.get("representative"),
-        motifNumber    : loc.get("motifNumber"),
-        pvalue         : loc.get("pvalue"),
-        score          : loc.get("score")
+        start          : loc.start,
+        end            : loc.end,
+        representative : loc.representative,
+        motifNumber    : loc.motifNumber,
+        pvalue         : loc.pvalue,
+        score          : loc.score
     ]
 }
 
 def fmtPrositePatternsLocationNode(Map loc) {
     return [
-        start          : loc.get("start"),
-        end            : loc.get("end"),
-        representative : loc.get("representative"),
-        level          : loc.get("level"),
+        start          : loc.start,
+        end            : loc.end,
+        representative : loc.representative,
+        level          : loc.level,
     ]
 }
 
 def fmtSmartLocationNode(Map loc) {
     return [
-        start          : loc.get("start"),
-        end            : loc.get("end"),
-        representative : loc.get("representative"),
-        evalue         : loc.get("evalue"),
-        score          : loc.get("score"),
-        hmmStart       : loc.get("hmmStart"),
-        hmmEnd         : loc.get("hmmEnd"),
-        hmmLength      : loc.get("hmmLength"),
-        hmmBounds      : loc.get("hmmBounds")
+        start          : loc.start,
+        end            : loc.end,
+        representative : loc.representative,
+        evalue         : loc.evalue,
+        score          : loc.score,
+        hmmStart       : loc.hmmStart,
+        hmmEnd         : loc.hmmEnd,
+        hmmLength      : loc.hmmLength,
+        hmmBounds      : loc.hmmBounds
     ]
 }
 
 def fmtSuperfamilyLocationNode(Map loc) {
     return [
-        start          : loc.get("start"),
-        end            : loc.get("end"),
-        representative : loc.get("representative"),
-        evalue         : loc.get("evalue"),
-        hmmLength      : loc.get("hmmLength")
+        start          : loc.start,
+        end            : loc.end,
+        representative : loc.representative,
+        evalue         : loc.evalue,
+        hmmLength      : loc.hmmLength
     ]
 }
 
 // add site nodes
 
-// TODO: change to json node handling
 def addSiteNodes(locationSites, memberDB, xml) {
     xml."sites" {
-        locationSites.each { siteObj ->
-            xml."$matchNodeName-site"(description: JsonReader.asString(siteObj.get("description")), numLocations: JsonReader.getString(siteObj.get("numLocations"))) {
-                if(siteObj.group){ group(siteObj.get("group")) }
-                if(siteObj.label){ label(siteObj.get("label")) }
+        locationSites.each { siteMap ->
+            xml."$matchNodeName-site"(description: siteMap.description, numLocations: siteMap.numLocations) {
+                if(siteMap.group){ group(siteMap.group) }
+                if(siteMap.label){ label(siteMap.label) }
                 if (memberDB != "cdd") {
-                    hmmStart(siteObj.get("hmmStart"))
-                    hmmEnd(siteObj.get("hmmEnd"))
+                    hmmStart(siteMap.hmmStart)
+                    hmmEnd(siteMap.hmmEnd)
                 }
                 "site-locations" {
-                    siteObj.siteLocations.each { siteLoc ->
+                    siteMap.siteLocations.each { siteLoc ->
                         xml."site-location"(
-                            residue : siteLoc.get("residue"),
-                            start   : siteLoc.get("start"),
-                            end     : siteLoc.get("end")
+                            residue : siteLoc.residue,
+                            start   : siteLoc.start,
+                            end     : siteLoc.end
                         )
                     }
                 }

@@ -1,7 +1,4 @@
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 
@@ -15,7 +12,6 @@ process WRITE_TSV_OUTPUT {
     val nucleic
 
     exec:
-    ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
     SeqDatabase seqDatabase = new SeqDatabase(seqDbPath.toString())
     def tsvFile = new File("${outputPath}.ips6.tsv".toString())
     tsvFile.text = "" // clear the file if it already exists
@@ -24,9 +20,11 @@ process WRITE_TSV_OUTPUT {
     def currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
 
     matchesFiles.each { matchFile ->
-        JsonReader.streamJson(matchFile.toString(), jacksonMapper) { String proteinMd5, JsonNode matchesNode ->
-            matchesNode.fields().each { Map.Entry<String, JsonNode> entry ->
-                Match match = Match.fromJsonNode((JsonNode) entry.value)
+        matchFile = new File(matchFile.toString())
+        matchFile = new ObjectMapper().readValue(matchFile, Map)
+        matchFile.each { String proteinMd5, Map matchesMap ->
+            matchesMap.each { String modelAcc, Map match ->
+                match = Match.fromMap(match)
                 String memberDb = match.signature.signatureLibraryRelease.library
                 String sigDesc = match.signature.description ?: '-'
                 String goterms = match.signature.entry?.goXRefs ? match.signature.entry.goXRefs.collect { "${it.id}(${it.databaseName})" }.join('|') : '-'
@@ -44,7 +42,7 @@ process WRITE_TSV_OUTPUT {
                     }
                 }
             } // end of matches in matchesNode
-        } // end of JsonReader
+        } // end of matchFile.each
     } // end of matchesFiles
 }
 
