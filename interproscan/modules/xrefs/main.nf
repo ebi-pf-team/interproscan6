@@ -2,9 +2,10 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import groovy.json.JsonOutput
 
 process XREFS {
-    label 'local'
+    label 'local', 'tiny'
 
     input:
     tuple val(meta), val(membersMatches)
@@ -37,7 +38,7 @@ process XREFS {
     membersMatches.each { matchesPath ->
         File file = new File(matchesPath.toString())
         JsonReader.streamJson(matchesPath.toString(), jacksonMapper) { String seqMd5, JsonNode matches ->
-            seqEntry = aggregatedMatches.computeIfAbsent(seqMd5, { [:] } )
+            def seqEntry = aggregatedMatches.computeIfAbsent(seqMd5, { [:] } )
 
             matches.fields().each { Map.Entry<String, JsonNode> entry ->
                 String modelAcc = entry.key   // Extract the modelAcc (key)
@@ -69,7 +70,7 @@ process XREFS {
 
                         if (signatureInfo["representative"] != null) { // if(var) does not work on JsonNodes, need explicit falsey check
                             match.representativeInfo = new RepresentativeInfo(
-                                JsonReader.asString(signatureInfo["representative"].get("type"))
+                                JsonReader.asString(signatureInfo["representative"].get("type")),
                                 signatureInfo["representative"].get("index").intValue()
                             )
                         }

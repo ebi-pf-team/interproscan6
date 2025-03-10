@@ -127,9 +127,9 @@ workflow {
     if (formats.contains("TSV")) {
         WRITE_TSV_OUTPUT(ch_results, "${outFileName}", ready_db_path, params.nucleic)
     }
-// //     if (formats.contains("XML")) {
-// //         WRITE_XML_OUTPUT(ch_results, "${outFileName}", params.nucleic, workflow.manifest.version)
-// //     }
+    if (formats.contains("XML")) {
+        WRITE_XML_OUTPUT(ch_results, "${outFileName}", ready_db_path, params.nucleic, workflow.manifest.version)
+    }
 }
 
 workflow.onComplete = {
