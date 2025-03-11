@@ -35,23 +35,22 @@ process LOOKUP_MATCHES {
 
         if (response != null) {
             response.results.each {
-                seqId = sequences[it.md5].id
                 if (it.found) {
-                    calculatedMatches[seqId] = [:]
+                    String proteinMd5 = it.md5.toLowerCase()
+                    calculatedMatches[it.md5] = [:]
                     it.matches.each { matchObj ->
                         String library = matchObj.signature.signatureLibraryRelease.library
                         String appName = library.toLowerCase().replaceAll("[-\\s]", "")
 
                         if (applications.contains(appName)) {
                             matchObj = transformMatch(matchObj)
-                            calculatedMatches[seqId][matchObj.modelAccession] = matchObj
+                            calculatedMatches[it.md5][matchObj.modelAccession] = matchObj
                         }
                     }
                 } else {
                     def seq = sequences[it.md5]
-                    noLookupMap[seqId] = seq
-                    noLookupFasta.append(">${seqId} ${seq.description}\n")
-                    noLookupFasta.append("${seq.sequence}\n")
+                    noLookupFasta.append(">${it.md5}\n")
+                    noLookupFasta.append("${seq}\n")
                 }
             }
         } else {

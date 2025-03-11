@@ -489,7 +489,7 @@ def streamJson(String filePath, ObjectMapper mapper, Closure closure) {
     } catch (IOException e) {
         throw new JsonException("IO error writing file: $filePath\nException: $e\nCause: ${e.getCause()}", e)
     } catch (Exception e) {
-        throw new Exception("Error occured when writing Json file $filePath\nException: $e\nCause: ${e.getCause()}", e)
+        throw new Exception("Error occurred when writing Json file $filePath\nException: $e\nCause: ${e.getCause()}", e)
     } finally {
         if (generator != null) {
             generator.close()
