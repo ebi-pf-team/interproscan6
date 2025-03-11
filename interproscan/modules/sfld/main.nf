@@ -189,16 +189,16 @@ Map<String, Set<String>> parseHierarchy(String filePath) {
     file.withReader{ reader ->
         for (String line = reader.readLine(); line != null; line = reader.readLine()) {
             def accessions = line.split(/\t/).toList()
-            def childAccession = accessions[-2]  // the last one is the description
+            def childAccession = accessions[-2]  // the final component is the description, only take the accs
             def parents = accessions.subList(0, accessions.size() - 2)
             hierarchy[childAccession] = parents as Set
-            for (parent in parents) {  // making sure all the ancestors are in the hierarchy
+            for (parent in parents) {  // ensure all ancestors are in the hierarchy
                 ancestors = hierarchy.get(parent)
                 if (ancestors.size() > 0) {
                     hierarchy[childAccession].addAll(ancestors)
                 }
             }
-	}
+	    }
     }
     return hierarchy
 }

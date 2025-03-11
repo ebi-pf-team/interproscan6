@@ -210,14 +210,13 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
 
     xml."$matchNodeName-match"(matchNodeAttributes) {
         xml.signature(signatureNodeAttributes) {
-            xml.signatureLibraryRelease {
-                xml.library(match.signature.signatureLibraryRelease.library)
-                xml.version(match.signature.signatureLibraryRelease.version)
-            }
+            xml.signatureLibraryRelease(
+                library: match.signature.signatureLibraryRelease.library,
+                version: match.signature.signatureLibraryRelease.version
+            )
             // GO TERMS AND PATHWAYS
         }
         xml."model-ac"(memberDB == "panther" ? match.treegrafter.subfamilyAccession : match.modelAccession)
-
         addLocationNodes(matchNodeName, memberDB, proteinMd5, match, xml)
     }
 }
@@ -254,16 +253,15 @@ def fmtSuperfamilyMatchNode(Map match) {
     ]
 }
 
-// Formating the Signature node
-
 def fmtSignatureNode(Map match) {
-    def name = match.signature.name
-    def desc = match.signature.description
-    return [ac: match.signature.accession].with {
-       if (name) name = name
-       if (desc) desc = desc
-       it
-   }
+    def signatureNodeAttributes = [ac: match.signature.accession]
+    if (match.signature.name != null) {
+        signatureNodeAttributes.name = match.signature.name
+    }
+    if (match.signature.desc != null) {
+        signatureNodeAttributes.desc = match.signature.desc
+    }
+    return signatureNodeAttributes
 }
 
 // Formating and add Location nodes
@@ -354,7 +352,7 @@ def addLocationNodes(String matchNodeName, String memberDB, String proteinMd5, M
                     xml.alignment(loc.targetAlignment ?: "")
                 }
                 if (loc.containsKey("sites") && loc.sites.size() > 0) {
-                    xml.addSiteNodes(loc.sites, memberDB, xml)
+                    addSiteNodes(loc.sites, memberDB, xml)
                 }
             }
         }
@@ -371,7 +369,7 @@ def fmtDefaultLocationNode(Map loc) {
         hmmStart       : loc.hmmStart,
         hmmEnd         : loc.hmmEnd,
         hmmLength      : loc.hmmLength,
-        hmmBounds      : loc.hmmBounds,
+        hmmBounds      : Match.getHmmBounds(loc.hmmBounds),
         evalue         : loc.evalue,
         score          : loc.score,
         envelopeStart  : loc.envelopeStart,
@@ -415,7 +413,7 @@ def fmtPantherLocationNode(Map loc) {
         hmmStart       : loc.hmmStart,
         hmmEnd         : loc.hmmEnd,
         hmmLength      : loc.hmmLength,
-        hmmBounds      : loc.hmmBounds,
+        hmmBounds      : Match.getHmmBounds(loc.hmmBounds),
         envelopeStart  : loc.envelopeStart,
         envelopeEnd    : loc.envelopeEnd
     ]
@@ -451,7 +449,7 @@ def fmtSmartLocationNode(Map loc) {
         hmmStart       : loc.hmmStart,
         hmmEnd         : loc.hmmEnd,
         hmmLength      : loc.hmmLength,
-        hmmBounds      : loc.hmmBounds
+        hmmBounds      : Match.getHmmBounds(loc.hmmBounds)
     ]
 }
 

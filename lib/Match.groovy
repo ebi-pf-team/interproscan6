@@ -90,6 +90,16 @@ class Match implements Serializable {
         location.targetAlignment = targetAlignment
     }
 
+    static String getHmmBounds(String hmmBounds) {
+        def boundsMapping = [
+                "[]"  : "COMPLETE",
+                "[."  : "N_TERMINAL_COMPLETE",
+                ".]"  : "C_TERMINAL_COMPLETE",
+                ".."  : "INCOMPLETE"
+        ]
+        return boundsMapping[hmmBounds]
+    }
+
     @Override
     public int hashCode() {
         int x = Objects.hash(modelAccession, sequenceLength, evalue, score, bias, signature, locations)
@@ -113,12 +123,13 @@ class Match implements Serializable {
 }
 
 class Signature implements Serializable {
+    // The order of the fields here determines their order in the final output files
     String accession
     String name
     String description
     String type
-    Entry entry
     SignatureLibraryRelease signatureLibraryRelease = new SignatureLibraryRelease(null, null)
+    Entry entry = null
 
     Signature(String accession) {
         this.accession = accession
@@ -420,16 +431,6 @@ class Location implements Serializable {
         loc.cigarAlignment = data.cigarAlignment
         loc.pvalue = data.pvalue
         return loc
-    }
-
-    String getHmmBounds(String hmmBounds) {
-        def boundsMapping = [
-                "[]"  : "COMPLETE",
-                "[."  : "N_TERMINAL_COMPLETE",
-                ".]"  : "C_TERMINAL_COMPLETE",
-                ".."  : "INCOMPLETE"
-        ]
-        return boundsMapping[hmmBounds]
     }
 
     @Override
