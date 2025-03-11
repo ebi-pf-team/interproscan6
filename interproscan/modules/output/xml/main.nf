@@ -145,6 +145,7 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
             matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
+        case "mobidb lite":
         case "mobidb-lite":
         case "mobidb_lite":  // use groovy case fall to allow multiple options
             matchNodeName = "Mobidb-Lite"

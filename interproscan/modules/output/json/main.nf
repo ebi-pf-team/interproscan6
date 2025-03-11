@@ -141,6 +141,7 @@ def writeMatch(String proteinMd5, Map match, JsonGenerator jsonWriter) {
         case "hamap":
             writeHAMAP(match, jsonWriter)
             break
+        case "mobidb lite":
         case "mobidb-lite":
         case "mobidb_lite":  // use groovy case fall to allow multiple options
             writeMobiDBlite(match, jsonWriter)
