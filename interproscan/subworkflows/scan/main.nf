@@ -139,7 +139,7 @@ workflow SCAN_SEQUENCES {
         )
 
         PREPARE_HAMAP(
-            PREPROCESS_HAMAP.out.join(ch_json),
+            PREPROCESS_HAMAP.out,
             "${datadir}/${appsConfig.hamap.dir}"
         )
 
@@ -312,7 +312,7 @@ workflow SCAN_SEQUENCES {
         )
 
         PARSE_SMART(
-            SEARCH_SMART.out.join(ch_json),
+            SEARCH_SMART.out,
             "${datadir}/${appsConfig.smart.hmm}"
         )
         results = results.mix(PARSE_SMART.out)
