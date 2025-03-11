@@ -23,7 +23,7 @@ process WRITE_TSV_OUTPUT {
         matchFile = new File(matchFile.toString())
         matchFile = new ObjectMapper().readValue(matchFile, Map)
         matchFile.each { String proteinMd5, Map matchesMap ->
-            matchesMap.each { String modelAcc, Map match ->
+            matchesMap.each { modelAcc, match ->
                 match = Match.fromMap(match)
                 String memberDb = match.signature.signatureLibraryRelease.library
                 String sigDesc = match.signature.description ?: '-'

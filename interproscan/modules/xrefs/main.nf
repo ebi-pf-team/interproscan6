@@ -36,8 +36,8 @@ process XREFS {
         matchesFileMap.each { String seqMd5, Map matches ->
             def seqEntry = aggregatedMatches.computeIfAbsent(seqMd5, { [:] } )
 
-            matches.each { String modelAcc, Map match ->
-                Match match = Match.fromMap(match)
+            matches.each { modelAcc, match ->
+                match = Match.fromMap(match)  // convert Map to Match object
 
                 if (!entries || entries == null) {  // no data to update, update match in aggregatedMatches
                     seqEntry[modelAcc] = match

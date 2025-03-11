@@ -1,5 +1,5 @@
 class SeqDatabase {
-    // This class contains the method for querying the internal IPS6 seq db, and handling any errors
+    // This class contains the methods for querying the internal IPS6 seq db, and handling any errors
     String dbPath
 
     SeqDatabase(String dbPath) {

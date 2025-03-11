@@ -343,15 +343,15 @@ def addLocationNodes(String matchNodeName, String memberDB, String proteinMd5, M
                 if (loc.containsKey("location-fragments") && loc["location-fragments"].size() > 0) {
                     xml."$matchNodeName-fragment" {
                         loc["location-fragments"].each { frag ->
-                            start(frag.start)
-                            end(frag.end)
-                            dcStatus(frag.dcStatus)
+                            xml.start(frag.start)
+                            xml.end(frag.end)
+                            xml.dcStatus(frag.dcStatus)
                         }
                     }
                 }
 
                 if (memberDB in ["hamap", "prosite patterns", "prosite profiles"]) {
-                    xml.alignment(loc.targetAlignment ?: ""))
+                    xml.alignment(loc.targetAlignment ?: "")
                 }
                 if (loc.containsKey("sites") && loc.sites.size() > 0) {
                     xml.addSiteNodes(loc.sites, memberDB, xml)

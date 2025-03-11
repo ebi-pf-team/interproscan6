@@ -1,4 +1,5 @@
 import com.fasterxml.jackson.databind.ObjectMapper
+import groovy.json.JsonOutput
 
 process REPRESENTATIVE_LOCATIONS {
     label 'local'
@@ -14,7 +15,7 @@ process REPRESENTATIVE_LOCATIONS {
     float DOM_OVERLAP_THRESHOLD = 0.3
     List<String> REPR_TYPE = ["family", "domain"]
 
-    def matchesMap = new ObjectMapper().readValue(new File(matchesPath), Map)
+    def matchesMap = new ObjectMapper().readValue(new File(matchesPath.toString()), Map)
     matchesMap.each { String md5, Map matchesInMap ->
         // Serialise the matches so we don't need to edit the map manually later
         Map<String, Match> currentMatches = [:]
