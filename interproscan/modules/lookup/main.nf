@@ -35,21 +35,21 @@ process LOOKUP_MATCHES {
 
         if (response != null) {
             response.results.each {
+                String proteinMd5 = it.md5.toLowerCase()
                 if (it.found) {
-                    String proteinMd5 = it.md5.toLowerCase()
-                    calculatedMatches[it.md5] = [:]
+                    calculatedMatches[proteinMd5] = [:]
                     it.matches.each { matchObj ->
                         String library = matchObj.signature.signatureLibraryRelease.library
                         String appName = library.toLowerCase().replaceAll("[-\\s]", "")
 
                         if (applications.contains(appName)) {
                             matchObj = transformMatch(matchObj)
-                            calculatedMatches[it.md5][matchObj.modelAccession] = matchObj
+                            calculatedMatches[proteinMd5][matchObj.modelAccession] = matchObj
                         }
                     }
                 } else {
-                    def seq = sequences[it.md5]
-                    noLookupFasta.append(">${it.md5}\n")
+                    def seq = sequences[proteinMd5]
+                    noLookupFasta.append(">${proteinMd5}\n")
                     noLookupFasta.append("${seq}\n")
                 }
             }
