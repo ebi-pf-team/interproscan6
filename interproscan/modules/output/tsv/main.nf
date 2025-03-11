@@ -1,60 +1,71 @@
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 
 process WRITE_TSV_OUTPUT {
-    label 'local'
+    label 'local', 'ips6_container'
 
     input:
-    val matches
+    val matchesFiles
     val outputPath
+    val seqDbPath
     val nucleic
 
     exec:
-    ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+    SeqDatabase seqDatabase = new SeqDatabase(seqDbPath.toString())
     def tsvFile = new File("${outputPath}.ips6.tsv".toString())
     tsvFile.text = "" // clear the file if it already exists
-    // Each line contains: seqId md5 seqLength memberDb modelAcc sigDesc start end evalue status date entryAcc entryDesc xrefs
+
+    // Each line contains: seqId md5 seqLength memberDb modelAcc sigDesc start end evalue status date entryAcc entryDesc goterms pathways
     def currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
 
-    JsonReader.streamArray(matches.toString(), jacksonMapper) { ObjectNode seqNode ->
-        seqNode.get("matches").fields().each { matchNode ->
-            Match match = Match.fromJsonNode((JsonNode) matchNode.value)
-            String memberDb = match.signature.signatureLibraryRelease.library
-            String sigDesc = (match.signature.description == null || match.signature.description == "null") ? '-' : match.signature.description
-            String goterms = match.signature.entry?.goXRefs ?
-                             (match.signature.entry.goXRefs.isEmpty() ? '-' :
-                             match.signature.entry.goXRefs.collect { goXref -> "${goXref.id}(${goXref.databaseName})" }.join('|')) : '-'
-            goterms = (goterms == "null") ? '-' : goterms
-            String pathways = match.signature.entry?.pathwayXRefs ?
-                             (match.signature.entry.pathwayXRefs.isEmpty() ? '-' :
-                             match.signature.entry.pathwayXRefs.collect { ptXref -> "${ptXref.databaseName}:${ptXref.id}" }.join('|')) : '-'
-            pathways = (pathways == "null") ? '-' : pathways
-            String entryAcc = (match.signature.entry?.accession == null || match.signature.entry?.accession == "null") ? '-' : match.signature.entry?.accession
-            String entryDesc = (match.signature.entry?.description == null || match.signature.entry?.description == "null") ? '-' : match.signature.entry?.description
-            char status = 'T'
-
-            seqNode.get("xref").each { xrefData ->
-                match.locations.each { Location loc ->
-                    if ( nucleic ) {
-                        seqNode.get("translatedFrom").forEach { translatedFromNode ->
-                            seqId = "${translatedFromNode.get('id').asText()}_${xrefData.get('id').asText()}"
-                            writeToTsv(tsvFile, match, currentDate, memberDb, sigDesc, goterms, pathways, entryAcc, entryDesc, status, seqNode, xrefData, loc, seqId)
-                        }
-                    } else {
-                        String seqId = xrefData.get("id").asText()
-                        writeToTsv(tsvFile, match, currentDate, memberDb, sigDesc, goterms, pathways, entryAcc, entryDesc, status, seqNode, xrefData, loc, seqId)
+    matchesFiles.each { matchFile ->
+        matchFile = new File(matchFile.toString())
+        matchFile = new ObjectMapper().readValue(matchFile, Map)
+        matchFile.each { String proteinMd5, Map matchesMap ->
+            matchesMap.each { modelAcc, match ->
+                match = Match.fromMap(match)
+                String memberDb = match.signature.signatureLibraryRelease.library
+                String sigDesc = match.signature.description ?: '-'
+                String goterms = match.signature.entry?.goXRefs ? match.signature.entry.goXRefs.collect { "${it.id}(${it.databaseName})" }.join('|') : '-'
+                String pathways = match.signature.entry?.pathwayXRefs ? match.signature.entry.pathwayXRefs.collect { "${it.databaseName}:${it.id}" }.join('|') : '-'
+                String entryAcc = match.signature.entry?.accession ?: '-'
+                String entryDesc = match.signature.entry?.description ?: '-'
+                char status = 'T'
+                seqData = getSeqData(seqDatabase, proteinMd5, nucleic)
+                seqData.each { row ->  // Protein: [id, sequence]; Nucleic: [] from
+                    row = row.split('\t')
+                    String seqId = nucleic ? "${row[0]}_${row[1]}" : row[0]
+                    int seqLength = row[nucleic ? 2 : 1].trim().length()
+                    match.locations.each { Location loc ->
+                        writeToTsv(tsvFile, seqId, proteinMd5, seqLength, match, loc, memberDb, sigDesc, status, currentDate, entryAcc, entryDesc, goterms, pathways)
                     }
                 }
-            }
-        }
-    }
+            } // end of matches in matchesNode
+        } // end of matchFile.each
+    } // end of matchesFiles
 }
 
-def writeToTsv(tsvFile, match, currentDate, memberDb,  sigDesc, goterms, pathways, entryAcc, entryDesc, status, seqNode, xrefData, loc, seqId) {
+def getSeqData(SeqDatabase seqDatabase, String querySeqMd5, boolean nucleic) {
+    // retrieve all seqIds associated with the query protein seq MD5 hash
+    def query = ""
+    if (nucleic) {
+        query = """SELECT N.id, P.id, S.sequence
+        FROM NUCLEOTIDE AS N
+        LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.nt_md5 = N2P.nt_md5
+        LEFT JOIN PROTEIN AS P ON N2P.protein_md5 = P.protein_md5
+        LEFT JOIN PROTEIN_SEQUENCE AS S ON P.protein_md5 = S.protein_md5
+        WHERE N2P.protein_md5 = '$querySeqMd5';"""
+    } else {
+        query = """SELECT P.id, S.sequence
+        FROM PROTEIN AS P
+        LEFT JOIN PROTEIN_SEQUENCE AS S ON P.protein_md5 = S.protein_md5
+        WHERE P.protein_md5 = '$querySeqMd5';"""
+    }
+    return seqDatabase.query(query)
+}
+
+def writeToTsv(tsvFile, seqId, md5, seqLength, match, loc, memberDb, sigDesc, status, currentDate, entryAcc, entryDesc, goterms, pathways) {
     int start = loc.start
     int end = loc.end
     def scoringValue = "-"
@@ -77,11 +88,8 @@ def writeToTsv(tsvFile, match, currentDate, memberDb,  sigDesc, goterms, pathway
     }
 
     tsvFile.append([
-        seqId, seqNode.get("md5").asText(), seqNode.get("sequence").asText().length(),
-        memberDb,
-        match.signature.accession, sigDesc,
-        start, end, scoringValue, status,
-        currentDate,
-        entryAcc, entryDesc, goterms, "${pathways}\n"
+        seqId, md5, seqLength, memberDb, match.signature.accession,
+        sigDesc, start, end, scoringValue, status,
+        currentDate, entryAcc, entryDesc, goterms, "${pathways}\n"
     ].join('\t'))
 }

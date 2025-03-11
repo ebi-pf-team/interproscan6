@@ -5,7 +5,7 @@ process ESL_TRANSLATE {
     path fasta
 
     output:
-    tuple path("translated.fasta"), path(fasta)
+    path "translated.fasta"
 
     script:
     """

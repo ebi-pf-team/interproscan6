@@ -6,7 +6,7 @@ process LOOKUP_MATCHES {
     label 'local'
 
     input:
-    tuple val(index), val(fasta), val(json)
+    tuple val(index), val(fasta)
     val applications
     val url
     val chunkSize
@@ -14,30 +14,16 @@ process LOOKUP_MATCHES {
 
     output:
     tuple val(index), path("calculatedMatches.json")
-    tuple val(index), path("noLookup.fasta"), path("noLookup.json"), optional: true
+    tuple val(index), path("noLookup.fasta"), optional: true
 
     exec:
     def calculatedMatchesPath = task.workDir.resolve("calculatedMatches.json")
-    def noLookupFastaPath = task.workDir.resolve("noLookup.fasta")
-    def noLookupMapPath = task.workDir.resolve("noLookup.json")
-
     def calculatedMatches = [:]
+
+    def noLookupFastaPath = task.workDir.resolve("noLookup.fasta")
     def noLookupFasta = new StringBuilder()
-    def noLookupMap = [:]
 
-    def jsonSlurper = new JsonSlurper()
-    def jsonFile = new File(json.toString())
-    def sequences = jsonSlurper.parse(jsonFile)
-        .collectEntries{ seqId, obj ->
-            if (obj instanceof List) { // nucleotide sequences case
-                obj.collectEntries { seq ->
-                    [(seq.md5): FastaSequence.fromMap(seq)]
-                }
-            } else {
-                [(obj.md5): FastaSequence.fromMap(obj)]
-            }
-        }
-
+    Map<String, String> sequences = FastaFile.parse(fasta.toString())  // [md5: sequence]
     def md5List = sequences.keySet().toList()
     def chunks = md5List.collate(chunkSize)
 
@@ -76,18 +62,12 @@ process LOOKUP_MATCHES {
 
     if (success) {
         def jsonMatches = JsonOutput.toJson(calculatedMatches)
-        new File(calculatedMatchesPath.toString()).write(jsonMatches)
-
-        if (!noLookupMap.isEmpty()) {
-            def jsonSequences = JsonOutput.toJson(noLookupMap)
-            new File(noLookupMapPath.toString()).write(jsonSequences)
-            new File(noLookupFastaPath.toString()).write(noLookupFasta.toString())
-        }
+        new File(calculatedMatchesPath.toString()).write(JsonOutput.toJson(calculatedMatches))
     } else {
         log.warn "An error occurred while querying the Matches API, analyses will be run locally"
+        // when the connection fails, write out all sequences to "noLookup.fasta"
         new File(calculatedMatchesPath.toString()).write(JsonOutput.toJson([:]))
         new File(fasta.toString()).copyTo(new File(noLookupFastaPath.toString()))
-        jsonFile.copyTo(new File(noLookupMapPath.toString()))
     }
 }
 
@@ -156,6 +136,7 @@ def httpRequest(String urlString, String data, int maxRetries, boolean verbose) 
 }
 
 def Map transformMatch(Map match) {
+    // * operator - spread contents of a map or collecion into another map or collection
     return [
         *            : match,
         "treegrafter": ["ancestralNodeID": match["annotationNode"]],

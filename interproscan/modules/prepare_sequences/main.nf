@@ -1,56 +1,87 @@
-import groovy.json.JsonOutput
-
-process PREPARE_NUCLEIC_SEQUENCES {
-    label 'local'
+process POPULATE_SEQ_DATABASE {
+    // Populate a local sqlite3 database with sequences from the pipeline's input FASTA file.
+    label         'local', 'ips6_container'
+    errorStrategy 'terminate'
 
     input:
-    tuple val(n_fasta), val(p_fasta)
+    file fasta
+    val nucleic
 
     output:
-    tuple val(task.index), val(p_fasta), path("sequences.json")
+    path "ips6.seq.db"
 
-    exec:
-    def sequences = FastaFile.parse(n_fasta.toString())
-    def ntSequences = [:]
-    sequences.each { seq ->
-        ntSequences[seq.id] = seq
-    }
-
-    sequences = FastaFile.parse(p_fasta.toString())
-    def output = [:]
-    sequences.each { seq ->
-        def match = seq.description =~ /source=(\S+)/
-        assert match
-        def source = match[0][1]
-        def ntSeq = ntSequences[source]
-        seq.translatedFrom = ntSeq
-        if (!output.containsKey(seq.md5)) {
-            output[seq.md5] = []
-        }
-        output[seq.md5] << seq
-    }
-    def outputPath = task.workDir.resolve("sequences.json")
-    def json = JsonOutput.toJson(output)
-    new File(outputPath.toString()).write(json)
+    script:
+    """
+    python3 $projectDir/interproscan/scripts/database.py \
+        ips6.seq.db \
+        populate_sequences \
+        --fasta $fasta \
+         ${nucleic ? '--nucleic' : ''}
+    chmod 777 ips6.seq.db
+    """
 }
 
-
-process PREPARE_PROTEIN_SEQUENCES {
-    label 'local'
+process UPDATE_ORFS {
+    // add protein seqs translated from ORFS in the nt seqs to the database
+    label         'local', 'ips6_container'
+    errorStrategy 'terminate'
 
     input:
-    val fasta
+    val translatedFastas  // could be one or multiple paths
+    val dbPath
 
     output:
-    tuple val(task.index), val(fasta), path("sequences.json")
+    val dbPath // ensure BUILD_BATCHES runs after UPDATE_ORFS
+
+    script:
+    """
+    python3 $projectDir/interproscan/scripts/database.py \
+        $dbPath \
+        update_orfs \
+        --fasta "$translatedFastas"
+    """
+}
+
+process BUILD_BATCHES {
+    // Build the FASTA file batches of unique protein sequences for the sequence analysis
+    label         'local', 'ips6_container'
+    errorStrategy 'terminate'
+
+    input:
+    val dbPath
+    val batchSize
+    val nucleic
+
+    output:
+    path "*.fasta"
+
+    script:
+    """
+    python3 $projectDir/interproscan/scripts/database.py \
+        $dbPath \
+        build_batches \
+        --batch_size $batchSize \
+        ${nucleic ? '--nucleic' : ''}
+    """
+}
+
+process INDEX_BATCHES {
+    label         'local', 'ips6_container'
+    errorStrategy 'terminate'
+
+    input:
+    val fastaFiles
+
+    output:
+    val indexedFiles
 
     exec:
-    def output = [:]
-    def sequences = FastaFile.parse(fasta.toString())
-    sequences.each { seq ->
-        output[seq.id] = seq
+    indexedFiles = []
+    int index = 1
+    // handle when a single fasta file path is provided
+    def fastaList = fastaFiles instanceof List ? fastaFiles : [fastaFiles]
+    for (fasta: fastaList) {
+        indexedFiles << [index, fasta]
+        index += 1
     }
-    def outputPath = task.workDir.resolve("sequences.json")
-    def json = JsonOutput.toJson(output)
-    new File(outputPath.toString()).write(json)
 }

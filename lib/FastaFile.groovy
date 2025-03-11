@@ -1,31 +1,24 @@
 import FastaSequence
 
 class FastaFile {
-    static List<FastaSequence> parse(String fastaFilePath) {
-        def sequences = []
-        FastaSequence currentSequence = null
+    static Map<String, String> parse(String fastaFilePath) {
+        def sequences = [:]
+        def md5 = null
+        def currentSequence = null
         new File(fastaFilePath).eachLine { line ->
             if (line.startsWith(">")) {
                 if (currentSequence) {
-                    currentSequence.updateMD5()
-                    sequences.add(currentSequence)
+                    sequences[md5] = currentSequence
                 }
-
-                def header = line.substring(1).split(" ", 2).collect { it.trim() }
-                currentSequence = new FastaSequence(
-                    header[0], 
-                    header.size() > 1 ? header[1] : ""
-                )
+                md5 = line.substring(1).trim()
+                currentSequence = ""
             } else {
-                currentSequence.sequence += line.trim()
+                currentSequence += line.trim()
             }
         }
-
         if (currentSequence) {
-            currentSequence.updateMD5()
-            sequences.add(currentSequence)
+            sequences[md5] = currentSequence
         }
-
         return sequences
     }
 

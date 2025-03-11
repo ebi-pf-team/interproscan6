@@ -1,5 +1,3 @@
-import com.fasterxml.jackson.databind.JsonNode
-
 class Match implements Serializable {
     String modelAccession
     Double evalue
@@ -73,22 +71,6 @@ class Match implements Serializable {
         }
     }
 
-    static Map asMap(Match match) {
-        Map matchMap = [
-                "modelAccession": match.modelAccession,
-                "sequenceLength": match.sequenceLength,
-                "evalue": match.evalue,
-                "score": match.score,
-                "signature": match.signature ? Signature.asMap(match.signature) : null,
-                "locations": match.locations.collect { Location.asMap(it) },
-                "included": match.included,
-                "representativeInfo": RepresentativeInfo.asMap(match.representativeInfo),
-                "treeGrafter": match.treegrafter ? TreeGrafter.asMap(match.treegrafter) : null,
-                "graphScan": match.graphScan,
-        ]
-        return matchMap
-    }
-
     static Match fromMap(Map data) {
         Match match = new Match(data.modelAccession, data.evalue, data.score, data.bias)
         match.sequenceLength = data.sequenceLength
@@ -97,31 +79,6 @@ class Match implements Serializable {
         match.locations = data.locations.collect { Location.fromMap(it) }
         match.treegrafter = TreeGrafter.fromMap(data.treegrafter)
         match.representativeInfo = RepresentativeInfo.fromMap(data.representativeInfo)
-        return match
-    }
-
-    static Match fromJsonNode(JsonNode node) {
-        Match match = new Match(node.get("modelAccession").asText().replaceAll('["\\\\"]', ''))
-        match.sequenceLength = node.has("sequenceLength") ? node.get("sequenceLength").asInt() : null
-        match.evalue = node.has("evalue") ? node.get("evalue").asDouble() : null
-        match.score = node.has("score") ? node.get("score").asDouble() : null
-        match.bias = node.has("bias") ? node.get("bias").asDouble() : null
-        if (node.has("signature")) {
-            match.signature = Signature.fromJsonNode(node.get("signature"))
-        }
-        if (node.has("locations") && node.get("locations").isArray()) {
-            match.locations = node.get("locations").collect { Location.fromJsonNode(it) }
-        }
-        if (node.has("treegrafter")) {
-            match.treegrafter = TreeGrafter.fromJsonNode(node.get("treegrafter"))
-        }
-        if (node.has("representativeInfo")) {
-            match.representativeInfo = RepresentativeInfo.fromJsonNode(node.get("representativeInfo"))
-        }
-        if (node.has("graphScan")) {
-            match.graphScan = node.get("graphScan").asText().replaceAll('["\\\\"]', '')
-        }
-        match.included = node.has("included") ? node.get("included").asBoolean() : true
         return match
     }
 
@@ -200,32 +157,6 @@ class Signature implements Serializable {
         this.entry = entry
     }
 
-    static Map asMap(Signature sig) {
-        if (!sig) {
-            return [:]
-        }
-        Map sigMap = [:]
-        if (sig.accession) {
-            sigMap["accession"] = sig.accession
-        }
-        if (sig.name) {
-            sigMap["name"] = sig.name
-        }
-        if (sig.description) {
-            sigMap["description"] = sig.description
-        }
-        if (sig.type) {
-            sigMap["type"] = sig.type
-        }
-        if (sig.signatureLibraryRelease) {
-            sigMap["signatureLibraryRelease"] = SignatureLibraryRelease.asMap(sig.signatureLibraryRelease)
-        }
-        if (sig.entry) {
-            sigMap["entry"] = Entry.asMap(sig.entry)
-        }
-        return sigMap
-    }
-
     void setType(String type) {
         this.type = type
     }
@@ -243,17 +174,6 @@ class Signature implements Serializable {
                 Entry.fromMap(data.entry)
         )
     }
-
-    static Signature fromJsonNode(JsonNode node) {
-        String accession = node.has("accession") ? node.get("accession").asText().replaceAll('["\\\\"]', '') : null
-        String name = node.has("name") ? node.get("name").asText().replaceAll('["\\\\"]', '') : null
-        String description = node.has("description") ? node.get("description").asText().replaceAll('["\\\\"]', '') : null
-        SignatureLibraryRelease library = node.has("signatureLibraryRelease") ?
-                SignatureLibraryRelease.fromJsonNode(node.get("signatureLibraryRelease")) :
-                new SignatureLibraryRelease(null, null)
-        Entry entry = node.has("entry") ? Entry.fromJsonNode(node.get("entry")) : null
-        return new Signature(accession, name, description, library, entry)
-    }
 }
 
 class SignatureLibraryRelease implements Serializable {
@@ -265,24 +185,11 @@ class SignatureLibraryRelease implements Serializable {
         this.version = version
     }
 
-    static Map asMap(SignatureLibraryRelease library) {
-        return library ? ["library": library.library, "version": library.version] : null
-    }
-
     static SignatureLibraryRelease fromMap(Map data) {
         if (data == null) {
             return null
         }
         return new SignatureLibraryRelease(data.library, data.version)
-    }
-
-    static SignatureLibraryRelease fromJsonNode(JsonNode node) {
-        if (node == null || node.isNull()) {
-            return null
-        }
-        String library = node.has("library") ? node.get("library").asText().replaceAll('["\\\\"]', '') : null
-        String version = node.has("version") ? node.get("version").asText().replaceAll('["\\\\"]', '') : null
-        return new SignatureLibraryRelease(library, version)
     }
 }
 
@@ -318,17 +225,6 @@ class Entry implements Serializable {
         this.pathwayXRefs = pathwayXRefs
     }
 
-    static Map asMap(Entry entry) {
-        return entry ? [
-                "accession"    : entry.accession,
-                "name"         : entry.name,
-                "description"  : entry.description,
-                "type"         : entry.type,
-                "goXRefs"      : entry.goXRefs.collect { GoXRefs.asMap(it) },
-                "pathwayXRefs" : entry.pathwayXRefs.collect { PathwayXRefs.asMap(it) },
-        ] : null
-    }
-
     static Entry fromMap(Map data) {
         if (data == null) {
             return null
@@ -341,25 +237,6 @@ class Entry implements Serializable {
                 data.goXRefs.collect { GoXRefs.fromMap(it) },
                 data.pathwayXRefs.collect { PathwayXRefs.fromMap(it) }
         )
-    }
-
-    static Entry fromJsonNode(JsonNode node) {
-        if (node == null || node.isNull()) {
-            return null
-        }
-        String accession = node.has("accession") ? node.get("accession").asText().replaceAll('["\\\\"]', '') : null
-        String name = node.has("name") ? node.get("name").asText().replaceAll('["\\\\"]', '') : null
-        String description = node.has("description") ? node.get("description").asText().replaceAll('["\\\\"]', '') : null
-        String type = node.has("type") ? node.get("type").asText().replaceAll('["\\\\"]', '') : null
-        List<GoXRefs> goXRefs = []
-        if (node.has("goXRefs") && node.get("goXRefs").isArray()) {
-            goXRefs = node.get("goXRefs").collect { GoXRefs.fromJsonNode(it) }
-        }
-        List<PathwayXRefs> pathwayXRefs = []
-        if (node.has("pathwayXRefs") && node.get("pathwayXRefs").isArray()) {
-            pathwayXRefs = node.get("pathwayXRefs").collect { PathwayXRefs.fromJsonNode(it) }
-        }
-        return new Entry(accession, name, description, type, goXRefs, pathwayXRefs)
     }
 
     void addGoXRefs(GoXRefs go) {
@@ -479,7 +356,7 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-     Location(int start, int end, Double score, String targetAlignment) { // Used for Hamap, PrositeProfiles
+    Location(int start, int end, Double score, String targetAlignment) { // Used for Hamap, PrositeProfiles
         this.start = start
         this.end = end
         this.score = score
@@ -520,33 +397,6 @@ class Location implements Serializable {
         this.sites.add(site)
     }
 
-    static Map asMap(Location loc) {
-        if (!loc) return [:]
-
-        def mapLocation = [ "start": loc.start, "end": loc.end ]
-        if (loc.hmmStart != null) mapLocation["hmmStart"] = loc.hmmStart
-        if (loc.hmmEnd != null) mapLocation["hmmEnd"] = loc.hmmEnd
-        if (loc.hmmLength != null) mapLocation["hmmLength"] = loc.hmmLength
-        if (loc.hmmBounds != null) mapLocation["hmmBounds"] = loc.hmmBounds
-        if (loc.envelopeStart != null) mapLocation["envelopeStart"] = loc.envelopeStart
-        if (loc.envelopeEnd != null) mapLocation["envelopeEnd"] = loc.envelopeEnd
-        if (loc.evalue != null) mapLocation["evalue"] = loc.evalue
-        if (loc.score != null) mapLocation["score"] = loc.score
-        if (loc.bias != null) mapLocation["bias"] = loc.bias
-        if (loc.queryAlignment != null) mapLocation["queryAlignment"] = loc.queryAlignment
-        if (loc.targetAlignment != null) mapLocation["targetAlignment"] = loc.targetAlignment
-        if (loc.sequenceFeature != null) mapLocation["sequenceFeature"] = loc.sequenceFeature
-        if (loc.pvalue != null) mapLocation["pvalue"] = loc.pvalue
-        if (loc.motifNumber != null) mapLocation["motifNumber"] = loc.motifNumber
-        if (loc.level != null) mapLocation["level"] = loc.level
-        if (loc.cigarAlignment != null) mapLocation["cigarAlignment"] = loc.cigarAlignment
-        if (loc.fragments) mapLocation["fragments"] = loc.fragments.collect { LocationFragment.asMap(it) }
-        if (loc.sites) mapLocation["sites"] = loc.sites.collect { Site.asMap(it) }
-        mapLocation["representative"] = loc.representative
-        mapLocation["included"] = loc.included
-        return mapLocation
-    }
-
     static Location fromMap(data) {
         Location loc = new Location(
                 data.start,
@@ -574,6 +424,7 @@ class Location implements Serializable {
         return loc
     }
 
+<<<<<<< HEAD
     static Location fromJsonNode(JsonNode node) {
         Location location = new Location()
         location.start = node.has("start") ? node.get("start").asInt() : null
@@ -618,18 +469,18 @@ class Location implements Serializable {
 
     static String getReverseHmmBounds(String hmmBounds) {
         return [
-            "COMPLETE"           : "[]",
-            "N_TERMINAL_COMPLETE": "[.",
-            "C_TERMINAL_COMPLETE": ".]",
-            "INCOMPLETE"         : ".."
+            "COMPLETE"            : "[]",
+            "N_TERMINAL_COMPLETE" : "[.",
+            "C_TERMINAL_COMPLETE" : ".]",
+            "INCOMPLETE"          : ".."
         ][hmmBounds]
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(start, end, hmmStart, hmmEnd, hmmLength, hmmBounds,
-                            envelopeStart, envelopeEnd, evalue, score, bias,
-                            queryAlignment, targetAlignment, fragments, sites)
+            envelopeStart, envelopeEnd, evalue, score, bias,
+            queryAlignment, targetAlignment, fragments, sites)
     }
 
     @Override
@@ -688,14 +539,6 @@ class LocationFragment implements Serializable {
         this.start = start
         this.end = end
         this.dcStatus = dcStatus
-    }
-
-    static Map asMap(LocationFragment locFrag) {
-        locFrag ? [
-                "start"   : locFrag.start,
-                "end"     : locFrag.end,
-                "dbStatus": locFrag.dcStatus
-        ] : [:]
     }
 
     static LocationFragment fromMap(Map data) {
@@ -781,43 +624,11 @@ class Site implements Serializable {
         return siteLocations
     }
 
-    static Map asMap(Site site, String memberDB = null) {
-        if (!site) { return [:] }
-        Map siteMap = [
-                "description"   : site.description,
-                "numLocations"  : site.numLocations ?: null,
-                "siteLocations" : site.siteLocations.collect { SiteLocation.asMap(it) }
-        ]
-        if (memberDB != "CDD") {
-            if (site.label) { siteMap["label"] = site.label }
-            if (site.group) { siteMap["group"] = site.group }
-            if (site.hmmStart) { siteMap["hmmStart"] = site.hmmStart }
-            if (site.hmmEnd) { siteMap["hmmEnd"] = site.hmmEnd }
-        }
-        return siteMap
-    }
-
     static Site fromMap(Map data) {
         return new Site(
                 data.description,
                 data.siteLocations.collect { SiteLocation.fromMap(it) }
         )
-    }
-
-    static Site fromJsonNode(JsonNode node) {
-        String description = node.has("description") ? node.get("description").asText().replaceAll('["\\\\"]', '') : ""
-        String label = node.has("label") && !node.get("label").isNull() ? node.get("label").asText().replaceAll('["\\\\"]', '') : null
-        String group = node.has("group") && !node.get("group").isNull() ? node.get("group").asText().replaceAll('["\\\\"]', '') : null
-        int hmmStart = node.has("hmmStart") ? node.get("hmmStart").asInt() : 0
-        int hmmEnd = node.has("hmmEnd") ? node.get("hmmEnd").asInt() : 0
-        List<SiteLocation> siteLocations = node.has("siteLocations") && node.get("siteLocations").isArray() ?
-                node.get("siteLocations").collect { SiteLocation.fromJsonNode(it) } : []
-        return new Site(description, siteLocations).tap {
-            it.label = label
-            it.group = group
-            it.hmmStart = hmmStart
-            it.hmmEnd = hmmEnd
-        }
     }
 
     boolean isInRange(int start, int end) {
@@ -834,9 +645,9 @@ class Site implements Serializable {
         if (this == obj) return true
         if (obj == null || getClass() != obj.getClass()) return false
         return (
-            description == obj.description &&
-            numLocations == obj.numLocations &&
-            Objects.equals(siteLocations, obj.siteLocations)
+                description == obj.description &&
+                        numLocations == obj.numLocations &&
+                        Objects.equals(siteLocations, obj.siteLocations)
         )
     }
 
@@ -856,22 +667,8 @@ class SiteLocation implements Serializable {
         this.residue = residue
     }
 
-    static Map asMap(SiteLocation siteLoc ) {
-        return siteLoc ? [ "start": siteLoc.start, "end": siteLoc.end, "residue": siteLoc.residue ] : [:]
-    }
-
     static SiteLocation fromMap(Map data) {
         return new SiteLocation(data.start, data.end, data.residue)
-    }
-
-    static SiteLocation fromJsonNode(JsonNode node) {
-        if (node == null || node.isNull()) {
-            return null
-        }
-        String residue = node.has("residue") ? node.get("residue").asText().replaceAll('["\\\\"]', '') : null
-        int start = node.has("start") ? node.get("start").asInt() : -1
-        int end = node.has("end") ? node.get("end").asInt() : -1
-        return new SiteLocation(residue, start, end)
     }
 
     @Override
@@ -907,17 +704,6 @@ class TreeGrafter implements Serializable {
         this.ancestralNodeID = ancestralNodeID
     }
 
-    static Map asMap(TreeGrafter tg) {
-        return [
-            "ancestralNodeID":      tg.ancestralNodeID ? tg.ancestralNodeID : null,
-            "graftPoint":           tg.graftPoint,
-            "subfamilyAccession":   tg.subfamilyAccession,
-            "subfamilyName":        tg.subfamilyName,
-            "subfamilyDescription": tg.subfamilyDescription,
-            "proteinClass":         tg.proteinClass,
-        ]
-    }
-
     static TreeGrafter fromMap(Map data) {
         if (data == null) {
             return null
@@ -928,19 +714,6 @@ class TreeGrafter implements Serializable {
         tg.subfamilyName = data.subfamilyName
         tg.subfamilyDescription = data.subfamilyDescription
         tg.proteinClass = data.proteinClass
-        return tg
-    }
-
-    static TreeGrafter fromJsonNode(JsonNode jsonNode) {
-        if (jsonNode == null || jsonNode.isNull()) {
-            return null
-        }
-        TreeGrafter tg = new TreeGrafter(jsonNode.get("ancestralNodeID").asText().replaceAll('["\\\\"]', ''))
-        tg.graftPoint = jsonNode.has("graftPoint") ? jsonNode.get("graftPoint").asText(null) : null
-        tg.subfamilyAccession = jsonNode.has("subfamilyAccession") ? jsonNode.get("subfamilyAccession").asText(null) : null
-        tg.subfamilyName = jsonNode.has("subfamilyName") ? jsonNode.get("subfamilyName").asText(null) : null
-        tg.subfamilyDescription = jsonNode.has("subfamilyDescription") ? jsonNode.get("subfamilyDescription").asText(null) : null
-        tg.proteinClass = jsonNode.has("proteinClass") ? jsonNode.get("proteinClass").asText(null) : null
         return tg
     }
 }
@@ -954,25 +727,11 @@ class RepresentativeInfo implements Serializable {
         this.rank = rank
     }
 
-    static Map asMap(RepresentativeInfo ri) {
-        return ri ? ["type": ri.type, "rank": ri.rank] : null
-    }
-
     static RepresentativeInfo fromMap(Map data) {
         if (data == null) {
             return null
         }
         return new RepresentativeInfo(data.type, data.rank)
-    }
-
-    static RepresentativeInfo fromJsonNode(JsonNode jsonNode) {
-        if (jsonNode == null || jsonNode.isNull()) {
-            return null
-        }
-        String type = jsonNode.has("type") && !jsonNode.get("type").isNull() ? jsonNode.get("type").asText().replaceAll('["\\\\"]', '') : null
-        int rank = jsonNode.has("rank") && jsonNode.get("rank").isNumber() ? jsonNode.get("rank").asInt() : 0
-
-        return new RepresentativeInfo(type, rank)
     }
 }
 
@@ -989,27 +748,11 @@ class GoXRefs implements Serializable {
         this.id = id
     }
 
-    static Map asMap(GoXRefs go) {
-        return go ? ["name": go.name, "databaseName": go.databaseName, "category": go.category, "id": go.id] : null
-    }
-
     static GoXRefs fromMap(Map data) {
         if (data == null) {
             return null
         }
         return new GoXRefs(data.name, data.databaseName, data.category, data.id)
-    }
-
-    static GoXRefs fromJsonNode(JsonNode node) {
-        if (node == null || node.isNull()) {
-            return null
-        }
-        return new GoXRefs(
-                node.get("name").asText().replaceAll('["\\\\"]', ''),
-                node.get("databaseName").asText().replaceAll('["\\\\"]', ''),
-                node.get("category").asText().replaceAll('["\\\\"]', ''),
-                node.get("id").asText().replaceAll('["\\\\"]', '')
-        )
     }
 }
 
@@ -1024,25 +767,10 @@ class PathwayXRefs implements Serializable {
         this.id = id
     }
 
-    static Map asMap(PathwayXRefs pthwy) {
-        return pthwy ? ["name": pthwy.name, "databaseName": pthwy.databaseName, "id": pthwy.id] : null
-    }
-
     static PathwayXRefs fromMap(Map data) {
         if (data == null) {
             return null
         }
         return new PathwayXRefs(data.name, data.databaseName, data.id)
-    }
-
-    static PathwayXRefs fromJsonNode(JsonNode node) {
-        if (node == null || node.isNull()) {
-            return null
-        }
-        return new PathwayXRefs(
-                node.get("name").asText().replaceAll('["\\\\"]', ''),
-                node.get("databaseName").asText().replaceAll('["\\\\"]', ''),
-                node.get("id").asText().replaceAll('["\\\\"]', '')
-        )
     }
 }

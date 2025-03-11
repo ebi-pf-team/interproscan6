@@ -1,5 +1,4 @@
 import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
 
 process SEARCH_SMART {
     label 'medium', 'ips6_container'
@@ -9,7 +8,7 @@ process SEARCH_SMART {
     path hmmbindb
 
     output:
-    tuple val(meta), path("hmmpfam.out")
+    tuple val(meta), path("hmmpfam.out"), path(fasta)
 
     script:
     """
@@ -23,25 +22,14 @@ process PARSE_SMART {
     label 'local'
 
     input:
-    tuple val(meta), val(hmmpfam_out), val(seq_json)
+    tuple val(meta), val(hmmpfam_out), val(fasta)
     val hmmtxtdb
 
     output:
     tuple val(meta), path("smart.json")
 
     exec:
-    def jsonFile = new File(seq_json.toString())
-    def jsonSlurper = new JsonSlurper()
-    def sequences = jsonSlurper.parse(jsonFile)
-        .collectEntries{ seqId, obj ->
-            if (obj instanceof List) { // nucleotide sequences case
-                obj.collectEntries { seq ->
-                    [(seq.id): FastaSequence.fromMap(seq)]
-                }
-            } else {
-                [(seqId): FastaSequence.fromMap(obj)]
-            }
-        }
+    Map<String, String> sequences = FastaFile.parse(fasta.toString())  // [md5: sequence]
 
     def hmmLengths = HMMER2.parseHMM(hmmtxtdb.toString())
     def matches = HMMER2.parseOutput(hmmpfam_out.toString(), hmmLengths, "SMART")
