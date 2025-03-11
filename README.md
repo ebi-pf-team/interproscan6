@@ -122,7 +122,7 @@ nextflow run ebi-pf-team/interproscan6 \
 * `--pathways` - Include corresponding Pathway annotations in the final results.
 
 > [!IMPORTANT]
-> *--max-workers* is only applies when using the `local` profile (i.e. `-profile local`) it does **_not_** apply when running on a cluster.
+> *--max-workers* only applies when using the `local` profile (i.e. `-profile local`), it does **_not_** apply when running on a cluster.
 > IPS6 will always use a minimum or 2 CPUs, with at least 1 dedicated to the main workflow and 1 to run 
 > processes (exception for PRINTS member, which require 2 CPUs to run processes).
 
