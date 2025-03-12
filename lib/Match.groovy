@@ -78,6 +78,7 @@ class Match implements Serializable {
         match.included = data.included
         match.locations = data.locations.collect { Location.fromMap(it) }
         match.treegrafter = TreeGrafter.fromMap(data.treegrafter)
+        match.graphScan = data.graphScan
         match.representativeInfo = RepresentativeInfo.fromMap(data.representativeInfo)
         return match
     }
@@ -90,6 +91,25 @@ class Match implements Serializable {
         Location location = this.locations[locationIndex]
         location.queryAlignment = queryAlignment
         location.targetAlignment = targetAlignment
+    }
+
+    static String getHmmBounds(String hmmBounds) {
+        def boundsMapping = [
+                "[]"  : "COMPLETE",
+                "[."  : "N_TERMINAL_COMPLETE",
+                ".]"  : "C_TERMINAL_COMPLETE",
+                ".."  : "INCOMPLETE"
+        ]
+        return boundsMapping[hmmBounds]
+    }
+ 
+    static String getReverseHmmBounds(String hmmBounds) {
+        return [
+            "COMPLETE"            : "[]",
+            "N_TERMINAL_COMPLETE" : "[.",
+            "C_TERMINAL_COMPLETE" : ".]",
+            "INCOMPLETE"          : ".."
+        ][hmmBounds]
     }
 
     @Override
@@ -115,12 +135,13 @@ class Match implements Serializable {
 }
 
 class Signature implements Serializable {
+    // The order of the fields here determines their order in the final output files
     String accession
     String name
     String description
     String type
-    Entry entry
     SignatureLibraryRelease signatureLibraryRelease = new SignatureLibraryRelease(null, null)
+    Entry entry = null
 
     Signature(String accession) {
         this.accession = accession
@@ -421,25 +442,8 @@ class Location implements Serializable {
         loc.level = data.level
         loc.cigarAlignment = data.cigarAlignment
         loc.pvalue = data.pvalue
+        if (data.containsKey("motifNumber")) { loc.motifNumber = data.motifNumber }
         return loc
-    }
-
-    static String getHmmBounds(String hmmBounds) {
-        return [
-            "[]" : "COMPLETE",
-            "[." : "N_TERMINAL_COMPLETE",
-            ".]" : "C_TERMINAL_COMPLETE",
-            ".." : "INCOMPLETE"
-        ][hmmBounds]
-    }
-
-    static String getReverseHmmBounds(String hmmBounds) {
-        return [
-            "COMPLETE"            : "[]",
-            "N_TERMINAL_COMPLETE" : "[.",
-            "C_TERMINAL_COMPLETE" : ".]",
-            "INCOMPLETE"          : ".."
-        ][hmmBounds]
     }
 
     @Override

@@ -57,13 +57,13 @@ process XREFS {
                     }
 
                     // Update signature info
-                    if (!signatureInfo) {
+                    if (signatureInfo != null) {
                         match.signature.name = signatureInfo["name"]
                         match.signature.description = signatureInfo["description"]
                         String sigType = signatureInfo["type"]
                         match.signature.setType(sigType)
 
-                        if (!signatureInfo["representative"]) {
+                        if (signatureInfo["representative"] != null) {
                             match.representativeInfo = new RepresentativeInfo(
                                 signatureInfo["representative"]["type"],
                                 signatureInfo["representative"]["index"]

@@ -119,6 +119,8 @@ def addProteinNodes (String proteinMd5, Map proteinMatches, def xml, SeqDatabase
 def addMatchNode(String proteinMd5, Map match, def xml) {
     // Write an individual node representing a match. The structure is dependent on the memberDB.
     String memberDB = match.signature.signatureLibraryRelease.library.toLowerCase() ?: ""
+
+    // Define the name for the match node and it's attributes
     switch (memberDB) {
         case "antifam":
             matchNodeName = "hmmer3"
@@ -138,8 +140,8 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "coils":
-            matchNodeName = "COILS"
-            matchNodeAttributes = fmtDefaultMatchNode(match)
+            matchNodeName = "coils"
+            matchNodeAttributes = null
             break
         case "hamap":
             matchNodeName = "hmmer3"
@@ -187,7 +189,7 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "sfld":
-            matchNodeName = "SFLD"
+            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "signalp":
@@ -210,15 +212,14 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
 
     xml."$matchNodeName-match"(matchNodeAttributes) {
         xml.signature(signatureNodeAttributes) {
-            xml.signatureLibraryRelease {
-                xml.library(match.signature.signatureLibraryRelease.library)
-                xml.version(match.signature.signatureLibraryRelease.version)
-            }
+            xml.signatureLibraryRelease(
+                library: match.signature.signatureLibraryRelease.library,
+                version: match.signature.signatureLibraryRelease.version
+            )
             // GO TERMS AND PATHWAYS
         }
         xml."model-ac"(memberDB == "panther" ? match.treegrafter.subfamilyAccession : match.modelAccession)
-
-        addLocationNodes(matchNodeName, memberDB, proteinMd5, match, xml)
+        addLocationNodes(memberDB, proteinMd5, match, xml)
     }
 }
 
@@ -254,21 +255,20 @@ def fmtSuperfamilyMatchNode(Map match) {
     ]
 }
 
-// Formating the Signature node
-
 def fmtSignatureNode(Map match) {
-    def name = match.signature.name
-    def desc = match.signature.description
-    return [ac: match.signature.accession].with {
-       if (name) name = name
-       if (desc) desc = desc
-       it
-   }
+    def signatureNodeAttributes = [ac: match.signature.accession]
+    if (match.signature.name != null) {
+        signatureNodeAttributes.name = match.signature.name
+    }
+    if (match.signature.desc != null) {
+        signatureNodeAttributes.desc = match.signature.desc
+    }
+    return signatureNodeAttributes
 }
 
 // Formating and add Location nodes
 
-def addLocationNodes(String matchNodeName, String memberDB, String proteinMd5, Map match, def xml) {
+def addLocationNodes(String memberDB, String proteinMd5, Map match, def xml) {
     xml.locations {
         match.locations.each { loc ->
             def locationAttributes
@@ -277,25 +277,28 @@ def addLocationNodes(String matchNodeName, String memberDB, String proteinMd5, M
                     locationAttributes = fmtDefaultLocationNode(loc)
                     break
                 case "cath-funfam":
+                case "funfam":
+                    locationAttributes = fmtDefaultLocationNode(loc)
+                    break
                 case "cath-gene3d":
+                case "gene3d":
                     locationAttributes = fmtDefaultLocationNode(loc)
                     break
                 case "cdd":
                     locationAttributes = fmtCddLocationNode(match, loc)
                     break
                 case "coils":
-                    locationAttributes = []
+                    locationAttributes = fmtCoilsLocationNode(loc)
                     break
                 case "deeptmhmm":
                     locationAttributes = []
                     break
-                case "funfam":
-                    locationAttributes = fmtDefaultLocationNode(loc)
-                    break
                 case "hamap":
                     locationAttributes = fmtMinimalistLocationNode(loc)
                     break
+                case "mobidb lite":
                 case "mobidb-lite":
+                case "mobidb_lite":
                     locationAttributes = fmtMobidbLiteLocationNode(loc)
                     break
                 case "ncbifam":
@@ -311,6 +314,8 @@ def addLocationNodes(String matchNodeName, String memberDB, String proteinMd5, M
                     locationAttributes = []
                     break
                 case "pirsf":
+                    locationAttributes = fmtDefaultLocationNode(loc)
+                    break
                 case "pirsr":
                     locationAttributes = fmtDefaultLocationNode(loc)
                     break
@@ -340,21 +345,22 @@ def addLocationNodes(String matchNodeName, String memberDB, String proteinMd5, M
             }
 
             xml.location(locationAttributes) {
-                if (loc.containsKey("location-fragments") && loc["location-fragments"].size() > 0) {
-                    xml."$matchNodeName-fragment" {
-                        loc["location-fragments"].each { frag ->
-                            xml.start(frag.start)
-                            xml.end(frag.end)
-                            xml.dcStatus(frag.dcStatus)
+                if (loc.containsKey("fragments") && loc["fragments"].size() > 0) {
+                    xml."location-fragments" {
+                        loc.fragments.each { frag ->
+                            xml.fragment([
+                                start      : frag.start,
+                                end        : frag.end,
+                                "dc-status": frag.dcStatus
+                            ])
                         }
                     }
                 }
-
                 if (memberDB in ["hamap", "prosite patterns", "prosite profiles"]) {
                     xml.alignment(loc.targetAlignment ?: "")
                 }
                 if (loc.containsKey("sites") && loc.sites.size() > 0) {
-                    xml.addSiteNodes(loc.sites, memberDB, xml)
+                    addSiteNodes(loc.sites, memberDB, xml)
                 }
             }
         }
@@ -368,14 +374,14 @@ def fmtDefaultLocationNode(Map loc) {
         start          : loc.start,
         end            : loc.end,
         representative : loc.representative,
-        hmmStart       : loc.hmmStart,
-        hmmEnd         : loc.hmmEnd,
-        hmmLength      : loc.hmmLength,
-        hmmBounds      : loc.hmmBounds,
+        "hmm-start"    : loc.hmmStart,
+        "hmm-end"      : loc.hmmEnd,
+        "hmm-length"   : loc.hmmLength,
+        "hmm-bounds"   : Match.getHmmBounds(loc.hmmBounds),
         evalue         : loc.evalue,
         score          : loc.score,
-        envelopeStart  : loc.envelopeStart,
-        envelopeEnd    : loc.envelopeEnd
+        "env-start"    : loc.envelopeStart,
+        "env-end"      : loc.envelopeEnd
     ]
 }
 
@@ -398,6 +404,14 @@ def fmtCddLocationNode(Map match, Map loc) {
     ]
 }
 
+def fmtCoilsLocationNode(Map loc) {
+    return [
+        start          : loc.start,
+        end            : loc.end,
+        representative : loc.representative,
+    ]
+}
+
 def fmtMobidbLiteLocationNode(Map loc) {
     return [
         start              : loc.start,
@@ -412,12 +426,12 @@ def fmtPantherLocationNode(Map loc) {
         start          : loc.start,
         end            : loc.end,
         representative : loc.representative,
-        hmmStart       : loc.hmmStart,
-        hmmEnd         : loc.hmmEnd,
-        hmmLength      : loc.hmmLength,
-        hmmBounds      : loc.hmmBounds,
-        envelopeStart  : loc.envelopeStart,
-        envelopeEnd    : loc.envelopeEnd
+        "hmm-start"    : loc.hmmStart,
+        "hmm-end"      : loc.hmmEnd,
+        "hmm-length"   : loc.hmmLength,
+        "hmm-bounds"   : Match.getHmmBounds(loc.hmmBounds),
+        "env-start"    : loc.envelopeStart,
+        "env-end"      : loc.envelopeEnd
     ]
 }
 
@@ -448,10 +462,10 @@ def fmtSmartLocationNode(Map loc) {
         representative : loc.representative,
         evalue         : loc.evalue,
         score          : loc.score,
-        hmmStart       : loc.hmmStart,
-        hmmEnd         : loc.hmmEnd,
-        hmmLength      : loc.hmmLength,
-        hmmBounds      : loc.hmmBounds
+        "hmm-start"    : loc.hmmStart,
+        "hmm-end"      : loc.hmmEnd,
+        "hmm-length"   : loc.hmmLength,
+        "hmm-bounds"   : Match.getHmmBounds(loc.hmmBounds)
     ]
 }
 
@@ -461,7 +475,7 @@ def fmtSuperfamilyLocationNode(Map loc) {
         end            : loc.end,
         representative : loc.representative,
         evalue         : loc.evalue,
-        hmmLength      : loc.hmmLength
+        "hmm-length"   : loc.hmmLength
     ]
 }
 
@@ -470,13 +484,7 @@ def fmtSuperfamilyLocationNode(Map loc) {
 def addSiteNodes(locationSites, memberDB, xml) {
     xml."sites" {
         locationSites.each { siteMap ->
-            xml."$matchNodeName-site"(description: siteMap.description, numLocations: siteMap.numLocations) {
-                if(siteMap.group){ group(siteMap.group) }
-                if(siteMap.label){ label(siteMap.label) }
-                if (memberDB != "cdd") {
-                    hmmStart(siteMap.hmmStart)
-                    hmmEnd(siteMap.hmmEnd)
-                }
+            xml."site"(description: siteMap.description, numLocations: siteMap.numLocations) {
                 "site-locations" {
                     siteMap.siteLocations.each { siteLoc ->
                         xml."site-location"(
@@ -485,6 +493,12 @@ def addSiteNodes(locationSites, memberDB, xml) {
                             end     : siteLoc.end
                         )
                     }
+                }
+                if(siteMap.group){ group(siteMap.group) }
+                if(siteMap.label){ label(siteMap.label) }
+                if (memberDB != "cdd") {
+                    hmmStart(siteMap.hmmStart)
+                    hmmEnd(siteMap.hmmEnd)
                 }
             }
         }
