@@ -76,6 +76,7 @@ class Match implements Serializable {
         match.included = data.included
         match.locations = data.locations.collect { Location.fromMap(it) }
         match.treegrafter = TreeGrafter.fromMap(data.treegrafter)
+        match.graphScan = data.graphScan
         match.representativeInfo = RepresentativeInfo.fromMap(data.representativeInfo)
         return match
     }
@@ -430,6 +431,7 @@ class Location implements Serializable {
         loc.level = data.level
         loc.cigarAlignment = data.cigarAlignment
         loc.pvalue = data.pvalue
+        if (data.containsKey("motifNumber")) { loc.motifNumber = data.motifNumber }
         return loc
     }
 
