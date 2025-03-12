@@ -162,7 +162,7 @@ def writeMatch(String proteinMd5, Map match, JsonGenerator jsonWriter) {
             writeDefault(match, jsonWriter)
             break
         case "pirsr":
-            writeDefaultNoHmmBounds(match, jsonWriter)
+            writePirsr(match, jsonWriter)
             break
         case "prints":
             writePRINTS(match, jsonWriter)
@@ -174,7 +174,7 @@ def writeMatch(String proteinMd5, Map match, JsonGenerator jsonWriter) {
             writePROSITEprofiles(match, jsonWriter)
             break
         case "sfld":
-            writeDefaultNoHmmBounds(match, jsonWriter)
+            writeSFLD(match, jsonWriter)
             break
         case "signalp":
             writeSignalp(match, jsonWriter)
@@ -204,7 +204,7 @@ def writeDefault(Map match, JsonGenerator jsonWriter) {
                 "hmmStart"          : loc.hmmStart,
                 "hmmEnd"            : loc.hmmEnd,
                 "hmmLength"         : loc.hmmLength,
-                "hmmBounds"         : loc.hmmBounds,
+                "hmmBounds"         : Match.getHmmBounds(loc.hmmBounds),
                 "evalue"            : loc.evalue,
                 "score"             : loc.score,
                 "envelopeStart"     : loc.envelopeStart,
@@ -327,7 +327,7 @@ def writePANTHER(Map match, JsonGenerator jsonWriter) {
                 "hmmStart"          : loc.hmmStart,
                 "hmmEnd"            : loc.hmmEnd,
                 "hmmLength"         : loc.hmmLength,
-                "hmmBounds"         : loc.hmmBounds,
+                "hmmBounds"         : Match.getHmmBounds(loc.hmmBounds),
                 "evalue"            : loc.evalue,
                 "score"             : loc.score,
                 "envelopeStart"     : loc.envelopeStart,
@@ -335,6 +335,46 @@ def writePANTHER(Map match, JsonGenerator jsonWriter) {
                 "location-fragments": loc.fragments
             ]
         }
+    ])
+}
+
+def writePirsr(Map match, JsonGenerator jsonWriter) {
+    jsonWriter.writeObject([
+        "signature": match.signature,
+        "model-ac" : match.modelAccession,
+        "evalue"   : match.evalue,
+        "score"    : match.score,
+        "locations": match.locations.collect { loc ->
+            [
+                "start"             : loc.start,
+                "end"               : loc.end,
+                "representative"    : loc.representative,
+                "hmmStart"          : loc.hmmStart,
+                "hmmEnd"            : loc.hmmEnd,
+                "hmmLength"         : loc.hmmLength,
+                "score"             : loc.score,
+                "envelopeStart"     : loc.envelopeStart,
+                "envelopeEnd"       : loc.envelopeEnd,
+                "location-fragments": loc.fragments,
+                "sites"             : loc.sites.collect { site ->
+                    [
+                        "description": site.description,
+                        "numLocations": site.numLocations,
+                        "siteLocations": site.siteLocations.collect { siteLoc ->
+                            [
+                                "start"  : siteLoc.start,
+                                "end"    : siteLoc.end,
+                                "residue": siteLoc.residue
+                            ]
+                        },
+                        "label"   : site.label,
+                        "group"   : site.group,
+                        "hmmStart": site.hmmStart,
+                        "hmmEnd"  : site.hmmEnd
+                    ]
+                } // end of "sites"
+            ]
+        } // end of "locations"
     ])
 }
 
@@ -410,6 +450,46 @@ def writeSignalp(Map match, JsonGenerator jsonWriter) {
     ])
 }
 
+def writeSFLD(Map match, JsonGenerator jsonWriter) {
+     jsonWriter.writeObject([
+         "signature": match.signature,
+         "model-ac" : match.modelAccession,
+         "evalue"   : match.evalue,
+         "score"    : match.score,
+         "locations": match.locations.collect { loc ->
+             [
+                 "start"             : loc.start,
+                 "end"               : loc.end,
+                 "representative"    : loc.representative,
+                 "hmmStart"          : loc.hmmStart,
+                 "hmmEnd"            : loc.hmmEnd,
+                 "hmmLength"         : loc.hmmLength,
+                 "score"             : loc.score,
+                 "envelopeStart"     : loc.envelopeStart,
+                 "envelopeEnd"       : loc.envelopeEnd,
+                 "location-fragments": loc.fragments,
+                 "sites"             : loc.sites.collect { site ->
+                     [
+                         "description": site.description,
+                         "numLocations": site.numLocations,
+                         "siteLocations": site.siteLocations.collect { siteLoc ->
+                             [
+                                 "start"  : siteLoc.start,
+                                 "end"    : siteLoc.end,
+                                 "residue": siteLoc.residue
+                             ]
+                         },
+                         "label"   : site.label,
+                         "group"   : site.group,
+                         "hmmStart": site.hmmStart,
+                         "hmmEnd"  : site.hmmEnd
+                    ]
+                } // end of "sites"
+            ]
+        } // end of "locations"
+    ])
+}
+
 def writeSMART(Map match, JsonGenerator jsonWriter) {
     jsonWriter.writeObject([
         "signature": match.signature,
@@ -424,7 +504,7 @@ def writeSMART(Map match, JsonGenerator jsonWriter) {
                 "hmmStart"          : loc.hmmStart,
                 "hmmEnd"            : loc.hmmEnd,
                 "hmmLength"         : loc.hmmLength,
-                "hmmBounds"         : loc.hmmBounds,
+                "hmmBounds"         : Match.getHmmBounds(loc.hmmBounds),
                 "evalue"            : loc.evalue,
                 "score"             : loc.score,
                 "location-fragments": loc.fragments
