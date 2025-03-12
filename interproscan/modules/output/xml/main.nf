@@ -30,7 +30,7 @@ process WRITE_XML_OUTPUT {
                 matchFile = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
                 nucleicToProteinMd5 = seqDatabase.groupProteins(matchFile)
                 nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
-                    addNucleotideNode(nucleicMd5, proteinMd5s, matchFile, xml)
+                    addNucleotideNode(nucleicMd5, proteinMd5s, matchFile, xml, seqDatabase)
                 }
             } else {
                 matchFile = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
@@ -64,10 +64,10 @@ def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMat
     ntSeqData = seqDatabase.getSeqData(nucleicMd5, true)
     String sequence = ntSeqData[0].split('\t')[-1]
     xml."nucleotideNode" {
-        sequence(md5: nucleicMd5, sequence)
+        xml.sequence(md5: nucleicMd5, sequence)
 
         // 2. <xref id="id" name="id desc"/>
-        writeXref(seqData, xml)
+        writeXref(ntSeqData, xml)
 
         // 3. <orf end="", start="", strand="">
         proteinMd5s.each { proteinMd5 ->
@@ -77,11 +77,11 @@ def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMat
                 def proteinDesc = row.split("\t")[1]
                 def proteinSource = SOURCE_NT_PATTERN.matcher(proteinDesc)
                 assert proteinSource.matches()
-                orf(
+                xml.orf([
                     start  : proteinSource.group(1) as int,
                     end    : proteinSource.group(2) as int,
                     strand : proteinSource.group(3) as int < 4 ? "SENSE" : "ANTISENSE"
-                ) {
+                ]) {
                     // 4. <protein> ... <\protein>
                     addProteinNodes(proteinMd5, proteinMatches[proteinMd5], xml, seqDatabase)
                 }
