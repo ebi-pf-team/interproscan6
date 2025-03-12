@@ -93,25 +93,6 @@ class Match implements Serializable {
         location.targetAlignment = targetAlignment
     }
 
-    static String getHmmBounds(String hmmBounds) {
-        def boundsMapping = [
-                "[]"  : "COMPLETE",
-                "[."  : "N_TERMINAL_COMPLETE",
-                ".]"  : "C_TERMINAL_COMPLETE",
-                ".."  : "INCOMPLETE"
-        ]
-        return boundsMapping[hmmBounds]
-    }
- 
-    static String getReverseHmmBounds(String hmmBounds) {
-        return [
-            "COMPLETE"            : "[]",
-            "N_TERMINAL_COMPLETE" : "[.",
-            "C_TERMINAL_COMPLETE" : ".]",
-            "INCOMPLETE"          : ".."
-        ][hmmBounds]
-    }
-
     @Override
     public int hashCode() {
         int x = Objects.hash(modelAccession, sequenceLength, evalue, score, bias, signature, locations)
@@ -444,6 +425,25 @@ class Location implements Serializable {
         loc.pvalue = data.pvalue
         if (data.containsKey("motifNumber")) { loc.motifNumber = data.motifNumber }
         return loc
+    }
+
+    static String getHmmBounds(String hmmBounds) {
+        def boundsMapping = [
+                "[]"  : "COMPLETE",
+                "[."  : "N_TERMINAL_COMPLETE",
+                ".]"  : "C_TERMINAL_COMPLETE",
+                ".."  : "INCOMPLETE"
+        ]
+        return boundsMapping[hmmBounds]
+    }
+
+    static String getReverseHmmBounds(String hmmBounds) {
+        return [
+                "COMPLETE"            : "[]",
+                "N_TERMINAL_COMPLETE" : "[.",
+                "C_TERMINAL_COMPLETE" : ".]",
+                "INCOMPLETE"          : ".."
+        ][hmmBounds]
     }
 
     @Override

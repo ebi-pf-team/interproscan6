@@ -378,7 +378,7 @@ def fmtDefaultLocationNode(Map loc) {
         "hmm-start"    : loc.hmmStart,
         "hmm-end"      : loc.hmmEnd,
         "hmm-length"   : loc.hmmLength,
-        "hmm-bounds"   : Match.getHmmBounds(loc.hmmBounds),
+        "hmm-bounds"   : Location.getHmmBounds(loc.hmmBounds),
         evalue         : loc.evalue,
         score          : loc.score,
         "env-start"    : loc.envelopeStart,
@@ -430,7 +430,7 @@ def fmtPantherLocationNode(Map loc) {
         "hmm-start"    : loc.hmmStart,
         "hmm-end"      : loc.hmmEnd,
         "hmm-length"   : loc.hmmLength,
-        "hmm-bounds"   : Match.getHmmBounds(loc.hmmBounds),
+        "hmm-bounds"   : Location.getHmmBounds(loc.hmmBounds),
         "env-start"    : loc.envelopeStart,
         "env-end"      : loc.envelopeEnd
     ]
@@ -466,7 +466,7 @@ def fmtSmartLocationNode(Map loc) {
         "hmm-start"    : loc.hmmStart,
         "hmm-end"      : loc.hmmEnd,
         "hmm-length"   : loc.hmmLength,
-        "hmm-bounds"   : Match.getHmmBounds(loc.hmmBounds)
+        "hmm-bounds"   : Location.getHmmBounds(loc.hmmBounds)
     ]
 }
 
