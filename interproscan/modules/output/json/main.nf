@@ -185,6 +185,10 @@ def writeMatch(String proteinMd5, Map match, JsonGenerator jsonWriter) {
         case "superfamily":
             writeSUPERFAMILY(match, jsonWriter)
             break
+        case "tmhmm":
+        case "deeptmhmm":
+            writeMinimalist(match, jsonWriter)
+            break
         default:
             throw new UnsupportedOperationException("Unknown database '${memberDB}' for query protein with MD5 ${proteinMd5}")
     }
@@ -243,6 +247,8 @@ def writeCDD(Map match, JsonGenerator jsonWriter) {
     jsonWriter.writeObject([
         "signature": match.signature,
         "model-ac" : match.modelAccession,
+        "evalue"   : match.evalue,
+        "score"    : match.score,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
@@ -315,11 +321,12 @@ def writePANTHER(Map match, JsonGenerator jsonWriter) {
     jsonWriter.writeObject([
         "signature"   : match.signature,
         "model-ac"    : match.modelAccession,
+        "name"        : match.treegrafter.subfamilyDescription,
         "evalue"      : match.evalue,
         "score"       : match.score,
         "proteinClass": match.treegrafter.proteinClass,
         "graftPoint"  : match.treegrafter.graftPoint,
-        "locations": match.locations.collect { loc ->
+        "locations"   : match.locations.collect { loc ->
             [
                 "start"             : loc.start,
                 "end"               : loc.end,
@@ -328,8 +335,6 @@ def writePANTHER(Map match, JsonGenerator jsonWriter) {
                 "hmmEnd"            : loc.hmmEnd,
                 "hmmLength"         : loc.hmmLength,
                 "hmmBounds"         : Location.getHmmBounds(loc.hmmBounds),
-                "evalue"            : loc.evalue,
-                "score"             : loc.score,
                 "envelopeStart"     : loc.envelopeStart,
                 "envelopeEnd"       : loc.envelopeEnd,
                 "location-fragments": loc.fragments
@@ -442,9 +447,7 @@ def writeSignalp(Map match, JsonGenerator jsonWriter) {
                 "start"             : loc.start,
                 "end"               : loc.end,
                 "representative"    : loc.representative,
-                "pvalue"            : loc.pvalue,
-                "cleavageStart"     : loc.cleavageStart,
-                "cleavageEnd"       : loc.cleavageEnd
+                "pvalue"            : loc.score
             ]
         }
     ])

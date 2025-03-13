@@ -136,7 +136,7 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "cdd":
-            matchNodeName = "CDD"
+            matchNodeName = "cdd"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "coils":
@@ -150,15 +150,15 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
         case "mobidb lite":
         case "mobidb-lite":
         case "mobidb_lite":  // use groovy case fall to allow multiple options
-            matchNodeName = "Mobidb-Lite"
-            matchNodeAttributes = fmtDefaultMatchNode(match)
+            matchNodeName = "mobidb-lite"
+            matchNodeAttributes = null
             break
         case "ncbifam":
             matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "panther":
-            matchNodeName = "PANTHER"
+            matchNodeName = "panther"
             matchNodeAttributes = fmtPantherMatchNode(match)
             break
         case "pfam":
@@ -166,7 +166,7 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "phobius":
-            matchNodeName = "Phobius"
+            matchNodeName = "phobius"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "pirsf":
@@ -178,15 +178,15 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "prints":
-            matchNodeName = "PRINTS"
+            matchNodeName = "prints"
             matchNodeAttributes = fmtPrintsMatchNode(match)
             break
         case "prosite patterns":
-            matchNodeName = "PROSITE-patterns"
+            matchNodeName = "protsite-patterns"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "prosite profiles":
-            matchNodeName = "PROSITE-profiles"
+            matchNodeName = "prosite-profiles"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "sfld":
@@ -194,8 +194,8 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "signalp":
-            matchNodeName = "SignalP"
-            matchNodeAttributes = fmtDefaultMatchNode(match)
+            matchNodeName = "signalp"
+            matchNodeAttributes =  null
             break
         case "smart":
             matchNodeName = "hmmer3"
@@ -204,6 +204,11 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
         case "superfamily":
             matchNodeName = "hmmer3"
             matchNodeAttributes = fmtSuperfamilyMatchNode(match)
+            break
+        case "tmhmm":
+        case "deeptmhmm":
+            matchNodeName = "deeptmhmm"
+            matchNodeAttributes = null
             break
         default:
             throw new UnsupportedOperationException("Unknown database '${memberDB}' for query protein with MD5 ${proteinMd5}")
@@ -264,6 +269,9 @@ def fmtSignatureNode(Map match) {
     if (match.signature.desc != null) {
         signatureNodeAttributes.desc = match.signature.desc
     }
+    if (match.signature.type != null) {
+        signatureNodeAttributes.type = match.signature.type
+    }
     return signatureNodeAttributes
 }
 
@@ -289,7 +297,7 @@ def addLocationNodes(String memberDB, String proteinMd5, Map match, def xml) {
                     locationAttributes = fmtCddLocationNode(match, loc)
                     break
                 case "coils":
-                    locationAttributes = fmtCoilsLocationNode(loc)
+                    locationAttributes = fmMinimalistLoctationNode(loc)
                     break
                 case "deeptmhmm":
                     locationAttributes = []
@@ -312,7 +320,7 @@ def addLocationNodes(String memberDB, String proteinMd5, Map match, def xml) {
                     locationAttributes = fmtDefaultLocationNode(loc)
                     break
                 case "phobius":
-                    locationAttributes = []
+                    locationAttributes = fmtMinimalistLocationNode(loc)
                     break
                 case "pirsf":
                     locationAttributes = fmtDefaultLocationNode(loc)
@@ -333,13 +341,17 @@ def addLocationNodes(String memberDB, String proteinMd5, Map match, def xml) {
                     locationAttributes = fmtDefaultLocationNode(loc)
                     break
                 case "signalp":
-                    locationAttributes = fmtMinimalistLocationNode(loc)
+                    locationAttributes = fmtSignalpLocationNode(loc)
                     break
                 case "smart":
                     locationAttributes = fmtSmartLocationNode(loc)
                     break
                 case "superfamily":
                     locationAttributes = fmtSuperfamilyLocationNode(loc)
+                    break
+                case "tmhmm":
+                case "deeptmhmm":
+                    locationAttributes = fmMinimalistLoctationNode(loc)
                     break
                 default:
                     throw new UnsupportedOperationException("Unknown database for match ${matchId}")
@@ -405,7 +417,7 @@ def fmtCddLocationNode(Map match, Map loc) {
     ]
 }
 
-def fmtCoilsLocationNode(Map loc) {
+def fmMinimalistLoctationNode(Map loc) {
     return [
         start          : loc.start,
         end            : loc.end,
@@ -453,6 +465,15 @@ def fmtPrositePatternsLocationNode(Map loc) {
         end            : loc.end,
         representative : loc.representative,
         level          : loc.level,
+    ]
+}
+
+def fmtSignalpLocationNode(Map loc) {
+    return [
+        start          : loc.start,
+        end            : loc.end,
+        representative : loc.representative,
+        pvalue         : loc.score
     ]
 }
 
