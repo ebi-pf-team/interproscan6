@@ -62,12 +62,12 @@ process LOOKUP_MATCHES {
     if (success) {
         def jsonMatches = JsonOutput.toJson(calculatedMatches)
         new File(calculatedMatchesPath.toString()).write(JsonOutput.toJson(calculatedMatches))
-        if (!noLookupFasta.length() != 0) { new File(noLookupFastaPath.toString()).write(noLookupFasta.toString()) }
+        if (noLookupFasta.length() != 0) { new File(noLookupFastaPath.toString()).write(noLookupFasta.toString()) }
     } else {
         log.warn "An error occurred while querying the Matches API, analyses will be run locally"
         // when the connection fails, write out all sequences to "noLookup.fasta"
         new File(calculatedMatchesPath.toString()).write(JsonOutput.toJson([:]))
-        new File(fasta.toString()).copyTo(new File(noLookupFastaPath.toString()))
+        if (noLookupFasta.length() != 0) { new File(noLookupFastaPath.toString()).write(noLookupFasta.toString()) }
     }
 }
 
