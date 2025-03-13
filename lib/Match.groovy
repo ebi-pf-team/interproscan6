@@ -1,6 +1,5 @@
 class Match implements Serializable {
     String modelAccession
-    Integer sequenceLength
     Double evalue
     Double score
     Double bias
@@ -11,6 +10,9 @@ class Match implements Serializable {
 
     // PANTHER
     TreeGrafter treegrafter = null
+
+    // PIRSF
+    Integer sequenceLength = null
 
     // PRINTS
     String graphScan = null
@@ -89,16 +91,6 @@ class Match implements Serializable {
         Location location = this.locations[locationIndex]
         location.queryAlignment = queryAlignment
         location.targetAlignment = targetAlignment
-    }
-
-    static String getHmmBounds(String hmmBounds) {
-        def boundsMapping = [
-                "[]"  : "COMPLETE",
-                "[."  : "N_TERMINAL_COMPLETE",
-                ".]"  : "C_TERMINAL_COMPLETE",
-                ".."  : "INCOMPLETE"
-        ]
-        return boundsMapping[hmmBounds]
     }
 
     @Override
@@ -431,8 +423,27 @@ class Location implements Serializable {
         loc.level = data.level
         loc.cigarAlignment = data.cigarAlignment
         loc.pvalue = data.pvalue
-        if (data.containsKey("motifNumber")) { loc.motifNumber = data.motifNumber }
+        loc.motifNumber = data.motifNumber
         return loc
+    }
+
+    static String getHmmBounds(String hmmBounds) {
+        def boundsMapping = [
+                "[]"  : "COMPLETE",
+                "[."  : "N_TERMINAL_COMPLETE",
+                ".]"  : "C_TERMINAL_COMPLETE",
+                ".."  : "INCOMPLETE"
+        ]
+        return boundsMapping[hmmBounds]
+    }
+
+    static String getReverseHmmBounds(String hmmBounds) {
+        return [
+                "COMPLETE"            : "[]",
+                "N_TERMINAL_COMPLETE" : "[.",
+                "C_TERMINAL_COMPLETE" : ".]",
+                "INCOMPLETE"          : ".."
+        ][hmmBounds]
     }
 
     @Override
@@ -542,11 +553,11 @@ class Site implements Serializable {
         this.numLocations = siteLocations.size()
 
         for (SiteLocation loc: siteLocations) {
-            if (loc.start == -1 || loc.start < this.start) {
+            if (this.start == -1 || loc.start < this.start) {
                 this.start = loc.start
             }
 
-            if (loc.end == -1 || loc.end > this.end) {
+            if (this.end == -1 || loc.end > this.end) {
                 this.end = loc.end
             }
         }
@@ -584,10 +595,14 @@ class Site implements Serializable {
     }
 
     static Site fromMap(Map data) {
-        return new Site(
+        Site site = new Site(
                 data.description,
                 data.siteLocations.collect { SiteLocation.fromMap(it) }
         )
+        if (data.containsKey("label")) { site.label = data.label }
+        if (data.containsKey("group")) { site.label = data.group }
+        if (data.containsKey("hmmStart")) { site.label = data.hmmStart }
+        if (data.containsKey("hmmEnd")) { site.label = data.hmmEnd }
     }
 
     boolean isInRange(int start, int end) {

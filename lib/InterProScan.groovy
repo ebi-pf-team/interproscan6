@@ -13,12 +13,14 @@ class InterProScan {
         [
             name: "datadir",  // only required when using members with datafiles
             metavar: "<DATA-DIR>",
-            description: "path to data directory."
+            description: "path to data directory.",
+            canBeNull: true
         ],
         [
             name: "applications",
             metavar: "<APPLICATIONS>",
-            description: "comma-separated applications to scan the sequences with. Default: all."
+            description: "comma-separated applications to scan the sequences with. Default: all.",
+            canBeNull: true
         ],
         [
             name: "formats",
@@ -31,13 +33,14 @@ class InterProScan {
             description: "output directory where results will be saved. Default: current working directory."
         ],
         [
-            name: "disable-precalc",
-            description: "treat input sequences as DNA/RNA."
+            name: "offline",
+            description: "run InterProScan in offline mode, disabling queries to the InterPro Matches API. Pre-calculated matches for known sequences will not be retrieved, and analyses will be run locally."
         ],
         [
-            name: "precalc-url",
+            name: "matches-api-url",
             metavar: "<URL>",
-            description: "URL of the match lookup service. Default: https://www.ebi.ac.uk/interpro/match-lookup."
+            description: "override the default InterPro Matches API, hosted at EMBL-EBI. Use this option to specify the URL of an alternative Matches API instance.",
+            canBeNull: true
         ],
         [
             name: "nucleic",
@@ -59,11 +62,11 @@ class InterProScan {
             name: "max-workers",
             description: "define maximum number of workers available for the InterProScan when running locally."
         ],
-        [
-            name: "lookup-host",
-            description: "define host to lookup service, just change in case of using a local MLS database."
-        ],
-        // No description -> not displayed in the help message
+        /*
+        If an option's description is set to null, it will be hidden from the help message
+        and no "Unrecognised option" warning will be produced.
+        Use this for params defined in config files that should not be available on the command line
+        */
         [
             name: "batch-size",
             description: null
@@ -86,14 +89,6 @@ class InterProScan {
         ],
         [
             name: "lookup-service",
-            description: null
-        ],
-        [
-            name: "api-chunk-size",
-            description: null
-        ],
-        [
-            name: "max-retries",
             description: null
         ],
     ]
@@ -136,7 +131,7 @@ class InterProScan {
             if (allowedParams.contains(kebabParamName.toLowerCase())) {
                 def paramObj = this.PARAMS.find { it.name.toLowerCase() == kebabParamName.toLowerCase() }
                 assert paramObj != null
-                if (paramObj?.metavar != null && !(paramValue instanceof String)) {
+                if (paramObj?.metavar != null && !paramObj?.canBeNull && !(paramValue instanceof String)) {
                     log.error "'--${paramObj.name} ${paramObj.metavar}' is mandatory and cannot be empty."
                     System.exit(1)
                 }

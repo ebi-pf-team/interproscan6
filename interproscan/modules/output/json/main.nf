@@ -141,6 +141,7 @@ def writeMatch(String proteinMd5, Map match, JsonGenerator jsonWriter) {
         case "hamap":
             writeHAMAP(match, jsonWriter)
             break
+        case "mobidb lite":
         case "mobidb-lite":
         case "mobidb_lite":  // use groovy case fall to allow multiple options
             writeMobiDBlite(match, jsonWriter)
@@ -184,6 +185,10 @@ def writeMatch(String proteinMd5, Map match, JsonGenerator jsonWriter) {
         case "superfamily":
             writeSUPERFAMILY(match, jsonWriter)
             break
+        case "tmhmm":
+        case "deeptmhmm":
+            writeMinimalist(match, jsonWriter)
+            break
         default:
             throw new UnsupportedOperationException("Unknown database '${memberDB}' for query protein with MD5 ${proteinMd5}")
     }
@@ -203,7 +208,7 @@ def writeDefault(Map match, JsonGenerator jsonWriter) {
                 "hmmStart"          : loc.hmmStart,
                 "hmmEnd"            : loc.hmmEnd,
                 "hmmLength"         : loc.hmmLength,
-                "hmmBounds"         : Match.getHmmBounds(loc.hmmBounds),
+                "hmmBounds"         : Location.getHmmBounds(loc.hmmBounds),
                 "evalue"            : loc.evalue,
                 "score"             : loc.score,
                 "envelopeStart"     : loc.envelopeStart,
@@ -242,6 +247,8 @@ def writeCDD(Map match, JsonGenerator jsonWriter) {
     jsonWriter.writeObject([
         "signature": match.signature,
         "model-ac" : match.modelAccession,
+        "evalue"   : match.evalue,
+        "score"    : match.score,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
@@ -314,11 +321,12 @@ def writePANTHER(Map match, JsonGenerator jsonWriter) {
     jsonWriter.writeObject([
         "signature"   : match.signature,
         "model-ac"    : match.modelAccession,
+        "name"        : match.treegrafter.subfamilyDescription,
         "evalue"      : match.evalue,
         "score"       : match.score,
         "proteinClass": match.treegrafter.proteinClass,
         "graftPoint"  : match.treegrafter.graftPoint,
-        "locations": match.locations.collect { loc ->
+        "locations"   : match.locations.collect { loc ->
             [
                 "start"             : loc.start,
                 "end"               : loc.end,
@@ -326,9 +334,7 @@ def writePANTHER(Map match, JsonGenerator jsonWriter) {
                 "hmmStart"          : loc.hmmStart,
                 "hmmEnd"            : loc.hmmEnd,
                 "hmmLength"         : loc.hmmLength,
-                "hmmBounds"         : Match.getHmmBounds(loc.hmmBounds),
-                "evalue"            : loc.evalue,
-                "score"             : loc.score,
+                "hmmBounds"         : Location.getHmmBounds(loc.hmmBounds),
                 "envelopeStart"     : loc.envelopeStart,
                 "envelopeEnd"       : loc.envelopeEnd,
                 "location-fragments": loc.fragments
@@ -441,9 +447,7 @@ def writeSignalp(Map match, JsonGenerator jsonWriter) {
                 "start"             : loc.start,
                 "end"               : loc.end,
                 "representative"    : loc.representative,
-                "pvalue"            : loc.pvalue,
-                "cleavageStart"     : loc.cleavageStart,
-                "cleavageEnd"       : loc.cleavageEnd
+                "pvalue"            : loc.score
             ]
         }
     ])
@@ -503,7 +507,7 @@ def writeSMART(Map match, JsonGenerator jsonWriter) {
                 "hmmStart"          : loc.hmmStart,
                 "hmmEnd"            : loc.hmmEnd,
                 "hmmLength"         : loc.hmmLength,
-                "hmmBounds"         : Match.getHmmBounds(loc.hmmBounds),
+                "hmmBounds"         : Location.getHmmBounds(loc.hmmBounds),
                 "evalue"            : loc.evalue,
                 "score"             : loc.score,
                 "location-fragments": loc.fragments
@@ -569,7 +573,7 @@ def streamJson(String filePath, ObjectMapper mapper, Closure closure) {
     } catch (IOException e) {
         throw new JsonException("IO error writing file: $filePath\nException: $e\nCause: ${e.getCause()}", e)
     } catch (Exception e) {
-        throw new Exception("Error occured when writing Json file $filePath\nException: $e\nCause: ${e.getCause()}", e)
+        throw new Exception("Error occurred when writing Json file $filePath\nException: $e\nCause: ${e.getCause()}", e)
     } finally {
         if (generator != null) {
             generator.close()

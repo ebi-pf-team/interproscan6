@@ -33,6 +33,7 @@ workflow {
     formats         = INIT_PIPELINE.out.formats.val
     apps            = INIT_PIPELINE.out.apps.val
     signalpMode     = INIT_PIPELINE.out.signalpMode.val
+    matchesApiUrl   = INIT_PIPELINE.out.matchesApiUrl.val
 
     if (params.nucleic) {
         // Store the input seqs in the internal ips6 seq db
@@ -60,20 +61,12 @@ workflow {
     ch_seqs = INDEX_BATCHES(BUILD_BATCHES.out).flatMap { it } // flatMap so tuples are emitted one at a time
 
     matchResults = Channel.empty()
-    if (params.disablePrecalc) {
-        SCAN_SEQUENCES(
-            ch_seqs,
-            apps,
-            params.appsConfig,
-            data_dir
-        )
-        matchResults = SCAN_SEQUENCES.out
-    } else {
+    if (matchesApiUrl != null) {
         LOOKUP_MATCHES(
             ch_seqs,
             apps,
-            params.lookupService.apiChunkSize,
-            params.lookupService.lookupHost,
+            matchesApiUrl,
+            params.lookupService.chunkSize,
             params.lookupService.maxRetries
         )
 
@@ -90,8 +83,16 @@ workflow {
 
         def combined = LOOKUP_MATCHES.out[0].concat(expandedScan)
         matchResults = combined.groupTuple()
+    } else {
+        SCAN_SEQUENCES(
+            ch_seqs,
+            apps,
+            params.appsConfig,
+            data_dir
+        )
+        matchResults = SCAN_SEQUENCES.out
     }
-    // matchResults = [[meta, [member.json, member.json, member.json]]
+    // matchResults format: [[meta, [member1.json, member2.json, ..., memberN.json]]
 
     /* XREFS:
     Aggregate matches across all members for each sequence --> single JSON with all matches for the batch
