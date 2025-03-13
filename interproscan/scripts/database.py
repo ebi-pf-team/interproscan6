@@ -4,6 +4,7 @@ import re
 import sqlite3
 import sys
 
+from tests.unit_tests.test_inputs.xrefs.build_entries_json import seq_id
 
 ESL_TRANSLATE = re.compile(r"^>orf\d+\s+source=(.+?)\s+coords=\d+\.\.\d+\s+length=\d+\s+frame=\d\s+desc=.+$")
 
@@ -33,7 +34,8 @@ def populate_sequences(db_path, fasta, nucleic):
             if line.startswith(">"):
                 if current_sequence:
                     add_sequence(conn, current_sequence, nucleic)
-                seq_id, seq_desc = line.lstrip(">").rstrip("\n").split(" ", maxsplit=1)
+                seq_data = line.lstrip(">").rstrip("\n").split(" ", maxsplit=1)
+                seq_id, seq_desc = (seq_data[0], seq_data[1] if len(seq_data) > 1 else None)
                 current_sequence = {"id": seq_id, "description": seq_desc, "sequence": ""}
             else:
                 current_sequence["sequence"] += line.strip()
