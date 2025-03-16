@@ -388,7 +388,7 @@ def writePRINTS(Map match, JsonGenerator jsonWriter) {
         "signature": match.signature,
         "model-ac" : match.modelAccession,
         "evalue"   : match.evalue,
-        "graphscan": match.graphscan,
+        "graphscan": match.graphScan,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
