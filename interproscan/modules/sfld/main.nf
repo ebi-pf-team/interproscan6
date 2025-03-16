@@ -27,29 +27,29 @@ process POST_PROCESS_SFLD {
     label 'small'
 
     input:
-    tuple val(meta), val(hmmsearch_out), val(hmmsearch_dtbl), val(hmmsearch_alignment)
+    tuple val(meta), path(hmmsearch_out), val(hmmsearch_dtbl), val(hmmsearch_alignment)
     val site_info
 
     output:
-    tuple val(meta), path("sfld.tsv")
+    tuple val(meta), path("sfld.tsv"), path(hmmsearch_out)
 
     script:
     """
-    $projectDir/interproscan/bin/sfld/sfld_postprocess \
-        --alignment ${hmmsearch_alignment} \
-        --dom ${hmmsearch_dtbl} \
-        --hmmer-out ${hmmsearch_out} \
-        --site-info ${site_info} \
+    ${projectDir}/interproscan/bin/sfld/sfld_postprocess \
+        --alignment "${hmmsearch_alignment}" \
+        --dom "${hmmsearch_dtbl}" \
+        --hmmer-out "${hmmsearch_out}" \
+        --site-info "${site_info}" \
         --output sfld.tsv
+    # ${hmmsearch_out} "hmmsearch.out"
     """
 }
-
 
 process PARSE_SFLD {
     label 'local'
 
     input:
-    tuple val(meta), val(postprocess_out)
+    tuple val(meta), val(postprocess_out), val(hmmsearch_out)
     val hierarchy_db
 
     output:
@@ -57,7 +57,8 @@ process PARSE_SFLD {
 
     exec:
     def outputFilePath = task.workDir.resolve("sfld.json")
-    def sequences = parseOutput(postprocess_out.toString())
+    def (hmmLengths, hmmBounds) = getHmmData(hmmsearch_out.toString())
+    def sequences = parseOutput(postprocess_out.toString(), hmmLengths, hmmBounds)
     def hierarchy = parseHierarchy(hierarchy_db.toString())
     SignatureLibraryRelease library = new SignatureLibraryRelease("SFLD", null)
 
@@ -203,7 +204,30 @@ Map<String, Set<String>> parseHierarchy(String filePath) {
     return hierarchy
 }
 
-Map<String, Map<String, Match>> parseOutput(String outputFilePath) {
+List<Map> getHmmData(String outputFilePath) {
+    def matchesMap = HMMER3.parseOutput(outputFilePath.toString(), "AntiFam")  // proteinMd5: modelAccession: Match
+    def hmmLengths = [:]  // modelAccession: hmmLength
+    def hmmBounds  = [:]  // proteinMd5: modelAccession: (tuple representing loc): hmmbound
+    matchesMap.each { String sequenceId, matches ->
+        matches.each { String modelAccession, Match match ->
+            match.locations.each { Location loc ->
+                def locKey = [loc.start, loc.end, loc.hmmStart, loc.hmmEnd, loc.envelopeStart, loc.envelopeEnd]
+                hmmLengths[modelAccession] = loc.hmmLength
+                hmmBounds.computeIfAbsent(sequenceId) {     [:] }
+                         .computeIfAbsent(modelAccession) { [:] }
+                         .computeIfAbsent(locKey) {         loc.hmmBounds }
+            }
+        }
+    }
+    return [hmmLengths, hmmBounds]
+}
+
+Map<String, Map<String, Match>> parseOutput(
+    String outputFilePath,
+    Map<String, Integer> hmmLengthsMap,
+    Map<String, Map> hmmBoundsMap
+) {
+    // Parse the output TSV file from the SFLD postprocess bin
     def matches = [:]
     File file = new File(outputFilePath)
     file.withReader{ reader ->
@@ -222,14 +246,19 @@ Map<String, Map<String, Match>> parseOutput(String outputFilePath) {
                 break
             }
 
-            matches[sequenceId] = parseBlock(reader)
+            matches[sequenceId] = parseBlock(reader, sequenceId, hmmLengthsMap, hmmBoundsMap)
         }
     }
 
     return matches
 }
 
-Map<String, Match> parseBlock(Reader reader) {
+Map<String, Match> parseBlock(
+    Reader reader,
+    String sequenceId,
+    Map<String, Integer> hmmLengthsMap,
+    Map<String, Map> hmmBoundsMap     // proteinMd5: modelAccession: (tuple representing loc): hmmbound
+) {
     SignatureLibraryRelease library = new SignatureLibraryRelease("SFLD", null)
     boolean inDomains = false
     def domains = [:]
@@ -260,13 +289,20 @@ Map<String, Match> parseBlock(Reader reader) {
             Double domIEvalue = fields[12] as Double
             Double accuracy = fields[13] as Double
             Double domBias = fields[14] as Double
+            Integer hmmLength = hmmLengthsMap[modelAccession]
+            def locKey = [aliStart, aliEnd, hmmStart, hmmEnd, envStart, envEnd]
+            String hmmBounds = (hmmBoundsMap.containsKey(sequenceId) &&
+                    hmmBoundsMap[sequenceId].containsKey(modelAccession) &&
+                    hmmBoundsMap[sequenceId][modelAccession] != null) ?
+                    hmmBoundsMap[sequenceId][modelAccession][locKey]?.toString() :
+                    null
 
             if (aliStart <= aliEnd && hmmStart <= hmmEnd && envStart <= envEnd) {
                 Match match = domains.computeIfAbsent(modelAccession, k -> {
                     Signature signature = new Signature(modelAccession, library)
                     return new Match(modelAccession, seqEvalue, seqScore, seqBias, signature)
                 });
-                Location location = new Location(aliStart, aliEnd, hmmStart, hmmEnd, null, null,
+                Location location = new Location(aliStart, aliEnd, hmmStart, hmmEnd, hmmLength, hmmBounds,
                         envStart, envEnd, domIEvalue, domScore, domBias)
                 match.addLocation(location)
             }
