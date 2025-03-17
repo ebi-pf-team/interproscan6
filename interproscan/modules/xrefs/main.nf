@@ -9,6 +9,7 @@ process XREFS {
     tuple val(meta), val(membersMatches)
     val apps
     val dataDir
+    val databasesFile
     val entriesFile
     val gotermFilePrefix
     val pathwaysFilePrefix
@@ -21,9 +22,13 @@ process XREFS {
 
     exec:
     // Load entries data. NOTE: The entries, go terms and pathway files are too large for JsonSlurper to handle.
-    String entriesPath = "${dataDir}/${entriesFile}"
-    def (entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null]
+    def interProDataDir = dataDir
+    def (databaseInfo, entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null, null]
     if (dataDir.toString().trim()) {  // datadir is not needed when exclusively running members with no interpro data
+        String databasesPath = "${interProDataDir}/${databasesFile}"
+        File databasesJson = new File(databasesPath)
+        databaseInfo = new ObjectMapper().readValue(databasesJson, Map)
+        String entriesPath = "${interProDataDir}/${entriesFile}"
         File entriesJson = new File(entriesPath)
         entries = new ObjectMapper().readValue(entriesJson, Map)
         if (addGoterms) (ipr2go, goInfo) = loadXRefFiles(gotermFilePrefix, dataDir)
@@ -43,12 +48,12 @@ process XREFS {
                     seqEntry[modelAcc] = match
                 } else {
                     String signatureAcc = match.signature.accession
-                    def signatureInfo = entries["entries"][signatureAcc] ?: entries["entries"][modelAcc]
+                    def signatureInfo = entries[signatureAcc] ?: entries[modelAcc]
 
                     // Update library version
                     def version = (match.signature.signatureLibraryRelease.version == "null") ? null : match.signature.signatureLibraryRelease.version
                     if (!version && signatureInfo != null) {
-                        match.signature.signatureLibraryRelease.version = entries["databases"][signatureInfo["database"]]
+                        match.signature.signatureLibraryRelease.version = databaseInfo[signatureInfo["database"]]
                     }
 
                     // Handle PANTHER data
@@ -73,7 +78,7 @@ process XREFS {
                         // Handle InterPro data
                         String interproAcc = signatureInfo["integrated"]
                         if (interproAcc != null) {
-                             def entryInfo = entries["entries"][interproAcc]
+                             def entryInfo = entries[interproAcc]
                              assert entryInfo != null
                              match.signature.entry = new Entry(
                                  interproAcc, entryInfo["name"], entryInfo["description"], entryInfo["type"]
@@ -114,9 +119,9 @@ def updatePantherData(def match, def dataDir, def paintAnnoDir, def signatureAcc
             match.treegrafter.graftPoint = (nodeData[3] == "null") ? null : nodeData[3]
         }
     }
-    if (entries["entries"][signatureAcc]) {
-        match.treegrafter.subfamilyName = entries["entries"][signatureAcc]["name"]
-        match.treegrafter.subfamilyDescription = entries["entries"][signatureAcc]["description"]
+    if (entries[signatureAcc]) {
+        match.treegrafter.subfamilyName = entries[signatureAcc]["name"]
+        match.treegrafter.subfamilyDescription = entries[signatureAcc]["description"]
     }
 }
 
@@ -142,8 +147,9 @@ def addXRefs(Match match, String interproAcc, def ipr2go, def goInfo, def ipr2pa
 }
 
 def String getInterProVersion(Path directory) {
+    // Used during the INIT subworkflow
     ObjectMapper objectMapper = new ObjectMapper();
-    File file = new File(new File(directory.toString(), "xrefs"), "entries.json")
+    File file = new File(new File(directory.toString(), "xrefs"), "databases.json")
     Map<String, Object> metadata = objectMapper.readValue(file, Map.class);
-    return metadata.databases["InterPro"]
+    return metadata["InterPro"]
 }

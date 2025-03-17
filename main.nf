@@ -105,6 +105,7 @@ workflow {
         matchResults,
         apps,
         data_dir,
+        params.xRefsConfig.databases,
         params.xRefsConfig.entries,
         params.xRefsConfig.goterms,
         params.xRefsConfig.pathways,
