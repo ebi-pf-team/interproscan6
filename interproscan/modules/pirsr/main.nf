@@ -42,6 +42,9 @@ process PARSE_PIRSR {
     hmmerMatches.each { seqId, matches ->
         def filteredSeqMatches = [:]
         matches.each { modelAccession, match ->
+            // set the signature name, which defaults to null in the HMMER3 parser
+            match.signature.name = modelAccession
+
             List<Location> sortedLocations = match.locations.sort { loc ->
                 [loc.evalue, -loc.score]  // sorting by evalue ASC, score DESC
             }
