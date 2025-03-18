@@ -111,7 +111,6 @@ workflow INIT_PIPELINE {
         }
     }
 
-
     matchesApiUrl = _matchesApiUrl
     datadir = _datadir
 
