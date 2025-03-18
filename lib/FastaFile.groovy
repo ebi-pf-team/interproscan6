@@ -31,7 +31,7 @@ class FastaFile {
 
         // Check for generally illegal chars
         String alphabet = isNucleic ? NUCLEIC_ALPHABET : PROTEIN_ALPHABET
-        cmd = "grep -v '^>' $fastaFilePath | grep -En '[^$alphabet]'"
+        cmd = "grep -v '^>' $fastaFilePath | grep -En '[^$alphabet${alphabet.toLowerCase()}]'"
         String grepOut = searchFile(cmd)
         if (grepOut) {
             errorMsg += "Forbidden characters found in $fastaFilePath on lines: $grepOut\n"
@@ -42,7 +42,7 @@ class FastaFile {
             def forbiddenChars = appsConfig[app].invalid_chars ?: ""
             forbiddenChars = forbiddenChars.toSet()  // remove duplicates
             forbiddenChars.each { String forbiddenChar ->
-                cmd = "grep -En '^[^>].*[$forbiddenChar${forbiddenChar.toUpperCase()}]' $fastaFilePath"
+                cmd = "grep -En '^[^>].*[$forbiddenChar${forbiddenChar.toLowerCase()}]' $fastaFilePath"
                 grepOut = searchFile(cmd)
                 if (grepOut) {
                     errorMsg += "$app forbidden character '$forbiddenChar' found in $fastaFilePath on lines: $grepOut\n"
