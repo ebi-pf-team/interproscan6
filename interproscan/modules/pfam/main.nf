@@ -207,7 +207,7 @@ def stockholmDatParser(String pfamADatFile) {
         } else if (line.startsWith("#=GF NE")) {
             String nestedAcc = line.split()[2]
             parsedDat[accession]?.nested?.add(nestedAcc) ?:
-                (parsedDat[accession] = [nested: ([nestedAcc] as Set)])
+                (parsedDat[accession] = [nested: ([nestedAcc])])
          } else if (line.startsWith("#=GF CL")) {
             String claAcc = line.split()[2]
             if (parsedDat[accession]) {
@@ -221,7 +221,7 @@ def stockholmDatParser(String pfamADatFile) {
     parsedDat.each { acc, info ->
         def nestedNames = info.nested ?: []
         def nestedAccessions = nestedNames.collect { name2acc[it] }.findAll { it != null }
-        info.nested = nestedAccessions as List
+        info.nested = nestedAccessions.unique()
     }
 
     return parsedDat
