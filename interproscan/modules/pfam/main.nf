@@ -135,7 +135,7 @@ process PARSE_PFAM {
                             fragmentDcStatus = null
                         }
 
-                        boolean twoActualRegions = false
+                        boolean areSeparateFrags = false
                         if (fragment['start'] <= newLocationStart) {
                             newLocationStart = fragment['end'] + 1
                             fragmentDcStatus = "N_TERMINAL_DISC"
