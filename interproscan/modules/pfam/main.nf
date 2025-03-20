@@ -34,7 +34,7 @@ process PARSE_PFAM {
     exec:
     def outputFilePath = task.workDir.resolve("pfam.json")
     def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "Pfam")
-    Map<String, List<String>> dat = stockholmDatParser(datPath)
+    Map<String, Map<String, Object>> dat = stockholmDatParser(datPath)  // [modelAcc: [clan: str, nested: [str]]]
     Map<String, Map<String, Match>> filteredMatches = [:]
     minLength = 8
 
