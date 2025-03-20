@@ -24,21 +24,25 @@ process PARSE_PFAM {
 
     input:
     tuple val(meta), val(hmmsearch_out)
-    val seedPath
-    val clanPath
     val datPath
 
     output:
     tuple val(meta), path("pfam.json")
 
     exec:
+    int MINLENGTH = 8  // minimum length of a fragment
     def outputFilePath = task.workDir.resolve("pfam.json")
     def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "Pfam")
     Map<String, Map<String, Object>> dat = stockholmDatParser(datPath)  // [modelAcc: [clan: str, nested: [str]]]
     Map<String, Map<String, Match>> filteredMatches = [:]
-    minLength = 8
 
-    // filter matches
+    /* Filter matches
+         When the current match to previously evaluated Pfam matches (that we decided to keep), we ONLY ignore a match if:
+            - the match overlaps another match,
+            - both matches belong to the same clan AND
+            - one of the matches is NOT nested in the other
+    */
+
     hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
         // sorting matches by evalue ASC, score DESC to keep the best matches
          // Separate locations such that each location is treated as an independent match
@@ -66,20 +70,20 @@ process PARSE_PFAM {
         allMatches.each { match ->
             boolean keep = true
             Map<String, List<String>> candidateMatch = dat[match.modelAccession] ?: [:]
-            String candidateClan = candidateMatch?.["clan"]
+            String candidateClan = candidateMatch?.clan
             filteredMatches[seqId].each { filteredMatch -> // iterates through the matches already chosen
                 Map<String, List<String>> filteredMatchInfo = dat[filteredMatch.modelAccession] ?: [:]
-                String filteredMatchClan = filteredMatchInfo?.["clan"]
+                String filteredMatchClan = filteredMatchInfo?.clan
                 if (candidateClan == filteredMatchClan) {  // check if both are on the same clan
                     boolean overlapped = isOverlapping(
                         match.locations[0].start, match.locations[0].end,
                         filteredMatch.locations[0].start, filteredMatch.locations[0].end
                     )
                     if (overlapped) {
-                        List<String> candidateNested = candidateMatch?.["nested"] ?: []
-                        List<String> filteredNested = filteredMatchInfo?.["nested"] ?: []
-                        boolean matchesAreNested = (candidateNested.contains(filteredMatch.modelAccession) || filteredNested.contains(match.modelAccession))
-                        if (!matchesAreNested) {
+                        List<String> candidateNested = candidateMatch?.nested ?: []
+                        List<String> filteredNested = filteredMatchInfo?.nested ?: []
+                        // check if candidates are NOT nested
+                        if (!(candidateNested.contains(filteredMatch.modelAccession) || filteredNested.contains(match.modelAccession))) {
                             keep = false
                         }
                     }
@@ -96,7 +100,7 @@ process PARSE_PFAM {
     processedMatches = filteredMatches.collectEntries { seqId, matches ->
         def matchesAggregated = [:]
         matches.each { match ->
-            List<String> nestedModels = dat.get(match.modelAccession)?.nested ?: []
+            List<String> nestedModels = dat[match.modelAccession]?.nested ?: []
             if (nestedModels) {
                 List<Map<String, Integer>> locationFragments = matches.findAll { otherMatch ->
                     otherMatch.modelAccession in nestedModels &&
@@ -145,7 +149,7 @@ process PARSE_PFAM {
                             fragmentDcStatus = "C_TERMINAL_DISC"
                         }
 
-                        if (newLocationEnd - newLocationStart + 1 >= minLength) {
+                        if (newLocationEnd - newLocationStart + 1 >= MINLENGTH) {
                             fragments.add(new LocationFragment(newLocationStart, newLocationEnd, fragmentDcStatus))
                             rawDiscontinuousMatch.locations[0].fragments = fragments
                         }
@@ -154,7 +158,7 @@ process PARSE_PFAM {
                             //deal with final region
                             fragmentDcStatus = "N_TERMINAL_DISC"
                             rawDiscontinuousMatch.locations[0].end = finalLocationEnd
-                            if (finalLocationEnd - newLocationStart + 1 >= minLength) {
+                            if (finalLocationEnd - newLocationStart + 1 >= MINLENGTH) {
                                 fragments.add(new LocationFragment(newLocationStart, finalLocationEnd, fragmentDcStatus))
                                 rawDiscontinuousMatch.locations[0].fragments = fragments
                             }
@@ -165,8 +169,8 @@ process PARSE_PFAM {
                         }
                         newMatchesFromFragment << rawDiscontinuousMatch
                     }
-                    // filter out fragment matches that are shorter than minLength
-                    rawDiscontinuousMatches = newMatchesFromFragment.findAll { it.locations[0].end - it.locations[0].start + 1 >= minLength }
+                    // filter out fragment matches that are shorter than MINLENGTH
+                    rawDiscontinuousMatches = newMatchesFromFragment.findAll { it.locations[0].end - it.locations[0].start + 1 >= MINLENGTH }
                 }
                 rawDiscontinuousMatches.each { rawMatch ->
                     if (matchesAggregated.containsKey(rawMatch.modelAccession)) {
@@ -175,12 +179,8 @@ process PARSE_PFAM {
                         matchesAggregated[rawMatch.modelAccession] = rawMatch
                     }
                 }
-            } else if (match.locations[0].end - match.locations[0].start + 1 >= minLength) {  // filter out matches that are shorter than minLength
-                if (matchesAggregated.containsKey(match.modelAccession)) {
-                    matchesAggregated[match.modelAccession].locations << match.locations[0]
-                } else {
-                    matchesAggregated[match.modelAccession] = match
-                }
+            } else if (match.locations[0].end - match.locations[0].start + 1 >= MINLENGTH) {  // filter out matches that are shorter than MINLENGTH
+                matchesAggregated.computeIfAbsent(match.modelAccession, { match }).locations << match.locations[0]
             }
         }
 
