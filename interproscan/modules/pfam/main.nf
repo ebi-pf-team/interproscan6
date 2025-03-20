@@ -34,34 +34,90 @@ process PARSE_PFAM {
     def outputFilePath = task.workDir.resolve("pfam.json")
     def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "Pfam")
     Map<String, Map<String, Object>> dat = stockholmDatParser(datPath)  // [modelAcc: [clan: str, nested: [str]]]
-    Map<String, Map<String, Match>> filteredMatches = [:]
 
-    /* Filter matches
-         When the current match to previously evaluated Pfam matches (that we decided to keep), we ONLY ignore a match if:
+    def filteredMatches = filterMatches(hmmerMatches, dat)
+    def processedMatches = buildFragments(dat, filteredMatches, MINLENGTH)
+
+    json = JsonOutput.toJson(processedMatches)
+    new File(outputFilePath.toString()).write(json)
+}
+
+def stockholmDatParser(String pfamADatFile) {
+    /* Retrieve nested models and clan classifications.
+    E.g. [ PF00026:[nested:[PF03489, PF05184], clan:CL0129], PF06826:[clan:CL0064, nested:[]] ]
+    */
+    Map<String, String> name2acc = [:]
+    Map<String, List<String>> parsedDat = [:]
+    String name = null
+    String accession = null
+    new File(pfamADatFile).eachLine { rawLine ->
+        def line = decode(rawLine.bytes)
+        if (line.startsWith("#=GF ID")) {
+            name = line.split()[2]
+        } else if (line.startsWith("#=GF AC")) {
+            accession = line.split()[2].split("\\.")[0]
+            name2acc[name] = accession
+        } else if (line.startsWith("#=GF NE")) {
+            String nestedAcc = line.split()[2]
+            parsedDat[accession]?.nested?.add(nestedAcc) ?: (parsedDat[accession] = [nested: [nestedAcc]])
+         } else if (line.startsWith("#=GF CL")) {
+            String claAcc = line.split()[2]
+            parsedDat.computeIfAbsent(accession, { [clan: claAcc] }).clan = claAcc
+        }
+    }
+    // convert nested 'names' to 'acc'
+    parsedDat.each { acc, info ->
+        def nestedNames = info.nested ?: []
+        def nestedAccessions = nestedNames.collect { name2acc[it] }.findAll { it != null }
+        info.nested = nestedAccessions.unique()
+    }
+
+    return parsedDat
+}
+
+def decode(byte[] b) {
+    try {
+        return new String(b, "UTF-8").trim()
+    } catch (Exception e) {
+        return new String(b, "ISO-8859-1").trim()
+    }
+}
+
+def isOverlapping(location1Start, location1End, location2Start, location2End) {
+    Math.max(location1Start, location2Start) <= Math.min(location1End, location2End)
+}
+
+def flatMatchLocations(matches) {
+    // Separate locations such that each location is treated as an independent match
+    matches.collectMany { modelAccession, match ->
+        modelAccession = modelAccession.split("\\.")[0]
+        match.locations.collect { location ->
+            Match matchInfo = new Match(
+                modelAccession,
+                match.evalue,
+                match.score,
+                match.bias,
+                match.signature
+            )
+            matchInfo.locations = [location]
+            matchInfo.signature.accession = modelAccession
+            return matchInfo
+        }
+    }
+}
+
+def filterMatches(Map<String, Map<String, Match>> hmmerMatches, Map<String, Map<String, Object>> dat) {
+    /*
+        When compare a match with the previously evaluated Pfam matches, we ONLY ignore a match if:
             - the match overlaps another match,
             - both matches belong to the same clan AND
             - one of the matches is NOT nested in the other
     */
+    Map<String, List<Match>> filteredMatches = [:]
+    hmmerMatches.each { seqId, matches ->
+         List<Match> allMatches = flatMatchLocations(matches)
 
-    hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
-        // sorting matches by evalue ASC, score DESC to keep the best matches
-         // Separate locations such that each location is treated as an independent match
-         def allMatches = matches.collectMany { modelAccession, match ->
-            modelAccession = modelAccession.split("\\.")[0]
-            match.locations.collect { location ->
-                Match matchInfo = new Match(
-                                modelAccession,
-                                match.evalue,
-                                match.score,
-                                match.bias,
-                                match.signature
-                            )
-                matchInfo.locations = [location]
-                matchInfo.signature.accession = modelAccession
-                return matchInfo
-            }
-        }
-        // Sort matches by evalue ASC, score DESC
+        // Sort matches by evalue ASC, score DESC to keep the best matches
         allMatches.sort { a, b ->
             (a.locations[0].evalue <=> b.locations[0].evalue) ?: -(a.locations[0].score <=> b.locations[0].score)
         }
@@ -93,11 +149,13 @@ process PARSE_PFAM {
                 filteredMatches[seqId] << match
             }
         }
-        [seqId: filteredMatches[seqId]]
     }
+    return filteredMatches
+}
 
-    // build fragments
-    processedMatches = filteredMatches.collectEntries { seqId, matches ->
+def buildFragments(Map<String, Map<String, Object>> dat, Map<String, Map<String, Match>> filteredMatches, int MINLENGTH) {
+    Map<String, Map<String, Match>> processedMatches = [:]
+    filteredMatches.each { seqId, matches ->
         def matchesAggregated = [:]
         matches.each { match ->
             List<String> nestedModels = dat[match.modelAccession]?.nested ?: []
@@ -183,55 +241,7 @@ process PARSE_PFAM {
                 matchesAggregated.computeIfAbsent(match.modelAccession, { match }).locations << match.locations[0]
             }
         }
-
-        [seqId: matchesAggregated]
+        processedMatches[seqId] = matchesAggregated
     }
-
-    json = JsonOutput.toJson(processedMatches)
-    new File(outputFilePath.toString()).write(json)
-}
-
-Map<String, Map<String, Object>> stockholmDatParser(String pfamADatFile) {
-    /* Retrieve nested models and clan classifications.
-    E.g. [ PF00026:[nested:[PF03489, PF05184], clan:CL0129], PF06826:[clan:CL0064, nested:[]] ]
-    */
-    Map<String, String> name2acc = [:]
-    Map<String, List<String>> parsedDat = [:]
-    String name = null
-    String accession = null
-    new File(pfamADatFile).eachLine { rawLine ->
-        def line = decode(rawLine.bytes)
-        if (line.startsWith("#=GF ID")) {
-            name = line.split()[2]
-        } else if (line.startsWith("#=GF AC")) {
-            accession = line.split()[2].split("\\.")[0]
-            name2acc[name] = accession
-        } else if (line.startsWith("#=GF NE")) {
-            String nestedAcc = line.split()[2]
-            parsedDat[accession]?.nested?.add(nestedAcc) ?: (parsedDat[accession] = [nested: [nestedAcc]])
-         } else if (line.startsWith("#=GF CL")) {
-            String claAcc = line.split()[2]
-            parsedDat.computeIfAbsent(accession, { [clan: claAcc] }).clan = claAcc
-        }
-    }
-    // convert nested 'names' to 'acc'
-    parsedDat.each { acc, info ->
-        def nestedNames = info.nested ?: []
-        def nestedAccessions = nestedNames.collect { name2acc[it] }.findAll { it != null }
-        info.nested = nestedAccessions.unique()
-    }
-
-    return parsedDat
-}
-
-def decode(byte[] b) {
-    try {
-        return new String(b, "UTF-8").trim()
-    } catch (Exception e) {
-        return new String(b, "ISO-8859-1").trim()
-    }
-}
-
-def isOverlapping(location1Start, location1End, location2Start, location2End) {
-    Math.max(location1Start, location2Start) <= Math.min(location1End, location2End)
+    return processedMatches
 }
