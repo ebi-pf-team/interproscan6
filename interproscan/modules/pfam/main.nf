@@ -192,7 +192,10 @@ process PARSE_PFAM {
     new File(outputFilePath.toString()).write(json)
 }
 
-def stockholmDatParser(String pfamADatFile) {
+Map<String, Map<String, Object>> stockholmDatParser(String pfamADatFile) {
+    /* Retrieve nested models and clan classifications.
+    E.g. [ PF00026:[nested:[PF03489, PF05184], clan:CL0129], PF06826:[clan:CL0064, nested:[]] ]
+    */
     Map<String, String> name2acc = [:]
     Map<String, List<String>> parsedDat = [:]
     String name = null
