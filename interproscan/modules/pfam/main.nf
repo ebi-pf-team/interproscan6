@@ -69,7 +69,7 @@ process PARSE_PFAM {
             String candidateClan = candidateMatch?.["clan"]
             filteredMatches[seqId].each { filteredMatch -> // iterates through the matches already chosen
                 Map<String, List<String>> filteredMatchInfo = dat[filteredMatch.modelAccession] ?: [:]
-                String filteredMatchClan = filteredMatchInfo?.get("clan", null)
+                String filteredMatchClan = filteredMatchInfo?.["clan"]
                 if (candidateClan && candidateClan == filteredMatchClan) {  // check if both are on the same clan
                     boolean matchOverlapFiltered = isOverlapping(
                         match.locations[0].start, match.locations[0].end,
