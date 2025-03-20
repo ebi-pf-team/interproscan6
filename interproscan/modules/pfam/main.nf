@@ -215,11 +215,7 @@ Map<String, Map<String, Object>> stockholmDatParser(String pfamADatFile) {
                 (parsedDat[accession] = [nested: ([nestedAcc])])
          } else if (line.startsWith("#=GF CL")) {
             String claAcc = line.split()[2]
-            if (parsedDat[accession]) {
-                parsedDat[accession].clan = claAcc
-            } else {
-                parsedDat[accession] = [clan: claAcc]
-            }
+            parsedDat.computeIfAbsent(accession, { [clan: claAcc] }).clan = claAcc
         }
     }
     // convert nested 'names' to 'acc'
