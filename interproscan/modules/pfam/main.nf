@@ -187,7 +187,7 @@ process PARSE_PFAM {
             }
         }
 
-        [(seqId): matchesAggregated]
+        [seqId: matchesAggregated]
     }
 
     json = JsonOutput.toJson(processedMatches)
