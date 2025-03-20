@@ -76,8 +76,8 @@ process PARSE_PFAM {
                         filteredMatch.locations[0].start, filteredMatch.locations[0].end
                     )
                     if (matchOverlapFiltered) {
-                        List<String> candidateNested = candidateMatch.get("nested", [])
-                        List<String> filteredNested = filteredMatchInfo.get("nested", [])
+                        List<String> candidateNested = candidateMatch?.["nested"] ?: []
+                        List<String> filteredNested = filteredMatchInfo?.["nested"] ?: []
                         boolean matchesAreNested = (candidateNested.contains(filteredMatch.modelAccession) || filteredNested.contains(match.modelAccession))
                         if (!matchesAreNested) {
                             keep = false
