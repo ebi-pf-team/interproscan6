@@ -66,7 +66,7 @@ process PARSE_PFAM {
         allMatches.each { match ->
             boolean keep = true
             Map<String, List<String>> candidateMatch = dat[match.modelAccession] ?: [:]
-            String candidateClan = candidateMatch?.get("clan", null)
+            String candidateClan = candidateMatch?.["clan"]
             filteredMatches[seqId].each { filteredMatch -> // iterates through the matches already chosen
                 Map<String, List<String>> filteredMatchInfo = dat[filteredMatch.modelAccession] ?: [:]
                 String filteredMatchClan = filteredMatchInfo?.get("clan", null)
