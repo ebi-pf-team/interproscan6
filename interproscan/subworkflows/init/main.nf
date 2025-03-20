@@ -1,6 +1,3 @@
-include { getInfo            } from "../../modules/lookup"
-include { getInterProVersion } from "../../modules/xrefs"
-
 workflow INIT_PIPELINE {
     main:
     // Params validation
@@ -19,6 +16,8 @@ workflow INIT_PIPELINE {
         log.error error
         exit 1
     }
+
+    // Download data - if selected
 
     // Validate the data dir and application data files if needed by any members
     // e.g. mobidblite and coils do no need additional data files
@@ -84,33 +83,10 @@ workflow INIT_PIPELINE {
     } else if (params.offline) {
         _matchesApiUrl = null
     } else {
-        _matchesApiUrl = params.matchesApiUrl ?: params.lookupService.url
-        info = getInfo(_matchesApiUrl)
-        if (info == null) {
-            log.warn "An error occurred while querying the Matches API; analyses will be run locally"
-            _matchesApiUrl = null
-        } else {
-            def apiVersion = info.api ?: "X.Y.Z"
-            def majorVersion = apiVersion.split("\\.")[0]
-
-            if (majorVersion != "0") {
-                def msg = "${workflow.manifest.name} ${workflow.manifest.version}" +
-                    " is not compatible with the Matches API at ${_matchesApiUrl};" +
-                    " analyses will be run locally"
-                log.warn msg
-                _matchesApiUrl = null
-            } else if (_datadir) {
-                def iprVersion = getInterProVersion(_datadir)
-                if (iprVersion != info.release) {
-                    def msg = "InterPro version mismatch (local: ${iprVersion}, Matches API: ${info.release});" +
-                        " pre-calulated matches will not be retrieved, and analyses will be run locally"
-                    log.warn msg
-                    _matchesApiUrl = null
-                }
-            }
-        }
+        _matchesApiUrl = InterPro.getMatchesApiUrl(
+            params.matchesApiUrl, params.lookupService.url, _datadir, workflow.manifest, log
+        )
     }
-
 
     matchesApiUrl = _matchesApiUrl
     datadir = _datadir

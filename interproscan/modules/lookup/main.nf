@@ -27,11 +27,11 @@ process LOOKUP_MATCHES {
     def md5List = sequences.keySet().toList()
     def chunks = md5List.collate(chunkSize)
 
-    String baseUrl = sanitizeURL(url.toString())
+    String baseUrl = InterPro.sanitizeURL(url.toString())
     boolean success = true
     for (chunk in chunks) {
         String data = JsonOutput.toJson([md5: chunk])
-        def response = httpRequest("${baseUrl}/matches", data, maxRetries, true)
+        def response = InterPro.httpRequest("${baseUrl}/matches", data, maxRetries, true, log)
 
         if (response != null) {
             response.results.each {
@@ -68,70 +68,6 @@ process LOOKUP_MATCHES {
         // when the connection fails, write out all sequences to "noLookup.fasta"
         new File(calculatedMatchesPath.toString()).write(JsonOutput.toJson([:]))
         if (noLookupFasta.length() != 0) { new File(noLookupFastaPath.toString()).write(noLookupFasta.toString()) }
-    }
-}
-
-def String sanitizeURL(String url) {
-    return url.replaceAll(/\/+$/, '')
-}
-
-def Map getInfo(String baseUrl) {
-    return httpRequest("${sanitizeURL(baseUrl)}/info", null, 0, true)
-}
-
-def httpRequest(String urlString, String data, int maxRetries, boolean verbose) {
-    int attempts = 0
-    boolean isPost = data != null && data.length() > 0
-    HttpURLConnection connection = null
-    while (attempts < maxRetries + 1) {
-        attempts++
-
-        try {
-            URL url = new URL(urlString)
-            connection = (HttpURLConnection) url.openConnection()
-            connection.connectTimeout = 5000
-            connection.readTimeout = 5000
-            if (isPost) {
-                connection.doOutput = true
-                connection.requestMethod = "POST"
-                connection.setRequestProperty("Content-Type", "application/json")
-                connection.setRequestProperty("Accept", "application/json")
-                connection.outputStream.withWriter("UTF-8") { writer ->
-                    writer << data
-                }
-                connection.outputStream.flush()
-            } else {
-                connection.requestMethod = "GET"
-            }
-
-            int responseCode = connection.responseCode
-            if (responseCode >= 200 && responseCode < 300) {
-                String responseText = connection.inputStream.getText("UTF-8")
-                return new JsonSlurper().parseText(responseText)
-            } else {
-                if (verbose) {
-                    def errorMsg = connection.errorStream ? connection.errorStream.getText("UTF-8") : ""
-                    log.warn "Received HTTP ${responseCode} for ${urlString}"
-                }
-                return null
-            }
-        } catch (java.net.ConnectException | java.net.UnknownHostException e) {
-            if (verbose) {
-                log.warn "Connection error for ${urlString}: ${e.message}"
-            }
-            return null
-        } catch (java.net.SocketTimeoutException e) {
-            if (verbose) {
-                log.warn "Timeout error for ${urlString}; attempt ${attempts} / ${maxRetries + 1}"
-            }
-        } catch (Exception e) {
-            if (verbose) {
-                log.warn "Unexpected error for ${urlString}: ${e.message}"
-            }
-            return null
-        } finally {
-            connection?.disconnect()
-        }
     }
 }
 

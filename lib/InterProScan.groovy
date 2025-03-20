@@ -88,6 +88,10 @@ class InterProScan {
             description: null
         ],
         [
+            name: "ftp-server",
+            description: null
+        ],
+        [
             name: "lookup-service",
             description: null
         ],
