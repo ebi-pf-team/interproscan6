@@ -131,9 +131,6 @@ process PARSE_PFAM {
                             return
                         }
 
-                        if (fragmentDcStatus == "CONTINUOUS") {
-                            fragmentDcStatus = null
-                        }
 
                         boolean areSeparateFrags = false
                         if (fragment['start'] <= newLocationStart) {
