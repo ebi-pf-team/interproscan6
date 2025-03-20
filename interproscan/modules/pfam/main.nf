@@ -57,6 +57,7 @@ process PARSE_PFAM {
                 return matchInfo
             }
         }
+        // Sort matches by evalue ASC, score DESC
         allMatches.sort { a, b ->
             (a.locations[0].evalue <=> b.locations[0].evalue) ?: -(a.locations[0].score <=> b.locations[0].score)
         }
