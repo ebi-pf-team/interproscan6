@@ -89,7 +89,7 @@ process PARSE_PFAM {
                 filteredMatches[seqId] << match
             }
         }
-        [(seqId): filteredMatches[seqId]]
+        [seqId: filteredMatches[seqId]]
     }
 
     // build fragments
