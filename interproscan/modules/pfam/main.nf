@@ -97,7 +97,7 @@ process PARSE_PFAM {
         def matchesAggregated = [:]
         matches.each { match ->
             List<String> nestedModels = dat.get(match.modelAccession)?.nested ?: []
-            if (nestedModels && !nestedModels.isEmpty()) {
+            if (nestedModels) {
                 List<Map<String, Integer>> locationFragments = matches.findAll { otherMatch ->
                     otherMatch.modelAccession in nestedModels &&
                     isOverlapping(otherMatch.locations[0].start, otherMatch.locations[0].end,
