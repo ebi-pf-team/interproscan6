@@ -41,7 +41,8 @@ process PARSE_PFAM {
     // filter matches
     hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
         // sorting matches by evalue ASC, score DESC to keep the best matches
-        def allMatches = matches.collectMany { modelAccession, match ->
+         // Separate locations such that each location is treated as an independent match
+         def allMatches = matches.collectMany { modelAccession, match ->
             modelAccession = modelAccession.split("\\.")[0]
             match.locations.collect { location ->
                 Match matchInfo = new Match(
