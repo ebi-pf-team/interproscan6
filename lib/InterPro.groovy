@@ -5,6 +5,11 @@ import java.net.URL
 import com.fasterxml.jackson.databind.ObjectMapper
 
 class InterPro {
+    static boolean checkCompatibility() {
+        // Check InterPro and InterProScan versions are compatible ???
+        return null
+    }
+
     static String getDatabaseVersion(database, directory) {
         // Retrieve the database version from xrefs/databases.json
         // database may be a Path or string
@@ -15,11 +20,7 @@ class InterPro {
         return metadata.databases[database]
     }
 
-    static Map getInfo(String baseUrl, log) {
-        return httpRequest("${sanitizeURL(baseUrl)}/info", null, 0, true, log)
-    }
-
-    static httpRequest(String urlString, String data, int maxRetries, boolean verbose, log) {
+    static httpRequest(String urlString, String data, int maxRetries, boolean verbose, log, json = true) {
         int attempts = 0
         boolean isPost = data != null && data.length() > 0
         HttpURLConnection connection = null
@@ -47,7 +48,7 @@ class InterPro {
                 int responseCode = connection.responseCode
                 if (responseCode >= 200 && responseCode < 300) {
                     String responseText = connection.inputStream.getText("UTF-8")
-                    return new JsonSlurper().parseText(responseText)
+                    return json ? new JsonSlurper().parseText(responseText) : responseText
                 } else {
                     if (verbose) {
                         def errorMsg = connection.errorStream ? connection.errorStream.getText("UTF-8") : ""
@@ -73,35 +74,6 @@ class InterPro {
                 connection?.disconnect()
             }
         }
-    }
-
-    static String getMatchesApiUrl(matchesApiUrl, lookupServiceUrl, datadir, workflowManifest, log) {
-        String _matchesApiUrl = matchesApiUrl ?: lookupServiceUrl
-        Map info = getInfo(_matchesApiUrl, log)
-
-        if (info == null) {
-            log.warn("An error occurred while querying the Matches API; analyses will be run locally")
-            _matchesApiUrl = null
-        } else {
-            def apiVersion = info.api ?: "X.Y.Z"
-            def majorVersion = apiVersion.split("\\.")[0]
-
-            if (majorVersion != "0") {
-                log.warn("${workflowManifest.name} ${workflowManifest.version}" +
-                        " is not compatible with the Matches API at ${_matchesApiUrl};" +
-                        " analyses will be run locally")
-                _matchesApiUrl = null
-            } else if (datadir) {
-                def iprVersion = getDatabaseVersion("InterPro", datadir)
-                if (iprVersion != info.release) {
-                    log.warn("InterPro version mismatch (local: ${iprVersion}, Matches API: ${info.release});" +
-                            " pre-calulated matches will not be retrieved, and analyses will be run locally")
-                    _matchesApiUrl = null
-                }
-            }
-        }
-
-        return _matchesApiUrl
     }
 
     static String sanitizeURL(String url) {

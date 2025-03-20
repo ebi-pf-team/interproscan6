@@ -71,6 +71,34 @@ process LOOKUP_MATCHES {
     }
 }
 
+String getMatchesApiUrl(matchesApiUrl, lookupServiceUrl, datadir, workflowManifest) {
+    String _matchesApiUrl = matchesApiUrl ?: lookupServiceUrl
+    // Get MLS metadata: api (version), release, release_date
+    Map info = InterPro.httpRequest("${sanitizeURL(baseUrl)}/info", null, 0, true, log)
+    if (info == null) {
+        log.warn "An error occurred while querying the Matches API; analyses will be run locally"
+        _matchesApiUrl = null
+    } else {
+        def apiVersion = info.api ?: "X.Y.Z"
+        def majorVersion = apiVersion.split("\\.")[0]
+
+        if (majorVersion != "0") {
+            log.warn "${workflowManifest.name} ${workflowManifest.version}" +
+                    " is not compatible with the Matches API at ${_matchesApiUrl};" +
+                    " analyses will be run locally"
+            _matchesApiUrl = null
+        } else if (datadir) {
+            def iprVersion = getDatabaseVersion("InterPro", datadir)
+            if (iprVersion != info.release) {
+                log.warn "InterPro version mismatch (local: ${iprVersion}, Matches API: ${info.release});" +
+                        " pre-calulated matches will not be retrieved, and analyses will be run locally"
+                _matchesApiUrl = null
+            }
+        }
+    }
+    return _matchesApiUrl
+}
+
 def Map transformMatch(Map match) {
     // * operator - spread contents of a map or collecion into another map or collection
     return [

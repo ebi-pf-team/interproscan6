@@ -1,3 +1,6 @@
+include { DOWNLOAD_INTERPRO } from "../download"
+include { getMatchesApiUrl  } from "../../modules/lookup"
+
 workflow INIT_PIPELINE {
     main:
     // Params validation
@@ -18,6 +21,7 @@ workflow INIT_PIPELINE {
     }
 
     // Download data - if selected
+    DOWNLOAD_INTERPRO(apps, params.appsConfig, params.datadir)
 
     // Validate the data dir and application data files if needed by any members
     // e.g. mobidblite and coils do no need additional data files
@@ -83,7 +87,7 @@ workflow INIT_PIPELINE {
     } else if (params.offline) {
         _matchesApiUrl = null
     } else {
-        _matchesApiUrl = InterPro.getMatchesApiUrl(
+        _matchesApiUrl = getMatchesApiUrl(
             params.matchesApiUrl, params.lookupService.url, _datadir, workflow.manifest, log
         )
     }
