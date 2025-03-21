@@ -74,67 +74,64 @@ workflow INIT_PIPELINE {
         def _interproVersion = null
         def _interproDir = ""
         def _versionsMaps = new JsonSlurper().parse(new File(_versionsFile.toString())) // E.g. [6.0: [102.0, 103.0, 104.0]]
+
         if (!_versionsMaps.containsKey(_iprScanVersion)) {
             log.error "InterProScan version ${_iprScanVersion} is not listed in ${_versions}"
             exit 1
         }
 
         if (params.interpro == "latest") {
-            // Get the list of compatible InterPro releases
             def _compatibleVersions = _versionsMaps[_iprScanVersion]*.toFloat()
-
-            // Check which InterPro releases are already in the datadir, if any
             def _interproDir = new File(_datadir.resolve("interpro").toString())
-            if (_interproDir.exists() && _interproDir.isDirectory()) {
-                def _dirs = _interproDir.listFiles()
-                            .findAll { it.isDirectory() }
-                            .collect { it.name.toFloat }
-                            .findAll { it in _compatibleVersions }
-                if (!_dirs) {
-                    // No compatible InterPro releases are stored in the data dir
-                    if (params.download) {
-                        download = true
-                    } else {
-                        // No compatible InterPro releases and --download is not enabled
-                        log.error ("No compatible InterPro releases are stored in the data dir ${_datadir}.\n" +
-                                   "Compatible releases: ${_compatibleVersions.join(', ')}\n" +
-                                   "Please ensure that the data dir is correctly populated or use --download")
-                        exit 1
-                    }
-                } else {
-                    _latestDir = _dirs.max()
-                    if (_latestDir < _compatibleVersions.max()) {
-                        if (params.download) {
-                            _interproVersion = _compatibleVersions.max()
-                            download = true
-                        } else {
-                            _interproVersion = _dirs.max()
-                            log.info("A newer compatible InterPro release (${_compatibleVersions.max()}) is available.\n" +
-                                     "Tip: Use the '--download' option to automatically fetch the latest compatible InterPro release.")
-                        }
-                    } else {
-                        _interproVersion = _compatibleVersions.max()
-                    }
-                }
-            } else {
-                // _interproDir does not exist
-                if (params.download) {
-                    _interproVersion = _compatibleVersions
-                    download = true
-                } else {
+
+            if (!_interproDir.exists() || !_interproDir.isDirectory() {
+                if (!params.download) {
                     log.error ("No 'interpro' directory was found in the data directory ${_datadir}\n" +
                                "Please ensure that the data dir is correctly populated or use --download")
-                    )
                     exit 1
                 }
+                _interproVersion = _compatibleVersions.max()
+                download = true
+                return
+            }
+
+            // Check which InterPro releases are already in the datadir, if any
+            def _dirs = _interproDir.listFiles()
+                        .findAll { it.isDirectory() }
+                        .collect { it.name.toFloat }
+                        .findAll { it in _compatibleVersions }
+
+            if (_dirs.isEmpty()) {
+                if (!params.download) {
+                    log.error ("No compatible InterPro releases are stored in the data dir ${_datadir}.\n" +
+                               "Compatible releases: ${_compatibleVersions.join(', ')}\n" +
+                               "Please ensure that the data dir is correctly populated or use --download")
+                    exit 1
+                }
+                _interproVersion = _compatibleVersions.max()
+                download = true
+                return
+            }
+
+            def _latestDir = _dirs.max()
+            if (_latestDir < _compatibleVersions.max()) {
+                if (params.download) {
+                    _interproVersion = _compatibleVersions.max()
+                    download = true
+                } else {
+                    _interproVersion = _dirs.max()
+                    log.info("A newer compatible InterPro release (${_compatibleVersions.max()}) is available.\n" +
+                             "Tip: Use the '--download' option to automatically fetch the latest compatible InterPro release.")
+                }
+            } else {
+                _interproVersion = _compatibleVersions.max()
             }
         } else {
-            // Using the user selected InterPro release. But first check it is compatible with the Iprscan version
+            // Using the user selected InterPro release. But first check it is compatible with the IprScan version
             if (_versionsMaps[_iprScanVersion].contains(params.interpro.toString())) {
                 _interproVersion = params.interpro.toString()
             } else {
-                log.error ("Interpro version ${params.interpro} is not compatible with InterProScan " +
-                           "version ${_iprScanVersion}")
+                log.error "Interpro version ${params.interpro} is not compatible with InterProScan version ${_iprScanVersion}"
                 exit 1
             }
         }
