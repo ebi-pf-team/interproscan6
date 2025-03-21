@@ -55,6 +55,13 @@ class InterProScan {
             description: "include pathway mapping in output files."
         ],
         [
+            name: "download",
+            description: ("Download data for the selected applications. " +
+                    "If `<DATA-DIR>/xrefs` exists, InterProScan will use the existing InterPro data. " +
+                    "Otherwise, the latest compatible InterPro release will be downloaded."
+            )
+        ],
+        [
             name: "help",
             description: "print the help message and exit."
         ],
@@ -225,6 +232,8 @@ class InterProScan {
 
     static validateAppData(List<String> appsToRun, Path datadir, Map appsConfig) {
         def errorMsg = appsToRun.collectMany { appName ->
+            def appVersion =
+            def appDir =
             appsConfig[appName].collect { key, value ->
                 if (this.DATA_TYPE["FILE"].contains(key)) {
                     if (!resolveFile(datadir.resolve(value).toString())) {
