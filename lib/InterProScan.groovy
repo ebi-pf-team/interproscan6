@@ -230,28 +230,32 @@ class InterProScan {
         return [appsToRun.toSet().toList(), null]
     }
 
-    static validateAppData(List<String> appsToRun, Path datadir, Map appsConfig) {
+    static validateAppData(List<String> appsToRun, Path datadir, Map appsConfig, Boolean returnSet=false) {
+        def missingApps = [] as Set // only returned if returnList is true
         def errorMsg = appsToRun.collectMany { appName ->
             def appVersion =
             def appDir =
             appsConfig[appName].collect { key, value ->
                 if (this.DATA_TYPE["FILE"].contains(key)) {
                     if (!resolveFile(datadir.resolve(value).toString())) {
+                        missingApps.add(appName)
                         return "${appName}: file: '${key}': ${value ?: 'null'}"
                     }
                 } else if (this.DATA_TYPE["DIR"].contains(key)) {
                     if (!value) {
+                        missingApps.add(appName)
                         return "${appName}: dir: '${key}': 'null'"
                     }
                     Path dirPath = this.LICENSED_SOFTWARE.contains(appName) ? Paths.get(value) : datadir.resolve(value)
                     if (!Files.exists(dirPath) || !Files.isDirectory(dirPath)) {
+                        missingApps.add(appName)
                         return "${appName}: dir: '${key}': ${value ?: 'null'}"
                     }
                 }
                 return null
             }.findAll { it }
         }.join('\n')
-        return errorMsg ? "Could not find the following data files\n${errorMsg}" : null
+        return returnSet ? missingApps : (errorMsg ? "Could not find the following data files\n${errorMsg}" : null)
     }
 
     static validateXrefFiles(Path datadir, Map xRefsConfig, boolean goterms, boolean pathways) {

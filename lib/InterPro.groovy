@@ -20,7 +20,7 @@ class InterPro {
         return metadata.databases[database]
     }
 
-    static httpRequest(String urlString, String data, int maxRetries, boolean verbose, log, json = true) {
+    static httpRequest(String urlString, String data, int maxRetries, boolean verbose, log) {
         int attempts = 0
         boolean isPost = data != null && data.length() > 0
         HttpURLConnection connection = null
@@ -48,7 +48,7 @@ class InterPro {
                 int responseCode = connection.responseCode
                 if (responseCode >= 200 && responseCode < 300) {
                     String responseText = connection.inputStream.getText("UTF-8")
-                    return json ? new JsonSlurper().parseText(responseText) : responseText
+                    return new JsonSlurper().parseText(responseText)
                 } else {
                     if (verbose) {
                         def errorMsg = connection.errorStream ? connection.errorStream.getText("UTF-8") : ""
