@@ -70,7 +70,7 @@ workflow INIT_PIPELINE {
     // Sequences validation
     (error, numSequences) = FastaFile.validate(params.input, params.nucleic, params.appsConfig, apps)
     if (error) {
-        log.error error
+        log.error "Illegal characters found in ${params.input}\n$error"
         exit 1
     } else if (!numSequences) {
         log.error "No FASTA sequences found in ${params.input}"
@@ -110,7 +110,6 @@ workflow INIT_PIPELINE {
             }
         }
     }
-
 
     matchesApiUrl = _matchesApiUrl
     datadir = _datadir
