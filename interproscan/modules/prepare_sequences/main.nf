@@ -1,4 +1,4 @@
-process POPULATE_SEQ_DATABASE {
+process LOAD_SEQUENCES {
     // Populate a local sqlite3 database with sequences from the pipeline's input FASTA file.
     label         'local', 'ips6_container'
     errorStrategy 'terminate'
