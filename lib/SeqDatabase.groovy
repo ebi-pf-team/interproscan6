@@ -34,7 +34,7 @@ class SeqDatabase {
                 """
             def result = this.query(proteinQuery)
             result.each { ntSeqId ->
-                nucleicRelationships.computeIfAbsent(ntSeqId, { [] as Set } )
+                nucleicRelationships.computeIfAbsent(ntSeqId, { [] as Set })
                 nucleicRelationships[ntSeqId].add(proteinMd5)
             }
         }
@@ -63,7 +63,6 @@ class SeqDatabase {
                    LEFT JOIN PROTEIN_SEQUENCE AS S ON P.protein_md5 = S.protein_md5
                    WHERE P.protein_md5 = '$md5';"""
         }
-        def result = this.query(seqQuery)
-        return result
+        return this.query(seqQuery)
     }
 }
