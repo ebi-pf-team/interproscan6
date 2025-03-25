@@ -478,10 +478,6 @@ def writeSFLD(Map match, JsonGenerator jsonWriter) {
                                  "residue": siteLoc.residue
                              ]
                          },
-                         "label"   : site.label,
-                         "group"   : site.group,
-                         "hmmStart": site.hmmStart,
-                         "hmmEnd"  : site.hmmEnd
                     ]
                 } // end of "sites"
             ]
