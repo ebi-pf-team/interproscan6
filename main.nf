@@ -59,7 +59,6 @@ workflow {
     fastaList = BUILD_BATCHES.out.collect()
     // Convert a list (or single file path) to a list of tuples containing indexed fasta file paths
     ch_seqs = fastaList
-        .collect()
         .map { fastaList -> fastaList.indexed() } // creates a map-like object
         .flatMap()
         .map { entry -> [entry.key, entry.value] } // Convert to tuple [index, fasta]
