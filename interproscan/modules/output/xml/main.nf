@@ -516,12 +516,6 @@ def addSiteNodes(locationSites, memberDB, xml) {
                         )
                     }
                 }
-                if(siteMap.group){ group(siteMap.group) }
-                if(siteMap.label){ label(siteMap.label) }
-                if (memberDB != "cdd") {
-                    hmmStart(siteMap.hmmStart)
-                    hmmEnd(siteMap.hmmEnd)
-                }
             }
         }
     }
