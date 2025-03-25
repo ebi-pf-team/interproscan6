@@ -599,10 +599,6 @@ class Site implements Serializable {
                 data.description,
                 data.siteLocations.collect { SiteLocation.fromMap(it) }
         )
-        if (data.containsKey("label")) { site.label = data.label }
-        if (data.containsKey("group")) { site.label = data.group }
-        if (data.containsKey("hmmStart")) { site.label = data.hmmStart }
-        if (data.containsKey("hmmEnd")) { site.label = data.hmmEnd }
     }
 
     boolean isInRange(int start, int end) {
