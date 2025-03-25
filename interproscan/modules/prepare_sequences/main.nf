@@ -64,24 +64,3 @@ process BUILD_BATCHES {
         ${nucleic ? '--nucleic' : ''}
     """
 }
-
-process INDEX_BATCHES {
-    label         'local', 'ips6_container'
-    errorStrategy 'terminate'
-
-    input:
-    val fastaFiles
-
-    output:
-    val indexedFiles
-
-    exec:
-    indexedFiles = []
-    int index = 1
-    // handle when a single fasta file path is provided
-    def fastaList = fastaFiles instanceof List ? fastaFiles : [fastaFiles]
-    for (fasta: fastaList) {
-        indexedFiles << [index, fasta]
-        index += 1
-    }
-}

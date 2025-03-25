@@ -5,8 +5,7 @@ include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan
 
 include { LOAD_SEQUENCES;
           UPDATE_ORFS;
-          BUILD_BATCHES;
-          INDEX_BATCHES                 } from "./interproscan/modules/prepare_sequences"
+          BUILD_BATCHES                 } from "./interproscan/modules/prepare_sequences"
 include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
 include { LOOKUP_MATCHES                } from "./interproscan/modules/lookup"
 include { XREFS                         } from "./interproscan/modules/xrefs"
@@ -57,8 +56,14 @@ workflow {
     // Build batches of unique protein seqs for the analysis
     BUILD_BATCHES(seq_db_path, params.batchSize, params.nucleic)
 
-    // [fasta, fasta, fasta] --> [[index, fasta], [index, fasta], [index, fasta]] - to help gather matches for each batch
-    ch_seqs = INDEX_BATCHES(BUILD_BATCHES.out).flatMap { it } // flatMap so tuples are emitted one at a time
+    fastaList = BUILD_BATCHES.out.collect()
+    // Convert a list (or single file path) to a list of tuples containing indexed fasta file paths
+    ch_seqs = fastaList
+        .collect()
+        .map { fastaList -> fastaList.indexed() } // creates a map-like object
+        .flatMap()
+        .map { entry -> [entry.key, entry.value] } // Convert to tuple [index, fasta]
+    ch_seqs.view() // [[index, fasta], [index, fasta], [index, fasta]]
 
     matchResults = Channel.empty()
     if (matchesApiUrl != null) {
