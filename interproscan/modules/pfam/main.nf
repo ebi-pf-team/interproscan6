@@ -153,7 +153,9 @@ def filterMatches(Map<String, Map<String, Match>> hmmerMatches, Map<String, Map<
     return filteredMatches
 }
 
-def buildFragments(Map<String, Map<String, Object>> dat, Map<String, Map<String, Match>> filteredMatches, int MINLENGTH) {
+def buildFragments(Map<String, Map<String, Object>> dat,
+                               Map<String, Map<String, Match>> filteredMatches,
+                               int MINLENGTH) {
     Map<String, Map<String, Match>> processedMatches = [:]
     filteredMatches.each { String seqId, List<Match> matches ->
         def matchesAggregated = [:]
