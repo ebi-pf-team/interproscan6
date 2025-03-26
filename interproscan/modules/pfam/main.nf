@@ -108,10 +108,15 @@ def flattenMatches(matches) {
 
 def filterMatches(Map<String, Map<String, Match>> hmmerMatches, Map<String, Map<String, Object>> dat) {
     /*
-        When compare a match with the previously evaluated Pfam matches, we ONLY ignore a match if:
-            - the match overlaps another match,
-            - both matches belong to the same clan AND
-            - one of the matches is NOT nested in the other
+        A match is ignored only if it meets all of the following conditions when compared 
+        to previously evaluated Pfam matches:
+        - It overlaps with another match.
+        - Both matches belong to the same clan.
+        - Neither match is fully nested within the other.
+        Reasoning: Pfam matches aren't supposed to overlap, but families within the 
+        same clan are evolutionary related so overlapping is common.
+        Therefore, the `nested` field in `pfam_a.dat` is used to whitelist overlaps that 
+        can occur between two families.
     */
     Map<String, List<Match>> filteredMatches = [:]
     hmmerMatches.each { seqId, matches ->
