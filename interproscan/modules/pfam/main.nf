@@ -236,10 +236,13 @@ def buildFragments(Map<String, Map<String, Object>> dat,
                                 rawDiscontinuousMatch.locations[0].fragments = fragments
                             }
                         }
+                        
+                        // If only one valid fragment remains after filtering, update the match start and end to reflect the new fragment boundaries
                         if (rawDiscontinuousMatch.locations[0].fragments.size() == 1) {
                             rawDiscontinuousMatch.locations[0].start = rawDiscontinuousMatch.locations[0].fragments[0].start
                             rawDiscontinuousMatch.locations[0].end = rawDiscontinuousMatch.locations[0].fragments[0].end
                         }
+                        
                         newMatchesFromFragment << rawDiscontinuousMatch
                     }
                     // filter out fragment matches that are shorter than MINLENGTH
