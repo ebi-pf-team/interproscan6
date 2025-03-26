@@ -175,6 +175,9 @@ def buildFragments(Map<String, Map<String, Object>> dat,
                 }
                 locationFragments.sort { a, b -> a.start <=> b.start ?: a.end <=> b.end }
 
+                /* Process fragments and identify discontinuous matches.
+                The fragmentDcStatus var tracks whether a match is continuous or has discontinuities
+                due to nested fragments */
                 String fragmentDcStatus = "CONTINUOUS"
                 def rawDiscontinuousMatches = []
                 rawDiscontinuousMatches << match
