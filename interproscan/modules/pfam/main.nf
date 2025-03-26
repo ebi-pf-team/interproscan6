@@ -87,7 +87,7 @@ def isOverlapping(location1Start, location1End, location2Start, location2End) {
     Math.max(location1Start, location2Start) <= Math.min(location1End, location2End)
 }
 
-def flatMatchLocations(matches) {
+def flattenMatches(matches) {
     // Separate locations such that each location is treated as an independent match
     matches.collectMany { modelAccession, match ->
         modelAccession = modelAccession.split("\\.")[0]
