@@ -87,7 +87,7 @@ def isOverlapping(location1Start, location1End, location2Start, location2End) {
     Math.max(location1Start, location2Start) <= Math.min(location1End, location2End)
 }
 
-def flattenMatches(matches) {
+def flatMatchLocations(matches) {
     // Separate locations such that each location is treated as an independent match
     matches.collectMany { modelAccession, match ->
         modelAccession = modelAccession.split("\\.")[0]
@@ -135,7 +135,7 @@ def filterMatches(Map<String, Map<String, Match>> hmmerMatches, Map<String, Map<
             filteredMatches[seqId].each { filteredMatch -> // iterate through the matches that have already been chosen
                 Map<String, List<String>> filteredMatchInfo = dat[filteredMatch.modelAccession] ?: [:]
                 String filteredMatchClan = filteredMatchInfo?.clan
-                if (candidateClan == filteredMatchClan) {  // check if both are in the same clan
+                if (candidateMatchClan == filteredMatchClan) {  // check if both are in the same clan
                     boolean overlapped = isOverlapping(
                         match.locations[0].start, match.locations[0].end,
                         filteredMatch.locations[0].start, filteredMatch.locations[0].end
@@ -161,6 +161,8 @@ def filterMatches(Map<String, Map<String, Match>> hmmerMatches, Map<String, Map<
 def buildFragments(Map<String, Map<String, Object>> dat,
                                Map<String, Map<String, Match>> filteredMatches,
                                int MINLENGTH) {
+    /* Add fragmentLocation objects to the Matches and gather Matches for the same
+    model accession into a single Match object */
     Map<String, Map<String, Match>> processedMatches = [:]
     filteredMatches.each { String seqId, List<Match> matches ->
         def matchesAggregated = [:]
@@ -188,7 +190,7 @@ def buildFragments(Map<String, Map<String, Object>> dat,
                 locationFragments.each { fragment ->
                     // As we iterate over each fragment, we will attempt to split or adjust matches
                     def newMatchesFromFragment = []
-                    rawDiscontinuousMatches.each { rawDiscontinuousMatch ->
+                    discontinuousMatchesList.each { rawDiscontinuousMatch ->
                         List<LocationFragment> fragments = []
                         int newLocationStart = rawDiscontinuousMatch.locations[0].start
                         int newLocationEnd = rawDiscontinuousMatch.locations[0].end
@@ -202,7 +204,7 @@ def buildFragments(Map<String, Map<String, Object>> dat,
 
                         if (fragment['start'] <= newLocationStart && fragment['end'] >= newLocationEnd) {
                             fragmentDcStatus = "NC_TERMINAL_DISC"
-                            fragments.add(new LocationFragment(rawDiscontinuousMatch.locations[0].start, rawDiscontinuousMatch.locations[0].end, fragmentDcStatus))
+                            fragments.add(new LocationFragment(newLocationStart, newLocationEnd, fragmentDcStatus))
                             rawDiscontinuousMatch.locations[0].fragments = fragments
                             newMatchesFromFragment << rawDiscontinuousMatch
                             return
@@ -231,7 +233,7 @@ def buildFragments(Map<String, Map<String, Object>> dat,
                             //deal with final region
                             fragmentDcStatus = "N_TERMINAL_DISC"
                             rawDiscontinuousMatch.locations[0].end = finalLocationEnd  // ensure the 2nd frag extends to the original match's end position
-                            // Keep the 2nd region only if it meets the MINLENGTH and store a sa new LocationFragment inside discontinuousMatch
+                            // Keep the 2nd region only if it meets the MINLENGTH and store as a new LocationFragment inside discontinuousMatch
                             if (finalLocationEnd - newLocationStart + 1 >= MINLENGTH) {
                                 fragments.add(new LocationFragment(newLocationStart, finalLocationEnd, fragmentDcStatus))
                                 rawDiscontinuousMatch.locations[0].fragments = fragments
@@ -247,9 +249,9 @@ def buildFragments(Map<String, Map<String, Object>> dat,
                         newMatchesFromFragment << rawDiscontinuousMatch
                     }
                     // filter out fragment matches that are shorter than MINLENGTH
-                    rawDiscontinuousMatches = newMatchesFromFragment.findAll { it.locations[0].end - it.locations[0].start + 1 >= MINLENGTH }
+                    discontinuousMatchesList = newMatchesFromFragment.findAll { it.locations[0].end - it.locations[0].start + 1 >= MINLENGTH }
                 }
-                rawDiscontinuousMatches.each { rawMatch ->
+                discontinuousMatchesList.each { rawMatch ->
                     if (matchesAggregated.containsKey(rawMatch.modelAccession)) {
                         matchesAggregated[rawMatch.modelAccession].locations << rawMatch.locations[0]
                     } else {
