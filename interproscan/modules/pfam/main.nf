@@ -162,6 +162,10 @@ def buildFragments(Map<String, Map<String, Object>> dat,
         matches.each { Match match ->
             List<String> nestedModels = dat[match.modelAccession]?.nested ?: []
             if (nestedModels) {
+                /* Find all matches whose models are listed as nested within the current model 
+                in pfam_a.dat AND which overlap the current match.
+                Then these matches are converted into a list of maps, that each contain a 
+                `start` and `end` field. */
                 List<Map<String, Integer>> locationFragments = matches.findAll { otherMatch ->
                     otherMatch.modelAccession in nestedModels &&
                     isOverlapping(otherMatch.locations[0].start, otherMatch.locations[0].end,
