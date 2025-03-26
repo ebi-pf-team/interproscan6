@@ -184,8 +184,7 @@ def buildFragments(Map<String, Map<String, Object>> dat,
                 The fragmentDcStatus var tracks whether a match is continuous or has discontinuities
                 due to nested fragments */
                 String fragmentDcStatus = "CONTINUOUS"
-                def rawDiscontinuousMatches = []
-                rawDiscontinuousMatches << match
+                def discontinuousMatchesList = [match]
                 locationFragments.each { fragment ->
                     def newMatchesFromFragment = []
                     rawDiscontinuousMatches.each { rawDiscontinuousMatch ->
