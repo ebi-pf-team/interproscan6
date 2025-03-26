@@ -126,7 +126,7 @@ def filterMatches(Map<String, Map<String, Match>> hmmerMatches, Map<String, Map<
         allMatches.each { match ->
             boolean keep = true
             Map<String, List<String>> candidateMatch = dat[match.modelAccession] ?: [:]
-            String candidateClan = candidateMatch?.clan
+            String candidateMatchClan = candidateMatch?.clan
             filteredMatches[seqId].each { filteredMatch -> // iterate through the matches that have already been chosen
                 Map<String, List<String>> filteredMatchInfo = dat[filteredMatch.modelAccession] ?: [:]
                 String filteredMatchClan = filteredMatchInfo?.clan
