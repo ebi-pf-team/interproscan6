@@ -231,6 +231,7 @@ def buildFragments(Map<String, Map<String, Object>> dat,
                             //deal with final region
                             fragmentDcStatus = "N_TERMINAL_DISC"
                             rawDiscontinuousMatch.locations[0].end = finalLocationEnd  // ensure the 2nd frag extends to the original match's end position
+                            // Keep the 2nd region only if it meets the MINLENGTH and store a sa new LocationFragment inside discontinuousMatch
                             if (finalLocationEnd - newLocationStart + 1 >= MINLENGTH) {
                                 fragments.add(new LocationFragment(newLocationStart, finalLocationEnd, fragmentDcStatus))
                                 rawDiscontinuousMatch.locations[0].fragments = fragments
