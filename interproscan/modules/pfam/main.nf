@@ -186,6 +186,7 @@ def buildFragments(Map<String, Map<String, Object>> dat,
                 String fragmentDcStatus = "CONTINUOUS"
                 def discontinuousMatchesList = [match]
                 locationFragments.each { fragment ->
+                    // As we iterate over each fragment, we will attempt to split or adjust matches
                     def newMatchesFromFragment = []
                     rawDiscontinuousMatches.each { rawDiscontinuousMatch ->
                         List<LocationFragment> fragments = []
