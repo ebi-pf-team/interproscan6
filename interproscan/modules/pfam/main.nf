@@ -157,7 +157,7 @@ def buildFragments(Map<String, Map<String, Object>> dat, Map<String, Map<String,
     Map<String, Map<String, Match>> processedMatches = [:]
     filteredMatches.each { String seqId, List<Match> matches ->
         def matchesAggregated = [:]
-        matches.each { match ->
+        matches.each { Match match ->
             List<String> nestedModels = dat[match.modelAccession]?.nested ?: []
             if (nestedModels) {
                 List<Map<String, Integer>> locationFragments = matches.findAll { otherMatch ->
