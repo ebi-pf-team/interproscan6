@@ -189,6 +189,7 @@ def buildFragments(Map<String, Map<String, Object>> dat,
                         int newLocationEnd = rawDiscontinuousMatch.locations[0].end
                         int finalLocationEnd = rawDiscontinuousMatch.locations[0].end
 
+                        // The fragment does NOT overlap the match, so the match is left unchanged
                         if (! isOverlapping(newLocationStart, newLocationEnd, fragment['start'], fragment['end'])) {
                             newMatchesFromFragment << rawDiscontinuousMatch
                             return
