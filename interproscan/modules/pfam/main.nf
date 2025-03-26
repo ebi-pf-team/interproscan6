@@ -155,7 +155,7 @@ def filterMatches(Map<String, Map<String, Match>> hmmerMatches, Map<String, Map<
 
 def buildFragments(Map<String, Map<String, Object>> dat, Map<String, Map<String, Match>> filteredMatches, int MINLENGTH) {
     Map<String, Map<String, Match>> processedMatches = [:]
-    filteredMatches.each { seqId, matches ->
+    filteredMatches.each { String seqId, List<Match> matches ->
         def matchesAggregated = [:]
         matches.each { match ->
             List<String> nestedModels = dat[match.modelAccession]?.nested ?: []
