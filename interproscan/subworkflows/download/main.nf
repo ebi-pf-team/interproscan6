@@ -105,7 +105,3 @@ def validateAppData(List<String> apps, String baseUrl) {
 
     }
 }
-
-// Get paths for files that need downloading
-// If files are present check the md5 hash
-// If files are not present or md5 hash does not match

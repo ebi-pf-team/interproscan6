@@ -10,25 +10,33 @@ class InterPro {
 
     static boolean checkCompatibility(Float iprscan, String interpro) {
         // Check InterPro and InterProScan versions are compatible
-        def warning = ""
+        def noConnWarning = ""
+        def latestReleaseWarning = ""
         def error = ""
         def releasesURL = InterPro.sanitizeURL("${FTP_URL}/${iprscanURL}/releases.json")
         Map compatibleReleases = InterPro.httpRequest(releasesURL, null, 0, true, log)
         if (compatibleReleases == null) {
-             warning = "An error occurred while querying the EBI ftp to assess the compatibility of\n"+
+            noConnWarning = "An error occurred while querying the EBI ftp to assess the compatibility of\n"+
                      "InterPro release '${interpro}' with InterProScan version '${iprscan}'\n"+
                      "Proceeding with using InterPro release '${interpro}'. Warning InterProScan may not behave as expected"
         } else if (!compatibleReleases[iprscan].contains(interpro)) {
             error = "InterPro release '$interpro' is not compatiable with "
+        } else if (interpro < compatibleReleases[iprscan].max()) {
+            latestReleaseWarning = "A later compatible InterPro release '${compatibleReleases[iprscan].max()}' is availble.\n"+
+                                   "Tip: Use the '--download' option to automatically fetch the latest compatible InterPro release"
         }
-        return [warning, error]
+        return [noConnWarning, latestReleaseWarning, error]
     }
 
     static getInterproRelease(Path datadir, String interpro) {
+        // Checks the InterProDir exists and then gets the specified interpro release number
+        def _interproRelease = null
+        def _interproDir = ""
+        def error = ""
+
         (_interproDir, error) = InterProScan.validateInterproDir(datadir)
         if (error) {  // no datadir/interpro dir found
-            log.error error
-            exit 1
+            return [_interproRelease, error]
         }
 
         if (interpro == "latest") {
@@ -37,15 +45,16 @@ class InterPro {
                     .findAll { it.isDirectory() }
                     .collect { it.name.toFloat } // what if the user put a dir in that can't be converted to a float
             if (_dirs.isEmpty()) {
-                log.error ("No InterPro release directories were found in ${_datadir}/interpro"+
-                        "Please ensure that the data dir is correctly populated or use --download")
-                exit 1
+                error = "No InterPro release directories were found in ${datadir}/interpro" +
+                        "Please ensure that the data dir is correctly populated or use --download"
+                return [_interproRelease, error]
             }
             _interproRelease = _dirs.max()
         } else {
             // Use the user specified InterPro release
-            _interproRelease = params.interpro.toString()
+            _interproRelease = interpro
         }
+        return [_interproRelease, error]
     }
 
     static String getDatabaseVersion(database, directory) {
