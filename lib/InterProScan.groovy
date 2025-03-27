@@ -230,6 +230,16 @@ class InterProScan {
         return [appsToRun.toSet().toList(), null]
     }
 
+    static validateInterproDir(Path datadir) {
+        def errorMsg = ""
+        def _interproDir = new File(datadir.resolve("interpro").toString())
+        if (!_InterproDir.exists() || !_interproDir.isDirectory()) {
+            errorMsg = "No 'interpro' directory was found in the data directory ${_datadir}\n" +
+                    "Please ensure that the data dir is correctly populated or use --download"
+        }
+        return [_interpDir, error]
+    }
+
     static validateAppData(List<String> appsToRun, Path datadir, Map appsConfig, Boolean returnSet=false) {
         def missingApps = [] as Set // only returned if returnList is true
         def errorMsg = appsToRun.collectMany { appName ->

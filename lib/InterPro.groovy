@@ -3,11 +3,49 @@
 import groovy.json.JsonSlurper
 import java.net.URL
 import com.fasterxml.jackson.databind.ObjectMapper
+import InterProScan
 
 class InterPro {
-    static boolean checkCompatibility() {
-        // Check InterPro and InterProScan versions are compatible ???
-        return null
+    static final def FTP_URL = "https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6"
+
+    static boolean checkCompatibility(Float iprscan, String interpro) {
+        // Check InterPro and InterProScan versions are compatible
+        def warning = ""
+        def error = ""
+        def releasesURL = InterPro.sanitizeURL("${FTP_URL}/${iprscanURL}/releases.json")
+        Map compatibleReleases = InterPro.httpRequest(releasesURL, null, 0, true, log)
+        if (compatibleReleases == null) {
+             warning = "An error occurred while querying the EBI ftp to assess the compatibility of\n"+
+                     "InterPro release '${interpro}' with InterProScan version '${iprscan}'\n"+
+                     "Proceeding with using InterPro release '${interpro}'. Warning InterProScan may not behave as expected"
+        } else if (!compatibleReleases[iprscan].contains(interpro)) {
+            error = "InterPro release '$interpro' is not compatiable with "
+        }
+        return [warning, error]
+    }
+
+    static getInterproRelease(Path datadir, String interpro) {
+        (_interproDir, error) = InterProScan.validateInterproDir(datadir)
+        if (error) {  // no datadir/interpro dir found
+            log.error error
+            exit 1
+        }
+
+        if (interpro == "latest") {
+            // Use the latest interpro release in datadir/interpro
+            def _dirs = _interproDir.listFiles()
+                    .findAll { it.isDirectory() }
+                    .collect { it.name.toFloat } // what if the user put a dir in that can't be converted to a float
+            if (_dirs.isEmpty()) {
+                log.error ("No InterPro release directories were found in ${_datadir}/interpro"+
+                        "Please ensure that the data dir is correctly populated or use --download")
+                exit 1
+            }
+            _interproRelease = _dirs.max()
+        } else {
+            // Use the user specified InterPro release
+            _interproRelease = params.interpro.toString()
+        }
     }
 
     static String getDatabaseVersion(database, directory) {

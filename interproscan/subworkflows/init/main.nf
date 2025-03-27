@@ -33,9 +33,77 @@ workflow INIT_PIPELINE {
         params.appsConfig.get(appName)?.has_data || InterProScan.LICENSED_SOFTWARE.contains(appName)
     }
     def _datadir = ""
-    def _downloadInterpro = false
-    def _downloadApps = false
+    def _interproDir = ""
+    def _interproRelease = ""
+    if (need_data) {
+        if (params.download) {
+            DOWNLOAD_INTERPRO(apps, params.appsConfig)
+            _interproRelease = DOWNLOAD_INTERPRO.out.interproRelease.val
+        } else if (!params.offline) {
+            (_interproDir, error) = InterProScan.validateInterproDir(_datadir)
+            if (error) {  // no datadir/interpro dir found
+                log.error error
+                exit 1
+            }
+            _interproRelease = InterPro.getInterproRelease(_datadir, params.interpro.toString())
+
+            // Check compatibility
+
+        } else {
+            // Working offline so do not check for interpro-iprscan compatibility
+            (_interproDir, error) = InterProScan.validateInterproDir(_datadir)
+            if (error) {  // no datadir/interpro dir found
+                log.error error
+                exit 1
+            }
+            _interproRelease = InterPro.getInterproRelease(_datadir, params.interpro.toString())
+        }
+
+        // Validate the interpro and Xref data files
+        // Validate these first as we need the interpro files for validateAppData
+        error = InterProScan.validateXrefFiles(_datadir, params.xRefsConfig, params.goterms, params.pathways)
+        if (error) {
+            log.error error
+            exit 1
+        }
+
+        // Validate the selected member databases data files and dirs
+        error = InterProScan.validateAppData(apps, _datadir, params.appsConfig)
+        if (error) {
+            log.error error
+            exit 1
+        }
+
+
+    }
+
     if (need_data && params.download) {
+        DOWNLOAD_INTERPRO(apps, params.appsConfig)
+        _interproRelease = DOWNLOAD_INTERPRO.out.interproRelease.val
+    } else if (need_data && !params.download) {
+        // Check there is an InterPro dir
+        (_interproDir, error) = InterProScan.validateInterproDir(_datadir)
+        if (error) {  // no datadir/interpro dir found
+            log.error error
+            exit 1
+        }
+
+        if (params.interpro == "latest") {
+            // Use the latest interpro release in datadir/interpro
+            def _dirs = _interproDir.listFiles()
+                        .findAll { it.isDirectory() }
+                        .collect { it.name.toFloat } // what if the user put a dir in that can't be converted to a float
+            if (_dirs.isEmpty()) {
+                log.error ("No InterPro release directories were found in ${_datadir}/interpro"+
+                           "Please ensure that the data dir is correctly populated or use --download")
+               exit 1
+            }
+            _interproRelease = _dirs.max()
+        } else {
+            // Use the user specified InterPro release
+            _interproRelease = params.interpro.toString()
+        }
+    }
 
 
         // [2] Check datadir/versions.json exists or download the file if able
@@ -58,7 +126,7 @@ workflow INIT_PIPELINE {
         def _iprScanVersion = workflow.manifest.version.split("\\.")[0..1].join(".")
 
         // [4] Get the version of InterPro to be used
-        def _interproVersion = null
+        def _interproRelease = null
         def _interproDir = ""
         def _versionsMaps = new JsonSlurper().parse(new File(_versionsFile.toString())) // E.g. [6.0: [102.0, 103.0, 104.0]]
 
@@ -77,7 +145,7 @@ workflow INIT_PIPELINE {
                                "Please ensure that the data dir is correctly populated or use --download")
                     exit 1
                 }
-                _interproVersion = _compatibleVersions.max()
+                _interproRelease = _compatibleVersions.max()
                 _downloadInterpro = true
                 _downloadApps = true
                 return
@@ -96,7 +164,7 @@ workflow INIT_PIPELINE {
                                "Please ensure that the data dir is correctly populated or use --download")
                     exit 1
                 }
-                _interproVersion = _compatibleVersions.max()
+                _interproRelease = _compatibleVersions.max()
                 _downloadInterpro = true
                 _downloadApps = true
                 return
@@ -107,27 +175,27 @@ workflow INIT_PIPELINE {
             // is impossible
             if (_latestDir < _compatibleVersions.max()) {
                 if (params.download) {
-                    _interproVersion = _compatibleVersions.max()
+                    _interproRelease = _compatibleVersions.max()
                     _downloadInterpro = true
                     _downloadApps = true
                 } else {
-                    _interproVersion = _dirs.max()
+                    _interproRelease = _dirs.max()
                     log.info("A newer compatible InterPro release (${_compatibleVersions.max()}) is available.\n" +
                              "Tip: Use the '--download' option to automatically fetch the latest compatible InterPro release")
                 }
             } else {
-                _interproVersion = _compatibleVersions.max()
+                _interproRelease = _compatibleVersions.max()
             }
         } else {
             // Using the user selected InterPro release. But first check it is compatible with the IprScan version
             if (_versionsMaps[_iprScanVersion].contains(params.interpro.toString())) {
-                _interproVersion = params.interpro.toString()
+                _interproRelease = params.interpro.toString()
 
                 // Check the interpro datadir exists
-                def _interproDir = new File(_datadir.resolve("interpro").resolve(_interproVersion).toString())
+                def _interproDir = new File(_datadir.resolve("interpro").resolve(_interproRelease).toString())
                 if (!_interproDir.exists() || !_interproDir.isDirectory() {
                     if (!params.download) {
-                        log.error ("No 'interpro/${_interproVersion}' directory was found in the data directory ${_datadir}\n" +
+                        log.error ("No 'interpro/${_interproRelease}' directory was found in the data directory ${_datadir}\n" +
                                    "Please ensure that the data dir is correctly populated or use --download")
                         exit 1
                     }
@@ -140,7 +208,7 @@ workflow INIT_PIPELINE {
                 exit 1
             }
         }
-        println "# InterPro: $_interproVersion"
+        println "# InterPro: $_interproRelease"
 
         // [5] Check if need to download any member database data
         if (!_downloadApps) {
@@ -152,22 +220,10 @@ workflow INIT_PIPELINE {
 
         // [6] Download data if needed and enabled
         if (_downloadInterpro || _downloadApps) {
-            DOWNLOAD_INTERPRO(apps, params.appsConfig, params.datadir, _interproVersion, _iprScanVersion)
+            DOWNLOAD_INTERPRO(apps, params.appsConfig, params.datadir, _interproRelease, _iprScanVersion)
         }
 
-        // [7] Validate the selected member databases data files and dirs
-        error = InterProScan.validateAppData(apps, _datadir, params.appsConfig)
-        if (error) {
-            log.error error
-            exit 1
-        }
 
-        // [8] Validate the interpro Xref data files
-        error = InterProScan.validateXrefFiles(_datadir, params.xRefsConfig, params.goterms, params.pathways)
-        if (error) {
-            log.error error
-            exit 1
-        }
     }
 
     // Check valid output file formats were provided

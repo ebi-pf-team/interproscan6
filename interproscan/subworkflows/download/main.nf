@@ -4,8 +4,6 @@ workflow DOWNLOAD_INTERPRO {
     take:
     applications           // list of applications to run
     appsConfig             // map of applications
-    downloadInterPro       // bool: download interpro entries+xref data
-    downloadApps           // bool: download member db application data
 
     main:
     def _datadir = ""
@@ -43,7 +41,7 @@ workflow DOWNLOAD_INTERPRO {
 
         // [3] Get the list of InterPro releases that are compatible with this InterProScan release
         def _releasesURL = "${baseUrl}/${_iprScanVersion}/versions.json"
-        _interproReleases = def InterPro.httpRequest(_releasesURL, null, 0, true, log)
+        def _interproReleases = InterPro.httpRequest(_releasesURL, null, 0, true, log)
         def _compatibleReleases = _interproReleases[_iprScanVersion]*.toFloat()
 
         // [4] Get the InterPro release to be used
@@ -82,10 +80,10 @@ workflow DOWNLOAD_INTERPRO {
         // Download member database data
     }
 
-    datadir = _datadir
+    interproRelease = _interproRelease
 
     emit:
-    datadir       // str: path to data directory
+    interproRelease       // str: InterPro release version number
 }
 
 def buildDataDir(String datadir) {
