@@ -45,7 +45,6 @@ workflow INIT_PIPELINE {
                 log.error error
                 exit 1
             }
-            // Check compatibility
             (noConnWarning, latestReleaseWarning, error) = InterPro.checkCompatibility(_iprScanVersion, _interproRelease)
             if (error) { // Not compatible, terminate
                 log.error error
