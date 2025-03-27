@@ -1,24 +1,20 @@
 process LOAD_SEQUENCES {
     // Populate a local sqlite3 database with sequences from the pipeline's input FASTA file.
-    label         'local', 'ips6_container'
+    label         'local'
     errorStrategy 'terminate'
 
     input:
-    file fasta
+    val fasta
     val nucleic
 
     output:
-    path "ips6.seq.db"
+    path "sequences.db"
 
-    script:
-    """
-    python3 $projectDir/interproscan/scripts/database.py \
-        ips6.seq.db \
-        populate_sequences \
-        --fasta $fasta \
-         ${nucleic ? '--nucleic' : ''}
-    chmod 777 ips6.seq.db
-    """
+    exec:
+    def outputFilePath = task.workDir.resolve("sequences.db")
+    SeqDB db = new SeqDB(outputFilePath.toString())
+    db.loadFastaFile(fasta.toString(), nucleic)
+    db.close()
 }
 
 process UPDATE_ORFS {
