@@ -220,7 +220,7 @@ def buildFragments(Map<String, Map<String, Match>> filteredMatches,
                             fragmentDcStatus = "C_TERMINAL_DISC"
                         } else if (fragment['start'] > newLocationStart && fragment['end'] < newLocationEnd) {
                             newLocationEnd = fragment['start'] - 1
-                            twoActualRegions = true
+                            areSeparateFrags = true
                             fragmentDcStatus = "C_TERMINAL_DISC"
                         }
 
