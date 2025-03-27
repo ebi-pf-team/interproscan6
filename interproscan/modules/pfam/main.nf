@@ -165,7 +165,7 @@ def buildFragments(Map<String, Map<String, Match>> filteredMatches,
     model accession into a single Match object */
     Map<String, Map<String, Match>> processedMatches = [:]
     filteredMatches.each { String seqId, List<Match> matches ->
-        def matchesAggregated = [:]
+        def aggregatedMatches = [:]
         matches.each { Match match ->
             List<String> nestedModels = dat[match.modelAccession]?.nested ?: []
             if (nestedModels) {
@@ -252,7 +252,7 @@ def buildFragments(Map<String, Map<String, Match>> filteredMatches,
                     // filter out fragment matches that are shorter than MINLENGTH
                     discontinuousMatchesList = newMatchesFromFragment.findAll { it.locations[0].end - it.locations[0].start + 1 >= MINLENGTH }
                 }
-                aggregatedMatches = storeMatches(aggregatedMatches, discontinuousMatches)
+                aggregatedMatches = storeMatches(aggregatedMatches, discontinuousMatchesList)
             } else if (match.locations[0].end - match.locations[0].start + 1 >= MINLENGTH) {  // filter out matches that are shorter than MINLENGTH
                 aggregatedMatches.computeIfAbsent(match.modelAccession, { match }).locations << match.locations[0]
             }
