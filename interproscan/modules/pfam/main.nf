@@ -35,8 +35,8 @@ process PARSE_PFAM {
     def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "Pfam")
     Map<String, Map<String, Object>> dat = stockholmDatParser(datPath)  // [modelAcc: [clan: str, nested: [str]]]
 
-    def filteredMatches = filterMatches(hmmerMatches, dat)
-    def processedMatches = buildFragments(dat, filteredMatches, MINLENGTH)
+    Map<String, List<Match>> filteredMatches = filterMatches(hmmerMatches, dat)
+    Map<String, Map<String, Match>> processedMatches = buildFragments(filteredMatches, dat, MINLENGTH)
 
     json = JsonOutput.toJson(processedMatches)
     new File(outputFilePath.toString()).write(json)
@@ -83,39 +83,16 @@ def decode(byte[] b) {
     }
 }
 
-def isOverlapping(location1Start, location1End, location2Start, location2End) {
-    Math.max(location1Start, location2Start) <= Math.min(location1End, location2End)
-}
-
-def flatMatchLocations(matches) {
-    // Separate locations such that each location is treated as an independent match
-    matches.collectMany { modelAccession, match ->
-        modelAccession = modelAccession.split("\\.")[0]
-        match.locations.collect { location ->
-            Match matchInfo = new Match(
-                modelAccession,
-                match.evalue,
-                match.score,
-                match.bias,
-                match.signature
-            )
-            matchInfo.locations = [location]
-            matchInfo.signature.accession = modelAccession
-            return matchInfo
-        }
-    }
-}
-
 def filterMatches(Map<String, Map<String, Match>> hmmerMatches, Map<String, Map<String, Object>> dat) {
     /*
-        A match is ignored only if it meets all of the following conditions when compared 
+        A match is ignored only if it meets all of the following conditions when compared
         to previously evaluated Pfam matches:
         - It overlaps with another match.
         - Both matches belong to the same clan.
         - Neither match is fully nested within the other.
-        Reasoning: Pfam matches aren't supposed to overlap, but families within the 
+        Reasoning: Pfam matches aren't supposed to overlap, but families within the
         same clan are evolutionary related so overlapping is common.
-        Therefore, the `nested` field in `pfam_a.dat` is used to whitelist overlaps that 
+        Therefore, the `nested` field in `pfam_a.dat` is used to whitelist overlaps that
         can occur between two families.
     */
     Map<String, List<Match>> filteredMatches = [:]
@@ -144,7 +121,7 @@ def filterMatches(Map<String, Map<String, Match>> hmmerMatches, Map<String, Map<
                         List<String> candidateNested = candidateMatch?.nested ?: []
                         List<String> filteredNested = filteredMatchInfo?.nested ?: []
                         // check if candidates are NOT nested
-                        if (!(candidateNested.contains(filteredMatch.modelAccession) || filteredNested.contains(match.modelAccession))) {
+                        if (!candidateNested.contains(filteredMatch.modelAccession) && !filteredNested.contains(match.modelAccession)) {
                             keep = false
                         }
                     }
@@ -158,8 +135,31 @@ def filterMatches(Map<String, Map<String, Match>> hmmerMatches, Map<String, Map<
     return filteredMatches
 }
 
-def buildFragments(Map<String, Map<String, Object>> dat,
-                               Map<String, Map<String, Match>> filteredMatches,
+def flatMatchLocations(matches) {
+    // Separate locations such that each location is treated as an independent match
+    matches.collectMany { modelAccession, match ->
+        modelAccession = modelAccession.split("\\.")[0]
+        match.locations.collect { location ->
+            Match matchInfo = new Match(
+                modelAccession,
+                match.evalue,
+                match.score,
+                match.bias,
+                match.signature
+            )
+            matchInfo.locations = [location]
+            matchInfo.signature.accession = modelAccession
+            return matchInfo
+        }
+    }
+}
+
+def isOverlapping(location1Start, location1End, location2Start, location2End) {
+    Math.max(location1Start, location2Start) <= Math.min(location1End, location2End)
+}
+
+def buildFragments(Map<String, Map<String, Match>> filteredMatches,
+                               Map<String, Map<String, Object>> dat,
                                int MINLENGTH) {
     /* Add fragmentLocation objects to the Matches and gather Matches for the same
     model accession into a single Match object */
@@ -169,9 +169,9 @@ def buildFragments(Map<String, Map<String, Object>> dat,
         matches.each { Match match ->
             List<String> nestedModels = dat[match.modelAccession]?.nested ?: []
             if (nestedModels) {
-                /* Find all matches whose models are listed as nested within the current model 
+                /* Find all matches whose models are listed as nested within the current model
                 in pfam_a.dat AND which overlap the current match.
-                Then these matches are converted into a list of maps, that each contain a 
+                Then these matches are converted into a list of maps, that each contain a
                 `start` and `end` field. */
                 List<Map<String, Integer>> locationFragments = matches.findAll { otherMatch ->
                     otherMatch.modelAccession in nestedModels &&
@@ -224,12 +224,13 @@ def buildFragments(Map<String, Map<String, Object>> dat,
                             fragmentDcStatus = "C_TERMINAL_DISC"
                         }
 
+                        // Keep the region only if it meets the MINLENGTH
                         if (newLocationEnd - newLocationStart + 1 >= MINLENGTH) {
                             fragments.add(new LocationFragment(newLocationStart, newLocationEnd, fragmentDcStatus))
                             rawDiscontinuousMatch.locations[0].fragments = fragments
                         }
                         newLocationStart = fragment.end + 1
-                        if (twoActualRegions) {
+                        if (areSeparateFrags) {
                             //deal with final region
                             fragmentDcStatus = "N_TERMINAL_DISC"
                             rawDiscontinuousMatch.locations[0].end = finalLocationEnd  // ensure the 2nd frag extends to the original match's end position
@@ -239,30 +240,36 @@ def buildFragments(Map<String, Map<String, Object>> dat,
                                 rawDiscontinuousMatch.locations[0].fragments = fragments
                             }
                         }
-                        
+
                         // If only one valid fragment remains after filtering, update the match start and end to reflect the new fragment boundaries
                         if (rawDiscontinuousMatch.locations[0].fragments.size() == 1) {
                             rawDiscontinuousMatch.locations[0].start = rawDiscontinuousMatch.locations[0].fragments[0].start
                             rawDiscontinuousMatch.locations[0].end = rawDiscontinuousMatch.locations[0].fragments[0].end
                         }
-                        
+
                         newMatchesFromFragment << rawDiscontinuousMatch
                     }
                     // filter out fragment matches that are shorter than MINLENGTH
                     discontinuousMatchesList = newMatchesFromFragment.findAll { it.locations[0].end - it.locations[0].start + 1 >= MINLENGTH }
                 }
-                discontinuousMatchesList.each { rawMatch ->
-                    if (matchesAggregated.containsKey(rawMatch.modelAccession)) {
-                        matchesAggregated[rawMatch.modelAccession].locations << rawMatch.locations[0]
-                    } else {
-                        matchesAggregated[rawMatch.modelAccession] = rawMatch
-                    }
-                }
+                aggregatedMatches = storeMatches(aggregatedMatches, discontinuousMatches)
             } else if (match.locations[0].end - match.locations[0].start + 1 >= MINLENGTH) {  // filter out matches that are shorter than MINLENGTH
-                matchesAggregated.computeIfAbsent(match.modelAccession, { match }).locations << match.locations[0]
+                aggregatedMatches.computeIfAbsent(match.modelAccession, { match }).locations << match.locations[0]
             }
         }
-        processedMatches[seqId] = matchesAggregated
+        processedMatches[seqId] = aggregatedMatches
     }
     return processedMatches
+}
+
+def storeMatches(Map<String, Match> aggregatedMatches, List<Match> matches) {
+    // Aggregate processed matches under their respective model accessions
+    matches.each { match ->
+        if (aggregatedMatches.containsKey(match.modelAccession)) {
+            aggregatedMatches[match.modelAccession].locations << match.locations[0]
+        } else {
+            aggregatedMatches[match.modelAccession] = match
+        }
+    }
+    return aggregatedMatches
 }
