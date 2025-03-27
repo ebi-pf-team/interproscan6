@@ -13,13 +13,13 @@ process LOAD_SEQUENCES {
     exec:
     def outputFilePath = task.workDir.resolve("sequences.db")
     SeqDB db = new SeqDB(outputFilePath.toString())
-    db.loadFastaFile(fasta.toString(), nucleic)
+    db.loadFastaFile(fasta.toString(), nucleic, false)
     db.close()
 }
 
-process UPDATE_ORFS {
+process LOAD_ORFS {
     // add protein seqs translated from ORFS in the nt seqs to the database
-    label         'local', 'ips6_container'
+    label         'local'
     errorStrategy 'terminate'
 
     input:
@@ -27,36 +27,31 @@ process UPDATE_ORFS {
     val dbPath
 
     output:
-    val dbPath // ensure BUILD_BATCHES runs after UPDATE_ORFS
+    val dbPath // ensure BUILD_BATCHES runs after LOAD_ORFS
 
-    script:
-    """
-    python3 $projectDir/interproscan/scripts/database.py \
-        $dbPath \
-        update_orfs \
-        --fasta "$translatedFastas"
-    """
+    exec:
+    SeqDB db = new SeqDB(dbPath.toString())
+    translatedFastas.each {
+        db.loadFastaFile(it.toString(), false, true)
+    }
+    db.close()
 }
 
-process BUILD_BATCHES {
+process SPLIT_FASTA {
     // Build the FASTA file batches of unique protein sequences for the sequence analysis
-    label         'local', 'ips6_container'
+    label         'local'
     errorStrategy 'terminate'
 
     input:
     val dbPath
     val batchSize
-    val nucleic
 
     output:
     path "*.fasta"
 
-    script:
-    """
-    python3 $projectDir/interproscan/scripts/database.py \
-        $dbPath \
-        build_batches \
-        --batch_size $batchSize \
-        ${nucleic ? '--nucleic' : ''}
-    """
+    exec:
+    String prefix = task.workDir.resolve("input").toString()
+    SeqDB db = new SeqDB(dbPath.toString())
+    db.splitFasta(prefix, batchSize)
+    db.close()
 }
