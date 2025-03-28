@@ -15,9 +15,10 @@ workflow DOWNLOAD_INTERPRO {
 
     main:
     def _datadir = ""
+    def dbReleasesMap = [:] // Downloaded from the ftp = [db: [release(s)]]
     def downloadInterpro = false
-    def downloadApps = false
-    def interproReleases = [:]
+    def downloadApps = []
+    def dbReleasesMap = [:]
     def _interproRelease = null
     def baseUrl = "https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6"
     def downloadURL = ""
@@ -37,7 +38,7 @@ workflow DOWNLOAD_INTERPRO {
         if (!_datadir) {
             buildDataDir(_datadir)
             downloadInterpro = true
-            downloadApps = true
+            downloadApps = _apps  // download data for all apps that need data
             break  // go straight to downloading everything
         }
 
@@ -47,8 +48,8 @@ workflow DOWNLOAD_INTERPRO {
 
         // [3] Get the list of InterPro releases that are compatible with this InterProScan release
         def _releasesURL = "${baseUrl}/${_iprScanVersion}/versions.json"
-        def interproReleases = InterPro.httpRequest(_releasesURL, null, 0, true, log)
-        def compatibleReleases = interproReleases[_iprScanVersion]*.toFloat()
+        def dbReleasesMap = InterPro.httpRequest(_releasesURL, null, 0, true, log)
+        def compatibleReleases = dbReleasesMap["interpro"]*.toFloat()
 
         // [4] Get the InterPro release to be used
         if (params.interpro == "latest") {
@@ -87,25 +88,31 @@ workflow DOWNLOAD_INTERPRO {
 
         // [6] Check if we need to download any member database data
         // InterProScan.validateAppData() only returns something if there is missing data
-        if (InterProScan.validateAppData(_apps, _datadir, params.appsConfig, true)) {
-            downloadApps = true
-        }
-
+        // TODO: Add a check md5 sum check
+        downloadApps = InterProScan.validateAppData(_apps, _datadir, params.appsConfig, returnSet=true)
         break
     }
 
     if (downloadInterpro) {
         downloadURL = "${baseUrl}/interpro/interpro-${_interproRelease}.tar.gz"
         savePath = _datadir.resolve("interpro/interpro-${_interproRelease}.tar.gz")
-        error = downloadFile(downloadURL, savePath)
+        error = InterPro.downloadFile(downloadURL, savePath)
         if (error) {
             log.error error
             exit 1
         }
     }
 
-    if (downloadApps) {
-        // Download member database data
+    def dbRelease = ""
+    downloadApps.each { app ->
+        dbRelease = dbReleasesMap[app]
+        downloadURL = "${baseUrl}/app/$app-$dbRelease.tar.gz"
+        savePath = _datadir.resolve("$app/$app-${dbRelease}.tar.gz")
+        error = InterPro.downloadFile(downloadURL, savePath)
+        if (error) {
+            log.error error
+            exit 1
+        }
     }
 
     interproRelease = _interproRelease
@@ -117,30 +124,4 @@ workflow DOWNLOAD_INTERPRO {
 def buildDataDir(String dirPath) {
     def dir = new File(dirPath)
     dir.mkdirs()
-}
-
-def downloadFile(String fileUrl, String savePath) {
-    error = null
-    try {
-        URL url = new URL(fileUrl)
-        InputStream inputStream = url.openStream()
-        OutputStream outputStream = new FileOutputStream(new File(savePath))
-
-        byte[] buffer = new byte[1024]
-        int bytesRead
-        while((bytesRead = inputStream.read(buffer)) != -1) {
-            outputStream.write(buffer, 0, bytesRead)
-        }
-        inputStream.close()
-        outputStream.close()
-    } catch (MalformedURLException e) {
-        error = "Invalid URL to download InterPro data: $fileUrl:\n$e"
-    } catch (IOException e) {
-        error = "I/O Error when downloading the file at $fileUrl:\n$e"
-    } catch (SecurityException e) {
-        error = "Permission denied when attempting to download the file at $fileUrl:\n$e"
-    } catch (Exception e) {
-        error = "Unexpected when downloading the file at $fileUrl:\n$e"
-    }
-    return error
 }
