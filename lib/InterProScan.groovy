@@ -245,7 +245,7 @@ class InterProScan {
         return [appsToRun.toSet().toList(), null]
     }
 
-    static validateAppData(List<String> appsToRun, Path datadir, Map appsConfig, Boolean returnSet=false) {
+    static validateAppData(List<String> appsToRun, Path datadir, Map appsConfig, Boolean returnList=false) {
         def missingApps = [] as Set // only returned if returnList is true
         def errorMsg = appsToRun.collectMany { appName ->
             def appVersion =
@@ -270,22 +270,15 @@ class InterProScan {
                 return null
             }.findAll { it }
         }.join('\n')
-        return returnSet ? missingApps : (errorMsg ? "Could not find the following data files\n${errorMsg}" : null)
+        return returnList ? missingApps as List : (errorMsg ? "Could not find the following data files\n${errorMsg}" : null)
     }
 
-    static validateXrefFiles(Path datadir, Map xRefsConfig, boolean goterms, boolean pathways, boolean returnMap = false) {
-        // If returnList, return a Map with the md5 hash, else return an error message for the logger
-        def error = returnMap ? [:] : []
+    static validateXrefFiles(Path datadir, Map xRefsConfig, boolean goterms, boolean pathways) {
+        def error = ""
         def addError = { type, suffix ->
             String path = datadir.resolve("${xRefsConfig[type]}${suffix}").toString()
             if (!resolveFile(path)) {
-                if (returnMap) {
-                    error["${type}${suffix}"] = null
-                } else {
-                    error << "${type}${suffix}: ${path}"
-                }
-            } else {
-                error["${type}${suffix}"] = getMD5Hash(path)
+                error << "${type}${suffix}: ${path}"
             }
         }
         addError('entries', '')  // we hard code the file ext in xrefsconfig so no suffix needed here
@@ -297,7 +290,7 @@ class InterProScan {
             addError('pathways', '.ipr.json')
             addError('pathways', '.json')
         }
-        return returnMap ? error : (error ? "Could not find the following XREF data files\n${error.join('\n')}" : null)
+        return error ? "Could not find the following XREF data files\n${error.join('\n')}" : null
     }
 
     static Set<String> validateFormats(String userFormats) {

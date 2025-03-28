@@ -2,8 +2,19 @@
 
 import groovy.json.JsonSlurper
 import java.net.URL
+import java.net.MalformedURLException
+import jave.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.zip.GZIPInputStream
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import com.fasterxml.jackson.databind.ObjectMapper
 import InterProScan
+
+import java.util.zip.GZIPInputStream
 
 class InterPro {
     static final def FTP_URL = "https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6"
@@ -52,6 +63,36 @@ class InterPro {
             error = "Unexpected when downloading the file at $fileUrl:\n$e"
         }
         return error
+    }
+
+    static void extractTarFile(String tarFilePath, String outputDir) {
+        def error = null
+        try {
+            File inputFile = new File(tarFilePath)
+            InputStream fileInputStream = new FileInputStream(inputFile)
+            InputStream gzipInputStream = new GZIPInputStream(fileInputStream)
+            TarArchiveInputStream tarInputStream = new TarArchiveInputStream(gzipInputStream)
+
+            TarArchiveEntry entry
+            while ((entry = tarInputStream.getNextTarEntry()) != null) {
+                File outputFile = new File(outputDir, entry.getName())
+                if (entry.isDirectory()) {
+                    outputFile.mkdirs()
+                } else {
+                    outputFile.getParentFile().mkdirs()
+                    OutputStream outputStream = new FileOutputStream(outputFile)
+                    byte[] buffer = new byte[1024]
+                    int bytesRead
+                    while ((bytesRead = tarInputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, bytesRead)
+                    }
+                    outputStream.close()
+                }
+            }
+            tarInputStream.close()
+        } catch (IOException e) {
+            error = "Error extracting file: ${e.message}"
+        }
     }
 
     static getInterproRelease(Path datadir, String interpro) {

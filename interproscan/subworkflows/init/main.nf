@@ -47,8 +47,8 @@ workflow INIT_PIPELINE {
             // Check if there is a data directory
             // If --datadir is called and no path is given it converts to a boolean
             def dirPath = params.datadir instanceof Boolean ? null : params.datadir
-            (datadir, error) = InterProScan.resolveDirectory(dirPath, true, false)
-            if (!datadir) {
+            (_datadir, error) = InterProScan.resolveDirectory(dirPath, true, false)
+            if (!_datadir) {
                 log.error error
                 exit 1
             }
