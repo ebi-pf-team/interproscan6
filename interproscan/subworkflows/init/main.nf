@@ -37,29 +37,44 @@ workflow INIT_PIPELINE {
     def _interproRelease = ""
     if (need_data) {
         if (params.download) {
+            if (!params.datadir) {
+                log.error "--datadir <DATA-DIR> is mandatory when using --download"
+                exit 1
+            }
             DOWNLOAD_INTERPRO(apps, params.appsConfig)
             _interproRelease = DOWNLOAD_INTERPRO.out.interproRelease.val
-        } else if (!params.offline) {
-            (_interproRelease, error) = InterPro.getInterproRelease(_datadir, params.interpro.toString())
-            if (error) {
-                log.error error
-                exit 1
-            }
-            (noConnWarning, latestReleaseWarning, error) = InterPro.checkCompatibility(_iprScanVersion, _interproRelease)
-            if (error) { // Not compatible, terminate
-                log.error error
-                exit 1
-            } else if (noConnWarning) {  // Could not connect to the ftp, so continuing assuming it's compatible
-                log.warn noConnWarning
-            } else if (latestReleaseWarning) { // Let the user know a later InterPro release is available
-                log.warn latestReleaseWarning
-            }
         } else {
-            // Working offline so do not check for interpro-iprscan compatibility
-            (_interproRelease, error) = InterPro.getInterproRelease(_datadir, params.interpro.toString())
-            if (error) {
+            // Check if there is a data directory
+            // If --datadir is called and no path is given it converts to a boolean
+            def dirPath = params.datadir instanceof Boolean ? null : params.datadir
+            (datadir, error) = InterProScan.resolveDirectory(dirPath, true, false)
+            if (!datadir) {
                 log.error error
                 exit 1
+            }
+
+            // Get the number of the InterPro release to use
+            if (!params.offline) {  // Online - check the interpro-iprscan compatibility
+                (_interproRelease, error) = InterPro.getInterproRelease(_datadir, params.interpro.toString())
+                if (error) {
+                    log.error error
+                    exit 1
+                }
+                (noConnWarning, latestReleaseWarning, compatError) = InterPro.checkCompatibility(_iprScanVersion, _interproRelease)
+                if (compatError) { // Not compatible, terminate
+                    log.error compatError
+                    exit 1
+                } else if (noConnWarning) {  // Could not connect to the ftp, so continuing assuming it's compatible
+                    log.warn noConnWarning
+                } else if (latestReleaseWarning) {  // Let the user know a later InterPro release is available
+                    log.warn latestReleaseWarning
+                }
+            } else {  // Offline - do not check for interpro-iprscan compatibility
+                (_interproRelease, error) = InterPro.getInterproRelease(_datadir, params.interpro.toString())
+                if (error) {
+                    log.error error
+                    exit 1
+                }
             }
         }
         println "# InterPro: $_interproRelease"  // adds to the pipeline intro lines in main.nf
@@ -82,7 +97,7 @@ workflow INIT_PIPELINE {
             log.error error
             exit 1
         }
-    }
+    } // end of (need_data)
 
     // Check valid output file formats were provided
     (formats, error) = InterProScan.validateFormats(params.formats)

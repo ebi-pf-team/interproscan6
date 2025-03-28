@@ -9,7 +9,7 @@ class InterPro {
     static final def FTP_URL = "https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6"
 
     static boolean checkCompatibility(Float iprscan, String interpro) {
-        // Check InterPro and InterProScan versions are compatible
+        // Check that the InterPro and InterProScan versions are compatible
         def noConnWarning = ""
         def latestReleaseWarning = ""
         def error = ""
@@ -28,14 +28,42 @@ class InterPro {
         return [noConnWarning, latestReleaseWarning, error]
     }
 
+    def downloadFile(String fileUrl, String savePath) {
+        def error = null
+        try {
+            URL url = new URL(fileUrl)
+            InputStream inputStream = url.openStream()
+            OutputStream outputStream = new FileOutputStream(new File(savePath))
+
+            byte[] buffer = new byte[1024]
+            int bytesRead
+            while((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead)
+            }
+            inputStream.close()
+            outputStream.close()
+        } catch (MalformedURLException e) {
+            error = "Invalid URL to download InterPro data: $fileUrl:\n$e"
+        } catch (IOException e) {
+            error = "I/O Error when downloading the file at $fileUrl:\n$e"
+        } catch (SecurityException e) {
+            error = "Permission denied when attempting to download the file at $fileUrl:\n$e"
+        } catch (Exception e) {
+            error = "Unexpected when downloading the file at $fileUrl:\n$e"
+        }
+        return error
+    }
+
     static getInterproRelease(Path datadir, String interpro) {
-        // Checks the InterProDir exists and then gets the specified interpro release number
+        // Checks the InterProDir exists and then retrieve the specified interpro release number
         def _interproRelease = null
-        def _interproDir = ""
         def error = ""
 
-        (_interproDir, error) = InterProScan.validateInterproDir(datadir)
-        if (error) {  // no datadir/interpro dir found
+        // Check if the <datadir>/interpro dir exists
+        def _interproDir = new File(datadir.resolve("interpro").toString())
+        if (!_InterproDir.exists() || !_interproDir.isDirectory()) {
+            error = "No 'interpro' directory was found in the data directory ${_datadir}\n" +
+                    "Please ensure that the data dir is correctly populated or use --download"
             return [_interproRelease, error]
         }
 
@@ -125,5 +153,18 @@ class InterPro {
 
     static String sanitizeURL(String url) {
         return url.replaceAll(/\/+$/, '')
+    }
+
+    static List<String> getFtpMd5(String database, String dbRelease) {
+        // Retrieve the precompute md5 hash from the EBI ftp
+        String error = ""
+        String md5Hash = ""
+        String url = "https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/${database}/${database}-${dbRelease}.tar.gz.md5"
+        try {
+            md5Hash = new URL(url).text.replace("${database}-{$dbRelease}.tar.gz", "").trim()
+        } catch (IOException e) {
+            error = "Error: Unable to retrieved MD5 hash from the EBI FTP at ${url}"
+        }
+        return [md5Hash, error]
     }
 }

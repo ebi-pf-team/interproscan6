@@ -1,3 +1,11 @@
+import java.net.URL
+import java.net.MalformedURLException
+import jave.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+
 workflow DOWNLOAD_INTERPRO {
     // This subworkflow runs when the --download flag is used.
 
@@ -7,11 +15,13 @@ workflow DOWNLOAD_INTERPRO {
 
     main:
     def _datadir = ""
-    def _downloadInterpro = false
-    def _downloadApps = false
-    def _interproReleases = [:]
+    def downloadInterpro = false
+    def downloadApps = false
+    def interproReleases = [:]
     def _interproRelease = null
     def baseUrl = "https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6"
+    def downloadURL = ""
+    def savePath = ""
 
     // Apps that have data to download
     _apps = applications.findAll { String appName ->
@@ -19,20 +29,16 @@ workflow DOWNLOAD_INTERPRO {
     }
 
     // Establish which data needs to be downloaded
-    while (!_downloadInterpro && !_downloadApps) {
-        // [1] Check the data dir exists
+    while (!downloadInterpro && !downloadApps) {
+        // [1] Check the data dir exists. Do we need to build one?
         // If --datadir is called and no path is given it converts to a boolean
         def dirPath = params.datadir instanceof Boolean ? null : params.datadir
         (_datadir, error) = InterProScan.resolveDirectory(dirPath, true, false)
         if (!_datadir) {
-            if (!params.datadir) {
-                log.error "--datadir <DATA-DIR> is mandatory when using --download"
-                exit 1
-            } else { // datadir is missing, it's needed and --download is enabled
-                _downloadInterpro = true
-                _downloadApps = true
-                break  // go straight to downloading everything
-            }
+            buildDataDir(_datadir)
+            downloadInterpro = true
+            downloadApps = true
+            break  // go straight to downloading everything
         }
 
         // [2] Get the iprscan version, which determines the compatible interpro releases
@@ -41,42 +47,64 @@ workflow DOWNLOAD_INTERPRO {
 
         // [3] Get the list of InterPro releases that are compatible with this InterProScan release
         def _releasesURL = "${baseUrl}/${_iprScanVersion}/versions.json"
-        def _interproReleases = InterPro.httpRequest(_releasesURL, null, 0, true, log)
-        def _compatibleReleases = _interproReleases[_iprScanVersion]*.toFloat()
+        def interproReleases = InterPro.httpRequest(_releasesURL, null, 0, true, log)
+        def compatibleReleases = interproReleases[_iprScanVersion]*.toFloat()
 
         // [4] Get the InterPro release to be used
         if (params.interpro == "latest") {
-            _interproRelease = _compatibleReleases.max()
+            _interproRelease = compatibleReleases.max()
         } else {
             // Using the user selected InterPro release. But first check it is compatible with this iprScan release
              _interproRelease = params.interpro.toString()
-             if (!_compatibleReleases.contains(_interproRelease)) {
+             if (!compatibleReleases.contains(_interproRelease)) {
                  log.error "The InterPro release ${_interproRelease} is not compatible with InterProScan version ${_iprScanVersion}"
                  exit 1
+             } else if (params.interpro.toFloat() < compatibleReleases.max()) {
+                log.info "A later compatible InterPro release '${compatibleReleases[iprscan].max()}' is availble.\n"+
+                         "Tip: Use the '--download' option to automatically fetch the latest compatible InterPro release"
              }
         }
-        println "# InterPro: $__interproRelease" // Adds to the summary statements in the main workflow
+        println "# InterPro: $_interproRelease" // Adds to the summary statements in the main workflow
 
-        // [5] Check if the InterPro (entries and XREF) data is available locally
-        def _interproDir = new File(_datadir.resolve("interpro").resolve(_interproRelease).toString())
-        if (!_interproDir.exists() || !_interproDir.isDirectory()) {
-            _downloadInterpro = true
+        // [7] Check if we need to download the correct InterPro and XREF files
+        // TODO: check the MD5 check
+        def xrefMd5s = InterProScan.validateXrefFiles(datadir, params.xRefsConfig, params.goterms, params.pathways, returnList=true)
+        xrefMd5s.each {String xrefFile ->
+            if (!xrefMd5s[xrefFile]) {
+                // File not found
+                downloadInterpro = true
+            } else {
+                // Check the md5 is correct
+                 (ftpMd5, error) = InterPro.getFtpMd5("interpro", _interproRelease.toString())
+                 if (error) {
+                    log.error error
+                    exit 1
+                 } else if (xrefMd5s[xrefFile] != ftpMd5) {
+                    downloadInterpro = true
+                 }
+            }
         }
 
         // [6] Check if we need to download any member database data
         // InterProScan.validateAppData() only returns something if there is missing data
         if (InterProScan.validateAppData(_apps, _datadir, params.appsConfig, true)) {
-            _downloadApps = true
+            downloadApps = true
         }
 
         break
     }
 
-    if (_downloadInterpro) {
-        // Download the InterPro (entries+xref) data
+    if (downloadInterpro) {
+        downloadURL = "${baseUrl}/interpro/interpro-${_interproRelease}.tar.gz"
+        savePath = _datadir.resolve("interpro/interpro-${_interproRelease}.tar.gz")
+        error = downloadFile(downloadURL, savePath)
+        if (error) {
+            log.error error
+            exit 1
+        }
     }
 
-    if (_downloadApps) {
+    if (downloadApps) {
         // Download member database data
     }
 
@@ -86,22 +114,33 @@ workflow DOWNLOAD_INTERPRO {
     interproRelease       // str: InterPro release version number
 }
 
-def buildDataDir(String datadir) {
-    // Build a directory to store data
-    return
+def buildDataDir(String dirPath) {
+    def dir = new File(dirPath)
+    dir.mkdirs()
 }
 
-def validateAppData(List<String> apps, String baseUrl) {
-    apps.each { String app ->
-        // Compile path to app datadir
-        def appDataDir = "$datadir/$app"
+def downloadFile(String fileUrl, String savePath) {
+    error = null
+    try {
+        URL url = new URL(fileUrl)
+        InputStream inputStream = url.openStream()
+        OutputStream outputStream = new FileOutputStream(new File(savePath))
 
-        def downloadURL = ""
-        def cmd = []
-        def process = cmd.execute()
-        process.waitFor()
-
-        // Check the md5 hash to ensure file was correctly download
-
+        byte[] buffer = new byte[1024]
+        int bytesRead
+        while((bytesRead = inputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, bytesRead)
+        }
+        inputStream.close()
+        outputStream.close()
+    } catch (MalformedURLException e) {
+        error = "Invalid URL to download InterPro data: $fileUrl:\n$e"
+    } catch (IOException e) {
+        error = "I/O Error when downloading the file at $fileUrl:\n$e"
+    } catch (SecurityException e) {
+        error = "Permission denied when attempting to download the file at $fileUrl:\n$e"
+    } catch (Exception e) {
+        error = "Unexpected when downloading the file at $fileUrl:\n$e"
     }
+    return error
 }

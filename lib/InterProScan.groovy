@@ -1,5 +1,6 @@
 // Class and methods for validating the user inputs
 
+import java.security.MessageDigest
 import java.nio.file.*
 
 class InterProScan {
@@ -163,6 +164,20 @@ class InterProScan {
         }
     }
 
+    static String getMD5Hash(String filePath) {
+        // Get the MD5 Hash of a local file. Used to check if the correct or complete file has been downloaded
+        def file = new File(filePath)
+        MessageDigest md = MessageDigest.getInstance("MD5")
+        file.withInputStream { is ->
+            byte[] buffer = new byte[8192]
+            int bytesRead
+            while ((bytesRead = is.read(buffer)) != -1) {
+                md.update(buffer, 0, bytesRead)
+            }
+        }
+        return md.digest().collect { String.format("%02x", it)}.join()
+    }
+
     static String resolveFile(String filePath) {
         Path path = Paths.get(filePath)
         return Files.isRegularFile(path) ? path.toRealPath() : null
@@ -230,16 +245,6 @@ class InterProScan {
         return [appsToRun.toSet().toList(), null]
     }
 
-    static validateInterproDir(Path datadir) {
-        def errorMsg = ""
-        def _interproDir = new File(datadir.resolve("interpro").toString())
-        if (!_InterproDir.exists() || !_interproDir.isDirectory()) {
-            errorMsg = "No 'interpro' directory was found in the data directory ${_datadir}\n" +
-                    "Please ensure that the data dir is correctly populated or use --download"
-        }
-        return [_interpDir, error]
-    }
-
     static validateAppData(List<String> appsToRun, Path datadir, Map appsConfig, Boolean returnSet=false) {
         def missingApps = [] as Set // only returned if returnList is true
         def errorMsg = appsToRun.collectMany { appName ->
@@ -268,12 +273,19 @@ class InterProScan {
         return returnSet ? missingApps : (errorMsg ? "Could not find the following data files\n${errorMsg}" : null)
     }
 
-    static validateXrefFiles(Path datadir, Map xRefsConfig, boolean goterms, boolean pathways) {
-        def errorMsg = []
+    static validateXrefFiles(Path datadir, Map xRefsConfig, boolean goterms, boolean pathways, boolean returnMap = false) {
+        // If returnList, return a Map with the md5 hash, else return an error message for the logger
+        def error = returnMap ? [:] : []
         def addError = { type, suffix ->
-            String path = datadir.resolve("${xRefsConfig[type]}${suffix}")
+            String path = datadir.resolve("${xRefsConfig[type]}${suffix}").toString()
             if (!resolveFile(path)) {
-                errorMsg << "${type}${suffix}: ${path}"
+                if (returnMap) {
+                    error["${type}${suffix}"] = null
+                } else {
+                    error << "${type}${suffix}: ${path}"
+                }
+            } else {
+                error["${type}${suffix}"] = getMD5Hash(path)
             }
         }
         addError('entries', '')  // we hard code the file ext in xrefsconfig so no suffix needed here
@@ -285,7 +297,7 @@ class InterProScan {
             addError('pathways', '.ipr.json')
             addError('pathways', '.json')
         }
-        return errorMsg ? "Could not find the following XREF data files\n${errorMsg.join('\n')}" : null
+        return returnMap ? error : (error ? "Could not find the following XREF data files\n${error.join('\n')}" : null)
     }
 
     static Set<String> validateFormats(String userFormats) {
