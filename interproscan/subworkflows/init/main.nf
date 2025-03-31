@@ -67,16 +67,6 @@ workflow INIT_PIPELINE {
         exit 1
     }
 
-    // Sequences validation
-    (error, numSequences) = FastaFile.validate(params.input, params.nucleic, params.appsConfig, apps)
-    if (error) {
-        log.error "Illegal characters found in ${params.input}\n$error"
-        exit 1
-    } else if (!numSequences) {
-        log.error "No FASTA sequences found in ${params.input}"
-        exit 1
-    }
-
     def _matchesApiUrl = null
     if (params.offline && params.matchesApiUrl != null) {
         log.error "--offline and --matches-api-url are mutually exlusive"

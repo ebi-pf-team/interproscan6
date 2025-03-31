@@ -1,11 +1,9 @@
 nextflow.enable.dsl=2
 
 include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
+include { PREPARE_SEQUENCES             } from "./interproscan/subworkflows/prepare_sequences"
 include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
 
-include { LOAD_SEQUENCES;
-          LOAD_ORFS;
-          SPLIT_FASTA                   } from "./interproscan/modules/prepare_sequences"
 include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
 include { LOOKUP_MATCHES                } from "./interproscan/modules/lookup"
 include { XREFS                         } from "./interproscan/modules/xrefs"
@@ -25,7 +23,6 @@ workflow {
     }
 
     INIT_PIPELINE()
-
     fasta_file      = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
     data_dir        = INIT_PIPELINE.out.datadir.val
     outut_dir       = INIT_PIPELINE.out.outdir.val
@@ -34,34 +31,9 @@ workflow {
     signalpMode     = INIT_PIPELINE.out.signalpMode.val
     matchesApiUrl   = INIT_PIPELINE.out.matchesApiUrl.val
 
-    if (params.nucleic) {
-        // Store the input seqs in the internal ips6 seq db
-        LOAD_SEQUENCES(fasta_file, params.nucleic)
-
-        // Chunk input file in smaller files for translation
-        fasta_file
-            .splitFasta( by: params.batchSize, file: true )
-            .set { ch_fasta }
-
-        /* Translate DNA/RNA sequences to protein sequences. Only proceed once completed
-        ensuring SPLIT_FASTA only runs once LOAD_ORFS is completed */
-        ch_translated = ESL_TRANSLATE(ch_fasta).collect()
-
-        // Store sequences in the sequence database
-        seq_db_path = LOAD_ORFS(ch_translated, LOAD_SEQUENCES.out)
-    } else {
-        // Store the input seqs in the internal ips6 seq db
-        seq_db_path = LOAD_SEQUENCES(fasta_file, params.nucleic)
-    }
-    // Build batches of unique protein seqs for the analysis
-    SPLIT_FASTA(seq_db_path, params.batchSize)
-
-    fastaList = SPLIT_FASTA.out.collect()
-    // Convert a list (or single file path) to a list of tuples containing indexed fasta file paths
-    ch_seqs = fastaList
-        .map { fastaList -> fastaList.indexed() } // creates a map-like object
-        .flatMap()
-        .map { entry -> [entry.key, entry.value] } // Convert to tuple [index, fasta]
+    PREPARE_SEQUENCES(fasta_file, apps)
+    ch_seqs         = PREPARE_SEQUENCES.out.ch_seqs
+    seq_db_path     = PREPARE_SEQUENCES.out.seq_db_path
 
     matchResults = Channel.empty()
     if (matchesApiUrl != null) {
