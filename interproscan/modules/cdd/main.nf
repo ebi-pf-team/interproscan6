@@ -55,7 +55,7 @@ process RUN_RPSPROC {
 
 
 process PARSE_RPSPROC {
-    label 'local'
+    label 'run_locally'
 
     input:
     tuple val(meta), val(rpsbproc_out)

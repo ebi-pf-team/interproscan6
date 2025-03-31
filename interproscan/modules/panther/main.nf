@@ -21,7 +21,7 @@ process SEARCH_PANTHER {
 }
 
 process PREPARE_TREEGRAFTER {
-    label 'local'
+    label 'run_locally'
 
     input:
     tuple val(meta), val(hmmseach_out)
@@ -182,7 +182,7 @@ process RUN_TREEGRAFTER {
 }
 
 process PARSE_PANTHER {
-    label 'local'
+    label 'run_locally'
 
     input:
     tuple val(meta), val(hmmseach_json), val(epagn_tsv)

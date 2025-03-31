@@ -61,7 +61,7 @@ process ASSIGN_CATH {
 }
 
 process PARSE_CATHGENE3D {
-    label 'local'
+    label 'run_locally'
 
     input:
     tuple val(meta), val(hmmseach_out), val(cath_tsv)

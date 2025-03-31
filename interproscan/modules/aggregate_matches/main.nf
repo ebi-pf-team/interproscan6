@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.SerializationFeature
 
 process AGGREGATE_SEQS_MATCHES {
-    label 'local'
+    label 'run_locally'
     // Aggregates sequence meta data with the corresponding match data
     input:
     tuple val(meta), val(seqsPath), val(matchesPath)
@@ -91,7 +91,7 @@ def processProteinData(JsonNode protein, Map seqMatchesAggreg,  Map<String, Json
 }
 
 process AGGREGATE_ALL_MATCHES {
-    label 'local'
+    label 'run_locally'
 
     input:
     val seqMatches

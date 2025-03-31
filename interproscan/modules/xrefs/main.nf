@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 
 process XREFS {
-    label 'local'
+    label 'run_locally'
 
     input:
     tuple val(meta), val(membersMatches)
