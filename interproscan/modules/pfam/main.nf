@@ -97,7 +97,7 @@ def filterMatches(Map<String, Map<String, Match>> hmmerMatches, Map<String, Map<
     */
     Map<String, List<Match>> filteredMatches = [:]
     hmmerMatches.each { seqId, matches ->
-         List<Match> allMatches = flatMatchLocations(matches)
+         List<Match> allMatches = flattenMatchLocations(matches)
 
         // Sort matches by evalue ASC, score DESC to keep the best matches
         allMatches.sort { a, b ->
