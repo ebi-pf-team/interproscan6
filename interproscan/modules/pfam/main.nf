@@ -229,8 +229,8 @@ def buildFragments(Map<String, Map<String, Match>> filteredMatches,
                             rawDiscontinuousMatch.locations[0].fragments = fragments
                         }
                         newLocationStart = fragment.end + 1
+                        // The first region (located upstream of the fragment) has already been handled, not handle the second regions (downstream of the fragment)
                         if (areSeparateFrags) {
-                            //deal with final region
                             fragmentDcStatus = "N_TERMINAL_DISC"
                             rawDiscontinuousMatch.locations[0].end = finalLocationEnd  // ensure the 2nd frag extends to the original match's end position
                             // Keep the 2nd region only if it meets the MINLENGTH and store as a new LocationFragment inside discontinuousMatch
