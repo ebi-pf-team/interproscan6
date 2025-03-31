@@ -210,7 +210,6 @@ def buildFragments(Map<String, Map<String, Match>> filteredMatches,
                             return
                         }
 
-
                         boolean areSeparateFrags = false
                         if (fragment['start'] <= newLocationStart) {
                             newLocationStart = fragment['end'] + 1
