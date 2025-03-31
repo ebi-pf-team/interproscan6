@@ -27,13 +27,15 @@ workflow {
 
     INIT_PIPELINE()
 
-    fasta_file      = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
-    data_dir        = INIT_PIPELINE.out.datadir.val
-    outut_dir       = INIT_PIPELINE.out.outdir.val
-    formats         = INIT_PIPELINE.out.formats.val
-    apps            = INIT_PIPELINE.out.apps.val
-    signalpMode     = INIT_PIPELINE.out.signalpMode.val
-    matchesApiUrl   = INIT_PIPELINE.out.matchesApiUrl.val
+    fasta_file         = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
+    data_dir           = INIT_PIPELINE.out.datadir.val
+    interpro_release   = INIT_PIPELINE.out.interproRelease.val
+    member_db_releases = INIT_PIPELINE.out.memberDbReleases.val
+    outdir             = INIT_PIPELINE.out.outdir.val
+    formats            = INIT_PIPELINE.out.formats.val
+    apps               = INIT_PIPELINE.out.apps.val
+    signalpMode        = INIT_PIPELINE.out.signalpMode.val
+    matchesApiUrl      = INIT_PIPELINE.out.matchesApiUrl.val
 
     if (params.nucleic) {
         // Store the input seqs in the internal ips6 seq db
@@ -72,6 +74,7 @@ workflow {
 
         SCAN_SEQUENCES(
             LOOKUP_MATCHES.out[1],
+            member_db_releases,
             apps,
             params.appsConfig,
             data_dir
@@ -86,6 +89,7 @@ workflow {
     } else {
         SCAN_SEQUENCES(
             ch_seqs,
+            member_db_releases,
             apps,
             params.appsConfig,
             data_dir
@@ -105,12 +109,14 @@ workflow {
         matchResults,
         apps,
         data_dir,
+        "${data_dir}/interpro/${interpro_release}",
+        member_db_releases,
         params.xRefsConfig.entries,
         params.xRefsConfig.goterms,
         params.xRefsConfig.pathways,
         params.goterms,
         params.pathways,
-        params.appsConfig.panther.paint
+        "${data_dir}/${member_db_releases.panther}/${params.appsConfig.panther.paint}"
     )
 
     REPRESENTATIVE_LOCATIONS(XREFS.out)
