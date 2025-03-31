@@ -60,7 +60,7 @@ def stockholmDatParser(String pfamADatFile) {
         } else if (line.startsWith("#=GF NE")) {
             String nestedAcc = line.split()[2]
             parsedDat[accession]?.nested?.add(nestedAcc) ?: (parsedDat[accession] = [nested: [nestedAcc]])
-         } else if (line.startsWith("#=GF CL")) {
+        } else if (line.startsWith("#=GF CL")) {
             String claAcc = line.split()[2]
             parsedDat.computeIfAbsent(accession, { [clan: claAcc] }).clan = claAcc
         }
@@ -97,7 +97,7 @@ def filterMatches(Map<String, Map<String, Match>> hmmerMatches, Map<String, Map<
     */
     Map<String, List<Match>> filteredMatches = [:]
     hmmerMatches.each { seqId, matches ->
-         List<Match> allMatches = flattenMatchLocations(matches)
+        List<Match> allMatches = flattenMatchLocations(matches)
 
         // Sort matches by evalue ASC, score DESC to keep the best matches
         allMatches.sort { a, b ->
@@ -114,8 +114,8 @@ def filterMatches(Map<String, Map<String, Match>> hmmerMatches, Map<String, Map<
                 String filteredMatchClan = filteredMatchInfo?.clan
                 if (candidateMatchClan == filteredMatchClan) {  // check if both are in the same clan
                     boolean overlapped = isOverlapping(
-                        match.locations[0].start, match.locations[0].end,
-                        filteredMatch.locations[0].start, filteredMatch.locations[0].end
+                            match.locations[0].start, match.locations[0].end,
+                            filteredMatch.locations[0].start, filteredMatch.locations[0].end
                     )
                     if (overlapped) {
                         List<String> candidateNested = candidateMatch?.nested ?: []
@@ -141,11 +141,11 @@ def flattenMatchLocations(matches) {
         modelAccession = modelAccession.split("\\.")[0]
         match.locations.collect { location ->
             Match matchInfo = new Match(
-                modelAccession,
-                match.evalue,
-                match.score,
-                match.bias,
-                match.signature
+                    modelAccession,
+                    match.evalue,
+                    match.score,
+                    match.bias,
+                    match.signature
             )
             matchInfo.locations = [location]
             matchInfo.signature.accession = modelAccession
@@ -159,8 +159,8 @@ def isOverlapping(location1Start, location1End, location2Start, location2End) {
 }
 
 def buildFragments(Map<String, Map<String, Match>> filteredMatches,
-                               Map<String, Map<String, Object>> dat,
-                               int MINLENGTH) {
+                   Map<String, Map<String, Object>> dat,
+                   int MINLENGTH) {
     /* Add fragmentLocation objects to the Matches and gather Matches for the same
     model accession into a single Match object */
     Map<String, Map<String, Match>> processedMatches = [:]
@@ -168,6 +168,7 @@ def buildFragments(Map<String, Map<String, Match>> filteredMatches,
         def aggregatedMatches = [:]
         matches.each { Match match ->
             List<String> nestedModels = dat[match.modelAccession]?.nested ?: []
+            finalMatchLocations = []
             if (nestedModels) {
                 /* Find all matches whose models are listed as nested within the current model
                 in pfam_a.dat AND which overlap the current match.
@@ -175,7 +176,7 @@ def buildFragments(Map<String, Map<String, Match>> filteredMatches,
                 `start` and `end` field. */
                 List<Map<String, Integer>> locationFragments = matches.findAll { otherMatch ->
                     otherMatch.modelAccession in nestedModels &&
-                    isOverlapping(otherMatch.locations[0].start, otherMatch.locations[0].end,
+                            isOverlapping(otherMatch.locations[0].start, otherMatch.locations[0].end,
                                     match.locations[0].start, match.locations[0].end)
                 }.collect { otherMatch ->
                     [start: otherMatch.locations[0].start, end: otherMatch.locations[0].end]
@@ -252,8 +253,9 @@ def buildFragments(Map<String, Map<String, Match>> filteredMatches,
                     discontinuousMatchesList = newMatchesFromFragment.findAll { it.locations[0].end - it.locations[0].start + 1 >= MINLENGTH }
                 }
                 aggregatedMatches = storeMatches(aggregatedMatches, discontinuousMatchesList)
-            } else if (match.locations[0].end - match.locations[0].start + 1 >= MINLENGTH) {  // filter out matches that are shorter than MINLENGTH
-                aggregatedMatches.computeIfAbsent(match.modelAccession, { match }).locations << match.locations[0]
+            } else if (match.locations[0].end - match.locations[0].start + 1 >= MINLENGTH) {  // filter out not nested matches that are shorter than MINLENGTH
+                finalMatchLocations << match.locations[0]
+                aggregatedMatches.computeIfAbsent(match.modelAccession, { match }).locations = finalMatchLocations
             }
         }
         processedMatches[seqId] = aggregatedMatches
