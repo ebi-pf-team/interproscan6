@@ -24,6 +24,7 @@ include { RUN_DEEPTMHMM; PARSE_DEEPTMHMM                                        
 workflow SCAN_SEQUENCES {
     take:
     ch_seqs             // channel of tuples (index, fasta file)
+    member_db_releases  // map: [db: version number]
     applications        // list of applications to run
     appsConfig          // map of applications
     datadir             // path to data directory
@@ -32,9 +33,11 @@ workflow SCAN_SEQUENCES {
     results = Channel.empty()
 
     if (applications.contains("antifam")) {
+        def antifam_release = member_db_releases['antifam']
+        def antifam_dir = "${datadir}/${appsConfig.antifam.dir}/${antifam_release}"
         RUN_ANTIFAM(
             ch_seqs,
-            "${datadir}/${appsConfig.antifam.hmm}"
+            "${antifam_dir}/${appsConfig.antifam.hmm}"
         )
 
         PARSE_ANTIFAM(RUN_ANTIFAM.out)
@@ -42,10 +45,12 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("cathgene3d") || applications.contains("cathfunfam")) {
+        def gene3d_release = member_db_releases['cath-gene3d']
+        def gene3d_dir = "${datadir}/${appsConfig.cathgene3d.dir}/${gene3d_release}"
         // Search Gene3D profiles
         SEARCH_GENE3D(
             ch_seqs,
-            "${datadir}/${appsConfig.cathgene3d.hmm}")
+            "${gene3d_dir}/${appsConfig.cathgene3d.hmm}")
         ch_gene3d = SEARCH_GENE3D.out
 
         // Select best domain matches
@@ -54,8 +59,8 @@ workflow SCAN_SEQUENCES {
         // Assign CATH superfamily to matches
         ASSIGN_CATH(
             RESOLVE_GENE3D.out,
-            "${datadir}/${appsConfig.cathgene3d.model2sfs}",
-            "${datadir}/${appsConfig.cathgene3d.disc_regs}"
+            "${gene3d_dir}/${appsConfig.cathgene3d.model2sfs}",
+            "${gene3d_dir}/${appsConfig.cathgene3d.disc_regs}"
         )
 
         // Join results and parse them
@@ -67,10 +72,12 @@ workflow SCAN_SEQUENCES {
         }
 
         if (applications.contains("cathfunfam")) {
+            def funfam_release = member_db_releases['cath-funfam']
+            def funfam_dir = "${datadir}/${appsConfig.cathfunfam.dir}/${funfam_release}"
             // Find unique CATH superfamilies with at least one hit
             PREPARE_FUNFAM(
                 PARSE_CATHGENE3D.out,
-                "${datadir}/${appsConfig.cathfunfam.dir}"
+                "${funfam_dir}"
             )
 
             /*
@@ -89,7 +96,7 @@ workflow SCAN_SEQUENCES {
             // Search FunFam profiles
             SEARCH_FUNFAM(
                 ch_funfams,
-                "${datadir}/${appsConfig.cathfunfam.dir}"
+                "${funfam_dir}"
             )
 
             // Select best domain matches
@@ -103,14 +110,16 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("cdd")) {
+        def cdd_release = member_db_releases['cdd']
+        def cdd_dir = "${datadir}/${appsConfig.cdd.dir}/${cdd_release}"
         RUN_RPSBLAST(
             ch_seqs,
-            "${datadir}/${appsConfig.cdd.rpsblast_db}"
+            "${cdd_dir}/${appsConfig.cdd.rpsblast_db}"
         )
 
         RUN_RPSPROC(
             RUN_RPSBLAST.out,
-            "${datadir}/${appsConfig.cdd.rpsproc_db}"
+            "${cdd_dir}/${appsConfig.cdd.rpsproc_db}"
         )
 
         PARSE_RPSPROC(RUN_RPSPROC.out)
@@ -133,19 +142,21 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("hamap")) {
+        def hamap_release = member_db_releases['hamap']
+        def hamap_dir = "${datadir}/${appsConfig.hamap.dir}/${hamap_release}"
         PREPROCESS_HAMAP(
             ch_seqs,
-            "${datadir}/${appsConfig.hamap.hmm}"
+            "${hamap_dir}/${appsConfig.hamap.hmm}"
         )
 
         PREPARE_HAMAP(
             PREPROCESS_HAMAP.out,
-            "${datadir}/${appsConfig.hamap.dir}"
+            "${hamap_dir}/${appsConfig.hamap.dir}"
         )
 
         RUN_HAMAP(
             PREPARE_HAMAP.out,
-            "${datadir}/${appsConfig.hamap.dir}"
+            "${hamap_dir}/${appsConfig.hamap.dir}"
         )
 
         PARSE_HAMAP(RUN_HAMAP.out)
@@ -160,9 +171,11 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("ncbifam")) {
+        def ncbifam_release = member_db_releases['ncbifam']
+        def ncbifam_dir = "${datadir}/${appsConfig.ncbifam.dir}/${ncbifam_release}"
         RUN_NCBIFAM(
             ch_seqs,
-            "${datadir}/${appsConfig.ncbifam.hmm}"
+            "${ncbifam_dir}/${appsConfig.ncbifam.hmm}"
         )
 
         PARSE_NCBIFAM(RUN_NCBIFAM.out)
@@ -170,20 +183,22 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("panther")) {
+        def panther_release = member_db_releases['panther']
+        def panther_dir = "${datadir}/${appsConfig.panther.dir}/${panther_release}"
         SEARCH_PANTHER(
             ch_seqs,
-            "${datadir}/${appsConfig.panther.hmm}"
+            "${panther_dir}/${appsConfig.panther.hmm}"
         )
         ch_panther = SEARCH_PANTHER.out
 
         PREPARE_TREEGRAFTER(
             ch_panther,
-            "${datadir}/${appsConfig.panther.msf}"
+            "${panther_dir}/${appsConfig.panther.msf}"
         )
 
         RUN_TREEGRAFTER(
             PREPARE_TREEGRAFTER.out.fasta,
-            "${datadir}/${appsConfig.panther.msf}"
+            "${panther_dir}/${appsConfig.panther.msf}"
         )
 
         PARSE_PANTHER(
@@ -203,82 +218,96 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("pfam")) {
+        def pfam_release = member_db_releases['pfam']
+        def pfam_dir = "${datadir}/${appsConfig.pfam.dir}/${pfam_release}"
         SEARCH_PFAM(
             ch_seqs,
-            "${datadir}/${appsConfig.pfam.hmm}"
+            "${pfam_dir}/${appsConfig.pfam.hmm}"
         )
 
         PARSE_PFAM(
             SEARCH_PFAM.out,
-            "${datadir}/${appsConfig.pfam.seed}",
-            "${datadir}/${appsConfig.pfam.clan}",
-            "${datadir}/${appsConfig.pfam.dat}"
+            "${pfam_dir}/${appsConfig.pfam.seed}",
+            "${pfam_dir}/${appsConfig.pfam.clan}",
+            "${pfam_dir}/${appsConfig.pfam.dat}"
         )
         results = results.mix(PARSE_PFAM.out)
     }
 
     if (applications.contains("pirsf")) {
+        def pirsf_release = member_db_releases['pirsf']
+        def pirsf_dir = "${datadir}/${appsConfig.pirsf.dir}/${pirsf_release}"
         RUN_PIRSF(ch_seqs,
-            "${datadir}/${appsConfig.pirsf.hmm}"
+            "${pirsf_dir}/${appsConfig.pirsf.hmm}"
         )
         PARSE_PIRSF(RUN_PIRSF.out,
-            "${datadir}/${appsConfig.pirsf.dat}")
+            "${pirsf_dir}/${appsConfig.pirsf.dat}")
 
         results = results.mix(PARSE_PIRSF.out)
     }
 
     if (applications.contains("pirsr")) {
+        def pirsr_release = member_db_releases['pirsr']
+        def pirsr_dir = "${datadir}/${appsConfig.pirsr.dir}/${pirsr_release}"
         RUN_PIRSR(ch_seqs,
-            "${datadir}/${appsConfig.pirsr.hmm}")
+            "${pirsr_dir}/${appsConfig.pirsr.hmm}")
 
         PARSE_PIRSR(RUN_PIRSR.out,
-            "${datadir}/${appsConfig.pirsr.rules}")
+            "${pirsr_dir}/${appsConfig.pirsr.rules}")
 
         results = results.mix(PARSE_PIRSR.out)
     }
 
     if (applications.contains("prints")) {
+        def prints_release = member_db_releases['prints']
+        def prints_dir = "${datadir}/${appsConfig.prints.dir}/${prints_release}"
         RUN_PRINTS(
             ch_seqs,
-            "${datadir}/${appsConfig.prints.pval}"
+            "${prints_dir}/${appsConfig.prints.pval}"
         )
 
         PARSE_PRINTS(
             RUN_PRINTS.out,
-            "${datadir}/${appsConfig.prints.hierarchy}"
+            "${prints_dir}/${appsConfig.prints.hierarchy}"
         )
         results = results.mix(PARSE_PRINTS.out)
     }
 
     if (applications.contains("prositepatterns")) {
+        def prositepatterns_release = member_db_releases['prosite patterns']
+        def prositepatterns_dir = "${datadir}/${appsConfig.prositepatterns.dir}/${prositepatterns_release}"
         RUN_PFSCAN(
             ch_seqs,
-            "${datadir}/${appsConfig.prositepatterns.dat}",
-            "${datadir}/${appsConfig.prositepatterns.evaluator}")
+            "${prositepatterns_dir}/${appsConfig.prositepatterns.dat}",
+            "${prositepatterns_dir}/${appsConfig.prositepatterns.evaluator}")
 
         PARSE_PFSCAN(RUN_PFSCAN.out)
         results = results.mix(PARSE_PFSCAN.out)
     }
 
     if (applications.contains("prositeprofiles")) {
+        def prositeprofiles_release = member_db_releases['prosite profiles']
+        def prositeprofiles_dir = "${datadir}/${appsConfig.prositeprofiles.dir}/${prositeprofiles_release}"
         RUN_PFSEARCH(
             ch_seqs,
-            "${datadir}/${appsConfig.prositeprofiles.dir}")
+            "${prositeprofiles_dir}/${appsConfig.prositeprofiles.dir}")
         PARSE_PFSEARCH(
             RUN_PFSEARCH.out,
-            "${datadir}/${appsConfig.prositeprofiles.skip_flagged_profiles}")
+            "${prositeprofiles_dir}/${appsConfig.prositeprofiles.skip_flagged_profiles}")
         results = results.mix(PARSE_PFSEARCH.out)
     }
 
     if (applications.contains("sfld")) {
+        def sfld_release = member_db_releases['sfld']
+        def sfld_dir = "${datadir}/${appsConfig.sfld.dir}/${sfld_release}"
         RUN_SFLD(ch_seqs,
-            "${datadir}/${appsConfig.sfld.hmm}")
+            "${sfld_dir}/${appsConfig.sfld.hmm}")
 
         POST_PROCESS_SFLD(RUN_SFLD.out,
-            "${datadir}/${appsConfig.sfld.sites_annotation}")
+            "${sfld_dir}/${appsConfig.sfld.sites_annotation}")
 
         PARSE_SFLD(POST_PROCESS_SFLD.out,
-            "${datadir}/${appsConfig.sfld.hierarchy}")
+            "${sfld_dir}/${appsConfig.sfld.hierarchy}")
 
         results = results.mix(PARSE_SFLD.out)
     }
@@ -306,32 +335,36 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("smart")) {
+        def smart_release = member_db_releases['smart']
+        def smart_dir = "${datadir}/${appsConfig.smart.dir}/${smart_release}"
         SEARCH_SMART(
             ch_seqs,
-            "${datadir}/${appsConfig.smart.hmmbin}"
+            "${smart_dir}/${appsConfig.smart.hmmbin}"
         )
 
         PARSE_SMART(
             SEARCH_SMART.out,
-            "${datadir}/${appsConfig.smart.hmm}"
+            "${smart_dir}/${appsConfig.smart.hmm}"
         )
         results = results.mix(PARSE_SMART.out)
     }
 
     if (applications.contains("superfamily")) {
+        def superfamily_release = member_db_releases['superfamily']
+        def superfamily_dir = "${datadir}/${appsConfig.superfamily.dir}/${superfamily_release}"
         SEARCH_SUPERFAMILY(
             ch_seqs,
-            "${datadir}/${appsConfig.superfamily.hmm}",
-            "${datadir}/${appsConfig.superfamily.selfhits}",
-            "${datadir}/${appsConfig.superfamily.cla}",
-            "${datadir}/${appsConfig.superfamily.model}",
-            "${datadir}/${appsConfig.superfamily.pdbj95d}"
+            "${superfamily_dir}/${appsConfig.superfamily.hmm}",
+            "${superfamily_dir}/${appsConfig.superfamily.selfhits}",
+            "${superfamily_dir}/${appsConfig.superfamily.cla}",
+            "${superfamily_dir}/${appsConfig.superfamily.model}",
+            "${superfamily_dir}/${appsConfig.superfamily.pdbj95d}"
         )
 
         PARSE_SUPERFAMILY(
             SEARCH_SUPERFAMILY.out,
-            "${datadir}/${appsConfig.superfamily.model}",
-            "${datadir}/${appsConfig.superfamily.hmm}"
+            "${superfamily_dir}/${appsConfig.superfamily.model}",
+            "${superfamily_dir}/${appsConfig.superfamily.hmm}"
         )
         results = results.mix(PARSE_SUPERFAMILY.out)
     }

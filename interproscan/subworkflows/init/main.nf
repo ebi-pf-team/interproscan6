@@ -1,7 +1,7 @@
 import groovy.json.JsonSlurper
 
-include { DOWNLOAD_INTERPRO } from "../download"
-include { getMatchesApiUrl  } from "../../modules/lookup"
+include { DOWNLOAD } from "../download"
+include { getMatchesApiUrl } from "../../modules/lookup"
 
 workflow INIT_PIPELINE {
     main:
@@ -35,14 +35,19 @@ workflow INIT_PIPELINE {
     def _datadir = ""
     def _interproDir = ""
     def _interproRelease = ""
+    def _iprScanVersion = ""
+    def _memberDbReleases = [:]
     if (need_data) {
+        // Get the iprscan version (only major and minor version needed), to determine the compatible interpro releases
+        _iprScanVersion = workflow.manifest.version.split("\\.")[0..1].join(".")
+
         if (params.download) {
             if (!params.datadir) {
                 log.error "--datadir <DATA-DIR> is mandatory when using --download"
                 exit 1
             }
-            DOWNLOAD_INTERPRO(apps, params.appsConfig)
-            _interproRelease = DOWNLOAD_INTERPRO.out.interproRelease.val
+            DOWNLOAD(_iprScanVersion, apps, params.appsConfig)
+            _interproRelease = DOWNLOAD.out.interproRelease.val
         } else {
             // Check if there is a data directory
             // If --datadir is called and no path is given it converts to a boolean
@@ -60,7 +65,7 @@ workflow INIT_PIPELINE {
                     log.error error
                     exit 1
                 }
-                (noConnWarning, latestReleaseWarning, compatError) = InterPro.checkCompatibility(_iprScanVersion, _interproRelease)
+                (noConnWarning, latestReleaseWarning, compatError) = InterPro.checkCompatibility(_iprScanVersion, _interproRelease, log)
                 if (compatError) { // Not compatible, terminate
                     log.error compatError
                     exit 1
@@ -77,22 +82,28 @@ workflow INIT_PIPELINE {
                 }
             }
         }
-        println "# InterPro: $_interproRelease"  // adds to the pipeline intro lines in main.nf
-
-        /* TODO: Update InterProScan.validate<TYPE>Data/Files
-        to include the release numbers. The applciations.conf has 
-        already been updated. */
+        println "# InterPro $_interproRelease"  // adds to the pipeline intro lines in main.nf
 
         // Validate the interpro and Xref data files
         // Validate these first as we need the interpro files for validateAppData
-        error = InterProScan.validateXrefFiles(_datadir, params.xRefsConfig, params.goterms, params.pathways)
+        error = InterProScan.validateXrefFiles(_datadir, _interproRelease, params.xRefsConfig, params.goterms, params.pathways)
         if (error) {
             log.error error
             exit 1
         }
 
+        /* Load the database.json file and set all keys to lowercase to match applications.config
+        Don't worry about checking it exists, this was done in InterProScan.validateXrefFiles() */
+        JsonSlurper jsonSlurper = new JsonSlurper()
+        def databaseJsonPath = _datadir.resolve("${params.xRefsConfig.dir}/${_interproRelease}/${params.xRefsConfig.databases}")
+        def databaseJson = new File(databaseJsonPath.toString())
+        _memberDbReleases = jsonSlurper.parse(databaseJson)
+        _memberDbReleases = _memberDbReleases.collectEntries { appName, versionNum ->
+            [(appName.toLowerCase()): versionNum]
+        }
+
         // Validate the selected member databases data files and dirs
-        error = InterProScan.validateAppData(apps, _datadir, params.appsConfig)
+        error = InterProScan.validateAppData(apps, _datadir, params.appsConfig, _memberDbReleases)
         if (error) {
             log.error error
             exit 1
@@ -138,25 +149,23 @@ workflow INIT_PIPELINE {
         _matchesApiUrl = null
     } else {
         _matchesApiUrl = getMatchesApiUrl(
-            params.matchesApiUrl, params.lookupService.url, _datadir, workflow.manifest, log
+            params.matchesApiUrl, params.lookupService.url, _interproRelease, workflow.manifest, log
         )
     }
 
     matchesApiUrl = _matchesApiUrl
     datadir = _datadir
+    interproRelease = _interproRelease
+    memberDbReleases = _memberDbReleases
 
     emit:
-    fasta         // str: path to input fasta file
-    datadir       // str: path to data directory
-    apps          // list: list of application to
-    outdir        // str: path to output directory
-    formats       // set<String>: output file formats
-    signalpMode   // str: Models to be used with SignalP
-    matchesApiUrl // str|null: URL of Matches API to query
-}
-
-def checkData() {
-    /* This code is placed in a separate function so that if at any point download is set to true
-    we exit and go straight to downloading data. */
-
+    fasta            // str: path to input fasta file
+    datadir          // str: path to data directory
+    interproRelease  // str: interpro db version number
+    memberDbReleases // map: [db: version number]
+    apps             // list: list of application to
+    outdir           // str: path to output directory
+    formats          // set<String>: output file formats
+    signalpMode      // str: Models to be used with SignalP
+    matchesApiUrl    // str|null: URL of Matches API to query
 }

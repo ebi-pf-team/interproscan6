@@ -2,6 +2,7 @@
 
 import java.security.MessageDigest
 import java.nio.file.*
+import InterPro
 
 class InterProScan {
     static final def PARAMS = [
@@ -36,6 +37,10 @@ class InterProScan {
         [
             name: "offline",
             description: "run InterProScan in offline mode, disabling queries to the InterPro Matches API. Pre-calculated matches for known sequences will not be retrieved, and analyses will be run locally."
+        ],
+        [
+            name : "interpro",
+            description: "the InterPro release to be used. Defaults to 'latest'."
         ],
         [
             name: "matches-api-url",
@@ -113,7 +118,7 @@ class InterProScan {
             "FILE": ["cla", "clan", "dat", "disc_regs", "evaluator", "hierarchy", "hmm", "hmmbin",
                      "model", "model2sfs", "pdbj95d", "rules", "seed", "selfhits", "site_annotations",
                      "skip_flagged_profiles"],
-            "DIR": ["dir", "msf", "paint", "rpsblast_db", "rpsproc_db"]
+            "DIR": ["msf", "paint", "rpsblast_db", "rpsproc_db"]
     ]
 
     static void validateParams(params, log) {
@@ -245,23 +250,36 @@ class InterProScan {
         return [appsToRun.toSet().toList(), null]
     }
 
-    static validateAppData(List<String> appsToRun, Path datadir, Map appsConfig, Boolean returnList=false) {
+    static validateAppData(List<String> appsToRun, Path datadir, Map appsConfig, Map databaseMap, Boolean returnList=false) {
         def missingApps = [] as Set // only returned if returnList is true
         def errorMsg = appsToRun.collectMany { appName ->
-            def appVersion =
-            def appDir =
+            def fmtAppName = InterPro.formatMemberDbName(appName)
+
+            def appVersion = databaseMap[fmtAppName].toString()
+
+            if (!appVersion) {
+                return "Could not retrieve release for $appName"
+            }
+            if (!appsConfig[appName]['dir']) {  // member does not have a datadir, e.g. coils and mobidblite
+                return null
+            }
+            def appDir = datadir.resolve("${appsConfig[appName]['dir']}/$appVersion".toString())
+            if (!Files.exists(appDir) || !Files.isDirectory(appDir)) {
+                missingApps.add(appName)
+                return ["${appName}: dir ${appDir.toString()} is missing"]
+            }
             appsConfig[appName].collect { key, value ->
                 if (this.DATA_TYPE["FILE"].contains(key)) {
-                    if (!resolveFile(datadir.resolve(value).toString())) {
+                    if (!resolveFile(appDir.resolve(value).toString())) {
                         missingApps.add(appName)
                         return "${appName}: file: '${key}': ${value ?: 'null'}"
                     }
-                } else if (this.DATA_TYPE["DIR"].contains(key)) {
+                } else if (this.DATA_TYgitPE["DIR"].contains(key)) {
                     if (!value) {
                         missingApps.add(appName)
                         return "${appName}: dir: '${key}': 'null'"
                     }
-                    Path dirPath = this.LICENSED_SOFTWARE.contains(appName) ? Paths.get(value) : datadir.resolve(value)
+                    Path dirPath = this.LICENSED_SOFTWARE.contains(appName) ? Paths.get(value) : appDir.resolve(value)
                     if (!Files.exists(dirPath) || !Files.isDirectory(dirPath)) {
                         missingApps.add(appName)
                         return "${appName}: dir: '${key}': ${value ?: 'null'}"
@@ -273,10 +291,10 @@ class InterProScan {
         return returnList ? missingApps as List : (errorMsg ? "Could not find the following data files\n${errorMsg}" : null)
     }
 
-    static validateXrefFiles(Path datadir, Map xRefsConfig, boolean goterms, boolean pathways) {
+    static validateXrefFiles(Path datadir, String interproRelease, Map xRefsConfig, boolean goterms, boolean pathways) {
         def error = ""
         def addError = { type, suffix ->
-            String path = datadir.resolve("${xRefsConfig[type]}${suffix}").toString()
+            String path = datadir.resolve("interpro/$interproRelease/${xRefsConfig[type]}${suffix}").toString()
             if (!resolveFile(path)) {
                 error << "${type}${suffix}: ${path}"
             }

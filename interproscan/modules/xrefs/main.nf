@@ -9,6 +9,8 @@ process XREFS {
     tuple val(meta), val(membersMatches)
     val apps
     val dataDir
+    val xrefDir
+    val memberDbReleases
     val entriesFile
     val gotermFilePrefix
     val pathwaysFilePrefix
@@ -21,13 +23,13 @@ process XREFS {
 
     exec:
     // Load entries data. NOTE: The entries, go terms and pathway files are too large for JsonSlurper to handle.
-    String entriesPath = "${dataDir}/${entriesFile}"
+    String entriesPath = "${xrefDir}/${entriesFile}"
     def (entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null]
     if (dataDir.toString().trim()) {  // datadir is not needed when exclusively running members with no interpro data
         File entriesJson = new File(entriesPath)
         entries = new ObjectMapper().readValue(entriesJson, Map)
-        if (addGoterms) (ipr2go, goInfo) = loadXRefFiles(gotermFilePrefix, dataDir)
-        if (addPathways) (ipr2pa, paInfo) = loadXRefFiles(pathwaysFilePrefix, dataDir)
+        if (addGoterms) (ipr2go, goInfo) = loadXRefFiles(gotermFilePrefix, xrefDir)
+        if (addPathways) (ipr2pa, paInfo) = loadXRefFiles(pathwaysFilePrefix, xrefDir)
     }
 
     def aggregatedMatches = [:]  // seqMd5: {modelAcc: Match} -- otherwise a seqMd5 will appear multiple times in the output
@@ -43,17 +45,18 @@ process XREFS {
                     seqEntry[modelAcc] = match
                 } else {
                     String signatureAcc = match.signature.accession
-                    def signatureInfo = entries["entries"][signatureAcc] ?: entries["entries"][modelAcc]
+                    def signatureInfo = entries[signatureAcc] ?: entries[modelAcc]
 
                     // Update library version
                     def version = (match.signature.signatureLibraryRelease.version == "null") ? null : match.signature.signatureLibraryRelease.version
                     if (!version && signatureInfo != null) {
-                        match.signature.signatureLibraryRelease.version = entries["databases"][signatureInfo["database"]]
+                        def memberName = InterPro.formatMemberDbName(signatureInfo["database"])
+                        match.signature.signatureLibraryRelease.version = memberDbReleases[memberName]
                     }
 
                     // Handle PANTHER data
                     if (match.signature.signatureLibraryRelease.library == "PANTHER") {
-                        updatePantherData(match, dataDir, paintAnnoDir, signatureAcc, entries)
+                        updatePantherData(match, paintAnnoDir, signatureAcc, entries)
                     }
 
                     // Update signature info
@@ -73,7 +76,7 @@ process XREFS {
                         // Handle InterPro data
                         String interproAcc = signatureInfo["integrated"]
                         if (interproAcc != null) {
-                             def entryInfo = entries["entries"][interproAcc]
+                             def entryInfo = entries[interproAcc]
                              assert entryInfo != null
                              match.signature.entry = new Entry(
                                  interproAcc, entryInfo["name"], entryInfo["description"], entryInfo["type"]
@@ -93,17 +96,17 @@ process XREFS {
     new File(outputFilePath.toString()).write(json)
 }
 
-def loadXRefFiles(xrefDir, dataDir) {
-    def iprFilePath = new File("${dataDir}/${xrefDir}.ipr.json")
-    def infoFilePath = new File("${dataDir}/${xrefDir}.json")
+def loadXRefFiles(xrefFileName, xrefDir) {
+    def iprFilePath = new File("${xrefDir}/${xrefFileName}.ipr.json")
+    def infoFilePath = new File("${xrefDir}/${xrefFileName}.json")
     return [
         new ObjectMapper().readValue(iprFilePath, Map),
         new ObjectMapper().readValue(infoFilePath, Map)
     ]
 }
 
-def updatePantherData(def match, def dataDir, def paintAnnoDir, def signatureAcc, def entries) {
-    File paintAnnotationFile = new File("${dataDir}/${paintAnnoDir}/${signatureAcc}.json")
+def updatePantherData(def match, def paintAnnoDir, def signatureAcc, def entries) {
+    File paintAnnotationFile = new File("${paintAnnoDir}/${signatureAcc}.json")
     if (paintAnnotationFile.exists()) {
         def paintAnnotationsContent = new ObjectMapper().readValue(paintAnnotationFile, Map)
         String nodeId = match.treegrafter.ancestralNodeID
@@ -114,9 +117,9 @@ def updatePantherData(def match, def dataDir, def paintAnnoDir, def signatureAcc
             match.treegrafter.graftPoint = (nodeData[3] == "null") ? null : nodeData[3]
         }
     }
-    if (entries["entries"][signatureAcc]) {
-        match.treegrafter.subfamilyName = entries["entries"][signatureAcc]["name"]
-        match.treegrafter.subfamilyDescription = entries["entries"][signatureAcc]["description"]
+    if (entries[signatureAcc]) {
+        match.treegrafter.subfamilyName = entries[signatureAcc]["name"]
+        match.treegrafter.subfamilyDescription = entries[signatureAcc]["description"]
     }
 }
 

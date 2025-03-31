@@ -1,35 +1,27 @@
 // Class and methods for interacting with InterPro servers and data
 
 import groovy.json.JsonSlurper
-import java.net.URL
-import java.net.MalformedURLException
-import jave.io.File
-import java.io.FileOutputStream
+import java.io.File
 import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.util.zip.GZIPInputStream
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-import com.fasterxml.jackson.databind.ObjectMapper
+import java.net.URL  // TODO: Depracted. Migrate to URI
+import java.nio.file.*
 import InterProScan
-
-import java.util.zip.GZIPInputStream
 
 class InterPro {
     static final def FTP_URL = "https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6"
 
-    static boolean checkCompatibility(Float iprscan, String interpro) {
+    static List<String> checkCompatibility(String iprscan, String interpro, def log) {
         // Check that the InterPro and InterProScan versions are compatible
         def noConnWarning = ""
         def latestReleaseWarning = ""
         def error = ""
-        def releasesURL = InterPro.sanitizeURL("${FTP_URL}/${iprscanURL}/releases.json")
+        def releasesURL = InterPro.sanitizeURL("${FTP_URL}/${iprscan}/releases.json")
         Map compatibleReleases = InterPro.httpRequest(releasesURL, null, 0, true, log)
-        if (compatibleReleases == null) {
+        if (!compatibleReleases) {
             noConnWarning = "An error occurred while querying the EBI ftp to assess the compatibility of\n"+
                      "InterPro release '${interpro}' with InterProScan version '${iprscan}'\n"+
-                     "Proceeding with using InterPro release '${interpro}'. Warning InterProScan may not behave as expected"
+                     "Proceeding with using InterPro release '${interpro}'.\n"+
+                    "Warning, InterProScan may not behave as expected"
         } else if (!compatibleReleases[iprscan].contains(interpro)) {
             error = "InterPro release '$interpro' is not compatiable with "
         } else if (interpro < compatibleReleases[iprscan].max()) {
@@ -39,59 +31,14 @@ class InterPro {
         return [noConnWarning, latestReleaseWarning, error]
     }
 
-    def downloadFile(String fileUrl, String savePath) {
-        def error = null
-        try {
-            URL url = new URL(fileUrl)
-            InputStream inputStream = url.openStream()
-            OutputStream outputStream = new FileOutputStream(new File(savePath))
-
-            byte[] buffer = new byte[1024]
-            int bytesRead
-            while((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead)
-            }
-            inputStream.close()
-            outputStream.close()
-        } catch (MalformedURLException e) {
-            error = "Invalid URL to download InterPro data: $fileUrl:\n$e"
-        } catch (IOException e) {
-            error = "I/O Error when downloading the file at $fileUrl:\n$e"
-        } catch (SecurityException e) {
-            error = "Permission denied when attempting to download the file at $fileUrl:\n$e"
-        } catch (Exception e) {
-            error = "Unexpected when downloading the file at $fileUrl:\n$e"
-        }
-        return error
-    }
-
-    static void extractTarFile(String tarFilePath, String outputDir) {
-        def error = null
-        try {
-            File inputFile = new File(tarFilePath)
-            InputStream fileInputStream = new FileInputStream(inputFile)
-            InputStream gzipInputStream = new GZIPInputStream(fileInputStream)
-            TarArchiveInputStream tarInputStream = new TarArchiveInputStream(gzipInputStream)
-
-            TarArchiveEntry entry
-            while ((entry = tarInputStream.getNextTarEntry()) != null) {
-                File outputFile = new File(outputDir, entry.getName())
-                if (entry.isDirectory()) {
-                    outputFile.mkdirs()
-                } else {
-                    outputFile.getParentFile().mkdirs()
-                    OutputStream outputStream = new FileOutputStream(outputFile)
-                    byte[] buffer = new byte[1024]
-                    int bytesRead
-                    while ((bytesRead = tarInputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, bytesRead)
-                    }
-                    outputStream.close()
-                }
-            }
-            tarInputStream.close()
-        } catch (IOException e) {
-            error = "Error extracting file: ${e.message}"
+    static formatMemberDbName(String memberName) {
+        def fmtMemberName = memberName.toLowerCase()
+        if (fmtMemberName.startsWith("cath")) {
+            return fmtMemberName.replace("cath", "cath-")
+        } else if (fmtMemberName.startsWith("prosite")) {
+            return  fmtMemberName.replace("prosite", "prosite ")
+        } else {
+            return fmtMemberName
         }
     }
 
@@ -102,8 +49,8 @@ class InterPro {
 
         // Check if the <datadir>/interpro dir exists
         def _interproDir = new File(datadir.resolve("interpro").toString())
-        if (!_InterproDir.exists() || !_interproDir.isDirectory()) {
-            error = "No 'interpro' directory was found in the data directory ${_datadir}\n" +
+        if (!_interproDir.exists() || !_interproDir.isDirectory()) {
+            error = "No 'interpro' directory was found in the data directory ${datadir}\n" +
                     "Please ensure that the data dir is correctly populated or use --download"
             return [_interproRelease, error]
         }
@@ -112,7 +59,7 @@ class InterPro {
             // Use the latest interpro release in datadir/interpro
             def _dirs = _interproDir.listFiles()
                     .findAll { it.isDirectory() }
-                    .collect { it.name.toFloat } // what if the user put a dir in that can't be converted to a float
+                    .collect { it.name.toFloat() } // what if the user put a dir in that can't be converted to a float
             if (_dirs.isEmpty()) {
                 error = "No InterPro release directories were found in ${datadir}/interpro" +
                         "Please ensure that the data dir is correctly populated or use --download"
@@ -122,18 +69,23 @@ class InterPro {
         } else {
             // Use the user specified InterPro release
             _interproRelease = interpro
+            def _interproReleaseDir = new File(datadir.resolve("interpro/${_interproRelease}").toString())
+            if (!_interproReleaseDir.exists() || !_interproReleaseDir.isDirectory()) {
+                error = "Could not find the InterPro release dir at ${_interproReleaseDir}\n" +
+                        "Please check the correct InterPro release was provided and that the data dir is correctly populated or use --download"
+                return [_interproRelease, error]
+            }
         }
-        return [_interproRelease, error]
+        return [_interproRelease.toString(), error]
     }
 
-    static String getDatabaseVersion(database, directory) {
+    static String getDatabaseVersion(String database, String databaseJson) {
         // Retrieve the database version from xrefs/databases.json
-        // database may be a Path or string
-        // TODO: change to JsonSlurper when we migrate to databases.json
-        ObjectMapper objectMapper = new ObjectMapper();
-        File file = new File(new File(directory.toString(), "xrefs"), "entries.json")
-        Map<String, Object> metadata = objectMapper.readValue(file, Map.class);
-        return metadata.databases[database]
+        // var database may be a Path or string
+        JsonSlurper jsonSlurper = new JsonSlurper()
+        File file = new File(databaseJson)
+        def memberDbReleases = jsonSlurper.parse(file)
+        return memberDbReleases[database]
     }
 
     static httpRequest(String urlString, String data, int maxRetries, boolean verbose, log) {

@@ -71,10 +71,10 @@ process LOOKUP_MATCHES {
     }
 }
 
-String getMatchesApiUrl(matchesApiUrl, lookupServiceUrl, datadir, workflowManifest) {
+String getMatchesApiUrl(matchesApiUrl, lookupServiceUrl, interproRelease, workflowManifest, log) {
     String _matchesApiUrl = matchesApiUrl ?: lookupServiceUrl
     // Get MLS metadata: api (version), release, release_date
-    Map info = InterPro.httpRequest("${sanitizeURL(baseUrl)}/info", null, 0, true, log)
+    Map info = InterPro.httpRequest("${InterPro.sanitizeURL(_matchesApiUrl)}/info", null, 0, true, log)
     if (info == null) {
         log.warn "An error occurred while querying the Matches API; analyses will be run locally"
         _matchesApiUrl = null
@@ -87,11 +87,10 @@ String getMatchesApiUrl(matchesApiUrl, lookupServiceUrl, datadir, workflowManife
                     " is not compatible with the Matches API at ${_matchesApiUrl};" +
                     " analyses will be run locally"
             _matchesApiUrl = null
-        } else if (datadir) {
-            def iprVersion = getDatabaseVersion("InterPro", datadir)
-            if (iprVersion != info.release) {
-                log.warn "InterPro version mismatch (local: ${iprVersion}, Matches API: ${info.release});" +
-                        " pre-calulated matches will not be retrieved, and analyses will be run locally"
+        } else if (interproRelease) {
+            if (interproRelease != info.release) {
+                log.warn "The local InterPro version does not match the match API release (Local: ${interproRelease}, Matches API: ${info.release}).\n" +
+                        "Pre-calculated matches will not be retrieved, and analyses will be run locally"
                 _matchesApiUrl = null
             }
         }
