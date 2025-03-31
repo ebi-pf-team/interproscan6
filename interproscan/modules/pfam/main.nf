@@ -135,7 +135,7 @@ def filterMatches(Map<String, Map<String, Match>> hmmerMatches, Map<String, Map<
     return filteredMatches
 }
 
-def flatMatchLocations(matches) {
+def flattenMatchLocations(matches) {
     // Separate locations such that each location is treated as an independent match
     matches.collectMany { modelAccession, match ->
         modelAccession = modelAccession.split("\\.")[0]
