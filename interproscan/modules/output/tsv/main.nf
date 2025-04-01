@@ -12,7 +12,7 @@ process WRITE_TSV_OUTPUT {
     val nucleic
 
     exec:
-    SeqDatabase seqDatabase = new SeqDatabase(seqDbPath.toString())
+    SeqDB db = new SeqDB(seqDbPath.toString())
     def tsvFile = new File("${outputPath}.ips6.tsv".toString())
     tsvFile.text = "" // clear the file if it already exists
 
@@ -32,11 +32,10 @@ process WRITE_TSV_OUTPUT {
                 String entryAcc = match.signature.entry?.accession ?: '-'
                 String entryDesc = match.signature.entry?.description ?: '-'
                 char status = 'T'
-                seqData = seqDatabase.getSeqData(proteinMd5, nucleic)
+                seqData = SeqDB.getSeqData(proteinMd5, nucleic)
                 seqData.each { row ->  // Protein or Nucleic: [id, desc, sequence]
-                    row = row.split('\t')
-                    String seqId = nucleic ? "${row[0]}_${row[1]}" : row[0]
-                    int seqLength = row[-1].trim().length()
+                    String seqId = nucleic ? "${row.id}_${row.description}" : row,id
+                    int seqLength = row.sequence.trim().length()
                     match.locations.each { Location loc ->
                         writeToTsv(tsvFile, seqId, proteinMd5, seqLength, match, loc, memberDb, sigDesc, status, currentDate, entryAcc, entryDesc, goterms, pathways)
                     }

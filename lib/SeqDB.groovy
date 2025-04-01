@@ -3,6 +3,7 @@ import java.security.MessageDigest
 import java.util.regex.Pattern
 
 class SeqDB {
+    // This class contains the methods for querying the internal IPS6 seq db, and handling any errors
     private String path
     private Sql sql
     public static final Pattern eslDescription = ~/^source=(.+?)\s+coords=/
@@ -13,7 +14,7 @@ class SeqDB {
         this.createTables()
     }
 
-   private void connect() {
+    private void connect() {
         String url = "jdbc:sqlite:${this.path}"
         String driver = "org.sqlite.JDBC"
         try {
@@ -101,7 +102,7 @@ class SeqDB {
             String table = isNucleic ? "NUCLEOTIDE" : "PROTEIN"
             String query1 = "INSERT OR IGNORE INTO ${table}_SEQUENCE (md5, sequence) VALUES (?, ?)"
             String query2 = "INSERT OR IGNORE INTO ${table} (md5, id, description) VALUES (?, ?, ?)"
-            
+
             // Use batches for the sequence table
             sql.withBatch(100, query1) { ps1 ->
                 // Use batches for the metadata table
@@ -171,7 +172,7 @@ class SeqDB {
                             String ntMD5 = row.md5
                             ntSequences[ntId].each { protMD5 ->
                                 records.add([protMD5, ntMD5])
-                            } 
+                            }
                         }
 
                         records.each {
@@ -223,5 +224,49 @@ class SeqDB {
         }
 
         writer.close()
+    }
+
+    def groupProteins(Map proteinMatches) {
+        /* Gather nucleotide Seq IDs and child protein MD5s so we can gather all ORFs from the same
+        parent NT seq together in the final output. */
+        def nucleicRelationships = [:]  // [ntSeqId: [proteinMd5]]
+        proteinMatches.each { proteinMd5, matchesNode ->
+            // get all parent NT seq Ids
+            def query = """SELECT N.nt_md5
+                FROM NUCLEOTIDE AS N
+                LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.nt_md5 = N2P.nt_md5
+                WHERE N2P.protein_md5 = '$proteinMd5'
+                """
+            this.sql.eachRow(query) { row ->
+                nucleicRelationships.computeIfAbsent(row.nt_md5, { [] as Set })
+                nucleicRelationships[row.nt_md5].add(proteinMd5)
+            }
+        }
+        return nucleicRelationships
+    }
+
+    List<String> getSeqData(String md5, Boolean nucleic, String nucleicMd5 = null) {
+        /* Retrieve all associated seq IDs and desc for the given seq (id'd by it's md5 hash)
+        Return a list of rows as a seq may be associated with multiple ids */
+        def query = ""
+        if (nucleic && !nucleicMd5) { // retrieve data for a nucleic sequence
+            query = """SELECT N.id, N.description, S.sequence
+                   FROM NUCLEOTIDE AS N
+                   LEFT JOIN NUCLEOTIDE_SEQUENCE AS S ON N.nt_md5 = S.nt_md5
+                   WHERE N.nt_md5 = '$md5';"""
+        } else if (nucleic && nucleicMd5) {  // retrieve the open reading frame for the current nucleic seq
+            // a protein may be associated with multiple unique nucleotide sequences
+            query = """SELECT P.id, P.description, S.sequence
+                   FROM PROTEIN AS P
+                   LEFT JOIN PROTEIN_SEQUENCE AS S ON P.protein_md5 = S.protein_md5
+                   WHERE P.protein_md5 = '$nucleicMd5' AND P.description REGEXP 'source=${nucleicMd5}*'
+                   """
+        } else {  // retrieve data for a protein
+            query = """SELECT P.id, P.description, S.sequence
+                   FROM PROTEIN AS P
+                   LEFT JOIN PROTEIN_SEQUENCE AS S ON P.protein_md5 = S.protein_md5
+                   WHERE P.protein_md5 = '$md5';"""
+        }
+        return this.sql.rows(query)
     }
 }
