@@ -168,7 +168,6 @@ def buildFragments(Map<String, Map<String, Match>> filteredMatches,
         def aggregatedMatches = [:]
         matches.each { Match match ->
             List<String> nestedModels = dat[match.modelAccession]?.nested ?: []
-            finalMatchLocations = []
             if (nestedModels) {
                 /* Find all matches whose models are listed as nested within the current model
                 in pfam_a.dat AND which overlap the current match.
@@ -253,9 +252,8 @@ def buildFragments(Map<String, Map<String, Match>> filteredMatches,
                     discontinuousMatchesList = newMatchesFromFragment.findAll { it.locations[0].end - it.locations[0].start + 1 >= MINLENGTH }
                 }
                 aggregatedMatches = storeMatches(aggregatedMatches, discontinuousMatchesList)
-            } else if (match.locations[0].end - match.locations[0].start + 1 >= MINLENGTH) {  // filter out not nested matches that are shorter than MINLENGTH
-                finalMatchLocations << match.locations[0]
-                aggregatedMatches.computeIfAbsent(match.modelAccession, { match }).locations = finalMatchLocations
+            } else if (match.locations[0].end - match.locations[0].start + 1 >= MINLENGTH) {  // filter out matches that are shorter than MINLENGTH
+                aggregatedMatches = storeMatches(aggregatedMatches, [match])
             }
         }
         processedMatches[seqId] = aggregatedMatches
