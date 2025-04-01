@@ -4,7 +4,6 @@ include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init
 include { PREPARE_SEQUENCES             } from "./interproscan/subworkflows/prepare_sequences"
 include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
 
-include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
 include { LOOKUP_MATCHES                } from "./interproscan/modules/lookup"
 include { XREFS                         } from "./interproscan/modules/xrefs"
 include { REPRESENTATIVE_LOCATIONS      } from "./interproscan/modules/representative_locations"

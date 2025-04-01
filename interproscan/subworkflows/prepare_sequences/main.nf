@@ -2,6 +2,7 @@ include { VALIDATE_FASTA;
           LOAD_SEQUENCES;
           LOAD_ORFS;
           SPLIT_FASTA     } from "../../modules/prepare_sequences"
+include { ESL_TRANSLATE   } from "../../modules/esl_translate"
 
 workflow PREPARE_SEQUENCES {
     take:
@@ -24,7 +25,7 @@ workflow PREPARE_SEQUENCES {
         LOAD_SEQUENCES(validated_fasta, params.nucleic)
 
         // Chunk input file in smaller files for translation
-        params.input
+        Channel.fromPath(params.input)
             .splitFasta( by: params.batchSize, file: true )
             .set { ch_fasta }
 

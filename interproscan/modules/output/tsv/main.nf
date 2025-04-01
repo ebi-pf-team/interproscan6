@@ -3,7 +3,7 @@ import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 
 process WRITE_TSV_OUTPUT {
-    label 'local', 'ips6_container'
+    label 'local'
 
     input:
     val matchesFiles
@@ -32,9 +32,9 @@ process WRITE_TSV_OUTPUT {
                 String entryAcc = match.signature.entry?.accession ?: '-'
                 String entryDesc = match.signature.entry?.description ?: '-'
                 char status = 'T'
-                seqData = SeqDB.getSeqData(proteinMd5, nucleic)
+                seqData = db.getSeqData(proteinMd5, nucleic)
                 seqData.each { row ->  // Protein or Nucleic: [id, desc, sequence]
-                    String seqId = nucleic ? "${row.id}_${row.description}" : row,id
+                    String seqId = nucleic ? "${row.nid}_${row.pid}" : row.id
                     int seqLength = row.sequence.trim().length()
                     match.locations.each { Location loc ->
                         writeToTsv(tsvFile, seqId, proteinMd5, seqLength, match, loc, memberDb, sigDesc, status, currentDate, entryAcc, entryDesc, goterms, pathways)
