@@ -53,7 +53,7 @@ def writeNucleic(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches,
     jsonWriter.writeStartObject()
 
     // 1. {"sequence": seq, "md5": ntMd5}
-    ntSeqData = db.getSeqData(nucleicMd5, true)
+    ntSeqData = db.nucleicMd5ToNucleicSeq(nucleicMd5)
     String sequence = ntSeqData[0].sequence
     jsonWriter.writeStringField("sequence", sequence)
     jsonWriter.writeStringField("md5", nucleicMd5)
@@ -75,7 +75,7 @@ def writeOpenReadingFrames(String nucleicMd5, Set<String> proteinMd5s, Map prote
     jsonWriter.writeStartArray()
     proteinMd5s.each { String proteinMd5 ->
         // a proteinSeq/Md5 may be associated with multiple nt md5s/seq, only pull the data where the nt md5/seq is relevant
-        proteinSeqData = db.getSeqData(proteinMd5, false, nucleicMd5)
+        proteinSeqData = db.getOrfSeq(proteinMd5, nucleicMd5)
         proteinSeqData.each { row ->
             def proteinSource = SOURCE_NT_PATTERN.matcher(row.description)
             assert proteinSource.matches()
@@ -98,7 +98,7 @@ def writeProtein(String proteinMd5, Map proteinMatches, JsonGenerator jsonWriter
     jsonWriter.writeStartObject()
 
     // 1. {"sequence": seq, "md5": proteinMd5}
-    proteinSeqData = db.getSeqData(proteinMd5, false)
+    proteinSeqData = db.proteinMd5ToProteinSeq(proteinMd5)
     String sequence = proteinSeqData[0].sequence
     jsonWriter.writeStringField("sequence", sequence)
     jsonWriter.writeStringField("md5", proteinMd5)

@@ -72,7 +72,7 @@ def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMat
         // 3. <orf end="", start="", strand="">
         proteinMd5s.each { proteinMd5 ->
             // a proteinSeq MD5 may be associated with multiple nt seqs, only pull the data where the nt md5/seq is relevant
-            proteinSeqData = db.nucleicMd5ToProteinSeq(proteinMd5, nucleicMd5)
+            proteinSeqData = db.getOrfSeq(proteinMd5, nucleicMd5)
             proteinSeqData.each { row ->
                 def proteinSource = SOURCE_NT_PATTERN.matcher(row.description)
                 assert proteinSource.matches()
