@@ -7,6 +7,7 @@ process DOWNLOAD {
 
     input:
     tuple val(database), val(dbVersion), val(baseURL), val(datadir)
+    val interproRelease
     // DATADIR must be a path object so that we can build the absolute path
 
     output:

@@ -28,7 +28,7 @@ workflow DOWNLOAD_DATA {
     _apps = applications.findAll { String appName ->
         params.appsConfig.get(appName)?.has_data || InterProScan.LICENSED_SOFTWARE.contains(appName)
     }
-    println "[1]"
+    println "DEBUG: [1]"
 
     // [2] Get the list of InterPro releases that are compatible with this InterProScan release
     def _releasesURL = "${baseURL}/versions.json"
@@ -38,12 +38,12 @@ workflow DOWNLOAD_DATA {
         exit 1
     }
     def compatibleReleases = interproReleasesMap["interpro"]*.toFloat()
-    println "[2]"
+    println "DEBUG: [2]"
 
     // [3] Get the InterPro release to be used
     if (params.interpro == "latest") {
         _interproRelease = compatibleReleases.max()
-        println "[3a]"
+        println "DEBUG: [3a]"
     } else {
         // Using the user selected InterPro release, but first check it is compatible with this iprScan release
          _interproRelease = params.interpro.toString()
@@ -54,9 +54,9 @@ workflow DOWNLOAD_DATA {
             log.info "A later compatible InterPro release '${compatibleReleases[iprscan].max()}' is availble.\n"+
                      "Tip: Use the '--download' option to automatically fetch the latest compatible InterPro release"
          }
-         println "[3b]"
+         println "DEBUG: [3b]"
     }
-    println "[3c]"
+    println "DEBUG: [3c]"
 
     // [4] Do we need to download InterPro data?
     // [4a] Check if the datadir exists
@@ -69,7 +69,7 @@ workflow DOWNLOAD_DATA {
         toDownload = _apps  // download data for all apps that need data
         _datadir = new File(dirPath)
         _datadir.mkdirs()
-        println "[4a]"
+        println "DEBUG: [4a]"
     } else {
         // [4b] Check if we need to specifically download the InterPro data
         def interproDir = new File(_datadir.resolve("interpro/$_interproRelease").toString())
@@ -82,38 +82,35 @@ workflow DOWNLOAD_DATA {
                 downloadInterPro = true
             }
         }
-        println "[4b]"
+        println "DEBUG: [4b]"
     }
-    println "[4c]"
+    println "DEBUG: [4c]"
 
     // [5] Download InterPro
-    println "DOWNLOAD: $downloadInterPro"
+    println "DEBUG: DOWNLOAD: $downloadInterPro"
     if (downloadInterPro) {
         log.info "Downloading InterPro release $_interproRelease"
-        DOWNLOAD_INTERPRO(["interpro", _interproRelease, baseURL, _datadir]).collect()
-        println "Complete"
+        DOWNLOAD_INTERPRO(["interpro", _interproRelease, baseURL, _datadir], _interproRelease).collect()
         // [6] Compile params for downloading data for the member dbs with missing data
-        download_params = CHECK_APP_DATA(DOWNLOAD_INTERPRO.out, baseURL, _interproRelease, _apps, params.appsConfig, params.xRefsConfig).collect().flatten() | DOWNLOAD_MEMBERDB
-        println "After CHECK_APP_DATA"
-        println "Downloaded member"
+        CHECK_APP_DATA(DOWNLOAD_INTERPRO.out, baseURL, _interproRelease, _apps, params.appsConfig, params.xRefsConfig)
     } else {
         // [6] Compile params for downloading data for the member dbs with missing data
-        download_params = CHECK_APP_DATA(_datadir, baseURL, _interproRelease, _apps, params.appsConfig, params.xRefsConfig).collect().flatten()
-        println "Before *** CHECK_APP_DATA ***"
-        CHECK_APP_DATA(datadir, baseURL, interproRelease, applications, appsConfig, xRefsConfig) | DOWNLOAD_MEMBERDB
-        println "Downloaded *** member"
+        CHECK_APP_DATA(_datadir, baseURL, _interproRelease, _apps, params.appsConfig, params.xRefsConfig)
+        // Do I need to process download_params?
     }
+    println "DEBUG: [5] & [6]"
+    
+    download_params = CHECK_APP_DATA.out.flatMap()
 
     // [7] Download member database data if needed
     if (download_params) {
-        println "Startin download: $download_params"
-        downloaded = DOWNLOAD_MEMBERDB(download_params).collect()
-        println "Downloaded member"
+        interproRelease = DOWNLOAD_MEMBERDB(download_params, _interproRelease)
+    } else {
+        interproRelease = _interproRelease
     }
-    println "[7]"
-
-    interproRelease = _interproRelease
-    log.error "Got to err"
+    println "DEBUG: [7]"
+    log.info "DEBUG: interproRelease - $interproRelease"
+    log.error "DEBUG: Got to end of DOWNLOAD_DATA"
 //     exit 2
 
     emit:
