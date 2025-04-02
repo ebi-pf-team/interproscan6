@@ -1,6 +1,11 @@
-include { DOWNLOAD_INTERPRO } from "../../modules/download"
+include { DOWNLOAD as DOWNLOAD_INTERPRO
+          DOWNLOAD as DOWNLOAD_MEMBERDB
+          CHECK_APP_DATA                } from "../../modules/download"
+// Load with different names to make the terminal output clearer for the user
 
-workflow DOWNLOAD {
+import java.io.File
+
+workflow DOWNLOAD_DATA {
     // This subworkflow runs when the --download flag is used.
 
     take:
@@ -9,81 +14,107 @@ workflow DOWNLOAD {
     appsConfig             // map of applications
 
     main:
-    def baseUrl = "https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6"
+    def baseURL = "https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/${iprScanVersion}"
     def _datadir = ""
     def dirPath = ""
+    def downloadInterPro = false
     def downloadURL = ""
-    def dbReleasesMap = [:] // Downloaded from the ftp = [db: [release(s)]]
+    def interproReleasesMap = [:] // Downloaded from the ftp = [interpro: [release(s)]]
     def savePath = ""
-    def toDownload = [] // names of dbs to download
+    def toDownload = [] // names of member dbs to download
     def _interproRelease = null
 
-    // Apps that have data to download
+    // [1] Identify the apps that need data to run
     _apps = applications.findAll { String appName ->
         params.appsConfig.get(appName)?.has_data || InterProScan.LICENSED_SOFTWARE.contains(appName)
     }
+    println "[1]"
 
-    // Establish which data needs to be downloaded
-    while (toDownload.isEmpty()) {
-        // [1] Check the data dir exists. Do we need to build one?
-        // If --datadir is called and no path is given it converts to a boolean
-        dirPath = params.datadir instanceof Boolean ? null : params.datadir
-        (_datadir, error) = InterProScan.resolveDirectory(dirPath, true, false)
-        if (!_datadir) {
-            toDownload << "interpro"
-            downloadApps = _apps  // download data for all apps that need data
-            break  // go straight to downloading everything
-        }
+    // [2] Get the list of InterPro releases that are compatible with this InterProScan release
+    def _releasesURL = "${baseURL}/versions.json"
+    interproReleasesMap = InterPro.httpRequest(_releasesURL, null, 4, true, log)
+    if (!interproReleasesMap) {
+        log.error "Failed to retrieve the InterPro release 'versions.json' file from the FTP"
+        exit 1
+    }
+    def compatibleReleases = interproReleasesMap["interpro"]*.toFloat()
+    println "[2]"
 
-        // [3] Get the list of InterPro releases that are compatible with this InterProScan release
-        def _releasesURL = "${baseUrl}/${iprScanVersion}/versions.json"
-        dbReleasesMap = InterPro.httpRequest(_releasesURL, null, 0, true, log)
-        def compatibleReleases = dbReleasesMap["interpro"]*.toFloat()
+    // [3] Get the InterPro release to be used
+    if (params.interpro == "latest") {
+        _interproRelease = compatibleReleases.max()
+        println "[3a]"
+    } else {
+        // Using the user selected InterPro release, but first check it is compatible with this iprScan release
+         _interproRelease = params.interpro.toString()
+         if (!compatibleReleases.contains(_interproRelease)) {
+             log.error "The InterPro release ${_interproRelease} is not compatible with InterProScan version ${iprScanVersion}"
+             exit 1
+         } else if (params.interpro.toFloat() < compatibleReleases.max()) {
+            log.info "A later compatible InterPro release '${compatibleReleases[iprscan].max()}' is availble.\n"+
+                     "Tip: Use the '--download' option to automatically fetch the latest compatible InterPro release"
+         }
+         println "[3b]"
+    }
+    println "[3c]"
 
-        // [4] Get the InterPro release to be used
-        if (params.interpro == "latest") {
-            _interproRelease = compatibleReleases.max()
-        } else {
-            // Using the user selected InterPro release, but first check it is compatible with this iprScan release
-             _interproRelease = params.interpro.toString()
-             if (!compatibleReleases.contains(_interproRelease)) {
-                 log.error "The InterPro release ${_interproRelease} is not compatible with InterProScan version ${iprScanVersion}"
-                 exit 1
-             } else if (params.interpro.toFloat() < compatibleReleases.max()) {
-                log.info "A later compatible InterPro release '${compatibleReleases[iprscan].max()}' is availble.\n"+
-                         "Tip: Use the '--download' option to automatically fetch the latest compatible InterPro release"
-             }
-        }
-        println "# InterPro: $_interproRelease" // Adds to the summary statements in the main workflow
-
-        // [5] Check if we need to download the InterPro and XREF files
+    // [4] Do we need to download InterPro data?
+    // [4a] Check if the datadir exists
+    // If --datadir is called and no path is given, it can convert to a boolean
+    dirPath = params.datadir instanceof Boolean ? null : params.datadir
+    (_datadir, error) = InterProScan.resolveDirectory(dirPath, true, false)
+    if (!_datadir) {
+        // Will need to download everything
+        downloadInterPro = true
+        toDownload = _apps  // download data for all apps that need data
+        _datadir = new File(dirPath)
+        _datadir.mkdirs()
+        println "[4a]"
+    } else {
+        // [4b] Check if we need to specifically download the InterPro data
         def interproDir = new File(_datadir.resolve("interpro/$_interproRelease").toString())
         if (!interproDir.exists()) {
-            toDownload << "interpro"
+            downloadInterPro = true
         } else {
-            error = InterProScan.validateXrefFiles(_datadir, _interproRelease, params.xRefsConfig, params.goterms, params.pathways)
+            // check all the files are present in <datadir>/interpro/<version>/*
+            error = InterProScan.validateXrefFiles(_datadir, _interproRelease.toString(), params.xRefsConfig, params.goterms, params.pathways)
             if (error) {
-                toDownload << "interpro"
+                downloadInterPro = true
             }
         }
+        println "[4b]"
+    }
+    println "[4c]"
 
-        // [6] Check if we need to download any member db data. validateAppData returns a set of apps with missing data
-        downloadApps.addAll(InterProScan.validateAppData(_apps, _datadir, params.appsConfig, returnSet=true))
-        break
+    // [5] Download InterPro
+    println "DOWNLOAD: $downloadInterPro"
+    if (downloadInterPro) {
+        log.info "Downloading InterPro release $_interproRelease"
+        DOWNLOAD_INTERPRO(["interpro", _interproRelease, baseURL, _datadir]).collect()
+        println "Complete"
+        // [6] Compile params for downloading data for the member dbs with missing data
+        download_params = CHECK_APP_DATA(DOWNLOAD_INTERPRO.out, baseURL, _interproRelease, _apps, params.appsConfig, params.xRefsConfig).collect().flatten() | DOWNLOAD_MEMBERDB
+        println "After CHECK_APP_DATA"
+        println "Downloaded member"
+    } else {
+        // [6] Compile params for downloading data for the member dbs with missing data
+        download_params = CHECK_APP_DATA(_datadir, baseURL, _interproRelease, _apps, params.appsConfig, params.xRefsConfig).collect().flatten()
+        println "Before *** CHECK_APP_DATA ***"
+        CHECK_APP_DATA(datadir, baseURL, interproRelease, applications, appsConfig, xRefsConfig) | DOWNLOAD_MEMBERDB
+        println "Downloaded *** member"
     }
 
-    def dbRelease = ""
-    toDownload.each { dbName ->
-        dbRelease = (dbName == "interpro") ? _interproRelease : dbReleasesMap[dbName]
-        tarURL = "${baseUrl}/$dbName/$adbName-$dbRelease.tar.gz"
-        tarSavePath = _datadir.resolve("$adbName/$adbName-$dbRelease.tar.gz")
-        md5URL = "$tarURL.md5"
-        md5SavePath = "$tarSavePath.md5"
-        dirPath = _data.resolve("$adbName/$dbRelease")
-        DOWNLOAD_INTERPRO()
+    // [7] Download member database data if needed
+    if (download_params) {
+        println "Startin download: $download_params"
+        downloaded = DOWNLOAD_MEMBERDB(download_params).collect()
+        println "Downloaded member"
     }
+    println "[7]"
 
     interproRelease = _interproRelease
+    log.error "Got to err"
+//     exit 2
 
     emit:
     interproRelease       // str: InterPro release version number

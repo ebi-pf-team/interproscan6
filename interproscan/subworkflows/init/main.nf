@@ -1,6 +1,4 @@
-import groovy.json.JsonSlurper
-
-include { DOWNLOAD } from "../download"
+include { DOWNLOAD_DATA } from "../download"
 include { getMatchesApiUrl } from "../../modules/lookup"
 
 workflow INIT_PIPELINE {
@@ -46,8 +44,10 @@ workflow INIT_PIPELINE {
                 log.error "--datadir <DATA-DIR> is mandatory when using --download"
                 exit 1
             }
-            DOWNLOAD(_iprScanVersion, apps, params.appsConfig)
-            _interproRelease = DOWNLOAD.out.interproRelease.val
+            println "*** Downloading "
+            DOWNLOAD_DATA(_iprScanVersion, apps, params.appsConfig)
+            println "******** Downloading"
+            _interproRelease = DOWNLOAD_DATA.out.interproRelease.val
         } else {
             // Check if there is a data directory
             // If --datadir is called and no path is given it converts to a boolean
@@ -94,13 +94,7 @@ workflow INIT_PIPELINE {
 
         /* Load the database.json file and set all keys to lowercase to match applications.config
         Don't worry about checking it exists, this was done in InterProScan.validateXrefFiles() */
-        JsonSlurper jsonSlurper = new JsonSlurper()
-        def databaseJsonPath = _datadir.resolve("${params.xRefsConfig.dir}/${_interproRelease}/${params.xRefsConfig.databases}")
-        def databaseJson = new File(databaseJsonPath.toString())
-        _memberDbReleases = jsonSlurper.parse(databaseJson)
-        _memberDbReleases = _memberDbReleases.collectEntries { appName, versionNum ->
-            [(appName.toLowerCase()): versionNum]
-        }
+        _memberDbReleases = InterPro.getMemberDbReleases(params.xRefsConfig, _interproRelease, _datadir)
 
         // Validate the selected member databases data files and dirs
         error = InterProScan.validateAppData(apps, _datadir, params.appsConfig, _memberDbReleases)

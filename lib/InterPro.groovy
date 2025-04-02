@@ -10,6 +10,20 @@ import InterProScan
 class InterPro {
     static final def FTP_URL = "https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6"
 
+    static Map getMemberDbReleases(Map xRefsConfig, String interproRelease, datadir) {
+        /* Load the datadir/interpro/database.json file and set all keys to lowercase to match applications.config
+        Don't worry about checking it exists, this was done in InterProScan.validateXrefFiles() */
+        JsonSlurper jsonSlurper = new JsonSlurper()
+        def databaseJsonPath = datadir.toString() + "/${xRefsConfig.dir}/${interproRelease}/${xRefsConfig.databases}"
+        System.out.println( "** $databaseJsonPath -- databaseJsonPath" )
+        def databaseJson = new File(databaseJsonPath.toString())
+        def memberDbReleases = jsonSlurper.parse(databaseJson)
+        memberDbReleases = memberDbReleases.collectEntries { appName, versionNum ->
+            [(appName.toLowerCase()): versionNum]
+        }
+        return memberDbReleases
+    }
+
     static List<String> checkCompatibility(String iprscan, String interpro, def log) {
         // Check that the InterPro and InterProScan versions are compatible
         def noConnWarning = ""
