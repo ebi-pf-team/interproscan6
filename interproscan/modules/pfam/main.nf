@@ -175,7 +175,7 @@ def buildFragments(Map<String, Map<String, Match>> filteredMatches,
                 `start` and `end` field. */
                 List<Map<String, Integer>> locationFragments = matches.findAll { otherMatch ->
                     otherMatch.modelAccession in nestedModels &&
-                            isOverlapping(otherMatch.locations[0].start, otherMatch.locations[0].end,
+                            isLocationFullyEnclosed(otherMatch.locations[0].start, otherMatch.locations[0].end,
                                     match.locations[0].start, match.locations[0].end)
                 }.collect { otherMatch ->
                     [start: otherMatch.locations[0].start, end: otherMatch.locations[0].end]
@@ -259,6 +259,11 @@ def buildFragments(Map<String, Map<String, Match>> filteredMatches,
         processedMatches[seqId] = aggregatedMatches
     }
     return processedMatches
+}
+
+def isLocationFullyEnclosed(location1Start, location1End, location2Start, location2End) {
+    return (location1Start <= location2Start && location1End >= location2End) ||
+            (location2Start <= location1Start && location2End >= location1End)
 }
 
 def storeMatches(Map<String, Match> aggregatedMatches, List<Match> matches) {
