@@ -274,7 +274,7 @@ class InterProScan {
                         missingApps.add(appName)
                         return "${appName}: file: '${key}': ${value ?: 'null'}"
                     }
-                } else if (this.DATA_TYgitPE["DIR"].contains(key)) {
+                } else if (this.DATA_TYPE["DIR"].contains(key)) {
                     if (!value) {
                         missingApps.add(appName)
                         return "${appName}: dir: '${key}': 'null'"

@@ -62,15 +62,15 @@ process CHECK_APP_DATA {
 
     exec:
     def d = datadir
-    println "datadir -- ${d.getClass()} -- $d -- ${d[0]}"
-    def datadirPath = new File(datadir[0].toString())
+    println "datadir -- ${d.getClass()} -- $d"
+    def datadirPath = new File(datadir.toString())
     println "datadirPath --${datadirPath.getClass()} -- $datadirPath"
     def memberDbReleases = InterPro.getMemberDbReleases(xRefsConfig, interproRelease.toString(), datadirPath)
-    def appsToDownload = InterProScan.validateAppData(applications as List, datadir[0] as Path, appsConfig, memberDbReleases, returnSet=true)
+    def appsToDownload = InterProScan.validateAppData(applications as List, datadir as Path, appsConfig, memberDbReleases, returnSet=true)
 
     downloadParams = appsToDownload.collect { app ->
         def appVersion = memberDbReleases[app]
-        return [app, appVersion, baseURL, datadir[0]]
+        return [app, appVersion, baseURL, datadir]
     }
     println "DEBUG: $downloadParams"
     return downloadParams

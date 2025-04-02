@@ -90,16 +90,16 @@ workflow DOWNLOAD_DATA {
     println "DEBUG: DOWNLOAD: $downloadInterPro"
     if (downloadInterPro) {
         log.info "Downloading InterPro release $_interproRelease"
-        DOWNLOAD_INTERPRO(["interpro", _interproRelease, baseURL, _datadir], _interproRelease).collect()
+        DOWNLOAD_INTERPRO(["interpro", _interproRelease, baseURL, _datadir], _interproRelease)
         // [6] Compile params for downloading data for the member dbs with missing data
         CHECK_APP_DATA(DOWNLOAD_INTERPRO.out, baseURL, _interproRelease, _apps, params.appsConfig, params.xRefsConfig)
     } else {
         // [6] Compile params for downloading data for the member dbs with missing data
         CHECK_APP_DATA(_datadir, baseURL, _interproRelease, _apps, params.appsConfig, params.xRefsConfig)
-        // Do I need to process download_params?
     }
     println "DEBUG: [5] & [6]"
-    
+
+    // Allows DOWNLOAD_MEMBERDB to run per nested tuple
     download_params = CHECK_APP_DATA.out.flatMap()
 
     // [7] Download member database data if needed
