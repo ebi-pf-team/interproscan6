@@ -32,7 +32,7 @@ process WRITE_TSV_OUTPUT {
                 String entryAcc = match.signature.entry?.accession ?: '-'
                 String entryDesc = match.signature.entry?.description ?: '-'
                 char status = 'T'
-                seqData = db.getSeqData(proteinMd5, nucleic)
+                seqData = nucleic ? db.proteinMd5ToNucleicSeq(proteinMd5) : db.proteinMd5ToProteinSeq(proteinMd5)
                 seqData.each { row ->  // Protein or Nucleic: [id, desc, sequence]
                     String seqId = nucleic ? "${row.nid}_${row.pid}" : row.id
                     int seqLength = row.sequence.trim().length()

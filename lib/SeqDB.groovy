@@ -232,9 +232,9 @@ class SeqDB {
         def nucleicRelationships = [:]  // [ntSeqId: [proteinMd5]]
         proteinMatches.each { proteinMd5, matchesNode ->
             // get all parent NT seq Ids
-            def query = """SELECT N.md5
+            def query = """SELECT N.md5 AS nt_md5
                 FROM NUCLEOTIDE AS N
-                LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.protein_md5 = N2P.nt_md5
+                LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.md5 = N2P.nt_md5
                 WHERE N2P.protein_md5 = '$proteinMd5'
                 """
             this.sql.eachRow(query) { row ->
@@ -245,35 +245,41 @@ class SeqDB {
         return nucleicRelationships
     }
 
-    List<String> getSeqData(String md5, Boolean nucleic, String nucleicMd5 = null) {
-        /* Retrieve all associated seq IDs and desc for the given seq (id'd by it's md5 hash)
-        Return a list of rows as a seq may be associated with multiple ids */
-        def query = ""
-        if (nucleic && nucleicMd5 == null) { // retrieve data for a nucleic sequence
-            query = """SELECT N.id AS nid, N.description, S.sequence, P.id AS pid
-                       FROM NUCLEOTIDE AS N
-                       LEFT JOIN NUCLEOTIDE_SEQUENCE AS S ON N.md5 = S.md5
-                       LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.md5 = N2P.nt_md5
-                       LEFT JOIN PROTEIN AS P ON N2P.protein_md5 = P.md5
-                       WHERE P.md5 = '$md5';
-                       """
-//            query = """SELECT N.id, N.description, S.sequence
-//                   FROM NUCLEOTIDE AS N
-//                   LEFT JOIN NUCLEOTIDE_SEQUENCE AS S ON N.md5 = S.md5
-//                   WHERE N.md5 = '$md5';"""
-        } else if (nucleic && nucleicMd5) {  // retrieve the open reading frame for the current nucleic seq
-            // a protein may be associated with multiple unique nucleotide sequences
-            query = """SELECT P.id, P.description, S.sequence
-                   FROM PROTEIN AS P
-                   LEFT JOIN PROTEIN_SEQUENCE AS S ON P.md5 = S.md5
-                   WHERE P.md5 = '$nucleicMd5' AND P.description REGEXP 'source=${nucleicMd5}*'
-                   """
-        } else {  // retrieve data for a protein
-            query = """SELECT P.id, P.description, S.sequence
-                   FROM PROTEIN AS P
-                   LEFT JOIN PROTEIN_SEQUENCE AS S ON P.md5 = S.md5
-                   WHERE P.md5 = '$md5';"""
-        }
+    List<String> proteinMd5ToNucleicSeq(String proteinMD5) {
+        def query = """SELECT N.id AS nid, N.description, S.sequence, P.id AS pid
+            FROM NUCLEOTIDE AS N
+            LEFT JOIN NUCLEOTIDE_SEQUENCE AS S ON N.md5 = S.md5
+            LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.md5 = N2P.nt_md5
+            LEFT JOIN PROTEIN AS P ON N2P.protein_md5 = P.md5
+            WHERE P.md5 = '$proteinMD5';
+            """
+        return this.sql.rows(query)
+    }
+
+    List<String> proteinMd5ToProteinSeq(String proteinMD5) {
+        def query = """SELECT P.id, P.description, S.sequence
+            FROM PROTEIN AS P
+            LEFT JOIN PROTEIN_SEQUENCE AS S ON P.md5 = S.md5
+            WHERE P.md5 = '$proteinMD5';
+            """
+        return this.sql.rows(query)
+    }
+
+    List<String> nucleicMd5ToNucleicSeq(String nucleicMD5) {
+        def query = """SELECT N.id, N.description, S.sequence
+            FROM NUCLEOTIDE AS N
+            LEFT JOIN NUCLEOTIDE_SEQUENCE AS S ON N.md5 = S.md5
+            WHERE N.md5 = '$nucleicMD5';
+            """
+        return this.sql.rows(query)
+    }
+
+    List<String> nucleicMd5ToProteinSeq(String nucleicMD5) {
+        def query = """SELECT P.id, P.description, S.sequence
+            FROM PROTEIN AS P
+            LEFT JOIN PROTEIN_SEQUENCE AS S ON P.md5 = S.md5
+            WHERE P.md5 = '$nucleicMD5' AND P.description REGEXP 'source=${nucleicMD5}*';
+            """
         return this.sql.rows(query)
     }
 }
