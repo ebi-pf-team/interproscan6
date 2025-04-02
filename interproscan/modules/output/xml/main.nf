@@ -61,8 +61,7 @@ def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMat
     def SOURCE_NT_PATTERN = Pattern.compile(/^source=[^"]+\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=.*$/)
 
     // 1. <nt-seq> <sequence md5="" "<seq>" </sequence>
-    ntSeqData = db.nucleicMd5ToNucleicSeq(nucleicMd5, true)
-    println "nucleicMd5: $nucleicMd5 -->\n$ntSeqData\n"
+    ntSeqData = db.nucleicMd5ToNucleicSeq(nucleicMd5)
     String sequence = ntSeqData[0].sequence
     xml."nucleotideNode" {
         xml.sequence(md5: nucleicMd5, sequence)
@@ -73,7 +72,7 @@ def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMat
         // 3. <orf end="", start="", strand="">
         proteinMd5s.each { proteinMd5 ->
             // a proteinSeq MD5 may be associated with multiple nt seqs, only pull the data where the nt md5/seq is relevant
-            proteinSeqData = db.nucleicMd5ToProteinSeq(nucleicMd5)
+            proteinSeqData = db.nucleicMd5ToProteinSeq(proteinMd5, nucleicMd5)
             proteinSeqData.each { row ->
                 def proteinSource = SOURCE_NT_PATTERN.matcher(row.description)
                 assert proteinSource.matches()
@@ -100,7 +99,7 @@ def addProteinNodes (String proteinMd5, Map proteinMatches, def xml, SeqDB db) {
     There may be multiple seqIds and desc for the same sequence/md5, use the first entry to get the seq. */
     xml.protein {
         // 1. <sequence md5="" sequence </sequence>
-        proteinSeqData = db.proteinMd5ToProteinSeq(proteinMd5, false)
+        proteinSeqData = db.proteinMd5ToProteinSeq(proteinMd5)
         String sequence = proteinSeqData[0].sequence
         xml.sequence(md5: proteinMd5, sequence)
 

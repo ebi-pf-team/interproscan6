@@ -274,11 +274,13 @@ class SeqDB {
         return this.sql.rows(query)
     }
 
-    List<String> nucleicMd5ToProteinSeq(String nucleicMD5) {
-        def query = """SELECT P.id, P.description, S.sequence
+    List<String> nucleicMd5ToProteinSeq(String proteinMD5, String nucleicMD5) {
+        def query = """SELECT P.id, P.description, S.sequence, N.id AS nt_id
             FROM PROTEIN AS P
             LEFT JOIN PROTEIN_SEQUENCE AS S ON P.md5 = S.md5
-            WHERE P.md5 = '$nucleicMD5' AND P.description REGEXP 'source=${nucleicMD5}*';
+            LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON P.md5 = N2P.protein_md5
+            LEFT JOIN NUCLEOTIDE AS N ON N2P.nt_md5 = N.md5
+            WHERE P.md5 = '$proteinMD5' AND N.md5 = '$nucleicMD5' AND P.description LIKE 'source=' || N.id || '%';
             """
         return this.sql.rows(query)
     }
