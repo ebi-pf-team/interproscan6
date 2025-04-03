@@ -35,7 +35,7 @@ process LOOKUP_MATCHES {
 
         if (response != null) {
             response.results.each {
-                String proteinMd5 = it.md5.toLowerCase()
+                String proteinMd5 = it.md5.toUpperCase() // ensure it matches the local seq Db case
                 if (it.found) {
                     calculatedMatches[proteinMd5] = [:]
                     it.matches.each { matchObj ->

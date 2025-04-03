@@ -141,14 +141,13 @@ process PARSE_HAMAP {
 def fmtSequence(String sequence) {
     /* Use a stringBuild for efficiency, this stops a new str being created
     with each addition of a new line char.*/
-    def fmtdSeq = new StringBuilder(sequence)
-    def length = fmtdSeq.length()
-
-    // Start inserting from the end to avoid messing up the indexes
-    for (int i = 60; i < length; i += 61) {
-        fmtdSeq.insert(i, '\n')
-        length++
-    }
-
-    return fmtdSeq.toString()
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < sequence.length(); i += 60) {
+        int j = Math.min(i + 60, sequence.length());
+        sb.append(sequence, i, j);
+        if (j < sequence.length()) {
+            sb.append('\n');
+            }
+        }
+        return sb.toString()
 }
