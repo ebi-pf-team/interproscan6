@@ -19,7 +19,7 @@ process WRITE_JSON_OUTPUT {
     ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
     def outputFilePath = "${outputPath}.ips6.json"
 
-    SeqDatabase seqDatabase = new SeqDatabase(seqDbPath.toString())
+    SeqDB db = new SeqDB(seqDbPath.toString())
 
     streamJson(outputFilePath.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
         // {"interproscan-version": str, "results": []}
@@ -29,14 +29,14 @@ process WRITE_JSON_OUTPUT {
         matchesFiles.each { matchFile ->
             if (nucleic) {  // input was nucleic acid sequence
                 matchFile = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
-                nucleicToProteinMd5 = seqDatabase.groupProteins(matchFile)
+                nucleicToProteinMd5 = db.groupProteins(matchFile)
                 nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
-                    writeNucleic(nucleicMd5, proteinMd5s, matchFile, jsonWriter, seqDatabase)
+                    writeNucleic(nucleicMd5, proteinMd5s, matchFile, jsonWriter, db)
                 }
             } else {  // input was protein sequences
                 matchFile = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
                 matchFile.each { String proteinMd5, Map proteinMatches ->
-                    writeProtein(proteinMd5, proteinMatches, jsonWriter, seqDatabase)
+                    writeProtein(proteinMd5, proteinMatches, jsonWriter, db)
                 }
             }
         }
@@ -44,7 +44,7 @@ process WRITE_JSON_OUTPUT {
     }
 }
 
-def writeNucleic(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, JsonGenerator jsonWriter, SeqDatabase seqDatabase) {
+def writeNucleic(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, JsonGenerator jsonWriter, SeqDB db) {
     /* Write data for an input nucleic acid sequence, and then the matches for its associated ORFs
     {"sequence: nt seq, "md5": nt md5,
     "crossReferences": [{ntSeqData}, {ntSeqData}],
@@ -53,8 +53,8 @@ def writeNucleic(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches,
     jsonWriter.writeStartObject()
 
     // 1. {"sequence": seq, "md5": ntMd5}
-    ntSeqData = seqDatabase.getSeqData(nucleicMd5, true)
-    String sequence = ntSeqData[0].split('\t')[-1]
+    ntSeqData = db.nucleicMd5ToNucleicSeq(nucleicMd5)
+    String sequence = ntSeqData[0].sequence
     jsonWriter.writeStringField("sequence", sequence)
     jsonWriter.writeStringField("md5", nucleicMd5)
     
@@ -64,43 +64,42 @@ def writeNucleic(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches,
 
     // 3. {..., "openReadingFrames": [{protein}, {protein}]}
     jsonWriter.writeFieldName("openReadingFrames")
-    writeOpenReadingFrames(nucleicMd5, proteinMd5s, proteinMatches, jsonWriter, seqDatabase)
+    writeOpenReadingFrames(nucleicMd5, proteinMd5s, proteinMatches, jsonWriter, db)
 
     jsonWriter.writeEndObject()
 }
 
-def writeOpenReadingFrames(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, JsonGenerator jsonWriter, SeqDatabase seqDatabase){
+def writeOpenReadingFrames(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, JsonGenerator jsonWriter, SeqDB db){
     def SOURCE_NT_PATTERN = Pattern.compile(/^source=[^"]+\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=.*$/)
 
     jsonWriter.writeStartArray()
     proteinMd5s.each { String proteinMd5 ->
         // a proteinSeq/Md5 may be associated with multiple nt md5s/seq, only pull the data where the nt md5/seq is relevant
-        proteinSeqData = seqDatabase.getSeqData(proteinMd5, false, nucleicMd5)
+        proteinSeqData = db.getOrfSeq(proteinMd5, nucleicMd5)
         proteinSeqData.each { row ->
-            proteinDesc = row.split("\t")[1]
-            def proteinSource = SOURCE_NT_PATTERN.matcher(proteinDesc)
+            def proteinSource = SOURCE_NT_PATTERN.matcher(row.description)
             assert proteinSource.matches()
             jsonWriter.writeStartObject()
             jsonWriter.writeNumberField("start", proteinSource.group(1) as int)
             jsonWriter.writeNumberField("end", proteinSource.group(2) as int)
             jsonWriter.writeStringField("strand", (proteinSource.group(3) as int) < 4 ? "SENSE" : "ANTISENSE")
             jsonWriter.writeFieldName("protein")
-            writeProtein(proteinMd5, proteinMatches[proteinMd5], jsonWriter, seqDatabase)
+            writeProtein(proteinMd5, proteinMatches[proteinMd5], jsonWriter, db)
             jsonWriter.writeEndObject()
         }
     }
     jsonWriter.writeEndArray()
 }
 
-def writeProtein(String proteinMd5, Map proteinMatches, JsonGenerator jsonWriter, SeqDatabase seqDatabase) {
+def writeProtein(String proteinMd5, Map proteinMatches, JsonGenerator jsonWriter, SeqDB db) {
     /* Write data for a query protein sequence and its matches:
     { "sequence": sequence, "md5": proteinMd5, "matches": [], "xrefs": []}
     There may be multiple seqIds and desc for the same sequence/md5, use the first entry to get the seq. */
     jsonWriter.writeStartObject()
 
     // 1. {"sequence": seq, "md5": proteinMd5}
-    proteinSeqData = seqDatabase.getSeqData(proteinMd5, false)
-    String sequence = proteinSeqData[0].split('\t')[-1]
+    proteinSeqData = db.proteinMd5ToProteinSeq(proteinMd5)
+    String sequence = proteinSeqData[0].sequence
     jsonWriter.writeStringField("sequence", sequence)
     jsonWriter.writeStringField("md5", proteinMd5)
 
@@ -532,13 +531,10 @@ def writeXref(seqData, JsonGenerator jsonWriter) {
     } ] */
     jsonWriter.writeStartArray()
     seqData.each { row ->
-        row = row.split('\t')
-        seqId = row[0]
-        seqDesc = row[1]
         // jsonWrite.writeObject([name: "$seqId $seqDesc"]) does not correctly handle the formatted str
         jsonWriter.writeStartObject()
-        jsonWriter.writeStringField("name", "$seqId $seqDesc")
-        jsonWriter.writeStringField("id", seqId)
+        jsonWriter.writeStringField("name", "${row.id} ${row.description}")
+        jsonWriter.writeStringField("id", row.id)
         jsonWriter.writeEndObject()
     }
     jsonWriter.writeEndArray()

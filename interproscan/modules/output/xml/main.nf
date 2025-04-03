@@ -22,20 +22,20 @@ process WRITE_XML_OUTPUT {
     xml.setEscapeText(false)       // Prevent escaping text
     def analysisType = nucleic ? "nucleotide-sequence-matches" : "protein-matches"
     def jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-    def seqDatabase = new SeqDatabase(seqDbPath.toString())
+    SeqDB db = new SeqDB(seqDbPath.toString())
 
     xml."$analysisType"("interproscan-version": ips6Version) {
         matchesFiles.each { matchFile ->
             if (nucleic) {
                 matchFile = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
-                nucleicToProteinMd5 = seqDatabase.groupProteins(matchFile)
+                nucleicToProteinMd5 = db.groupProteins(matchFile)
                 nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
-                    addNucleotideNode(nucleicMd5, proteinMd5s, matchFile, xml, seqDatabase)
+                    addNucleotideNode(nucleicMd5, proteinMd5s, matchFile, xml, db)
                 }
             } else {
                 matchFile = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
                 matchFile.each { String proteinMd5, Map proteinMatches ->
-                    addProteinNodes(proteinMd5, proteinMatches, xml, seqDatabase)
+                    addProteinNodes(proteinMd5, proteinMatches, xml, db)
                 }
             }
         }
@@ -45,7 +45,7 @@ process WRITE_XML_OUTPUT {
     new File(outputFilePath).text = writer.toString()
 }
 
-def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, def xml, SeqDatabase seqDatabase) {
+def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, def xml, SeqDB db) {
     /* Write data for an input nucleic acid seq, and then the matches for its associated ORFs.
     <nucleotide-sequence>
         <sequence md5="" sequence </sequence>
@@ -61,8 +61,8 @@ def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMat
     def SOURCE_NT_PATTERN = Pattern.compile(/^source=[^"]+\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=.*$/)
 
     // 1. <nt-seq> <sequence md5="" "<seq>" </sequence>
-    ntSeqData = seqDatabase.getSeqData(nucleicMd5, true)
-    String sequence = ntSeqData[0].split('\t')[-1]
+    ntSeqData = db.nucleicMd5ToNucleicSeq(nucleicMd5)
+    String sequence = ntSeqData[0].sequence
     xml."nucleotideNode" {
         xml.sequence(md5: nucleicMd5, sequence)
 
@@ -71,11 +71,10 @@ def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMat
 
         // 3. <orf end="", start="", strand="">
         proteinMd5s.each { proteinMd5 ->
-            // a proteinSeq/Md5 may be associated with multiple nt md5s/seq, only pull the data where the nt md5/seq is relevant
-            proteinSeqData = seqDatabase.getSeqData(proteinMd5, false, nucleicMd5)
+            // a proteinSeq MD5 may be associated with multiple nt seqs, only pull the data where the nt md5/seq is relevant
+            proteinSeqData = db.getOrfSeq(proteinMd5, nucleicMd5)
             proteinSeqData.each { row ->
-                def proteinDesc = row.split("\t")[1]
-                def proteinSource = SOURCE_NT_PATTERN.matcher(proteinDesc)
+                def proteinSource = SOURCE_NT_PATTERN.matcher(row.description)
                 assert proteinSource.matches()
                 xml.orf([
                     start  : proteinSource.group(1) as int,
@@ -83,14 +82,14 @@ def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMat
                     strand : proteinSource.group(3) as int < 4 ? "SENSE" : "ANTISENSE"
                 ]) {
                     // 4. <protein> ... <\protein>
-                    addProteinNodes(proteinMd5, proteinMatches[proteinMd5], xml, seqDatabase)
+                    addProteinNodes(proteinMd5, proteinMatches[proteinMd5], xml, db)
                 }
             }
         }
     }
 }
 
-def addProteinNodes (String proteinMd5, Map proteinMatches, def xml, SeqDatabase seqDatabase) {
+def addProteinNodes (String proteinMd5, Map proteinMatches, def xml, SeqDB db) {
     /* Write data for a query protein sequence and its matches:
     <protein>
         <sequence md5="" sequence </sequence>
@@ -100,8 +99,8 @@ def addProteinNodes (String proteinMd5, Map proteinMatches, def xml, SeqDatabase
     There may be multiple seqIds and desc for the same sequence/md5, use the first entry to get the seq. */
     xml.protein {
         // 1. <sequence md5="" sequence </sequence>
-        proteinSeqData = seqDatabase.getSeqData(proteinMd5, false)
-        String sequence = proteinSeqData[0].split('\t')[-1]
+        proteinSeqData = db.proteinMd5ToProteinSeq(proteinMd5)
+        String sequence = proteinSeqData[0].sequence
         xml.sequence(md5: proteinMd5, sequence)
 
         // 2. <xref id="id", name="id desc"/>
@@ -524,9 +523,6 @@ def addSiteNodes(locationSites, memberDB, xml) {
 def writeXref(seqData, xml) {
     // <xref id="id" name="id desc"/>
     seqData.each { row ->
-        row = row.split('\t')
-        seqId = row[0]
-        seqDesc = row[1]
-        xml.xref(id: seqId, name: "$seqId $seqDesc")
+        xml.xref(id: row.id, name: "${row.id} ${row.description}")
     }
 }
