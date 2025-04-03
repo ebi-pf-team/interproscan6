@@ -1,6 +1,8 @@
 nextflow.enable.dsl=2
 
 include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
+include { DOWNLOAD_DATA                 } from "./interproscan/subworkflows/download_data"
+include { CHECK_DATA                    } from "./interproscan/subworkflows/check_data"
 include { PREPARE_SEQUENCES             } from "./interproscan/subworkflows/prepare_sequences"
 include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
 
@@ -23,25 +25,39 @@ workflow {
 
     INIT_PIPELINE()
     fasta_file         = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
-    data_dir           = INIT_PIPELINE.out.datadir.val
-    interpro_release   = INIT_PIPELINE.out.interproRelease.val
-    member_db_releases = INIT_PIPELINE.out.memberDbReleases.val
     outdir             = INIT_PIPELINE.out.outdir.val
     formats            = INIT_PIPELINE.out.formats.val
     apps               = INIT_PIPELINE.out.apps.val
-    signalpMode        = INIT_PIPELINE.out.signalpMode.val
-    matchesApiUrl      = INIT_PIPELINE.out.matchesApiUrl.val
+    signalp_mode        = INIT_PIPELINE.out.signalpMode.val
+    matches_api_url      = INIT_PIPELINE.out.matchesApiUrl.val
+
+    if (params.download) {
+        // Pass the interproRelease to Check data to force sequentialiality 
+        DOWNLOAD_DATA(apps)
+        downloaded_interpro_release = DOWNLOAD_DATA.out.interproRelease.val
+
+        CHECK_DATA(apps, downloaded_interpro_release)
+        data_dir           = CHECK_DATA.out.datadir.val
+        interpro_release   = CHECK_DATA.out.interproRelease.val
+        member_db_releases = CHECK_DATA.out.memberDbReleases.val
+    } else {
+        interpro_placeholder = ""
+        CHECK_DATA(apps, interpro_placeholder)
+        data_dir           = CHECK_DATA.out.datadir.val
+        interpro_release   = CHECK_DATA.out.interproRelease.val
+        member_db_releases = CHECK_DATA.out.memberDbReleases.val
+    }
 
     PREPARE_SEQUENCES(fasta_file, apps)
-    ch_seqs         = PREPARE_SEQUENCES.out.ch_seqs
-    seq_db_path     = PREPARE_SEQUENCES.out.seq_db_path
+    ch_seqs            = PREPARE_SEQUENCES.out.ch_seqs
+    seq_db_path        = PREPARE_SEQUENCES.out.seq_db_path
 
     matchResults = Channel.empty()
-    if (matchesApiUrl != null) {
+    if (matches_api_url != null) {
         LOOKUP_MATCHES(
             ch_seqs,
             apps,
-            matchesApiUrl,
+            matches_api_url,
             params.lookupService.chunkSize,
             params.lookupService.maxRetries
         )
