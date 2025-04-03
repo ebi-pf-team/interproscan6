@@ -247,9 +247,9 @@ class SeqDB {
     List<String> proteinMd5ToNucleicSeq(String proteinMD5) {
         def query = """SELECT N.id AS nid, N.description, S.sequence, P.id AS pid
             FROM NUCLEOTIDE AS N
-            LEFT JOIN NUCLEOTIDE_SEQUENCE AS S ON N.md5 = S.md5
-            LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.md5 = N2P.nt_md5
-            LEFT JOIN PROTEIN AS P ON N2P.protein_md5 = P.md5
+            INNER JOIN NUCLEOTIDE_SEQUENCE AS S ON N.md5 = S.md5
+            INNER JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.md5 = N2P.nt_md5
+            INNER JOIN PROTEIN AS P ON N2P.protein_md5 = P.md5
             WHERE P.md5 = ?;
             """
         return this.sql.rows(query, [proteinMD5])
@@ -258,7 +258,7 @@ class SeqDB {
     List<String> proteinMd5ToProteinSeq(String proteinMD5) {
         def query = """SELECT P.id, P.description, S.sequence
             FROM PROTEIN AS P
-            LEFT JOIN PROTEIN_SEQUENCE AS S ON P.md5 = S.md5
+            INNER JOIN PROTEIN_SEQUENCE AS S ON P.md5 = S.md5
             WHERE P.md5 = ?;
             """
         return this.sql.rows(query, [proteinMD5])
@@ -267,7 +267,7 @@ class SeqDB {
     List<String> nucleicMd5ToNucleicSeq(String nucleicMD5) {
         def query = """SELECT N.id, N.description, S.sequence
             FROM NUCLEOTIDE AS N
-            LEFT JOIN NUCLEOTIDE_SEQUENCE AS S ON N.md5 = S.md5
+            INNER JOIN NUCLEOTIDE_SEQUENCE AS S ON N.md5 = S.md5
             WHERE N.md5 = ?;
             """
         return this.sql.rows(query, [nucleicMD5])
@@ -276,9 +276,9 @@ class SeqDB {
     List<String> getOrfSeq(String proteinMD5, String nucleicMD5) {
         def query = """SELECT P.id, P.description, S.sequence, N.id AS nt_id
             FROM PROTEIN AS P
-            LEFT JOIN PROTEIN_SEQUENCE AS S ON P.md5 = S.md5
-            LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON P.md5 = N2P.protein_md5
-            LEFT JOIN NUCLEOTIDE AS N ON N2P.nt_md5 = N.md5
+            INNER JOIN PROTEIN_SEQUENCE AS S ON P.md5 = S.md5
+            INNER JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON P.md5 = N2P.protein_md5
+            INNER JOIN NUCLEOTIDE AS N ON N2P.nt_md5 = N.md5
             WHERE P.md5 = ? AND N.md5 = ? AND P.description LIKE 'source=' || N.id || '%';
             """
         return this.sql.rows(query, [proteinMD5, nucleicMD5])
