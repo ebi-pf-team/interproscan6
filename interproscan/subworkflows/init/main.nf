@@ -1,5 +1,3 @@
-include { getMatchesApiUrl } from "../../modules/lookup"
-
 workflow INIT_PIPELINE {
     // Validate pipeline input parameters
 
@@ -51,15 +49,7 @@ workflow INIT_PIPELINE {
     if (params.offline && params.matchesApiUrl != null) {
         log.error "--offline and --matches-api-url are mutually exclusive"
         exit 1
-    } else if (params.offline) {
-        _matchesApiUrl = null
-    } else {
-        _matchesApiUrl = getMatchesApiUrl(
-            params.matchesApiUrl, params.lookupService.url, _interproRelease, workflow.manifest, log
-        )
     }
-
-    matchesApiUrl = _matchesApiUrl
 
     emit:
     fasta            // str: path to input fasta file
@@ -67,5 +57,4 @@ workflow INIT_PIPELINE {
     outdir           // str: path to output directory
     formats          // set<String>: output file formats
     signalpMode      // str: Models to be used with SignalP
-    matchesApiUrl    // str|null: URL of Matches API to query
 }

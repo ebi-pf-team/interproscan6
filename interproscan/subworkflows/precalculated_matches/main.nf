@@ -1,0 +1,31 @@
+include { LOOKUP_MATCHES;
+          getMatchesApiUrl } from "../../modules/lookup"
+
+workflow PRECALCULATED_MATCHES {
+    // Prepare connection and retrive precalculated matched from the InterPro API
+    take:
+    ch_seqs           // fasta files of protein sequences to analyse
+    apps              // member db analyses to run
+    interproRelease   // str, interpro db version number
+
+    main:
+    _matchesApiUrl = getMatchesApiUrl(
+        params.matchesApiUrl, params.lookupService.url, interproRelease, workflow.manifest, log
+    )
+
+    LOOKUP_MATCHES(
+        ch_seqs,
+        apps,
+        _matchesApiUrl,
+        params.lookupService.chunkSize,
+        params.lookupService.maxRetries
+    )
+
+    precalculatedMatches = LOOKUP_MATCHES.out[0]
+    noMatchesFasta       = LOOKUP_MATCHES.out[1]
+
+    emit:
+    precalculatedMatches
+    noMatchesFasta
+
+}

@@ -4,9 +4,9 @@ include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init
 include { DOWNLOAD_DATA                 } from "./interproscan/subworkflows/download_data"
 include { CHECK_DATA                    } from "./interproscan/subworkflows/check_data"
 include { PREPARE_SEQUENCES             } from "./interproscan/subworkflows/prepare_sequences"
+include { PRECALCULATED_MATCHES         } from "./interproscan/subworkflows/precalculated_matches"
 include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
 
-include { LOOKUP_MATCHES                } from "./interproscan/modules/lookup"
 include { XREFS                         } from "./interproscan/modules/xrefs"
 include { REPRESENTATIVE_LOCATIONS      } from "./interproscan/modules/representative_locations"
 include { WRITE_JSON_OUTPUT             } from "./interproscan/modules/output/json"
@@ -28,8 +28,7 @@ workflow {
     outdir             = INIT_PIPELINE.out.outdir.val
     formats            = INIT_PIPELINE.out.formats.val
     apps               = INIT_PIPELINE.out.apps.val
-    signalp_mode        = INIT_PIPELINE.out.signalpMode.val
-    matches_api_url      = INIT_PIPELINE.out.matchesApiUrl.val
+    signalp_mode       = INIT_PIPELINE.out.signalpMode.val
 
     if (params.download) {
         // Pass the interproRelease to Check data to force sequentialiality 
@@ -53,17 +52,26 @@ workflow {
     seq_db_path        = PREPARE_SEQUENCES.out.seq_db_path
 
     matchResults = Channel.empty()
-    if (matches_api_url != null) {
-        LOOKUP_MATCHES(
+    if (params.offline) {
+        SCAN_SEQUENCES(
+            ch_seqs,
+            member_db_releases,
+            apps,
+            params.appsConfig,
+            data_dir
+        )
+        matchResults = SCAN_SEQUENCES.out
+    } else {
+        PRECALCULATED_MATCHES(
             ch_seqs,
             apps,
-            matches_api_url,
-            params.lookupService.chunkSize,
-            params.lookupService.maxRetries
+            interpro_release
         )
+        precalculated_matches = PRECALCULATED_MATCHES.out.precalculatedMatches
+        no_matches_fastas     = PRECALCULATED_MATCHES.out.noMatchesFasta
 
         SCAN_SEQUENCES(
-            LOOKUP_MATCHES.out[1],
+            no_matches_fastas,
             member_db_releases,
             apps,
             params.appsConfig,
@@ -74,17 +82,8 @@ workflow {
             scan[1].collect { path -> [scan[0], path] }
         }
 
-        def combined = LOOKUP_MATCHES.out[0].concat(expandedScan)
+        def combined = precalculated_matches.concat(expandedScan)
         matchResults = combined.groupTuple()
-    } else {
-        SCAN_SEQUENCES(
-            ch_seqs,
-            member_db_releases,
-            apps,
-            params.appsConfig,
-            data_dir
-        )
-        matchResults = SCAN_SEQUENCES.out
     }
     // matchResults format: [[meta, [member1.json, member2.json, ..., memberN.json]]
 
