@@ -232,10 +232,9 @@ class SeqDB {
         def nucleicRelationships = [:]  // [ntSeqId: [proteinMd5]]
         proteinMatches.each { proteinMD5, matchesNode ->
             // get all parent NT seq Ids
-            def query = """SELECT N.md5 AS nt_md5
-                FROM NUCLEOTIDE AS N
-                LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.md5 = N2P.nt_md5
-                WHERE N2P.protein_md5 = ?
+            def query = """SELECT DISTINCT nt_md5
+                FROM PROTEIN_TO_NUCLEOTIDE
+                WHERE protein_md5 = ?
                 """
             this.sql.eachRow(query, [proteinMD5]) { row ->
                 nucleicRelationships.computeIfAbsent(row.nt_md5, { [] as Set })
