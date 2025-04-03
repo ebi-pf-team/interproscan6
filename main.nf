@@ -82,7 +82,7 @@ workflow {
             scan[1].collect { path -> [scan[0], path] }
         }
 
-        def combined = precalculated_matches.concat(expandedScan)
+        combined = precalculated_matches.concat(expandedScan)
         matchResults = combined.groupTuple()
     }
     // matchResults format: [[meta, [member1.json, member2.json, ..., memberN.json]]

@@ -9,12 +9,11 @@ workflow DOWNLOAD_DATA {
     // This subworkflow runs when the --download flag is used.
 
     take:
-    iprScanVersion         // str, major and minor iprscan release number
-    applications           // list of applications to run
-    appsConfig             // map of applications
+    applications  // list of applications to run
 
     main:
-    def baseURL = "https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/${iprScanVersion}"
+    def _iprScanVersion = workflow.manifest.version.split("\\.")[0..1].join(".")  // We only need the major and minor version number
+    def baseURL = "https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/${_iprScanVersion}"
     def _datadir = ""
     def dirPath = ""
     def downloadInterPro = false
@@ -48,10 +47,10 @@ workflow DOWNLOAD_DATA {
         // Using the user selected InterPro release, but first check it is compatible with this iprScan release
          _interproRelease = params.interpro.toString()
          if (!compatibleReleases.contains(_interproRelease)) {
-             log.error "The InterPro release ${_interproRelease} is not compatible with InterProScan version ${iprScanVersion}"
+             log.error "The InterPro release ${_interproRelease} is not compatible with InterProScan version ${_iprScanVersion}"
              exit 1
          } else if (params.interpro.toFloat() < compatibleReleases.max()) {
-            log.info "A later compatible InterPro release '${compatibleReleases[iprscan].max()}' is availble.\n"+
+            log.info "A later compatible InterPro release '${compatibleReleases[_iprScanVersion].max()}' is availble.\n"+
                      "Tip: Use the '--download' option to automatically fetch the latest compatible InterPro release"
          }
          println "DEBUG: [3b]"
