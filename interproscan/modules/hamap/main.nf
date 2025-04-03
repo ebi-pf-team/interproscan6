@@ -147,7 +147,7 @@ def fmtSequence(String sequence) {
         sb.append(sequence, i, j);
         if (j < sequence.length()) {
             sb.append('\n');
-            }
         }
-        return sb.toString()
+    }
+    return sb.toString()
 }
