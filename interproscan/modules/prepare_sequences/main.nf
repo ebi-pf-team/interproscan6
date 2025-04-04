@@ -140,6 +140,7 @@ process SPLIT_FASTA {
     input:
     val dbPath
     val batchSize
+    val nucleic
 
     output:
     path "*.fasta"
@@ -147,6 +148,6 @@ process SPLIT_FASTA {
     exec:
     String prefix = task.workDir.resolve("input").toString()
     SeqDB db = new SeqDB(dbPath.toString())
-    db.splitFasta(prefix, batchSize)
+    db.splitFasta(prefix, batchSize, nucleic)
     db.close()
 }

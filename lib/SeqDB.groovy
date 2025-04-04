@@ -196,34 +196,57 @@ class SeqDB {
         return [id: id, description: description, md5: md5]
     }
 
-    void splitFasta(String outputPrefix, int maxSequencesPerFile) {
-        String query = "SELECT md5, sequence FROM PROTEIN_SEQUENCE ORDER BY md5"
+    void splitFasta(String outputPrefix, int maxSequencesPerFile, boolean nucleic) {
+        def n = nucleic
+        System.out.println("DEBUG: $n ${n.getClass()}")
+        String query = n ? """SELECT P2N.nt_md5, S.md5, S.sequence
+            FROM PROTEIN_SEQUENCE AS S
+            LEFT JOIN PROTEIN AS P ON S.md5 = P.md5
+            LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS P2N ON P.md5 = P2N.protein_md5
+            WHERE P2N.nt_md5 IS NOT NULL
+            ORDER BY P2N.nt_md5""" : "SELECT NULL AS nt_md5, md5, sequence FROM PROTEIN_SEQUENCE ORDER BY md5"
         int fileIndex = 1
-        int seqCounter = 0
-
-        // Open the first file for writing
-        def writer = new File("${outputPrefix}.${fileIndex}.fasta").newWriter()
+        def batch = []
+        def currentMD5 = null
+        def writer = null
 
         this.sql.eachRow(query) { row ->
-            if (seqCounter >= maxSequencesPerFile) {
-                // We've reached the maximum for the current file: close it and open a new file
+            // If we encounter a new nt_md5 and the batch is full --> write to a new batch
+            if (currentMD5 && currentMD5 != row.nt_md5 && batch.size() >= maxSequencesPerFile) {
+                writer = new File("${outputPrefix}.${fileIndex}.fasta").newWriter()
+                for (record in batch) {
+                    writer.writeLine(">${record.md5}")
+                    String sequence = record.sequence
+                    for (int i = 0; i < sequence.length(); i += 60) {
+                        int end = Math.min(i + 60, sequence.length())
+                        writer.writeLine(sequence.substring(i, end))
+                    }
+                }
                 writer.close()
                 fileIndex++
-                seqCounter = 0
-                writer = new File("${outputPrefix}.${fileIndex}.fasta").newWriter()
+                batch.clear()
             }
-
-            writer.writeLine(">${row.md5}")
-
-            String sequence = row.sequence
-            for (int i = 0; i < sequence.length(); i += 60) {
-                int end = Math.min(i + 60, sequence.length())
-                writer.writeLine(sequence.substring(i, end))
-            }
-            seqCounter++
+            // Don't add the GroovyResultSet item, else when writing the final batch we will get a ResultSet closed error
+            batch.add([
+                    nt_md5 : row.nt_md5,
+                    md5    : row.md5,
+                    sequence: row.sequence
+            ])
+            currentMD5 = n ? row.nt_md5 : row.md5
         }
 
-        writer.close()
+        // write the final batch
+        if (!batch.isEmpty()) {
+            writer = new File("${outputPrefix}.${fileIndex}.fasta").newWriter()
+            batch.each { record ->
+                writer.writeLine(">${record.md5}")
+                def seq = record.sequence
+                for (int i = 0; i < seq.length(); i += 60) {
+                    writer.writeLine(seq.substring(i, Math.min(i + 60, seq.length())))
+                }
+            }
+            writer.close()
+        }
     }
 
     def groupProteins(Map proteinMatches) {
