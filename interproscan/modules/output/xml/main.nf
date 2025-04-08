@@ -27,14 +27,14 @@ process WRITE_XML_OUTPUT {
     xml."$analysisType"("interproscan-version": ips6Version) {
         matchesFiles.each { matchFile ->
             if (nucleic) {
-                matchFile = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
-                nucleicToProteinMd5 = db.groupProteins(matchFile)
+                Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
+                nucleicToProteinMd5 = db.groupProteins(proteins)
                 nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
                     addNucleotideNode(nucleicMd5, proteinMd5s, matchFile, xml, db)
                 }
             } else {
-                matchFile = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
-                matchFile.each { String proteinMd5, Map proteinMatches ->
+                Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
+                proteins.each { String proteinMd5, Map proteinMatches ->
                     addProteinNodes(proteinMd5, proteinMatches, xml, db)
                 }
             }
