@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.util.regex.Pattern
 
 process WRITE_JSON_OUTPUT {
-    label 'local'
+    label 'run_locally'
 
     input:
     val matches

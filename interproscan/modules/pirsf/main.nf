@@ -21,7 +21,7 @@ process RUN_PIRSF {
 }
 
 process PARSE_PIRSF {
-    label 'local'
+    label 'run_locally'
 
     input:
     tuple val(meta), val(hmmsearch_dtbl)

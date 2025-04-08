@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 
 process WRITE_TSV_OUTPUT {
-    label 'local'
+    label 'run_locally'
 
     input:
     val matches

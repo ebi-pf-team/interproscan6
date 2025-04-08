@@ -9,7 +9,7 @@ import java.io.StringWriter
 import java.util.regex.Pattern
 
 process WRITE_XML_OUTPUT {
-    label 'local'
+    label 'run_locally'
 
     input:
     val matches

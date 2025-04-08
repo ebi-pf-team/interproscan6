@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.SerializationFeature
 
 process REPRESENTATIVE_LOCATIONS {
-    label 'local'
+    label 'run_locally'
 
     input:
     val matchesPath

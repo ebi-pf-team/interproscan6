@@ -30,7 +30,7 @@ process RUN_SIGNALP {
 }
 
 process PARSE_SIGNALP {
-    label 'local'
+    label 'run_locally'
 
     input:
     tuple val(meta), val(organism), val(mode), val(signalp_out)
