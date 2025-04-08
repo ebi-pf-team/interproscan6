@@ -1,18 +1,14 @@
 nextflow.enable.dsl=2
 
 include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
-include { DOWNLOAD_DATA                 } from "./interproscan/subworkflows/download_data"
-include { CHECK_DATA                    } from "./interproscan/subworkflows/check_data"
 include { PREPARE_SEQUENCES             } from "./interproscan/subworkflows/prepare_sequences"
 include { PRECALCULATED_MATCHES         } from "./interproscan/subworkflows/precalculated_matches"
 include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
 include { PREPARE_DATA                  } from "./interproscan/subworkflows/prepare_data"
+include { OUTPUT                        } from "./interproscan/subworkflows/output"
 
 include { XREFS                         } from "./interproscan/modules/xrefs"
 include { REPRESENTATIVE_LOCATIONS      } from "./interproscan/modules/representative_locations"
-include { WRITE_JSON_OUTPUT             } from "./interproscan/modules/output/json"
-include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
-include { WRITE_XML_OUTPUT              } from "./interproscan/modules/output/xml"
 
 
 workflow {
@@ -57,28 +53,11 @@ workflow {
         datadir,
         params.download
     )
+    interproscan_version = PREPARE_DATA.out.iprscan_major_minor.val
 
- 
-    // if (params.download) {
-    //     // Pass the interproRelease to Check data to force sequentialiality 
-    //     DOWNLOAD_DATA(apps)
-    //     downloaded_interpro_release = DOWNLOAD_DATA.out.interproRelease.val
-
-    //     CHECK_DATA(apps, downloaded_interpro_release)
-    //     data_dir           = CHECK_DATA.out.datadir.val
-    //     interpro_release   = CHECK_DATA.out.interproRelease.val
-    //     member_db_releases = CHECK_DATA.out.memberDbReleases.val
-    // } else {
-    //     interpro_placeholder = ""
-    //     CHECK_DATA(apps, interpro_placeholder)
-    //     data_dir           = CHECK_DATA.out.datadir.val
-    //     interpro_release   = CHECK_DATA.out.interproRelease.val
-    //     member_db_releases = CHECK_DATA.out.memberDbReleases.val
-    // }
-
-    // PREPARE_SEQUENCES(fasta_file, apps)
-    // ch_seqs            = PREPARE_SEQUENCES.out.ch_seqs
-    // seq_db_path        = PREPARE_SEQUENCES.out.seq_db_path
+    PREPARE_SEQUENCES(fasta_file, applications)
+    ch_seqs            = PREPARE_SEQUENCES.out.ch_seqs
+    seq_db_path        = PREPARE_SEQUENCES.out.seq_db_path
 
     // matchResults = Channel.empty()
     // if (params.offline) {
@@ -143,18 +122,7 @@ workflow {
     //     .map { meta, json -> json }
     //     .collect()
 
-    // def fileName = params.input.split('/').last()
-    // def outFileName = "${params.outdir}/${fileName}"
-
-    // if (formats.contains("JSON")) {
-    //     WRITE_JSON_OUTPUT(ch_results, "${outFileName}", seq_db_path, params.nucleic, workflow.manifest.version)
-    // }
-    // if (formats.contains("TSV")) {
-    //     WRITE_TSV_OUTPUT(ch_results, "${outFileName}", seq_db_path, params.nucleic)
-    // }
-    // if (formats.contains("XML")) {
-    //     WRITE_XML_OUTPUT(ch_results, "${outFileName}", seq_db_path, params.nucleic, workflow.manifest.version)
-    // }
+//     OUTPUT(ch_results)
 }
 
 workflow.onComplete = {
