@@ -1,15 +1,11 @@
 nextflow.enable.dsl=2
 
 include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
+include { PREPARE_SEQUENCES             } from "./interproscan/subworkflows/prepare_sequences"
 include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
 
-include { ESL_TRANSLATE                 } from "./interproscan/modules/esl_translate"
-include { PREPARE_NUCLEIC_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
-include { PREPARE_PROTEIN_SEQUENCES     } from "./interproscan/modules/prepare_sequences"
 include { LOOKUP_MATCHES                } from "./interproscan/modules/lookup"
 include { XREFS                         } from "./interproscan/modules/xrefs"
-include { AGGREGATE_SEQS_MATCHES;
-          AGGREGATE_ALL_MATCHES         } from "./interproscan/modules/aggregate_matches"
 include { REPRESENTATIVE_LOCATIONS      } from "./interproscan/modules/representative_locations"
 include { WRITE_JSON_OUTPUT             } from "./interproscan/modules/output/json"
 include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
@@ -26,58 +22,34 @@ workflow {
     }
 
     INIT_PIPELINE()
-
     fasta_file      = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
     data_dir        = INIT_PIPELINE.out.datadir.val
     outut_dir       = INIT_PIPELINE.out.outdir.val
     formats         = INIT_PIPELINE.out.formats.val
     apps            = INIT_PIPELINE.out.apps.val
     signalpMode     = INIT_PIPELINE.out.signalpMode.val
+    matchesApiUrl   = INIT_PIPELINE.out.matchesApiUrl.val
 
-    // Chunk input file in smaller files
-    fasta_file
-        .splitFasta( by: params.batchSize, file: true )
-        .set { ch_fasta }
-
-    if (params.nucleic) {
-        // Translate DNA/RNA sequences to protein sequences
-        ch_translated = ESL_TRANSLATE(ch_fasta)
-
-        // Split again
-        ch_translated
-            .splitFasta( by: params.batchSize, file: true )
-            .map { split_pt_file, orig_nt_file -> tuple ( orig_nt_file, split_pt_file ) }
-            .set { ch_translated_split }
-
-        // Store sequences as JSON objects
-        ch_seqs = PREPARE_NUCLEIC_SEQUENCES(ch_translated_split)
-    } else {
-        // Store sequences as JSON objects
-        ch_seqs = PREPARE_PROTEIN_SEQUENCES(ch_fasta)
-    }
+    PREPARE_SEQUENCES(fasta_file, apps)
+    ch_seqs         = PREPARE_SEQUENCES.out.ch_seqs
+    seq_db_path     = PREPARE_SEQUENCES.out.seq_db_path
 
     matchResults = Channel.empty()
-    if (params.disablePrecalc) {
-        SCAN_SEQUENCES(
-            ch_seqs,
-            apps,
-            params.appsConfig,
-            data_dir
-        )
-        matchResults = SCAN_SEQUENCES.out
-    } else {
+    if (matchesApiUrl != null) {
         LOOKUP_MATCHES(
             ch_seqs,
             apps,
-            params.lookupService.apiChunkSize,
-            params.lookupService.lookupHost,
-            params.lookupService.maxRetries)
+            matchesApiUrl,
+            params.lookupService.chunkSize,
+            params.lookupService.maxRetries
+        )
 
         SCAN_SEQUENCES(
             LOOKUP_MATCHES.out[1],
             apps,
             params.appsConfig,
-            data_dir)
+            data_dir
+        )
 
         def expandedScan = SCAN_SEQUENCES.out.flatMap { scan ->
             scan[1].collect { path -> [scan[0], path] }
@@ -85,10 +57,19 @@ workflow {
 
         def combined = LOOKUP_MATCHES.out[0].concat(expandedScan)
         matchResults = combined.groupTuple()
-    } // matchResults = [[meta, [member.json, member.json, member.json]]
+    } else {
+        SCAN_SEQUENCES(
+            ch_seqs,
+            apps,
+            params.appsConfig,
+            data_dir
+        )
+        matchResults = SCAN_SEQUENCES.out
+    }
+    // matchResults format: [[meta, [member1.json, member2.json, ..., memberN.json]]
 
     /* XREFS:
-    Aggregate matches across all members for each sequence
+    Aggregate matches across all members for each sequence --> single JSON with all matches for the batch
     Add signature and entry desc and names
     Add PAINT annotations (if panther is enabled)
     Add go terms (if enabled)
@@ -106,30 +87,23 @@ workflow {
         params.appsConfig.panther.paint
     )
 
-    ch_seqs.join(XREFS.out, by: 0)
-    .map { batchnumber, fasta, sequences, matches ->
-        [batchnumber, sequences, matches]
-    }.set { ch_seq_matches }
-
-    // Aggregate seq meta data with the matches
-    AGGREGATE_SEQS_MATCHES(ch_seq_matches, params.nucleic)
-
-    // Aggregate all data into a single JSON file
-    AGGREGATE_ALL_MATCHES(AGGREGATE_SEQS_MATCHES.out.collect())
-
-    // Identify representative locations for the applicable member databases
-    REPRESENTATIVE_LOCATIONS(AGGREGATE_ALL_MATCHES.out)
+    REPRESENTATIVE_LOCATIONS(XREFS.out)
+    // Collect all JSON files into a single channel so we don't have cocurrent writing to the output files
+    ch_results = REPRESENTATIVE_LOCATIONS.out
+        .map { meta, json -> json }
+        .collect()
 
     def fileName = params.input.split('/').last()
     def outFileName = "${params.outdir}/${fileName}"
+
     if (formats.contains("JSON")) {
-        WRITE_JSON_OUTPUT(REPRESENTATIVE_LOCATIONS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
+        WRITE_JSON_OUTPUT(ch_results, "${outFileName}", seq_db_path, params.nucleic, workflow.manifest.version)
     }
     if (formats.contains("TSV")) {
-        WRITE_TSV_OUTPUT(REPRESENTATIVE_LOCATIONS.out, "${outFileName}", params.nucleic)
+        WRITE_TSV_OUTPUT(ch_results, "${outFileName}", seq_db_path, params.nucleic)
     }
     if (formats.contains("XML")) {
-        WRITE_XML_OUTPUT(REPRESENTATIVE_LOCATIONS.out, "${outFileName}", params.nucleic, workflow.manifest.version)
+        WRITE_XML_OUTPUT(ch_results, "${outFileName}", seq_db_path, params.nucleic, workflow.manifest.version)
     }
 }
 

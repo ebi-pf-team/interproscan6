@@ -1,56 +1,153 @@
-import groovy.json.JsonOutput
-
-process PREPARE_NUCLEIC_SEQUENCES {
-    label 'run_locally'
+process VALIDATE_FASTA {
+    // check the formating of the intput FASTA, i.e. look for illegal characters
+    label         'run_locally', 'ips6_container'
+    errorStrategy 'terminate'
 
     input:
-    tuple val(n_fasta), val(p_fasta)
+    path fasta
+    val isNucleic
+    val appsToRun
+    val appsConfig
 
     output:
-    tuple val(task.index), val(p_fasta), path("sequences.json")
+    path fasta
+    path "invalid_char_summary"
 
-    exec:
-    def sequences = FastaFile.parse(n_fasta.toString())
-    def ntSequences = [:]
-    sequences.each { seq ->
-        ntSequences[seq.id] = seq
-    }
+    script:
+    def commands = ""
+    def checkFile = "invalid_char_check"
 
-    sequences = FastaFile.parse(p_fasta.toString())
-    def output = [:]
-    sequences.each { seq ->
-        def match = seq.description =~ /source=(\S+)/
-        assert match
-        def source = match[0][1]
-        def ntSeq = ntSequences[source]
-        seq.translatedFrom = ntSeq
-        if (!output.containsKey(seq.md5)) {
-            output[seq.md5] = []
+    // General illegal character check
+    def alphabet = isNucleic ? FastaFile.NUCLEIC_ALPHABET : FastaFile.PROTEIN_ALPHABET
+    def alphabetName = isNucleic ? "nucleic acid" : "protein"
+    commands += "echo 'Check: General: Tolerated characters: $alphabet' >> $checkFile\n"
+    commands += "grep -vi '^>' $fasta | grep -Eni '[^$alphabet]' >> $checkFile || true\n"
+
+    // Member database illegal specific character checks
+    appsToRun.each { app ->
+        def forbiddenChars = appsConfig[app]?.invalid_chars ?: []
+        forbiddenChars.each { forbiddenChar ->
+            forbiddenChar = forbiddenChar.toString()
+            commands += "echo 'Check: $app $forbiddenChar' >> $checkFile\n"
+            commands += "grep -Eni '^[^>].*[$forbiddenChar${forbiddenChar.toLowerCase()}]' $fasta >> $checkFile || true\n"
         }
-        output[seq.md5] << seq
     }
-    def outputPath = task.workDir.resolve("sequences.json")
-    def json = JsonOutput.toJson(output)
-    new File(outputPath.toString()).write(json)
+
+    """
+    # Run inside the script block to ensure it is run inside the ips6 container which contains grep
+    ${commands}
+
+    touch invalid_char_summary
+
+    # Check if the file has only the "Check" lines (i.e., no grep results, meaning no invalid characters)
+    line_count=\$(wc -l < $checkFile)
+    check_line_count=\$(grep -c "^Check:" $checkFile)
+
+    if [ "\$line_count" -eq "\$check_line_count" ]; then
+        echo "No invalid chars"
+        # Only contains the initial Check lines, no errors found
+        # Do nothing
+        :
+    else
+        echo "Parsing $checkFile"
+        # Build a summary of the invalid characters that were found
+        current_app=""
+        current_char=""
+
+        while IFS= read -r line; do
+            if [[ \$line == Check:* ]]; then
+                # Extract app info - for general check or specific app check
+                if [[ \$line == *"Tolerated characters:"* ]]; then
+                    current_app="general"
+                    current_char=""
+                else
+                    # For app-specific checks like "Check: antifam -"
+                    current_app=\$(echo "\$line" | awk '{print \$2}')
+                    current_char=\$(echo "\$line" | awk '{print \$3}')
+                fi
+
+                # Reset line number collection for new check
+                line_nums=""
+            elif [[ \$line =~ ^[0-9]+: ]]; then
+                # Extract line number from grep output
+                line_num=\$(echo "\$line" | grep -o '^[0-9]*')
+
+                # Append to line numbers for this check
+                if [ -z "\$line_nums" ]; then
+                    line_nums="\$line_num"
+                else
+                    line_nums="\$line_nums, \$line_num"
+                fi
+
+                # Write to summary when we have line numbers
+                if [ -n "\$current_app" ] && [ -n "\$line_nums" ]; then
+                    if [ -n "\$current_char" ]; then
+                        echo "\$current_app forbidden character '\$current_char' found on lines: \$line_nums" >> invalid_char_summary
+                    else
+                        echo "\$current_app forbidden character(s) found on lines: \$line_nums" >> invalid_char_summary
+                    fi
+                fi
+            fi
+        done < $checkFile
+    fi
+    """
 }
 
-
-process PREPARE_PROTEIN_SEQUENCES {
-    label 'run_locally'
+process LOAD_SEQUENCES {
+    // Populate a run_locally sqlite3 database with sequences from the pipeline's input FASTA file.
+    label         'run_locally'
+    errorStrategy 'terminate'
 
     input:
     val fasta
+    val nucleic
 
     output:
-    tuple val(task.index), val(fasta), path("sequences.json")
+    path "sequences.db"
 
     exec:
-    def output = [:]
-    def sequences = FastaFile.parse(fasta.toString())
-    sequences.each { seq ->
-        output[seq.id] = seq
+    def outputFilePath = task.workDir.resolve("sequences.db")
+    SeqDB db = new SeqDB(outputFilePath.toString())
+    db.loadFastaFile(fasta.toString(), nucleic, false)
+    db.close()
+}
+
+process LOAD_ORFS {
+    // add protein seqs translated from ORFS in the nt seqs to the database
+    label         'run_locally'
+    errorStrategy 'terminate'
+
+    input:
+    val translatedFastas  // could be one or multiple paths
+    val dbPath
+
+    output:
+    val dbPath // ensure BUILD_BATCHES runs after LOAD_ORFS
+
+    exec:
+    SeqDB db = new SeqDB(dbPath.toString())
+    translatedFastas.each {
+        db.loadFastaFile(it.toString(), false, true)
     }
-    def outputPath = task.workDir.resolve("sequences.json")
-    def json = JsonOutput.toJson(output)
-    new File(outputPath.toString()).write(json)
+    db.close()
+}
+
+process SPLIT_FASTA {
+    // Build the FASTA file batches of unique protein sequences for the sequence analysis
+    label         'run_locally'
+    errorStrategy 'terminate'
+
+    input:
+    val dbPath
+    val batchSize
+    val nucleic
+
+    output:
+    path "*.fasta"
+
+    exec:
+    String prefix = task.workDir.resolve("input").toString()
+    SeqDB db = new SeqDB(dbPath.toString())
+    db.splitFasta(prefix, batchSize, nucleic)
+    db.close()
 }

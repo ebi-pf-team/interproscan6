@@ -1,5 +1,4 @@
 import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
 
 process PREPROCESS_HAMAP {
     label 'small', 'ips6_container'
@@ -9,7 +8,7 @@ process PREPROCESS_HAMAP {
     path hmmdb
 
     output:
-    tuple val(meta), path("hmmsearch.tab")
+    tuple val(meta), path("hmmsearch.tab"), path(fasta)
 
     script:
     """
@@ -25,25 +24,14 @@ process PREPARE_HAMAP {
     label 'run_locally'
 
     input:
-    tuple val(meta), val(hmmsearch_tab), val(seq_json)
+    tuple val(meta), val(hmmsearch_tab), val(fasta)
     val profile_dir
 
     output:
     tuple val(meta), val(profiles), path(fasta_files)
 
     exec:
-    def jsonFile = new File(seq_json.toString())
-    def jsonSlurper = new JsonSlurper()
-    def sequences = jsonSlurper.parse(jsonFile)
-        .collectEntries{ seqId, obj ->
-            if (obj instanceof List) { // nucleotide sequences case
-                obj.collectEntries { seq ->
-                    [(seq.id): FastaSequence.fromMap(seq)]
-                }
-            } else {
-                [(seqId): FastaSequence.fromMap(obj)]
-            }
-        }
+    Map<String, String> sequences = FastaFile.parse(fasta.toString())  // [md5: sequence]
 
     // Find profiles with matches
     def matches = [:]
@@ -74,9 +62,9 @@ process PREPARE_HAMAP {
                 Path fastaPath = task.workDir.resolve("${query}.fa")
                 new File(fastaPath.toString()).withWriter('UTF-8') { writer ->
                     targets.each { seqId ->
-                        FastaSequence seq = sequences[seqId]
+                        String seq = sequences[seqId]
                         writer.writeLine(">${seqId}")
-                        writer.writeLine(seq.sequence)
+                        writer.writeLine(fmtSequence(seq))
                     }
                 }
 
@@ -148,4 +136,18 @@ process PARSE_HAMAP {
     def outputFilePath = task.workDir.resolve("hamap.json")
     def json = JsonOutput.toJson(matches)
     new File(outputFilePath.toString()).write(json)
+}
+
+def fmtSequence(String sequence) {
+    /* Use a stringBuild for efficiency, this stops a new str being created
+    with each addition of a new line char.*/
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < sequence.length(); i += 60) {
+        int j = Math.min(i + 60, sequence.length());
+        sb.append(sequence, i, j);
+        if (j < sequence.length()) {
+            sb.append('\n');
+        }
+    }
+    return sb.toString()
 }

@@ -19,18 +19,29 @@ def main():
         observed = flattern_dict(json.load(fh))
 
     diff = difflib.ndiff(sorted(expected), sorted(observed))
+    expected_only, observed_only, both = 0, 0, 0
     for line in diff:
         if line.startswith(("-", "+", " ")):  # skip summary lines such as "?    ^^^^  -    ^^  ^ ^"
             try:
                 tab_separated = '\t'.join(map(str, ast.literal_eval(line[2:])))  # Safely eval str and convert to tab-sep str
                 if line.startswith("-"):
                     print(f"< {tab_separated}")  # Only in expected
+                    expected_only += 1
                 elif line.startswith("+"):
                     print(f"> {tab_separated}")  # Only in observed
+                    observed_only += 1
                 elif line.startswith(" "):
                     print(f"- {tab_separated}")  # In both
+                    both += 1
             except (SyntaxError, ValueError):
                 print(f"Could not parse line {line}")
+
+    print(
+        f"============ Summary ============\n"
+        f"Matches only in expected : {expected_only}\n"
+        f"Matches only in observed : {observed_only}\n"
+        f"Matches in both          : {both}"
+    )
 
 
 def flattern_dict(iprsn_dict: dict):

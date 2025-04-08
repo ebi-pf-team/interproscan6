@@ -1,7 +1,4 @@
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 
@@ -9,52 +6,46 @@ process WRITE_TSV_OUTPUT {
     label 'run_locally'
 
     input:
-    val matches
+    val matchesFiles
     val outputPath
+    val seqDbPath
     val nucleic
 
     exec:
-    ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+    SeqDB db = new SeqDB(seqDbPath.toString())
     def tsvFile = new File("${outputPath}.ips6.tsv".toString())
     tsvFile.text = "" // clear the file if it already exists
-    // Each line contains: seqId md5 seqLength memberDb modelAcc sigDesc start end evalue status date entryAcc entryDesc xrefs
+
+    // Each line contains: seqId md5 seqLength memberDb modelAcc sigDesc start end evalue status date entryAcc entryDesc goterms pathways
     def currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
 
-    JsonReader.streamArray(matches.toString(), jacksonMapper) { ObjectNode seqNode ->
-        seqNode.get("matches").fields().each { matchNode ->
-            Match match = Match.fromJsonNode((JsonNode) matchNode.value)
-            String memberDb = match.signature.signatureLibraryRelease.library
-            String sigDesc = (match.signature.description == null || match.signature.description == "null") ? '-' : match.signature.description
-            String goterms = match.signature.entry?.goXRefs ?
-                             (match.signature.entry.goXRefs.isEmpty() ? '-' :
-                             match.signature.entry.goXRefs.collect { goXref -> "${goXref.id}(${goXref.databaseName})" }.join('|')) : '-'
-            goterms = (goterms == "null") ? '-' : goterms
-            String pathways = match.signature.entry?.pathwayXRefs ?
-                             (match.signature.entry.pathwayXRefs.isEmpty() ? '-' :
-                             match.signature.entry.pathwayXRefs.collect { ptXref -> "${ptXref.databaseName}:${ptXref.id}" }.join('|')) : '-'
-            pathways = (pathways == "null") ? '-' : pathways
-            String entryAcc = (match.signature.entry?.accession == null || match.signature.entry?.accession == "null") ? '-' : match.signature.entry?.accession
-            String entryDesc = (match.signature.entry?.description == null || match.signature.entry?.description == "null") ? '-' : match.signature.entry?.description
-            char status = 'T'
-
-            seqNode.get("xref").each { xrefData ->
-                match.locations.each { Location loc ->
-                    if ( nucleic ) {
-                        seqNode.get("translatedFrom").forEach { translatedFromNode ->
-                            seqId = "${translatedFromNode.get('id').asText()}_${xrefData.get('id').asText()}"
-                            writeToTsv(tsvFile, match, currentDate, memberDb, sigDesc, goterms, pathways, entryAcc, entryDesc, status, seqNode, xrefData, loc, seqId)
-                        }
-                    } else {
-                        String seqId = xrefData.get("id").asText()
-                        writeToTsv(tsvFile, match, currentDate, memberDb, sigDesc, goterms, pathways, entryAcc, entryDesc, status, seqNode, xrefData, loc, seqId)
+    matchesFiles.each { matchFile ->
+        matchFile = new File(matchFile.toString())
+        Map proteins = new ObjectMapper().readValue(matchFile, Map)
+        proteins.each { String proteinMd5, Map matchesMap ->
+            matchesMap.each { modelAcc, match ->
+                match = Match.fromMap(match)
+                String memberDb = match.signature.signatureLibraryRelease.library
+                String sigDesc = match.signature.description ?: '-'
+                String goterms = match.signature.entry?.goXRefs ? match.signature.entry.goXRefs.collect { "${it.id}(${it.databaseName})" }.join('|') : '-'
+                String pathways = match.signature.entry?.pathwayXRefs ? match.signature.entry.pathwayXRefs.collect { "${it.databaseName}:${it.id}" }.join('|') : '-'
+                String entryAcc = match.signature.entry?.accession ?: '-'
+                String entryDesc = match.signature.entry?.description ?: '-'
+                char status = 'T'
+                seqData = nucleic ? db.proteinMd5ToNucleicSeq(proteinMd5) : db.proteinMd5ToProteinSeq(proteinMd5)
+                seqData.each { row ->  // Protein or Nucleic: [id, desc, sequence]
+                    String seqId = nucleic ? "${row.nid}_${row.pid}" : row.id
+                    int seqLength = row.sequence.trim().length()
+                    match.locations.each { Location loc ->
+                        writeToTsv(tsvFile, seqId, proteinMd5, seqLength, match, loc, memberDb, sigDesc, status, currentDate, entryAcc, entryDesc, goterms, pathways)
                     }
                 }
-            }
-        }
-    }
+            } // end of matches in matchesNode
+        } // end of proteins.each
+    } // end of matchesFiles
 }
 
-def writeToTsv(tsvFile, match, currentDate, memberDb,  sigDesc, goterms, pathways, entryAcc, entryDesc, status, seqNode, xrefData, loc, seqId) {
+def writeToTsv(tsvFile, seqId, md5, seqLength, match, loc, memberDb, sigDesc, status, currentDate, entryAcc, entryDesc, goterms, pathways) {
     int start = loc.start
     int end = loc.end
     def scoringValue = "-"
@@ -77,11 +68,8 @@ def writeToTsv(tsvFile, match, currentDate, memberDb,  sigDesc, goterms, pathway
     }
 
     tsvFile.append([
-        seqId, seqNode.get("md5").asText(), seqNode.get("sequence").asText().length(),
-        memberDb,
-        match.signature.accession, sigDesc,
-        start, end, scoringValue, status,
-        currentDate,
-        entryAcc, entryDesc, goterms, "${pathways}\n"
+        seqId, md5, seqLength, memberDb, match.signature.accession,
+        sigDesc, start, end, scoringValue, status,
+        currentDate, entryAcc, entryDesc, goterms, "${pathways}\n"
     ].join('\t'))
 }

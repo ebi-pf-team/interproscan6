@@ -1,3 +1,6 @@
+include { getInfo            } from "../../modules/lookup"
+include { getInterProVersion } from "../../modules/xrefs"
+
 workflow INIT_PIPELINE {
     main:
     // Params validation
@@ -22,26 +25,25 @@ workflow INIT_PIPELINE {
     need_data = apps.any { String appName ->
         params.appsConfig.get(appName)?.has_data || InterProScan.LICENSED_SOFTWARE.contains(appName)
     }
+    def _datadir = ""
     if (need_data) {
         // If --datadir is called and no path is given it converts to a boolean
         def dirPath = params.datadir instanceof Boolean ? null : params.datadir
-        (datadir, error) = InterProScan.resolveDirectory(dirPath, true, false)
-        if (!datadir) {
+        (_datadir, error) = InterProScan.resolveDirectory(dirPath, true, false)
+        if (!_datadir) {
             log.error error
             exit 1
         }
-        error = InterProScan.validateAppData(apps, datadir, params.appsConfig)
+        error = InterProScan.validateAppData(apps, _datadir, params.appsConfig)
         if (error) {
             log.error error
             exit 1
         }
-        error = InterProScan.validateXrefFiles(datadir, params.xRefsConfig, params.goterms, params.pathways)
+        error = InterProScan.validateXrefFiles(_datadir, params.xRefsConfig, params.goterms, params.pathways)
         if (error) {
             log.error error
             exit 1
         }
-    } else {
-        datadir = ""
     }
 
     // Check valid output file formats were provided
@@ -65,21 +67,49 @@ workflow INIT_PIPELINE {
         exit 1
     }
 
-    // Sequences validation
-    (error, numSequences) = FastaFile.validate(params.input, params.nucleic, params.appsConfig, apps)
-    if (error) {
-        log.error error
+    def _matchesApiUrl = null
+    if (params.offline && params.matchesApiUrl != null) {
+        log.error "--offline and --matches-api-url are mutually exlusive"
         exit 1
-    } else if (!numSequences) {
-        log.error "No FASTA sequences found in ${params.input}"
-        exit 1
+    } else if (params.offline) {
+        _matchesApiUrl = null
+    } else {
+        _matchesApiUrl = params.matchesApiUrl ?: params.lookupService.url
+        info = getInfo(_matchesApiUrl)
+        if (info == null) {
+            log.warn "An error occurred while querying the Matches API; analyses will be run locally"
+            _matchesApiUrl = null
+        } else {
+            def apiVersion = info.api ?: "X.Y.Z"
+            def majorVersion = apiVersion.split("\\.")[0]
+
+            if (majorVersion != "0") {
+                def msg = "${workflow.manifest.name} ${workflow.manifest.version}" +
+                    " is not compatible with the Matches API at ${_matchesApiUrl};" +
+                    " analyses will be run locally"
+                log.warn msg
+                _matchesApiUrl = null
+            } else if (_datadir) {
+                def iprVersion = getInterProVersion(_datadir)
+                if (iprVersion != info.release) {
+                    def msg = "InterPro version mismatch (local: ${iprVersion}, Matches API: ${info.release});" +
+                        " pre-calulated matches will not be retrieved, and analyses will be run locally"
+                    log.warn msg
+                    _matchesApiUrl = null
+                }
+            }
+        }
     }
 
+    matchesApiUrl = _matchesApiUrl
+    datadir = _datadir
+
     emit:
-    fasta        // str: path to input fasta file
-    datadir      // str: path to data directory
-    apps         // list: list of application to
-    outdir       // str: path to output directory
-    formats      // set<String>: output file formats
-    signalpMode  // str: Models to be used with SignalP
+    fasta         // str: path to input fasta file
+    datadir       // str: path to data directory
+    apps          // list: list of application to
+    outdir        // str: path to output directory
+    formats       // set<String>: output file formats
+    signalpMode   // str: Models to be used with SignalP
+    matchesApiUrl // str|null: URL of Matches API to query
 }

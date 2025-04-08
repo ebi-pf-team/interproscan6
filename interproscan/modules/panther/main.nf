@@ -87,8 +87,8 @@ process PREPARE_TREEGRAFTER {
         String familyId = match.modelAccession
         Path fastaPath = file("${msfPath}/${familyId}.AN.fasta")
         assert fastaPath.exists()
-        def sequences = FastaFile.parse(fastaPath.toString())
-        int length = sequences.first().sequence.length()
+        Map sequences = FastaFile.parse(fastaPath.toString())  // [md5 : "seq"]
+        int length = sequences.values().first().length()
 
         // Query sequence to graft
         StringBuilder sb = new StringBuilder()

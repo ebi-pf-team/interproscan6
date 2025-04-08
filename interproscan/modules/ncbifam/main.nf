@@ -44,4 +44,3 @@ process PARSE_NCBIFAM {
     def json = JsonOutput.toJson(processedMatches)
     new File(outputFilePath.toString()).write(json)
 }
-

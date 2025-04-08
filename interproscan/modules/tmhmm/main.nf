@@ -2,7 +2,7 @@ import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
 process RUN_DEEPTMHMM {
-    label 'medium', 'deeptmhmm_runner'
+    label 'medium', 'deeptmhmm_container'
     stageInMode 'copy'
 
     input:

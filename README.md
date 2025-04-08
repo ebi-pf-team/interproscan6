@@ -38,8 +38,8 @@ otherwise Nextflow will use the available image.
 
 1. **Download InterPro data files**
 ```bash
-curl -OJ https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/102.0/interproscan-data-102.0.tar.gz
-tar -pxzf interproscan-data-102.0.tar.gz
+curl -OJ https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/6.0/104.0/interproscan-data-104.0.tar.gz
+tar -pxzf interproscan-data-104.0.tar.gz
 ```
 
 2. (Optional) Install licensed software (`Phobius`, `SignalP`, `DeepTMHMM`) - See the ['Installing licensed applications'](#installing-licensed-applications-phobius-signalp-deeptmhmm) documentation.
@@ -56,8 +56,8 @@ nextflow run ebi-pf-team/interproscan6 \
 
 1. **Download InterPro data files**
 ```bash
-curl -OJ https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/102.0/interproscan-data-102.0.tar.gz
-tar -pxzf interproscan-data-102.0.tar.gz
+curl -OJ https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6/6.0/104.0/interproscan-data-104.0.tar.gz
+tar -pxzf interproscan-data-104.0.tar.gz
 ```
 
 2. **Clone the `InterProScan` repository**
@@ -112,7 +112,7 @@ nextflow run ebi-pf-team/interproscan6 \
 **Optional arguments:**
 
 * `--applications` - Comma separated list of analyses to run. By default `InterProScan` runs all members in `conf/applications.conf` with a populated `dir` field.
-* `--disablePrecalc` - Do not retrieve pre-calculated matches from the InterPro database.
+* `--offline` - Do not retrieve pre-calculated matches from the InterPro Matches API.
 * `--formats` - Comma separated list of output files to write (TSV, JSON, XML). Default: TSV, JSON and XML
 * `--goterms` - Include Gene Ontology (GO) annotations in the final results.
 * `--help` - Display the help message.
@@ -122,7 +122,7 @@ nextflow run ebi-pf-team/interproscan6 \
 * `--pathways` - Include corresponding Pathway annotations in the final results.
 
 > [!IMPORTANT]
-> *--max-workers* is only applies when using the `local` profile (i.e. `-profile local`) it does **_not_** apply when running on a cluster.
+> *--max-workers* only applies when using the `local` profile (i.e. `-profile local`), it does **_not_** apply when running on a cluster.
 > IPS6 will always use a minimum or 2 CPUs, with at least 1 dedicated to the main workflow and 1 to run 
 > processes (exception for PRINTS member, which require 2 CPUs to run processes).
 
@@ -136,7 +136,7 @@ nextflow run ebi-pf-team/interproscan6 \
   --input tests/data/test_prot.fa \
   --datadir data \
   --applications signalp,antifam \
-  --disablePrecalc \
+  --offline \
   --formats json,xml \
   --outdir results \
   --goterms \
