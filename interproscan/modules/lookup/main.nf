@@ -71,6 +71,30 @@ process LOOKUP_MATCHES {
     }
 }
 
+def Map transformMatch(Map match) {
+    // * operator - spread contents of a map or collecion into another map or collection
+    return [
+        *            : match,
+        "treegrafter": ["ancestralNodeID": match["annotationNode"]],
+        "locations"  : match["locations"].collect { loc ->
+            return [
+                *          : loc,
+                "hmmBounds": loc["hmmBounds"] ? Location.getReverseHmmBounds(loc["hmmBounds"]) : null,
+                "fragments": loc["fragments"].collect { tranformFragment(it) },
+                "sites"    : loc["sites"] ?: []
+            ]
+        },
+    ]
+}
+
+def Map tranformFragment(Map fragment) {
+    return [
+        "start"   : fragment["start"],
+        "end"     : fragment["end"],
+        "dcStatus": fragment["type"]
+    ]
+}
+
 String getMatchesApiUrl(matchesApiUrl, lookupServiceUrl, interproRelease, workflowManifest, log) {
     String _matchesApiUrl = matchesApiUrl ?: lookupServiceUrl
     // Get MLS metadata: api (version), release, release_date
@@ -96,28 +120,4 @@ String getMatchesApiUrl(matchesApiUrl, lookupServiceUrl, interproRelease, workfl
         }
     }
     return _matchesApiUrl
-}
-
-def Map transformMatch(Map match) {
-    // * operator - spread contents of a map or collecion into another map or collection
-    return [
-        *            : match,
-        "treegrafter": ["ancestralNodeID": match["annotationNode"]],
-        "locations"  : match["locations"].collect { loc ->
-            return [
-                *          : loc,
-                "hmmBounds": loc["hmmBounds"] ? Location.getReverseHmmBounds(loc["hmmBounds"]) : null,
-                "fragments": loc["fragments"].collect { tranformFragment(it) },
-                "sites"    : loc["sites"] ?: []
-            ]
-        },
-    ]
-}
-
-def Map tranformFragment(Map fragment) {
-    return [
-        "start"   : fragment["start"],
-        "end"     : fragment["end"],
-        "dcStatus": fragment["type"]
-    ]
 }

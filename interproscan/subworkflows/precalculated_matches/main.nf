@@ -7,10 +7,13 @@ workflow PRECALCULATED_MATCHES {
     ch_seqs           // fasta files of protein sequences to analyse
     apps              // member db analyses to run
     interproRelease   // str, interpro db version number
+    iprscanRelease    // str, full iprscan release number
+    matchesApiUrl     // str, from cmd-line
+    lookupServiceUrl  // str, from confs/lookup.conf
 
     main:
     _matchesApiUrl = getMatchesApiUrl(
-        params.matchesApiUrl, params.lookupService.url, interproRelease, workflow.manifest, log
+        matchesApiUrl, lookupServiceUrl, interproRelease, iprscanRelease, log
     )
 
     LOOKUP_MATCHES(

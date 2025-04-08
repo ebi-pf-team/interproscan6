@@ -53,47 +53,51 @@ workflow {
         datadir,
         params.download
     )
-    interproscan_version = PREPARE_DATA.out.iprscan_major_minor.val
+    member_db_releases = PREPARE_DATA.out.memberDbReleases.val
 
     PREPARE_SEQUENCES(fasta_file, applications)
     ch_seqs            = PREPARE_SEQUENCES.out.ch_seqs
     seq_db_path        = PREPARE_SEQUENCES.out.seq_db_path
 
-    // matchResults = Channel.empty()
-    // if (params.offline) {
-    //     SCAN_SEQUENCES(
-    //         ch_seqs,
-    //         member_db_releases,
-    //         apps,
-    //         params.appsConfig,
-    //         data_dir
-    //     )
-    //     matchResults = SCAN_SEQUENCES.out
-    // } else {
-    //     PRECALCULATED_MATCHES(
-    //         ch_seqs,
-    //         apps,
-    //         interpro_release
-    //     )
-    //     precalculated_matches = PRECALCULATED_MATCHES.out.precalculatedMatches
-    //     no_matches_fastas     = PRECALCULATED_MATCHES.out.noMatchesFasta
+    matchResults = Channel.empty()
+    if (params.offline) {
+        SCAN_SEQUENCES(
+            ch_seqs,
+            member_db_releases,
+            applications,
+            params.appsConfig,
+            datadir
+        )
+        matchResults = SCAN_SEQUENCES.out
+    } else {
+        PRECALCULATED_MATCHES(
+            ch_seqs,
+            applications,
+            interpro_version,
+            workflow.manifest,
+            params.matchesApiUrl,     // from the cmd-offline
+            params.lookupService.url, // from confs
+        )
+        precalculated_matches = PRECALCULATED_MATCHES.out.precalculatedMatches
+        no_matches_fastas     = PRECALCULATED_MATCHES.out.noMatchesFasta
 
-    //     SCAN_SEQUENCES(
-    //         no_matches_fastas,
-    //         member_db_releases,
-    //         apps,
-    //         params.appsConfig,
-    //         data_dir
-    //     )
+        SCAN_SEQUENCES(
+            no_matches_fastas,
+            member_db_releases,
+            applications,
+            params.appsConfig,
+            datadir
+        )
 
-    //     def expandedScan = SCAN_SEQUENCES.out.flatMap { scan ->
-    //         scan[1].collect { path -> [scan[0], path] }
-    //     }
+        def expandedScan = SCAN_SEQUENCES.out.flatMap { scan ->
+            scan[1].collect { path -> [scan[0], path] }
+        }
 
-    //     combined = precalculated_matches.concat(expandedScan)
-    //     matchResults = combined.groupTuple()
-    // }
-    // // matchResults format: [[meta, [member1.json, member2.json, ..., memberN.json]]
+        combined = precalculated_matches.concat(expandedScan)
+        matchResults = combined.groupTuple()
+    }
+    // matchResults format: [[meta, [member1.json, member2.json, ..., memberN.json]]
+    matchResults.view()
 
     // /* XREFS:
     // Aggregate matches across all members for each sequence --> single JSON with all matches for the batch

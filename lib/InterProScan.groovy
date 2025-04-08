@@ -1,5 +1,6 @@
 // Class and methods for validating the user inputs
 
+import groovy.json.JsonSlurper
 import java.security.MessageDigest
 import java.nio.file.*
 import InterPro
@@ -190,6 +191,17 @@ class InterProScan {
     static String resolveFile(String filePath) {
         Path path = Paths.get(filePath)
         return Files.isRegularFile(path) ? path.toRealPath() : null
+    }
+
+    static Map getMemberDbReleases(def path) {
+        // Load the datadir/interpro/database.json file and set all keys to lowercase to match applications.config
+        JsonSlurper jsonSlurper = new JsonSlurper()
+        def databaseJson = new File(path.toString())
+        def memberDbReleases = jsonSlurper.parse(databaseJson)
+        memberDbReleases = memberDbReleases.collectEntries { appName, versionNum ->
+            [(appName.toLowerCase()): versionNum]
+        }
+        return memberDbReleases
     }
 
     static List<String> getAppsWithData(List<String> applications, Map appsConfig) {
