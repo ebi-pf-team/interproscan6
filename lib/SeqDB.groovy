@@ -227,9 +227,9 @@ class SeqDB {
             }
             // Don't add the GroovyResultSet item, else when writing the final batch we will get a ResultSet closed error
             batch.add([
-                    nt_md5 : row.nt_md5,
-                    md5    : row.md5,
-                    sequence: row.sequence
+                nt_md5  : row.nt_md5,
+                md5     : row.md5,
+                sequence: row.sequence
             ])
             currentMD5 = n ? row.nt_md5 : row.md5
         }
