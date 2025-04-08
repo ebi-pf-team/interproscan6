@@ -198,7 +198,6 @@ class SeqDB {
 
     void splitFasta(String outputPrefix, int maxSequencesPerFile, boolean nucleic) {
         def n = nucleic
-        System.out.println("DEBUG: $n ${n.getClass()}")
         String query = n ? """SELECT P2N.nt_md5, S.md5, S.sequence
             FROM PROTEIN_SEQUENCE AS S
             LEFT JOIN PROTEIN AS P ON S.md5 = P.md5
