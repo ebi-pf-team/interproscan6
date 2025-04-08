@@ -24,7 +24,7 @@ process RUN_PFSEARCH {
 }
 
 process PARSE_PFSEARCH {
-    label 'local'
+    label 'run_locally'
 
     input:
         tuple val(meta), val(pfsearch_out)
