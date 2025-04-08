@@ -34,7 +34,7 @@ process WRITE_JSON_OUTPUT {
                     writeNucleic(nucleicMd5, proteinMd5s, proteins, jsonWriter, db)
                 }
             } else {  // input was protein sequences
-                Map proteins = new ObjectMapper().readValue(new File(proteins.toString()), Map)
+                Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
                 proteins.each { String proteinMd5, Map proteinMatches ->
                     writeProtein(proteinMd5, proteinMatches, jsonWriter, db)
                 }

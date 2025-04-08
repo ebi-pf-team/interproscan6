@@ -197,8 +197,7 @@ class SeqDB {
     }
 
     void splitFasta(String outputPrefix, int maxSequencesPerFile, boolean nucleic) {
-        def n = nucleic
-        String query = n ? """SELECT P2N.nt_md5, S.md5, S.sequence
+        String query = nucleic ? """SELECT P2N.nt_md5, S.md5, S.sequence
             FROM PROTEIN_SEQUENCE AS S
             LEFT JOIN PROTEIN AS P ON S.md5 = P.md5
             LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS P2N ON P.md5 = P2N.protein_md5
@@ -231,7 +230,7 @@ class SeqDB {
                 md5     : row.md5,
                 sequence: row.sequence
             ])
-            currentMD5 = n ? row.nt_md5 : row.md5
+            currentMD5 = nucleic ? row.nt_md5 : row.md5
         }
 
         // write the final batch
