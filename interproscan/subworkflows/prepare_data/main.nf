@@ -14,7 +14,7 @@ workflow PREPARE_DATA {
     download
 
     main:
-    iprscan_major_minor = iprscan_version.split("\\.")[0..1].join(".")
+    def iprscan_major_minor = iprscan_version.split("\\.")[0..1].join(".")
 
     // TODO: need to bypass this if running application without data
 
@@ -110,7 +110,9 @@ Use the '--download' option to automatically download InterPro release data."""
     }
 
     memberDbReleases = InterProScan.getMemberDbReleases(path)
+    interproscanVersion = iprscan_major_minor
 
     emit:
     memberDbReleases       // map: [db name (lowercase): release]
+    interproscanVersion
 }

@@ -60,3 +60,20 @@ process PREPARE_DOWNLOADS {
         }
     }
 }
+
+process GET_MEMBER_RELEASES {
+    input:
+    val json_file
+    val ready
+
+    output:
+    val databases_with_version
+
+    exec:
+    JsonSlurper jsonSlurper = new JsonSlurper()
+    def databaseJson = new File(path.toString())
+    def databases_with_version = jsonSlurper.parse(databaseJson)
+    databases_with_version = databases_with_version.collectEntries { appName, versionNum ->
+        [(appName.toLowerCase()): versionNum]
+    }
+}

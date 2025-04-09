@@ -95,7 +95,7 @@ def Map tranformFragment(Map fragment) {
     ]
 }
 
-String getMatchesApiUrl(matchesApiUrl, lookupServiceUrl, interproRelease, workflowManifest, log) {
+String getMatchesApiUrl(matchesApiUrl, lookupServiceUrl, interproRelease, iprscanRelease, workflowManifest, log) {
     String _matchesApiUrl = matchesApiUrl ?: lookupServiceUrl
     // Get MLS metadata: api (version), release, release_date
     Map info = InterPro.httpRequest("${InterPro.sanitizeURL(_matchesApiUrl)}/info", null, 0, true, log)
@@ -105,8 +105,7 @@ String getMatchesApiUrl(matchesApiUrl, lookupServiceUrl, interproRelease, workfl
     } else {
         def apiVersion = info.api ?: "X.Y.Z"
         def majorVersion = apiVersion.split("\\.")[0]
-
-        if (majorVersion != "0") {
+        if (majorVersion != iprscanRelease.split("\\.")[0]) {
             log.warn "${workflowManifest.name} ${workflowManifest.version}" +
                     " is not compatible with the Matches API at ${_matchesApiUrl};" +
                     " analyses will be run locally"

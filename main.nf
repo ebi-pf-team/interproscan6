@@ -1,15 +1,12 @@
 nextflow.enable.dsl=2
 
 include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
+include { PREPARE_DATA                  } from "./interproscan/subworkflows/prepare_data"
 include { PREPARE_SEQUENCES             } from "./interproscan/subworkflows/prepare_sequences"
 include { PRECALCULATED_MATCHES         } from "./interproscan/subworkflows/precalculated_matches"
 include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
-include { PREPARE_DATA                  } from "./interproscan/subworkflows/prepare_data"
+include { INTERPRO                      } from "./interproscan/subworkflows/interpro"
 include { OUTPUT                        } from "./interproscan/subworkflows/output"
-
-include { XREFS                         } from "./interproscan/modules/xrefs"
-include { REPRESENTATIVE_LOCATIONS      } from "./interproscan/modules/representative_locations"
-
 
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
@@ -53,13 +50,15 @@ workflow {
         datadir,
         params.download
     )
-    member_db_releases = PREPARE_DATA.out.memberDbReleases.val
+    member_db_releases   = PREPARE_DATA.out.memberDbReleases.val
+    interproscan_version = PREPARE_DATA.out.interproscanVersion.val
 
     PREPARE_SEQUENCES(fasta_file, applications)
     ch_seqs            = PREPARE_SEQUENCES.out.ch_seqs
     seq_db_path        = PREPARE_SEQUENCES.out.seq_db_path
 
-    matchResults = Channel.empty()
+    match_results = Channel.empty()
+
     if (params.offline) {
         SCAN_SEQUENCES(
             ch_seqs,
@@ -68,15 +67,16 @@ workflow {
             params.appsConfig,
             datadir
         )
-        matchResults = SCAN_SEQUENCES.out
+        match_results = SCAN_SEQUENCES.out
     } else {
         PRECALCULATED_MATCHES(
             ch_seqs,
             applications,
-            interpro_version,
+            member_db_releases,
+            interproscan_version,
             workflow.manifest,
             params.matchesApiUrl,     // from the cmd-offline
-            params.lookupService.url, // from confs
+            params.lookupService,     // from confs
         )
         precalculated_matches = PRECALCULATED_MATCHES.out.precalculatedMatches
         no_matches_fastas     = PRECALCULATED_MATCHES.out.noMatchesFasta
@@ -94,37 +94,19 @@ workflow {
         }
 
         combined = precalculated_matches.concat(expandedScan)
-        matchResults = combined.groupTuple()
+        match_results = combined.groupTuple()
     }
-    // matchResults format: [[meta, [member1.json, member2.json, ..., memberN.json]]
-    matchResults.view()
+    // match_results format: [[meta, [member1.json, member2.json, ..., memberN.json]]
+    match_results.view()
 
-    // /* XREFS:
-    // Aggregate matches across all members for each sequence --> single JSON with all matches for the batch
-    // Add signature and entry desc and names
-    // Add PAINT annotations (if panther is enabled)
-    // Add go terms (if enabled)
-    // Add pathways (if enabled)
-    // */
-    // XREFS(
-    //     matchResults,
-    //     apps,
-    //     data_dir,
-    //     "${data_dir}/interpro/${interpro_release}",
-    //     member_db_releases,
-    //     params.xRefsConfig.entries,
-    //     params.xRefsConfig.goterms,
-    //     params.xRefsConfig.pathways,
-    //     params.goterms,
-    //     params.pathways,
-    //     "${data_dir}/${member_db_releases.panther}/${params.appsConfig.panther.paint}"
-    // )
-
-    // REPRESENTATIVE_LOCATIONS(XREFS.out)
-    // // Collect all JSON files into a single channel so we don't have cocurrent writing to the output files
-    // ch_results = REPRESENTATIVE_LOCATIONS.out
-    //     .map { meta, json -> json }
-    //     .collect()
+//     INTERPRO(
+//         match_results,
+//         applications,
+//         datadir,
+//         params.xRefsConfig,
+//         params.goterms,
+//         params.pathways
+//     )
 
 //     OUTPUT(ch_results)
 }

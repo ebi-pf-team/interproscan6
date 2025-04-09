@@ -6,22 +6,23 @@ workflow PRECALCULATED_MATCHES {
     take:
     ch_seqs           // fasta files of protein sequences to analyse
     apps              // member db analyses to run
-    interproRelease   // str, interpro db version number
+    member_db_releases   // str, interpro db version number
     iprscanRelease    // str, full iprscan release number
+    workflowManifest  // map
     matchesApiUrl     // str, from cmd-line
-    lookupServiceUrl  // str, from confs/lookup.conf
+    lookupService     // Map of confs/lookup.conf
 
     main:
-    _matchesApiUrl = getMatchesApiUrl(
-        matchesApiUrl, lookupServiceUrl, interproRelease, iprscanRelease, log
+    def _matchesApiUrl = getMatchesApiUrl(
+        matchesApiUrl, lookupService.url, member_db_releases.interpro, iprscanRelease, workflowManifest, log
     )
 
     LOOKUP_MATCHES(
         ch_seqs,
         apps,
         _matchesApiUrl,
-        params.lookupService.chunkSize,
-        params.lookupService.maxRetries
+        lookupService.chunkSize,
+        lookupService.maxRetries
     )
 
     precalculatedMatches = LOOKUP_MATCHES.out[0]
