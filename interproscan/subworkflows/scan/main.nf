@@ -210,8 +210,6 @@ workflow SCAN_SEQUENCES {
 
         PARSE_PFAM(
             SEARCH_PFAM.out,
-            "${datadir}/${appsConfig.pfam.seed}",
-            "${datadir}/${appsConfig.pfam.clan}",
             "${datadir}/${appsConfig.pfam.dat}"
         )
         results = results.mix(PARSE_PFAM.out)
