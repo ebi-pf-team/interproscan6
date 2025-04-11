@@ -1,6 +1,6 @@
 import groovy.json.JsonOutput
 
-process RUN_SFLD {
+process SEARCH_SFLD {
     label 'small', 'ips6_container'
 
     input:

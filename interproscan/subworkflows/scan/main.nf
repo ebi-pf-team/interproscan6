@@ -1,6 +1,3 @@
-include { RUN_SFLD; POST_PROCESS_SFLD; PARSE_SFLD                                 } from  "../../modules/sfld"
-include { RUN_SIGNALP as RUN_SIGNALP_EUK; PARSE_SIGNALP as PARSE_SIGNALP_EUK      } from  "../../modules/signalp"
-include { RUN_SIGNALP as RUN_SIGNALP_PROK; PARSE_SIGNALP as PARSE_SIGNALP_PROK    } from  "../../modules/signalp"
 include { SCAN_SMART; PREPARE_SMART; SEARCH_SMART; PARSE_SMART                    } from  "../../modules/smart"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
 
@@ -20,6 +17,8 @@ include { PIRSR            } from "../applications/pirsr"
 include { PRINTS           } from "../applications/prints"
 include { PROSITE_PATTERNS } from "../applications/prosite/patterns"
 include { PROSITE_PROFILES } from "../applications/prosite/profiles"
+include { SFLD             } from "../applications/sfld"
+include { SIGNALP          } from "../applications/signalp"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -168,38 +167,27 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("sfld")) {
-        RUN_SFLD(ch_seqs,
-            "${datadir}/${appsConfig.sfld.hmm}")
-
-        POST_PROCESS_SFLD(RUN_SFLD.out,
-            "${datadir}/${appsConfig.sfld.sites_annotation}")
-
-        PARSE_SFLD(POST_PROCESS_SFLD.out,
-            "${datadir}/${appsConfig.sfld.hierarchy}")
-
-        results = results.mix(PARSE_SFLD.out)
+        SFLD(
+            ch_seqs,
+            "${datadir}/${appsConfig.sfld.hmm}",
+            "${datadir}/${appsConfig.sfld.sites_annotation}",
+            "${datadir}/${appsConfig.sfld.hierarchy}"
+        )
+        results = results.mix(SFLD.out)
     }
 
-    if (applications.contains("signalp_euk")) {
-        RUN_SIGNALP_EUK(
+    if (applications.contains("signalp_euk") || applications.contains("signalp_prok")) {
+        SIGNALP(
             ch_seqs,
+            applications,
             appsConfig.signalp_euk.organism,
             appsConfig.signalp_euk.mode,
-            appsConfig.signalp_euk.dir
-        )
-        PARSE_SIGNALP_EUK(RUN_SIGNALP_EUK.out)
-        results = results.mix(PARSE_SIGNALP_EUK.out)
-    }
-
-    if (applications.contains("signalp_prok")) {
-        RUN_SIGNALP_PROK(
-            ch_seqs,
+            appsConfig.signalp_euk.dir,
             appsConfig.signalp_prok.organism,
             appsConfig.signalp_prok.mode,
             appsConfig.signalp_prok.dir
-        )
-        PARSE_SIGNALP_PROK(RUN_SIGNALP_PROK.out)
-        results = results.mix(PARSE_SIGNALP_PROK.out)
+        ).set{ ch_signalp }
+        results = results.mix(ch_signalp)
     }
 
     if (applications.contains("smart")) {
