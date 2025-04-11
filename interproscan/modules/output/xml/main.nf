@@ -4,7 +4,7 @@ import groovy.xml.MarkupBuilder
 import java.io.StringWriter
 import java.util.regex.Pattern
 
-process WRITE_XML_OUTPUT {
+process WRITE_XML {
     label 'run_locally'
 
     input:

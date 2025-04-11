@@ -1,16 +1,13 @@
 nextflow.enable.dsl=2
+import groovy.json.JsonSlurper  // until selective downloads
 
 include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
 include { PREPARE_SEQUENCES             } from "./interproscan/subworkflows/prepare_sequences"
 include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
+include { INTERPRO                      } from "./interproscan/subworkflows/interpro"
+include { OUTPUT                        } from "./interproscan/subworkflows/output"
 
-include { LOOKUP_MATCHES                } from "./interproscan/modules/lookup"
-include { XREFS                         } from "./interproscan/modules/xrefs"
-include { REPRESENTATIVE_LOCATIONS      } from "./interproscan/modules/representative_locations"
-include { WRITE_JSON_OUTPUT             } from "./interproscan/modules/output/json"
-include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
-include { WRITE_XML_OUTPUT              } from "./interproscan/modules/output/xml"
-
+include { LOOKUP_MATCHES                } from "./interproscan/modules/lookup" // will be migrated to a subworkflow when selective downloads is merged
 
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
@@ -34,7 +31,7 @@ workflow {
     ch_seqs         = PREPARE_SEQUENCES.out.ch_seqs
     seq_db_path     = PREPARE_SEQUENCES.out.seq_db_path
 
-    matchResults = Channel.empty()
+    match_results = Channel.empty()
     if (matchesApiUrl != null) {
         LOOKUP_MATCHES(
             ch_seqs,
@@ -56,7 +53,7 @@ workflow {
         }
 
         def combined = LOOKUP_MATCHES.out[0].concat(expandedScan)
-        matchResults = combined.groupTuple()
+        match_results = combined.groupTuple()
     } else {
         SCAN_SEQUENCES(
             ch_seqs,
@@ -64,47 +61,37 @@ workflow {
             params.appsConfig,
             data_dir
         )
-        matchResults = SCAN_SEQUENCES.out
+        match_results = SCAN_SEQUENCES.out
     }
-    // matchResults format: [[meta, [member1.json, member2.json, ..., memberN.json]]
+    // match_results format: [[meta, [member1.json, member2.json, ..., memberN.json]]
 
-    /* XREFS:
+    /* INTERPRO:
     Aggregate matches across all members for each sequence --> single JSON with all matches for the batch
-    Add signature and entry desc and names
+    Add InterPro signature and entry desc and names
     Add PAINT annotations (if panther is enabled)
     Add go terms (if enabled)
     Add pathways (if enabled)
+    Identify representative domains and families
     */
-    XREFS(
-        matchResults,
+    ch_results = INTERPRO(
+        match_results,
         apps,
         data_dir,
-        params.xRefsConfig.entries,
-        params.xRefsConfig.goterms,
-        params.xRefsConfig.pathways,
+        params.xRefsConfig,
         params.goterms,
         params.pathways,
         params.appsConfig.panther.paint
     )
 
-    REPRESENTATIVE_LOCATIONS(XREFS.out)
-    // Collect all JSON files into a single channel so we don't have cocurrent writing to the output files
-    ch_results = REPRESENTATIVE_LOCATIONS.out
-        .map { meta, json -> json }
-        .collect()
+    ch_results.view()
 
-    def fileName = params.input.split('/').last()
-    def outFileName = "${params.outdir}/${fileName}"
-
-    if (formats.contains("JSON")) {
-        WRITE_JSON_OUTPUT(ch_results, "${outFileName}", seq_db_path, params.nucleic, workflow.manifest.version)
-    }
-    if (formats.contains("TSV")) {
-        WRITE_TSV_OUTPUT(ch_results, "${outFileName}", seq_db_path, params.nucleic)
-    }
-    if (formats.contains("XML")) {
-        WRITE_XML_OUTPUT(ch_results, "${outFileName}", seq_db_path, params.nucleic, workflow.manifest.version)
-    }
+//     OUTPUT(
+//         ch_results
+//         formats,
+//         outut_dir,
+//         params.nucleic,
+//         workflow.manifest.version
+//     )
 }
 
 workflow.onComplete = {

@@ -5,7 +5,7 @@ import groovy.json.JsonException
 import com.fasterxml.jackson.databind.SerializationFeature
 import java.util.regex.Pattern
 
-process WRITE_JSON_OUTPUT {
+process WRITE_JSON {
     label 'run_locally'
 
     input:
