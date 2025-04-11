@@ -1,5 +1,5 @@
-include { RUN_HMMER     } from "../../../modules/hmmer"
-include { PARSE_NCBIFAM } from "../../../modules/ncbifam"
+include { RUN_HMMER as SEARCH_NCBIFAM } from "../../../modules/hmmer"
+include { PARSE_NCBIFAM               } from "../../../modules/ncbifam"
 
 workflow NCBIFAM {
     take:
@@ -7,7 +7,7 @@ workflow NCBIFAM {
     hmm                 // path to hmm file
 
     main:
-    RUN_HMMER(
+    SEARCH_NCBIFAM(
         ch_seqs,
         hmm,
         "-Z 61295632 --cut_tc"

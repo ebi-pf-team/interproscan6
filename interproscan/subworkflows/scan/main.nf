@@ -1,6 +1,3 @@
-include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP                 } from  "../../modules/hamap"
-include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                        } from  "../../modules/mobidblite"
-include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
 include { SEARCH_PFAM; PARSE_PFAM                                                 } from  "../../modules/pfam"
 include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                           } from  "../../modules/phobius"
 include { RUN_PIRSR; PARSE_PIRSR                                                  } from  "../../modules/pirsr"
@@ -13,13 +10,15 @@ include { RUN_SIGNALP as RUN_SIGNALP_EUK; PARSE_SIGNALP as PARSE_SIGNALP_EUK    
 include { RUN_SIGNALP as RUN_SIGNALP_PROK; PARSE_SIGNALP as PARSE_SIGNALP_PROK    } from  "../../modules/signalp"
 include { SCAN_SMART; PREPARE_SMART; SEARCH_SMART; PARSE_SMART                    } from  "../../modules/smart"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
-include { RUN_DEEPTMHMM; PARSE_DEEPTMHMM                                          } from  "../../modules/tmhmm"
 
-include { ANTIFAM } from "../applications/antifam"
-include { CATH    } from "../applications/cath"
-include { CDD     } from "../applications/cdd"
-include { COILS   } from "../applications/coils"
-include { NCBIFAM } from "../applications/ncbifam"
+include { ANTIFAM    } from "../applications/antifam"
+include { CATH       } from "../applications/cath"
+include { CDD        } from "../applications/cdd"
+include { COILS      } from "../applications/coils"
+include { DEEPTMHMM  } from "../applications/deeptmhmm"
+include { HAMAP      } from "../applications/hamap"
+include { MOBIDBLITE } from "../applications/mobidblite"
+include { NCBIFAM    } from "../applications/ncbifam"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -67,39 +66,25 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("deeptmhmm")) {
-        RUN_DEEPTMHMM(
+        DEEPTMHMM(
             ch_seqs,
             appsConfig.deeptmhmm.dir
         )
-        PARSE_DEEPTMHMM(RUN_DEEPTMHMM.out)
-        results = results.mix(PARSE_DEEPTMHMM.out)
+        results = results.mix(DEEPTMHMM.out)
     }
 
     if (applications.contains("hamap")) {
-        PREPROCESS_HAMAP(
+        HAMAP(
             ch_seqs,
-            "${datadir}/${appsConfig.hamap.hmm}"
-        )
-
-        PREPARE_HAMAP(
-            PREPROCESS_HAMAP.out,
+            "${datadir}/${appsConfig.hamap.hmm}",
             "${datadir}/${appsConfig.hamap.dir}"
         )
-
-        RUN_HAMAP(
-            PREPARE_HAMAP.out,
-            "${datadir}/${appsConfig.hamap.dir}"
-        )
-
-        PARSE_HAMAP(RUN_HAMAP.out)
-        results = results.mix(PARSE_HAMAP.out)
+        results = results.mix(HAMAP.out)
     }
 
     if (applications.contains("mobidblite")) {
-        RUN_MOBIDBLITE(ch_seqs)
-
-        PARSE_MOBIDBLITE(RUN_MOBIDBLITE.out)
-        results = results.mix(PARSE_MOBIDBLITE.out)
+        MOBIDBLITE(ch_seqs)
+        results = results.mix(MOBIDBLITE.out)
     }
 
     if (applications.contains("ncbifam")) {
@@ -111,26 +96,12 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("panther")) {
-        SEARCH_PANTHER(
+        PANTHER(
             ch_seqs,
-            "${datadir}/${appsConfig.panther.hmm}"
-        )
-        ch_panther = SEARCH_PANTHER.out
-
-        PREPARE_TREEGRAFTER(
-            ch_panther,
+            "${datadir}/${appsConfig.panther.hmm}",
             "${datadir}/${appsConfig.panther.msf}"
         )
-
-        RUN_TREEGRAFTER(
-            PREPARE_TREEGRAFTER.out.fasta,
-            "${datadir}/${appsConfig.panther.msf}"
-        )
-
-        PARSE_PANTHER(
-            PREPARE_TREEGRAFTER.out.json.join(RUN_TREEGRAFTER.out)
-        )
-        results = results.mix(PARSE_PANTHER.out)
+        results = results.mix(PANTHER.out)
     }
 
     if (applications.contains("phobius")) {

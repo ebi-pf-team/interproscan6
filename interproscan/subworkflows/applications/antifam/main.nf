@@ -1,5 +1,5 @@
-include { RUN_HMMER     } from "../../../modules/hmmer"
-include { PARSE_ANTIFAM } from "../../../modules/antifam"
+include { RUN_HMMER as SEARCH_ANTIFAM } from "../../../modules/hmmer"
+include { PARSE_ANTIFAM               } from "../../../modules/antifam"
 
 workflow ANTIFAM {
     take:
@@ -7,7 +7,7 @@ workflow ANTIFAM {
     hmm                 // path to hmm file
 
     main:
-    RUN_HMMER(
+    SEARCH_ANTIFAM(
         ch_seqs,
         hmm,
         "--cut_ga"
