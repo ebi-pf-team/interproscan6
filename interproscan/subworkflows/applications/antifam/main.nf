@@ -14,7 +14,7 @@ workflow ANTIFAM {
     )
 
     ch_antifam = PARSE_ANTIFAM(
-        RUN_HMMER.out
+        SEARCH_ANTIFAM.out
     )
 
     emit:

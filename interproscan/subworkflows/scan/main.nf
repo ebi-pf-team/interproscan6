@@ -1,5 +1,3 @@
-include { SEARCH_PFAM; PARSE_PFAM                                                 } from  "../../modules/pfam"
-include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                           } from  "../../modules/phobius"
 include { RUN_PIRSR; PARSE_PIRSR                                                  } from  "../../modules/pirsr"
 include { RUN_PIRSF; PARSE_PIRSF                                                  } from  "../../modules/pirsf"
 include { RUN_PRINTS; PARSE_PRINTS                                                } from  "../../modules/prints"
@@ -19,6 +17,9 @@ include { DEEPTMHMM  } from "../applications/deeptmhmm"
 include { HAMAP      } from "../applications/hamap"
 include { MOBIDBLITE } from "../applications/mobidblite"
 include { NCBIFAM    } from "../applications/ncbifam"
+include { PANTHER    } from "../applications/panther"
+include { PFAM       } from "../applications/pfam"
+include { PHOBIUS    } from "../applications/phobius"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -104,27 +105,21 @@ workflow SCAN_SEQUENCES {
         results = results.mix(PANTHER.out)
     }
 
+    if (applications.contains("pfam")) {
+        PFAM(
+            ch_seqs,
+            "${datadir}/${appsConfig.pfam.hmm}",
+            "${datadir}/${appsConfig.pfam.dat}"
+        )
+        results = results.mix(PFAM.out)
+    }
+
     if (applications.contains("phobius")) {
-        SEARCH_PHOBIUS(
+        PHOBIUS(
             ch_seqs,
             appsConfig.phobius.dir
         )
-
-        PARSE_PHOBIUS(SEARCH_PHOBIUS.out)
-        results = results.mix(PARSE_PHOBIUS.out)
-    }
-
-    if (applications.contains("pfam")) {
-        SEARCH_PFAM(
-            ch_seqs,
-            "${datadir}/${appsConfig.pfam.hmm}"
-        )
-
-        PARSE_PFAM(
-            SEARCH_PFAM.out,
-            "${datadir}/${appsConfig.pfam.dat}"
-        )
-        results = results.mix(PARSE_PFAM.out)
+        results = results.mix(PHOBIUS.out)
     }
 
     if (applications.contains("pirsf")) {

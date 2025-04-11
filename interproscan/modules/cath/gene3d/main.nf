@@ -1,24 +1,5 @@
 import groovy.json.JsonOutput
 
-process SEARCH_GENE3D {
-    label 'medium', 'ips6_container'
-
-    input:
-    tuple val(meta), path(fasta)
-    path hmmdb
-
-    output:
-    tuple val(meta), path("hmmsearch.out")
-
-    script:
-    """
-    /opt/hmmer3/bin/hmmsearch \
-        -Z 65245 -E 0.001 \
-        --cpu ${task.cpus} \
-        ${hmmdb} ${fasta} > hmmsearch.out
-    """
-}
-
 process RESOLVE_GENE3D {
     label 'small', 'ips6_container'
 

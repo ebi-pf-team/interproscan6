@@ -1,24 +1,5 @@
 import groovy.json.JsonOutput
 
-process RUN_ANTIFAM {
-    label 'small', 'ips6_container'
-
-    input:
-    tuple val(meta), path(fasta)
-    path hmmdb
-
-    output:
-    tuple val(meta), path("hmmsearch.out")
-
-    script:
-    """
-    /opt/hmmer3/bin/hmmsearch \
-        --cut_ga \
-        --cpu ${task.cpus} \
-        ${hmmdb} ${fasta} > hmmsearch.out
-    """
-}
-
 process PARSE_ANTIFAM {
     label 'run_locally'
 

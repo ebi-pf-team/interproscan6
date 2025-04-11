@@ -14,7 +14,7 @@ workflow NCBIFAM {
     )
 
     ch_ncbifam = PARSE_NCBIFAM(
-        RUN_HMMER.out
+        SEARCH_NCBIFAM.out
     )
 
     emit:
