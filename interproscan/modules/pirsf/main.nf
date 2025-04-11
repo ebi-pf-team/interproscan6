@@ -1,6 +1,6 @@
 import groovy.json.JsonOutput
 
-process RUN_PIRSF {
+process SEARCH_PIRSF {
     label 'small', 'ips6_container'
 
     input:

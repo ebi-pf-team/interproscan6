@@ -1,7 +1,3 @@
-include { RUN_PIRSR; PARSE_PIRSR                                                  } from  "../../modules/pirsr"
-include { RUN_PIRSF; PARSE_PIRSF                                                  } from  "../../modules/pirsf"
-include { RUN_PRINTS; PARSE_PRINTS                                                } from  "../../modules/prints"
-include { RUN_PFSCAN ; PARSE_PFSCAN                                               } from  "../../modules/prosite/patterns"
 include { RUN_PFSEARCH ; PARSE_PFSEARCH                                           } from  "../../modules/prosite/profiles"
 include { RUN_SFLD; POST_PROCESS_SFLD; PARSE_SFLD                                 } from  "../../modules/sfld"
 include { RUN_SIGNALP as RUN_SIGNALP_EUK; PARSE_SIGNALP as PARSE_SIGNALP_EUK      } from  "../../modules/signalp"
@@ -9,17 +5,22 @@ include { RUN_SIGNALP as RUN_SIGNALP_PROK; PARSE_SIGNALP as PARSE_SIGNALP_PROK  
 include { SCAN_SMART; PREPARE_SMART; SEARCH_SMART; PARSE_SMART                    } from  "../../modules/smart"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
 
-include { ANTIFAM    } from "../applications/antifam"
-include { CATH       } from "../applications/cath"
-include { CDD        } from "../applications/cdd"
-include { COILS      } from "../applications/coils"
-include { DEEPTMHMM  } from "../applications/deeptmhmm"
-include { HAMAP      } from "../applications/hamap"
-include { MOBIDBLITE } from "../applications/mobidblite"
-include { NCBIFAM    } from "../applications/ncbifam"
-include { PANTHER    } from "../applications/panther"
-include { PFAM       } from "../applications/pfam"
-include { PHOBIUS    } from "../applications/phobius"
+include { ANTIFAM          } from "../applications/antifam"
+include { CATH             } from "../applications/cath"
+include { CDD              } from "../applications/cdd"
+include { COILS            } from "../applications/coils"
+include { DEEPTMHMM        } from "../applications/deeptmhmm"
+include { HAMAP            } from "../applications/hamap"
+include { MOBIDBLITE       } from "../applications/mobidblite"
+include { NCBIFAM          } from "../applications/ncbifam"
+include { PANTHER          } from "../applications/panther"
+include { PFAM             } from "../applications/pfam"
+include { PHOBIUS          } from "../applications/phobius"
+include { PIRSF            } from "../applications/pirsf"
+include { PIRSR            } from "../applications/pirsr"
+include { PRINTS           } from "../applications/prints"
+include { PROSITE_PATTERNS } from "../applications/prosite/patterns"
+// include { PROSITE_PROFILE  } from "../applications/prosite/profiles"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -123,55 +124,47 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("pirsf")) {
-        RUN_PIRSF(ch_seqs,
-            "${datadir}/${appsConfig.pirsf.hmm}"
+        PIRSF(
+            ch_seqs,
+            "${datadir}/${appsConfig.pirsf.hmm}",
+            "${datadir}/${appsConfig.pirsf.dat}"
         )
-        PARSE_PIRSF(RUN_PIRSF.out,
-            "${datadir}/${appsConfig.pirsf.dat}")
-
-        results = results.mix(PARSE_PIRSF.out)
+        results = results.mix(PIRSF.out)
     }
 
     if (applications.contains("pirsr")) {
-        RUN_PIRSR(ch_seqs,
-            "${datadir}/${appsConfig.pirsr.hmm}")
-
-        PARSE_PIRSR(RUN_PIRSR.out,
-            "${datadir}/${appsConfig.pirsr.rules}")
-
-        results = results.mix(PARSE_PIRSR.out)
+        PIRSR(
+            ch_seqs,
+            "${datadir}/${appsConfig.pirsr.hmm}",
+            "${datadir}/${appsConfig.pirsr.rules}"
+        )
+        results = results.mix(PIRSR.out)
     }
 
     if (applications.contains("prints")) {
-        RUN_PRINTS(
+        PRINTS(
             ch_seqs,
-            "${datadir}/${appsConfig.prints.pval}"
-        )
-
-        PARSE_PRINTS(
-            RUN_PRINTS.out,
+            "${datadir}/${appsConfig.prints.pval}",
             "${datadir}/${appsConfig.prints.hierarchy}"
         )
-        results = results.mix(PARSE_PRINTS.out)
+        results = results.mix(PRINTS.out)
     }
 
     if (applications.contains("prositepatterns")) {
-        RUN_PFSCAN(
+        PROSITE_PATTERNS(
             ch_seqs,
             "${datadir}/${appsConfig.prositepatterns.dat}",
-            "${datadir}/${appsConfig.prositepatterns.evaluator}")
-
-        PARSE_PFSCAN(RUN_PFSCAN.out)
-        results = results.mix(PARSE_PFSCAN.out)
+            "${datadir}/${appsConfig.prositepatterns.evaluator}"
+        )
+        results = results.mix(PROSITE_PATTERNS.out)
     }
 
     if (applications.contains("prositeprofiles")) {
-        RUN_PFSEARCH(
+        PROSITE_PROFILES(
             ch_seqs,
-            "${datadir}/${appsConfig.prositeprofiles.dir}")
-        PARSE_PFSEARCH(
-            RUN_PFSEARCH.out,
-            "${datadir}/${appsConfig.prositeprofiles.skip_flagged_profiles}")
+            "${datadir}/${appsConfig.prositeprofiles.dir}",
+            "${datadir}/${appsConfig.prositeprofiles.skip_flagged_profiles}"
+        )
         results = results.mix(PARSE_PFSEARCH.out)
     }
 
