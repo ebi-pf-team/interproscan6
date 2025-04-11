@@ -5,6 +5,7 @@ include { WRITE_XML  } from "../../modules/output/xml"
 workflow OUTPUT {
     take:
     ch_results
+    seq_db_path
     formats
     outdir
     nucleic

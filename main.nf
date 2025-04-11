@@ -85,6 +85,7 @@ workflow {
 
     OUTPUT(
         ch_results,
+        seq_db_path,
         formats,
         outut_dir,
         params.nucleic,
