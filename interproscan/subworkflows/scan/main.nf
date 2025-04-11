@@ -1,4 +1,4 @@
-include { RUN_ANTIFAM; PARSE_ANTIFAM                                              } from  "../../modules/antifam"
+// include { RUN_ANTIFAM; PARSE_ANTIFAM                                              } from  "../../modules/antifam"
 include { SEARCH_GENE3D; RESOLVE_GENE3D; ASSIGN_CATH; PARSE_CATHGENE3D            } from  "../../modules/cath/gene3d"
 include { PREPARE_FUNFAM; SEARCH_FUNFAM; RESOLVE_FUNFAM; PARSE_FUNFAM             } from  "../../modules/cath/funfam"
 include { RUN_RPSBLAST; RUN_RPSPROC; PARSE_RPSPROC                                } from  "../../modules/cdd"
@@ -17,9 +17,12 @@ include { RUN_PFSEARCH ; PARSE_PFSEARCH                                         
 include { RUN_SFLD; POST_PROCESS_SFLD; PARSE_SFLD                                 } from  "../../modules/sfld"
 include { RUN_SIGNALP as RUN_SIGNALP_EUK; PARSE_SIGNALP as PARSE_SIGNALP_EUK      } from  "../../modules/signalp"
 include { RUN_SIGNALP as RUN_SIGNALP_PROK; PARSE_SIGNALP as PARSE_SIGNALP_PROK    } from  "../../modules/signalp"
-include { SCAN_SMART; PREPARE_SMART; SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
+include { SCAN_SMART; PREPARE_SMART; SEARCH_SMART; PARSE_SMART                    } from  "../../modules/smart"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
 include { RUN_DEEPTMHMM; PARSE_DEEPTMHMM                                          } from  "../../modules/tmhmm"
+
+include { ANTIFAM } from "../applications/antifam"
+include { NCBIFAM } from "../applications/ncbifam"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -32,13 +35,11 @@ workflow SCAN_SEQUENCES {
     results = Channel.empty()
 
     if (applications.contains("antifam")) {
-        RUN_ANTIFAM(
+        ANTIFAM(
             ch_seqs,
             "${datadir}/${appsConfig.antifam.hmm}"
         )
-
-        PARSE_ANTIFAM(RUN_ANTIFAM.out)
-        results = results.mix(PARSE_ANTIFAM.out)
+        results = results.mix(ANTIFAM.out)
     }
 
     if (applications.contains("cathgene3d") || applications.contains("cathfunfam")) {
@@ -160,13 +161,11 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("ncbifam")) {
-        RUN_NCBIFAM(
+        NCBIFAM(
             ch_seqs,
             "${datadir}/${appsConfig.ncbifam.hmm}"
         )
-
-        PARSE_NCBIFAM(RUN_NCBIFAM.out)
-        results = results.mix(PARSE_NCBIFAM.out)
+        results = results.mix(NCBIFAM.out)
     }
 
     if (applications.contains("panther")) {
