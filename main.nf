@@ -83,15 +83,13 @@ workflow {
         params.appsConfig.panther.paint
     )
 
-    ch_results.view()
-
-//     OUTPUT(
-//         ch_results
-//         formats,
-//         outut_dir,
-//         params.nucleic,
-//         workflow.manifest.version
-//     )
+    OUTPUT(
+        ch_results,
+        formats,
+        outut_dir,
+        params.nucleic,
+        workflow.manifest.version
+    )
 }
 
 workflow.onComplete = {
