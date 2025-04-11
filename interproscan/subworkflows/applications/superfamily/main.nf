@@ -9,7 +9,6 @@ workflow SUPERFAMILY {
     model
     pdbj95d
 
-
     main:
     SEARCH_SUPERFAMILY(
         ch_seqs,
