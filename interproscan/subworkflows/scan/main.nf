@@ -1,11 +1,5 @@
-// include { RUN_ANTIFAM; PARSE_ANTIFAM                                              } from  "../../modules/antifam"
-include { SEARCH_GENE3D; RESOLVE_GENE3D; ASSIGN_CATH; PARSE_CATHGENE3D            } from  "../../modules/cath/gene3d"
-include { PREPARE_FUNFAM; SEARCH_FUNFAM; RESOLVE_FUNFAM; PARSE_FUNFAM             } from  "../../modules/cath/funfam"
-include { RUN_RPSBLAST; RUN_RPSPROC; PARSE_RPSPROC                                } from  "../../modules/cdd"
-include { RUN_COILS; PARSE_COILS                                                  } from  "../../modules/coils"
 include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP                 } from  "../../modules/hamap"
 include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE                                        } from  "../../modules/mobidblite"
-include { RUN_NCBIFAM; PARSE_NCBIFAM                                              } from  "../../modules/ncbifam"
 include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER     } from  "../../modules/panther"
 include { SEARCH_PFAM; PARSE_PFAM                                                 } from  "../../modules/pfam"
 include { SEARCH_PHOBIUS; PARSE_PHOBIUS                                           } from  "../../modules/phobius"
@@ -22,6 +16,9 @@ include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                 
 include { RUN_DEEPTMHMM; PARSE_DEEPTMHMM                                          } from  "../../modules/tmhmm"
 
 include { ANTIFAM } from "../applications/antifam"
+include { CATH    } from "../applications/cath"
+include { CDD     } from "../applications/cdd"
+include { COILS   } from "../applications/coils"
 include { NCBIFAM } from "../applications/ncbifam"
 
 workflow SCAN_SEQUENCES {
@@ -43,85 +40,30 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("cathgene3d") || applications.contains("cathfunfam")) {
-        // Search Gene3D profiles
-        SEARCH_GENE3D(
+        CATH(
             ch_seqs,
-            "${datadir}/${appsConfig.cathgene3d.hmm}")
-        ch_gene3d = SEARCH_GENE3D.out
-
-        // Select best domain matches
-        RESOLVE_GENE3D(ch_gene3d)
-
-        // Assign CATH superfamily to matches
-        ASSIGN_CATH(
-            RESOLVE_GENE3D.out,
+            applications,
+            "${datadir}/${appsConfig.cathgene3d.hmm}",
             "${datadir}/${appsConfig.cathgene3d.model2sfs}",
-            "${datadir}/${appsConfig.cathgene3d.disc_regs}"
-        )
-
-        // Join results and parse them
-        ch_cathgene3d = ch_gene3d.join(ASSIGN_CATH.out)
-        PARSE_CATHGENE3D(ch_cathgene3d)
-
-        if (applications.contains("cathgene3d")) {
-            results = results.mix(PARSE_CATHGENE3D.out)
-        }
-
-        if (applications.contains("cathfunfam")) {
-            // Find unique CATH superfamilies with at least one hit
-            PREPARE_FUNFAM(
-                PARSE_CATHGENE3D.out,
-                "${datadir}/${appsConfig.cathfunfam.dir}"
-            )
-
-            /*
-                Join input fasta file with superfamilies.
-                We split in smaller chunks to parallelize searching FunFam profiles
-            */
-            ch_seqs
-                .join(PREPARE_FUNFAM.out)
-                .flatMap { id, file, supfams ->
-                    supfams
-                        .collate(appsConfig.cathfunfam.chunkSize)
-                        .collect { chunk -> [id, file, chunk] }
-                }
-                .set { ch_funfams }
-
-            // Search FunFam profiles
-            SEARCH_FUNFAM(
-                ch_funfams,
-                "${datadir}/${appsConfig.cathfunfam.dir}"
-            )
-
-            // Select best domain matches
-            RESOLVE_FUNFAM(SEARCH_FUNFAM.out)
-
-            // Join results and parse them
-            ch_cathfunfam = SEARCH_FUNFAM.out.join(RESOLVE_FUNFAM.out)
-            PARSE_FUNFAM(ch_cathfunfam)
-            results = results.mix(PARSE_FUNFAM.out)
-        }
+            "${datadir}/${appsConfig.cathgene3d.disc_regs}",
+            "${datadir}/${appsConfig.cathfunfam.dir}",
+            appsConfig.cathfunfam.chunkSize
+        ).set{ ch_cath }
+        results = results.mix(ch_cath)
     }
 
     if (applications.contains("cdd")) {
-        RUN_RPSBLAST(
+        CDD(
             ch_seqs,
-            "${datadir}/${appsConfig.cdd.rpsblast_db}"
-        )
-
-        RUN_RPSPROC(
-            RUN_RPSBLAST.out,
+            "${datadir}/${appsConfig.cdd.rpsblast_db}",
             "${datadir}/${appsConfig.cdd.rpsproc_db}"
         )
-
-        PARSE_RPSPROC(RUN_RPSPROC.out)
-        results = results.mix(PARSE_RPSPROC.out)
+        results = results.mix(CDD.out)
     }
 
     if (applications.contains("coils")) {
-        RUN_COILS(ch_seqs)
-        PARSE_COILS(RUN_COILS.out)
-        results = results.mix(PARSE_COILS.out)
+        COILS(ch_seqs)
+        results = results.mix(COILS.out)
     }
 
     if (applications.contains("deeptmhmm")) {
