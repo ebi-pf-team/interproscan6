@@ -1,6 +1,3 @@
-include { SCAN_SMART; PREPARE_SMART; SEARCH_SMART; PARSE_SMART                    } from  "../../modules/smart"
-include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
-
 include { ANTIFAM          } from "../applications/antifam"
 include { CATH             } from "../applications/cath"
 include { CDD              } from "../applications/cdd"
@@ -19,6 +16,8 @@ include { PROSITE_PATTERNS } from "../applications/prosite/patterns"
 include { PROSITE_PROFILES } from "../applications/prosite/profiles"
 include { SFLD             } from "../applications/sfld"
 include { SIGNALP          } from "../applications/signalp"
+include { SMART            } from "../applications/smart"
+include { SUPERFAMILY      } from "../applications/superfamily"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -191,31 +190,18 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("smart")) {
-        SCAN_SMART(
+        SMART(
             ch_seqs,
-            "${datadir}/${appsConfig.smart.hmm}"
+            "${datadir}/${appsConfig.smart.hmmer3_hmm}",
+            "${datadir}/${appsConfig.smart.hmmer2_hmm}",
+            "${datadir}/${appsConfig.smart.hmm_dir}",
+            appsConfig.smart.chunkSize
         )
-
-        PREPARE_SMART(
-            SCAN_SMART.out,
-            appsConfig.smart.chunkSize,
-            "${datadir}/${appsConfig.smart.hmm_dir}"
-        )
-
-        SEARCH_SMART(
-            PREPARE_SMART.out,
-            "${datadir}/${appsConfig.smart.hmm_dir}"
-        )
-
-        PARSE_SMART(
-            SEARCH_SMART.out,
-            "${datadir}/${appsConfig.smart.hmm}"
-        )
-        results = results.mix(PARSE_SMART.out)
+        results = results.mix(SMART.out)
     }
 
     if (applications.contains("superfamily")) {
-        SEARCH_SUPERFAMILY(
+        SUPERFAMILY(
             ch_seqs,
             "${datadir}/${appsConfig.superfamily.hmm}",
             "${datadir}/${appsConfig.superfamily.selfhits}",
@@ -223,13 +209,7 @@ workflow SCAN_SEQUENCES {
             "${datadir}/${appsConfig.superfamily.model}",
             "${datadir}/${appsConfig.superfamily.pdbj95d}"
         )
-
-        PARSE_SUPERFAMILY(
-            SEARCH_SUPERFAMILY.out,
-            "${datadir}/${appsConfig.superfamily.model}",
-            "${datadir}/${appsConfig.superfamily.hmm}"
-        )
-        results = results.mix(PARSE_SUPERFAMILY.out)
+        results = results.mix(SUPERFAMILY.out)
     }
 
     results
