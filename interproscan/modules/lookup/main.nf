@@ -15,7 +15,7 @@ process PREPARE_LOOKUP {
     exec:
     String _matchesApiUrl = _url  // reassign to avoid 'variable' already used error when logging
     // Get MLS metadata: api (version), release, release_date
-    Map info = InterPro.httpRequest("${InterPro.sanitizeURL(_matchesApiUrl)}/info", null, 0, true, log)
+    Map info = HTTPRequest.fetch("${HTTPRequest.sanitizeURL(_matchesApiUrl)}/info", null, 0, true, log)
     if (info == null) {
         log.warn "An error occurred while querying the Matches API; analyses will be run locally"
         matchesApiUrl = null
@@ -64,7 +64,7 @@ process LOOKUP_MATCHES {
     boolean success = true
     for (chunk in chunks) {
         String data = JsonOutput.toJson([md5: chunk])
-        def response = InterPro.httpRequest("${baseUrl}/matches", data, maxRetries, true, log)
+        def response = HTTPRequest.fetch("${baseUrl}/matches", data, maxRetries, true, log)
 
         if (response != null) {
             response.results.each {

@@ -53,7 +53,7 @@ process XREFS {
                     // Update library version
                     def version = (match.signature.signatureLibraryRelease.version == "null") ? null : match.signature.signatureLibraryRelease.version
                     if (!version && signatureInfo != null) {
-                        def memberName = InterPro.formatMemberDbName(signatureInfo["database"])
+                        def memberName = InterProScan.formatMemberDbName(signatureInfo["database"])
                         match.signature.signatureLibraryRelease.version = member_db_releases[memberName]
                     }
 

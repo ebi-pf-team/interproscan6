@@ -328,6 +328,17 @@ class InterProScan {
         return returnList ? missingApps as List : (errorMsg ? "Could not find the following data files\n${errorMsg}" : null)
     }
 
+    static formatMemberDbName(String memberName) {
+        def fmtMemberName = memberName.toLowerCase()
+        if (fmtMemberName.startsWith("cath")) {
+            return fmtMemberName.replace("cath", "cath-")
+        } else if (fmtMemberName.startsWith("prosite")) {
+            return  fmtMemberName.replace("prosite", "prosite ")
+        } else {
+            return fmtMemberName
+        }
+    }
+
     static String validateInterProVersion(versionParam) {
         String version = null
         if (versionParam instanceof Number) {
