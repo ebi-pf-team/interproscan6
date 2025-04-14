@@ -34,21 +34,24 @@ workflow {
         params.matchesApiUrl,
         params.interpro
     )
-    fasta_file         = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
-    applications       = INIT_PIPELINE.out.apps.val
-    data_dir           = INIT_PIPELINE.out.datadir.val
-    out_dir            = INIT_PIPELINE.out.outdir.val
-    formats            = INIT_PIPELINE.out.formats.val
-    signalp_mode       = INIT_PIPELINE.out.signalp_mode.val
-    interpro_version   = INIT_PIPELINE.out.version.val
+    fasta_file           = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
+    applications         = INIT_PIPELINE.out.apps.val
+    data_dir             = INIT_PIPELINE.out.datadir.val
+    out_dir              = INIT_PIPELINE.out.outdir.val
+    formats              = INIT_PIPELINE.out.formats.val
+    signalp_mode         = INIT_PIPELINE.out.signalp_mode.val
+    interpro_version     = INIT_PIPELINE.out.version.val
 
     PREPARE_DATA(
         applications,
         params.appsConfig,
+        params.xRefsConfig,
+        data_dir,
         interpro_version,
         workflow.manifest.version,
-        data_dir,
-        params.download
+        params.download,
+        params.goterms,
+        params.pathways
     )
     member_db_releases   = PREPARE_DATA.out.memberDbReleases
     interproscan_version = PREPARE_DATA.out.interproscanVersion.val
@@ -57,8 +60,8 @@ workflow {
         fasta_file,
         applications
     )
-    ch_seqs            = PREPARE_SEQUENCES.out.ch_seqs
-    seq_db_path        = PREPARE_SEQUENCES.out.seq_db_path
+    ch_seqs              = PREPARE_SEQUENCES.out.ch_seqs
+    seq_db_path          = PREPARE_SEQUENCES.out.seq_db_path
 
     match_results = Channel.empty()
 
@@ -123,7 +126,7 @@ workflow {
         ch_results,
         seq_db_path,
         formats,
-        out_dir
+        out_dir,
         params.nucleic,
         workflow.manifest.version
     )

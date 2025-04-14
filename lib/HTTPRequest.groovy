@@ -2,7 +2,7 @@ import java.net.URI
 import groovy.json.JsonSlurper
 
 class HTTPRequest {
-    static fetch(String urlString, String data, int maxRetries, log) {
+    static fetch(String urlString, String data, int maxRetries, boolean log=true) {
         int attempts = 0
         boolean isPost = data != null && data.length() > 0
         HttpURLConnection connection = null
@@ -32,24 +32,24 @@ class HTTPRequest {
                     String responseText = connection.inputStream.getText("UTF-8")
                     return new JsonSlurper().parseText(responseText)
                 } else {
-                    if (log != null) {
+                    if (log) {
                         def errorMsg = connection.errorStream ? connection.errorStream.getText("UTF-8") : ""
-                        log.warn("Received HTTP ${responseCode} for ${urlString}")
+                        System.err.println("Received HTTP ${responseCode} for ${urlString}")
                     }
                     return null
                 }
             } catch (java.net.ConnectException | java.net.UnknownHostException e) {
-                if (log != null) {
-                    log.warn("Connection error for ${urlString}: ${e.message}")
+                if (log) {
+                    System.err.println("Connection error for ${urlString}: ${e.message}")
                 }
                 return null
             } catch (java.net.SocketTimeoutException e) {
-                if (log != null) {
-                    log.warn("Timeout error for ${urlString}; attempt ${attempts} / ${maxRetries + 1}")
+                if (log) {
+                    System.err.println("Timeout error for ${urlString}; attempt ${attempts} / ${maxRetries + 1}")
                 }
             } catch (Exception e) {
-                if (log != null) {
-                    log.warn("Unexpected error for ${urlString}: ${e.message}")
+                if (log) {
+                    System.err.println("Unexpected error for ${urlString}: ${e.message}")
                 }
                 return null
             } finally {

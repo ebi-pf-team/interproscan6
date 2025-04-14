@@ -1,24 +1,28 @@
 
 include { DOWNLOAD as DOWNLOAD_INTERPRO } from "../../modules/download"
 include { DOWNLOAD as DOWNLOAD_DATABASE } from "../../modules/download"
-include { PREPARE_DOWNLOADS             } from "../../modules/download"
-include { GET_MEMBER_RELEASES           } from "../../modules/download"
+include { VALIDATE_APP_DATA             } from "../../modules/download"
+include { GET_DB_RELEASES           } from "../../modules/download"
 
 
 workflow PREPARE_DATA {
     take:
     applications
     apps_config
+    xref_config
+    data_dir
     interpro_version
     iprscan_version
-    datadir
     download
+    add_goterms
+    add_pathways
 
     main:
     def iprscan_major_minor = iprscan_version.split("\\.")[0..1].join(".")
 
-    // TODO: need to bypass this if running application without data
-
+    /* Do not skip this step, even when only running members without data
+    because we need the interpro version to check against the match lookup service
+    API to make sure they are compatible. */
     if (download) {
         def versions = InterProScan.fetchCompatibleVersions(iprscan_major_minor)
         if (versions == null) {
@@ -33,9 +37,9 @@ workflow PREPARE_DATA {
             log.error error
         }
     } else if (interpro_version == "latest") {
-        def highest_version = InterProScan.findLocalHighestVersionDir("${datadir}/interpro")
+        def highest_version = InterProScan.findLocalHighestVersionDir("${data_dir}/interpro")
         if (!highest_version) {
-           log.error "No version of InterPro found in ${datadir}/interpro"
+           log.error "No version of InterPro found in ${data_dir}/interpro"
            exit 1
         }
 
@@ -58,39 +62,38 @@ To ensure you're using the latest compatible data, re-run with the --download op
     }
 
     // Check if we have the interpro database release file
-    path = "${datadir}/interpro/${interpro_version}/databases.json"
-    if (InterProScan.resolveFile(path)) {
-        PREPARE_DOWNLOADS(
+    db_json_path = "${data_dir}/${xref_config.dir}/${interpro_version}/databases.json"
+    if (InterProScan.resolveFile(db_json_path)) {
+        VALIDATE_APP_DATA(
             true,
-            path,
+            db_json_path,
             applications,
             app_dirs,
-            datadir
+            data_dir
         )
     } else {
         if (download) {
             DOWNLOAD_INTERPRO(
                 ["interpro", interpro_version],
                 iprscan_major_minor,
-                datadir
+                data_dir
             )
-            // ready_ch = DOWNLOAD_INTERPRO.out.collect()
-            // memberDbReleases = InterProScan.getMemberDbReleases(path, ready_ch)
-            PREPARE_DOWNLOADS(
+
+            VALIDATE_APP_DATA(
                 DOWNLOAD_INTERPRO.out,
-                path,
+                db_json_path,
                 applications,
                 app_dirs,
-                datadir
+                data_dir
             )
         } else {
-            log.error """No database release file found in ${datadir}/interpro/${interpro_version}
+            log.error """No database release file found in ${data_dir}/interpro/${interpro_version}
 Use the '--download' option to automatically download InterPro release data."""
             exit 1
         }
     }
 
-    ch_appls = PREPARE_DOWNLOADS.out.flatMap()
+    ch_appls = VALIDATE_APP_DATA.out.flatMap()
 
     // Create an empty Channel to be used as default when no databases need download
     empty_db_channel = Channel.of([]).collect()
@@ -99,7 +102,7 @@ Use the '--download' option to automatically download InterPro release data."""
         ch_ready = DOWNLOAD_DATABASE(
             ch_appls,
             iprscan_major_minor,
-            datadir
+            data_dir
         ).collect()
     } else {
         // Check if we have apps that need download
@@ -107,7 +110,7 @@ Use the '--download' option to automatically download InterPro release data."""
         ch_appls_check.subscribe { apps ->
             if (apps.size() > 0) {
                 def msg = apps.collect { app -> "Database: ${app[0]} - Release: ${app[1]}" }.join("\n")
-                log.error """Data is missing in ${datadir} for the following applications:
+                log.error """Data is missing in ${data_dir} for the following applications:
 ${msg}
 Use the '--download' option to automatically download InterPro release data."""
                 exit 1
@@ -116,8 +119,13 @@ Use the '--download' option to automatically download InterPro release data."""
     }
 
     // Force wait on the databases.json path whether we have apps or not
-    memberDbReleases = GET_MEMBER_RELEASES(
+    path = "${data_dir}/${xref_config.dir}/${interpro_version}"
+    memberDbReleases = GET_DB_RELEASES(
+        db_json_path,
         path,
+        xref_config,
+        add_goterms,
+        add_pathways,
         ch_appls.collect().ifEmpty { empty_db_channel }
     )
     interproscanVersion = iprscan_major_minor

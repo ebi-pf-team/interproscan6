@@ -3,7 +3,6 @@
 import groovy.json.JsonSlurper
 import java.security.MessageDigest
 import java.nio.file.*
-import InterPro
 import HTTPRequest
 
 class InterProScan {
@@ -287,47 +286,6 @@ class InterProScan {
         return [appsToRun.toSet().toList(), null]
     }
 
-    static validateAppData(List<String> appsToRun, Path datadir, Map appsConfig, Map databaseMap, Boolean returnList=false) {
-        def missingApps = [] as Set // only returned if returnList is true
-        def errorMsg = appsToRun.collectMany { appName ->
-            def fmtAppName = InterPro.formatMemberDbName(appName)
-
-            def appVersion = databaseMap[fmtAppName].toString()
-
-            if (!appVersion) {
-                return "Could not retrieve release for $appName"
-            }
-            if (!appsConfig[appName]['dir']) {  // member does not have a datadir, e.g. coils and mobidblite
-                return null
-            }
-            def appDir = datadir.resolve("${appsConfig[appName]['dir']}/$appVersion".toString())
-            if (!Files.exists(appDir) || !Files.isDirectory(appDir)) {
-                missingApps.add(appName)
-                return ["${appName}: dir ${appDir.toString()} is missing"]
-            }
-            appsConfig[appName].collect { key, value ->
-                if (this.DATA_TYPE["FILE"].contains(key)) {
-                    if (!resolveFile(appDir.resolve(value).toString())) {
-                        missingApps.add(appName)
-                        return "${appName}: file: '${key}': ${value ?: 'null'}"
-                    }
-                } else if (this.DATA_TYPE["DIR"].contains(key)) {
-                    if (!value) {
-                        missingApps.add(appName)
-                        return "${appName}: dir: '${key}': 'null'"
-                    }
-                    Path dirPath = this.LICENSED_SOFTWARE.contains(appName) ? Paths.get(value) : appDir.resolve(value)
-                    if (!Files.exists(dirPath) || !Files.isDirectory(dirPath)) {
-                        missingApps.add(appName)
-                        return "${appName}: dir: '${key}': ${value ?: 'null'}"
-                    }
-                }
-                return null
-            }.findAll { it }
-        }.join('\n')
-        return returnList ? missingApps as List : (errorMsg ? "Could not find the following data files\n${errorMsg}" : null)
-    }
-
     static formatMemberDbName(String memberName) {
         def fmtMemberName = memberName.toLowerCase()
         if (fmtMemberName.startsWith("cath")) {
@@ -356,14 +314,14 @@ class InterProScan {
 
     static List<String> fetchCompatibleVersions(String majorMinorVersion) {
         String url = "${InterProScan.FTP_URL}/${majorMinorVersion}/versions.json"
-        Map versions = HTTPRequest.fetch(url, null, 2, null)
+        Map versions = HTTPRequest.fetch(url, null, 2, false)
         return versions["interpro"]*.toString() ?: null
     }
 
-    static validateXrefFiles(Path datadir, String interproRelease, Map xRefsConfig, boolean goterms, boolean pathways) {
+    static validateXrefFiles(String xref_dir, Map xRefsConfig, boolean goterms, boolean pathways) {
         def error = ""
         def addError = { type, suffix ->
-            String path = datadir.resolve("interpro/$interproRelease/${xRefsConfig[type]}${suffix}").toString()
+            String path = "${xref_dir}/${xRefsConfig[type]}${suffix}"
             if (!resolveFile(path)) {
                 error << "${type}${suffix}: ${path}"
             }

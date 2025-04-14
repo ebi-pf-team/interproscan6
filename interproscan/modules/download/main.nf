@@ -26,7 +26,7 @@ process DOWNLOAD {
     """
 }
 
-process PREPARE_DOWNLOADS {
+process VALIDATE_APP_DATA {
     input:
     val ready
     val json_file
@@ -62,18 +62,35 @@ process PREPARE_DOWNLOADS {
     }
 }
 
-process GET_MEMBER_RELEASES {
+process GET_DB_RELEASES {
     // Run as a process to ensure it runs after all downloading is complete
     input:
-    val json_file
+    val db_json_file
+    val xref_dir
+    val xref_config
+    val add_goterms
+    val add_pathways
     val ready
 
     output:
     val databases_with_version
 
     exec:
+    // Before getting all the dbs (inc. interpro) version numbers check we have all the interpro data
+    // member data was checked in PREPARE_DOWNLOADS
+    error = InterProScan.validateXrefFiles(
+        xref_dir,
+        xref_config,
+        add_goterms,
+        add_pathways
+    )
+    if (error) {
+        log.error error
+        exit 1
+    }
+
     JsonSlurper jsonSlurper = new JsonSlurper()
-    def databaseJson = new File(json_file.toString())
+    def databaseJson = new File(db_json_file.toString())
     databases_with_version = jsonSlurper.parse(databaseJson)
     databases_with_version = databases_with_version.collectEntries { appName, versionNum ->
         [(appName.toLowerCase()): versionNum]

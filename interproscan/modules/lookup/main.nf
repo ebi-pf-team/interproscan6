@@ -15,7 +15,7 @@ process PREPARE_LOOKUP {
     exec:
     String _matchesApiUrl = _url  // reassign to avoid 'variable' already used error when logging
     // Get MLS metadata: api (version), release, release_date
-    Map info = HTTPRequest.fetch("${HTTPRequest.sanitizeURL(_matchesApiUrl)}/info", null, 0, true, log)
+    Map info = HTTPRequest.fetch("${HTTPRequest.sanitizeURL(_matchesApiUrl)}/info".toString(), null, 0, true)
     if (info == null) {
         log.warn "An error occurred while querying the Matches API; analyses will be run locally"
         matchesApiUrl = null
@@ -60,11 +60,11 @@ process LOOKUP_MATCHES {
     def md5List = sequences.keySet().toList()
     def chunks = md5List.collate(chunkSize)
 
-    String baseUrl = InterPro.sanitizeURL(url.toString())
+    String baseUrl = HTTPRequest.sanitizeURL(url.toString())
     boolean success = true
     for (chunk in chunks) {
         String data = JsonOutput.toJson([md5: chunk])
-        def response = HTTPRequest.fetch("${baseUrl}/matches", data, maxRetries, true, log)
+        def response = HTTPRequest.fetch("${baseUrl}/matches", data, maxRetries, true)
 
         if (response != null) {
             response.results.each {
