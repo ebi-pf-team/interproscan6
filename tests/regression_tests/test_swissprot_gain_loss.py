@@ -32,7 +32,7 @@ def get_i5_swissprot_mapping(ora_url: str):
 
     cur.execute(
         """
-        SELECT E.ENTRY_AC, M.METHOD_AC
+        SELECT DISTINCT E.ENTRY_AC, M.METHOD_AC
         FROM INTERPRO.MATCH M
         INNER JOIN INTERPRO.ENTRY2METHOD EM ON M.METHOD_AC = EM.METHOD_AC
         INNER JOIN INTERPRO.ENTRY E ON EM.ENTRY_AC = E.ENTRY_AC
@@ -83,9 +83,11 @@ def get_i6_swissprot_mapping(i6_result: dict):
 def swissprot_comparison(entry2sigs_i5: dict, entry2sigs_i6: dict):
     count_total_lost = 0
     count_total_gained = 0
+    count_total = 0
     for entry in entry2sigs_i5:
-        members_i6 = entry2sigs_i6.get(entry, set())
-        members_i5 = entry2sigs_i5.get(entry, set())
+        count_total += 1
+        members_i6 = set(entry2sigs_i6.get(entry, set()))
+        members_i5 = set(entry2sigs_i5.get(entry, set()))
         if members_i5 != members_i6:
             lost = members_i5 - members_i6
             gained = members_i6 - members_i5
@@ -93,13 +95,13 @@ def swissprot_comparison(entry2sigs_i5: dict, entry2sigs_i6: dict):
                 count_total_lost += len(lost)
                 count_total_gained += len(gained)
                 print(f"Entry: {entry} | #Lost: {len(lost)} | #Gained: {len(gained)} | Lost: {lost} | Gained: {gained}")
-    print(f"Total lost: {count_total_lost} | Total gained: {count_total_gained}")
+    print(f"From a total of: {count_total}... Total lost: {count_total_lost} | Total gained: {count_total_gained}")
 
 
 def main():
     parser = argparse.ArgumentParser(prog="IPS_swissprot_test", description="Check gain/lost of swissprot between i5 and i6", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--i6output", type=str, help="i6 SwissProt JSON result")
-    parser.add_argument("--bymembers", help="shows gain/lost by memberDB", action="store_true")
+    parser.add_argument("--bymember", help="shows gain/lost by memberDB", action="store_true")
 
     args = parser.parse_args()
     ora_url = os.environ["ORACLE_URL"]
@@ -109,7 +111,7 @@ def main():
 
     entry2sigs_i5 = get_i5_swissprot_mapping(ora_url)
 
-    if args.bymembers:
+    if args.bymember:
         # Compare by memberDB
         for prefix in PREFIX2MEMBERDB:
             entry2sig_i5_by_member = {}
