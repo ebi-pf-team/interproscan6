@@ -2,15 +2,48 @@ import groovy.json.JsonSlurper
 import java.net.URL
 import groovy.json.JsonOutput
 
+process PREPARE_LOOKUP {
+    input:
+    val _url
+    val db_releases           // map, db version numbers, including interpro, all lowercase
+    val interproscan_version  // major.minor iprscan version number
+    val workflow_manifest
+
+    output:
+    val matchesApiUrl
+
+    exec:
+    String _matchesApiUrl = _url  // reassign to avoid 'variable' already used error when logging
+    // Get MLS metadata: api (version), release, release_date
+    Map info = InterPro.httpRequest("${InterPro.sanitizeURL(_matchesApiUrl)}/info", null, 0, true, log)
+    if (info == null) {
+        log.warn "An error occurred while querying the Matches API; analyses will be run locally"
+        matchesApiUrl = null
+    } else {
+        def apiVersion = info.api ?: "X.Y.Z"
+        def majorVersion = apiVersion.split("\\.")[0]
+        if (majorVersion != "0") {
+            log.warn "${workflow_manifest.name} ${workflow_manifest.version}" +
+                    " is not compatible with the Matches API at ${_matchesApiUrl};" +
+                    " analyses will be run locally"
+            matchesApiUrl = null
+        } else if (db_releases) {  // can be null if we don't need data for the selected apps (e.g. mobidblite)
+            if (db_releases['interpro'] != info.release) {
+                log.warn "The local InterPro version does not match the match API release (Local: ${db_releases['interpro']}, Matches API: ${info.release}).\n" +
+                        "Pre-calculated matches will not be retrieved, and analyses will be run locally"
+                matchesApiUrl = null
+            }
+        }
+    }
+    matchesApiUrl = _matchesApiUrl
+    return matchesApiUrl
+}
+
 process LOOKUP_MATCHES {
     label 'local'
 
     input:
-    tuple val(index), val(fasta)
-    val applications
-    val url
-    val chunkSize
-    val maxRetries
+    tuple val(index), val(fasta), val(applications), val(url), val(chunkSize), val(maxRetries)
 
     output:
     tuple val(index), path("calculatedMatches.json")
@@ -38,13 +71,13 @@ process LOOKUP_MATCHES {
                 String proteinMd5 = it.md5.toUpperCase() // ensure it matches the local seq Db case
                 if (it.found) {
                     calculatedMatches[proteinMd5] = [:]
-                    it.matches.each { matchObj ->
-                        String library = matchObj.signature.signatureLibraryRelease.library
+                    it.matches.each { matchMap ->
+                        String library = matchMap.signature.signatureLibraryRelease.library
                         String appName = library.toLowerCase().replaceAll("[-\\s]", "")
 
                         if (applications.contains(appName)) {
-                            matchObj = transformMatch(matchObj)
-                            calculatedMatches[proteinMd5][matchObj.modelAccession] = matchObj
+                            matchMap = transformMatch(matchMap)
+                            calculatedMatches[proteinMd5][matchMap.modelAccession] = matchMap
                         }
                     }
                 } else {
@@ -71,33 +104,6 @@ process LOOKUP_MATCHES {
     }
 }
 
-String getMatchesApiUrl(matchesApiUrl, lookupServiceUrl, interproRelease, workflowManifest, log) {
-    String _matchesApiUrl = matchesApiUrl ?: lookupServiceUrl
-    // Get MLS metadata: api (version), release, release_date
-    Map info = InterPro.httpRequest("${InterPro.sanitizeURL(_matchesApiUrl)}/info", null, 0, true, log)
-    if (info == null) {
-        log.warn "An error occurred while querying the Matches API; analyses will be run locally"
-        _matchesApiUrl = null
-    } else {
-        def apiVersion = info.api ?: "X.Y.Z"
-        def majorVersion = apiVersion.split("\\.")[0]
-
-        if (majorVersion != "0") {
-            log.warn "${workflowManifest.name} ${workflowManifest.version}" +
-                    " is not compatible with the Matches API at ${_matchesApiUrl};" +
-                    " analyses will be run locally"
-            _matchesApiUrl = null
-        } else if (interproRelease) {
-            if (interproRelease != info.release) {
-                log.warn "The local InterPro version does not match the match API release (Local: ${interproRelease}, Matches API: ${info.release}).\n" +
-                        "Pre-calculated matches will not be retrieved, and analyses will be run locally"
-                _matchesApiUrl = null
-            }
-        }
-    }
-    return _matchesApiUrl
-}
-
 def Map transformMatch(Map match) {
     // * operator - spread contents of a map or collecion into another map or collection
     return [
@@ -106,12 +112,21 @@ def Map transformMatch(Map match) {
         "locations"  : match["locations"].collect { loc ->
             return [
                 *          : loc,
-                "hmmBounds": loc["hmmBounds"] ? Location.getReverseHmmBounds(loc["hmmBounds"]) : null,
+                "hmmBounds": loc["hmmBounds"] ? getReverseHmmBounds(loc["hmmBounds"]) : null,
                 "fragments": loc["fragments"].collect { tranformFragment(it) },
                 "sites"    : loc["sites"] ?: []
             ]
         },
     ]
+}
+
+def getReverseHmmBounds(hmmBounds) {
+    return [
+        "COMPLETE"            : "[]",
+        "N_TERMINAL_COMPLETE" : "[.",
+        "C_TERMINAL_COMPLETE" : ".]",
+        "INCOMPLETE"          : ".."
+    ][hmmBounds]
 }
 
 def Map tranformFragment(Map fragment) {

@@ -428,13 +428,12 @@ class Location implements Serializable {
     }
 
     static String getHmmBounds(String hmmBounds) {
-        def boundsMapping = [
+        return [
                 "[]"  : "COMPLETE",
                 "[."  : "N_TERMINAL_COMPLETE",
                 ".]"  : "C_TERMINAL_COMPLETE",
                 ".."  : "INCOMPLETE"
-        ]
-        return boundsMapping[hmmBounds]
+        ][hmmBounds]
     }
 
     static String getReverseHmmBounds(String hmmBounds) {

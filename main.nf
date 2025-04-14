@@ -1,18 +1,12 @@
 nextflow.enable.dsl=2
 
 include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
-include { DOWNLOAD_DATA                 } from "./interproscan/subworkflows/download_data"
-include { CHECK_DATA                    } from "./interproscan/subworkflows/check_data"
+include { PREPARE_DATA                  } from "./interproscan/subworkflows/prepare_data"
 include { PREPARE_SEQUENCES             } from "./interproscan/subworkflows/prepare_sequences"
 include { PRECALCULATED_MATCHES         } from "./interproscan/subworkflows/precalculated_matches"
 include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
-
-include { XREFS                         } from "./interproscan/modules/xrefs"
-include { REPRESENTATIVE_LOCATIONS      } from "./interproscan/modules/representative_locations"
-include { WRITE_JSON_OUTPUT             } from "./interproscan/modules/output/json"
-include { WRITE_TSV_OUTPUT              } from "./interproscan/modules/output/tsv"
-include { WRITE_XML_OUTPUT              } from "./interproscan/modules/output/xml"
-
+include { INTERPRO                      } from "./interproscan/subworkflows/interpro"
+include { OUTPUT                        } from "./interproscan/subworkflows/output"
 
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
@@ -23,49 +17,66 @@ workflow {
         exit 0
     }
 
-    INIT_PIPELINE()
+    // Params validation
+    InterProScan.validateParams(params, log)
+
+    INIT_PIPELINE(
+        params.input,
+        params.applications,
+        params.appsConfig,
+        params.download,
+        params.offline,
+        params.datadir,
+        params.formats,
+        params.outdir,
+        params.signalpMode,
+        params.matchesApiUrl,
+        params.interpro
+    )
     fasta_file         = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
     outdir             = INIT_PIPELINE.out.outdir.val
     formats            = INIT_PIPELINE.out.formats.val
-    apps               = INIT_PIPELINE.out.apps.val
-    signalp_mode       = INIT_PIPELINE.out.signalpMode.val
+    applications       = INIT_PIPELINE.out.apps.val
+    signalp_mode       = INIT_PIPELINE.out.signalp_mode.val
+    interpro_version   = INIT_PIPELINE.out.version.val
+    outdir             = INIT_PIPELINE.out.outdir.val
+    datadir            = INIT_PIPELINE.out.datadir.val
 
-    if (params.download) {
-        // Pass the interproRelease to Check data to force sequentialiality 
-        DOWNLOAD_DATA(apps)
-        downloaded_interpro_release = DOWNLOAD_DATA.out.interproRelease.val
+    PREPARE_DATA(
+        applications,
+        params.appsConfig,
+        interpro_version,
+        workflow.manifest.version,
+        datadir,
+        params.download
+    )
+    member_db_releases   = PREPARE_DATA.out.memberDbReleases
+    interproscan_version = PREPARE_DATA.out.interproscanVersion.val
 
-        CHECK_DATA(apps, downloaded_interpro_release)
-        data_dir           = CHECK_DATA.out.datadir.val
-        interpro_release   = CHECK_DATA.out.interproRelease.val
-        member_db_releases = CHECK_DATA.out.memberDbReleases.val
-    } else {
-        interpro_placeholder = ""
-        CHECK_DATA(apps, interpro_placeholder)
-        data_dir           = CHECK_DATA.out.datadir.val
-        interpro_release   = CHECK_DATA.out.interproRelease.val
-        member_db_releases = CHECK_DATA.out.memberDbReleases.val
-    }
-
-    PREPARE_SEQUENCES(fasta_file, apps)
+    PREPARE_SEQUENCES(fasta_file, applications)
     ch_seqs            = PREPARE_SEQUENCES.out.ch_seqs
     seq_db_path        = PREPARE_SEQUENCES.out.seq_db_path
 
-    matchResults = Channel.empty()
+    match_results = Channel.empty()
+
     if (params.offline) {
         SCAN_SEQUENCES(
             ch_seqs,
             member_db_releases,
-            apps,
+            applications,
             params.appsConfig,
-            data_dir
+            datadir
         )
-        matchResults = SCAN_SEQUENCES.out
+        match_results = SCAN_SEQUENCES.out
     } else {
         PRECALCULATED_MATCHES(
             ch_seqs,
-            apps,
-            interpro_release
+            applications,
+            member_db_releases,
+            interproscan_version,
+            workflow.manifest,
+            params.matchesApiUrl,     // from the cmd-offline
+            params.lookupService,     // from confs
         )
         precalculated_matches = PRECALCULATED_MATCHES.out.precalculatedMatches
         no_matches_fastas     = PRECALCULATED_MATCHES.out.noMatchesFasta
@@ -73,9 +84,9 @@ workflow {
         SCAN_SEQUENCES(
             no_matches_fastas,
             member_db_releases,
-            apps,
+            applications,
             params.appsConfig,
-            data_dir
+            datadir
         )
 
         def expandedScan = SCAN_SEQUENCES.out.flatMap { scan ->
@@ -83,49 +94,29 @@ workflow {
         }
 
         combined = precalculated_matches.concat(expandedScan)
-        matchResults = combined.groupTuple()
+        match_results = combined.groupTuple()
     }
-    // matchResults format: [[meta, [member1.json, member2.json, ..., memberN.json]]
+    // match_results format: [[meta, [member1.json, member2.json, ..., memberN.json]]
 
-    /* XREFS:
-    Aggregate matches across all members for each sequence --> single JSON with all matches for the batch
-    Add signature and entry desc and names
-    Add PAINT annotations (if panther is enabled)
-    Add go terms (if enabled)
-    Add pathways (if enabled)
-    */
-    XREFS(
-        matchResults,
-        apps,
-        data_dir,
-        "${data_dir}/interpro/${interpro_release}",
+    ch_results = INTERPRO(
+        match_results,
+        applications,
+        datadir,
         member_db_releases,
-        params.xRefsConfig.entries,
-        params.xRefsConfig.goterms,
-        params.xRefsConfig.pathways,
+        params.xRefsConfig,
         params.goterms,
         params.pathways,
-        "${data_dir}/${member_db_releases.panther}/${params.appsConfig.panther.paint}"
+        params.appsConfig.panther.paint
     )
 
-    REPRESENTATIVE_LOCATIONS(XREFS.out)
-    // Collect all JSON files into a single channel so we don't have cocurrent writing to the output files
-    ch_results = REPRESENTATIVE_LOCATIONS.out
-        .map { meta, json -> json }
-        .collect()
-
-    def fileName = params.input.split('/').last()
-    def outFileName = "${params.outdir}/${fileName}"
-
-    if (formats.contains("JSON")) {
-        WRITE_JSON_OUTPUT(ch_results, "${outFileName}", seq_db_path, params.nucleic, workflow.manifest.version)
-    }
-    if (formats.contains("TSV")) {
-        WRITE_TSV_OUTPUT(ch_results, "${outFileName}", seq_db_path, params.nucleic)
-    }
-    if (formats.contains("XML")) {
-        WRITE_XML_OUTPUT(ch_results, "${outFileName}", seq_db_path, params.nucleic, workflow.manifest.version)
-    }
+    OUTPUT(
+        ch_results,
+        seq_db_path,
+        formats,
+        outdir,
+        params.nucleic,
+        workflow.manifest.version
+    )
 }
 
 workflow.onComplete = {

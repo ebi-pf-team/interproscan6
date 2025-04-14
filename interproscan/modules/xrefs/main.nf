@@ -6,34 +6,37 @@ process XREFS {
     label 'local', 'tiny'
 
     input:
-    tuple val(meta), val(membersMatches)
+    tuple val(meta), val(members_matches)
     val apps
-    val dataDir
-    val xrefDir
-    val memberDbReleases
-    val entriesFile
-    val gotermFilePrefix
-    val pathwaysFilePrefix
-    val addGoterms
-    val addPathways
-    val paintAnnoDir
+    val data_dir
+    val member_db_releases
+    val xref_dir
+    val entries_file
+    val goterm_file_prefix
+    val pathways_file_prefix
+    val add_goterms
+    val add_pathways
+    val paint_anno_dir
 
     output:
     tuple val(meta), path("matches2xrefs.json")
 
     exec:
+    def xrefDir = "${data_dir}/${xref_dir}/${member_db_releases.interpro}"
+    def paintAnnoDir = "${data_dir}/${member_db_releases.panther}/${paint_anno_dir}"
+
     // Load entries data. NOTE: The entries, go terms and pathway files are too large for JsonSlurper to handle.
-    String entriesPath = "${xrefDir}/${entriesFile}"
+    String entriesPath = "${xrefDir}/${entries_file}"
     def (entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null]
-    if (dataDir.toString().trim()) {  // datadir is not needed when exclusively running members with no interpro data
+    if (data_dir.toString().trim()) {  // data_dir is not needed when exclusively running members with no interpro data
         File entriesJson = new File(entriesPath)
         entries = new ObjectMapper().readValue(entriesJson, Map)
-        if (addGoterms) (ipr2go, goInfo) = loadXRefFiles(gotermFilePrefix, xrefDir)
-        if (addPathways) (ipr2pa, paInfo) = loadXRefFiles(pathwaysFilePrefix, xrefDir)
+        if (add_goterms) (ipr2go, goInfo) = loadXRefFiles(goterm_file_prefix, xrefDir)
+        if (add_pathways) (ipr2pa, paInfo) = loadXRefFiles(pathways_file_prefix, xrefDir)
     }
 
     def aggregatedMatches = [:]  // seqMd5: {modelAcc: Match} -- otherwise a seqMd5 will appear multiple times in the output
-    membersMatches.each { matchesPath ->
+    members_matches.each { matchesPath ->
         def matchesFileMap = new ObjectMapper().readValue(new File(matchesPath.toString()), Map)
         matchesFileMap.each { String seqMd5, Map matches ->
             def seqEntry = aggregatedMatches.computeIfAbsent(seqMd5, { [:] } )
@@ -51,7 +54,7 @@ process XREFS {
                     def version = (match.signature.signatureLibraryRelease.version == "null") ? null : match.signature.signatureLibraryRelease.version
                     if (!version && signatureInfo != null) {
                         def memberName = InterPro.formatMemberDbName(signatureInfo["database"])
-                        match.signature.signatureLibraryRelease.version = memberDbReleases[memberName]
+                        match.signature.signatureLibraryRelease.version = member_db_releases[memberName]
                     }
 
                     // Handle PANTHER data

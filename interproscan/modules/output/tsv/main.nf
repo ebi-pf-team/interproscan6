@@ -2,7 +2,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 
-process WRITE_TSV_OUTPUT {
+process WRITE_TSV {
     label 'local'
 
     input:

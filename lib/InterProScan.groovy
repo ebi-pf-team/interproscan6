@@ -1,8 +1,10 @@
 // Class and methods for validating the user inputs
 
+import groovy.json.JsonSlurper
 import java.security.MessageDigest
 import java.nio.file.*
 import InterPro
+import HTTPRequest
 
 class InterProScan {
     static final def PARAMS = [
@@ -40,6 +42,7 @@ class InterProScan {
         ],
         [
             name : "interpro",
+            metavar: "<VERSION>",
             description: "the InterPro release to be used. Defaults to 'latest'."
         ],
         [
@@ -121,6 +124,8 @@ class InterProScan {
             "DIR": ["msf", "paint", "rpsblast_db", "rpsproc_db"]
     ]
 
+    static final String FTP_URL = "https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6"
+
     static void validateParams(params, log) {
         def allowedParams = this.PARAMS.collect { it.name.toLowerCase() }
 
@@ -148,7 +153,7 @@ class InterProScan {
             if (allowedParams.contains(kebabParamName.toLowerCase())) {
                 def paramObj = this.PARAMS.find { it.name.toLowerCase() == kebabParamName.toLowerCase() }
                 assert paramObj != null
-                if (paramObj?.metavar != null && !paramObj?.canBeNull && !(paramValue instanceof String)) {
+                if (paramObj?.metavar != null && !paramObj?.canBeNull && (paramValue instanceof Boolean)) {
                     log.error "'--${paramObj.name} ${paramObj.metavar}' is mandatory and cannot be empty."
                     System.exit(1)
                 }
@@ -188,6 +193,26 @@ class InterProScan {
         return Files.isRegularFile(path) ? path.toRealPath() : null
     }
 
+    static Map getMemberDbReleases(def path, def ready) {
+        // Load the datadir/interpro/database.json file and set all keys to lowercase to match applications.config
+        if (ready == null) {
+            return
+        }
+        JsonSlurper jsonSlurper = new JsonSlurper()
+        def databaseJson = new File(path.toString())
+        def memberDbReleases = jsonSlurper.parse(databaseJson)
+        memberDbReleases = memberDbReleases.collectEntries { appName, versionNum ->
+            [(appName.toLowerCase()): versionNum]
+        }
+        return memberDbReleases
+    }
+
+    static List<String> getAppsWithData(List<String> applications, Map appsConfig) {
+        return applications.findAll { String appName ->
+            appsConfig.get(appName)?.has_data || InterProScan.LICENSED_SOFTWARE.contains(appName)
+        }
+    }
+
     static resolveDirectory(String dirPath, boolean mustExist = false, boolean mustBeWritable = false) {
         if (!dirPath && mustExist) { // triggered when data dir is needed but --datadir not used
             return [null, "'--datadir <DATA-DIR>' is required for the selected applications."]
@@ -211,6 +236,18 @@ class InterProScan {
                 return [null, "Cannot create directory: ${dirPath}."]
             }
         }
+    }
+
+    static findLocalHighestVersionDir(String dirPath) {
+        Path path = Paths.get(dirPath)
+        def dirs = Files.list(path)
+            .findAll { Files.isDirectory(it) && it.fileName.toString() ==~ /^\d+\.\d+$/ }
+            .sort { a, b ->
+                def (aMajor, aMinor) = a.fileName.toString().tokenize('.').collect { it.toInteger() }
+                def (bMajor, bMinor) = b.fileName.toString().tokenize('.').collect { it.toInteger() }
+                return aMajor <=> bMajor ?: aMinor <=> bMinor
+            }
+        return dirs ? dirs.last().fileName.toString() : null
     }
 
     static validateApplications(String applications, Map appsConfig) {
@@ -289,6 +326,27 @@ class InterProScan {
             }.findAll { it }
         }.join('\n')
         return returnList ? missingApps as List : (errorMsg ? "Could not find the following data files\n${errorMsg}" : null)
+    }
+
+    static String validateInterProVersion(versionParam) {
+        String version = null
+        if (versionParam instanceof Number) {
+            double num = ((Number) versionParam).doubleValue();
+            if (num == Math.floor(num)) {
+                version = String.format("%.1f", num);
+            } else {
+                version = Double.toString(num);
+            }
+        } else if (versionParam instanceof String && versionParam == "latest") {
+            version = versionParam
+        }
+        return version
+    }
+
+    static List<String> fetchCompatibleVersions(String majorMinorVersion) {
+        String url = "${InterProScan.FTP_URL}/${majorMinorVersion}/versions.json"
+        Map versions = HTTPRequest.fetch(url, null, 2, null)
+        return versions["interpro"]*.toString() ?: null
     }
 
     static validateXrefFiles(Path datadir, String interproRelease, Map xRefsConfig, boolean goterms, boolean pathways) {
