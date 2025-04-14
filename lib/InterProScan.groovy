@@ -193,8 +193,11 @@ class InterProScan {
         return Files.isRegularFile(path) ? path.toRealPath() : null
     }
 
-    static Map getMemberDbReleases(def path) {
+    static Map getMemberDbReleases(def path, def ready) {
         // Load the datadir/interpro/database.json file and set all keys to lowercase to match applications.config
+        if (ready == null) {
+            return
+        }
         JsonSlurper jsonSlurper = new JsonSlurper()
         def databaseJson = new File(path.toString())
         def memberDbReleases = jsonSlurper.parse(databaseJson)

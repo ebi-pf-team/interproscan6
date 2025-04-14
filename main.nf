@@ -50,7 +50,7 @@ workflow {
         datadir,
         params.download
     )
-    member_db_releases   = PREPARE_DATA.out.memberDbReleases.val
+    member_db_releases   = PREPARE_DATA.out.memberDbReleases
     interproscan_version = PREPARE_DATA.out.interproscanVersion.val
 
     PREPARE_SEQUENCES(fasta_file, applications)
