@@ -1,3 +1,4 @@
+import groovy.json.JsonSlurper
 
 include { DOWNLOAD as DOWNLOAD_INTERPRO } from "../../modules/download"
 include { DOWNLOAD as DOWNLOAD_DATABASE } from "../../modules/download"
@@ -93,9 +94,20 @@ Use the '--download' option to automatically download InterPro release data."""
         }
     }
 
-    ch_appls = VALIDATE_APP_DATA.out.flatMap()
+    // TODO: Fix this warning:: WARN: Input tuple does not match tuple declaration in process `PREPARE_DATA:DOWNLOAD_DATABASE` -- offending value: DataflowQueue(queue=[]
+    ch_appls = VALIDATE_APP_DATA.out.map { jsonFile ->
+        def jsonSlurper = new JsonSlurper()
+        def data = jsonSlurper.parse(new File(jsonFile.toString()))
+        return data
+    }.flatMap { items ->
+        if (items.isEmpty()) {
+            return Channel.empty()
+        } else {
+            return Channel.from(items.toList())
+        }
+    }
 
-    // Create an empty Channel to be used as default when no databases need download
+    // Create an empty Channel to be used as default when no databases have data that needs downloading
     empty_db_channel = Channel.of([]).collect()
 
     if (download) {
@@ -120,7 +132,7 @@ Use the '--download' option to automatically download InterPro release data."""
 
     // Force wait on the databases.json path whether we have apps or not
     path = "${data_dir}/${xref_config.dir}/${interpro_version}"
-    memberDbReleases = GET_DB_RELEASES(
+    memberDbReleasesPath = GET_DB_RELEASES(
         db_json_path,
         path,
         xref_config,
@@ -128,6 +140,13 @@ Use the '--download' option to automatically download InterPro release data."""
         add_pathways,
         ch_appls.collect().ifEmpty { empty_db_channel }
     )
+
+    // Wait for the channel to resolve and assign the value
+    memberDbReleasesPath.map { dbFilePath ->
+        def jsonSlurper = new JsonSlurper()
+        return jsonSlurper.parse(new File(dbFilePath.toString()))
+    }.set { memberDbReleases }
+
     interproscanVersion = iprscan_major_minor
 
     emit:

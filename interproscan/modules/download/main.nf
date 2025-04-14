@@ -35,7 +35,7 @@ process VALIDATE_APP_DATA {
     val datadir
 
     output:
-    val databases_with_version
+    path "missing_databases.json"
 
     exec:
     File file = new File(json_file)
@@ -60,6 +60,11 @@ process VALIDATE_APP_DATA {
             }
         }
     }
+
+    // Pass the output to a file to avoid the esotericsoftware.kryo.serializers warning
+    def outputFile = task.workDir.resolve("missing_databases.json")
+    outputFile.text = groovy.json.JsonOutput.toJson(databases_with_version)
+    return outputFile.toString()
 }
 
 process GET_DB_RELEASES {
@@ -73,7 +78,7 @@ process GET_DB_RELEASES {
     val ready
 
     output:
-    val databases_with_version
+    path "databases_with_version.json"
 
     exec:
     // Before getting all the dbs (inc. interpro) version numbers check we have all the interpro data
@@ -95,4 +100,9 @@ process GET_DB_RELEASES {
     databases_with_version = databases_with_version.collectEntries { appName, versionNum ->
         [(appName.toLowerCase()): versionNum]
     }
+
+    // Pass the output to a file to avoid the esotericsoftware.kryo.serializers warning
+    def outputFile = task.workDir.resolve("databases_with_version.json")
+    outputFile.text = groovy.json.JsonOutput.toJson(databases_with_version)
+    return outputFile.toString()
 }
