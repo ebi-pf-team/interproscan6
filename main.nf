@@ -97,18 +97,26 @@ workflow {
         match_results = combined.groupTuple()
     }
     // match_results format: [[meta, [member1.json, member2.json, ..., memberN.json]]
-    match_results.view()
 
-//     INTERPRO(
-//         match_results,
-//         applications,
-//         datadir,
-//         params.xRefsConfig,
-//         params.goterms,
-//         params.pathways
-//     )
+    ch_results = INTERPRO(
+        match_results,
+        applications,
+        datadir,
+        member_db_releases,
+        params.xRefsConfig,
+        params.goterms,
+        params.pathways,
+        params.appsConfig.panther.paint
+    )
 
-//     OUTPUT(ch_results)
+    OUTPUT(
+        ch_results,
+        seq_db_path,
+        formats,
+        outdir,
+        params.nucleic,
+        workflow.manifest.version
+    )
 }
 
 workflow.onComplete = {

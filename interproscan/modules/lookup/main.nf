@@ -112,12 +112,21 @@ def Map transformMatch(Map match) {
         "locations"  : match["locations"].collect { loc ->
             return [
                 *          : loc,
-                "hmmBounds": loc["hmmBounds"] ? Location.getReverseHmmBounds(loc["hmmBounds"]) : null,
+                "hmmBounds": loc["hmmBounds"] ? getReverseHmmBounds(loc["hmmBounds"]) : null,
                 "fragments": loc["fragments"].collect { tranformFragment(it) },
                 "sites"    : loc["sites"] ?: []
             ]
         },
     ]
+}
+
+def getReverseHmmBounds(hmmBounds) {
+    return [
+        "COMPLETE"            : "[]",
+        "N_TERMINAL_COMPLETE" : "[.",
+        "C_TERMINAL_COMPLETE" : ".]",
+        "INCOMPLETE"          : ".."
+    ][hmmBounds]
 }
 
 def Map tranformFragment(Map fragment) {
