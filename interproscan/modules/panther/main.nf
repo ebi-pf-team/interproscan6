@@ -1,27 +1,8 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
-process SEARCH_PANTHER {
-    label 'small', 'ips6_container'
-
-    input:
-    tuple val(meta), path(fasta)
-    path hmmdb
-
-    output:
-    tuple val(meta), path("hmmsearch.out")
-
-    script:
-    """
-    /opt/hmmer3/bin/hmmsearch \
-        -Z 65000000 -E 0.001 --domE 0.00000001 --incdomE 0.00000001 \
-        --cpu ${task.cpus} \
-        ${hmmdb} ${fasta} > hmmsearch.out
-    """
-}
-
 process PREPARE_TREEGRAFTER {
-    label 'local'
+    label 'run_locally'
 
     input:
     tuple val(meta), val(hmmseach_out)
@@ -182,7 +163,7 @@ process RUN_TREEGRAFTER {
 }
 
 process PARSE_PANTHER {
-    label 'local'
+    label 'run_locally'
 
     input:
     tuple val(meta), val(hmmseach_json), val(epagn_tsv)

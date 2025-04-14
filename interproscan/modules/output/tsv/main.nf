@@ -3,8 +3,6 @@ import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 
 process WRITE_TSV {
-    label 'local'
-
     input:
     val matchesFiles
     val outputPath
@@ -21,8 +19,8 @@ process WRITE_TSV {
 
     matchesFiles.each { matchFile ->
         matchFile = new File(matchFile.toString())
-        matchFile = new ObjectMapper().readValue(matchFile, Map)
-        matchFile.each { String proteinMd5, Map matchesMap ->
+        Map proteins = new ObjectMapper().readValue(matchFile, Map)
+        proteins.each { String proteinMd5, Map matchesMap ->
             matchesMap.each { modelAcc, match ->
                 match = Match.fromMap(match)
                 String memberDb = match.signature.signatureLibraryRelease.library
@@ -41,7 +39,7 @@ process WRITE_TSV {
                     }
                 }
             } // end of matches in matchesNode
-        } // end of matchFile.each
+        } // end of proteins.each
     } // end of matchesFiles
 }
 

@@ -2,27 +2,8 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import java.util.regex.Pattern
 
-process RUN_PIRSR {
-    label 'small', 'ips6_container'
-
-    input:
-    tuple val(meta), path(fasta)
-    path hmmdb
-
-    output:
-    tuple val(meta), path("hmmsearch.out")
-
-    script:
-    """
-    /opt/hmmer3/bin/hmmsearch \
-        -E 0.01 --acc \
-        --cpu ${task.cpus} \
-        ${hmmdb} ${fasta} > hmmsearch.out
-    """
-}
-
 process PARSE_PIRSR {
-    label 'local'
+    label 'run_locally'
 
     input:
     tuple val(meta), val(hmmsearch_out)

@@ -1,4 +1,5 @@
 nextflow.enable.dsl=2
+import groovy.json.JsonSlurper  // until selective downloads
 
 include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
 include { PREPARE_DATA                  } from "./interproscan/subworkflows/prepare_data"
@@ -34,26 +35,28 @@ workflow {
         params.interpro
     )
     fasta_file         = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
-    outdir             = INIT_PIPELINE.out.outdir.val
-    formats            = INIT_PIPELINE.out.formats.val
     applications       = INIT_PIPELINE.out.apps.val
+    data_dir           = INIT_PIPELINE.out.datadir.val
+    out_dir            = INIT_PIPELINE.out.outdir.val
+    formats            = INIT_PIPELINE.out.formats.val
     signalp_mode       = INIT_PIPELINE.out.signalp_mode.val
     interpro_version   = INIT_PIPELINE.out.version.val
-    outdir             = INIT_PIPELINE.out.outdir.val
-    datadir            = INIT_PIPELINE.out.datadir.val
 
     PREPARE_DATA(
         applications,
         params.appsConfig,
         interpro_version,
         workflow.manifest.version,
-        datadir,
+        data_dir,
         params.download
     )
     member_db_releases   = PREPARE_DATA.out.memberDbReleases
     interproscan_version = PREPARE_DATA.out.interproscanVersion.val
 
-    PREPARE_SEQUENCES(fasta_file, applications)
+    PREPARE_SEQUENCES(
+        fasta_file,
+        applications
+    )
     ch_seqs            = PREPARE_SEQUENCES.out.ch_seqs
     seq_db_path        = PREPARE_SEQUENCES.out.seq_db_path
 
@@ -65,10 +68,12 @@ workflow {
             member_db_releases,
             applications,
             params.appsConfig,
-            datadir
+            data_dir
         )
         match_results = SCAN_SEQUENCES.out
     } else {
+        /* Retrieve precalculated matches from the Match lookup API
+        Then run analyses on sequences not listed in the API */
         PRECALCULATED_MATCHES(
             ch_seqs,
             applications,
@@ -86,7 +91,7 @@ workflow {
             member_db_releases,
             applications,
             params.appsConfig,
-            datadir
+            data_dir
         )
 
         def expandedScan = SCAN_SEQUENCES.out.flatMap { scan ->
@@ -98,10 +103,15 @@ workflow {
     }
     // match_results format: [[meta, [member1.json, member2.json, ..., memberN.json]]
 
+    /* INTERPRO:
+    Aggregate matches across all members for each sequence --> single JSON with all matches for the batch
+    Add InterPro signature and entry desc and names, PAINT annotations (panther only),
+    go terms (if enabled), and pathways (if enabled). Then identify representative domains and families
+    */
     ch_results = INTERPRO(
         match_results,
         applications,
-        datadir,
+        data_dir,
         member_db_releases,
         params.xRefsConfig,
         params.goterms,
@@ -113,7 +123,7 @@ workflow {
         ch_results,
         seq_db_path,
         formats,
-        outdir,
+        out_dir
         params.nucleic,
         workflow.manifest.version
     )

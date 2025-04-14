@@ -2,7 +2,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 
 process REPRESENTATIVE_LOCATIONS {
-    label 'local'
+    label 'run_locally'
 
     input:
     tuple val(meta), val(matchesPath)

@@ -196,34 +196,54 @@ class SeqDB {
         return [id: id, description: description, md5: md5]
     }
 
-    void splitFasta(String outputPrefix, int maxSequencesPerFile) {
-        String query = "SELECT md5, sequence FROM PROTEIN_SEQUENCE ORDER BY md5"
+    void splitFasta(String outputPrefix, int maxSequencesPerFile, boolean nucleic) {
+        String query = nucleic ? """SELECT P2N.nt_md5, S.md5, S.sequence
+            FROM PROTEIN_SEQUENCE AS S
+            INNER JOIN PROTEIN AS P ON S.md5 = P.md5
+            INNER JOIN PROTEIN_TO_NUCLEOTIDE AS P2N ON P.md5 = P2N.protein_md5
+            ORDER BY P2N.nt_md5""" : "SELECT NULL AS nt_md5, md5, sequence FROM PROTEIN_SEQUENCE ORDER BY md5"
         int fileIndex = 1
-        int seqCounter = 0
-
-        // Open the first file for writing
-        def writer = new File("${outputPrefix}.${fileIndex}.fasta").newWriter()
+        def batch = []
+        def currentMD5 = null
+        def writer = null
 
         this.sql.eachRow(query) { row ->
-            if (seqCounter >= maxSequencesPerFile) {
-                // We've reached the maximum for the current file: close it and open a new file
+            // If we encounter a new nt_md5 and the batch is full --> write to a new batch
+            if (currentMD5 && currentMD5 != row.nt_md5 && batch.size() >= maxSequencesPerFile) {
+                writer = new File("${outputPrefix}.${fileIndex}.fasta").newWriter()
+                for (record in batch) {
+                    writer.writeLine(">${record.md5}")
+                    String sequence = record.sequence
+                    for (int i = 0; i < sequence.length(); i += 60) {
+                        int end = Math.min(i + 60, sequence.length())
+                        writer.writeLine(sequence.substring(i, end))
+                    }
+                }
                 writer.close()
                 fileIndex++
-                seqCounter = 0
-                writer = new File("${outputPrefix}.${fileIndex}.fasta").newWriter()
+                batch.clear()
             }
-
-            writer.writeLine(">${row.md5}")
-
-            String sequence = row.sequence
-            for (int i = 0; i < sequence.length(); i += 60) {
-                int end = Math.min(i + 60, sequence.length())
-                writer.writeLine(sequence.substring(i, end))
-            }
-            seqCounter++
+            // Don't add the GroovyResultSet item, else when writing the final batch we will get a ResultSet closed error
+            batch.add([
+                nt_md5  : row.nt_md5,
+                md5     : row.md5,
+                sequence: row.sequence
+            ])
+            currentMD5 = nucleic ? row.nt_md5 : row.md5
         }
 
-        writer.close()
+        // write the final batch
+        if (!batch.isEmpty()) {
+            writer = new File("${outputPrefix}.${fileIndex}.fasta").newWriter()
+            batch.each { record ->
+                writer.writeLine(">${record.md5}")
+                def seq = record.sequence
+                for (int i = 0; i < seq.length(); i += 60) {
+                    writer.writeLine(seq.substring(i, Math.min(i + 60, seq.length())))
+                }
+            }
+            writer.close()
+        }
     }
 
     def groupProteins(Map proteinMatches) {
@@ -232,10 +252,9 @@ class SeqDB {
         def nucleicRelationships = [:]  // [ntSeqId: [proteinMd5]]
         proteinMatches.each { proteinMD5, matchesNode ->
             // get all parent NT seq Ids
-            def query = """SELECT N.md5 AS nt_md5
-                FROM NUCLEOTIDE AS N
-                LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.md5 = N2P.nt_md5
-                WHERE N2P.protein_md5 = ?
+            def query = """SELECT DISTINCT nt_md5
+                FROM PROTEIN_TO_NUCLEOTIDE
+                WHERE protein_md5 = ?
                 """
             this.sql.eachRow(query, [proteinMD5]) { row ->
                 nucleicRelationships.computeIfAbsent(row.nt_md5, { [] as Set })
@@ -248,9 +267,9 @@ class SeqDB {
     List<String> proteinMd5ToNucleicSeq(String proteinMD5) {
         def query = """SELECT N.id AS nid, N.description, S.sequence, P.id AS pid
             FROM NUCLEOTIDE AS N
-            LEFT JOIN NUCLEOTIDE_SEQUENCE AS S ON N.md5 = S.md5
-            LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.md5 = N2P.nt_md5
-            LEFT JOIN PROTEIN AS P ON N2P.protein_md5 = P.md5
+            INNER JOIN NUCLEOTIDE_SEQUENCE AS S ON N.md5 = S.md5
+            INNER JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.md5 = N2P.nt_md5
+            INNER JOIN PROTEIN AS P ON N2P.protein_md5 = P.md5
             WHERE P.md5 = ?;
             """
         return this.sql.rows(query, [proteinMD5])
@@ -259,7 +278,7 @@ class SeqDB {
     List<String> proteinMd5ToProteinSeq(String proteinMD5) {
         def query = """SELECT P.id, P.description, S.sequence
             FROM PROTEIN AS P
-            LEFT JOIN PROTEIN_SEQUENCE AS S ON P.md5 = S.md5
+            INNER JOIN PROTEIN_SEQUENCE AS S ON P.md5 = S.md5
             WHERE P.md5 = ?;
             """
         return this.sql.rows(query, [proteinMD5])
@@ -268,18 +287,23 @@ class SeqDB {
     List<String> nucleicMd5ToNucleicSeq(String nucleicMD5) {
         def query = """SELECT N.id, N.description, S.sequence
             FROM NUCLEOTIDE AS N
-            LEFT JOIN NUCLEOTIDE_SEQUENCE AS S ON N.md5 = S.md5
+            INNER JOIN NUCLEOTIDE_SEQUENCE AS S ON N.md5 = S.md5
             WHERE N.md5 = ?;
             """
         return this.sql.rows(query, [nucleicMD5])
     }
 
     List<String> getOrfSeq(String proteinMD5, String nucleicMD5) {
+        /* A protein seq may be associated with multiple nucleotide seqs.
+        This could because of duplication or multiple nucleotide seqs encoding the same protein.
+        To ensure we return the data for the protein associated for ONLY the current working nucleotide
+        seq we need to check the nucleotide seq ID against the description generated by ESL_translate.
+         */
         def query = """SELECT P.id, P.description, S.sequence, N.id AS nt_id
             FROM PROTEIN AS P
-            LEFT JOIN PROTEIN_SEQUENCE AS S ON P.md5 = S.md5
-            LEFT JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON P.md5 = N2P.protein_md5
-            LEFT JOIN NUCLEOTIDE AS N ON N2P.nt_md5 = N.md5
+            INNER JOIN PROTEIN_SEQUENCE AS S ON P.md5 = S.md5
+            INNER JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON P.md5 = N2P.protein_md5
+            INNER JOIN NUCLEOTIDE AS N ON N2P.nt_md5 = N.md5
             WHERE P.md5 = ? AND N.md5 = ? AND P.description LIKE 'source=' || N.id || '%';
             """
         return this.sql.rows(query, [proteinMD5, nucleicMD5])

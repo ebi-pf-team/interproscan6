@@ -6,8 +6,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import java.util.regex.Pattern
 
 process WRITE_JSON {
-    label 'local', 'ips6_container'
-
     input:
     val matchesFiles  // {query prot seq md5: {model acc: match}}
     val outputPath
@@ -28,14 +26,14 @@ process WRITE_JSON {
         jsonWriter.writeStartArray()  // start of results [...
         matchesFiles.each { matchFile ->
             if (nucleic) {  // input was nucleic acid sequence
-                matchFile = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
-                nucleicToProteinMd5 = db.groupProteins(matchFile)
+                Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
+                nucleicToProteinMd5 = db.groupProteins(proteins)
                 nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
-                    writeNucleic(nucleicMd5, proteinMd5s, matchFile, jsonWriter, db)
+                    writeNucleic(nucleicMd5, proteinMd5s, proteins, jsonWriter, db)
                 }
             } else {  // input was protein sequences
-                matchFile = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
-                matchFile.each { String proteinMd5, Map proteinMatches ->
+                Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
+                proteins.each { String proteinMd5, Map proteinMatches ->
                     writeProtein(proteinMd5, proteinMatches, jsonWriter, db)
                 }
             }

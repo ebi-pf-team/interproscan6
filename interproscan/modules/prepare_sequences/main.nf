@@ -1,6 +1,6 @@
 process VALIDATE_FASTA {
     // check the formating of the intput FASTA, i.e. look for illegal characters
-    label         'local', 'ips6_container'
+    label         'run_locally', 'ips6_container'
     errorStrategy 'terminate'
 
     input:
@@ -94,8 +94,8 @@ process VALIDATE_FASTA {
 }
 
 process LOAD_SEQUENCES {
-    // Populate a local sqlite3 database with sequences from the pipeline's input FASTA file.
-    label         'local'
+    // Populate a run_locally sqlite3 database with sequences from the pipeline's input FASTA file.
+    label         'run_locally'
     errorStrategy 'terminate'
 
     input:
@@ -114,7 +114,7 @@ process LOAD_SEQUENCES {
 
 process LOAD_ORFS {
     // add protein seqs translated from ORFS in the nt seqs to the database
-    label         'local'
+    label         'run_locally'
     errorStrategy 'terminate'
 
     input:
@@ -134,12 +134,13 @@ process LOAD_ORFS {
 
 process SPLIT_FASTA {
     // Build the FASTA file batches of unique protein sequences for the sequence analysis
-    label         'local'
+    label         'run_locally'
     errorStrategy 'terminate'
 
     input:
     val dbPath
     val batchSize
+    val nucleic
 
     output:
     path "*.fasta"
@@ -147,6 +148,6 @@ process SPLIT_FASTA {
     exec:
     String prefix = task.workDir.resolve("input").toString()
     SeqDB db = new SeqDB(dbPath.toString())
-    db.splitFasta(prefix, batchSize)
+    db.splitFasta(prefix, batchSize, nucleic)
     db.close()
 }

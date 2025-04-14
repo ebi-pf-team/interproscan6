@@ -3,7 +3,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 
 process XREFS {
-    label 'local', 'tiny'
+    label 'run_locally', 'tiny'
 
     input:
     tuple val(meta), val(members_matches)

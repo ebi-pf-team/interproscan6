@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
-process SEARCH_SMART {
-    label 'medium', 'ips6_container'
+process SCAN_SMART {
+    label 'small', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -12,14 +12,105 @@ process SEARCH_SMART {
 
     script:
     """
-    /opt/hmmer2/bin/hmmpfam \
-        --acc -A 0 -E 0.01 -Z 350000 \
+    /opt/hmmer3/bin/hmmsearch \
+        -E 100 --domE 100 --incE 100 --incdomE 100 \
         ${hmmbindb} ${fasta} > hmmpfam.out
     """
 }
 
+process PREPARE_SMART {
+    label 'run_locally'
+
+    input:
+    tuple val(meta), val(hmmseach_out), val(fasta)
+    val chunk_size
+    val model_dir
+
+    output:
+    tuple val(meta), path("chunk_*.fasta"), val(smarts)
+
+    exec:
+    // Extract model accessions against which at least one sequence match was found
+    def matches = HMMER3.parseOutput(hmmseach_out.toString(), "SMART")
+    smarts = matches.values()
+        .collect { jsonMatches -> jsonMatches.keySet() }
+        .flatten()
+        .unique()
+        .findAll { smartId ->
+            String hmmPath = "${smartId}.hmm"
+            new File("${model_dir}/${hmmPath}").exists()
+        }
+
+    // Build a custom FASTA file with only the seqs that at least one SMART model matches
+    def matchedSeqIds = matches.keySet()
+    Map<String, String> allSeqs = FastaFile.parse(fasta.toString())
+    // Filter to only the matching sequences
+    def matchedSeqs = matchedSeqIds.collectEntries { [(it): allSeqs[it]] }
+
+    // Chunk the sequences
+    def chunkedFastaPaths = []
+    def chunk = []
+    int chunkIndex = 0
+
+    matchedSeqs.each { seqId, seq ->
+        if (chunk.size() >= chunk_size) {
+            def chunkFile = file("${task.workDir}/chunk_${chunkIndex}.fasta")
+            chunkFile.withWriter { writer ->
+                chunk.each { chunkSeqId, chunkSeq ->
+                    writer.writeLine(">${chunkSeqId}")
+                    for (int i = 0; i < chunkSeq.length(); i += 60) {
+                        writer.writeLine(chunkSeq.substring(i, Math.min(i + 60, chunkSeq.length())))
+                    }
+                }
+            }
+            chunkedFastaPaths << chunkFile
+            chunk = []
+            chunkIndex++
+        } else {
+            chunk << [seqId, seq]
+        }
+    }
+    // Write the final chunk
+    if (!chunk.isEmpty()) {
+        def chunkFile = file("${task.workDir}/chunk_${chunkIndex}.fasta")
+        chunkFile.withWriter { writer ->
+            chunk.each { chunkSeqId, chunkSeq ->
+                writer.writeLine(">${chunkSeqId}")
+                for (int i = 0; i < chunkSeq.length(); i += 60) {
+                    writer.writeLine(chunkSeq.substring(i, Math.min(i + 60, chunkSeq.length())))
+                }
+            }
+        }
+        chunkedFastaPaths << chunkFile
+    }
+}
+
+process SEARCH_SMART {
+    label 'medium', 'ips6_container'
+
+    input:
+    tuple val(meta), path(fasta), val(smarts)
+    val model_dir
+
+    output:
+    tuple val(meta), path("hmmpfam.out"), path(fasta)
+
+    script:
+    def commands = ""
+    smarts.each { smartFile ->
+        String hmmFilePath = "${model_dir}/${smartFile}.hmm"  // reassign to a var so the cmd can run
+        commands += "/opt/hmmer2/bin/hmmpfam"
+        commands += " --acc -A 0 -E 0.01 -Z 350000"
+        commands += " $hmmFilePath $fasta >> hmmpfam.out\n"
+    }
+
+    """
+    ${commands}
+    """
+}
+
 process PARSE_SMART {
-    label 'local'
+    label 'run_locally'
 
     input:
     tuple val(meta), val(hmmpfam_out), val(fasta)

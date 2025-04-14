@@ -1,6 +1,6 @@
 import groovy.json.JsonOutput
 
-process RUN_PIRSF {
+process SEARCH_PIRSF {
     label 'small', 'ips6_container'
 
     input:
@@ -21,7 +21,7 @@ process RUN_PIRSF {
 }
 
 process PARSE_PIRSF {
-    label 'local'
+    label 'run_locally'
 
     input:
     tuple val(meta), val(hmmsearch_dtbl)

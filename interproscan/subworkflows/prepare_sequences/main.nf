@@ -40,7 +40,7 @@ workflow PREPARE_SEQUENCES {
         seq_db_path = LOAD_SEQUENCES(validated_fasta, params.nucleic)
     }
     // Build batches of unique protein seqs for the analysis
-    SPLIT_FASTA(seq_db_path, params.batchSize)
+    SPLIT_FASTA(seq_db_path, params.batchSize, params.nucleic)
 
     fastaList = SPLIT_FASTA.out.collect()
     // Convert a list (or single file path) to a list of tuples containing indexed fasta file paths

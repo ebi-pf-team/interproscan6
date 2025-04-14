@@ -1,6 +1,6 @@
 import groovy.json.JsonOutput
 
-process RUN_SFLD {
+process SEARCH_SFLD {
     label 'small', 'ips6_container'
 
     input:
@@ -46,7 +46,7 @@ process POST_PROCESS_SFLD {
 }
 
 process PARSE_SFLD {
-    label 'local'
+    label 'run_locally'
 
     input:
     tuple val(meta), val(postprocess_out), val(hmmsearch_out)
