@@ -2,6 +2,7 @@
 include { DOWNLOAD as DOWNLOAD_INTERPRO } from "../../modules/download"
 include { DOWNLOAD as DOWNLOAD_DATABASE } from "../../modules/download"
 include { PREPARE_DOWNLOADS             } from "../../modules/download"
+include { GET_MEMBER_RELEASES           } from "../../modules/download"
 
 
 workflow PREPARE_DATA {
@@ -73,7 +74,8 @@ To ensure you're using the latest compatible data, re-run with the --download op
                 iprscan_major_minor,
                 datadir
             )
-
+            // ready_ch = DOWNLOAD_INTERPRO.out.collect()
+            // memberDbReleases = InterProScan.getMemberDbReleases(path, ready_ch)
             PREPARE_DOWNLOADS(
                 DOWNLOAD_INTERPRO.out,
                 path,
@@ -90,6 +92,9 @@ Use the '--download' option to automatically download InterPro release data."""
 
     ch_appls = PREPARE_DOWNLOADS.out.flatMap()
 
+    // Create an empty Channel to be used as default when no databases need download
+    empty_db_channel = Channel.of([]).collect()
+
     if (download) {
         ch_ready = DOWNLOAD_DATABASE(
             ch_appls,
@@ -97,19 +102,24 @@ Use the '--download' option to automatically download InterPro release data."""
             datadir
         ).collect()
     } else {
-        ch_appls
-            .map { app -> "Database: ${app[0]} - Release: ${app[1]}" }
-            .collect()
-            .subscribe { lines ->
-                def msg = lines.join("\n")
+        // Check if we have apps that need download
+        ch_appls_check = ch_appls.collect()
+        ch_appls_check.subscribe { apps ->
+            if (apps.size() > 0) {
+                def msg = apps.collect { app -> "Database: ${app[0]} - Release: ${app[1]}" }.join("\n")
                 log.error """Data is missing in ${datadir} for the following applications:
 ${msg}
 Use the '--download' option to automatically download InterPro release data."""
                 exit 1
             }
+        }
     }
 
-    memberDbReleases = InterProScan.getMemberDbReleases(path)
+    // Force wait on the databases.json path whether we have apps or not
+    memberDbReleases = GET_MEMBER_RELEASES(
+        path,
+        ch_appls.collect().ifEmpty { empty_db_channel }
+    )
     interproscanVersion = iprscan_major_minor
 
     emit:

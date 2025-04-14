@@ -40,17 +40,18 @@ process PREPARE_DOWNLOADS {
     exec:
     File file = new File(json_file)
     def json = new JsonSlurper().parse(file)
-    def normalized_json = [:]
+    def normalised_json = [:]
     json.each { key, value ->
-        normalized_json[key.replaceAll(/[\s\-]+/, '').toLowerCase()] = value
+        normalised_json[key.replaceAll(/[\s\-]+/, '').toLowerCase()] = value
     }
 
     databases_with_version = [] as Set
     databases.each { db_name ->
         if (app_dirs.containsKey(db_name)) {
-            assert normalized_json.containsKey(db_name)
-            def db_version = normalized_json[db_name]
-            def db_dir_parts = app_dirs[db_name]
+            def normalised_name = db_name.replaceAll(/[\s\-]+/, '').toLowerCase()
+            assert normalised_json.containsKey(normalised_name)
+            def db_version = normalised_json[normalised_name]
+            def db_dir_parts = app_dirs[normalised_name]
             def db_dir = db_dir_parts[0]
             def db_subdir = db_dir_parts[1]
             Path path = Paths.get("${datadir}/${db_dir}/${db_version}/${db_subdir}")
@@ -62,6 +63,7 @@ process PREPARE_DOWNLOADS {
 }
 
 process GET_MEMBER_RELEASES {
+    // Run as a process to ensure it runs after all downloading is complete
     input:
     val json_file
     val ready
@@ -71,8 +73,8 @@ process GET_MEMBER_RELEASES {
 
     exec:
     JsonSlurper jsonSlurper = new JsonSlurper()
-    def databaseJson = new File(path.toString())
-    def databases_with_version = jsonSlurper.parse(databaseJson)
+    def databaseJson = new File(json_file.toString())
+    databases_with_version = jsonSlurper.parse(databaseJson)
     databases_with_version = databases_with_version.collectEntries { appName, versionNum ->
         [(appName.toLowerCase()): versionNum]
     }
