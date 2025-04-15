@@ -21,7 +21,7 @@ process PREPROCESS_HAMAP {
 }
 
 process PREPARE_HAMAP {
-    label 'run_locally'
+    executor 'local'
 
     input:
     tuple val(meta), val(hmmsearch_tab), val(fasta)
@@ -100,7 +100,7 @@ process RUN_HAMAP {
 }
 
 process PARSE_HAMAP {
-    label 'run_locally'
+    executor 'local'
 
     input:
     tuple val(meta), val(pfsearch_out)

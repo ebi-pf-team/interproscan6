@@ -22,7 +22,7 @@ process RUN_PIRSR {
 }
 
 process PARSE_PIRSR {
-    label 'run_locally'
+    executor 'local'
 
     input:
     tuple val(meta), val(hmmsearch_out)

@@ -46,7 +46,7 @@ process POST_PROCESS_SFLD {
 }
 
 process PARSE_SFLD {
-    label 'run_locally'
+    executor 'local'
 
     input:
     tuple val(meta), val(postprocess_out), val(hmmsearch_out)

@@ -19,7 +19,7 @@ process SEARCH_SMART {
 }
 
 process PARSE_SMART {
-    label 'run_locally'
+    executor 'local'
 
     input:
     tuple val(meta), val(hmmpfam_out), val(fasta)

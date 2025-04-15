@@ -5,7 +5,7 @@ import java.io.StringWriter
 import java.util.regex.Pattern
 
 process WRITE_XML_OUTPUT {
-    label 'run_locally'
+    executor 'local'
 
     input:
     val matchesFiles  // {query prot seq md5: {model acc: match}}

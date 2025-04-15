@@ -20,7 +20,7 @@ process RUN_NCBIFAM {
 }
 
 process PARSE_NCBIFAM {
-    label 'run_locally'
+    executor 'local'
 
     input:
     tuple val(meta), val(hmmseach_out)

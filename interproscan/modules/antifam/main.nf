@@ -20,7 +20,7 @@ process RUN_ANTIFAM {
 }
 
 process PARSE_ANTIFAM {
-    label 'run_locally'
+    executor 'local'
 
     input:
     tuple val(meta), val(hmmseach_out)

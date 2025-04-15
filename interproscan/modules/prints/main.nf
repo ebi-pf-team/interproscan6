@@ -22,7 +22,7 @@ process RUN_PRINTS {
 }
 
 process PARSE_PRINTS {
-    label 'run_locally'
+    executor 'local'
 
     input:
     tuple val(meta), val(prints_output)
