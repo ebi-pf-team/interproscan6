@@ -94,18 +94,7 @@ Use the '--download' option to automatically download InterPro release data."""
         }
     }
 
-    // TODO: Fix this warning:: WARN: Input tuple does not match tuple declaration in process `PREPARE_DATA:DOWNLOAD_DATABASE` -- offending value: DataflowQueue(queue=[]
-    ch_appls = VALIDATE_APP_DATA.out.map { jsonFile ->
-        def jsonSlurper = new JsonSlurper()
-        def data = jsonSlurper.parse(new File(jsonFile.toString()))
-        return data
-    }.flatMap { items ->
-        if (items.isEmpty()) {
-            return Channel.empty()
-        } else {
-            return Channel.from(items.toList())
-        }
-    }
+    ch_appls = VALIDATE_APP_DATA.out.flatMap()
 
     // Create an empty Channel to be used as default when no databases have data that needs downloading
     empty_db_channel = Channel.of([]).collect()
@@ -131,6 +120,7 @@ Use the '--download' option to automatically download InterPro release data."""
     }
 
     // Force wait on the databases.json path whether we have apps or not
+    // This ensures the SCAN subworkflow does not start until all data has finished downloading
     path = "${data_dir}/${xref_config.dir}/${interpro_version}"
     memberDbReleasesPath = GET_DB_RELEASES(
         db_json_path,

@@ -1,6 +1,7 @@
 import java.io.File
 import java.nio.file.*
 import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
 
 process DOWNLOAD {
     maxForks 1
@@ -35,7 +36,7 @@ process VALIDATE_APP_DATA {
     val datadir
 
     output:
-    path "missing_databases.json"
+    val databases_with_version
 
     exec:
     File file = new File(json_file)
@@ -60,11 +61,6 @@ process VALIDATE_APP_DATA {
             }
         }
     }
-
-    // Pass the output to a file to avoid the esotericsoftware.kryo.serializers warning
-    def outputFile = task.workDir.resolve("missing_databases.json")
-    outputFile.text = groovy.json.JsonOutput.toJson(databases_with_version)
-    return outputFile.toString()
 }
 
 process GET_DB_RELEASES {
@@ -82,7 +78,7 @@ process GET_DB_RELEASES {
 
     exec:
     // Before getting all the dbs (inc. interpro) version numbers check we have all the interpro data
-    // member data was checked in PREPARE_DOWNLOADS
+    // Member data was checked in PREPARE_DOWNLOADS
     error = InterProScan.validateXrefFiles(
         xref_dir,
         xref_config,
@@ -94,15 +90,17 @@ process GET_DB_RELEASES {
         exit 1
     }
 
+    // Bring back app file checking?
+
     JsonSlurper jsonSlurper = new JsonSlurper()
     def databaseJson = new File(db_json_file.toString())
-    databases_with_version = jsonSlurper.parse(databaseJson)
+    def databases_with_version = jsonSlurper.parse(databaseJson)
     databases_with_version = databases_with_version.collectEntries { appName, versionNum ->
         [(appName.toLowerCase()): versionNum]
     }
 
     // Pass the output to a file to avoid the esotericsoftware.kryo.serializers warning
     def outputFile = task.workDir.resolve("databases_with_version.json")
-    outputFile.text = groovy.json.JsonOutput.toJson(databases_with_version)
-    return outputFile.toString()
+    def json = JsonOutput.toJson(databases_with_version)
+    new File(outputFile.toString()).write(json)
 }
