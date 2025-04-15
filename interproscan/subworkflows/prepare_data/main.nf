@@ -121,21 +121,15 @@ Use the '--download' option to automatically download InterPro release data."""
 
     // Force wait on the databases.json path whether we have apps or not
     // This ensures the SCAN subworkflow does not start until all data has finished downloading
-    path = "${data_dir}/${xref_config.dir}/${interpro_version}"
-    memberDbReleasesPath = GET_DB_RELEASES(
+    xref_path = "${data_dir}/${xref_config.dir}/${interpro_version}"
+    memberDbReleases = GET_DB_RELEASES(
         db_json_path,
-        path,
+        xref_path,
         xref_config,
         add_goterms,
         add_pathways,
         ch_appls.collect().ifEmpty { empty_db_channel }
     )
-
-    // Wait for the channel to resolve and assign the value
-    memberDbReleasesPath.map { dbFilePath ->
-        def jsonSlurper = new JsonSlurper()
-        return jsonSlurper.parse(new File(dbFilePath.toString()))
-    }.set { memberDbReleases }
 
     interproscanVersion = iprscan_major_minor
 

@@ -64,6 +64,8 @@ process VALIDATE_APP_DATA {
 }
 
 process GET_DB_RELEASES {
+    cache false  // Stops the esotericsoftware.kryo.serializers warning
+
     // Run as a process to ensure it runs after all downloading is complete
     input:
     val db_json_file
@@ -74,11 +76,11 @@ process GET_DB_RELEASES {
     val ready
 
     output:
-    path "databases_with_version.json"
+    val databases_with_version
 
     exec:
     // Before getting all the dbs (inc. interpro) version numbers check we have all the interpro data
-    // Member data was checked in PREPARE_DOWNLOADS
+    // member data was checked in PREPARE_DOWNLOADS
     error = InterProScan.validateXrefFiles(
         xref_dir,
         xref_config,
@@ -90,17 +92,10 @@ process GET_DB_RELEASES {
         exit 1
     }
 
-    // Bring back app file checking?
-
     JsonSlurper jsonSlurper = new JsonSlurper()
     def databaseJson = new File(db_json_file.toString())
-    def databases_with_version = jsonSlurper.parse(databaseJson)
+    databases_with_version = jsonSlurper.parse(databaseJson)
     databases_with_version = databases_with_version.collectEntries { appName, versionNum ->
         [(appName.toLowerCase()): versionNum]
     }
-
-    // Pass the output to a file to avoid the esotericsoftware.kryo.serializers warning
-    def outputFile = task.workDir.resolve("databases_with_version.json")
-    def json = JsonOutput.toJson(databases_with_version)
-    new File(outputFile.toString()).write(json)
 }
