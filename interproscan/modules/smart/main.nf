@@ -1,6 +1,6 @@
 import groovy.json.JsonOutput
 
-process SCAN_SMART {
+process PREFILTER_SMART {
     label 'small', 'ips6_container'
 
     input:

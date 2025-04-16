@@ -17,7 +17,7 @@ include { RUN_PFSEARCH ; PARSE_PFSEARCH                                         
 include { RUN_SFLD; POST_PROCESS_SFLD; PARSE_SFLD                                 } from  "../../modules/sfld"
 include { RUN_SIGNALP as RUN_SIGNALP_EUK; PARSE_SIGNALP as PARSE_SIGNALP_EUK      } from  "../../modules/signalp"
 include { RUN_SIGNALP as RUN_SIGNALP_PROK; PARSE_SIGNALP as PARSE_SIGNALP_PROK    } from  "../../modules/signalp"
-include { SCAN_SMART; PREPARE_SMART; SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
+include { PREFILTER_SMART; PREPARE_SMART; SEARCH_SMART; PARSE_SMART                                               } from  "../../modules/smart"
 include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY                                   } from  "../../modules/superfamily"
 include { RUN_DEEPTMHMM; PARSE_DEEPTMHMM                                          } from  "../../modules/tmhmm"
 
@@ -304,13 +304,13 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("smart")) {
-        SCAN_SMART(
+        PREFILTER_SMART(
             ch_seqs,
             "${datadir}/${appsConfig.smart.hmm}"
         )
 
         PREPARE_SMART(
-            SCAN_SMART.out,
+            PREFILTER_SMART.out,
             appsConfig.smart.chunkSize,
             "${datadir}/${appsConfig.smart.hmm_dir}"
         )
