@@ -1,3 +1,4 @@
+import java.nio.file.Files
 import groovy.json.JsonOutput
 
 process PREFILTER_SMART {
@@ -96,10 +97,9 @@ process SEARCH_SMART {
     tuple val(meta), path("hmmpfam.out"), path(fasta)
 
     script:
-    def f = fasta
     def commands = ""
     smarts.each { smartFile ->
-        f.each { chunkFile ->
+        fasta.each { chunkFile ->
             String hmmFilePath = "${model_dir}/${smartFile}.hmm"  // reassign to a var so the cmd can run
             commands += "/opt/hmmer2/bin/hmmpfam"
             commands += " --acc -A 0 -E 0.01 -Z 350000"
@@ -123,9 +123,14 @@ process PARSE_SMART {
     tuple val(meta), path("smart.json")
 
     exec:
-    Map<String, String> sequences = [:]  // [md5: sequence]
-    fasta.each { fastaFile ->
-        sequences = sequences + FastaFile.parse(fastaFile.toString())
+    // fasta may be a single file or multiple
+    Map<String, String> sequences = [:] // [md5: sequence]
+    if (Files.exists(fasta)) {
+        sequences = FastaFile.parse(fasta.toString())
+    } else {
+        fasta.each { fastaFile ->
+            sequences = sequences + FastaFile.parse(fastaFile.toString())
+        }
     }
 
     def hmmLengths = HMMER2.parseHMM(hmmtxtdb.toString())
