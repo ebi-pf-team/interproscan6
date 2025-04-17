@@ -26,9 +26,14 @@ process XREFS {
     def paintAnnoDir = "${data_dir}/${member_db_releases.panther}/${paint_anno_dir}"
 
     // Load entries data. NOTE: The entries, go terms and pathway files are too large for JsonSlurper to handle.
-    String entriesPath = "${xrefDir}/${entries_file}"
-    def (entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null]
-    if (data_dir.toString().trim()) {  // data_dir is not needed when exclusively running members with no interpro data
+
+    def interProDataDir = dataDir
+    def (databaseInfo, entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null, null]
+    if (dataDir.toString().trim()) {  // datadir is not needed when exclusively running members with no interpro data
+        String databasesPath = "${interProDataDir}/${databasesFile}"
+        File databasesJson = new File(databasesPath)
+        databaseInfo = new ObjectMapper().readValue(databasesJson, Map)
+        String entriesPath = "${interProDataDir}/${entriesFile}"
         File entriesJson = new File(entriesPath)
         entries = new ObjectMapper().readValue(entriesJson, Map)
         if (add_goterms) (ipr2go, goInfo) = loadXRefFiles(goterm_file_prefix, xrefDir)
