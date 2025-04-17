@@ -1,7 +1,8 @@
+import java.nio.file.Files
 import groovy.json.JsonOutput
 
-process SEARCH_SMART {
-    label 'medium', 'ips6_container'
+process PREFILTER_SMART {
+    label 'small', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -12,9 +13,102 @@ process SEARCH_SMART {
 
     script:
     """
-    /opt/hmmer2/bin/hmmpfam \
-        --acc -A 0 -E 0.01 -Z 350000 \
+    /opt/hmmer3/bin/hmmsearch \
+        -E 100 --domE 100 --incE 100 --incdomE 100 \
         ${hmmbindb} ${fasta} > hmmpfam.out
+    """
+}
+
+process PREPARE_SMART {
+    label 'run_locally'
+
+    input:
+    tuple val(meta), val(hmmseach_out), val(fasta)
+    val chunk_size
+    val model_dir
+
+    output:
+    tuple val(meta), path("chunk_*.fasta"), val(smarts)
+
+    exec:
+    // Extract model accessions against which at least one sequence match was found
+    def matches = HMMER3.parseOutput(hmmseach_out.toString(), "SMART")
+    smarts = matches.values()
+        .collect { jsonMatches -> jsonMatches.keySet() }
+        .flatten()
+        .unique()
+        .findAll { smartId ->
+            String hmmPath = "${smartId}.hmm"
+            new File("${model_dir}/${hmmPath}").exists()
+        }
+
+    // Build a custom FASTA file with only the seqs that at least one SMART model matches
+    def matchedSeqIds = matches.keySet()
+    Map<String, String> allSeqs = FastaFile.parse(fasta.toString())
+    // Filter to only the matching sequences
+    def matchedSeqs = matchedSeqIds.collectEntries { [(it): allSeqs[it]] }
+
+    // Chunk the sequences
+    def chunkedFastaPaths = []
+    def chunk = []
+    int chunkIndex = 0
+
+    matchedSeqs.each { seqId, seq ->
+        if (chunk.size() >= chunk_size) {
+            def chunkFile = file("${task.workDir}/chunk_${chunkIndex}.fasta")
+            chunkFile.withWriter { writer ->
+                chunk.each { chunkSeqId, chunkSeq ->
+                    writer.writeLine(">${chunkSeqId}")
+                    for (int i = 0; i < chunkSeq.length(); i += 60) {
+                        writer.writeLine(chunkSeq.substring(i, Math.min(i + 60, chunkSeq.length())))
+                    }
+                }
+            }
+            chunkedFastaPaths << chunkFile
+            chunk = []
+            chunkIndex++
+        } else {
+            chunk << [seqId, seq]
+        }
+    }
+    // Write the final chunk
+    if (!chunk.isEmpty()) {
+        def chunkFile = file("${task.workDir}/chunk_${chunkIndex}.fasta")
+        chunkFile.withWriter { writer ->
+            chunk.each { chunkSeqId, chunkSeq ->
+                writer.writeLine(">${chunkSeqId}")
+                for (int i = 0; i < chunkSeq.length(); i += 60) {
+                    writer.writeLine(chunkSeq.substring(i, Math.min(i + 60, chunkSeq.length())))
+                }
+            }
+        }
+        chunkedFastaPaths << chunkFile
+    }
+}
+
+process SEARCH_SMART {
+    label 'medium', 'ips6_container'
+
+    input:
+    tuple val(meta), path(fasta), val(smarts)
+    val model_dir
+
+    output:
+    tuple val(meta), path("hmmpfam.out"), path(fasta)
+
+    script:
+    def commands = ""
+    smarts.each { smartFile ->
+        fasta.each { chunkFile ->
+            String hmmFilePath = "${model_dir}/${smartFile}.hmm"  // reassign to a var so the cmd can run
+            commands += "/opt/hmmer2/bin/hmmpfam"
+            commands += " --acc -A 0 -E 0.01 -Z 350000"
+            commands += " $hmmFilePath ${chunkFile} >> hmmpfam.out\n"
+        }
+    }
+
+    """
+    ${commands}
     """
 }
 
@@ -29,7 +123,15 @@ process PARSE_SMART {
     tuple val(meta), path("smart.json")
 
     exec:
-    Map<String, String> sequences = FastaFile.parse(fasta.toString())  // [md5: sequence]
+    // fasta may be a single file or multiple
+    Map<String, String> sequences = [:] // [md5: sequence]
+    if (Files.exists(fasta)) {
+        sequences = FastaFile.parse(fasta.toString())
+    } else {
+        fasta.each { fastaFile ->
+            sequences = sequences + FastaFile.parse(fastaFile.toString())
+        }
+    }
 
     def hmmLengths = HMMER2.parseHMM(hmmtxtdb.toString())
     def matches = HMMER2.parseOutput(hmmpfam_out.toString(), hmmLengths, "SMART")
@@ -48,7 +150,7 @@ process PARSE_SMART {
                 have a hit against the same sequence,
                 we need to perform an additional check before selecting them
             */
-            String sequence = sequences[seqId].sequence
+            String sequence = sequences[seqId]
             boolean tyrKinaseOK = (sequence ==~ tyrKinasePattern)
             boolean serThrKinaseOK = (sequence ==~ serThrKinasePattern)
 
