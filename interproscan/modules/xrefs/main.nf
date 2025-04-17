@@ -149,7 +149,7 @@ def addXRefs(Match match, String interproAcc, def ipr2go, def goInfo, def ipr2pa
 def String getInterProVersion(Path directory) {
     // Used during the INIT subworkflow
     ObjectMapper objectMapper = new ObjectMapper();
-    File file = new File(new File(directory.toString(), "xrefs"), "databases.json")
+    File file = new File(new File(directory.toString(), "interpro"), "databases.json")
     Map<String, Object> metadata = objectMapper.readValue(file, Map.class);
     return metadata["InterPro"]
 }

@@ -23,6 +23,7 @@ workflow INTERPRO {
         matchResults,
         apps,
         datadir,
+        xRefsConfig.databases,
         xRefsConfig.entries,
         xRefsConfig.goterms,
         xRefsConfig.pathways,

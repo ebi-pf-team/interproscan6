@@ -15,7 +15,7 @@ workflow SMART {
     )
 
     PREPARE_SMART(
-        SCAN_SMART.out,
+        PREFILTER_SMART.out,
         smart_chunksize,
         smart_hmm_dir
     )
