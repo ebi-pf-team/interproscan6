@@ -197,6 +197,7 @@ workflow SCAN_SEQUENCES {
             "${datadir}/${appsConfig.smart.hmm_dir}",
             appsConfig.smart.chunkSize
         )
+
         results = results.mix(SMART.out)
     }
 
