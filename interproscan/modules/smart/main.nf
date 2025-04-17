@@ -96,12 +96,15 @@ process SEARCH_SMART {
     tuple val(meta), path("hmmpfam.out"), path(fasta)
 
     script:
+    def f = fasta
     def commands = ""
     smarts.each { smartFile ->
-        String hmmFilePath = "${model_dir}/${smartFile}.hmm"  // reassign to a var so the cmd can run
-        commands += "/opt/hmmer2/bin/hmmpfam"
-        commands += " --acc -A 0 -E 0.01 -Z 350000"
-        commands += " $hmmFilePath $fasta >> hmmpfam.out\n"
+        f.each { chunkFile ->
+            String hmmFilePath = "${model_dir}/${smartFile}.hmm"  // reassign to a var so the cmd can run
+            commands += "/opt/hmmer2/bin/hmmpfam"
+            commands += " --acc -A 0 -E 0.01 -Z 350000"
+            commands += " $hmmFilePath ${chunkFile} >> hmmpfam.out\n"
+        }
     }
 
     """
@@ -120,7 +123,10 @@ process PARSE_SMART {
     tuple val(meta), path("smart.json")
 
     exec:
-    Map<String, String> sequences = FastaFile.parse(fasta.toString())  // [md5: sequence]
+    Map<String, String> sequences = [:]  // [md5: sequence]
+    fasta.each { fastaFile ->
+        sequences = sequences + FastaFile.parse(fastaFile.toString())
+    }
 
     def hmmLengths = HMMER2.parseHMM(hmmtxtdb.toString())
     def matches = HMMER2.parseOutput(hmmpfam_out.toString(), hmmLengths, "SMART")
@@ -139,7 +145,7 @@ process PARSE_SMART {
                 have a hit against the same sequence,
                 we need to perform an additional check before selecting them
             */
-            String sequence = sequences[seqId].sequence
+            String sequence = sequences[seqId]
             boolean tyrKinaseOK = (sequence ==~ tyrKinasePattern)
             boolean serThrKinaseOK = (sequence ==~ serThrKinasePattern)
 
