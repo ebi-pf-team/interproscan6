@@ -1,4 +1,4 @@
-include { SCAN_SMART; PREPARE_SMART; SEARCH_SMART; PARSE_SMART } from  "../../../modules/smart"
+include { PREFILTER_SMART; PREPARE_SMART; SEARCH_SMART; PARSE_SMART } from  "../../../modules/smart"
 
 workflow SMART {
     take:
@@ -9,7 +9,7 @@ workflow SMART {
     smart_chunksize
 
     main:
-    SCAN_SMART(
+    PREFILTER_SMART(
         ch_seqs,
         hmmer3_hmm
     )
