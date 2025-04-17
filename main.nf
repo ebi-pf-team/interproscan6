@@ -77,7 +77,10 @@ workflow {
         match_results,
         apps,
         data_dir,
-        params.xRefsConfig,
+        params.xRefsConfig.databases,
+        params.xRefsConfig.entries,
+        params.xRefsConfig.goterms,
+        params.xRefsConfig.pathways,
         params.goterms,
         params.pathways,
         params.appsConfig.panther.paint
