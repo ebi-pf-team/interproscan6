@@ -47,6 +47,15 @@ process FIND_MISSING_APP_DATA {
         normalised_json[key.replaceAll(/[\s\-]+/, '').toLowerCase()] = value
     }
 
+    /* 
+        Ugly trick to make sure that metadata for both CATH-Gene3D are CATH-FunFam
+        are available even if we need only one
+    */
+    if (apps_to_run.contains("cathgene3d") || apps_to_run.contains("cathfunfam")) {
+        apps_to_run.add("cathgene3d")
+        apps_to_run.add("cathfunfam")
+    }
+
     with_data = [] as Set
     without_data = [] as Set
     apps_to_run.each { db_name ->
