@@ -22,7 +22,7 @@ include { SUPERFAMILY      } from "../applications/superfamily"
 workflow SCAN_SEQUENCES {
     take:
     ch_seqs             // channel of tuples (index, fasta file)
-    member_db_releases  // map: [db: version number]
+    databases           // map: [db: version, dirpath]
     applications        // list of applications to run
     appsConfig          // map of applications
     datadir             // path to data directory
@@ -31,8 +31,7 @@ workflow SCAN_SEQUENCES {
     results = Channel.empty()
 
     if (applications.contains("antifam")) {
-        def antifam_release = member_db_releases['antifam']
-        def antifam_dir = "${datadir}/${appsConfig.antifam.dir}/${antifam_release}"
+        def antifam_dir = databases["antifam"]["dirpath"]
 
         ANTIFAM(
             ch_seqs,

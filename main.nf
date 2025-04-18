@@ -45,7 +45,6 @@ workflow {
     PREPARE_DATA(
         applications,
         params.appsConfig,
-        params.xRefsConfig,
         data_dir,
         interpro_version,
         workflow.manifest.version,
@@ -53,83 +52,85 @@ workflow {
         params.goterms,
         params.pathways
     )
-    member_db_releases   = PREPARE_DATA.out.memberDbReleases
-    interproscan_version = PREPARE_DATA.out.interproscanVersion.val
+    databases   = PREPARE_DATA.out.versions
+    interproscan_version = PREPARE_DATA.out.iprscan_major_minor
 
-    PREPARE_SEQUENCES(
-        fasta_file,
-        applications
-    )
-    ch_seqs              = PREPARE_SEQUENCES.out.ch_seqs
-    seq_db_path          = PREPARE_SEQUENCES.out.seq_db_path
+    // PREPARE_SEQUENCES(
+    //     fasta_file,
+    //     applications
+    // )
+    // ch_seqs              = PREPARE_SEQUENCES.out.ch_seqs
+    // seq_db_path          = PREPARE_SEQUENCES.out.seq_db_path
 
-    match_results = Channel.empty()
+    // match_results = Channel.empty()
 
-    if (params.offline) {
-        SCAN_SEQUENCES(
-            ch_seqs,
-            member_db_releases,
-            applications,
-            params.appsConfig,
-            data_dir
-        )
-        match_results = SCAN_SEQUENCES.out
-    } else {
-        /* Retrieve precalculated matches from the Match lookup API
-        Then run analyses on sequences not listed in the API */
-        PRECALCULATED_MATCHES(
-            ch_seqs,
-            applications,
-            member_db_releases,
-            interproscan_version,
-            workflow.manifest,
-            params.matchesApiUrl,     // from the cmd-offline
-            params.lookupService,     // from confs
-        )
-        precalculated_matches = PRECALCULATED_MATCHES.out.precalculatedMatches
-        no_matches_fastas     = PRECALCULATED_MATCHES.out.noMatchesFasta
+    // if (params.offline) {
+    //     SCAN_SEQUENCES(
+    //         ch_seqs,
+    //         databases,
+    //         applications,
+    //         params.appsConfig,
+    //         data_dir
+    //     )
+    //     match_results = SCAN_SEQUENCES.out
+    // } else {
+    //     /* Retrieve precalculated matches from the Match lookup API
+    //     Then run analyses on sequences not listed in the API */
+    //     PRECALCULATED_MATCHES(
+    //         ch_seqs,
+    //         applications,
+    //         member_db_releases,
+    //         interproscan_version,
+    //         workflow.manifest,
+    //         params.matchesApiUrl,     // from the cmd-offline
+    //         params.lookupService,     // from confs
+    //     )
+    //     precalculated_matches = PRECALCULATED_MATCHES.out.precalculatedMatches
+    //     no_matches_fastas     = PRECALCULATED_MATCHES.out.noMatchesFasta
 
-        SCAN_SEQUENCES(
-            no_matches_fastas,
-            member_db_releases,
-            applications,
-            params.appsConfig,
-            data_dir
-        )
+    //     SCAN_SEQUENCES(
+    //         no_matches_fastas,
+    //         member_db_releases,
+    //         applications,
+    //         params.appsConfig,
+    //         data_dir
+    //     )
 
-        def expandedScan = SCAN_SEQUENCES.out.flatMap { scan ->
-            scan[1].collect { path -> [scan[0], path] }
-        }
+    //     def expandedScan = SCAN_SEQUENCES.out.flatMap { scan ->
+    //         scan[1].collect { path -> [scan[0], path] }
+    //     }
 
-        combined = precalculated_matches.concat(expandedScan)
-        match_results = combined.groupTuple()
-    }
-    // match_results format: [[meta, [member1.json, member2.json, ..., memberN.json]]
+    //     combined = precalculated_matches.concat(expandedScan)
+    //     match_results = combined.groupTuple()
+    // }
+    // // match_results format: [[meta, [member1.json, member2.json, ..., memberN.json]]
 
-    /* INTERPRO:
-    Aggregate matches across all members for each sequence --> single JSON with all matches for the batch
-    Add InterPro signature and entry desc and names, PAINT annotations (panther only),
-    go terms (if enabled), and pathways (if enabled). Then identify representative domains and families
-    */
-    ch_results = INTERPRO(
-        match_results,
-        applications,
-        data_dir,
-        member_db_releases,
-        params.xRefsConfig,
-        params.goterms,
-        params.pathways,
-        params.appsConfig.panther.paint
-    )
+    // match_results.view()
 
-    OUTPUT(
-        ch_results,
-        seq_db_path,
-        formats,
-        out_dir,
-        params.nucleic,
-        workflow.manifest.version
-    )
+    // /* INTERPRO:
+    // Aggregate matches across all members for each sequence --> single JSON with all matches for the batch
+    // Add InterPro signature and entry desc and names, PAINT annotations (panther only),
+    // go terms (if enabled), and pathways (if enabled). Then identify representative domains and families
+    // */
+    // ch_results = INTERPRO(
+    //     match_results,
+    //     applications,
+    //     data_dir,
+    //     member_db_releases,
+    //     params.xRefsConfig,
+    //     params.goterms,
+    //     params.pathways,
+    //     params.appsConfig.panther.paint
+    // )
+
+    // OUTPUT(
+    //     ch_results,
+    //     seq_db_path,
+    //     formats,
+    //     out_dir,
+    //     params.nucleic,
+    //     workflow.manifest.version
+    // )
 }
 
 workflow.onComplete = {

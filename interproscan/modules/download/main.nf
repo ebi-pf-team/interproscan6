@@ -4,50 +4,52 @@ import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
 process DOWNLOAD {
-    maxForks 1
+    maxForks 4
     label    'local', 'ips6_container'
 
     input:
-    tuple val(name), val(version)
+    tuple val(name), val(arcname), val(version)
     val iprscan_version
     val outdir
 
     output:
-    val true
+    tuple val(name), val(version), val("${outdir}/${arcname}/${version}")
 
     script:
     """
     cd ${outdir}
-    curl -OJ ${InterProScan.FTP_URL}/${iprscan_version}/${name}/${name}-${version}.tar.gz
-    curl -OJ ${InterProScan.FTP_URL}/${iprscan_version}/${name}/${name}-${version}.tar.gz.md5
-    md5sum -c ${name}-${version}.tar.gz.md5 || { echo "Error: MD5 checksum failed" >&2; exit 1; }
-    tar -zxf ${name}-${version}.tar.gz
-    rm ${name}-${version}.tar.gz*
-    chmod 777 -R ${name}
+    curl -OJ ${InterProScan.FTP_URL}/${iprscan_version}/${arcname}/${arcname}-${version}.tar.gz
+    curl -OJ ${InterProScan.FTP_URL}/${iprscan_version}/${arcname}/${arcname}-${version}.tar.gz.md5
+    md5sum -c ${arcname}-${version}.tar.gz.md5 || { echo "Error: MD5 checksum failed" >&2; exit 1; }
+    tar -zxf ${arcname}-${version}.tar.gz
+    rm ${arcname}-${version}.tar.gz*
+    chmod 777 -R ${arcname}
     """
 }
 
-process VALIDATE_APP_DATA {
+process FIND_MISSING_APP_DATA {
     input:
-    val ready
-    val json_file
-    val databases
+    tuple val(n), val(v), val(p)  // state dependency
+    val json_database
+    val apps_to_run
     val app_dirs
     val datadir
 
     output:
-    val databases_with_version
+    val with_data,          emit: with_data
+    val without_data,       emit: without_data
 
     exec:
-    File file = new File(json_file)
+    File file = new File(json_database)
     def json = new JsonSlurper().parse(file)
     def normalised_json = [:]
     json.each { key, value ->
         normalised_json[key.replaceAll(/[\s\-]+/, '').toLowerCase()] = value
     }
 
-    databases_with_version = [] as Set
-    databases.each { db_name ->
+    with_data = [] as Set
+    without_data = [] as Set
+    apps_to_run.each { db_name ->
         if (app_dirs.containsKey(db_name)) {
             def normalised_name = db_name.replaceAll(/[\s\-]+/, '').toLowerCase()
             assert normalised_json.containsKey(normalised_name)
@@ -56,46 +58,26 @@ process VALIDATE_APP_DATA {
             def db_dir = db_dir_parts[0]
             def db_subdir = db_dir_parts[1]
             Path path = Paths.get("${datadir}/${db_dir}/${db_version}/${db_subdir}")
-            if (!Files.exists(path)) {
-                databases_with_version.add( [db_dir, db_version] )
+            if (Files.exists(path)) {
+                with_data.add( [ normalised_name, db_version, path.toString() ])
+            } else {
+                without_data.add( [ normalised_name, db_dir, db_version ] )
             }
         }
     }
 }
 
-process GET_DB_RELEASES {
+process WAIT_FOR_DOWNLOADS {
     cache false  // Stops the esotericsoftware.kryo.serializers warning
 
-    // Run as a process to ensure it runs after all downloading is complete
     input:
-    val db_json_file
-    val xref_dir
-    val xref_config
-    val add_goterms
-    val add_pathways
-    val ready
+    val list_databases
 
     output:
-    val databases_with_version
+    val map_databases
 
     exec:
-    // Before getting all the dbs (inc. interpro) version numbers check we have all the interpro data
-    // member data was checked in PREPARE_DOWNLOADS
-    error = InterProScan.validateXrefFiles(
-        xref_dir,
-        xref_config,
-        add_goterms,
-        add_pathways
-    )
-    if (error) {
-        log.error error
-        exit 1
-    }
-
-    JsonSlurper jsonSlurper = new JsonSlurper()
-    def databaseJson = new File(db_json_file.toString())
-    databases_with_version = jsonSlurper.parse(databaseJson)
-    databases_with_version = databases_with_version.collectEntries { appName, versionNum ->
-        [(appName.toLowerCase()): versionNum]
-    }
+    map_databases = list_databases.collectEntries { name, version, dirpath ->
+        [(name): [version: version, dirpath: dirpath]]
+    } 
 }
