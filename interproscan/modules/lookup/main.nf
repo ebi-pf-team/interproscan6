@@ -5,7 +5,7 @@ import groovy.json.JsonOutput
 process PREPARE_LOOKUP {
     input:
     val _url
-    val db_releases           // map, db version numbers, including interpro, all lowercase
+    val db_releases
     val interproscan_version  // major.minor iprscan version number
     val workflow_manifest
 
@@ -28,7 +28,7 @@ process PREPARE_LOOKUP {
                     " analyses will be run locally"
             matchesApiUrl = null
         } else if (db_releases) {  // can be null if we don't need data for the selected apps (e.g. mobidblite)
-            if (db_releases['interpro'] != info.release) {
+            if (db_releases["interpro"]["version"] != info.release) {
                 log.warn "The local InterPro version does not match the match API release (Local: ${db_releases['interpro']}, Matches API: ${info.release}).\n" +
                         "Pre-calculated matches will not be retrieved, and analyses will be run locally"
                 matchesApiUrl = null
