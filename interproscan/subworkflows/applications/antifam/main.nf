@@ -4,12 +4,14 @@ include { PARSE_ANTIFAM               } from "../../../modules/antifam"
 workflow ANTIFAM {
     take:
     ch_seqs             // channel of tuples (index, fasta file)
-    hmm                 // path to hmm file
+    dirpath             // data directory path
+    hmmfile             // HMM file
 
     main:
     SEARCH_ANTIFAM(
         ch_seqs,
-        hmm,
+        dirpath,
+        hmmfile,
         "--cut_ga"
     )
 

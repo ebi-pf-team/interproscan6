@@ -5,7 +5,7 @@ workflow PRECALCULATED_MATCHES {
     take:
     ch_seqs               // fasta files of protein sequences to analyse
     apps                  // member db analyses to run
-    db_releases           // map, db version numbers, including interpro, all lowercase
+    db_releases           // map: [db: version, dirpath]           
     interproscan_version  // major.minor interproscan version number
     workflow_manifest     // map, from nextflow.conf
     matches_api_url       // str, from cmd-line
