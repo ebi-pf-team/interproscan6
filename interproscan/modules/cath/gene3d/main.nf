@@ -25,8 +25,9 @@ process ASSIGN_CATH {
 
     input:
     tuple val(meta), path(cath_resolve_out)
-    path dom2fam_file
-    path disc_pickle_file
+    path dirpath
+    val dom2fam
+    val disc_pickle
 
     output:
     tuple val(meta), path("cath.tsv")
@@ -34,8 +35,8 @@ process ASSIGN_CATH {
     script:
     """
     python ${projectDir}/bin/cath/assign_cath_superfamilies.py \
-        ${dom2fam_file} \
-        ${disc_pickle_file} \
+        ${dirpath}/${dom2fam} \
+        ${dirpath}/${disc_pickle} \
         ${cath_resolve_out} \
         cath.tsv
     """
