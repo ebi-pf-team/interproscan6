@@ -112,7 +112,7 @@ Use the '--download' option to automatically download InterPro release data."""
         } else {
             ch_to_download.collect(flat: false).subscribe { apps ->
                 if (apps.size() > 0) {
-                    def details = apps.collect { app -> "  - ${app[0]} ${app[1]}" }.join("\n")
+                    def details = apps.collect { app -> "  - ${app[0]} ${app[2]}" }.join("\n")
                     log.error """Data is missing in ${data_dir} for the following applications:
 ${details}
 Use the '--download' option to automatically download InterPro release data."""
