@@ -4,11 +4,13 @@ include { PARSE_NCBIFAM               } from "../../../modules/ncbifam"
 workflow NCBIFAM {
     take:
     ch_seqs             // channel of tuples (index, fasta file)
-    hmm                 // path to hmm file
+    dir
+    hmm
 
     main:
     SEARCH_NCBIFAM(
         ch_seqs,
+        dir,
         hmm,
         "-Z 61295632 --cut_tc"
     )
