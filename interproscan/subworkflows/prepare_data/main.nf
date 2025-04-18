@@ -124,7 +124,7 @@ Use the '--download' option to automatically download InterPro release data."""
         ch_ready = ch_ready.collect(flat: false)
     }
 
-    WAIT_FOR_DOWNLOADS(ch_ready.ifEmpty { empty_db_channel })
+    WAIT_FOR_DOWNLOADS(ch_ready.ifEmpty { [] })
 
     emit:
     versions = WAIT_FOR_DOWNLOADS.out                // map: [ dbname: [version: <version>, path: <datapath>] ]
