@@ -5,7 +5,8 @@ process SEARCH_SFLD {
 
     input:
     tuple val(meta), path(fasta)
-    path hmmdb
+    path dirpath
+    val hmmfile
 
     output:
     tuple val(meta), path("hmmsearch.out"), path("hmmsearch.tab"), path("hmmsearch.sto")
@@ -19,7 +20,7 @@ process SEARCH_SFLD {
         -o hmmsearch.out \
         --domtblout hmmsearch.tab \
         -A hmmsearch.sto \
-        ${hmmdb} ${fasta}
+        ${dirpath}/${hmmfile} ${fasta}
     """
 }
 
@@ -28,7 +29,8 @@ process POST_PROCESS_SFLD {
 
     input:
     tuple val(meta), path(hmmsearch_out), val(hmmsearch_dtbl), val(hmmsearch_alignment)
-    val site_info
+    path dirpath
+    val annofile
 
     output:
     tuple val(meta), path("sfld.tsv"), path(hmmsearch_out)
@@ -39,7 +41,7 @@ process POST_PROCESS_SFLD {
         --alignment "${hmmsearch_alignment}" \
         --dom "${hmmsearch_dtbl}" \
         --hmmer-out "${hmmsearch_out}" \
-        --site-info "${site_info}" \
+        --site-info "${dirpath}/${annofile}" \
         --output sfld.tsv
     # ${hmmsearch_out} "hmmsearch.out"
     """
@@ -50,7 +52,8 @@ process PARSE_SFLD {
 
     input:
     tuple val(meta), val(postprocess_out), val(hmmsearch_out)
-    val hierarchy_db
+    val dirpath
+    val hierarchydb
 
     output:
     tuple val(meta), path("sfld.json")
@@ -59,7 +62,7 @@ process PARSE_SFLD {
     def outputFilePath = task.workDir.resolve("sfld.json")
     def (hmmLengths, hmmBounds) = getHmmData(hmmsearch_out.toString())
     def sequences = parseOutput(postprocess_out.toString(), hmmLengths, hmmBounds)
-    def hierarchy = parseHierarchy(hierarchy_db.toString())
+    def hierarchy = parseHierarchy("${dirpath.toString()}/${hierarchydb}")
     SignatureLibraryRelease library = new SignatureLibraryRelease("SFLD", null)
 
     sequences = sequences.collectEntries { seqId, matches -> 
