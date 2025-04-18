@@ -8,12 +8,12 @@ process DOWNLOAD {
     label    'local', 'ips6_container'
 
     input:
-    tuple val(name), val(arcname), val(version), val(skip)
+    tuple val(name), val(arcname), val(version), val(skip), val(path)
     val iprscan_version
     val outdir
 
     output:
-    tuple val(name), val(version), val("${outdir}/${arcname}/${version}")
+    tuple val(name), val(version), val(path)
 
     script:
     if (skip) {
@@ -77,7 +77,7 @@ process FIND_MISSING_DATA {
             if (Files.exists(path)) {
                 with_data.add( [ normalised_name, db_version, path.toString() ])
             } else {
-                without_data.add( [ normalised_name, db_dir, db_version, to_download.contains(db_dir) ] )
+                without_data.add( [ normalised_name, db_dir, db_version, to_download.contains(db_dir), path.toString() ] )
                 to_download.add( db_dir )
             }
         }
