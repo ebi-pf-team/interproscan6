@@ -3,31 +3,35 @@ include { PREFILTER_SMART; PREPARE_SMART; SEARCH_SMART; PARSE_SMART } from  "../
 workflow SMART {
     take:
     ch_seqs
+    dirpath
     hmmer3_hmm
-    hmmer2_hmm
-    smart_hmm_dir
-    smart_chunksize
+    hmmer2_dir
+    chunksize
 
     main:
     PREFILTER_SMART(
         ch_seqs,
+        dirpath,
         hmmer3_hmm
     )
 
     PREPARE_SMART(
         PREFILTER_SMART.out,
-        smart_chunksize,
-        smart_hmm_dir
+        dirpath,
+        hmmer2_dir,
+        chunksize
     )
 
     SEARCH_SMART(
         PREPARE_SMART.out,
-        smart_hmm_dir
+        dirpath,
+        hmmer2_dir
     )
 
     ch_smart = PARSE_SMART(
         SEARCH_SMART.out,
-        hmmer2_hmm
+        dirpath,
+        hmmer2_dir
     )
 
     emit:

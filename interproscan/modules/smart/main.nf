@@ -6,7 +6,8 @@ process PREFILTER_SMART {
 
     input:
     tuple val(meta), path(fasta)
-    path hmmbindb
+    path dirpath
+    val hmmfile
 
     output:
     tuple val(meta), path("hmmpfam.out"), path(fasta)
@@ -15,7 +16,7 @@ process PREFILTER_SMART {
     """
     /opt/hmmer3/bin/hmmsearch \
         -E 100 --domE 100 --incE 100 --incdomE 100 \
-        ${hmmbindb} ${fasta} > hmmpfam.out
+        ${dirpath}/${hmmfile} ${fasta} > hmmpfam.out
     """
 }
 
@@ -24,8 +25,9 @@ process PREPARE_SMART {
 
     input:
     tuple val(meta), val(hmmseach_out), val(fasta)
+    val dirpath
+    val hmmdir
     val chunk_size
-    val model_dir
 
     output:
     tuple val(meta), path("chunk_*.fasta"), val(smarts)
@@ -38,8 +40,7 @@ process PREPARE_SMART {
         .flatten()
         .unique()
         .findAll { smartId ->
-            String hmmPath = "${smartId}.hmm"
-            new File("${model_dir}/${hmmPath}").exists()
+            new File("${dirpath.toString()}/${hmmdir}/${smartId}.hmm").exists()
         }
 
     // Build a custom FASTA file with only the seqs that at least one SMART model matches
@@ -91,7 +92,8 @@ process SEARCH_SMART {
 
     input:
     tuple val(meta), path(fasta), val(smarts)
-    val model_dir
+    val dirpath
+    val hmmdir
 
     output:
     tuple val(meta), path("hmmpfam.out"), path(fasta)
@@ -100,7 +102,7 @@ process SEARCH_SMART {
     def commands = ""
     smarts.each { smartFile ->
         fasta.each { chunkFile ->
-            String hmmFilePath = "${model_dir}/${smartFile}.hmm"  // reassign to a var so the cmd can run
+            String hmmFilePath = "${dirpath.toString()}/${hmmdir}/${smartFile}.hmm"  // reassign to a var so the cmd can run
             commands += "/opt/hmmer2/bin/hmmpfam"
             commands += " --acc -A 0 -E 0.01 -Z 350000"
             commands += " $hmmFilePath ${chunkFile} >> hmmpfam.out\n"
@@ -117,7 +119,8 @@ process PARSE_SMART {
 
     input:
     tuple val(meta), val(hmmpfam_out), val(fasta)
-    val hmmtxtdb
+    val dirpath
+    val hmmdir
 
     output:
     tuple val(meta), path("smart.json")
@@ -133,7 +136,7 @@ process PARSE_SMART {
         }
     }
 
-    def hmmLengths = HMMER2.parseHMM(hmmtxtdb.toString())
+    def hmmLengths = HMMER2.parseHMMs("${dirpath.toString()}/${hmmdir}")
     def matches = HMMER2.parseOutput(hmmpfam_out.toString(), hmmLengths, "SMART")
 
     String tyrKinaseAccession = "SM00219"
