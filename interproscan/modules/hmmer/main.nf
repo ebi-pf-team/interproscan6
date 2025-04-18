@@ -5,7 +5,8 @@ process RUN_HMMER {
 
     input:
     tuple val(meta), path(fasta)
-    path hmmdb
+    path hmmdir
+    val hmmfile
     val options    // e.g. "-Z 65245 -E 0.001"
 
     output:
@@ -16,6 +17,6 @@ process RUN_HMMER {
     /opt/hmmer3/bin/hmmsearch \
         ${options} \
         --cpu ${task.cpus} \
-        ${hmmdb} ${fasta} > hmmsearch.out
+        ${hmmdir}/${hmmfile} ${fasta} > hmmsearch.out
     """
 }
