@@ -6,7 +6,8 @@ process PREPARE_TREEGRAFTER {
 
     input:
     tuple val(meta), val(hmmseach_out)
-    val msf_dir
+    val dir
+    val msf
 
     output:
     tuple val(meta), path("panther.json"),                             emit: json
@@ -53,7 +54,7 @@ process PREPARE_TREEGRAFTER {
     familyIds = []
     fastas = []
     sequenceIds = []
-    String msfPath = msf_dir.toString()
+    String dirPath = dir.toString()
     hmmerMatches.each { seqId, matches ->
         // Ensure we only have one family
         assert matches.size() == 1
@@ -66,7 +67,7 @@ process PREPARE_TREEGRAFTER {
 
         // Get expected length of the sequence
         String familyId = match.modelAccession
-        Path fastaPath = file("${msfPath}/${familyId}.AN.fasta")
+        Path fastaPath = file("${dirPath}/${msf}/${familyId}.AN.fasta")
         assert fastaPath.exists()
         Map sequences = FastaFile.parse(fastaPath.toString())  // [md5 : "seq"]
         int length = sequences.values().first().length()
@@ -120,7 +121,8 @@ process RUN_TREEGRAFTER {
     
     input:
     tuple val(meta), val(sequenceIds), val(familyIds), val(fastas)
-    path msf_dir
+    path dir
+    val msf
 
     output:
     tuple val(meta), path("epang.tsv")
@@ -140,15 +142,15 @@ process RUN_TREEGRAFTER {
             epang_command += " -G 0.05"
             epang_command += " -m WAG"
             epang_command += " -T ${task.cpus}"
-            epang_command += " -t ${msf_dir.toString()}/${family}.bifurcate.newick"
-            epang_command += " -s ${msf_dir.toString()}/${family}.AN.fasta"
+            epang_command += " -t ${dir.toString()}/${msf}/${family}.bifurcate.newick"
+            epang_command += " -s ${dir.toString()}/${msf}/${family}.AN.fasta"
             epang_command += " -q ${fastaPath}"
             epang_command += " --redo"
 
             // Parse results
             def py_command = "python ${projectDir}/bin/panther/parse_epang.py"
             py_command += " epa_result.jplace"
-            py_command += " ${msf_dir.toString()}/${family}.newick"
+            py_command += " ${dir.toString()}/${msf}/${family}.newick"
 
             // Add sequence ID
             def awk_command = "awk '{print \"${seqID}\",\$0}'"
