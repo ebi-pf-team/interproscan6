@@ -76,7 +76,7 @@ workflow PREPARE_DATA {
         } else if (download) {
             // Not found: download the InterPro metadata archive
             DOWNLOAD_INTERPRO(
-                ["interpro", "interpro", interpro_version],
+                ["interpro", "interpro", interpro_version, false],
                 iprscan_major_minor,
                 data_dir
             )
