@@ -4,19 +4,22 @@ include { PARSE_PIRSR               } from  "../../../modules/pirsr"
 workflow PIRSR {
     take:
     ch_seqs
-    pirsr_hmm
-    pirsr_rules
+    dirpath
+    hmmfile
+    rulesfile
 
     main:
     SEARCH_PIRSR(
         ch_seqs,
-        pirsr_hmm,
+        dirpath,
+        hmmfile,
         "-E 0.01 --acc"
     )
 
     ch_pirsr = PARSE_PIRSR(
         SEARCH_PIRSR.out,
-        pirsr_rules
+        dirpath,
+        rulesfile
     )
 
     emit:
