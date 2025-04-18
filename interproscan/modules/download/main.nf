@@ -33,7 +33,7 @@ process DOWNLOAD {
     
 }
 
-process FIND_MISSING_APP_DATA {
+process FIND_MISSING_DATA {
     input:
     tuple val(n), val(v), val(p)  // state dependency
     val json_database
@@ -84,7 +84,7 @@ process FIND_MISSING_APP_DATA {
     }
 }
 
-process WAIT_FOR_DOWNLOADS {
+process VALIDATE_DATA {
     cache false  // Stops the esotericsoftware.kryo.serializers warning
 
     input:

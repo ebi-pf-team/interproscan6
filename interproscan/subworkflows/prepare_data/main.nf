@@ -2,8 +2,8 @@ import groovy.json.JsonSlurper
 
 include { DOWNLOAD as DOWNLOAD_INTERPRO } from "../../modules/download"
 include { DOWNLOAD as DOWNLOAD_DATABASE } from "../../modules/download"
-include { FIND_MISSING_APP_DATA         } from "../../modules/download"
-include { WAIT_FOR_DOWNLOADS            } from "../../modules/download"
+include { FIND_MISSING_DATA             } from "../../modules/download"
+include { VALIDATE_DATA                 } from "../../modules/download"
 
 
 workflow PREPARE_DATA {
@@ -64,7 +64,7 @@ workflow PREPARE_DATA {
         db_json_path = "${data_dir}/interpro/${interpro_version}/databases.json"
         if (InterProScan.resolveFile(db_json_path)) {
             // JSON file of database metadata found
-            FIND_MISSING_APP_DATA(
+            FIND_MISSING_DATA(
                 ["", "", ""],  // state dependency, can be anything
                 db_json_path,
                 applications,
@@ -83,7 +83,7 @@ workflow PREPARE_DATA {
 
             ch_interpro = DOWNLOAD_INTERPRO.out
 
-            FIND_MISSING_APP_DATA(
+            FIND_MISSING_DATA(
                 ch_interpro,
                 db_json_path,
                 applications,
@@ -98,8 +98,8 @@ Use the '--download' option to automatically download InterPro release data."""
         }
 
         ch_ready = ch_ready.mix(ch_interpro)
-        ch_ready = ch_ready.mix(FIND_MISSING_APP_DATA.out.with_data.flatMap())
-        ch_to_download = FIND_MISSING_APP_DATA.out.without_data.flatMap()
+        ch_ready = ch_ready.mix(FIND_MISSING_DATA.out.with_data.flatMap())
+        ch_to_download = FIND_MISSING_DATA.out.without_data.flatMap()
         
         if (download) {
             DOWNLOAD_DATABASE(
@@ -124,9 +124,9 @@ Use the '--download' option to automatically download InterPro release data."""
         ch_ready = ch_ready.collect(flat: false)
     }
 
-    WAIT_FOR_DOWNLOADS(ch_ready.ifEmpty { [] })
+    VALIDATE_DATA(ch_ready.ifEmpty { [] })
 
     emit:
-    versions = WAIT_FOR_DOWNLOADS.out                // map: [ dbname: [version: <version>, path: <datapath>] ]
+    versions = VALIDATE_DATA.out                // map: [ dbname: [version: <version>, path: <datapath>] ]
     iprscan_major_minor
 }
