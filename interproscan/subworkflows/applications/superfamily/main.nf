@@ -3,6 +3,7 @@ include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY } from  "../../../modules/superf
 workflow SUPERFAMILY {
     take:
     ch_seqs
+    dirpath
     hmm
     selfhits
     cla
@@ -12,6 +13,7 @@ workflow SUPERFAMILY {
     main:
     SEARCH_SUPERFAMILY(
         ch_seqs,
+        dirpath,
         hmm,
         selfhits,
         cla,
@@ -21,6 +23,7 @@ workflow SUPERFAMILY {
 
     ch_superfams = PARSE_SUPERFAMILY(
         SEARCH_SUPERFAMILY.out,
+        dirpath,
         model,
         hmm
     )
