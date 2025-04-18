@@ -4,13 +4,11 @@ include { REPRESENTATIVE_LOCATIONS      } from "../../modules/representative_loc
 workflow INTERPRO {
     take:
     match_results
-    apps
-    datadir
-    member_db_releases
-    xRefsConfig
-    goterms
-    pathways
-    paint_dir
+    applications
+    db_releases
+    add_goterms
+    add_pathways
+    panther_paint_dir
 
     main:
 
@@ -23,16 +21,11 @@ workflow INTERPRO {
     */
     XREFS(
         match_results,
-        apps,
-        datadir,
-        member_db_releases,
-        xRefsConfig.dir,
-        xRefsConfig.entries,
-        xRefsConfig.goterms,
-        xRefsConfig.pathways,
-        goterms,
-        pathways,
-        paint_dir
+        applications,
+        db_releases,
+        add_goterms,
+        add_pathways,
+        panther_paint_dir
     )
 
     REPRESENTATIVE_LOCATIONS(XREFS.out)
