@@ -5,7 +5,8 @@ process PREPROCESS_HAMAP {
 
     input:
     tuple val(meta), path(fasta)
-    path hmmdb
+    path dirpath
+    val hmmfile
 
     output:
     tuple val(meta), path("hmmsearch.tab"), path(fasta)
@@ -16,7 +17,7 @@ process PREPROCESS_HAMAP {
         -E 100 --domE 100 --incE 100 --incdomE 100 \
         --cpu ${task.cpus} \
         --tblout hmmsearch.tab \
-        ${hmmdb} ${fasta} > /dev/null
+        ${dirpath}/${hmmfile} ${fasta} > /dev/null
     """
 }
 
@@ -25,7 +26,8 @@ process PREPARE_HAMAP {
 
     input:
     tuple val(meta), val(hmmsearch_tab), val(fasta)
-    val profile_dir
+    val dirpath
+    val profiles_dir
 
     output:
     tuple val(meta), val(profiles), path(fasta_files)
@@ -56,7 +58,7 @@ process PREPARE_HAMAP {
     // Create a FASTA file for each profile to search with
     matches
         .each { query, targets ->
-            Path prfPath = file("${profile_dir.toString()}/${query}.prf")
+            Path prfPath = file("${dirpath.toString()}/${profiles_dir}/${query}.prf")
             File prfFile = new File(prfPath.toString())
             if (prfFile.exists()) {
                 Path fastaPath = task.workDir.resolve("${query}.fa")
@@ -79,7 +81,8 @@ process RUN_HAMAP {
 
     input:
     tuple val(meta), val(profiles), path(fasta_files)
-    path profile_dir
+    path dirpath
+    val profiles_dir
 
     output:
     tuple val(meta), stdout
@@ -90,7 +93,7 @@ process RUN_HAMAP {
     [profiles, fasta_files]
         .transpose()
         .each { profile, fasta ->
-            def profilePath = "${profile_dir.toString()}/${profile}.prf"
+            def profilePath = "${dirpath.toString()}/${profiles_dir}/${profile}.prf"
             commands += "/opt/pftools/pfsearchV3 -f -o 7 ${profilePath} ${fasta}\n"
         }
 
