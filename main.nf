@@ -1,5 +1,4 @@
 nextflow.enable.dsl=2
-import groovy.json.JsonSlurper  // until selective downloads
 
 include { INIT_PIPELINE      } from "./subworkflows/init"
 include { PREPARE_DATABASES  } from "./subworkflows/prepare/databases"
@@ -82,8 +81,9 @@ workflow {
             db_releases,
             interproscan_version,
             workflow.manifest,
-            params.matchesApiUrl,     // from the cmd-offline
-            params.lookupService,     // from confs
+            params.matchesApiUrl,
+            params.matchesApiChunkSize,
+            params.matchesApiMaxRetries
         )
         precalculated_matches = LOOKUP.out.precalculatedMatches
         no_matches_fastas     = LOOKUP.out.noMatchesFasta
