@@ -52,7 +52,7 @@ class InterProScan {
         ],
         [
             name: "nucleic",
-            description: "do no retrieve pre-calculated matches from the match lookup service."
+            description: "interpret input as nucleotide sequences and translate them in all six reading frames to identify open reading frames (ORFs) for annotation."
         ],
         [
             name: "goterms",
@@ -64,10 +64,7 @@ class InterProScan {
         ],
         [
             name: "download",
-            description: ("Download data for the selected applications. " +
-                    "If `<DATA-DIR>/xrefs` exists, InterProScan will use the existing InterPro data. " +
-                    "Otherwise, the latest compatible InterPro release will be downloaded."
-            )
+            description: "download any missing metadata and database files."
         ],
         [
             name: "help",
