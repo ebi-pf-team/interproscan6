@@ -1,33 +1,46 @@
-# InterProScan6
+# InterProScan 6
 
+<!--
 [![nf-test](https://img.shields.io/badge/tested_with-nf--test-337ab7.svg)](https://github.com/askimed/nf-test)
 ![Unit tests](https://github.com/ebi-pf-team/interproscan6/actions/workflows/unit-tests.yml/badge.svg)
 [![Check Docker Files](https://github.com/ebi-pf-team/interproscan6/actions/workflows/docker-check.yml/badge.svg)](https://github.com/ebi-pf-team/interproscan6/actions/workflows/docker-check.yml)
 [![Citation](https://github.com/ebi-pf-team/interproscan6/actions/workflows/citation.yml/badge.svg)](#citation)
 
+-->
+
+[InterPro](http://www.ebi.ac.uk/interpro/) is a database which integrates together predictive information about proteins’ functions from a number of partner resources, giving an overview of the families that a protein belongs to as well as the domains and sites it contains.
+
+**InterProScan** is the software package that allows sequences to be scanned against InterPro's member database signatures. Researchs who have novel nucleotide or protein sequences that they wish to functionally characterise can use InterProScan to run the scanning algorithms against the InterPro database in an integrated way.
+
 > [!CAUTION]
-> InterProScan6 is currently under active development and is not yet stable enough for a full release.
+> InterProScan6 is under active development and is not guaranteed to be stable.
 
-[InterPro](http://www.ebi.ac.uk/interpro/) is a database which integrates together predictive information about proteins’ functions from a number 
-of partner resources, giving an overview of the families that a protein belongs to as well as the domains and sites it contains.
+## Installation
 
-Users who have novel nucleotide or protein sequences that they wish to functionally characterise can use the software 
-package `InterProScan` to run the scanning algorithms from the InterPro database in an integrated way. Sequences are 
-submitted in FASTA format. Matches are then calculated against all the required member databases signatures and the 
-results are then output in a variety of formats.
+* [Nextflow](https://www.nextflow.io/) 24.10.04 or later
+* A container runtime. InterProScran currently supports:
+    * [Docker](https://www.docker.com/)
+    * [SingularityCE](https://sylabs.io/singularity/)
+    * [Apptainer](https://apptainer.org/)
+* Licenses and additional data from their respective authors are required to run `Phobius`, `SignalP` and `DeepTMHMM`
+
+## Usage
+
+```sh
+nextflow run ebi-pf-team/interproscan6 \
+  -profile test,docker \
+  --datadir data \
+  --interpro latest \
+  --download
+```
+
+The parameters used are:
+
+* `-profile test,docker`: run InterProScan in *local* mode, i.e. on 
 
 # Documentation
 
-Our full documentation is available at [ReadTheDocs](https://interproscan-docs.readthedocs.io/en/latest/).
-
-# Requirements
-
-* `Nextflow` (version >=23.04.01)
-* A container run time. `InterProScan` includes built in support for:
-    * `Docker` (version >= 24.0.5)
-    * `SingularityCE` (version >= 4.2.0)
-    * `Apptainer` (version >= 1.3.4)
-* Licenses and additional data from their respective authors are required to run `Phobius`, `SignalP` and `DeepTMHMM`
+Our full documentation is available at [ReadTheDocs](https://interproscan-docs.readthedocs.io/en/v6/).
 
 # Set up
 
