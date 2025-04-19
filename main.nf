@@ -1,13 +1,13 @@
 nextflow.enable.dsl=2
 import groovy.json.JsonSlurper  // until selective downloads
 
-include { INIT_PIPELINE                 } from "./interproscan/subworkflows/init"
-include { PREPARE_DATA                  } from "./interproscan/subworkflows/prepare_data"
-include { PREPARE_SEQUENCES             } from "./interproscan/subworkflows/prepare_sequences"
-include { PRECALCULATED_MATCHES         } from "./interproscan/subworkflows/precalculated_matches"
-include { SCAN_SEQUENCES                } from "./interproscan/subworkflows/scan"
-include { INTERPRO                      } from "./interproscan/subworkflows/interpro"
-include { OUTPUT                        } from "./interproscan/subworkflows/output"
+include { INIT_PIPELINE                 } from "./subworkflows/init"
+include { PREPARE_DATA                  } from "./subworkflows/prepare_data"
+include { PREPARE_SEQUENCES             } from "./subworkflows/prepare_sequences"
+include { PRECALCULATED_MATCHES         } from "./subworkflows/precalculated_matches"
+include { SCAN_SEQUENCES                } from "./subworkflows/scan"
+include { INTERPRO                      } from "./subworkflows/interpro"
+include { OUTPUT                        } from "./subworkflows/output"
 
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
