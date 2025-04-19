@@ -4,7 +4,7 @@ import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
 process DOWNLOAD {
-    maxForks 2
+    maxForks 1
     label    'local', 'ips6_container'
 
     input:
