@@ -22,6 +22,7 @@ process RUN_SIGNALP {
         --format none \
         --organism ${organism} \
         --mode ${mode} \
+        --torch_num_threads 1 \
         --write_procs 1 \
         --model_dir ${signalp_dir}/signalp-6-package/models
     rm -r signalp
