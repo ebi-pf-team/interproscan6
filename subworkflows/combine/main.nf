@@ -1,7 +1,7 @@
 include { XREFS                         } from "../../modules/xrefs"
 include { REPRESENTATIVE_LOCATIONS      } from "../../modules/representative_locations"
 
-workflow INTERPRO {
+workflow COMBINE {
     take:
     match_results
     applications

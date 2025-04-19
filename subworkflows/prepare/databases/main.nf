@@ -1,12 +1,12 @@
 import groovy.json.JsonSlurper
 
-include { DOWNLOAD as DOWNLOAD_INTERPRO } from "../../modules/download"
-include { DOWNLOAD as DOWNLOAD_DATABASE } from "../../modules/download"
-include { FIND_MISSING_DATA             } from "../../modules/download"
-include { VALIDATE_DATA                 } from "../../modules/download"
+include { DOWNLOAD as DOWNLOAD_INTERPRO } from "../../../modules/download"
+include { DOWNLOAD as DOWNLOAD_DATABASE } from "../../../modules/download"
+include { FIND_MISSING_DATA             } from "../../../modules/download"
+include { VALIDATE_DATA                 } from "../../../modules/download"
 
 
-workflow PREPARE_DATA {
+workflow PREPARE_DATABASES {
     take:
     applications
     apps_config

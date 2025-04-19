@@ -1,13 +1,13 @@
 nextflow.enable.dsl=2
 import groovy.json.JsonSlurper  // until selective downloads
 
-include { INIT_PIPELINE                 } from "./subworkflows/init"
-include { PREPARE_DATA                  } from "./subworkflows/prepare_data"
-include { PREPARE_SEQUENCES             } from "./subworkflows/prepare_sequences"
-include { PRECALCULATED_MATCHES         } from "./subworkflows/precalculated_matches"
-include { SCAN_SEQUENCES                } from "./subworkflows/scan"
-include { INTERPRO                      } from "./subworkflows/interpro"
-include { OUTPUT                        } from "./subworkflows/output"
+include { INIT_PIPELINE      } from "./subworkflows/init"
+include { PREPARE_DATABASES  } from "./subworkflows/prepare/databases"
+include { PREPARE_SEQUENCES  } from "./subworkflows/prepare/sequences"
+include { LOOKUP             } from "./subworkflows/lookup"
+include { SCAN_SEQUENCES     } from "./subworkflows/scan"
+include { COMBINE            } from "./subworkflows/combine"
+include { OUTPUT             } from "./subworkflows/output"
 
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
@@ -42,7 +42,7 @@ workflow {
     signalp_mode         = INIT_PIPELINE.out.signalp_mode.val
     interpro_version     = INIT_PIPELINE.out.version.val
 
-    PREPARE_DATA(
+    PREPARE_DATABASES(
         applications,
         params.appsConfig,
         data_dir,
@@ -52,8 +52,8 @@ workflow {
         params.goterms,
         params.pathways
     )
-    db_releases   = PREPARE_DATA.out.versions
-    interproscan_version = PREPARE_DATA.out.iprscan_major_minor
+    db_releases   = PREPARE_DATABASES.out.versions
+    interproscan_version = PREPARE_DATABASES.out.iprscan_major_minor
 
     PREPARE_SEQUENCES(
         fasta_file,
@@ -76,7 +76,7 @@ workflow {
     } else {
         /* Retrieve precalculated matches from the Match lookup API
         Then run analyses on sequences not listed in the API */
-        PRECALCULATED_MATCHES(
+        LOOKUP(
             ch_seqs,
             applications,
             db_releases,
@@ -85,8 +85,8 @@ workflow {
             params.matchesApiUrl,     // from the cmd-offline
             params.lookupService,     // from confs
         )
-        precalculated_matches = PRECALCULATED_MATCHES.out.precalculatedMatches
-        no_matches_fastas     = PRECALCULATED_MATCHES.out.noMatchesFasta
+        precalculated_matches = LOOKUP.out.precalculatedMatches
+        no_matches_fastas     = LOOKUP.out.noMatchesFasta
 
         SCAN_SEQUENCES(
             no_matches_fastas,
@@ -105,12 +105,12 @@ workflow {
     }
     // match_results format: [[meta, [member1.json, member2.json, ..., memberN.json]]
 
-    /* INTERPRO:
+    /* COMBINE:
     Aggregate matches across all members for each sequence --> single JSON with all matches for the batch
     Add InterPro signature and entry desc and names, PAINT annotations (panther only),
     go terms (if enabled), and pathways (if enabled). Then identify representative domains and families
     */
-    ch_results = INTERPRO(
+    ch_results = COMBINE(
         match_results,
         applications,
         db_releases,

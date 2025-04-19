@@ -1,8 +1,8 @@
 include { VALIDATE_FASTA;
           LOAD_SEQUENCES;
           LOAD_ORFS;
-          SPLIT_FASTA     } from "../../modules/prepare_sequences"
-include { ESL_TRANSLATE   } from "../../modules/esl_translate"
+          SPLIT_FASTA     } from "../../../modules/prepare_sequences"
+include { ESL_TRANSLATE   } from "../../../modules/esl_translate"
 
 workflow PREPARE_SEQUENCES {
     take:
