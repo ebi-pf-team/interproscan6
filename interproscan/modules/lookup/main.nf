@@ -73,6 +73,10 @@ process LOOKUP_MATCHES {
                     calculatedMatches[proteinMd5] = [:]
                     it.matches.each { matchMap ->
                         String library = matchMap.signature.signatureLibraryRelease.library
+                        if (library == "MobiDB Lite") {
+                            matchMap.signature.signatureLibraryRelease.library = "MobiDB-lite"
+                        }
+                        
                         String appName = library.toLowerCase().replaceAll("[-\\s]", "")
 
                         if (applications.contains(appName)) {
