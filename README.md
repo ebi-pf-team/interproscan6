@@ -156,7 +156,7 @@ echo "${PWD}/phobius"
 
 SignalP 6.0 supports two modes: a slow one that uses the full model, and a fast one that uses a distilled version of the full mode. InterProScan suppports both, but only one at a time. The fast mode is recommended for most users.
 
-You need a license for each of these mode:
+You need a license for each of these models:
 
 * download the distilled model: [fast](https://services.healthtech.dtu.dk/cgi-bin/sw_request?software=signalp&version=6.0&packageversion=6.0h&platform=fast)
 * download the full model: [slow_sequential](https://services.healthtech.dtu.dk/cgi-bin/sw_request?software=signalp&version=6.0&packageversion=6.0h&platform=slow_sequential)
@@ -203,15 +203,19 @@ nextflow run ebi-pf-team/interproscan6 \
   -c licensed.conf \
   -profile docker
   --input /path/to/sequences.fasta \
-  --applications deeptmhmm,phobius,signalp6_euk,signalp6_prok
+  --applications deeptmhmm,phobius,signalp6_euk,signalp6_prok \
+  --offline
 ```
+
+> [!WARNING]  
+> DeepTMHMM 1.0 and SignalP 6.0 predictions are not yet available in the [Matches API](https://www.ebi.ac.uk/interpro/matches/api/). The pre-calculated matches lookup needs to be disabled with `--offline`.
 
 > [!NOTE]  
 > Running both `signalp6_euk` and `signalp6_prok` will execute SignalP twice, once with eukaryotic post-processing and once without. Choose the mode best suited to your dataset.
 
 ## Documentation
 
-Our full documentation is available at [ReadTheDocs](https://interproscan-docs.readthedocs.io/en/v6/).
+Our full documentation is available on [ReadTheDocs](https://interproscan-docs.readthedocs.io/en/v6/).
 
 # Citation
 
