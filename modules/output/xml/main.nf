@@ -39,7 +39,7 @@ process WRITE_XML {
         }
     }
 
-    def outputFilePath = "${outputPath}.ips6.xml"
+    def outputFilePath = "${outputPath}.xml"
     new File(outputFilePath).text = writer.toString()
 }
 

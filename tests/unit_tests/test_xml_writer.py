@@ -77,7 +77,7 @@ def x_protein_elm():
 def x_outpath(test_output_dir):
     outdir = test_output_dir / "temp"
     outdir.mkdir(parents=True, exist_ok=True)
-    filepath = outdir / "unittest.ips6.xml"
+    filepath = outdir / "unittest.xml"
     return filepath
 
 

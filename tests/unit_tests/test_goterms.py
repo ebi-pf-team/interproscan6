@@ -33,7 +33,7 @@ def expected_output(test_output_dir):
 @pytest.fixture
 def temp_output(test_output_dir):
     dirpath = test_output_dir / "temp"
-    filepath = dirpath / "unittest.ips6.json"
+    filepath = dirpath / "unittest.json"
     dirpath.mkdir(parents=True, exist_ok=True)
     return filepath
 

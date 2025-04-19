@@ -11,7 +11,7 @@ process WRITE_TSV {
 
     exec:
     SeqDB db = new SeqDB(seqDbPath.toString())
-    def tsvFile = new File("${outputPath}.ips6.tsv".toString())
+    def tsvFile = new File("${outputPath}.tsv".toString())
     tsvFile.text = "" // clear the file if it already exists
 
     // Each line contains: seqId md5 seqLength memberDb modelAcc sigDesc start end evalue status date entryAcc entryDesc goterms pathways

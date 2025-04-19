@@ -135,6 +135,6 @@ workflow.onComplete = {
     def outputDir = params.outdir.endsWith('/') ? params.outdir[0..-2] : params.outdir
 
     println "InterProScan workflow completed successfully: $workflow.success."
-    println "Any results are located at ${outputDir}/${outputFileName}.ips6.*"
+    println "Any results are located at ${outputDir}/${outputFileName}.*"
     println "Duration: $workflow.duration"
 }

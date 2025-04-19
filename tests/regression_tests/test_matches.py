@@ -10,7 +10,7 @@ import json
 def main():
     parser = argparse.ArgumentParser(prog="IPS_match_regression_test", description="Check presence of matches", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--expected", type=str, default="tests/data/test_prot.fa.json", help="JSON with expected results")
-    parser.add_argument("--observed", type=str, default="test_prot.fa.ips6.json", help="JSON output file from IPS6")
+    parser.add_argument("--observed", type=str, default="test_prot.fa.json", help="JSON output file from IPS6")
     args = parser.parse_args()
 
     with open(args.expected, "r") as fh:

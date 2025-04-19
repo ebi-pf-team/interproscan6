@@ -53,7 +53,7 @@ def j_nucleic_seq_matches(test_input_dir):
 def j_out_path(test_output_dir):
     outdir = test_output_dir / "temp"
     outdir.mkdir(parents=True, exist_ok=True)
-    filepath = outdir / "tsv.unittest.ips6.tsv"
+    filepath = outdir / "tsv.unittest.tsv"
     return filepath
 
 

@@ -58,7 +58,7 @@ def expected_tsvpro_outdir(test_output_dir):
 @pytest.fixture
 def tsvout_path(test_output_dir):
     dirpath = test_output_dir / "temp"
-    filepath = dirpath / "tsv.unittest.ips6.tsv"
+    filepath = dirpath / "tsv.unittest.tsv"
     dirpath.mkdir(parents=True, exist_ok=True)
     return filepath
 

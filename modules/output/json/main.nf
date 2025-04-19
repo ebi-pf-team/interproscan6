@@ -15,7 +15,7 @@ process WRITE_JSON {
 
     exec:
     ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-    def outputFilePath = "${outputPath}.ips6.json"
+    def outputFilePath = "${outputPath}.json"
 
     SeqDB db = new SeqDB(seqDbPath.toString())
 
