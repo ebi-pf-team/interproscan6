@@ -76,7 +76,7 @@ nextflow run ebi-pf-team/interproscan6 \
 
 ### Selecting specific analyses
 
-To run only certain tools (for example, Pfam and MobiDB‑lite):
+To run only certain analyses (for example, Pfam and MobiDB‑lite):
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
