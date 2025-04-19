@@ -63,11 +63,6 @@ workflow INIT_PIPELINE {
         exit 1
     }
 
-    if (offline && matches_api_url != null) {
-        log.error "--offline and --matches-api-url are mutually exclusive"
-        exit 1
-    }
-
     version = InterProScan.validateInterProVersion(interpro_version)
     if (version == null) {
         log.error "--interpro <VERSION>: invalid format; expecting number of 'latest'"
