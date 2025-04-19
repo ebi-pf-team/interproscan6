@@ -1,24 +1,28 @@
 # InterProScan 6
 
-[InterPro](http://www.ebi.ac.uk/interpro/) is a database which integrates together predictive information about proteins’ functions from a number of partner resources, giving an overview of the families that a protein belongs to as well as the domains and sites it contains.
+[InterPro](http://www.ebi.ac.uk/interpro/) is a database that brings together predictive information on protein function from multiple partner resources. It provides an integrated view of the families, domains and functional sites to which a given protein belongs.
 
-**InterProScan** is the software package that allows sequences to be scanned against InterPro's member database signatures. Researchs who have novel nucleotide or protein sequences that they wish to functionally characterise can use InterProScan to run the scanning algorithms against the InterPro database in an integrated way.
+**InterProScan** is the command‑line tool that allows you to scan protein or nucleotide sequences against the InterPro member‑database signatures in a single workflow. Researchers with novel sequences can use InterProScan to annotate their data with family classifications, domain architectures and site predictions.
 
 > [!CAUTION]
-> InterProScan6 is under active development and is not guaranteed to be stable.
+> InterProScan 6 is under active development and may be unstable.
 
 ## Installation
 
-To run InterProScan, you need:
+Before you begin, you will need:
 
 * [Nextflow](https://www.nextflow.io/) 24.10.04 or later
-* A container runtime. InterProScran currently supports:
+* A container runtime. The currently supported are:
     * [Docker](https://www.docker.com/)
     * [SingularityCE](https://sylabs.io/singularity/)
     * [Apptainer](https://apptainer.org/)
-* Licenses and additional data from their respective authors are required to run Phobius, SignalP and DeepTMHMM (see [licensed analyses](#licensed-analyses))
+
+> [!NOTE]  
+> Phobius, SignalP and DeepTMHMM also require separate licenses and data downloads. See [Licensed analyses](#licensed-analyses) below.
 
 ## Usage
+
+### Running the built‑in test
 
 To test InterProScan, run the following command:
 
@@ -32,24 +36,24 @@ nextflow run ebi-pf-team/interproscan6 \
 
 Explanation of parameters:
 
-* `-profile test,docker`: use the following built-in profiles:
-  * `test`: use an included FASTA file of protein sequences
+* `-profile test,docker`:
+  * `test`: use an included example FASTA file
   * `docker`: execute tasks in Docker containers
-* `--datadir data`: use `data` as the directory to store files required to scan sequences, such as HMM databases. The directory is created if it doesn't exists.
-* `--interpro latest`: use the latest version of InterPro and its member databases
-* `--download`: download InterPro metadata and member database files, if they are not found in the `data` directory.
+* `--datadir data`: use `data` as the directory for storing all required databases; created automatically if needed
+* `--interpro latest`: fetch the most recent InterPro release
+* `--download`: download any missing metadata and database files
 
-InterProScan will create three files in your current working directory:
+After completion, you’ll find three output files in your working directory:
 
-* `test.faa.json`: sequence annotations in the JSON format
-* `test.faa.tsv`: sequence annotations in the TSV format
-* `test.faa.xml`: sequence annotations in the XML format
+* `test.faa.json`: full annotations (JSON)
+* `test.faa.tsv`: tabular summary (TSV)
+* `test.faa.xml`: full annotations (XML)
 
-The JSON and XML output files are the richer, while the TSV provides less information.
+The JSON and XML outputs are more comprehensive; the TSV is a concise summary.
 
-### Using your own input file
+### Scanning your own sequences
 
-To annotate your own sequences, pass `--input /path/to/your/sequences.fasta` when running InterProScan. Remember to run InterProScan *without* the `test` profile.
+To annotate your own sequences FASTA file, omit the `test` profile and specify `--input`:
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
@@ -59,7 +63,7 @@ nextflow run ebi-pf-team/interproscan6 \
   --input /path/to/sequences.fasta
 ```
 
-Got nucleic sequences instead of protein ones? Pass the `--nucleic` parameter.
+For nucleotide sequences, add `--nucleic`:
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
@@ -67,14 +71,12 @@ nextflow run ebi-pf-team/interproscan6 \
   --datadir data \
   --interpro latest \
   --input /path/to/sequences.fna \
-  --nucleic  
+  --nucleic
 ```
 
-### Running specific analyses
+### Selecting specific analyses
 
-One may run only a specific subset of analyses available in InterProScan, e.g. only Pfam for protein family classification and MobiDB-lite for intrinsically disordered regions predicton.
-
-To do so, pass the `--applications` parameter, followed by the comma-separated list of analyses to execute:
+To run only certain tools (for example, Pfam and MobiDB‑lite):
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
@@ -84,7 +86,7 @@ nextflow run ebi-pf-team/interproscan6 \
   --applications Pfam,MobiDB-lite
 ```
 
-Please note that analyses are case-insensitive and that dashes (`-`) are removed, thereby `MobiDB-lite`  and `mobidblite` are both valid.
+Analyses are case‑insensitive and ignore hyphens, so `MobiDB-lite` and `mobidblite` both work.
 
 The available analyses are:
 
@@ -111,17 +113,12 @@ The available analyses are:
 * `SignalP-Euk`
 * `SignalP-Prok`
 
-> [!IMPORTANT]  
-> `DeepTMHMM`, `Phobius`, `SignalP-Euk`, and `SignalP-Prok` contain licensed components that prevent them to be integrated by default in InterProScan. Please read [how to execute licensed analyses](#licensed-analyses).
-
 > [!TIP]
-> When executing exclusively analyses that do not require InterPro data, the `--datadir`, `--interpro`, and `--download` aren't used. These analyses are `COILS`, `DeepTMHMM`,`MobiDB-lite`, `Phobius`, `SignalP-Euk`, and `SignalP-Prok`.
+> If you only run COILS, DeepTMHMM, MobiDB‑lite, Phobius, SignalP‑Euk or SignalP‑Prok, you don't need `--datadir`, `--interpro`, or `--download`.
 
 ### Licensed analyses
 
-DeepTMHMM, Phobius, and SignalP include licensed components that cannot be included with InterProScan, therefore these analyses are deactivated by default.
-
-To enable and execute these analyses, you first need to obtain their license, and data.
+DeepTMHMM, Phobius and SignalP contain licensed components and are disabled by default. To enable and execute these analyses, you first need to obtain their license, and data.
 
 #### Obtaining licensed components
 
@@ -178,29 +175,28 @@ echo "${PWD}/signal6p_fast"
 
 #### Executing licensed analyses
 
-Once you have downloaded and extracted or or multiple licensed analyses, create a config file as follows:
+Create a Nextflow config (e.g. `licensed.conf`) that points to each tool directory:
 
 ```groovy
-# licensed.conf
 params {
     appsConfig {
         deeptmhmm {
-            dir = "/path/to/DeepTMHMM"
+            dir = "/full/path/to/DeepTMHMM"
         }
         phobius {
-            dir = "/path/to/phobius"
+            dir = "/full/path/to/phobius"
         }
         signalp_euk {
-            dir = "/path/to/signal6p_fast"
+            dir = "/full/path/to/signal6p_fast"
         }
         signalp_prok {
-            dir = "/path/to/signal6p_fast"
+            dir = "/full/path/to/signal6p_fast"
         }
     }
 }
 ```
 
-Then pass this config file with `-c licensed.conf` when running InterProScan:
+And run with your config:
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
@@ -211,7 +207,7 @@ nextflow run ebi-pf-team/interproscan6 \
 ```
 
 > [!NOTE]  
-> SignalP 6.0 has an option to post-process signal peptide predictions to prevent spurious results in eukaryotic proteins. Running InterProScan with `signalp6_euk` *and* `signalp6_prok` will execute SignalP twice, once with the post-processing (better for eukaryotic proteins) and once without (better for prokaryotic proteins). You may want to run only one.
+> Running both `signalp6_euk` and `signalp6_prok` will execute SignalP twice, once with eukaryotic post-processing and once without. Choose the mode best suited to your dataset.
 
 ## Documentation
 
