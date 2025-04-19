@@ -201,9 +201,9 @@ And run with your config:
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
   -c licensed.conf \
-  -profile docker
+  -profile docker \
   --input /path/to/sequences.fasta \
-  --applications deeptmhmm,phobius,signalp6_euk,signalp6_prok \
+  --applications deeptmhmm,phobius,signalp_euk,signalp_prok \
   --offline
 ```
 
@@ -211,7 +211,7 @@ nextflow run ebi-pf-team/interproscan6 \
 > DeepTMHMM 1.0 and SignalP 6.0 predictions are not yet available in the [Matches API](https://www.ebi.ac.uk/interpro/matches/api/). The pre-calculated matches lookup needs to be disabled with `--offline`.
 
 > [!NOTE]  
-> Running both `signalp6_euk` and `signalp6_prok` will execute SignalP twice, once with eukaryotic post-processing and once without. Choose the mode best suited to your dataset.
+> Running both `signalp_euk` and `signalp_prok` will execute SignalP twice, once with eukaryotic post-processing and once without. Choose the mode best suited to your dataset.
 
 ## Documentation
 
