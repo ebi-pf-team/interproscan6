@@ -99,15 +99,11 @@ class InterProScan {
             description: null
         ],
         [
-            name: "x-refs-config",
+            name: "matches-api-chunk-size",
             description: null
         ],
         [
-            name: "ftp-server",
-            description: null
-        ],
-        [
-            name: "lookup-service",
+            name: "matches-api-max-retries",
             description: null
         ],
     ]
