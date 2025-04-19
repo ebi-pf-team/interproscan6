@@ -2,31 +2,13 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import java.util.regex.Pattern
 
-process RUN_PIRSR {
-    label 'small', 'ips6_container'
-
-    input:
-    tuple val(meta), path(fasta)
-    path hmmdb
-
-    output:
-    tuple val(meta), path("hmmsearch.out")
-
-    script:
-    """
-    /opt/hmmer3/bin/hmmsearch \
-        -E 0.01 --acc \
-        --cpu ${task.cpus} \
-        ${hmmdb} ${fasta} > hmmsearch.out
-    """
-}
-
 process PARSE_PIRSR {
     label 'run_locally'
 
     input:
     tuple val(meta), val(hmmsearch_out)
-    val rulesPath
+    val dirpath
+    val rulesfile
 
     output:
     tuple val(meta), path("pirsr.json")
@@ -36,7 +18,8 @@ process PARSE_PIRSR {
     def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "PIRSR")
 
     JsonSlurper jsonSlurper = new JsonSlurper()
-    def rules = jsonSlurper.parse(new File(rulesPath.toString()))
+    String rulesFilePath = "${dirpath.toString()}/${rulesfile}"
+    def rules = jsonSlurper.parse(new File(rulesFilePath))
 
     def validMatches = [:]
     hmmerMatches.each { seqId, matches ->

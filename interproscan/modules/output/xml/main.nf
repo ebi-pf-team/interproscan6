@@ -4,9 +4,7 @@ import groovy.xml.MarkupBuilder
 import java.io.StringWriter
 import java.util.regex.Pattern
 
-process WRITE_XML_OUTPUT {
-    label 'run_locally'
-
+process WRITE_XML {
     input:
     val matchesFiles  // {query prot seq md5: {model acc: match}}
     val outputPath

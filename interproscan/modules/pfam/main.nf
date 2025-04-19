@@ -1,30 +1,12 @@
 import groovy.json.JsonOutput
 
-process SEARCH_PFAM {
-    label 'small', 'ips6_container'
-
-    input:
-    tuple val(meta), path(fasta)
-    path hmmdb
-
-    output:
-    tuple val(meta), path("hmmsearch.out")
-
-    script:
-    """
-    /opt/hmmer3/bin/hmmsearch \
-        -Z 61295632 --cut_ga \
-        --cpu ${task.cpus} \
-        ${hmmdb} ${fasta} > hmmsearch.out
-    """
-}
-
 process PARSE_PFAM {
     label 'run_locally'
 
     input:
     tuple val(meta), val(hmmsearch_out)
-    val datPath
+    val dirpath
+    val datfile
 
     output:
     tuple val(meta), path("pfam.json")
@@ -33,6 +15,7 @@ process PARSE_PFAM {
     int MINLENGTH = 8  // minimum length of a fragment
     def outputFilePath = task.workDir.resolve("pfam.json")
     def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "Pfam")
+    String datPath = "${dirpath.toString()}/${datfile}"
     Map<String, Map<String, Object>> dat = stockholmDatParser(datPath)  // [modelAcc: [clan: str, nested: [str]]]
 
     Map<String, List<Match>> filteredMatches = filterMatches(hmmerMatches, dat)

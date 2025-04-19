@@ -1,115 +1,91 @@
-include { getInfo            } from "../../modules/lookup"
-include { getInterProVersion } from "../../modules/xrefs"
-
 workflow INIT_PIPELINE {
-    main:
-    // Params validation
-    InterProScan.validateParams(params, log)
+    // Validate pipeline input parameters
+    take:
+    input
+    applications
+    apps_config
+    download
+    offline
+    datadir
+    formats
+    outdir
+    signalp_mode
+    matches_api_url
+    interpro_version
 
+    main:
     // Check the input
-    fasta = InterProScan.resolveFile(params.input)
+    fasta = InterProScan.resolveFile(input)
     if (!fasta) {
-        log.error "No such file: ${params.input}"
+        log.error "No such file: ${input}"
         exit 1
     }
 
     // Applications validation
-    (apps, error) = InterProScan.validateApplications(params.applications, params.appsConfig)
+    (apps, error) = InterProScan.validateApplications(applications, apps_config)
     if (!apps) {
         log.error error
         exit 1
     }
 
-    // Validate the data dir and application data files if needed by any members
-    // e.g. mobidblite and coils do no need additional data files
-    need_data = apps.any { String appName ->
-        params.appsConfig.get(appName)?.has_data || InterProScan.LICENSED_SOFTWARE.contains(appName)
-    }
-    def _datadir = ""
-    if (need_data) {
-        // If --datadir is called and no path is given it converts to a boolean
-        def dirPath = params.datadir instanceof Boolean ? null : params.datadir
-        (_datadir, error) = InterProScan.resolveDirectory(dirPath, true, false)
-        if (!_datadir) {
-            log.error error
-            exit 1
-        }
-        error = InterProScan.validateAppData(apps, _datadir, params.appsConfig)
-        if (error) {
-            log.error error
-            exit 1
-        }
-        error = InterProScan.validateXrefFiles(_datadir, params.xRefsConfig, params.goterms, params.pathways)
-        if (error) {
-            log.error error
-            exit 1
-        }
+    if (download && offline) {
+        log.error "--download and --offline are mutually exclusive"
+        exit 1
     }
 
     // Check valid output file formats were provided
-    (formats, error) = InterProScan.validateFormats(params.formats)
+    (formats, error) = InterProScan.validateFormats(formats)
     if (error) {
         log.error error
         exit 1
     }
 
-    // Build output dir if needed
-    (outdir, error) = InterProScan.resolveDirectory(params.outdir, false, true)
+    apps_with_data = InterProScan.getAppsWithData(apps, apps_config)
+    if (apps_with_data.size() > 0) {
+        if (datadir == null) {
+            log.error "'--datadir <DATA-DIR>' is required for the selected applications."
+            edit 1
+        }
+    
+        (datadir, error) = InterProScan.resolveDirectory(datadir, false, true)
+        if (datadir == null) {
+            log.error error
+            exit 1
+        }
+    } else {
+        datadir = null
+    }
+  
+    // SignalP mode validation
+    (signalp_mode, error) = InterProScan.validateSignalpMode(signalp_mode)
+    if (!signalp_mode) {
+        log.error error
+        exit 1
+    }
+
+    if (offline && matches_api_url != null) {
+        log.error "--offline and --matches-api-url are mutually exclusive"
+        exit 1
+    }
+
+    version = InterProScan.validateInterProVersion(interpro_version)
+    if (version == null) {
+        log.error "--interpro <VERSION>: invalid format; expecting number of 'latest'"
+        exit 1
+    }
+
+    (outdir, error) = InterProScan.resolveDirectory(outdir, false, true)
     if (!outdir) {
         log.error error
         exit 1
     }
 
-    // SignalP mode validation
-    (signalpMode, error) = InterProScan.validateSignalpMode(params.signalpMode)
-    if (!signalpMode) {
-        log.error error
-        exit 1
-    }
-
-    def _matchesApiUrl = null
-    if (params.offline && params.matchesApiUrl != null) {
-        log.error "--offline and --matches-api-url are mutually exlusive"
-        exit 1
-    } else if (params.offline) {
-        _matchesApiUrl = null
-    } else {
-        _matchesApiUrl = params.matchesApiUrl ?: params.lookupService.url
-        info = getInfo(_matchesApiUrl)
-        if (info == null) {
-            log.warn "An error occurred while querying the Matches API; analyses will be run locally"
-            _matchesApiUrl = null
-        } else {
-            def apiVersion = info.api ?: "X.Y.Z"
-            def majorVersion = apiVersion.split("\\.")[0]
-
-            if (majorVersion != "0") {
-                def msg = "${workflow.manifest.name} ${workflow.manifest.version}" +
-                    " is not compatible with the Matches API at ${_matchesApiUrl};" +
-                    " analyses will be run locally"
-                log.warn msg
-                _matchesApiUrl = null
-            } else if (_datadir) {
-                def iprVersion = getInterProVersion(_datadir)
-                if (iprVersion != info.release) {
-                    def msg = "InterPro version mismatch (local: ${iprVersion}, Matches API: ${info.release});" +
-                        " pre-calulated matches will not be retrieved, and analyses will be run locally"
-                    log.warn msg
-                    _matchesApiUrl = null
-                }
-            }
-        }
-    }
-
-    matchesApiUrl = _matchesApiUrl
-    datadir = _datadir
-
     emit:
-    fasta         // str: path to input fasta file
-    datadir       // str: path to data directory
-    apps          // list: list of application to
-    outdir        // str: path to output directory
-    formats       // set<String>: output file formats
-    signalpMode   // str: Models to be used with SignalP
-    matchesApiUrl // str|null: URL of Matches API to query
+    fasta            // str: path to input fasta file
+    apps             // list: list of application to
+    datadir          // str: path to data directory, or null if not needed
+    outdir           // str: path to output directory
+    formats          // set<String>: output file formats
+    signalp_mode     // str: Models to be used with SignalP
+    version          // str: InterPro version (or "latest")
 }

@@ -2,9 +2,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 
-process WRITE_TSV_OUTPUT {
-    label 'run_locally'
-
+process WRITE_TSV {
     input:
     val matchesFiles
     val outputPath

@@ -6,7 +6,8 @@ process RUN_PFSEARCH {
 
     input:
         tuple val(meta), path(fasta)
-        val models_dir
+        path dirpath
+        val profiles_dir
 
     output:
         tuple val(meta), path("prosite_profiles.out")
@@ -14,7 +15,7 @@ process RUN_PFSEARCH {
     script:
     """
     touch prosite_profiles.out
-    find ${models_dir} -type f | while read profile; do
+    find ${dirpath}/${profiles_dir} -type f | while read profile; do
         output=\$(/opt/pftools/pfsearchV3 "\${profile}" "${fasta}" -f -o 7 -t 4)
         if [[ -n "\${output}" ]]; then
             echo "\${output}" >> prosite_profiles.out
@@ -28,7 +29,8 @@ process PARSE_PFSEARCH {
 
     input:
         tuple val(meta), val(pfsearch_out)
-        val skip_flagged_profiles
+        val dirpath
+        val blacklist_file
 
     output:
         tuple val(meta), path("prositeprofiles.json")
@@ -36,7 +38,7 @@ process PARSE_PFSEARCH {
     exec:
     Map matches = [:]
     SignatureLibraryRelease library = new SignatureLibraryRelease("PROSITE profiles", null)
-    def toSkip = new File(skip_flagged_profiles).readLines()
+    def toSkip = new File("${dirpath.toString()}/${blacklist_file}").readLines()
 
     new File(pfsearch_out.toString()).eachLine { line ->
         if (line.trim()) {

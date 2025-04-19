@@ -7,7 +7,8 @@ process RUN_PRINTS {
 
     input:
     tuple val(meta), path(fasta)
-    val pvalFile
+    path dirpath
+    val pval
 
     output:
     tuple val(meta), path("prints_output")
@@ -15,7 +16,7 @@ process RUN_PRINTS {
     script:
     """
     $projectDir/bin/prints/fingerPRINTScan \
-        ${pvalFile} \
+        ${dirpath}/${pval} \
         ${fasta} \
         -e 0.0001 -d 10 -E 257043 84355444 -fj -o 15 > prints_output
     """
@@ -26,15 +27,17 @@ process PARSE_PRINTS {
 
     input:
     tuple val(meta), val(prints_output)
-    val hierarchyDb
+    val dirpath
+    val hierarchydb
 
     output:
     tuple val(meta), path("prints.json")
 
     exec:
     SignatureLibraryRelease library = new SignatureLibraryRelease("PRINTS", null)
+    String hierarchyFilePath = "${dirpath.toString()}/${hierarchydb}"
     // Build up a map of the Model ID to fingerprint hierarchies
-    Map<String, HierarchyEntry> hierarchyMap = HierarchyEntry.parseHierarchyDbFile(hierarchyDb)
+    Map<String, HierarchyEntry> hierarchyMap = HierarchyEntry.parseHierarchyDbFile(hierarchyFilePath)
 
     // Parse the prints output into simple raw prints matches
     // Each location is represented by its own Print object

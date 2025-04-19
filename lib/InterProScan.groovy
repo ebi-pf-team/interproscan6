@@ -1,6 +1,9 @@
 // Class and methods for validating the user inputs
 
+import groovy.json.JsonSlurper
+import java.security.MessageDigest
 import java.nio.file.*
+import HTTPRequest
 
 class InterProScan {
     static final def PARAMS = [
@@ -37,6 +40,11 @@ class InterProScan {
             description: "run InterProScan in offline mode, disabling queries to the InterPro Matches API. Pre-calculated matches for known sequences will not be retrieved, and analyses will be run locally."
         ],
         [
+            name : "interpro",
+            metavar: "<VERSION>",
+            description: "the InterPro release to be used. Defaults to 'latest'."
+        ],
+        [
             name: "matches-api-url",
             metavar: "<URL>",
             description: "override the default InterPro Matches API, hosted at EMBL-EBI. Use this option to specify the URL of an alternative Matches API instance.",
@@ -53,6 +61,13 @@ class InterProScan {
         [
             name: "pathways",
             description: "include pathway mapping in output files."
+        ],
+        [
+            name: "download",
+            description: ("Download data for the selected applications. " +
+                    "If `<DATA-DIR>/xrefs` exists, InterProScan will use the existing InterPro data. " +
+                    "Otherwise, the latest compatible InterPro release will be downloaded."
+            )
         ],
         [
             name: "help",
@@ -88,6 +103,10 @@ class InterProScan {
             description: null
         ],
         [
+            name: "ftp-server",
+            description: null
+        ],
+        [
             name: "lookup-service",
             description: null
         ],
@@ -101,8 +120,10 @@ class InterProScan {
             "FILE": ["cla", "clan", "dat", "disc_regs", "evaluator", "hierarchy", "hmm", "hmmbin",
                      "model", "model2sfs", "pdbj95d", "rules", "seed", "selfhits", "site_annotations",
                      "skip_flagged_profiles"],
-            "DIR": ["dir", "msf", "paint", "rpsblast_db", "rpsproc_db"]
+            "DIR": ["msf", "paint", "rpsblast_db", "rpsproc_db"]
     ]
+
+    static final String FTP_URL = "https://ftp.ebi.ac.uk/pub/software/unix/iprscan/6"
 
     static void validateParams(params, log) {
         def allowedParams = this.PARAMS.collect { it.name.toLowerCase() }
@@ -131,7 +152,7 @@ class InterProScan {
             if (allowedParams.contains(kebabParamName.toLowerCase())) {
                 def paramObj = this.PARAMS.find { it.name.toLowerCase() == kebabParamName.toLowerCase() }
                 assert paramObj != null
-                if (paramObj?.metavar != null && !paramObj?.canBeNull && !(paramValue instanceof String)) {
+                if (paramObj?.metavar != null && !paramObj?.canBeNull && (paramValue instanceof Boolean)) {
                     log.error "'--${paramObj.name} ${paramObj.metavar}' is mandatory and cannot be empty."
                     System.exit(1)
                 }
@@ -152,9 +173,43 @@ class InterProScan {
         }
     }
 
+    static String getMD5Hash(String filePath) {
+        // Get the MD5 Hash of a local file. Used to check if the correct or complete file has been downloaded
+        def file = new File(filePath)
+        MessageDigest md = MessageDigest.getInstance("MD5")
+        file.withInputStream { is ->
+            byte[] buffer = new byte[8192]
+            int bytesRead
+            while ((bytesRead = is.read(buffer)) != -1) {
+                md.update(buffer, 0, bytesRead)
+            }
+        }
+        return md.digest().collect { String.format("%02x", it)}.join()
+    }
+
     static String resolveFile(String filePath) {
         Path path = Paths.get(filePath)
         return Files.isRegularFile(path) ? path.toRealPath() : null
+    }
+
+    static Map getMemberDbReleases(def path, def ready) {
+        // Load the datadir/interpro/database.json file and set all keys to lowercase to match applications.config
+        if (ready == null) {
+            return
+        }
+        JsonSlurper jsonSlurper = new JsonSlurper()
+        def databaseJson = new File(path.toString())
+        def memberDbReleases = jsonSlurper.parse(databaseJson)
+        memberDbReleases = memberDbReleases.collectEntries { appName, versionNum ->
+            [(appName.toLowerCase()): versionNum]
+        }
+        return memberDbReleases
+    }
+
+    static List<String> getAppsWithData(List<String> applications, Map appsConfig) {
+        return applications.findAll { String appName ->
+            appsConfig.get(appName)?.has_data || InterProScan.LICENSED_SOFTWARE.contains(appName)
+        }
     }
 
     static resolveDirectory(String dirPath, boolean mustExist = false, boolean mustBeWritable = false) {
@@ -180,6 +235,18 @@ class InterProScan {
                 return [null, "Cannot create directory: ${dirPath}."]
             }
         }
+    }
+
+    static findLocalHighestVersionDir(String dirPath) {
+        Path path = Paths.get(dirPath)
+        def dirs = Files.list(path)
+            .findAll { Files.isDirectory(it) && it.fileName.toString() ==~ /^\d+\.\d+$/ }
+            .sort { a, b ->
+                def (aMajor, aMinor) = a.fileName.toString().tokenize('.').collect { it.toInteger() }
+                def (bMajor, bMinor) = b.fileName.toString().tokenize('.').collect { it.toInteger() }
+                return aMajor <=> bMajor ?: aMinor <=> bMinor
+            }
+        return dirs ? dirs.last().fileName.toString() : null
     }
 
     static validateApplications(String applications, Map appsConfig) {
@@ -219,34 +286,33 @@ class InterProScan {
         return [appsToRun.toSet().toList(), null]
     }
 
-    static validateAppData(List<String> appsToRun, Path datadir, Map appsConfig) {
-        def errorMsg = appsToRun.collectMany { appName ->
-            appsConfig[appName].collect { key, value ->
-                if (this.DATA_TYPE["FILE"].contains(key)) {
-                    if (!resolveFile(datadir.resolve(value).toString())) {
-                        return "${appName}: file: '${key}': ${value ?: 'null'}"
-                    }
-                } else if (this.DATA_TYPE["DIR"].contains(key)) {
-                    if (!value) {
-                        return "${appName}: dir: '${key}': 'null'"
-                    }
-                    Path dirPath = this.LICENSED_SOFTWARE.contains(appName) ? Paths.get(value) : datadir.resolve(value)
-                    if (!Files.exists(dirPath) || !Files.isDirectory(dirPath)) {
-                        return "${appName}: dir: '${key}': ${value ?: 'null'}"
-                    }
-                }
-                return null
-            }.findAll { it }
-        }.join('\n')
-        return errorMsg ? "Could not find the following data files\n${errorMsg}" : null
+    static String validateInterProVersion(versionParam) {
+        String version = null
+        if (versionParam instanceof Number) {
+            double num = ((Number) versionParam).doubleValue();
+            if (num == Math.floor(num)) {
+                version = String.format("%.1f", num);
+            } else {
+                version = Double.toString(num);
+            }
+        } else if (versionParam instanceof String && versionParam == "latest") {
+            version = versionParam
+        }
+        return version
     }
 
-    static validateXrefFiles(Path datadir, Map xRefsConfig, boolean goterms, boolean pathways) {
-        def errorMsg = []
+    static List<String> fetchCompatibleVersions(String majorMinorVersion) {
+        String url = "${InterProScan.FTP_URL}/${majorMinorVersion}/versions.json"
+        Map versions = HTTPRequest.fetch(url, null, 2, false)
+        return versions["interpro"]*.toString() ?: null
+    }
+
+    static validateXrefFiles(String xref_dir, Map xRefsConfig, boolean goterms, boolean pathways) {
+        def error = ""
         def addError = { type, suffix ->
-            String path = datadir.resolve("${xRefsConfig[type]}${suffix}")
+            String path = "${xref_dir}/${xRefsConfig[type]}${suffix}"
             if (!resolveFile(path)) {
-                errorMsg << "${type}${suffix}: ${path}"
+                error << "${type}${suffix}: ${path}"
             }
         }
         addError('entries',  '')  // we hard code the file ext in xrefsconfig so no suffix needed here
@@ -259,7 +325,7 @@ class InterProScan {
             addError('pathways', '.ipr.json')
             addError('pathways', '.json')
         }
-        return errorMsg ? "Could not find the following XREF data files\n${errorMsg.join('\n')}" : null
+        return error ? "Could not find the following XREF data files\n${error.join('\n')}" : null
     }
 
     static Set<String> validateFormats(String userFormats) {

@@ -11,8 +11,9 @@ process RUN_PFSCAN {
 
     input:
         tuple val(meta), path(fasta)
-        path data
-        path evaluator
+        path dirpath
+        val datfile
+        val evafile
 
     output:
         tuple val(meta), path("ps_scan.out")
@@ -21,9 +22,9 @@ process RUN_PFSCAN {
     """
         perl /opt/pftools/ps_scan.pl \
         ${fasta} \
-        -d ${data} \
+        -d ${dirpath}/${datfile} \
         --pfscan /opt/pftools/pfscanV3 \
-        -b ${evaluator} \
+        -b ${dirpath}/${evafile} \
         -r -s -o ipro > ps_scan.out
     """
 }
