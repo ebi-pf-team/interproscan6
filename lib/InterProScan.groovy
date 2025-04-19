@@ -201,7 +201,7 @@ class InterProScan {
 
     static List<String> getAppsWithData(List<String> applications, Map appsConfig) {
         return applications.findAll { String appName ->
-            appsConfig.get(appName)?.has_data || InterProScan.LICENSED_SOFTWARE.contains(appName)
+            appsConfig.get(appName)?.has_data //|| InterProScan.LICENSED_SOFTWARE.contains(appName)
         }
     }
 
