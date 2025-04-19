@@ -132,7 +132,7 @@ Request a standalone copy of DeepTMHMM 1.0 by sending an email to <licensing@bio
 unzip -q DeepTMHMM-v1.0.zip
 ```
 
-and make not of the full path to the package:
+and make note of the full path to the package:
 
 ```sh
 echo "${PWD}/DeepTMHMM
@@ -146,7 +146,7 @@ Download a copy of Phobius 1.01 [from Erik Sonnhammer's website](https://softwar
 tar -zxf phobius101_linux.tgz
 ```
 
-and make not of the full path to the package:
+and make note of the full path to the package:
 
 ```sh
 echo "${PWD}/phobius"
@@ -167,7 +167,7 @@ Extract the archive:
 tar -zxf signalp-6.0h.fast.tar.gz
 ```
 
-and make not of the full path to the package:
+and make note of the full path to the package:
 
 ```sh
 echo "${PWD}/signal6p_fast"
