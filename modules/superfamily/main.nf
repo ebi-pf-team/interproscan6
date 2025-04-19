@@ -35,7 +35,7 @@ process SEARCH_SUPERFAMILY {
 }
 
 process PARSE_SUPERFAMILY {
-    label 'run_locally'
+    label 'native'
 
     input:
     tuple val(meta), val(superfamily_out)

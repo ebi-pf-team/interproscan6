@@ -1,6 +1,6 @@
 process VALIDATE_FASTA {
     // check the formating of the intput FASTA, i.e. look for illegal characters
-    label         'run_locally', 'ips6_container'
+    label         'native', 'ips6_container'
     errorStrategy 'terminate'
 
     input:
@@ -94,8 +94,8 @@ process VALIDATE_FASTA {
 }
 
 process LOAD_SEQUENCES {
-    // Populate a run_locally sqlite3 database with sequences from the pipeline's input FASTA file.
-    label         'run_locally'
+    // Populate a native sqlite3 database with sequences from the pipeline's input FASTA file.
+    label         'native'
     errorStrategy 'terminate'
 
     input:
@@ -114,7 +114,7 @@ process LOAD_SEQUENCES {
 
 process LOAD_ORFS {
     // add protein seqs translated from ORFS in the nt seqs to the database
-    label         'run_locally'
+    label         'native'
     errorStrategy 'terminate'
 
     input:
@@ -134,7 +134,7 @@ process LOAD_ORFS {
 
 process SPLIT_FASTA {
     // Build the FASTA file batches of unique protein sequences for the sequence analysis
-    label         'run_locally'
+    label         'native'
     errorStrategy 'terminate'
 
     input:

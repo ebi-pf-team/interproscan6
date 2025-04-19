@@ -17,7 +17,7 @@ process RUN_COILS {
 
 
 process PARSE_COILS {
-    label 'run_locally'
+    label 'native'
 
     input:
     tuple val(meta), val(coils_out)

@@ -9,27 +9,27 @@ workflow LOOKUP {
     interproscan_version  // major.minor interproscan version number
     workflow_manifest     // map, from nextflow.conf
     matches_api_url       // str, from cmd-line
-    lookup_service        // Map of confs/lookup.conf
+    chunk_size            // int
+    max_retries           // int
 
     main:
     // Initialise channels for outputs
     precalculatedMatches = Channel.empty()
     noMatchesFasta = Channel.empty()
 
-    _url = matches_api_url ?: lookup_service.url
     PREPARE_LOOKUP(
-        _url,
+        matches_api_url,
         db_releases,
         interproscan_version,
         workflow_manifest
     )
-    _matches_api_url = PREPARE_LOOKUP.out[0]
+    matches_api_url = PREPARE_LOOKUP.out[0]
 
-    _matches_api_url
+    matches_api_url
         .filter { it }
         .combine(ch_seqs)
         .map { url, index, fasta ->
-            tuple(index, fasta, apps, url, lookup_service.chunkSize, lookup_service.maxRetries)
+            tuple(index, fasta, apps, url, chunk_size, max_retries)
         }
         .set { lookup_input }
 
@@ -39,7 +39,7 @@ workflow LOOKUP {
     noMatchesFasta = LOOKUP_MATCHES.out[1]
 
     // fallback when no API URL is available
-    _matches_api_url
+    matches_api_url
         .filter { !it }
         .map { _ ->
             precalculatedMatches = Channel.empty()

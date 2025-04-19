@@ -20,7 +20,7 @@ process SEARCH_PHOBIUS {
 }
 
 process PARSE_PHOBIUS {
-    label 'run_locally'
+    label 'native'
 
     input:
     tuple val(meta), val(phobius_out)
