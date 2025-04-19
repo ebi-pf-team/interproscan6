@@ -128,25 +128,34 @@ class HMMER2 {
         return hits
     }
 
-    static parseHMM(String filePath) {
+    static parseHMMs(String dirPath) {
         def hmmLengths = [:]
-        String modelAccession = null
-        Integer length = null
-        new File(filePath).eachLine { line -> 
-            if (line.startsWith("ACC ")) {
-                def fields = line.split(/\s+/)
-                assert fields.size() == 2
-                modelAccession = fields[1]
-            } else if (line.startsWith("LENG ")) {
-                def fields = line.split(/\s+/)
-                assert fields.size() == 2
-                length = Integer.parseInt(fields[1])
-            } else if (line.startsWith("//")) {
-                assert modelAccession != null
-                assert length != null
-                hmmLengths[modelAccession] = length
-                modelAccession = null
-                length = null
+
+        new File(dirPath).eachFile { File file ->
+            if (!file.isFile()) 
+                return  // skip sub‑dirs
+
+            String modelAccession = null
+            Integer length = null
+
+            file.eachLine { line ->
+                if (line.startsWith("ACC ")) {
+                    // We expect only one model per file
+                    assert modelAccession == null
+                    def fields = line.split(/\s+/)
+                    assert fields.size() == 2
+                    modelAccession = fields[1]
+                }
+                else if (line.startsWith("LENG ")) {
+                    def fields = line.split(/\s+/)
+                    assert fields.size() == 2
+                    length = fields[1] as Integer
+                }
+                else if (line.startsWith("//")) {
+                    assert modelAccession != null
+                    assert length != null
+                    hmmLengths[modelAccession] = length
+                }
             }
         }
 

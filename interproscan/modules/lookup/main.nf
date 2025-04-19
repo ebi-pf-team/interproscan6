@@ -2,15 +2,48 @@ import groovy.json.JsonSlurper
 import java.net.URL
 import groovy.json.JsonOutput
 
+process PREPARE_LOOKUP {
+    input:
+    val _url
+    val db_releases
+    val interproscan_version  // major.minor iprscan version number
+    val workflow_manifest
+
+    output:
+    val matchesApiUrl
+
+    exec:
+    String _matchesApiUrl = _url  // reassign to avoid 'variable' already used error when logging
+    // Get MLS metadata: api (version), release, release_date
+    Map info = HTTPRequest.fetch("${HTTPRequest.sanitizeURL(_matchesApiUrl)}/info".toString(), null, 0, true)
+    if (info == null) {
+        log.warn "An error occurred while querying the Matches API; analyses will be run locally"
+        matchesApiUrl = null
+    } else {
+        def apiVersion = info.api ?: "X.Y.Z"
+        def majorVersion = apiVersion.split("\\.")[0]
+        if (majorVersion != "0") {
+            log.warn "${workflow_manifest.name} ${workflow_manifest.version}" +
+                    " is not compatible with the Matches API at ${_matchesApiUrl};" +
+                    " analyses will be run locally"
+            matchesApiUrl = null
+        } else if (db_releases) {  // can be null if we don't need data for the selected apps (e.g. mobidblite)
+            if (db_releases["interpro"]["version"] != info.release) {
+                log.warn "The local InterPro version does not match the match API release (Local: ${db_releases['interpro']}, Matches API: ${info.release}).\n" +
+                        "Pre-calculated matches will not be retrieved, and analyses will be run locally"
+                matchesApiUrl = null
+            }
+        }
+    }
+    matchesApiUrl = _matchesApiUrl
+    return matchesApiUrl
+}
+
 process LOOKUP_MATCHES {
     label 'run_locally'
 
     input:
-    tuple val(index), val(fasta)
-    val applications
-    val url
-    val chunkSize
-    val maxRetries
+    tuple val(index), val(fasta), val(applications), val(url), val(chunkSize), val(maxRetries)
 
     output:
     tuple val(index), path("calculatedMatches.json")
@@ -27,24 +60,28 @@ process LOOKUP_MATCHES {
     def md5List = sequences.keySet().toList()
     def chunks = md5List.collate(chunkSize)
 
-    String baseUrl = sanitizeURL(url.toString())
+    String baseUrl = HTTPRequest.sanitizeURL(url.toString())
     boolean success = true
     for (chunk in chunks) {
         String data = JsonOutput.toJson([md5: chunk])
-        def response = httpRequest("${baseUrl}/matches", data, maxRetries, true)
+        def response = HTTPRequest.fetch("${baseUrl}/matches", data, maxRetries, true)
 
         if (response != null) {
             response.results.each {
                 String proteinMd5 = it.md5.toUpperCase() // ensure it matches the local seq Db case
                 if (it.found) {
                     calculatedMatches[proteinMd5] = [:]
-                    it.matches.each { matchObj ->
-                        String library = matchObj.signature.signatureLibraryRelease.library
+                    it.matches.each { matchMap ->
+                        String library = matchMap.signature.signatureLibraryRelease.library
+                        if (library == "MobiDB Lite") {
+                            matchMap.signature.signatureLibraryRelease.library = "MobiDB-lite"
+                        }
+                        
                         String appName = library.toLowerCase().replaceAll("[-\\s]", "")
 
                         if (applications.contains(appName)) {
-                            matchObj = transformMatch(matchObj)
-                            calculatedMatches[proteinMd5][matchObj.modelAccession] = matchObj
+                            matchMap = transformMatch(matchMap)
+                            calculatedMatches[proteinMd5][matchMap.modelAccession] = matchMap
                         }
                     }
                 } else {
@@ -71,70 +108,6 @@ process LOOKUP_MATCHES {
     }
 }
 
-def String sanitizeURL(String url) {
-    return url.replaceAll(/\/+$/, '')
-}
-
-def Map getInfo(String baseUrl) {
-    return httpRequest("${sanitizeURL(baseUrl)}/info", null, 0, true)
-}
-
-def httpRequest(String urlString, String data, int maxRetries, boolean verbose) {
-    int attempts = 0
-    boolean isPost = data != null && data.length() > 0
-    HttpURLConnection connection = null
-    while (attempts < maxRetries + 1) {
-        attempts++
-
-        try {
-            URL url = new URL(urlString)
-            connection = (HttpURLConnection) url.openConnection()
-            connection.connectTimeout = 5000
-            connection.readTimeout = 5000
-            if (isPost) {
-                connection.doOutput = true
-                connection.requestMethod = "POST"
-                connection.setRequestProperty("Content-Type", "application/json")
-                connection.setRequestProperty("Accept", "application/json")
-                connection.outputStream.withWriter("UTF-8") { writer ->
-                    writer << data
-                }
-                connection.outputStream.flush()
-            } else {
-                connection.requestMethod = "GET"
-            }
-
-            int responseCode = connection.responseCode
-            if (responseCode >= 200 && responseCode < 300) {
-                String responseText = connection.inputStream.getText("UTF-8")
-                return new JsonSlurper().parseText(responseText)
-            } else {
-                if (verbose) {
-                    def errorMsg = connection.errorStream ? connection.errorStream.getText("UTF-8") : ""
-                    log.warn "Received HTTP ${responseCode} for ${urlString}"
-                }
-                return null
-            }
-        } catch (java.net.ConnectException | java.net.UnknownHostException e) {
-            if (verbose) {
-                log.warn "Connection error for ${urlString}: ${e.message}"
-            }
-            return null
-        } catch (java.net.SocketTimeoutException e) {
-            if (verbose) {
-                log.warn "Timeout error for ${urlString}; attempt ${attempts} / ${maxRetries + 1}"
-            }
-        } catch (Exception e) {
-            if (verbose) {
-                log.warn "Unexpected error for ${urlString}: ${e.message}"
-            }
-            return null
-        } finally {
-            connection?.disconnect()
-        }
-    }
-}
-
 def Map transformMatch(Map match) {
     // * operator - spread contents of a map or collecion into another map or collection
     return [
@@ -143,12 +116,21 @@ def Map transformMatch(Map match) {
         "locations"  : match["locations"].collect { loc ->
             return [
                 *          : loc,
-                "hmmBounds": loc["hmmBounds"] ? Location.getReverseHmmBounds(loc["hmmBounds"]) : null,
+                "hmmBounds": loc["hmmBounds"] ? getReverseHmmBounds(loc["hmmBounds"]) : null,
                 "fragments": loc["fragments"].collect { tranformFragment(it) },
                 "sites"    : loc["sites"] ?: []
             ]
         },
     ]
+}
+
+def getReverseHmmBounds(hmmBounds) {
+    return [
+        "COMPLETE"            : "[]",
+        "N_TERMINAL_COMPLETE" : "[.",
+        "C_TERMINAL_COMPLETE" : ".]",
+        "INCOMPLETE"          : ".."
+    ][hmmBounds]
 }
 
 def Map tranformFragment(Map fragment) {

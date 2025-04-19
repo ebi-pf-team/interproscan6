@@ -6,8 +6,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import java.util.regex.Pattern
 
 process WRITE_JSON {
-    label 'run_locally'
-
     input:
     val matchesFiles  // {query prot seq md5: {model acc: match}}
     val outputPath

@@ -5,12 +5,14 @@ include { PREPARE_FUNFAM; SEARCH_FUNFAM; RESOLVE_FUNFAM; PARSE_FUNFAM } from  ".
 workflow CATH {
     take:
     ch_seqs
-    applications
-    gene3d_hmm
-    gene3d_model2sfs
-    gene3d_disc_regs
-    funfam_dir
-    funfam_chunksize
+    report_cathgene3d
+    cathgene3d_dir
+    cathgene3d_hmm
+    cathgene3d_model2sfs
+    cathgene3d_disc_regs
+    report_cathfunfam
+    cathfunfam_dir
+    cathfunfam_chunksize
 
     main:
     results = Channel.empty()
@@ -18,7 +20,8 @@ workflow CATH {
     // Search Gene3D profiles
     SEARCH_GENE3D(
         ch_seqs,
-        gene3d_hmm,
+        cathgene3d_dir,
+        cathgene3d_hmm,
         "-Z 65245 -E 0.001"
     )
     ch_gene3d = SEARCH_GENE3D.out
@@ -29,23 +32,24 @@ workflow CATH {
     // Assign CATH superfamily to matches
     ASSIGN_CATH(
         RESOLVE_GENE3D.out,
-        gene3d_model2sfs,
-        gene3d_disc_regs
+        cathgene3d_dir,
+        cathgene3d_model2sfs,
+        cathgene3d_disc_regs
     )
 
     // Join results and parse them
     ch_gene3d = ch_gene3d.join(ASSIGN_CATH.out)
     PARSE_CATHGENE3D(ch_gene3d)
 
-    if (applications.contains("gene3d")) {
+    if (report_cathgene3d) {
         results = results.mix(PARSE_CATHGENE3D.out)
     }
 
-    if (applications.contains("cathfunfam")) {
+    if (report_cathfunfam) {
         // Find unique CATH superfamilies with at least one hit
         PREPARE_FUNFAM(
             PARSE_CATHGENE3D.out,
-            funfam_dir
+            cathfunfam_dir
         )
 
         /*
@@ -56,7 +60,7 @@ workflow CATH {
             .join(PREPARE_FUNFAM.out)
             .flatMap { id, file, supfams ->
                 supfams
-                    .collate(funfam_chunksize)
+                    .collate(cathfunfam_chunksize)
                     .collect { chunk -> [id, file, chunk] }
             }
             .set { ch_funfams }
@@ -64,7 +68,7 @@ workflow CATH {
         // Search FunFam profiles
         SEARCH_FUNFAM(
             ch_funfams,
-            funfam_dir
+            cathfunfam_dir
         )
 
         // Select best domain matches

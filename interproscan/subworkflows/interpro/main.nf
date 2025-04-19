@@ -3,15 +3,15 @@ include { REPRESENTATIVE_LOCATIONS      } from "../../modules/representative_loc
 
 workflow INTERPRO {
     take:
-    matchResults
-    apps
-    datadir
-    xRefsConfig
-    goterms
-    pathways
-    paint_dir
+    match_results
+    applications
+    db_releases
+    add_goterms
+    add_pathways
+    panther_paint_dir
 
     main:
+
     /* XREFS:
     Aggregate matches across all members for each sequence --> single JSON with all matches for the batch
     Add signature and entry desc and names
@@ -20,16 +20,12 @@ workflow INTERPRO {
     Add pathways (if enabled)
     */
     XREFS(
-        matchResults,
-        apps,
-        datadir,
-        xRefsConfig.databases,
-        xRefsConfig.entries,
-        xRefsConfig.goterms,
-        xRefsConfig.pathways,
-        goterms,
-        pathways,
-        paint_dir
+        match_results,
+        applications,
+        db_releases,
+        add_goterms,
+        add_pathways,
+        panther_paint_dir
     )
 
     REPRESENTATIVE_LOCATIONS(XREFS.out)

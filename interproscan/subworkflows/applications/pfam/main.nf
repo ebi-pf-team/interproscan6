@@ -4,19 +4,22 @@ include { PARSE_PFAM               } from  "../../../modules/pfam"
 workflow PFAM {
     take:
     ch_seqs
-    pfam_hmm
-    pfam_dat
+    dir
+    hmm
+    dat
 
     main:
     SEARCH_PFAM(
         ch_seqs,
-        pfam_hmm,
+        dir,
+        hmm,
         "-Z 61295632 --cut_ga"
     )
 
     ch_pfam = PARSE_PFAM(
         SEARCH_PFAM.out,
-        pfam_dat
+        dir,
+        dat
     )
 
     emit:

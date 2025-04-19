@@ -3,24 +3,28 @@ include { SEARCH_SFLD; POST_PROCESS_SFLD; PARSE_SFLD } from  "../../../modules/s
 workflow SFLD {
     take:
     ch_seqs
-    sfld_hmm
-    sites_annotation
-    sfld_hierarchy
+    dirpath
+    hmmfile
+    annofile
+    hierarchyfile
 
     main:
     SEARCH_SFLD(
         ch_seqs,
-        sfld_hmm
+        dirpath,
+        hmmfile
     )
 
     POST_PROCESS_SFLD(
         SEARCH_SFLD.out,
-        sites_annotation
+        dirpath,
+        annofile
     )
 
     ch_sfld = PARSE_SFLD(
         POST_PROCESS_SFLD.out,
-        sfld_hierarchy
+        dirpath,
+        hierarchyfile
     )
 
     emit:

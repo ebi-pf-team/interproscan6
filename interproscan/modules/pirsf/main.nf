@@ -5,7 +5,8 @@ process SEARCH_PIRSF {
 
     input:
     tuple val(meta), path(fasta)
-    path hmmdb
+    path dir
+    val hmm
 
     output:
     tuple val(meta), path("hmmsearch.dtbl")
@@ -16,7 +17,7 @@ process SEARCH_PIRSF {
         -E 0.01 --acc \
         --cpu ${task.cpus} \
         --domtblout hmmsearch.dtbl \
-        ${hmmdb} ${fasta}
+        ${dir}/${hmm} ${fasta}
     """
 }
 
@@ -25,13 +26,15 @@ process PARSE_PIRSF {
 
     input:
     tuple val(meta), val(hmmsearch_dtbl)
-    val pirsf_dat_file
+    val dirpath
+    val datfile
 
     output:
     tuple val(meta), path("pirsf.json")
 
     exec:
-    def datData = PirsfDatEntry.parsePirsfDatFile(pirsf_dat_file.toString())  // [datEntries, datChildren]
+    def datPath = "${dirpath.toString()}/${datfile}"
+    def datData = PirsfDatEntry.parsePirsfDatFile(datPath)  // [datEntries, datChildren]
     SignatureLibraryRelease library = new SignatureLibraryRelease("PIRSF", null)
 
     /* Retrieve the matches from the dtbl file because we need the tlen

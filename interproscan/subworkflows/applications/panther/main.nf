@@ -4,25 +4,29 @@ include { PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER } from  "../../../
 workflow PANTHER {
     take:
     ch_seqs
-    panther_hmm
-    panther_msf
+    dir
+    hmm
+    msf
     
     main:
     SEARCH_PANTHER(
         ch_seqs,
-        panther_hmm,
+        dir,
+        hmm,
         "-Z 65000000 -E 0.001 --domE 0.00000001 --incdomE 0.00000001"
     )
     ch_panther = SEARCH_PANTHER.out
 
     PREPARE_TREEGRAFTER(
         ch_panther,
-        panther_msf
+        dir,
+        msf
     )
 
     RUN_TREEGRAFTER(
         PREPARE_TREEGRAFTER.out.fasta,
-        panther_msf
+        dir,
+        msf
     )
 
     ch_panther = PARSE_PANTHER(

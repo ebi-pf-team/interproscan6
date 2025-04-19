@@ -5,30 +5,29 @@ process SEARCH_SUPERFAMILY {
 
     input:
     tuple val(meta), path(fasta)
-    path hmmdb
-    path selfhits
-    path cla
-    path model
-    path pdbj95d
+    path dirpath
+    val hmm
+    val selfhits
+    val cla
+    val model
+    val pdbj95d
 
     output:
     tuple val(meta), path("superfamily.out")
 
     script:
     """
-    /opt/hmmer3/bin/hmmpress ${hmmdb}
-
     /opt/hmmer3/bin/hmmscan \
         -E 10 -Z 15438 \
         --cpu ${task.cpus} \
-        ${hmmdb} ${fasta} > hmmscan.out
+        ${dirpath}/${hmm} ${fasta} > hmmscan.out
 
     perl ${projectDir}/bin/superfamily/ass3_single_threaded.pl \
         -e 0.0001 -t n -f 1 \
-        -s ${selfhits} \
-        -r ${cla} \
-        -m ${model} \
-        -p ${pdbj95d} \
+        -s ${dirpath}/${selfhits} \
+        -r ${dirpath}/${cla} \
+        -m ${dirpath}/${model} \
+        -p ${dirpath}/${pdbj95d} \
         ${fasta} \
         hmmscan.out \
         superfamily.out
@@ -40,8 +39,9 @@ process PARSE_SUPERFAMILY {
 
     input:
     tuple val(meta), val(superfamily_out)
+    val dirpath
     val model_tsv
-    val hmmdb
+    val hmm
 
     output:
     tuple val(meta), path("superfamily.json")
@@ -49,7 +49,7 @@ process PARSE_SUPERFAMILY {
     exec:
     SignatureLibraryRelease library = new SignatureLibraryRelease("SUPERFAMILY", null)
     def model2sf = [:]
-    file(model_tsv.toString()).eachLine { line ->
+    file("${dirpath.toString()}/${model_tsv}").eachLine { line ->
         def fields = line.trim().split(/\t/)
         String modelId = fields[0]
         String superfamilyAccession = fields[1]
@@ -60,7 +60,7 @@ process PARSE_SUPERFAMILY {
     def model2length = [:]
     String modelAc = null
     Integer length = null
-    new File(hmmdb).eachLine { line ->
+    new File("${dirpath.toString()}/${hmm}").eachLine { line ->
         line = line.trim()
         if (line.startsWith('//')) {
             assert modelAc != null && length != null

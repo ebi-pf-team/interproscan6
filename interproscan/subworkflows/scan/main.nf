@@ -22,6 +22,7 @@ include { SUPERFAMILY      } from "../applications/superfamily"
 workflow SCAN_SEQUENCES {
     take:
     ch_seqs             // channel of tuples (index, fasta file)
+    db_releases         // map: [db: version, dirpath]
     applications        // list of applications to run
     appsConfig          // map of applications
     datadir             // path to data directory
@@ -32,30 +33,37 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("antifam")) {
         ANTIFAM(
             ch_seqs,
-            "${datadir}/${appsConfig.antifam.hmm}"
+            db_releases.antifam.dirpath,
+            appsConfig.antifam.hmm
         )
+
         results = results.mix(ANTIFAM.out)
     }
 
     if (applications.contains("cathgene3d") || applications.contains("cathfunfam")) {
         CATH(
             ch_seqs,
-            applications,
-            "${datadir}/${appsConfig.cathgene3d.hmm}",
-            "${datadir}/${appsConfig.cathgene3d.model2sfs}",
-            "${datadir}/${appsConfig.cathgene3d.disc_regs}",
-            "${datadir}/${appsConfig.cathfunfam.dir}",
+            applications.contains("cathgene3d"),
+            db_releases.cathgene3d.dirpath,
+            appsConfig.cathgene3d.hmm,
+            appsConfig.cathgene3d.model2sfs,
+            appsConfig.cathgene3d.disc_regs,
+            applications.contains("cathfunfam"),
+            db_releases.cathfunfam.dirpath,
             appsConfig.cathfunfam.chunkSize
         ).set{ ch_cath }
+
         results = results.mix(ch_cath)
     }
 
     if (applications.contains("cdd")) {
         CDD(
             ch_seqs,
-            "${datadir}/${appsConfig.cdd.rpsblast_db}",
-            "${datadir}/${appsConfig.cdd.rpsproc_db}"
+            db_releases.cdd.dirpath,
+            appsConfig.cdd.rpsblast_db,
+            appsConfig.cdd.rpsproc_db
         )
+
         results = results.mix(CDD.out)
     }
 
@@ -75,9 +83,11 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("hamap")) {
         HAMAP(
             ch_seqs,
-            "${datadir}/${appsConfig.hamap.hmm}",
-            "${datadir}/${appsConfig.hamap.dir}"
+            db_releases.hamap.dirpath,
+            appsConfig.hamap.hmm,
+            appsConfig.hamap.profiles
         )
+
         results = results.mix(HAMAP.out)
     }
 
@@ -89,29 +99,35 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("ncbifam")) {
         NCBIFAM(
             ch_seqs,
-            "${datadir}/${appsConfig.ncbifam.hmm}"
+            db_releases.ncbifam.dirpath,
+            appsConfig.ncbifam.hmm
         )
+
         results = results.mix(NCBIFAM.out)
     }
 
     if (applications.contains("panther")) {
         PANTHER(
             ch_seqs,
-            "${datadir}/${appsConfig.panther.hmm}",
-            "${datadir}/${appsConfig.panther.msf}"
+            db_releases.panther.dirpath,
+            appsConfig.panther.hmm,
+            appsConfig.panther.msf
         )
+
         results = results.mix(PANTHER.out)
     }
 
     if (applications.contains("pfam")) {
         PFAM(
             ch_seqs,
-            "${datadir}/${appsConfig.pfam.hmm}",
-            "${datadir}/${appsConfig.pfam.dat}"
+            db_releases.pfam.dirpath,
+            appsConfig.pfam.hmm,
+            appsConfig.pfam.dat
         )
+
         results = results.mix(PFAM.out)
     }
-
+    
     if (applications.contains("phobius")) {
         PHOBIUS(
             ch_seqs,
@@ -120,58 +136,70 @@ workflow SCAN_SEQUENCES {
         results = results.mix(PHOBIUS.out)
     }
 
-    if (applications.contains("pirsf")) {
+    if (applications.contains("pirsf")) {   
         PIRSF(
             ch_seqs,
-            "${datadir}/${appsConfig.pirsf.hmm}",
-            "${datadir}/${appsConfig.pirsf.dat}"
+            db_releases.pirsf.dirpath,
+            appsConfig.pirsf.hmm,
+            appsConfig.pirsf.dat
         )
+
         results = results.mix(PIRSF.out)
     }
 
     if (applications.contains("pirsr")) {
         PIRSR(
             ch_seqs,
-            "${datadir}/${appsConfig.pirsr.hmm}",
-            "${datadir}/${appsConfig.pirsr.rules}"
+            db_releases.pirsr.dirpath,
+            appsConfig.pirsr.hmm,
+            appsConfig.pirsr.rules
         )
+
         results = results.mix(PIRSR.out)
     }
 
     if (applications.contains("prints")) {
         PRINTS(
             ch_seqs,
-            "${datadir}/${appsConfig.prints.pval}",
-            "${datadir}/${appsConfig.prints.hierarchy}"
+            db_releases.prints.dirpath,
+            appsConfig.prints.pval,
+            appsConfig.prints.hierarchy
         )
+
         results = results.mix(PRINTS.out)
     }
 
     if (applications.contains("prositepatterns")) {
         PROSITE_PATTERNS(
             ch_seqs,
-            "${datadir}/${appsConfig.prositepatterns.dat}",
-            "${datadir}/${appsConfig.prositepatterns.evaluator}"
+            db_releases.prositepatterns.dirpath,
+            appsConfig.prositepatterns.dat,
+            appsConfig.prositepatterns.evaluator
         )
+
         results = results.mix(PROSITE_PATTERNS.out)
     }
 
     if (applications.contains("prositeprofiles")) {
         PROSITE_PROFILES(
             ch_seqs,
-            "${datadir}/${appsConfig.prositeprofiles.dir}",
-            "${datadir}/${appsConfig.prositeprofiles.skip_flagged_profiles}"
+            db_releases.prositeprofiles.dirpath,
+            appsConfig.prositeprofiles.profiles,
+            appsConfig.prositeprofiles.skip_flagged_profiles
         )
+
         results = results.mix(PROSITE_PROFILES.out)
     }
 
     if (applications.contains("sfld")) {
         SFLD(
             ch_seqs,
-            "${datadir}/${appsConfig.sfld.hmm}",
-            "${datadir}/${appsConfig.sfld.sites_annotation}",
-            "${datadir}/${appsConfig.sfld.hierarchy}"
+            db_releases.sfld.dirpath,
+            appsConfig.sfld.hmm,
+            appsConfig.sfld.sites_annotation,
+            appsConfig.sfld.hierarchy
         )
+
         results = results.mix(SFLD.out)
     }
 
@@ -192,10 +220,10 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("smart")) {
         SMART(
             ch_seqs,
-            "${datadir}/${appsConfig.smart.hmmer3_hmm}",
-            "${datadir}/${appsConfig.smart.hmmer2_hmm}",
-            "${datadir}/${appsConfig.smart.hmm_dir}",
-            appsConfig.smart.chunkSize
+            db_releases.smart.dirpath,
+            appsConfig.smart.hmm3,
+            appsConfig.smart.hmm2,
+            appsConfig.smart.chunk_size
         )
 
         results = results.mix(SMART.out)
@@ -204,12 +232,14 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("superfamily")) {
         SUPERFAMILY(
             ch_seqs,
-            "${datadir}/${appsConfig.superfamily.hmm}",
-            "${datadir}/${appsConfig.superfamily.selfhits}",
-            "${datadir}/${appsConfig.superfamily.cla}",
-            "${datadir}/${appsConfig.superfamily.model}",
-            "${datadir}/${appsConfig.superfamily.pdbj95d}"
+            db_releases.superfamily.dirpath,
+            appsConfig.superfamily.hmm,
+            appsConfig.superfamily.selfhits,
+            appsConfig.superfamily.cla,
+            appsConfig.superfamily.model,
+            appsConfig.superfamily.pdbj95d
         )
+
         results = results.mix(SUPERFAMILY.out)
     }
 

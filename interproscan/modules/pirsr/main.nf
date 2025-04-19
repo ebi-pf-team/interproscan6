@@ -7,7 +7,8 @@ process PARSE_PIRSR {
 
     input:
     tuple val(meta), val(hmmsearch_out)
-    val rulesPath
+    val dirpath
+    val rulesfile
 
     output:
     tuple val(meta), path("pirsr.json")
@@ -17,7 +18,8 @@ process PARSE_PIRSR {
     def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "PIRSR")
 
     JsonSlurper jsonSlurper = new JsonSlurper()
-    def rules = jsonSlurper.parse(new File(rulesPath.toString()))
+    String rulesFilePath = "${dirpath.toString()}/${rulesfile}"
+    def rules = jsonSlurper.parse(new File(rulesFilePath))
 
     def validMatches = [:]
     hmmerMatches.each { seqId, matches ->

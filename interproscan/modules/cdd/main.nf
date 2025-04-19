@@ -5,7 +5,8 @@ process RUN_RPSBLAST {
 
     input:
     tuple val(meta), path(fasta)
-    val library
+    path cdd_dir
+    val rpsblast_db
 
     output:
     tuple val(meta), path("rpsblast.out")
@@ -15,7 +16,7 @@ process RUN_RPSBLAST {
     export LD_LIBRARY_PATH="/opt/blast/lib"
     /opt/blast/rpsblast \
         -query ${fasta} \
-        -db "${library}/Cdd_NCBI" \
+        -db "${cdd_dir}/${rpsblast_db}" \
         -out rpsblast.out \
         -evalue 0.01 -seg no -outfmt 11
     """
@@ -38,7 +39,8 @@ process RUN_RPSPROC {
 
     input:
     tuple val(meta), val(rpsblast_out)
-    path library
+    path cdd_dir
+    val rpsproc_db
 
     output:
     tuple val(meta), path("rpsbproc.out")
@@ -48,7 +50,7 @@ process RUN_RPSPROC {
     /opt/rpsbproc/RpsbProc-x64-linux/rpsbproc \
         --infile ${rpsblast_out} \
         --outfile rpsbproc.out \
-        --data-path ${library} \
+        --data-path ${cdd_dir}/${rpsproc_db} \
         -m std
     """
 }

@@ -3,18 +3,21 @@ include { SEARCH_PIRSF; PARSE_PIRSF } from  "../../../modules/pirsf"
 workflow PIRSF {
     take:
     ch_seqs
-    pirsf_hmm
-    pirsf_dat
+    dirpath
+    hmmfile
+    datfile
 
     main:
     SEARCH_PIRSF(
         ch_seqs,
-        pirsf_hmm
+        dirpath,
+        hmmfile
     )
 
     ch_pirsf = PARSE_PIRSF(
         SEARCH_PIRSF.out,
-        pirsf_dat
+        dirpath,
+        datfile
     )
 
     emit:
