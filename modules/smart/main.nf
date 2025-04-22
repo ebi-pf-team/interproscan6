@@ -128,12 +128,12 @@ process PARSE_SMART {
     exec:
     // fasta may be a single file or multiple
     Map<String, String> sequences = [:] // [md5: sequence]
-    if (Files.exists(fasta)) {
-        sequences = FastaFile.parse(fasta.toString())
-    } else {
+    if (fasta instanceof List) {
         fasta.each { fastaFile ->
             sequences = sequences + FastaFile.parse(fastaFile.toString())
         }
+    } else if (Files.exists(fasta)) {
+        sequences = FastaFile.parse(fasta.toString())
     }
 
     def hmmLengths = HMMER2.parseHMMs("${dirpath.toString()}/${hmmdir}")
