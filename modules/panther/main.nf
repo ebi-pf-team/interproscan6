@@ -2,7 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 process PREPARE_TREEGRAFTER {
-    label 'native'
+    executor 'native'
 
     input:
     tuple val(meta), val(hmmseach_out)
@@ -165,7 +165,7 @@ process RUN_TREEGRAFTER {
 }
 
 process PARSE_PANTHER {
-    label 'native'
+    executor 'native'
 
     input:
     tuple val(meta), val(hmmseach_json), val(epagn_tsv)

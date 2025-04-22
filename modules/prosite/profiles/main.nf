@@ -25,7 +25,7 @@ process RUN_PFSEARCH {
 }
 
 process PARSE_PFSEARCH {
-    label 'native'
+    executor 'native'
 
     input:
         tuple val(meta), val(pfsearch_out)

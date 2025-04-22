@@ -17,7 +17,7 @@ process RUN_COILS {
 
 
 process PARSE_COILS {
-    label 'native'
+    executor 'native'
 
     input:
     tuple val(meta), val(coils_out)

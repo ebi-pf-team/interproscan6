@@ -17,7 +17,7 @@ process RUN_MOBIDBLITE {
 
 
 process PARSE_MOBIDBLITE {
-    label 'native'
+    executor 'native'
 
     input:
     tuple val(meta), val(mobidblite_output)

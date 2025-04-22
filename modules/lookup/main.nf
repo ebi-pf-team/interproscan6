@@ -40,7 +40,7 @@ process PREPARE_LOOKUP {
 }
 
 process LOOKUP_MATCHES {
-    label 'native'
+    executor 'native'
 
     input:
     tuple val(index), val(fasta), val(applications), val(url), val(chunkSize), val(maxRetries)

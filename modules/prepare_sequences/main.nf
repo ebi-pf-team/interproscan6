@@ -1,6 +1,7 @@
 process VALIDATE_FASTA {
     // check the formating of the intput FASTA, i.e. look for illegal characters
-    label         'native', 'ips6_container'
+    executor      'native'
+    label         'ips6_container'
     errorStrategy 'terminate'
 
     input:

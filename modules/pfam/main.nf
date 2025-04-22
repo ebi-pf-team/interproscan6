@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process PARSE_PFAM {
-    label 'native'
+    executor 'native'
 
     input:
     tuple val(meta), val(hmmsearch_out)

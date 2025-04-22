@@ -31,7 +31,7 @@ process RUN_SIGNALP {
 }
 
 process PARSE_SIGNALP {
-    label 'native'
+    executor 'native'
 
     input:
     tuple val(meta), val(organism), val(mode), val(signalp_out)

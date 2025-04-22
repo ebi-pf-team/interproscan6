@@ -22,7 +22,7 @@ process PREPROCESS_HAMAP {
 }
 
 process PREPARE_HAMAP {
-    label 'native'
+    executor 'native'
 
     input:
     tuple val(meta), val(hmmsearch_tab), val(fasta)
@@ -103,7 +103,7 @@ process RUN_HAMAP {
 }
 
 process PARSE_HAMAP {
-    label 'native'
+    executor 'native'
 
     input:
     tuple val(meta), val(pfsearch_out)

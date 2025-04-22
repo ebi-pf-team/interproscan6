@@ -2,7 +2,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 
 process REPRESENTATIVE_LOCATIONS {
-    label 'native'
+    executor 'native'
 
     input:
     tuple val(meta), val(matchesPath)

@@ -5,6 +5,8 @@ import java.io.StringWriter
 import java.util.regex.Pattern
 
 process WRITE_XML {
+    executor 'native'
+
     input:
     val matchesFiles  // {query prot seq md5: {model acc: match}}
     val outputPath
