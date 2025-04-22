@@ -32,7 +32,6 @@ process RUN_PFSCAN {
 
 process PARSE_PFSCAN {
     executor 'local'
-    label 'small'
 
     input:
         tuple val(meta), val(pfscan_out)
