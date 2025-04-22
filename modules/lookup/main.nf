@@ -3,6 +3,8 @@ import java.net.URL
 import groovy.json.JsonOutput
 
 process PREPARE_LOOKUP {
+    executor 'local'
+
     input:
     val _url
     val db_releases

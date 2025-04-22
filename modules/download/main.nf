@@ -35,6 +35,8 @@ process DOWNLOAD {
 }
 
 process FIND_MISSING_DATA {
+    executor 'local'
+
     input:
     tuple val(n), val(v), val(p)  // state dependency
     val json_database
@@ -86,6 +88,7 @@ process FIND_MISSING_DATA {
 }
 
 process VALIDATE_DATA {
+    executor 'local'
     cache false  // Stops the esotericsoftware.kryo.serializers warning
 
     input:
