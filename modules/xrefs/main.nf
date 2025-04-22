@@ -4,7 +4,6 @@ import groovy.json.JsonOutput
 
 process XREFS {
     executor 'local'
-    label 'tiny'
 
     input:
     tuple val(meta), val(members_matches)
