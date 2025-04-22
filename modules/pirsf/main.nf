@@ -22,7 +22,7 @@ process SEARCH_PIRSF {
 }
 
 process PARSE_PIRSF {
-    executor 'native'
+    executor 'local'
 
     input:
     tuple val(meta), val(hmmsearch_dtbl)

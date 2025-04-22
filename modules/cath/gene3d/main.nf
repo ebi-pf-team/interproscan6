@@ -43,7 +43,7 @@ process ASSIGN_CATH {
 }
 
 process PARSE_CATHGENE3D {
-    executor 'native'
+    executor 'local'
 
     input:
     tuple val(meta), val(hmmseach_out), val(cath_tsv)

@@ -26,7 +26,7 @@ process RUN_DEEPTMHMM {
 }
 
 process PARSE_DEEPTMHMM {
-    executor 'native'
+    executor 'local'
     label 'deeptmhmm_container'
 
     input:

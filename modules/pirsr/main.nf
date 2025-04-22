@@ -3,7 +3,7 @@ import groovy.json.JsonSlurper
 import java.util.regex.Pattern
 
 process PARSE_PIRSR {
-    executor 'native'
+    executor 'local'
 
     input:
     tuple val(meta), val(hmmsearch_out)

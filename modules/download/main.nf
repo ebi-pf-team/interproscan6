@@ -5,7 +5,8 @@ import groovy.json.JsonOutput
 
 process DOWNLOAD {
     maxForks 1
-    label    'native', 'ips6_container'
+    executor 'local'
+    label    'ips6_container'
 
     input:
     tuple val(name), val(arcname), val(version), val(skip), val(path)
