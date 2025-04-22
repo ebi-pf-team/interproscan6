@@ -27,7 +27,6 @@ process RUN_DEEPTMHMM {
 
 process PARSE_DEEPTMHMM {
     executor 'local'
-    label 'deeptmhmm_container'
 
     input:
     tuple val(meta), val(tmhmm_output)
