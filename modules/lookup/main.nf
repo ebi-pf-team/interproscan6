@@ -3,6 +3,8 @@ import java.net.URL
 import groovy.json.JsonOutput
 
 process PREPARE_LOOKUP {
+    executor 'local'
+
     input:
     val _url
     val db_releases
@@ -40,7 +42,7 @@ process PREPARE_LOOKUP {
 }
 
 process LOOKUP_MATCHES {
-    label 'native'
+    executor 'local'
 
     input:
     tuple val(index), val(fasta), val(applications), val(url), val(chunkSize), val(maxRetries)

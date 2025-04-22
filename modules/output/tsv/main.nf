@@ -3,6 +3,8 @@ import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 
 process WRITE_TSV {
+    executor 'local'
+
     input:
     val matchesFiles
     val outputPath

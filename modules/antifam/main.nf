@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process PARSE_ANTIFAM {
-    label 'native'
+    executor 'local'
 
     input:
     tuple val(meta), val(hmmseach_out)
