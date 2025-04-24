@@ -5,7 +5,8 @@ import groovy.json.JsonOutput
 
 process DOWNLOAD {
     maxForks 1
-    label    'local', 'ips6_container'
+    executor 'local'
+    label    'ips6_container'
 
     input:
     tuple val(name), val(arcname), val(version), val(skip), val(path)
@@ -34,6 +35,8 @@ process DOWNLOAD {
 }
 
 process FIND_MISSING_DATA {
+    executor 'local'
+
     input:
     tuple val(n), val(v), val(p)  // state dependency
     val json_database
@@ -85,6 +88,7 @@ process FIND_MISSING_DATA {
 }
 
 process VALIDATE_DATA {
+    executor 'local'
     cache false  // Stops the esotericsoftware.kryo.serializers warning
 
     input:

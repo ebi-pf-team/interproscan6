@@ -70,15 +70,16 @@ class InterProScan {
             name: "help",
             description: "print the help message and exit."
         ],
-        [
-            name: "max-workers",
-            description: "define maximum number of workers available for the InterProScan when running locally."
-        ],
         /*
         If an option's description is set to null, it will be hidden from the help message
         and no "Unrecognised option" warning will be produced.
         Use this for params defined in config files that should not be available on the command line
         */
+        [
+            name: "max-workers",
+            description: null
+            // description: "define maximum number of workers available for the InterProScan when running locally."
+        ],
         [
             name: "batch-size",
             description: null

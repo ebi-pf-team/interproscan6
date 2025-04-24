@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process PARSE_NCBIFAM {
-    label 'native'
+    executor 'local'
 
     input:
     tuple val(meta), val(hmmseach_out)
