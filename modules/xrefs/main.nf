@@ -7,7 +7,6 @@ process XREFS {
 
     input:
     tuple val(meta), val(members_matches)
-    val applications
     val db_releases
     val add_goterms
     val add_pathways

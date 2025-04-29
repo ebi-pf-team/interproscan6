@@ -112,11 +112,11 @@ workflow {
     */
     ch_results = COMBINE(
         match_results,
-        applications,
         db_releases,
         params.goterms,
         params.pathways,
-        params.appsConfig.panther.paint
+        params.appsConfig.panther.paint,
+        params.skipInterpro
     )
 
     OUTPUT(
