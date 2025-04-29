@@ -54,8 +54,30 @@ process PREPARE_SMART {
     def chunk = []
     int chunkIndex = 0
 
-    matchedSeqs.each { seqId, seq ->
-        if (chunk.size() >= chunk_size) {
+    if (matchedSeqs.isEmpty()) {
+        // Create an empty file if no sequences match to avoid missing output
+        new File("${task.workDir}/chunk_empty.fasta").createNewFile()
+    } else {
+        matchedSeqs.each { seqId, seq ->
+            if (chunk.size() >= chunk_size) {
+                def chunkFile = file("${task.workDir}/chunk_${chunkIndex}.fasta")
+                chunkFile.withWriter { writer ->
+                    chunk.each { chunkSeqId, chunkSeq ->
+                        writer.writeLine(">${chunkSeqId}")
+                        for (int i = 0; i < chunkSeq.length(); i += 60) {
+                            writer.writeLine(chunkSeq.substring(i, Math.min(i + 60, chunkSeq.length())))
+                        }
+                    }
+                }
+                chunkedFastaPaths << chunkFile
+                chunk = []
+                chunkIndex++
+            } else {
+                chunk << [seqId, seq]
+            }
+        }
+        // Write the final chunk
+        if (!chunk.isEmpty()) {
             def chunkFile = file("${task.workDir}/chunk_${chunkIndex}.fasta")
             chunkFile.withWriter { writer ->
                 chunk.each { chunkSeqId, chunkSeq ->
@@ -66,24 +88,7 @@ process PREPARE_SMART {
                 }
             }
             chunkedFastaPaths << chunkFile
-            chunk = []
-            chunkIndex++
-        } else {
-            chunk << [seqId, seq]
         }
-    }
-    // Write the final chunk
-    if (!chunk.isEmpty()) {
-        def chunkFile = file("${task.workDir}/chunk_${chunkIndex}.fasta")
-        chunkFile.withWriter { writer ->
-            chunk.each { chunkSeqId, chunkSeq ->
-                writer.writeLine(">${chunkSeqId}")
-                for (int i = 0; i < chunkSeq.length(); i += 60) {
-                    writer.writeLine(chunkSeq.substring(i, Math.min(i + 60, chunkSeq.length())))
-                }
-            }
-        }
-        chunkedFastaPaths << chunkFile
     }
 }
 
@@ -100,12 +105,17 @@ process SEARCH_SMART {
 
     script:
     def commands = ""
-    smarts.each { smartFile ->
-        fasta.each { chunkFile ->
-            String hmmFilePath = "${dirpath.toString()}/${hmmdir}/${smartFile}.hmm"  // reassign to a var so the cmd can run
-            commands += "/opt/hmmer2/bin/hmmpfam"
-            commands += " --acc -A 0 -E 0.01 -Z 350000"
-            commands += " $hmmFilePath ${chunkFile} >> hmmpfam.out\n"
+    if (fasta.size() == 0) {
+        // Create an empty hmmpfam.out file if input is empty
+        commands = "touch hmmpfam.out"
+    } else {
+        smarts.each { smartFile ->
+            fasta.each { chunkFile ->
+                String hmmFilePath = "${dirpath.toString()}/${hmmdir}/${smartFile}.hmm"  // reassign to a var so the cmd can run
+                commands += "/opt/hmmer2/bin/hmmpfam"
+                commands += " --acc -A 0 -E 0.01 -Z 350000"
+                commands += " $hmmFilePath ${chunkFile} >> hmmpfam.out\n"
+            }
         }
     }
 
@@ -128,12 +138,12 @@ process PARSE_SMART {
     exec:
     // fasta may be a single file or multiple
     Map<String, String> sequences = [:] // [md5: sequence]
-    if (Files.exists(fasta)) {
-        sequences = FastaFile.parse(fasta.toString())
-    } else {
+    if (fasta instanceof List) {
         fasta.each { fastaFile ->
             sequences = sequences + FastaFile.parse(fastaFile.toString())
         }
+    } else if (Files.exists(fasta)) {
+        sequences = FastaFile.parse(fasta.toString())
     }
 
     def hmmLengths = HMMER2.parseHMMs("${dirpath.toString()}/${hmmdir}")
