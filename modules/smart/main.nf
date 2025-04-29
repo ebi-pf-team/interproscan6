@@ -104,13 +104,11 @@ process SEARCH_SMART {
     tuple val(meta), path("hmmpfam.out"), path(fasta)
 
     script:
+    def commands = ""
     if (fasta.size() == 0) {
         // Create an empty hmmpfam.out file if input is empty
-        """
-        touch hmmpfam.out
-        """
+        commands = "touch hmmpfam.out"
     } else {
-        def commands = ""
         smarts.each { smartFile ->
             fasta.each { chunkFile ->
                 String hmmFilePath = "${dirpath.toString()}/${hmmdir}/${smartFile}.hmm"  // reassign to a var so the cmd can run
@@ -119,11 +117,11 @@ process SEARCH_SMART {
                 commands += " $hmmFilePath ${chunkFile} >> hmmpfam.out\n"
             }
         }
-
-        """
-        ${commands}
-        """
     }
+
+    """
+    ${commands}
+    """
 }
 
 process PARSE_SMART {
