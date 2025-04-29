@@ -248,12 +248,14 @@ workflow SCAN_SEQUENCES {
         .groupTuple()
         .set { grouped_results }
 
-    grouped_results.mix(REPORT_NO_MATCHES(grouped_results, ch_seqs))
-        .groupTuple()
-        .set { all_grouped_results }
+    ch_no_matches = REPORT_NO_MATCHES(grouped_results, ch_seqs)
 
-    all_grouped_results.view()
+    merged_results = grouped_results
+        .join(ch_no_matches)
+        .map { batch_idx, paths_list, no_match_path ->
+            [batch_idx, paths_list + [no_match_path]]
+        }
 
     emit:
-    all_grouped_results
+    merged_results
 }
