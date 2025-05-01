@@ -1,5 +1,22 @@
 import groovy.json.JsonOutput
 
+process WRITE_FASTA {
+    input:
+    tuple val(meta), val(fasta)
+
+    output:
+    tuple val(meta), path("sequences.fasta")
+
+    exec:
+    def outputFilePath = task.workDir.resolve("sequences.fasta")
+    FastaFile.write(
+        fasta.toString(),
+        outputFilePath.toString(),
+        "BJOZ",
+        ["O": "K"]
+    )
+}
+
 process SEARCH_PHOBIUS {
     label       'small'
     stageInMode 'copy'
