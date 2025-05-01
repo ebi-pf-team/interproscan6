@@ -9,24 +9,26 @@ process WRITE_JSON {
     executor 'local'
 
     input:
-    val matchesFiles  // {query prot seq md5: {model acc: match}}
-    val outputPath
-    val seqDbPath
+    val matches_files  // {query prot seq md5: {model acc: match}}
+    val output_prefix
+    val seq_db_file
     val nucleic
-    val ips6Version
+    val interproscan_version
+    val interpro_version
 
     exec:
-    ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-    def outputFilePath = "${outputPath}.json"
+    ObjectMapper jacksonMapper = new ObjectMapper()
+    def output_file = "${output_prefix}.json"
 
-    SeqDB db = new SeqDB(seqDbPath.toString())
+    SeqDB db = new SeqDB(seq_db_file.toString())
 
-    streamJson(outputFilePath.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
+    streamJson(output_file.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
         // {"interproscan-version": str, "results": []}
-        jsonWriter.writeStringField("interproscan-version", ips6Version)
+        jsonWriter.writeStringField("interproscan-version", interproscan_version)
+        jsonWriter.writeStringField("interpro-version", null)
         jsonWriter.writeFieldName("results")
         jsonWriter.writeStartArray()  // start of results [...
-        matchesFiles.each { matchFile ->
+        matches_files.each { matchFile ->
             if (nucleic) {  // input was nucleic acid sequence
                 Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
                 nucleicToProteinMd5 = db.groupProteins(proteins)
