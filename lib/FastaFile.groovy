@@ -2,7 +2,7 @@ class FastaFile {
     // DNA, RNA, gaps
     static final String NUCLEIC_ALPHABET = "ACGTUN\\.\\s-"
     // 20 standard AAs, Sec, Pyl, any/unknown, Asx, Glx, Xle, gaps
-    static final String PROTEIN_ALPHABET = "ACDEFGHIKLMNPQRSTVWYUOXBZJ\\.\\s-"
+    static final String PROTEIN_ALPHABET = "ACDEFGHIKLMNPQRSTVWYUOXBZJ\\s"
 
     static Map<String, String> parse(String fastaFilePath) {
         def sequences = [:]
