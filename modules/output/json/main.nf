@@ -1,8 +1,9 @@
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
+import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonException
-import com.fasterxml.jackson.databind.SerializationFeature
 import java.util.regex.Pattern
 
 process WRITE_JSON {
@@ -553,8 +554,14 @@ def streamJson(String filePath, ObjectMapper mapper, Closure closure) {
     JsonGenerator generator = null
     try {
         JsonFactory factory = mapper.getFactory()
+
         fileWriter = new FileWriter(new File(filePath))
         generator = factory.createGenerator(fileWriter)
+
+        DefaultPrettyPrinter pp = new DefaultPrettyPrinter()
+        pp.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE)
+        generator.setPrettyPrinter(pp)
+
         generator.writeStartObject()
 
         closure.call(generator)  // Call the closure to write key-value pairs
@@ -572,4 +579,4 @@ def streamJson(String filePath, ObjectMapper mapper, Closure closure) {
             fileWriter.close()
         }
     }
-}
+}   
