@@ -7,20 +7,21 @@ class FastaFile {
     static Map<String, String> parse(String fastaFilePath) {
         def sequences = [:]
         def md5 = null
-        def currentSequence = null
+        StringBuilder currentSequence = null
+
         new File(fastaFilePath).eachLine { line ->
             if (line.startsWith(">")) {
                 if (currentSequence) {
-                    sequences[md5] = currentSequence
+                    sequences[md5] = currentSequence.toString()
                 }
                 md5 = line.substring(1).trim()
-                currentSequence = ""
+                currentSequence = new StringBuilder()
             } else {
-                currentSequence += line.trim()
+                currentSequence.append(line.replaceAll("\\s+", ""))
             }
         }
         if (currentSequence) {
-            sequences[md5] = currentSequence
+            sequences[md5] = currentSequence.toString()
         }
         return sequences
     }
