@@ -13,7 +13,7 @@ process WRITE_FASTA {
         fasta.toString(),
         outputFilePath.toString(),
         "BJOZ",
-        ["O": "K"]
+        [:]
     )
 }
 
