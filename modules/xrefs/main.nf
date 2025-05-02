@@ -6,7 +6,7 @@ process XREFS {
     executor 'local'
 
     input:
-    tuple val(meta), val(members_matches)
+    tuple val(meta), val(matches_path)
     val db_releases
     val add_goterms
     val add_pathways
@@ -29,66 +29,60 @@ process XREFS {
         if (add_pathways) (ipr2pa, paInfo) = loadXRefFiles("${interproDir}/pathways")
     }
 
-    def aggregatedMatches = [:]  // seqMd5: {modelAcc: Match} -- otherwise a seqMd5 will appear multiple times in the output
-    members_matches.each { matchesPath ->
-        def matchesFileMap = new ObjectMapper().readValue(new File(matchesPath.toString()), Map)
-        matchesFileMap.each { String seqMd5, Map matches ->
-            def seqEntry = aggregatedMatches.computeIfAbsent(seqMd5, { [:] } )
+    def matchesFileMap = new ObjectMapper().readValue(new File(matches_path.toString()), Map.class)
+    matchesFileMap.each { String seqMd5, Map matches ->
+        matches.each { modelAcc, matchMap ->
+            match = Match.fromMap(matchMap)  // convert Map to Match object
 
-            matches.each { modelAcc, match ->
-                match = Match.fromMap(match)  // convert Map to Match object
+            if (entries || entries != null) {
+                String signatureAcc = match.signature.accession
+                def signatureInfo = entries[signatureAcc] ?: entries[modelAcc]
 
-                if (!entries || entries == null) {  // no data to update, update match in aggregatedMatches
-                    seqEntry[modelAcc] = match
-                } else {
-                    String signatureAcc = match.signature.accession
-                    def signatureInfo = entries[signatureAcc] ?: entries[modelAcc]
+                // Update library version
+                def version = (match.signature.signatureLibraryRelease.version == "null") ? null : match.signature.signatureLibraryRelease.version
+                if (!version && signatureInfo != null) {
+                    match.signature.signatureLibraryRelease.version = databaseInfo[signatureInfo["database"]]
+                }
 
-                    // Update library version
-                    def version = (match.signature.signatureLibraryRelease.version == "null") ? null : match.signature.signatureLibraryRelease.version
-                    if (!version && signatureInfo != null) {
-                        match.signature.signatureLibraryRelease.version = databaseInfo[signatureInfo["database"]]
+                // Handle PANTHER data
+                if (match.signature.signatureLibraryRelease.library == "PANTHER") {
+                    updatePantherData(match, db_releases.panther.dirpath, panther_paint_dir, signatureAcc, entries)
+                }
+
+                // Update signature info
+                if (signatureInfo != null) {
+                    match.signature.name = signatureInfo["name"]
+                    match.signature.description = signatureInfo["description"]
+                    String sigType = signatureInfo["type"]
+                    match.signature.setType(sigType)
+
+                    if (signatureInfo["representative"] != null) {
+                        match.representativeInfo = new RepresentativeInfo(
+                            signatureInfo["representative"]["type"],
+                            signatureInfo["representative"]["index"]
+                        )
                     }
 
-                    // Handle PANTHER data
-                    if (match.signature.signatureLibraryRelease.library == "PANTHER") {
-                        updatePantherData(match, db_releases.panther.dirpath, panther_paint_dir, signatureAcc, entries)
+                    // Handle InterPro data
+                    String interproAcc = signatureInfo["integrated"]
+                    if (interproAcc != null) {
+                         def entryInfo = entries[interproAcc]
+                         assert entryInfo != null
+                         match.signature.entry = new Entry(
+                             interproAcc, entryInfo["name"], entryInfo["description"], entryInfo["type"]
+                         )
+                         addXRefs(match, interproAcc, ipr2go, goInfo, ipr2pa, paInfo)
                     }
+                }
 
-                    // Update signature info
-                    if (signatureInfo != null) {
-                        match.signature.name = signatureInfo["name"]
-                        match.signature.description = signatureInfo["description"]
-                        String sigType = signatureInfo["type"]
-                        match.signature.setType(sigType)
-
-                        if (signatureInfo["representative"] != null) {
-                            match.representativeInfo = new RepresentativeInfo(
-                                signatureInfo["representative"]["type"],
-                                signatureInfo["representative"]["index"]
-                            )
-                        }
-
-                        // Handle InterPro data
-                        String interproAcc = signatureInfo["integrated"]
-                        if (interproAcc != null) {
-                             def entryInfo = entries[interproAcc]
-                             assert entryInfo != null
-                             match.signature.entry = new Entry(
-                                 interproAcc, entryInfo["name"], entryInfo["description"], entryInfo["type"]
-                             )
-                             addXRefs(match, interproAcc, ipr2go, goInfo, ipr2pa, paInfo)
-                        }
-                    }
-                    // Update the in aggregatedMatches Match object
-                    seqEntry[modelAcc] = match
-                }  // end of if/else
-            } // end of matches
-        }  // end of Json reader / seq Id
-    } // end of members matches
+                // update the match
+                matches[modelAcc] = match
+            }  // end of if (entries)
+        } // end of matches
+    }  // end of Json reader / seq Id
 
     String outputFilePath = task.workDir.resolve("matches2xrefs.json")
-    def json = JsonOutput.toJson(aggregatedMatches)
+    def json = JsonOutput.toJson(matchesFileMap)
     new File(outputFilePath.toString()).write(json)
 }
 

@@ -15,17 +15,19 @@ workflow COMBINE {
     parsed_matches = Channel.empty()
 
     if (skip_interpro) {
+        // COMBINE_MATCHES: Aggregate matches across all members for each sequence -> single JSON with all matches for the batch
         parsed_matches = COMBINE_MATCHES(match_results)
     } else {
+        COMBINE_MATCHES(match_results)
+
         /* XREFS:
-        Aggregate matches across all members for each sequence --> single JSON with all matches for the batch
         Add signature and entry desc and names
         Add PAINT annotations (if panther is enabled)
         Add go terms (if enabled)
         Add pathways (if enabled)
         */
         XREFS(
-            match_results,
+            COMBINE_MATCHES.out,
             db_releases,
             add_goterms,
             add_pathways,
