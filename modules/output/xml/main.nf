@@ -20,11 +20,10 @@ process WRITE_XML {
     // set the correct encoding so symbols are formatted correctly in the final output
     xml.setEscapeAttributes(false) // Prevent escaping attributes
     xml.setEscapeText(false)       // Prevent escaping text
-    def analysisType = nucleic ? "nucleotide-sequence-matches" : "protein-matches"
     def jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
     SeqDB db = new SeqDB(seqDbPath.toString())
 
-    xml."$analysisType"("interproscan-version": ips6Version) {
+    xml."results"("interproscan-version": ips6Version) {
         matchesFiles.each { matchFile ->
             if (nucleic) {
                 Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
@@ -122,91 +121,70 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
     // Define the name for the match node and it's attributes
     switch (memberDB) {
         case "antifam":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "cath-gene3d":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "cath-funfam":
         case "funfam":  // use groovy case fall to allow multiple options
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "cdd":
-            matchNodeName = "cdd"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "coils":
-            matchNodeName = "coils"
             matchNodeAttributes = null
             break
         case "hamap":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "mobidb lite":
         case "mobidb-lite":
         case "mobidb_lite":  // use groovy case fall to allow multiple options
-            matchNodeName = "mobidb-lite"
             matchNodeAttributes = null
             break
         case "ncbifam":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "panther":
-            matchNodeName = "panther"
             matchNodeAttributes = fmtPantherMatchNode(match)
             break
         case "pfam":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "phobius":
-            matchNodeName = "phobius"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "pirsf":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "pirsr":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "prints":
-            matchNodeName = "prints"
             matchNodeAttributes = fmtPrintsMatchNode(match)
             break
         case "prosite patterns":
-            matchNodeName = "protsite-patterns"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "prosite profiles":
-            matchNodeName = "prosite-profiles"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "sfld":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "signalp":
-            matchNodeName = "signalp"
             matchNodeAttributes =  null
             break
         case "smart":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "superfamily":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtSuperfamilyMatchNode(match)
             break
         case "tmhmm":
         case "deeptmhmm":
-            matchNodeName = "deeptmhmm"
             matchNodeAttributes = null
             break
         default:
@@ -215,7 +193,7 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
 
     def signatureNodeAttributes = fmtSignatureNode(match)
 
-    xml."$matchNodeName-match"(matchNodeAttributes) {
+    xml."match"(matchNodeAttributes) {
         xml.signature(signatureNodeAttributes) {
             xml.signatureLibraryRelease(
                 library: match.signature.signatureLibraryRelease.library,
