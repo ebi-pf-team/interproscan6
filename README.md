@@ -42,7 +42,7 @@ Explanation of parameters:
 * `--datadir data`: use `data` as the directory for storing all required databases; created automatically if needed
 * `--interpro latest`: fetch the most recent InterPro release
 * `--download`: download any missing metadata and database files
-* `--max-workers` - Maximum number of workers available for the `InterProScan` when running locally
+* `--max-workers`: Maximum number of workers available for the `InterProScan` when running locally
 
 > [!IMPORTANT]
 > *--max-workers* only applies when using the `local` profile (i.e. `-profile local`), it does **_not_** apply when running on a cluster.
