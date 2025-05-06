@@ -49,6 +49,8 @@ process XREFS {
                     def version = (match.signature.signatureLibraryRelease.version == "null") ? null : match.signature.signatureLibraryRelease.version
                     if (!version && signatureInfo != null) {
                         match.signature.signatureLibraryRelease.version = databaseInfo[signatureInfo["database"]]
+                    } else if (match.signature.signatureLibraryRelease.library == "PIRSR") {
+                        match.signature.signatureLibraryRelease.version = databaseInfo["PIRSR"]
                     }
 
                     // Handle PANTHER data
