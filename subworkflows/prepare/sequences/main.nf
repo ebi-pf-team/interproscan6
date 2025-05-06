@@ -10,19 +10,18 @@ workflow PREPARE_SEQUENCES {
     apps         // list of applications to be run
 
     main:
-    def (validated_fasta, invalidCharCheckFile) = VALIDATE_FASTA(fasta_file, params.nucleic, apps, params.appsConfig)
-    // Wait for process to complete and check the contents of the invalid_char_check file
-    invalidCharCheckFile.subscribe { file ->
-        def content = file.text
-        if (content) {
-            log.error "Invalid characters found in the input FASTA file:\n$content"
+    def (fasta, error) = VALIDATE_FASTA(fasta_file, params.nucleic)
+    // Wait for process to complete so its output channels become available
+    error.subscribe { seq_id -> 
+        if (seq_id != null) {
+            log.error "Invalid character(s) found in the input FASTA file."
             exit 1
         }
     }
 
     if (params.nucleic) {
         // Store the input seqs in the internal ips6 seq db
-        LOAD_SEQUENCES(validated_fasta, params.nucleic)
+        LOAD_SEQUENCES(fasta, params.nucleic)
 
         // Chunk input file in smaller files for translation
         Channel.fromPath(params.input)
@@ -37,7 +36,7 @@ workflow PREPARE_SEQUENCES {
         seq_db_path = LOAD_ORFS(ch_translated, LOAD_SEQUENCES.out)
     } else {
         // Store the input seqs in the internal ips6 seq db
-        seq_db_path = LOAD_SEQUENCES(validated_fasta, params.nucleic)
+        seq_db_path = LOAD_SEQUENCES(fasta, params.nucleic)
     }
     // Build batches of unique protein seqs for the analysis
     SPLIT_FASTA(seq_db_path, params.batchSize, params.nucleic)
