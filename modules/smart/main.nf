@@ -97,7 +97,7 @@ process SEARCH_SMART {
 
     input:
     tuple val(meta), path(fasta), val(smarts)
-    val dirpath
+    path dirpath
     val hmmdir
 
     output:
