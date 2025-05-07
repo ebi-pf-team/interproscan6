@@ -125,6 +125,14 @@ class HMMER2 {
             }                
         }
 
+        // Remove matches without locations, 
+        hits.entrySet().removeIf { Map.Entry<String,Map<String,Match>> targetEntry ->
+            targetEntry.value.entrySet().removeIf { Map.Entry<String,Match> matchEntry ->
+                matchEntry.value.locations.isEmpty()
+            }
+            targetEntry.value.isEmpty()
+        }
+
         return hits
     }
 
