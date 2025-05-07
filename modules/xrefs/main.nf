@@ -25,8 +25,10 @@ process XREFS {
         String entriesPath = "${interproDir}/entries.json"
         File entriesJson = new File(entriesPath)
         entries = new ObjectMapper().readValue(entriesJson, Map)
-        if (add_goterms) (ipr2go, goInfo) = loadXRefFiles("${interproDir}/goterms")
-        if (add_pathways) (ipr2pa, paInfo) = loadXRefFiles("${interproDir}/pathways")
+        (ipr2go, goInfo) = loadXRefFiles("${interproDir}/goterms")
+        if (add_pathways) {
+            (ipr2pa, paInfo) = loadXRefFiles("${interproDir}/pathways")
+        }
     }
 
     def matchesFileMap = new ObjectMapper().readValue(new File(matches_path.toString()), Map.class)
@@ -48,7 +50,7 @@ process XREFS {
 
                 // Handle PANTHER data
                 if (match.signature.signatureLibraryRelease.library == "PANTHER") {
-                    updatePantherData(match, db_releases.panther.dirpath, panther_paint_dir, signatureAcc, entries)
+                    updatePantherData(match, db_releases.panther.dirpath, panther_paint_dir, signatureAcc, entries, goInfo)
                 }
 
                 // Update signature info
@@ -97,16 +99,33 @@ def loadXRefFiles(prefix) {
     ]
 }
 
-def updatePantherData(def match, def pantherDir, def paintAnnoDir, def signatureAcc, def entries) {
+def updatePantherData(def match, def pantherDir, def paintAnnoDir, def signatureAcc, def entries, def goInfo) {
+    Map<String,String> GO_PATTERN = ["P": "BIOLOGICAL_PROCESS", "C": "CELLULAR_COMPONENT", "F": "MOLECULAR_FUNCTION"]
     File paintAnnotationFile = new File("${pantherDir.toString()}/${paintAnnoDir}/${signatureAcc}.json")
     assert paintAnnotationFile.exists()
     def paintAnnotationsContent = new ObjectMapper().readValue(paintAnnotationFile, Map)
     String nodeId = match.treegrafter.ancestralNodeID
     def nodeData = paintAnnotationsContent[nodeId]
     if (nodeData != null) {
-        match.treegrafter.subfamilyAccession = (nodeData[0] == "null") ? null : nodeData[0]
-        match.treegrafter.proteinClass = (nodeData[2] == "null") ? null : nodeData[2]
-        match.treegrafter.graftPoint = (nodeData[3] == "null") ? null : nodeData[3]
+        match.treegrafter.subfamilyAccession = (nodeData[0] == null) ? null : nodeData[0]
+        if (nodeData[1] != null && goInfo?.terms != null) {
+            nodeData[1].split(',').each { goTermId ->
+                def term = goInfo.terms[goTermId]
+                if (term) {
+                    def (goTermName, goTermType) = term
+                    match.treegrafter.addGoXRefs(
+                        new GoXRefs(
+                            goTermName,
+                            "GO",
+                            GO_PATTERN[goTermType],
+                            goTermId
+                        )
+                    )
+                }
+            }
+        }
+        match.treegrafter.proteinClass = (nodeData[2] == null) ? null : nodeData[2]
+        match.treegrafter.graftPoint = (nodeData[3] == null) ? null : nodeData[3]
     }
 
     if (entries[signatureAcc]) {
