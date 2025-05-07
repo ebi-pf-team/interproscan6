@@ -4,6 +4,7 @@ import HierarchyEntry
 
 process RUN_PRINTS {
     label 'large'
+    cpus 1
 
     input:
     tuple val(meta), path(fasta)
