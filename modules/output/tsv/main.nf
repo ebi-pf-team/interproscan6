@@ -27,17 +27,17 @@ process WRITE_TSV {
                 match = Match.fromMap(match)
                 String memberDb = match.signature.signatureLibraryRelease.library
                 String sigDesc = match.signature.description ?: '-'
-                String goterms = match.signature.entry?.goXRefs ? match.signature.entry.goXRefs.collect { "${it.id}(${it.databaseName})" }.join('|') : '-'
-                String pathways = match.signature.entry?.pathwayXRefs ? match.signature.entry.pathwayXRefs.collect { "${it.databaseName}:${it.id}" }.join('|') : '-'
+                def goterms = match.signature.entry?.goXRefs
+                def pathways = match.signature.entry?.pathwayXRefs
                 String entryAcc = match.signature.entry?.accession ?: '-'
                 String entryDesc = match.signature.entry?.description ?: '-'
-                char status = 'T'
                 seqData = nucleic ? db.proteinMd5ToNucleicSeq(proteinMd5) : db.proteinMd5ToProteinSeq(proteinMd5)
                 seqData.each { row ->  // Protein or Nucleic: [id, desc, sequence]
                     String seqId = nucleic ? "${row.nid}_${row.pid}" : row.id
                     int seqLength = row.sequence.trim().length()
                     match.locations.each { Location loc ->
-                        writeToTsv(tsvFile, seqId, proteinMd5, seqLength, match, loc, memberDb, sigDesc, status, currentDate, entryAcc, entryDesc, goterms, pathways)
+                        def line = formatLine(seqId, proteinMd5, seqLength, match, loc, memberDb, sigDesc, currentDate, entryAcc, entryDesc, goterms, pathways)
+                        tsvFile.append("${line}\n")
                     }
                 }
             } // end of matches in matchesNode
@@ -45,10 +45,22 @@ process WRITE_TSV {
     } // end of matchesFiles
 }
 
-def writeToTsv(tsvFile, seqId, md5, seqLength, match, loc, memberDb, sigDesc, status, currentDate, entryAcc, entryDesc, goterms, pathways) {
+def formatLine(seqId, 
+               md5, 
+               seqLength, 
+               match, 
+               loc, 
+               memberDb, 
+               sigDesc, 
+               currentDate, 
+               entryAcc, 
+               entryDesc, 
+               interproGoTerms, 
+               interproPathways) {
     int start = loc.start
     int end = loc.end
     def scoringValue = "-"
+    def pantherGoTerms = []
     switch (memberDb) {
         case ["CDD", "PRINT"]:
             scoringValue = match.evalue
@@ -62,14 +74,31 @@ def writeToTsv(tsvFile, seqId, md5, seqLength, match, loc, memberDb, sigDesc, st
         case ["COILS", "MobiDB-lite", "Phobius", "PROSITE patterns", "DeepTMHMM"]:
             scoringValue = "-"
             break
+        case "PANTHER":
+            pantherGoTerms = match.treegrafter.goXRefs.collect { "${it.id}(PANTHER)" }
+            scoringValue = loc.evalue
+            break
         default:
             scoringValue = loc.evalue
             break
     }
 
-    tsvFile.append([
-        seqId, md5, seqLength, memberDb, match.signature.accession,
-        sigDesc, start, end, scoringValue, status,
-        currentDate, entryAcc, entryDesc, goterms, "${pathways}\n"
-    ].join('\t'))
+    goTerms = interproGoTerms.collect { "${it.id}(InterPro)" } + pantherGoTerms
+    return [
+        seqId, 
+        md5,
+        seqLength,
+        memberDb,
+        match.signature.accession,
+        sigDesc,
+        start,
+        end,
+        scoringValue,
+        "T",
+        currentDate,
+        entryAcc,
+        entryDesc,
+        goTerms.join("|") ?: "-",
+        interproPathways.collect { "${it.databaseName}:${it.id}" }.join("|") ?: "-"
+    ].join("\t")
 }
