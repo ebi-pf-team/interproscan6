@@ -11,7 +11,7 @@ process DOWNLOAD {
     input:
     tuple val(name), val(arcname), val(version), val(skip), val(path)
     val iprscan_version
-    val outdir
+    path outdir
 
     output:
     tuple val(name), val(version), val(path)
