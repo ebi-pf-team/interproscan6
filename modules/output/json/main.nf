@@ -319,12 +319,13 @@ def writeMobiDBlite(Map match, JsonGenerator jsonWriter) {
 def writePANTHER(Map match, JsonGenerator jsonWriter) {
     jsonWriter.writeObject([
         "signature"   : match.signature,
-        "model-ac"    : match.modelAccession,
+        "model-ac"    : match.treegrafter.subfamilyAccession ?: match.modelAccession,
         "name"        : match.treegrafter.subfamilyDescription,
         "evalue"      : match.evalue,
         "score"       : match.score,
         "proteinClass": match.treegrafter.proteinClass,
         "graftPoint"  : match.treegrafter.graftPoint,
+        "goXRefs"     : match.treegrafter.goXRefs,
         "locations"   : match.locations.collect { loc ->
             [
                 "start"             : loc.start,
