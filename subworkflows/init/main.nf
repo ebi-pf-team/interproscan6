@@ -12,6 +12,9 @@ workflow INIT_PIPELINE {
     signalp_mode
     matches_api_url
     interpro_version
+    skip_intepro
+    goterms
+    pathways
 
     main:
     // Check the input
@@ -30,6 +33,11 @@ workflow INIT_PIPELINE {
 
     if (download && offline) {
         log.error "--download and --offline are mutually exclusive"
+        exit 1
+    }
+
+    if (skip_intepro && (goterms || pathways)) {
+        log.error "--skip_intepro is mutually exclusive with --goterms and --pathways"
         exit 1
     }
 

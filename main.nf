@@ -31,7 +31,10 @@ workflow {
         params.outdir,
         params.signalpMode,
         params.matchesApiUrl,
-        params.interpro
+        params.interpro,
+        params.skipInterpro,
+        params.goterms,
+        params.pathways
     )
     fasta_file           = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
     applications         = INIT_PIPELINE.out.apps.val
@@ -112,11 +115,11 @@ workflow {
     */
     ch_results = COMBINE(
         match_results,
-        applications,
         db_releases,
         params.goterms,
         params.pathways,
-        params.appsConfig.panther.paint
+        params.appsConfig.panther.paint,
+        params.skipInterpro
     )
 
     OUTPUT(
