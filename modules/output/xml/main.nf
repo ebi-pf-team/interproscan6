@@ -20,8 +20,6 @@ process WRITE_XML {
     def xml = new MarkupBuilder(writer)
     // set the correct encoding so symbols are formatted correctly in the final output
     xml.setEscapeAttributes(false) // Prevent escaping attributes
-    xml.setEscapeText(false)       // Prevent escaping text
-    def jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
     SeqDB db = new SeqDB(seq_db_file.toString())
 
     xml."results"("interproscan-version": interproscan_version, "interpro-version": interpro_version) {
@@ -196,12 +194,42 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
 
     xml."match"(matchNodeAttributes) {
         xml.signature(signatureNodeAttributes) {
-            xml.signatureLibraryRelease(
+
+            if (match.signature.entry && match.signature.entry != null) {
+                xml.entry(
+                    ac: match.signature.entry.accession,
+                    desc: match.signature.entry.description,
+                    name: match.signature.entry.name,
+                    type: match.signature.entry.type
+                ) {
+                    if (match.signature.entry.goXRefs != null) {
+                        match.signature.entry.goXRefs.each { goXref ->
+                            xml."go-xref"(
+                                category: goXref.category,
+                                db: goXref.databaseName,
+                                id: goXref.id,
+                                name: goXref.name
+                            )
+                        }
+                    }
+                    if (match.signature.entry.pathwayXRefs != null) {
+                        match.signature.entry.pathwayXRefs.each { pathwayXref ->
+                            xml."pathway-xref"(
+                                db: pathwayXref.databaseName,
+                                id: pathwayXref.id,
+                                name: pathwayXref.name
+                            )
+                        }
+                    }
+                }
+            }
+
+            xml."signature-library-release"(
                 library: match.signature.signatureLibraryRelease.library,
                 version: match.signature.signatureLibraryRelease.version
             )
-            // GO TERMS AND PATHWAYS
         }
+
         xml."model-ac"(memberDB == "panther" ? match.treegrafter.subfamilyAccession : match.modelAccession)
         addLocationNodes(memberDB, proteinMd5, match, xml)
     }
