@@ -24,9 +24,8 @@ process WRITE_JSON {
     SeqDB db = new SeqDB(seq_db_file.toString())
 
     streamJson(output_file.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
-        // {"interproscan-version": str, "results": []}
         jsonWriter.writeStringField("interproscan-version", interproscan_version)
-        jsonWriter.writeStringField("interpro-version", null)
+        jsonWriter.writeStringField("interpro-version", interpro_version)
         jsonWriter.writeFieldName("results")
         jsonWriter.writeStartArray()  // start of results [...
         matches_files.each { matchFile ->

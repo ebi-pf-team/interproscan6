@@ -23,6 +23,6 @@ workflow OUTPUT {
         WRITE_TSV(ch_results, "${outFileName}", seq_db_path, nucleic)
     }
     if (formats.contains("XML")) {
-        WRITE_XML(ch_results, "${outFileName}", seq_db_path, nucleic, iprscan_version)
+        WRITE_XML(ch_results, "${outFileName}", seq_db_path, nucleic, iprscan_version, interpro_version)
     }
 }

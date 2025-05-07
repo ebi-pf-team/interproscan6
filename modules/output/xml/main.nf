@@ -8,11 +8,12 @@ process WRITE_XML {
     executor 'local'
 
     input:
-    val matchesFiles  // {query prot seq md5: {model acc: match}}
-    val outputPath
-    val seqDbPath
+    val matches_files  // {query prot seq md5: {model acc: match}}
+    val output_prefix
+    val seq_db_file
     val nucleic
-    val ips6Version
+    val interproscan_version
+    val interpro_version
 
     exec:
     def writer = new StringWriter()
@@ -21,10 +22,10 @@ process WRITE_XML {
     xml.setEscapeAttributes(false) // Prevent escaping attributes
     xml.setEscapeText(false)       // Prevent escaping text
     def jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-    SeqDB db = new SeqDB(seqDbPath.toString())
+    SeqDB db = new SeqDB(seq_db_file.toString())
 
-    xml."results"("interproscan-version": ips6Version) {
-        matchesFiles.each { matchFile ->
+    xml."results"("interproscan-version": interproscan_version, "interpro-version": interpro_version) {
+        matches_files.each { matchFile ->
             if (nucleic) {
                 Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
                 nucleicToProteinMd5 = db.groupProteins(proteins)
@@ -40,7 +41,7 @@ process WRITE_XML {
         }
     }
 
-    def outputFilePath = "${outputPath}.xml"
+    def outputFilePath = "${output_prefix}.xml"
     new File(outputFilePath).text = writer.toString()
 }
 
