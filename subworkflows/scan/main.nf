@@ -1,23 +1,24 @@
-include { ANTIFAM          } from "../antifam"
-include { CATH             } from "../cath"
-include { CDD              } from "../cdd"
-include { COILS            } from "../coils"
-include { DEEPTMHMM        } from "../deeptmhmm"
-include { HAMAP            } from "../hamap"
-include { MOBIDBLITE       } from "../mobidblite"
-include { NCBIFAM          } from "../ncbifam"
-include { PANTHER          } from "../panther"
-include { PFAM             } from "../pfam"
-include { PHOBIUS          } from "../phobius"
-include { PIRSF            } from "../pirsf"
-include { PIRSR            } from "../pirsr"
-include { PRINTS           } from "../prints"
-include { PROSITE_PATTERNS } from "../prosite/patterns"
-include { PROSITE_PROFILES } from "../prosite/profiles"
-include { SFLD             } from "../sfld"
-include { SIGNALP          } from "../signalp"
-include { SMART            } from "../smart"
-include { SUPERFAMILY      } from "../superfamily"
+include { ANTIFAM           } from "../antifam"
+include { CATH              } from "../cath"
+include { CDD               } from "../cdd"
+include { COILS             } from "../coils"
+include { DEEPTMHMM         } from "../deeptmhmm"
+include { HAMAP             } from "../hamap"
+include { MOBIDBLITE        } from "../mobidblite"
+include { NCBIFAM           } from "../ncbifam"
+include { PANTHER           } from "../panther"
+include { PFAM              } from "../pfam"
+include { PHOBIUS           } from "../phobius"
+include { PIRSF             } from "../pirsf"
+include { PIRSR             } from "../pirsr"
+include { PRINTS            } from "../prints"
+include { PROSITE_PATTERNS  } from "../prosite/patterns"
+include { PROSITE_PROFILES  } from "../prosite/profiles"
+include { SFLD              } from "../sfld"
+include { SIGNALP           } from "../signalp"
+include { SMART             } from "../smart"
+include { SUPERFAMILY       } from "../superfamily"
+include { REPORT_NO_MATCHES } from "../../modules/no_matches"
 
 workflow SCAN_SEQUENCES {
     take:
@@ -127,7 +128,7 @@ workflow SCAN_SEQUENCES {
 
         results = results.mix(PFAM.out)
     }
-    
+
     if (applications.contains("phobius")) {
         PHOBIUS(
             ch_seqs,
@@ -136,7 +137,7 @@ workflow SCAN_SEQUENCES {
         results = results.mix(PHOBIUS.out)
     }
 
-    if (applications.contains("pirsf")) {   
+    if (applications.contains("pirsf")) {
         PIRSF(
             ch_seqs,
             db_releases.pirsf.dirpath,
@@ -247,6 +248,14 @@ workflow SCAN_SEQUENCES {
         .groupTuple()
         .set { grouped_results }
 
+    ch_no_matches = REPORT_NO_MATCHES(grouped_results, ch_seqs)
+
+    merged_results = grouped_results
+        .join(ch_no_matches)
+        .map { batch_idx, paths_list, no_match_path ->
+            [batch_idx, paths_list + [no_match_path]]
+        }
+
     emit:
-    grouped_results
+    merged_results
 }

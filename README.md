@@ -42,6 +42,12 @@ Explanation of parameters:
 * `--datadir data`: use `data` as the directory for storing all required databases; created automatically if needed
 * `--interpro latest`: fetch the most recent InterPro release
 * `--download`: download any missing metadata and database files
+* `--max-workers`: Maximum number of workers available for the `InterProScan` when running locally
+
+> [!IMPORTANT]
+> *--max-workers* only applies when using the `local` profile (i.e. `-profile local`), it does **_not_** apply when running on a cluster.
+> IPS6 will always use a minimum or 2 CPUs, with at least 1 dedicated to the main workflow and 1 to run
+> processes (exception for PRINTS member, which require 2 CPUs to run processes).
 
 After completion, you’ll find three output files in your working directory:
 
@@ -209,6 +215,9 @@ nextflow run ebi-pf-team/interproscan6 \
 
 > [!WARNING]  
 > DeepTMHMM 1.0 and SignalP 6.0 predictions are not yet available in the [Matches API](https://www.ebi.ac.uk/interpro/matches/api/). The pre-calculated matches lookup needs to be disabled with `--offline`.
+
+> [!WARNING]  
+> Phobius does not support certain non-standard or ambiguous residues. Any sequence containing pyrrolysine (one-letter code `O`), Asx (Asp/Asn ambiguity, `B`), Glx (Glu/Gln ambiguity, `Z`) or Xle (Leu/Ile ambiguity, `J`) will be skipped by Phobius but will continue to be processed normally by all other applications.
 
 > [!NOTE]  
 > Running both `signalp_euk` and `signalp_prok` will execute SignalP twice, once with eukaryotic post-processing and once without. Choose the mode best suited to your dataset.

@@ -1,4 +1,4 @@
-include { SEARCH_PHOBIUS; PARSE_PHOBIUS } from  "../../modules/phobius"
+include { WRITE_FASTA; SEARCH_PHOBIUS; PARSE_PHOBIUS } from  "../../modules/phobius"
 
 workflow PHOBIUS {
     take:
@@ -6,8 +6,10 @@ workflow PHOBIUS {
     phobius_dir
 
     main:
+    WRITE_FASTA(ch_seqs)
+
     SEARCH_PHOBIUS(
-        ch_seqs,
+        WRITE_FASTA.out,
         phobius_dir
     )
 
