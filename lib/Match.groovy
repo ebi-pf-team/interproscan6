@@ -668,6 +668,7 @@ class TreeGrafter implements Serializable {
     String subfamilyName
     String subfamilyDescription
     String proteinClass
+    List<GoXRefs> goXRefs = []
 
     TreeGrafter(String ancestralNodeID) {
         this.ancestralNodeID = ancestralNodeID
@@ -683,7 +684,12 @@ class TreeGrafter implements Serializable {
         tg.subfamilyName = data.subfamilyName
         tg.subfamilyDescription = data.subfamilyDescription
         tg.proteinClass = data.proteinClass
+        tg.goXRefs = data.goXRefs.collect { GoXRefs.fromMap(it) }
         return tg
+    }
+
+    void addGoXRefs(GoXRefs go) {
+        this.goXRefs.add(go)
     }
 }
 

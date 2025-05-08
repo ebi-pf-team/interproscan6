@@ -202,7 +202,20 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
             )
         }
 
-        xml."model-ac"(memberDB == "panther" ? match.treegrafter.subfamilyAccession : match.modelAccession)
+        if (memberDB == "panther") {
+            xml."model-ac"(match.treegrafter.subfamilyAccession ?: match.modelAccession)
+            match.treegrafter.goXRefs.each { goXref ->
+                xml."go-xref"(
+                    category: goXref.category,
+                    db: goXref.databaseName,
+                    id: goXref.id,
+                    name: goXref.name
+                )
+            }
+        } else {
+            xml."model-ac"(match.modelAccession)
+        }
+
         addLocationNodes(memberDB, proteinMd5, match, xml)
     }
 }
