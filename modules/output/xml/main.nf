@@ -1,5 +1,4 @@
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
 import groovy.xml.MarkupBuilder
 import java.io.StringWriter
 import java.util.regex.Pattern
@@ -19,7 +18,7 @@ process WRITE_XML {
     def writer = new StringWriter()
     def xml = new MarkupBuilder(writer)
     // set the correct encoding so symbols are formatted correctly in the final output
-    xml.setEscapeAttributes(false) // Prevent escaping attributes
+    xml.setEscapeAttributes(false)
     SeqDB db = new SeqDB(seq_db_file.toString())
 
     xml."results"("interproscan-version": interproscan_version, "interpro-version": interpro_version) {
@@ -194,36 +193,9 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
 
     xml."match"(matchNodeAttributes) {
         xml.signature(signatureNodeAttributes) {
-
             if (match.signature.entry && match.signature.entry != null) {
-                xml.entry(
-                    ac: match.signature.entry.accession,
-                    desc: match.signature.entry.description,
-                    name: match.signature.entry.name,
-                    type: match.signature.entry.type
-                ) {
-                    if (match.signature.entry.goXRefs != null) {
-                        match.signature.entry.goXRefs.each { goXref ->
-                            xml."go-xref"(
-                                category: goXref.category,
-                                db: goXref.databaseName,
-                                id: goXref.id,
-                                name: goXref.name
-                            )
-                        }
-                    }
-                    if (match.signature.entry.pathwayXRefs != null) {
-                        match.signature.entry.pathwayXRefs.each { pathwayXref ->
-                            xml."pathway-xref"(
-                                db: pathwayXref.databaseName,
-                                id: pathwayXref.id,
-                                name: pathwayXref.name
-                            )
-                        }
-                    }
-                }
+                addEntryNode(match.signature.entry, xml)
             }
-
             xml."signature-library-release"(
                 library: match.signature.signatureLibraryRelease.library,
                 version: match.signature.signatureLibraryRelease.version
@@ -232,6 +204,41 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
 
         xml."model-ac"(memberDB == "panther" ? match.treegrafter.subfamilyAccession : match.modelAccession)
         addLocationNodes(memberDB, proteinMd5, match, xml)
+    }
+}
+
+def addEntryNode(Map entry, def xml) {
+    /* Add info on the InterPro Entry the signature is integrated into. For example:
+    <entry ac='IPR001584' desc='Integrase, catalytic core' name='Integrase_cat-core' type='Domain'>
+        <go-xref category='BIOLOGICAL_PROCESS' db='GO' id='GO:0015074' name='DNA integration' />
+        <pathway-xref db='MetaCyc' id='PWY-6955' name='lincomycin A biosynthesis' />
+    </entry>
+    */
+    xml.entry(
+        ac: entry.accession,
+        desc: entry.description,
+        name: entry.name,
+        type: entry.type
+    ) {
+        if (entry.goXRefs != null) {
+            entry.goXRefs.each { goXref ->
+                xml."go-xref"(
+                    category: goXref.category,
+                    db: goXref.databaseName,
+                    id: goXref.id,
+                    name: goXref.name
+                )
+            }
+        }
+        if (entry.pathwayXRefs != null) {
+            entry.pathwayXRefs.each { pathwayXref ->
+                xml."pathway-xref"(
+                    db: pathwayXref.databaseName,
+                    id: pathwayXref.id,
+                    name: pathwayXref.name
+                )
+            }
+        }
     }
 }
 
