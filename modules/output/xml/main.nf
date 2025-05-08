@@ -1,5 +1,4 @@
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
 import groovy.xml.MarkupBuilder
 import java.io.StringWriter
 import java.util.regex.Pattern
@@ -8,24 +7,22 @@ process WRITE_XML {
     executor 'local'
 
     input:
-    val matchesFiles  // {query prot seq md5: {model acc: match}}
-    val outputPath
-    val seqDbPath
+    val matches_files  // {query prot seq md5: {model acc: match}}
+    val output_prefix
+    val seq_db_file
     val nucleic
-    val ips6Version
+    val interproscan_version
+    val interpro_version
 
     exec:
     def writer = new StringWriter()
     def xml = new MarkupBuilder(writer)
     // set the correct encoding so symbols are formatted correctly in the final output
-    xml.setEscapeAttributes(false) // Prevent escaping attributes
-    xml.setEscapeText(false)       // Prevent escaping text
-    def analysisType = nucleic ? "nucleotide-sequence-matches" : "protein-matches"
-    def jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-    SeqDB db = new SeqDB(seqDbPath.toString())
+    xml.setEscapeAttributes(false)
+    SeqDB db = new SeqDB(seq_db_file.toString())
 
-    xml."$analysisType"("interproscan-version": ips6Version) {
-        matchesFiles.each { matchFile ->
+    xml."results"("interproscan-version": interproscan_version, "interpro-version": interpro_version) {
+        matches_files.each { matchFile ->
             if (nucleic) {
                 Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
                 nucleicToProteinMd5 = db.groupProteins(proteins)
@@ -41,7 +38,7 @@ process WRITE_XML {
         }
     }
 
-    def outputFilePath = "${outputPath}.xml"
+    def outputFilePath = "${output_prefix}.xml"
     new File(outputFilePath).text = writer.toString()
 }
 
@@ -122,91 +119,70 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
     // Define the name for the match node and it's attributes
     switch (memberDB) {
         case "antifam":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "cath-gene3d":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "cath-funfam":
         case "funfam":  // use groovy case fall to allow multiple options
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "cdd":
-            matchNodeName = "cdd"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "coils":
-            matchNodeName = "coils"
             matchNodeAttributes = null
             break
         case "hamap":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "mobidb lite":
         case "mobidb-lite":
         case "mobidb_lite":  // use groovy case fall to allow multiple options
-            matchNodeName = "mobidb-lite"
             matchNodeAttributes = null
             break
         case "ncbifam":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "panther":
-            matchNodeName = "panther"
             matchNodeAttributes = fmtPantherMatchNode(match)
             break
         case "pfam":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "phobius":
-            matchNodeName = "phobius"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "pirsf":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "pirsr":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "prints":
-            matchNodeName = "prints"
             matchNodeAttributes = fmtPrintsMatchNode(match)
             break
         case "prosite patterns":
-            matchNodeName = "protsite-patterns"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "prosite profiles":
-            matchNodeName = "prosite-profiles"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "sfld":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "signalp":
-            matchNodeName = "signalp"
             matchNodeAttributes =  null
             break
         case "smart":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "superfamily":
-            matchNodeName = "hmmer3"
             matchNodeAttributes = fmtSuperfamilyMatchNode(match)
             break
         case "tmhmm":
         case "deeptmhmm":
-            matchNodeName = "deeptmhmm"
             matchNodeAttributes = null
             break
         default:
@@ -215,16 +191,54 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
 
     def signatureNodeAttributes = fmtSignatureNode(match)
 
-    xml."$matchNodeName-match"(matchNodeAttributes) {
+    xml."match"(matchNodeAttributes) {
         xml.signature(signatureNodeAttributes) {
-            xml.signatureLibraryRelease(
+            if (match.signature.entry && match.signature.entry != null) {
+                addEntryNode(match.signature.entry, xml)
+            }
+            xml."signature-library-release"(
                 library: match.signature.signatureLibraryRelease.library,
                 version: match.signature.signatureLibraryRelease.version
             )
-            // GO TERMS AND PATHWAYS
         }
+
         xml."model-ac"(memberDB == "panther" ? match.treegrafter.subfamilyAccession : match.modelAccession)
         addLocationNodes(memberDB, proteinMd5, match, xml)
+    }
+}
+
+def addEntryNode(Map entry, def xml) {
+    /* Add info on the InterPro Entry the signature is integrated into. For example:
+    <entry ac='IPR001584' desc='Integrase, catalytic core' name='Integrase_cat-core' type='Domain'>
+        <go-xref category='BIOLOGICAL_PROCESS' db='GO' id='GO:0015074' name='DNA integration' />
+        <pathway-xref db='MetaCyc' id='PWY-6955' name='lincomycin A biosynthesis' />
+    </entry>
+    */
+    xml.entry(
+        ac: entry.accession,
+        desc: entry.description,
+        name: entry.name,
+        type: entry.type
+    ) {
+        if (entry.goXRefs != null) {
+            entry.goXRefs.each { goXref ->
+                xml."go-xref"(
+                    category: goXref.category,
+                    db: goXref.databaseName,
+                    id: goXref.id,
+                    name: goXref.name
+                )
+            }
+        }
+        if (entry.pathwayXRefs != null) {
+            entry.pathwayXRefs.each { pathwayXref ->
+                xml."pathway-xref"(
+                    db: pathwayXref.databaseName,
+                    id: pathwayXref.id,
+                    name: pathwayXref.name
+                )
+            }
+        }
     }
 }
 

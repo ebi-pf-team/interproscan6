@@ -1,32 +1,34 @@
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
+import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonException
-import com.fasterxml.jackson.databind.SerializationFeature
 import java.util.regex.Pattern
 
 process WRITE_JSON {
     executor 'local'
 
     input:
-    val matchesFiles  // {query prot seq md5: {model acc: match}}
-    val outputPath
-    val seqDbPath
+    val matches_files  // {query prot seq md5: {model acc: match}}
+    val output_prefix
+    val seq_db_file
     val nucleic
-    val ips6Version
+    val interproscan_version
+    val interpro_version
 
     exec:
-    ObjectMapper jacksonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-    def outputFilePath = "${outputPath}.json"
+    ObjectMapper jacksonMapper = new ObjectMapper()
+    def output_file = "${output_prefix}.json"
 
-    SeqDB db = new SeqDB(seqDbPath.toString())
+    SeqDB db = new SeqDB(seq_db_file.toString())
 
-    streamJson(outputFilePath.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
-        // {"interproscan-version": str, "results": []}
-        jsonWriter.writeStringField("interproscan-version", ips6Version)
+    streamJson(output_file.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
+        jsonWriter.writeStringField("interproscan-version", interproscan_version)
+        jsonWriter.writeStringField("interpro-version", interpro_version)
         jsonWriter.writeFieldName("results")
         jsonWriter.writeStartArray()  // start of results [...
-        matchesFiles.each { matchFile ->
+        matches_files.each { matchFile ->
             if (nucleic) {  // input was nucleic acid sequence
                 Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
                 nucleicToProteinMd5 = db.groupProteins(proteins)
@@ -552,8 +554,14 @@ def streamJson(String filePath, ObjectMapper mapper, Closure closure) {
     JsonGenerator generator = null
     try {
         JsonFactory factory = mapper.getFactory()
+
         fileWriter = new FileWriter(new File(filePath))
         generator = factory.createGenerator(fileWriter)
+
+        DefaultPrettyPrinter pp = new DefaultPrettyPrinter()
+        pp.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE)
+        generator.setPrettyPrinter(pp)
+
         generator.writeStartObject()
 
         closure.call(generator)  // Call the closure to write key-value pairs
@@ -571,4 +579,4 @@ def streamJson(String filePath, ObjectMapper mapper, Closure closure) {
             fileWriter.close()
         }
     }
-}
+}   
