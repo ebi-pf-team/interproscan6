@@ -54,7 +54,7 @@ workflow {
         params.goterms,
         params.pathways
     )
-    db_releases   = PREPARE_DATABASES.out.versions
+    db_releases = PREPARE_DATABASES.out.versions
     interproscan_version = PREPARE_DATABASES.out.iprscan_major_minor
 
     PREPARE_SEQUENCES(
@@ -128,7 +128,8 @@ workflow {
         formats,
         out_dir,
         params.nucleic,
-        workflow.manifest.version
+        workflow.manifest.version,
+        db_releases?.interpro?.version
     )
 }
 
