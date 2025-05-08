@@ -112,6 +112,8 @@ process REPRESENTATIVE_LOCATIONS {
                 }
             }
         }
+
+        matchesMap[md5] = currentMatches
     }
 
     def outputFilePath = task.workDir.resolve("matches_with_representative.json")
