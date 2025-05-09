@@ -39,7 +39,7 @@ process PREPARE_FUNFAM {
 }
 
 process SEARCH_FUNFAM {
-    label 'medium', 'ips6_container'
+    label 'large', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta), val(supfams)
