@@ -1,6 +1,7 @@
 *.DS_Store
 .idea/
 .nextflow*
+.vscode/
 *__pycache__*
 tests/integration_tests/test_outputs/current_output.json
 tests/integration_tests/test_outputs/current_output.tsv-pro
