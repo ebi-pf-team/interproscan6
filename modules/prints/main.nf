@@ -3,7 +3,7 @@ import Prints
 import HierarchyEntry
 
 process RUN_PRINTS {
-    label 'large'
+    label 'medium', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)

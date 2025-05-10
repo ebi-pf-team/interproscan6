@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process RESOLVE_GENE3D {
-    label 'small', 'ips6_container'
+    label 'tiny', 'ips6_container'
 
     input:
     tuple val(meta), path(hmmseach_out)
@@ -21,7 +21,7 @@ process RESOLVE_GENE3D {
 }
 
 process ASSIGN_CATH {
-    label 'small', 'ips6_container'
+    label 'tiny', 'ips6_container'
 
     input:
     tuple val(meta), path(cath_resolve_out)

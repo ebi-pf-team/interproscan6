@@ -65,7 +65,7 @@ process SEARCH_FUNFAM {
 }
 
 process RESOLVE_FUNFAM {
-    label 'small', 'ips6_container'
+    label 'tiny', 'ips6_container'
 
     input:
     tuple val(meta), path(hmmseach_out)
