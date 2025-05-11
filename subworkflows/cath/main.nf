@@ -17,9 +17,12 @@ workflow CATH {
     main:
     results = Channel.empty()
 
+    ch_split = ch_seqs
+        .splitFasta( by: 1000, file: true )
+
     // Search Gene3D profiles
     SEARCH_GENE3D(
-        ch_seqs,
+        ch_split,
         cathgene3d_dir,
         cathgene3d_hmm,
         "-Z 65245 -E 0.001"
@@ -56,7 +59,7 @@ workflow CATH {
             Join input fasta file with superfamilies.
             We split in smaller chunks to parallelize searching FunFam profiles
         */
-        ch_seqs
+        ch_split
             .join(PREPARE_FUNFAM.out)
             .flatMap { id, file, supfams ->
                 supfams
