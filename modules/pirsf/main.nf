@@ -59,10 +59,9 @@ process PARSE_PIRSF {
                         lineData[7].toDouble(),  // seqScore
                         lineData[8].toDouble()   // seqBias
                     )
-                    match.sequenceLength = lineData[5].toInteger()
+                    match.sequenceLength = lineData[2].toInteger()
                     rawMatches[proteinAccession].put(modelAccession, match)
                 }
-
                 Location location = new Location(
                     lineData[19].toInteger(),   // Start: use the envelope
                     lineData[20].toInteger(),   // End: use the envelope
@@ -70,8 +69,8 @@ process PARSE_PIRSF {
                     lineData[18].toInteger(),   // hmmEnd: use ali to
                     lineData[5].toInteger(),    // hmmLength
                     null,                       // hmmBounds -- added later when merging matches together
-                    lineData[19].toInteger(),   // envelopeStart
-                    lineData[20].toInteger(),   // envelopeEnd
+                    lineData[15].toInteger(),   // envelopeStart
+                    lineData[16].toInteger(),   // envelopeEnd
                     lineData[12].toDouble(),    // domain e-value
                     lineData[13].toFloat(),     // domain score
                     lineData[14].toFloat()      // domain bias
