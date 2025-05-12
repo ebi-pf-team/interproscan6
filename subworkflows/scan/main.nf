@@ -50,8 +50,7 @@ workflow SCAN_SEQUENCES {
             appsConfig.cathgene3d.model2sfs,
             appsConfig.cathgene3d.disc_regs,
             applications.contains("cathfunfam"),
-            db_releases.cathfunfam.dirpath,
-            appsConfig.cathfunfam.chunkSize
+            db_releases.cathfunfam.dirpath
         ).set{ ch_cath }
 
         results = results.mix(ch_cath)
