@@ -100,9 +100,9 @@ process PARSE_PIRSF {
 
             // Calculate ratios
             // Overall length
-            double ovl = Math.abs(match.locations[0].end - match.locations[0].start + 1) / match.sequenceLength
+            double ovl = Math.abs(match.locations[0].hmmEnd - match.locations[0].hmmStart + 1) / match.sequenceLength
             // Ratio over coverage of sequence and profile hmm
-            double r = Math.abs(match.locations[0].hmmEnd - match.locations[0].hmmStart + 1) / (match.locations[0].envelopeEnd - match.locations[0].envelopeStart + 1)
+            double r = Math.abs(match.locations[0].envelopeEnd - match.locations[0].envelopeStart + 1) / (match.locations[0].hmmEnd - match.locations[0].hmmStart + 1)
             // length deviation
             double ld = Math.abs(match.sequenceLength - datEntries[modelAccession].meanL)
 
