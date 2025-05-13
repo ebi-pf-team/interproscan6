@@ -16,6 +16,7 @@ process RUN_SIGNALP {
     script:
     """
     cp -Lr ${signalp_dir}/signalp-6-package/signalp signalp
+    sed -i "s/\('-tt',\s*\)/\1type=int, /" signalp/predict.py
     python -m signalp.predict \
         --fastafile ${fasta} \
         --output_dir outdir \
