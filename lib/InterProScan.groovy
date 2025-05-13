@@ -303,7 +303,7 @@ class InterProScan {
     static List<String> fetchCompatibleVersions(String majorMinorVersion) {
         String url = "${InterProScan.FTP_URL}/${majorMinorVersion}/versions.json"
         Map versions = HTTPRequest.fetch(url, null, 2, false)
-        return versions["interpro"]*.toString() ?: null
+        return versions?.interpro?.collect { it?.toString() } ?: null
     }
 
     static validateXrefFiles(String xref_dir, Map xRefsConfig, boolean goterms, boolean pathways) {
