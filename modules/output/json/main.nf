@@ -15,7 +15,7 @@ process WRITE_JSON {
     val seq_db_file
     val nucleic
     val interproscan_version
-    val interpro_version
+    val db_releases
 
     exec:
     ObjectMapper jacksonMapper = new ObjectMapper()
@@ -25,7 +25,7 @@ process WRITE_JSON {
 
     streamJson(output_file.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
         jsonWriter.writeStringField("interproscan-version", interproscan_version)
-        jsonWriter.writeStringField("interpro-version", interpro_version)
+        jsonWriter.writeStringField("interpro-version", db_releases?.interpro?.version)
         jsonWriter.writeFieldName("results")
         jsonWriter.writeStartArray()  // start of results [...
         matches_files.each { matchFile ->
