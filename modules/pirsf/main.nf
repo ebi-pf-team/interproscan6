@@ -69,8 +69,8 @@ process PARSE_PIRSF {
                     lineData[18].toInteger(),   // hmmEnd: use ali to
                     lineData[5].toInteger(),    // hmmLength
                     null,                       // hmmBounds -- added later when merging matches together
-                    lineData[15].toInteger(),   // envelopeStart
-                    lineData[16].toInteger(),   // envelopeEnd
+                    lineData[15].toInteger(),   // envelopeStart: use the hmm
+                    lineData[16].toInteger(),   // envelopeEnd: use the hmm
                     lineData[12].toDouble(),    // domain e-value
                     lineData[13].toFloat(),     // domain score
                     lineData[14].toFloat()      // domain bias
