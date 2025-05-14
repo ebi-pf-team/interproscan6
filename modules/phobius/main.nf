@@ -18,7 +18,7 @@ process WRITE_FASTA {
 }
 
 process SEARCH_PHOBIUS {
-    label       'small'
+    label       'small', 'ips6_container'
     stageInMode 'copy'
 
     input:
