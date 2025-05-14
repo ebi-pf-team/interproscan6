@@ -77,7 +77,8 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("deeptmhmm")) {
         DEEPTMHMM(
             ch_seqs,
-            appsConfig.deeptmhmm.dir
+            appsConfig.deeptmhmm.dir,
+            deeptmhmm_gpu
         )
         results = results.mix(DEEPTMHMM.out)
     }
