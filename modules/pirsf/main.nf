@@ -165,31 +165,24 @@ process PARSE_PIRSF {
         }
     }
 
-    /* filter to use only the best matches, by score */
+    /* filter to use only the best matches, by evalue ASC, score DESC */
     def bestMatches = [:]
     processedMatches.each { proteinAccession, proteinMatches ->
         def matchesSorted = proteinMatches.keySet().sort { key ->
-            proteinMatches[key]?.score ?: 0
-        }.reverse()
+            [proteinMatches[key]?.locations?.get(0)?.evalue ?: Double.MAX_VALUE,
+             -(proteinMatches[key]?.locations?.get(0)?.score ?: 0)]
+        }
 
-        matchesSorted.each { modelAccession ->
-            // ignore subfamilies
-            if (modelAccession ==~ /^PIRSF5/) { return }
+        // Find the first non-subfamily match (the best one)
+        def bestMatch = matchesSorted.find { !(it ==~ /^PIRSF5/) }
+        bestMatches.computeIfAbsent(proteinAccession, { [:] })
+        bestMatches[proteinAccession][bestMatch] = proteinMatches[bestMatch]
 
-            bestMatches.computeIfAbsent(proteinAccession, { [:] })
-            if (!bestMatches[proteinAccession].containsKey(modelAccession)) {
-                bestMatches[proteinAccession][modelAccession] = proteinMatches[modelAccession]
-            }
-
-            // see if this model has subfamilies that also matched the protein
-            if (datEntries[modelAccession].children != null) {
-                datEntries[modelAccession].children.each { subFamAccession ->
-                    if (proteinMatches.containsKey(subFamAccession)) {
-                        if (!bestMatches[proteinAccession]?.containsKey(subFamAccession)) {
-                            bestMatches[proteinAccession] = bestMatches[proteinAccession] ?: [:]
-                            bestMatches[proteinAccession][subFamAccession] = proteinMatches[subFamAccession]
-                        }
-                    }
+        // see if this model has subfamilies that also matched the protein
+        if (datEntries[bestMatch]?.children != null) {
+            datEntries[bestMatch].children.each { subFamAccession ->
+                if (proteinMatches.containsKey(subFamAccession)) {
+                    bestMatches[proteinAccession][subFamAccession] = proteinMatches[subFamAccession]
                 }
             }
         }
