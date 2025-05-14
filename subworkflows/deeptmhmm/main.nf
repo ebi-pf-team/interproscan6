@@ -1,4 +1,4 @@
-include { RUN_DEEPTMHMM_CPU, RUN_DEEPTMHMM_GPU; PARSE_DEEPTMHMM } from  "../../modules/deeptmhmm"
+include { RUN_DEEPTMHMM_CPU; RUN_DEEPTMHMM_GPU; PARSE_DEEPTMHMM } from  "../../modules/deeptmhmm"
 
 workflow DEEPTMHMM {
     take:
