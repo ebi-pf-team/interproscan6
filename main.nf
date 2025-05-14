@@ -72,7 +72,9 @@ workflow {
             db_releases,
             applications,
             params.appsConfig,
-            data_dir
+            data_dir,
+            params.signalpGpu,
+            params.deeptmhmmGpu
         )
         match_results = SCAN_SEQUENCES.out
     } else {
@@ -96,7 +98,9 @@ workflow {
             db_releases,
             applications,
             params.appsConfig,
-            data_dir
+            data_dir,
+            params.signalpGpu,
+            params.deeptmhmmGpu
         )
 
         def expandedScan = SCAN_SEQUENCES.out.flatMap { scan ->
