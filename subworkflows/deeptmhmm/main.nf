@@ -1,17 +1,28 @@
-include { RUN_DEEPTMHMM; PARSE_DEEPTMHMM } from  "../../modules/deeptmhmm"
+include { RUN_DEEPTMHMM_CPU, RUN_DEEPTMHMM_GPU; PARSE_DEEPTMHMM } from  "../../modules/deeptmhmm"
 
 workflow DEEPTMHMM {
     take:
     ch_seqs
     deeptmhmm_dir
+    use_gpu
 
     main:
-    RUN_DEEPTMHMM(
-        ch_seqs,
-        deeptmhmm_dir
-    )
-    ch_deeptmhmm = PARSE_DEEPTMHMM(RUN_DEEPTMHMM.out)
+    if (use_gpu) {
+        RUN_DEEPTMHMM_GPU(
+            ch_seqs,
+            deeptmhmm_dir
+        )
+        ch_deeptmhmm = RUN_DEEPTMHMM_GPU.out
+    } else {
+        RUN_DEEPTMHMM_CPU(
+            ch_seqs,
+            deeptmhmm_dir
+        )
+        ch_deeptmhmm = RUN_DEEPTMHMM_CPU.out
+    }
+    
+    ch_results = PARSE_DEEPTMHMM(ch_deeptmhmm)
 
     emit:
-    ch_deeptmhmm
+    ch_results
 }
