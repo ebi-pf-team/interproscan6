@@ -108,7 +108,7 @@ process PARSE_PIRSF {
 
             if (datChildren.containsKey(modelAccession)) {
                 // process a subfamily match
-                if (r > LENGTH_RATIO_THRESHOLD && match.locations[0].score >= datEntries[modelAccession].minS) {
+                if (r > LENGTH_RATIO_THRESHOLD && match.score >= datEntries[modelAccession].minS) {
                     String parent = datChildren[modelAccession]
                     if (store[proteinAccession]?.containsKey(parent)) {
                         processedMatches.computeIfAbsent(proteinAccession, { [:] })[parent] = store[proteinAccession][parent]
@@ -123,7 +123,7 @@ process PARSE_PIRSF {
             else if (
                 r > LENGTH_RATIO_THRESHOLD &&
                 ovl >= OVERLAP_THRESHOLD &&
-                match.locations[0].score >= datEntries[modelAccession].minS &&
+                match.score >= datEntries[modelAccession].minS &&
                 (ld < LENGTH_DEVIATION_THRESHOLD * datEntries[modelAccession].stdL || ld < MINIMUM_LENGTH_DEVIATION)
             ) {
                 UpdateMatch(processedMatches, proteinAccession, match)
@@ -145,7 +145,7 @@ process PARSE_PIRSF {
     def bestMatches = [:]
     processedMatches.each { proteinAccession, proteinMatches ->
         def matchesSorted = proteinMatches.keySet().sort { key ->
-            proteinMatches[key]?.locations?.get(0)?.score ?: 0
+            proteinMatches[key]?.score ?: 0
         }.reverse()
 
         matchesSorted.each { modelAccession ->
