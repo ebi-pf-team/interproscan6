@@ -82,7 +82,6 @@ jobs:
       - name: Run NF linter
         id: linter
         run: |
-          cd interproscan
           docker run -v $PWD:/data -e ruleset=general linter-rules-for-nextflow > docker.output.txt
           if grep -q "CodeNarc completed: (p1=0; p2=0;" docker.output.txt; then
             echo "Linting passed"
