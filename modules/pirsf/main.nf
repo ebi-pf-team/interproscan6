@@ -95,14 +95,38 @@ process PARSE_PIRSF {
 
     rawMatches.each { proteinAccession, modelMatches ->
         modelMatches.each { modelAccession, rawMatch ->
+            /* Combine multiple overlapping or related matches into a single consolidated match region,
+            but only when both the sequence and HMM model agree on the extensions.
+            Sequence:  1....5....10...15...20...25...30...35...40
+            Match 1:              |-------|            # seq: 15-25, hmm: 10-20
+            Match 2:           |-----|                 # seq: 12-18, hmm: 8-15
+            Match 3:                     |----------|  # seq: 22-35, hmm: 18-30
+            Combined:          |--------------------|  # seq: 12-35, hmm: 8-30
+            */
+            int seqStart = rawMatch.locations[0].start
+            int seqEnd = rawMatch.locations[0].end
+            int hmmStart = rawMatch.locations[0].hmmStart
+            int hmmEnd = rawMatch.locations[0].hmmEnd
+            int envelopeStart = rawMatch.locations[0].envelopeStart
+            int envelopeEnd = rawMatch.locations[0].envelopeEnd
+            // check subsequent matches
+            rawMatch.locations.each { location ->
+                seqStart = Math.min(seqStart, location.start)
+                seqEnd = Math.max(seqEnd, location.end)
+                hmmStart = Math.min(hmmStart, location.hmmStart)
+                hmmEnd = Math.max(hmmEnd, location.hmmEnd)
+                envelopeStart = Math.min(envelopeStart, location.envelopeStart)
+                envelopeEnd = Math.max(envelopeEnd, location.envelopeEnd)
+            }
+
             // Merge match locations together
             match = processMatchLocations(rawMatch, library)
 
             // Calculate ratios
             // Overall length
-            double ovl = Math.abs(match.locations[0].hmmEnd - match.locations[0].hmmStart + 1) / match.sequenceLength
+            double ovl = Math.abs(hmmEnd - hmmStart + 1) / match.sequenceLength
             // Ratio over coverage of sequence and profile hmm
-            double r = Math.abs(match.locations[0].envelopeEnd - match.locations[0].envelopeStart + 1) / (match.locations[0].hmmEnd - match.locations[0].hmmStart + 1)
+            double r = Math.abs(envelopeEnd - envelopeStart + 1) / (hmmEnd - hmmStart + 1)
             // length deviation
             double ld = Math.abs(match.sequenceLength - datEntries[modelAccession].meanL)
 
@@ -177,31 +201,6 @@ process PARSE_PIRSF {
 }
 
 def processMatchLocations(Match match, SignatureLibraryRelease library) {
-    /* Combine multiple overlapping or related matches into a single consolidated match region,
-    but only when both the sequence and HMM model agree on the extensions.
-    Sequence:  1....5....10...15...20...25...30...35...40
-    Match 1:              |-------|            # seq: 15-25, hmm: 10-20
-    Match 2:           |-----|                 # seq: 12-18, hmm: 8-15
-    Match 3:                     |----------|  # seq: 22-35, hmm: 18-30
-    Combined:          |--------------------|  # seq: 12-35, hmm: 8-30
-    */
-    // Initialise with the first location
-    int seqStart = match.locations[0].start
-    int seqEnd = match.locations[0].end
-    int hmmStart = match.locations[0].hmmStart
-    int hmmEnd = match.locations[0].hmmEnd
-    // check subsequent matches
-    match.locations.each { location ->
-        if (location.start < seqStart && location.hmmStart < hmmStart) {
-            seqStart = location.start
-            hmmStart = location.hmmStart
-        }
-        if (location.end > seqEnd && location.hmmEnd < hmmEnd) {
-            seqEnd = location.end
-            hmmEnd = location.hmmEnd
-        }
-    }
-
     Match processedMatch = new Match(
         match.modelAccession,
         match.evalue,
@@ -210,23 +209,26 @@ def processMatchLocations(Match match, SignatureLibraryRelease library) {
         new Signature(match.modelAccession, library)
     )
     processedMatch.sequenceLength = match.sequenceLength
-    String hmmBoundStart = hmmStart == 1 ? "[" : "."
-    String hmmBoundEnd = hmmEnd == match.locations[0].hmmLength ? "]" : "."
-    processedMatch.addLocation(
-        new Location(
-            seqStart,
-            seqEnd,   // start + end == envelopeStart + envelopeEnd
-            hmmStart,
-            hmmEnd,
-            match.locations[0].hmmLength,
-            "${hmmBoundStart}${hmmBoundEnd}",
-            seqStart,
-            seqEnd,   // envelopeStart + envelopeEnd
-            match.locations[0].evalue,
-            match.locations[0].score,
-            match.locations[0].bias
+
+    match.locations.each { location ->
+        String hmmBoundStart = location.hmmStart == 1 ? "[" : "."
+        String hmmBoundEnd = location.hmmEnd == location.hmmLength ? "]" : "."
+        processedMatch.addLocation(
+            new Location(
+                location.start,
+                location.end,
+                location.hmmStart,
+                location.hmmEnd,
+                location.hmmLength,
+                "${hmmBoundStart}${hmmBoundEnd}",
+                location.envelopeStart,
+                location.envelopeEnd,
+                location.evalue,
+                location.score,
+                location.bias
+            )
         )
-    )
+    }
 
     return processedMatch
 }
