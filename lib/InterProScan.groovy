@@ -93,9 +93,13 @@ class InterProScan {
             description: null
         ],
         [
-                name: "skip-interpro",
-                description: null
-                // Used in production. Skips adding InterPro xrefs and identifying representative locations
+            name: "deeptmhmm-gpu",
+            description: null
+        ],
+        [
+            name: "skip-interpro",
+            description: null
+            // Used in production. Skips adding InterPro xrefs and identifying representative locations
         ],
         [
             name: "apps-config",
