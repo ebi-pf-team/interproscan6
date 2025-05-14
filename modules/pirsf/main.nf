@@ -95,6 +95,7 @@ process PARSE_PIRSF {
 
     rawMatches.each { proteinAccession, modelMatches ->
         modelMatches.each { modelAccession, rawMatch ->
+
             /* Combine multiple overlapping or related matches into a single consolidated match region,
             but only when both the sequence and HMM model agree on the extensions.
             Sequence:  1....5....10...15...20...25...30...35...40
@@ -119,20 +120,19 @@ process PARSE_PIRSF {
                 envelopeEnd = Math.max(envelopeEnd, location.envelopeEnd)
             }
 
-            // Merge match locations together
-            match = processMatchLocations(rawMatch, library)
-
             // Calculate ratios
             // Overall length
-            double ovl = Math.abs(hmmEnd - hmmStart + 1) / match.sequenceLength
+            double ovl = Math.abs(hmmEnd - hmmStart + 1) / rawMatch.sequenceLength
             // Ratio over coverage of sequence and profile hmm
             double r = Math.abs(envelopeEnd - envelopeStart + 1) / (hmmEnd - hmmStart + 1)
             // length deviation
-            double ld = Math.abs(match.sequenceLength - datEntries[modelAccession].meanL)
+            double ld = Math.abs(rawMatch.sequenceLength - datEntries[modelAccession].meanL)
+
+            rawMatch.signature = new Signature(rawMatch.modelAccession, library)
 
             if (datChildren.containsKey(modelAccession)) {
                 // process a subfamily match
-                if (r > LENGTH_RATIO_THRESHOLD && match.score >= datEntries[modelAccession].minS) {
+                if (r > LENGTH_RATIO_THRESHOLD && rawMatch.score >= datEntries[modelAccession].minS) {
                     String parent = datChildren[modelAccession]
                     if (store[proteinAccession]?.containsKey(parent)) {
                         processedMatches.computeIfAbsent(proteinAccession, { [:] })[parent] = store[proteinAccession][parent]
@@ -140,27 +140,27 @@ process PARSE_PIRSF {
                     else {
                         promote["${proteinAccession}-${parent}"] = true
                     }
-                    UpdateMatch(processedMatches, proteinAccession, match)
+                    UpdateMatch(processedMatches, proteinAccession, rawMatch)
                 }
             }
 
             else if (
                 r > LENGTH_RATIO_THRESHOLD &&
                 ovl >= OVERLAP_THRESHOLD &&
-                match.score >= datEntries[modelAccession].minS &&
+                rawMatch.score >= datEntries[modelAccession].minS &&
                 (ld < LENGTH_DEVIATION_THRESHOLD * datEntries[modelAccession].stdL || ld < MINIMUM_LENGTH_DEVIATION)
             ) {
-                UpdateMatch(processedMatches, proteinAccession, match)
+                UpdateMatch(processedMatches, proteinAccession, rawMatch)
             }
 
             else if (promote["${proteinAccession}-${modelAccession}"]) {
-                UpdateMatch(processedMatches, proteinAccession, match)
+                UpdateMatch(processedMatches, proteinAccession, rawMatch)
             }
 
             else {
                 // store for potential use
                 store.computeIfAbsent(proteinAccession, { [:] })
-                store[proteinAccession].computeIfAbsent(modelAccession, {match})
+                store[proteinAccession].computeIfAbsent(modelAccession, {rawMatch})
             }
         }
     }
@@ -198,39 +198,6 @@ process PARSE_PIRSF {
     def outputFilePath = task.workDir.resolve("pirsf.json")
     def json = JsonOutput.toJson(bestMatches)
     new File(outputFilePath.toString()).write(json)
-}
-
-def processMatchLocations(Match match, SignatureLibraryRelease library) {
-    Match processedMatch = new Match(
-        match.modelAccession,
-        match.evalue,
-        match.score,
-        match.bias,
-        new Signature(match.modelAccession, library)
-    )
-    processedMatch.sequenceLength = match.sequenceLength
-
-    match.locations.each { location ->
-        String hmmBoundStart = location.hmmStart == 1 ? "[" : "."
-        String hmmBoundEnd = location.hmmEnd == location.hmmLength ? "]" : "."
-        processedMatch.addLocation(
-            new Location(
-                location.start,
-                location.end,
-                location.hmmStart,
-                location.hmmEnd,
-                location.hmmLength,
-                "${hmmBoundStart}${hmmBoundEnd}",
-                location.envelopeStart,
-                location.envelopeEnd,
-                location.evalue,
-                location.score,
-                location.bias
-            )
-        )
-    }
-
-    return processedMatch
 }
 
 def UpdateMatch(Map<String, Map<String, Match>> processedMatches, String proteinAccession, Match match) {
