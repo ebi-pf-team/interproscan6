@@ -16,8 +16,8 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-      - interproscan/subworkflows/**
-      - interproscan/modules/**
+      - subworkflows/**
+      - modules/**
       - main.nf
       - .github/workflows/nf-lint.yml
 
