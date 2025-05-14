@@ -2,7 +2,7 @@ import groovy.io.FileType
 import groovy.json.JsonOutput
 
 process RUN_PFSEARCH {
-    label 'small', 'ips6_container'
+    label 'tiny', 'ips6_container'
 
     input:
         tuple val(meta), path(fasta)

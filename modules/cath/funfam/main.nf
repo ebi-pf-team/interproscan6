@@ -5,11 +5,11 @@ process PREPARE_FUNFAM {
     executor 'local'
 
     input:
-    tuple val(meta), val(cathgene3d_json)
+    tuple val(meta), val(meta2), val(cathgene3d_json)
     val root_dir
 
     output:
-    tuple val(meta), val(funfams)
+    tuple val(meta), val(meta2), val(funfams)
     
     exec:
     File jsonFile = new File(cathgene3d_json.toString())
@@ -42,11 +42,11 @@ process SEARCH_FUNFAM {
     label 'medium', 'ips6_container'
 
     input:
-    tuple val(meta), path(fasta), val(supfams)
+    tuple val(meta), val(meta2), path(fasta), val(supfams)
     path root_dir
 
     output:
-    tuple val(meta), path("hmmsearch.out")
+    tuple val(meta), val(meta2), path("hmmsearch.out")
 
     script:
     def commands = ""
@@ -65,13 +65,13 @@ process SEARCH_FUNFAM {
 }
 
 process RESOLVE_FUNFAM {
-    label 'small', 'ips6_container'
+    label 'tiny', 'ips6_container'
 
     input:
-    tuple val(meta), path(hmmseach_out)
+    tuple val(meta), val(meta2), path(hmmseach_out)
 
     output:
-    tuple val(meta), path("resolved.out")
+    tuple val(meta), val(meta2), path("resolved.out")
 
     script:
     """
@@ -89,10 +89,10 @@ process PARSE_FUNFAM {
     executor 'local'
 
     input:
-    tuple val(meta), val(hmmseach_out), val(resolved_tsv)
+    tuple val(meta), val(meta2), val(hmmseach_out), val(resolved_tsv)
 
     output:
-    tuple val(meta), path("cathfunfam.json")
+    tuple val(meta), val(meta2), path("cathfunfam.json")
 
     exec:
     def memberDb = "CATH-FunFam"

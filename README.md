@@ -37,17 +37,14 @@ nextflow run ebi-pf-team/interproscan6 \
 Explanation of parameters:
 
 * `-profile test,docker`:
-  * `test`: use an included example FASTA file
-  * `docker`: execute tasks in Docker containers
-* `--datadir data`: use `data` as the directory for storing all required databases; created automatically if needed
-* `--interpro latest`: fetch the most recent InterPro release
-* `--download`: download any missing metadata and database files
-* `--max-workers`: Maximum number of workers available for the `InterProScan` when running locally
+  * `test`: Use an included example FASTA file.
+  * `docker`: Execute tasks in Docker containers.
+* `--datadir data`: Specify `data` as the directory for storing all required InterPro and member database files. The directory is created automatically if it doesn't exist.
+* `--interpro latest`: Use the most recent InterPro release.
+* `--download`: Download any missing metadata and database files into the specified `--datadir`
 
-> [!IMPORTANT]
-> *--max-workers* only applies when using the `local` profile (i.e. `-profile local`), it does **_not_** apply when running on a cluster.
-> IPS6 will always use a minimum or 2 CPUs, with at least 1 dedicated to the main workflow and 1 to run
-> processes (exception for PRINTS member, which require 2 CPUs to run processes).
+> [!TIP]
+> To use a specific version of InterPro, use the release number, e.g. `--interpro 105.0`.
 
 After completion, you’ll find three output files in your working directory:
 
@@ -65,7 +62,6 @@ To annotate your own sequences FASTA file, omit the `test` profile and specify `
 nextflow run ebi-pf-team/interproscan6 \
   -profile docker \
   --datadir data \
-  --interpro latest \
   --input /path/to/sequences.fasta
 ```
 
@@ -75,7 +71,6 @@ For nucleotide sequences, add `--nucleic`:
 nextflow run ebi-pf-team/interproscan6 \
   -profile docker \
   --datadir data \
-  --interpro latest \
   --input /path/to/sequences.fna \
   --nucleic
 ```
@@ -88,11 +83,10 @@ To run only certain analyses (for example, Pfam and MobiDB‑lite):
 nextflow run ebi-pf-team/interproscan6 \
   -profile test,docker \
   --datadir data \
-  --interpro latest \
   --applications Pfam,MobiDB-lite
 ```
 
-Analyses are case‑insensitive and ignore hyphens, so `MobiDB-lite` and `mobidblite` both work.
+Analyses are case‑insensitive and ignore hyphens, so both `MobiDB-lite` and `mobidblite` work.
 
 The available analyses are:
 

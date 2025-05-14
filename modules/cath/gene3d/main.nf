@@ -1,13 +1,33 @@
 import groovy.json.JsonOutput
 
-process RESOLVE_GENE3D {
+process SEARCH_GENE3D {
     label 'small', 'ips6_container'
 
     input:
-    tuple val(meta), path(hmmseach_out)
+    tuple val(meta), val(meta2), path(fasta)
+    path hmmdir
+    val hmmfile
 
     output:
-    tuple val(meta), path("resolved.out")
+    tuple val(meta), val(meta2), path("hmmsearch.out")
+
+    script:
+    """
+    /opt/hmmer3/bin/hmmsearch \
+        -Z 65245 -E 0.001 \
+        --cpu ${task.cpus} \
+        ${hmmdir}/${hmmfile} ${fasta} > hmmsearch.out
+    """
+}
+
+process RESOLVE_GENE3D {
+    label 'tiny', 'ips6_container'
+
+    input:
+    tuple val(meta), val(meta2), path(hmmseach_out)
+
+    output:
+    tuple val(meta), val(meta2), path("resolved.out")
 
     script:
     """
@@ -21,16 +41,16 @@ process RESOLVE_GENE3D {
 }
 
 process ASSIGN_CATH {
-    label 'small', 'ips6_container'
+    label 'tiny', 'ips6_container'
 
     input:
-    tuple val(meta), path(cath_resolve_out)
+    tuple val(meta), val(meta2), path(cath_resolve_out)
     path dirpath
     val dom2fam
     val disc_pickle
 
     output:
-    tuple val(meta), path("cath.tsv")
+    tuple val(meta), val(meta2), path("cath.tsv")
 
     script:
     """
@@ -46,10 +66,10 @@ process PARSE_CATHGENE3D {
     executor 'local'
 
     input:
-    tuple val(meta), val(hmmseach_out), val(cath_tsv)
+    tuple val(meta), val(meta2), val(hmmseach_out), val(cath_tsv)
 
     output:
-    tuple val(meta), path("cathgene3d.json")
+    tuple val(meta), val(meta2), path("cathgene3d.json")
 
     exec:
     def memberDb = "CATH-Gene3D"

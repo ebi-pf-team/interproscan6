@@ -12,7 +12,7 @@ process WRITE_XML {
     val seq_db_file
     val nucleic
     val interproscan_version
-    val interpro_version
+    val db_releases
 
     exec:
     def writer = new StringWriter()
@@ -21,7 +21,7 @@ process WRITE_XML {
     xml.setEscapeAttributes(false)
     SeqDB db = new SeqDB(seq_db_file.toString())
 
-    xml."results"("interproscan-version": interproscan_version, "interpro-version": interpro_version) {
+    xml."results"("interproscan-version": interproscan_version, "interpro-version": db_releases?.interpro?.version) {
         matches_files.each { matchFile ->
             if (nucleic) {
                 Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)

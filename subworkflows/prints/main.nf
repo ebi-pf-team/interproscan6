@@ -8,8 +8,11 @@ workflow PRINTS {
     hierarchyfile
 
     main:
+    ch_split = ch_seqs
+        .splitFasta( by: 1000, file: true )
+
     RUN_PRINTS(
-        ch_seqs,
+        ch_split,
         dirpath,
         pvalfile
     )

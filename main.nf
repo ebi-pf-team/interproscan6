@@ -129,7 +129,7 @@ workflow {
         out_dir,
         params.nucleic,
         workflow.manifest.version,
-        db_releases?.interpro?.version
+        db_releases
     )
 }
 

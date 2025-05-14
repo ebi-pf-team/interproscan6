@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process SEARCH_SFLD {
-    label 'small', 'ips6_container'
+    label 'mini', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -25,7 +25,7 @@ process SEARCH_SFLD {
 }
 
 process POST_PROCESS_SFLD {
-    label 'small'
+    label 'mini', 'ips6_container'
 
     input:
     tuple val(meta), path(hmmsearch_out), val(hmmsearch_dtbl), val(hmmsearch_alignment)

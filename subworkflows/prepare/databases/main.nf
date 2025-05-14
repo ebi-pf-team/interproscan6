@@ -45,9 +45,9 @@ workflow PREPARE_DATABASES {
 
             interpro_version = highest_version
             log.warn """Without the '--download' option enabled, InterProScan uses \
-    the highest locally available version of InterPro data, but cannot \
-    verify compatibility with InterProScan. \
-    To ensure you're using the latest compatible data, re-run with the --download option."""
+the highest locally available version of InterPro data, but cannot \
+verify compatibility with InterProScan. \
+To ensure you're using the latest compatible data, re-run with the --download option."""
         }
 
         // Most members have a single dir, but CATH-Gene3D and CATH-FuNFam are collated under cath for example
