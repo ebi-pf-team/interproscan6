@@ -1,5 +1,6 @@
 process VALIDATE_FASTA {
     // check the formating of the intput FASTA, i.e. look for illegal characters
+    label         'tiny'
     executor      'local'
     errorStrategy 'terminate'
 
@@ -17,6 +18,7 @@ process VALIDATE_FASTA {
 
 process LOAD_SEQUENCES {
     // Populate a native sqlite3 database with sequences from the pipeline's input FASTA file.
+    label         'tiny'
     executor      'local'
     errorStrategy 'terminate'
 
@@ -36,6 +38,7 @@ process LOAD_SEQUENCES {
 
 process LOAD_ORFS {
     // add protein seqs translated from ORFS in the nt seqs to the database
+    label         'tiny'
     executor      'local'
     errorStrategy 'terminate'
 
@@ -56,6 +59,7 @@ process LOAD_ORFS {
 
 process SPLIT_FASTA {
     // Build the FASTA file batches of unique protein sequences for the sequence analysis
+    label         'tiny'
     executor      'local'
     errorStrategy 'terminate'
 
