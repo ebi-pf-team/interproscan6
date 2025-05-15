@@ -12,16 +12,17 @@ workflow SIGNALP {
     euk_organism
     euk_mode
     euk_dir
+    euk_gpu
     prok_organism
     prok_mode
     prok_dir
-    use_gpu
+    prok_gpu
 
     main:
     results = Channel.empty()
 
     if (applications.contains("signalp_euk")) {
-        if (use) {
+        if (euk_gpu) {
             RUN_SIGNALP_GPU_EUK(
                 ch_seqs,
                 euk_organism,
@@ -43,7 +44,7 @@ workflow SIGNALP {
     }
 
     if (applications.contains("signalp_prok")) {
-        if (use_gpu) {
+        if (prok_gpu) {
             RUN_SIGNALP_GPU_PROK(
                 ch_seqs,
                 prok_organism,

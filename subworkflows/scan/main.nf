@@ -27,8 +27,6 @@ workflow SCAN_SEQUENCES {
     applications        // list of applications to run
     appsConfig          // map of applications
     datadir             // path to data directory
-    signalp_gpu
-    deeptmhmm_gpu
 
     main:
     results = Channel.empty()
@@ -78,7 +76,7 @@ workflow SCAN_SEQUENCES {
         DEEPTMHMM(
             ch_seqs,
             appsConfig.deeptmhmm.dir,
-            deeptmhmm_gpu
+            appsConfig.deeptmhmm.use_gpu
         )
         results = results.mix(DEEPTMHMM.out)
     }
@@ -213,10 +211,11 @@ workflow SCAN_SEQUENCES {
             appsConfig.signalp_euk.organism,
             appsConfig.signalp_euk.mode,
             appsConfig.signalp_euk.dir,
+            appsConfig.signalp_euk.use_gpu,
             appsConfig.signalp_prok.organism,
             appsConfig.signalp_prok.mode,
             appsConfig.signalp_prok.dir,
-            signalp_gpu
+            appsConfig.signalp_prok.use_gpu,
         ).set{ ch_signalp }
         results = results.mix(ch_signalp)
     }
