@@ -76,7 +76,7 @@ workflow INIT_PIPELINE {
     }
 
     if (!offline) {
-        def invalidApps = apps.findAll { app ->
+        invalidApps = apps.findAll { app ->
             ["signalp_euk", "signalp_prok", "deeptmhmm"].contains(app)
         }
 
