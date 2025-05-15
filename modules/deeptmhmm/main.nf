@@ -2,7 +2,7 @@ import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
 process RUN_DEEPTMHMM_CPU {
-    label 'medium', 'deeptmhmm_container'
+    label 'large', 'deeptmhmm_container'
     stageInMode 'copy'
 
     input:
@@ -26,7 +26,7 @@ process RUN_DEEPTMHMM_CPU {
 }
 
 process RUN_DEEPTMHMM_GPU {
-    label 'medium', 'deeptmhmm_container', 'use_gpu'
+    label 'large', 'deeptmhmm_container', 'use_gpu'
     stageInMode 'copy'
 
     input:
