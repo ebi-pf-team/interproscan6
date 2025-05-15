@@ -28,6 +28,7 @@ To test InterProScan, run the following command:
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
+  -r 6.0.0-alpha \
   -profile test,docker \
   --datadir data \
   --interpro latest \
@@ -36,10 +37,11 @@ nextflow run ebi-pf-team/interproscan6 \
 
 Explanation of parameters:
 
+* `-r 6.0.0-alpha`: Specify the version of the InterProScan workflow to use, in this case version `6.0.0-alpha`. For consistent and reproducible results, we strongly recommend always specifying a version.
 * `-profile test,docker`:
-  * `test`: Use an included example FASTA file.
+  * `test`: Run InterProScan with a small example FASTA file included in the workflow.
   * `docker`: Execute tasks in Docker containers.
-* `--datadir data`: Specify `data` as the directory for storing all required InterPro and member database files. The directory is created automatically if it doesn't exist.
+* `--datadir data`: Set `data` as the directory for storing all required InterPro and member database files. The directory is created automatically if it doesn't exist.
 * `--interpro latest`: Use the most recent InterPro release.
 * `--download`: Download any missing metadata and database files into the specified `--datadir`
 
@@ -60,6 +62,7 @@ To annotate your own sequences FASTA file, omit the `test` profile and specify `
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
+  -r 6.0.0-alpha \
   -profile docker \
   --datadir data \
   --input /path/to/sequences.fasta
@@ -69,6 +72,7 @@ For nucleotide sequences, add `--nucleic`:
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
+  -r 6.0.0-alpha \
   -profile docker \
   --datadir data \
   --input /path/to/sequences.fna \
@@ -81,6 +85,7 @@ To run only certain analyses (for example, Pfam and MobiDB‑lite):
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
+  -r 6.0.0-alpha \
   -profile test,docker \
   --datadir data \
   --applications Pfam,MobiDB-lite
@@ -200,15 +205,16 @@ And run with your config:
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
-  -c licensed.conf \
+  -r 6.0.0-alpha \
   -profile docker \
+  -c licensed.conf \
   --input /path/to/sequences.fasta \
   --applications deeptmhmm,phobius,signalp_euk,signalp_prok \
   --offline
 ```
 
 > [!WARNING]  
-> DeepTMHMM 1.0 and SignalP 6.0 predictions are not yet available in the [Matches API](https://www.ebi.ac.uk/interpro/matches/api/). The pre-calculated matches lookup needs to be disabled with `--offline`.
+> As DeepTMHMM 1.0 and SignalP 6.0 predictions are not yet available in the [Matches API](https://www.ebi.ac.uk/interpro/matches/api/), the pre-calculated matches lookup must be disabled with `--offline`.
 
 > [!WARNING]  
 > Phobius does not support certain non-standard or ambiguous residues. Any sequence containing pyrrolysine (one-letter code `O`), Asx (Asp/Asn ambiguity, `B`), Glx (Glu/Gln ambiguity, `Z`) or Xle (Leu/Ile ambiguity, `J`) will be skipped by Phobius but will continue to be processed normally by all other applications.
@@ -220,12 +226,12 @@ nextflow run ebi-pf-team/interproscan6 \
 
 Our full documentation is available on [ReadTheDocs](https://interproscan-docs.readthedocs.io/en/v6/).
 
-# Citation
+## Citation
 
 If you use InterPro in your work, please cite the following publication:
 
 > Blum M, Andreeva A, Florentino LC, Chuguransky SR, Grego T, Hobbs E, Pinto BL, Orr A, Paysan-Lafosse T, Ponamareva I, Salazar GA, Bordin N, Bork P, Bridge A, Colwell L, Gough J, Haft DH, Letunic I, Llinares-López F, Marchler-Bauer A, Meng-Papaxanthos L, Mi H, Natale DA, Orengo CA, Pandurangan AP, Piovesan D, Rivoire C, Sigrist CJA, Thanki N, Thibaud-Nissen F, Thomas PD, Tosatto SCE, Wu CH, Bateman A. **InterPro: the protein sequence classification resource in 2025**. *Nucleic Acids Res*. 2025 Jan;53(D1):D444-D456. [doi: 10.1093/nar/gkae1082](https://doi.org/10.1093/nar/gkae1082).
 
-# Support
+## Support
 
 For further assistance, please [create an issue](https://github.com/ebi-pf-team/interproscan6/issues) or [contact us](http://www.ebi.ac.uk/support/interproscan).
