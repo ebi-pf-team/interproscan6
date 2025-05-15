@@ -2,6 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 process PREPARE_FUNFAM {
+    label    'tiny'
     executor 'local'
 
     input:
@@ -86,6 +87,7 @@ process RESOLVE_FUNFAM {
 
 
 process PARSE_FUNFAM {
+    label    'tiny'
     executor 'local'
 
     input:

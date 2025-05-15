@@ -43,6 +43,7 @@ process ASSIGN_CATH {
 }
 
 process PARSE_CATHGENE3D {
+    label    'tiny'
     executor 'local'
 
     input:
