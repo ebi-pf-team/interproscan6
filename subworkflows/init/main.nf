@@ -9,7 +9,6 @@ workflow INIT_PIPELINE {
     datadir
     formats
     outdir
-    signalp_mode
     matches_api_url
     interpro_version
     skip_intepro
@@ -64,13 +63,6 @@ workflow INIT_PIPELINE {
         datadir = null
     }
   
-    // SignalP mode validation
-    (signalp_mode, error) = InterProScan.validateSignalpMode(signalp_mode)
-    if (!signalp_mode) {
-        log.error error
-        exit 1
-    }
-
     version = InterProScan.validateInterProVersion(interpro_version)
     if (version == null) {
         log.error "--interpro <VERSION>: invalid format; expecting number of 'latest'"
@@ -89,6 +81,5 @@ workflow INIT_PIPELINE {
     datadir          // str: path to data directory, or null if not needed
     outdir           // str: path to output directory
     formats          // set<String>: output file formats
-    signalp_mode     // str: Models to be used with SignalP
     version          // str: InterPro version (or "latest")
 }

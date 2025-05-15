@@ -85,10 +85,6 @@ class InterProScan {
             description: null
         ],
         [
-            name: "signalp-mode",
-            description: null
-        ],
-        [
             name: "skip-interpro",
             description: null
             // Used in production. Skips adding InterPro xrefs and identifying representative locations
