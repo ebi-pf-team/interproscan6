@@ -35,6 +35,7 @@ process SEARCH_SUPERFAMILY {
 }
 
 process PARSE_SUPERFAMILY {
+    label    'tiny'
     executor 'local'
 
     input:

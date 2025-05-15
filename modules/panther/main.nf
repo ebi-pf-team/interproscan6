@@ -2,6 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 process PREPARE_TREEGRAFTER {
+    label    'tiny'
     executor 'local'
 
     input:
@@ -165,6 +166,7 @@ process RUN_TREEGRAFTER {
 }
 
 process PARSE_PANTHER {
+    label    'tiny'
     executor 'local'
 
     input:

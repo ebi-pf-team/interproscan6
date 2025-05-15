@@ -23,6 +23,7 @@ process RUN_PRINTS {
 }
 
 process PARSE_PRINTS {
+    label    'tiny'
     executor 'local'
 
     input:

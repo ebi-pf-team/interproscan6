@@ -31,6 +31,7 @@ process RUN_PFSCAN {
 
 
 process PARSE_PFSCAN {
+    label    'tiny'
     executor 'local'
 
     input:

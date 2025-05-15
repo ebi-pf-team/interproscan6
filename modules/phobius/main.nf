@@ -1,6 +1,7 @@
 import groovy.json.JsonOutput
 
 process WRITE_FASTA {
+    label    'tiny'
     input:
     tuple val(meta), val(fasta)
 
@@ -37,6 +38,7 @@ process SEARCH_PHOBIUS {
 }
 
 process PARSE_PHOBIUS {
+    label    'tiny'
     executor 'local'
 
     input:

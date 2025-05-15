@@ -1,6 +1,7 @@
 import groovy.json.JsonOutput
 
 process PARSE_PFAM {
+    label    'tiny'
     executor 'local'
 
     input:

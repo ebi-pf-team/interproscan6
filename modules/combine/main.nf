@@ -2,6 +2,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 
 process COMBINE_MATCHES {
+    label    'tiny'
     executor 'local'
 
     input:

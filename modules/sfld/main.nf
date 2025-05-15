@@ -48,6 +48,7 @@ process POST_PROCESS_SFLD {
 }
 
 process PARSE_SFLD {
+    label    'tiny'
     executor 'local'
 
     input:

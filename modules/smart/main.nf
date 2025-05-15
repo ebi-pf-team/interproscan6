@@ -21,6 +21,7 @@ process PREFILTER_SMART {
 }
 
 process PREPARE_SMART {
+    label    'tiny'
     executor 'local'
 
     input:
@@ -125,6 +126,7 @@ process SEARCH_SMART {
 }
 
 process PARSE_SMART {
+    label    'tiny'
     executor 'local'
 
     input:

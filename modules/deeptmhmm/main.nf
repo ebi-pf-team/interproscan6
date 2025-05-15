@@ -26,6 +26,7 @@ process RUN_DEEPTMHMM {
 }
 
 process PARSE_DEEPTMHMM {
+    label    'tiny'
     executor 'local'
 
     input:

@@ -17,6 +17,7 @@ process RUN_MOBIDBLITE {
 
 
 process PARSE_MOBIDBLITE {
+    label    'tiny'
     executor 'local'
 
     input:
