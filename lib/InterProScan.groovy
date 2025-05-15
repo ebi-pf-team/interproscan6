@@ -199,7 +199,7 @@ class InterProScan {
 
     static List<String> getAppsWithData(List<String> applications, Map appsConfig) {
         return applications.findAll { String appName ->
-            appsConfig.get(appName)?.has_data //|| InterProScan.LICENSED_SOFTWARE.contains(appName)
+            appsConfig.get(appName)?.has_data
         }
     }
 
@@ -274,6 +274,16 @@ class InterProScan {
                 return [null, error]
             }
         }
+
+        def invalidApps = appsToRun.findAll { app ->
+            this.LICENSED_SOFTWARE.contains(app) && !appsConfig[app]?.dir
+        }
+
+        if (invalidApps) {
+            def error = "The following applications cannot be run: ${invalidApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses."
+            return [null, error]
+        }
+
         return [appsToRun.toSet().toList(), null]
     }
 
