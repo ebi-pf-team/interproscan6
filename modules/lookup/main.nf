@@ -3,6 +3,7 @@ import java.net.URL
 import groovy.json.JsonOutput
 
 process PREPARE_LOOKUP {
+    label    'tiny'
     executor 'local'
 
     input:
@@ -42,6 +43,7 @@ process PREPARE_LOOKUP {
 }
 
 process LOOKUP_MATCHES {
+    label    'tiny'
     executor 'local'
 
     input:
