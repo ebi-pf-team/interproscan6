@@ -75,6 +75,17 @@ workflow INIT_PIPELINE {
         exit 1
     }
 
+    if (!offline) {
+        def invalidApps = apps.findAll { app ->
+            ["signalp_euk", "signalp_prok", "deeptmhmm"].contains(app)
+        }
+
+        if (invalidApps) {
+            log.error "Pre-calculated results for DeepTMHMM, SignalP_Euk, and SignalP_Prok are not yet available in the Matches API. To ensure these analyses run locally and produce results, please add the '--offline' flag when invoking the pipeline."
+            exit 1
+        }
+    }
+
     emit:
     fasta            // str: path to input fasta file
     apps             // list: list of application to
