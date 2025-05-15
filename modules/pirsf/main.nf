@@ -95,6 +95,15 @@ process PARSE_PIRSF {
 
     rawMatches.each { proteinAccession, modelMatches ->
         modelMatches.each { modelAccession, rawMatch ->
+
+            /* Combine multiple overlapping or related matches into a single consolidated match region,
+            but only when both the sequence and HMM model agree on the extensions.
+            Sequence:  1....5....10...15...20...25...30...35...40
+            Match 1:              |-------|            # seq: 15-25, hmm: 10-20
+            Match 2:           |-----|                 # seq: 12-18, hmm: 8-15
+            Match 3:                     |----------|  # seq: 22-35, hmm: 18-30
+            Combined:          |--------------------|  # seq: 12-35, hmm: 8-30
+            */
             int seqStart = rawMatch.locations[0].start
             int seqEnd = rawMatch.locations[0].end
             int hmmStart = rawMatch.locations[0].hmmStart
@@ -133,10 +142,10 @@ process PARSE_PIRSF {
                     UpdateMatch(processedMatches, proteinAccession, match)
                 }
             } else if (
-                    r > LENGTH_RATIO_THRESHOLD &&
-                            ovl >= OVERLAP_THRESHOLD &&
-                            match.score >= datEntries[modelAccession].minS &&
-                            (ld < LENGTH_DEVIATION_THRESHOLD * datEntries[modelAccession].stdL || ld < MINIMUM_LENGTH_DEVIATION)
+                r > LENGTH_RATIO_THRESHOLD &&
+                    ovl >= OVERLAP_THRESHOLD &&
+                    match.score >= datEntries[modelAccession].minS &&
+                    (ld < LENGTH_DEVIATION_THRESHOLD * datEntries[modelAccession].stdL || ld < MINIMUM_LENGTH_DEVIATION)
             ) {
                 UpdateMatch(processedMatches, proteinAccession, match)
             } else if (promote["${proteinAccession}-${modelAccession}"]) {
@@ -144,7 +153,7 @@ process PARSE_PIRSF {
             } else {
                 // store for potential use
                 store.computeIfAbsent(proteinAccession, { [:] })
-                store[proteinAccession].computeIfAbsent(modelAccession, { match })
+                store[proteinAccession].computeIfAbsent(modelAccession, {match})
             }
         }
     }
@@ -178,20 +187,12 @@ process PARSE_PIRSF {
 }
 
 def processMatchLocations(Match match, SignatureLibraryRelease library) {
-    /* Combine multiple overlapping or related matches into a single consolidated match region,
-    but only when both the sequence and HMM model agree on the extensions.
-    Sequence:  1....5....10...15...20...25...30...35...40
-    Match 1:              |-------|            # seq: 15-25, hmm: 10-20
-    Match 2:           |-----|                 # seq: 12-18, hmm: 8-15
-    Match 3:                     |----------|  # seq: 22-35, hmm: 18-30
-    Combined:          |--------------------|  # seq: 12-35, hmm: 8-30
-    */
     Match processedMatch = new Match(
-            match.modelAccession,
-            match.evalue,
-            match.score,
-            match.bias,
-            new Signature(match.modelAccession, library)
+        match.modelAccession,
+        match.evalue,
+        match.score,
+        match.bias,
+        new Signature(match.modelAccession, library)
     )
     processedMatch.sequenceLength = match.sequenceLength
     match.locations.each { location ->
@@ -199,17 +200,17 @@ def processMatchLocations(Match match, SignatureLibraryRelease library) {
         String hmmBoundEnd = location.hmmEnd == location.hmmLength ? "]" : "."
         processedMatch.addLocation(
             new Location(
-                    location.envelopeStart,  // start is the envelopeStart value on output
-                    location.envelopeEnd,   // end is the envelopeEnd value on output
-                    location.hmmStart,
-                    location.hmmEnd,
-                    location.hmmLength,
-                    "${hmmBoundStart}${hmmBoundEnd}",
-                    location.envelopeStart,
-                    location.envelopeEnd,
-                    location.evalue,
-                    location.score,
-                    location.bias
+                location.envelopeStart,  // start is the envelopeStart value on output
+                location.envelopeEnd,   // end is the envelopeEnd value on output
+                location.start,  // hmmStart is the start value on output
+                location.end,  // hmmEnd is the end value on output
+                location.hmmLength,
+                "${hmmBoundStart}${hmmBoundEnd}",
+                location.envelopeStart,
+                location.envelopeEnd,
+                location.evalue,
+                location.score,
+                location.bias
             )
         )
     }
