@@ -1,5 +1,9 @@
 # InterProScan 6
 
+[![Nextflow](https://img.shields.io/badge/%E2%89%A524.10.4-0dc09d?style=flat&logo=nextflow&label=nextflow&labelColor=f5fafe)](https://www.nextflow.io/)
+[![run with docker](https://img.shields.io/badge/docker-1D63ED?logo=docker&logoColor=1D63ED&label=run%20with&labelColor=f5fafe)](https://www.docker.com/)
+[![run with singularity](https://img.shields.io/badge/singularity-1E4383?label=run%20with&labelColor=f5fafe)](https://sylabs.io/docs/)
+
 [InterPro](http://www.ebi.ac.uk/interpro/) is a database that brings together predictive information on protein function from multiple partner resources. It provides an integrated view of the families, domains and functional sites to which a given protein belongs.
 
 **InterProScan** is the command‑line tool that allows you to scan protein or nucleotide sequences against the InterPro member‑database signatures in a single workflow. Researchers with novel sequences can use InterProScan to annotate their data with family classifications, domain architectures and site predictions.
@@ -17,7 +21,7 @@ Before you begin, you will need:
     * [SingularityCE](https://sylabs.io/singularity/)
     * [Apptainer](https://apptainer.org/)
 
-> [!NOTE]  
+> [!IMPORTANT]  
 > Phobius, SignalP and DeepTMHMM also require separate licenses and data downloads. See [Licensed analyses](#licensed-analyses) below.
 
 ## Usage
@@ -37,7 +41,7 @@ nextflow run ebi-pf-team/interproscan6 \
 
 Explanation of parameters:
 
-* `-r 6.0.0-alpha`: Specify the version of the InterProScan workflow to use, in this case version `6.0.0-alpha`. For consistent and reproducible results, we strongly recommend always specifying a version.
+* `-r 6.0.0-alpha`: Specify the version of InterProScan to use, in this case version `6.0.0-alpha`. For consistent and reproducible results, we strongly recommend always specifying a version.
 * `-profile test,docker`:
   * `test`: Run InterProScan with a small example FASTA file included in the workflow.
   * `docker`: Execute tasks in Docker containers.
@@ -48,7 +52,7 @@ Explanation of parameters:
 > [!TIP]
 > To use a specific version of InterPro, use the release number, e.g. `--interpro 105.0`.
 
-After completion, you’ll find three output files in your working directory:
+After completion, you'll find three output files in your working directory:
 
 * `test.faa.json`: full annotations (JSON)
 * `test.faa.tsv`: tabular summary (TSV)
@@ -121,15 +125,31 @@ The available analyses are:
 > [!TIP]
 > If you only run COILS, DeepTMHMM, MobiDB‑lite, Phobius, SignalP‑Euk or SignalP‑Prok, you don't need `--datadir`, `--interpro`, or `--download`.
 
-### Licensed analyses
+### Running InterProScan on an HPC cluster with Slurm
+
+To run InterProScan on your institute's Slurm cluster, use the `slurm` profile. This ensures that each task in the pipeline is submitted as a job to the Slurm scheduler.
+
+Most HPC systems do not support Docker, but they often support Singularity or Apptainer for containerized execution. Include the appropriate profile (`singularity` or `apptainer`).
+
+```sh
+nextflow run ebi-pf-team/interproscan6 \
+  -r 6.0.0-alpha \
+  -profile singularity,slurm,test \
+  --datadir /path/to/data
+```
+
+> [!IMPORTANT]
+> The directory specified by `--datadir` must be accessible from all cluster nodes. This usually means it should be located on a shared network file system (e.g. NFS or Lustre).
+
+## Licensed analyses
 
 DeepTMHMM, Phobius and SignalP contain licensed components and are disabled by default. To enable and execute these analyses, you first need to obtain their license, and data.
 
-#### Obtaining licensed components
+### Obtaining licensed components
 
 For each analyses, you need to request a license, then download and extract an archive that contains the data and machine learning model(s) required to run the analysis.
 
-##### DeepTMHMM 1.0
+#### DeepTMHMM 1.0
 
 Request a standalone copy of DeepTMHMM 1.0 by sending an email to <licensing@biolib.com>, then extract it when you receive it:
 
@@ -143,7 +163,7 @@ and make note of the full path to the package:
 echo "${PWD}/DeepTMHMM
 ```
 
-##### Phobius 1.01
+#### Phobius 1.01
 
 Download a copy of Phobius 1.01 [from Erik Sonnhammer's website](https://software.sbc.su.se/phobius.html), then extract it:
 
@@ -157,7 +177,7 @@ and make note of the full path to the package:
 echo "${PWD}/phobius"
 ```
 
-##### SignalP 6.0
+#### SignalP 6.0
 
 SignalP 6.0 supports two modes: a slow one that uses the full model, and a fast one that uses a distilled version of the full mode. InterProScan suppports both, but only one at a time. The fast mode is recommended for most users.
 
@@ -178,7 +198,7 @@ and make note of the full path to the package:
 echo "${PWD}/signal6p_fast"
 ```
 
-#### Executing licensed analyses
+### Executing licensed analyses
 
 Create a Nextflow config (e.g. `licensed.conf`) that points to each tool directory:
 
