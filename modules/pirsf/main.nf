@@ -60,15 +60,14 @@ process PARSE_PIRSF {
                         lineData[7].toDouble(),  // seqScore
                         lineData[8].toDouble()   // seqBias
                     )
-                    match.sequenceLength = lineData[5].toInteger()
+                    match.sequenceLength = lineData[2].toInteger()
                     rawMatches[proteinAccession].put(modelAccession, match)
                 }
-
                 Location location = new Location(
-                    lineData[19].toInteger(),   // Start: use the envelope
-                    lineData[20].toInteger(),   // End: use the envelope
-                    lineData[17].toInteger(),   // hmmStart: use ali from
-                    lineData[18].toInteger(),   // hmmEnd: use ali to
+                    lineData[17].toInteger(),   // Start
+                    lineData[18].toInteger(),   // End
+                    lineData[15].toInteger(),   // hmmStart
+                    lineData[16].toInteger(),   // hmmEnd
                     lineData[5].toInteger(),    // hmmLength
                     null,                       // hmmBounds -- added later when merging matches together
                     lineData[19].toInteger(),   // envelopeStart
@@ -97,45 +96,62 @@ process PARSE_PIRSF {
 
     rawMatches.each { proteinAccession, modelMatches ->
         modelMatches.each { modelAccession, rawMatch ->
-            // Merge match locations together
-            match = processMatchLocations(rawMatch, library)
+
+            /* Combine multiple overlapping or related matches into a single consolidated match region,
+            but only when both the sequence and HMM model agree on the extensions.
+            Sequence:  1....5....10...15...20...25...30...35...40
+            Match 1:              |-------|            # seq: 15-25, hmm: 10-20
+            Match 2:           |-----|                 # seq: 12-18, hmm: 8-15
+            Match 3:                     |----------|  # seq: 22-35, hmm: 18-30
+            Combined:          |--------------------|  # seq: 12-35, hmm: 8-30
+            */
+            int seqStart = rawMatch.locations[0].start
+            int seqEnd = rawMatch.locations[0].end
+            int hmmStart = rawMatch.locations[0].hmmStart
+            int hmmEnd = rawMatch.locations[0].hmmEnd
+
+            rawMatch.locations.each { location ->
+                if (location.start < seqStart && location.hmmStart < hmmStart) {
+                    seqStart = location.start
+                    hmmStart = location.hmmStart
+                }
+                if (location.end > seqEnd && location.hmmEnd > hmmEnd) {
+                    seqEnd = location.end
+                    hmmEnd = location.hmmEnd
+                }
+            }
 
             // Calculate ratios
             // Overall length
-            double ovl = Math.abs(match.locations[0].end - match.locations[0].start + 1) / match.sequenceLength
+            double ovl = Math.abs(seqEnd - seqStart + 1) / rawMatch.sequenceLength
             // Ratio over coverage of sequence and profile hmm
-            double r = Math.abs(match.locations[0].hmmEnd - match.locations[0].hmmStart + 1) / (match.locations[0].envelopeEnd - match.locations[0].envelopeStart + 1)
+            double r = Math.abs(hmmEnd - hmmStart + 1) / (seqEnd - seqStart + 1)
             // length deviation
-            double ld = Math.abs(match.sequenceLength - datEntries[modelAccession].meanL)
+            double ld = Math.abs(rawMatch.sequenceLength - datEntries[modelAccession].meanL)
+
+            match = processMatchLocations(rawMatch, library)
 
             if (datChildren.containsKey(modelAccession)) {
                 // process a subfamily match
-                if (r > LENGTH_RATIO_THRESHOLD && match.locations[0].score >= datEntries[modelAccession].minS) {
+                if (r > LENGTH_RATIO_THRESHOLD && match.score >= datEntries[modelAccession].minS) {
                     String parent = datChildren[modelAccession]
                     if (store[proteinAccession]?.containsKey(parent)) {
                         processedMatches.computeIfAbsent(proteinAccession, { [:] })[parent] = store[proteinAccession][parent]
-                    }
-                    else {
+                    } else {
                         promote["${proteinAccession}-${parent}"] = true
                     }
                     UpdateMatch(processedMatches, proteinAccession, match)
                 }
-            }
-
-            else if (
+            } else if (
                 r > LENGTH_RATIO_THRESHOLD &&
-                ovl >= OVERLAP_THRESHOLD &&
-                match.locations[0].score >= datEntries[modelAccession].minS &&
-                (ld < LENGTH_DEVIATION_THRESHOLD * datEntries[modelAccession].stdL || ld < MINIMUM_LENGTH_DEVIATION)
+                    ovl >= OVERLAP_THRESHOLD &&
+                    match.score >= datEntries[modelAccession].minS &&
+                    (ld < LENGTH_DEVIATION_THRESHOLD * datEntries[modelAccession].stdL || ld < MINIMUM_LENGTH_DEVIATION)
             ) {
                 UpdateMatch(processedMatches, proteinAccession, match)
-            }
-
-            else if (promote["${proteinAccession}-${modelAccession}"]) {
+            } else if (promote["${proteinAccession}-${modelAccession}"]) {
                 UpdateMatch(processedMatches, proteinAccession, match)
-            }
-
-            else {
+            } else {
                 // store for potential use
                 store.computeIfAbsent(proteinAccession, { [:] })
                 store[proteinAccession].computeIfAbsent(modelAccession, {match})
@@ -143,31 +159,24 @@ process PARSE_PIRSF {
         }
     }
 
-    /* filter to use only the best matches, by score */
+    /* filter to use only the best matches, by evalue ASC, score DESC */
     def bestMatches = [:]
     processedMatches.each { proteinAccession, proteinMatches ->
         def matchesSorted = proteinMatches.keySet().sort { key ->
-            proteinMatches[key]?.locations?.get(0)?.score ?: 0
-        }.reverse()
+            [proteinMatches[key]?.locations?.get(0)?.evalue ?: Double.MAX_VALUE,
+             -(proteinMatches[key]?.locations?.get(0)?.score ?: 0)]
+        }
 
-        matchesSorted.each { modelAccession ->
-            // ignore subfamilies
-            if (modelAccession ==~ /^PIRSF5/) { return }
+        // Find the first non-subfamily match (the best one)
+        def bestMatch = matchesSorted.find { !(it ==~ /^PIRSF5/) }
+        bestMatches.computeIfAbsent(proteinAccession, { [:] })
+        bestMatches[proteinAccession][bestMatch] = proteinMatches[bestMatch]
 
-            bestMatches.computeIfAbsent(proteinAccession, { [:] })
-            if (!bestMatches[proteinAccession].containsKey(modelAccession)) {
-                bestMatches[proteinAccession][modelAccession] = proteinMatches[modelAccession]
-            }
-
-            // see if this model has subfamilies that also matched the protein
-            if (datEntries[modelAccession].children != null) {
-                datEntries[modelAccession].children.each { subFamAccession ->
-                    if (proteinMatches.containsKey(subFamAccession)) {
-                        if (!bestMatches[proteinAccession]?.containsKey(subFamAccession)) {
-                            bestMatches[proteinAccession] = bestMatches[proteinAccession] ?: [:]
-                            bestMatches[proteinAccession][subFamAccession] = proteinMatches[subFamAccession]
-                        }
-                    }
+        // see if this model has subfamilies that also matched the protein
+        if (datEntries[bestMatch]?.children != null) {
+            datEntries[bestMatch].children.each { subFamAccession ->
+                if (proteinMatches.containsKey(subFamAccession)) {
+                    bestMatches[proteinAccession][subFamAccession] = proteinMatches[subFamAccession]
                 }
             }
         }
@@ -179,31 +188,6 @@ process PARSE_PIRSF {
 }
 
 def processMatchLocations(Match match, SignatureLibraryRelease library) {
-    /* Combine multiple overlapping or related matches into a single consolidated match region,
-    but only when both the sequence and HMM model agree on the extensions.
-    Sequence:  1....5....10...15...20...25...30...35...40
-    Match 1:              |-------|            # seq: 15-25, hmm: 10-20
-    Match 2:           |-----|                 # seq: 12-18, hmm: 8-15
-    Match 3:                     |----------|  # seq: 22-35, hmm: 18-30
-    Combined:          |--------------------|  # seq: 12-35, hmm: 8-30
-    */
-    // Initialise with the first location
-    int seqStart = match.locations[0].start
-    int seqEnd = match.locations[0].end
-    int hmmStart = match.locations[0].hmmStart
-    int hmmEnd = match.locations[0].hmmEnd
-    // check subsequent matches
-    match.locations.each { location ->
-        if (location.start < seqStart && location.hmmStart < hmmStart) {
-            seqStart = location.start
-            hmmStart = location.hmmStart
-        }
-        if (location.end > seqEnd && location.hmmEnd < hmmEnd) {
-            seqEnd = location.end
-            hmmEnd = location.hmmEnd
-        }
-    }
-
     Match processedMatch = new Match(
         match.modelAccession,
         match.evalue,
@@ -212,24 +196,25 @@ def processMatchLocations(Match match, SignatureLibraryRelease library) {
         new Signature(match.modelAccession, library)
     )
     processedMatch.sequenceLength = match.sequenceLength
-    String hmmBoundStart = hmmStart == 1 ? "[" : "."
-    String hmmBoundEnd = hmmEnd == match.locations[0].hmmLength ? "]" : "."
-    processedMatch.addLocation(
-        new Location(
-            seqStart,
-            seqEnd,   // start + end == envelopeStart + envelopeEnd
-            hmmStart,
-            hmmEnd,
-            match.locations[0].hmmLength,
-            "${hmmBoundStart}${hmmBoundEnd}",
-            seqStart,
-            seqEnd,   // envelopeStart + envelopeEnd
-            match.locations[0].evalue,
-            match.locations[0].score,
-            match.locations[0].bias
+    match.locations.each { location ->
+        String hmmBoundStart = location.hmmStart == 1 ? "[" : "."
+        String hmmBoundEnd = location.hmmEnd == location.hmmLength ? "]" : "."
+        processedMatch.addLocation(
+            new Location(
+                location.envelopeStart,  // start is the envelopeStart value on output
+                location.envelopeEnd,   // end is the envelopeEnd value on output
+                location.start,  // hmmStart is the start value on output
+                location.end,  // hmmEnd is the end value on output
+                location.hmmLength,
+                "${hmmBoundStart}${hmmBoundEnd}",
+                location.envelopeStart,
+                location.envelopeEnd,
+                location.evalue,
+                location.score,
+                location.bias
+            )
         )
-    )
-
+    }
     return processedMatch
 }
 
