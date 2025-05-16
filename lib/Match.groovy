@@ -94,32 +94,32 @@ class Match implements Serializable {
     }
 
     static String encodeCigarAlignment(String alignment) {
-        String cigarAlignment = ""
-        alignment.each { baseChar ->
-            if (baseChar.isUpperCase()) {
-                cigarAlignment += "M" // match char
-            } else if (baseChar.isLowerCase()) {
-                cigarAlignment += "I" // insert char
-            } else if (baseChar == "-") {
-                cigarAlignment += "D" // delete char
+        if (!alignment) return ""
+        StringBuilder cigar = new StringBuilder()
+        char prevOp = '\0'
+        int count = 0
+
+        for (int i = 0; i < alignment.length(); i++) {
+            char c = alignment.charAt(i)
+            char op = (c == '-') ? 'D' : 'M' // Treat all letters (including mismatches) as 'M'
+
+            if (op == prevOp) {
+                count++
             } else {
-                throw new IllegalArgumentException("Unrecognised character ${baseChar} in ${alignment}")
+                if (count > 0) {
+                    cigar.append(count).append(prevOp)
+                }
+                prevOp = op
+                count = 1
             }
         }
-        // compress alignment, to give '5M' instead of 'MMMMM'
-        if (!cigarAlignment) return ""
-        cigarAlignment
-                .split('')
-                .inject([]) { groups, alignChar ->
-                    if (groups && groups.last()[1] == alignChar) {
-                        groups.last()[0]++  // cigar alignment char matches previous so add 1 to the count
-                    } else {
-                        groups << [1, alignChar]  // change type of alignment char, restart count
-                    }
-                    groups
-                }
-                .collect { count, alignChar -> "${count}${alignChar}" }
-                .join()
+
+        // Append the final operation
+        if (count > 0) {
+            cigar.append(count).append(prevOp)
+        }
+
+        return cigar.toString()
     }
 
     @Override
