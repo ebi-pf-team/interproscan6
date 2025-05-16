@@ -121,7 +121,7 @@ def Map transformMatch(Map match, String seq) {
                 "hmmBounds": loc["hmmBounds"] ? getReverseHmmBounds(loc["hmmBounds"]) : null,
                 "fragments": loc["fragments"].collect { tranformFragment(it) },
                 "sites"    : loc["sites"] ?: [],
-                "targetAlignment": loc["cigarAlignment"] ? decodeAlignment(loc["cigarAlignment"], seq) : null
+                "targetAlignment": loc["cigarAlignment"] ? decodeAlignment(loc["cigarAlignment"], seq, loc["start"]) : null
             ]
         },
     ]
@@ -136,9 +136,9 @@ def getReverseHmmBounds(hmmBounds) {
     ][hmmBounds]
 }
 
-def decodeAlignment(cigarAlignment, sequence) {
+def decodeAlignment(cigarAlignment, sequence, startIndex) {
     def targetAlign = new StringBuilder()
-    def index = 0
+    def index = startIndex - 1 // convert from 1-based numbering to 0-based numbering
     def matcher = (cigarAlignment =~ /(\d+)([MID=X])/)
     matcher.each { match ->
         def len = match[1].toInteger()
