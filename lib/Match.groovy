@@ -93,7 +93,7 @@ class Match implements Serializable {
         location.targetAlignment = targetAlignment
     }
 
-    static String parseCigarAlignment(String alignment) {
+    static String encodeCigarAlignment(String alignment) {
         String cigarAlignment = ""
         alignment.each { baseChar ->
             if (baseChar.isUpperCase()) {
@@ -103,13 +103,10 @@ class Match implements Serializable {
             } else if (baseChar == "-") {
                 cigarAlignment += "D" // delete char
             } else {
-                throw new IllegalArgumentException("Unrecognized character ${baseChar} in ${alignment}")
+                throw new IllegalArgumentException("Unrecognised character ${baseChar} in ${alignment}")
             }
         }
-        return cigarAlignment
-    }
-
-    static String encodeCigarAlignment(String cigarAlignment) {  // Compress alignment, to give '5M' instead of 'MMMMM'
+        // compress alignment, to give '5M' instead of 'MMMMM'
         if (!cigarAlignment) return ""
         cigarAlignment
                 .split('')

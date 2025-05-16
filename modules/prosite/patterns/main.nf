@@ -65,8 +65,7 @@ process PARSE_PFSCAN {
             level = "STRONG"
         }
         String alignment = matchDetails[2].replaceAll('Sequence ', '').replaceAll('"', '').replaceAll('\\.', '').trim()
-        String cigarAlignment = Match.parseCigarAlignment(alignment)
-        cigarAlignment = Match.encodeCigarAlignment(cigarAlignment)
+        String cigarAlignment = Match.encodeCigarAlignment(alignment)
         patternsMatches.computeIfAbsent(seqId) { [:] }
         Match matchObj = patternsMatches[seqId].computeIfAbsent(modelAccession) {
             new Match(modelAccession, new Signature(modelAccession, library))

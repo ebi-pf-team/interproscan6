@@ -55,8 +55,7 @@ process PARSE_PFSEARCH {
                 new Match(matchData.profile, new Signature(modelAccession, library))
             }
             String alignment = matchData.alignment
-            String cigarAlignment = Match.parseCigarAlignment(alignment)
-            cigarAlignment = Match.encodeCigarAlignment(cigarAlignment)
+            String cigarAlignment = Match.encodeCigarAlignment(alignment)
             Location location = new Location(matchData.start, matchData.end, matchData.normScore, alignment, cigarAlignment)
             matchObj.addLocation(location)
         }
