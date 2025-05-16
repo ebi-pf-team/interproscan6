@@ -17,6 +17,7 @@ process RUN_COILS {
 
 
 process PARSE_COILS {
+    label    'tiny'
     executor 'local'
 
     input:

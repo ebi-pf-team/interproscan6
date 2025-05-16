@@ -57,6 +57,7 @@ process RUN_RPSPROC {
 
 
 process PARSE_RPSPROC {
+    label    'tiny'
     executor 'local'
 
     input:

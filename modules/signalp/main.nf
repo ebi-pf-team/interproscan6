@@ -32,6 +32,7 @@ process RUN_SIGNALP {
 }
 
 process PARSE_SIGNALP {
+    label    'tiny'
     executor 'local'
 
     input:

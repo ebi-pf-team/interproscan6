@@ -35,6 +35,7 @@ process DOWNLOAD {
 }
 
 process FIND_MISSING_DATA {
+    label    'tiny'
     executor 'local'
 
     input:
@@ -88,6 +89,7 @@ process FIND_MISSING_DATA {
 }
 
 process VALIDATE_DATA {
+    label    'tiny'
     executor 'local'
     cache false  // Stops the esotericsoftware.kryo.serializers warning
 

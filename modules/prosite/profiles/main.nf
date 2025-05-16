@@ -25,6 +25,7 @@ process RUN_PFSEARCH {
 }
 
 process PARSE_PFSEARCH {
+    label    'tiny'
     executor 'local'
 
     input:

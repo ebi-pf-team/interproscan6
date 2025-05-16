@@ -7,6 +7,7 @@ import groovy.json.JsonException
 import java.util.regex.Pattern
 
 process WRITE_JSON {
+    label    'tiny'
     executor 'local'
 
     input:

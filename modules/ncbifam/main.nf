@@ -1,6 +1,7 @@
 import groovy.json.JsonOutput
 
 process PARSE_NCBIFAM {
+    label    'tiny'
     executor 'local'
 
     input:

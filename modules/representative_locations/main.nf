@@ -2,6 +2,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 
 process REPRESENTATIVE_LOCATIONS {
+    label    'tiny'
     executor 'local'
 
     input:

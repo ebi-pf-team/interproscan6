@@ -4,6 +4,7 @@ import java.io.StringWriter
 import java.util.regex.Pattern
 
 process WRITE_XML {
+    label    'tiny'
     executor 'local'
 
     input:

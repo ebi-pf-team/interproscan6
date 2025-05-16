@@ -22,6 +22,7 @@ process SEARCH_PIRSF {
 }
 
 process PARSE_PIRSF {
+    label    'tiny'
     executor 'local'
 
     input:

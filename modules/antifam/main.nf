@@ -1,6 +1,7 @@
 import groovy.json.JsonOutput
 
 process PARSE_ANTIFAM {
+    label    'tiny'
     executor 'local'
 
     input:
