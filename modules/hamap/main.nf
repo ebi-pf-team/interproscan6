@@ -123,6 +123,8 @@ process PARSE_HAMAP {
         int end = fields[5].toInteger()
         Double score = Double.parseDouble(fields[7])
         String alignment = fields[9]
+        String cigarAlignment = Match.parseCigarAlignment(alignment)
+        cigarAlignment = Match.encodeCigarAlignment(cigarAlignment)
 
         if (matches.containsKey(sequenceId) && matches[sequenceId].containsKey(modelAccession)) {
             match = matches[sequenceId][modelAccession]
@@ -132,7 +134,7 @@ process PARSE_HAMAP {
             matches[sequenceId][modelAccession] = match
         }
 
-        Location location = new Location(start, end, score, alignment)
+        Location location = new Location(start, end, score, alignment, cigarAlignment)
         match.addLocation(location)
     }
 

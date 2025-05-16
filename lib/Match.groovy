@@ -93,6 +93,38 @@ class Match implements Serializable {
         location.targetAlignment = targetAlignment
     }
 
+    static String parseCigarAlignment(String alignment) {
+        String cigarAlignment = ""
+        alignment.each { baseChar ->
+            if (baseChar.isUpperCase()) {
+                cigarAlignment += "M" // match char
+            } else if (baseChar.isLowerCase()) {
+                cigarAlignment += "I" // insert char
+            } else if (baseChar == "-") {
+                cigarAlignment += "D" // delete char
+            } else {
+                throw new IllegalArgumentException("Unrecognized character ${baseChar} in ${alignment}")
+            }
+        }
+        return cigarAlignment
+    }
+
+    static String encodeCigarAlignment(String cigarAlignment) {  // Compress alignment, to give '5M' instead of 'MMMMM'
+        if (!cigarAlignment) return ""
+        cigarAlignment
+                .split('')
+                .inject([]) { groups, alignChar ->
+                    if (groups && groups.last()[1] == alignChar) {
+                        groups.last()[0]++  // cigar alignment char matches previous so add 1 to the count
+                    } else {
+                        groups << [1, alignChar]  // change type of alignment char, restart count
+                    }
+                    groups
+                }
+                .collect { count, alignChar -> "${count}${alignChar}" }
+                .join()
+    }
+
     @Override
     public int hashCode() {
         int x = Objects.hash(modelAccession, sequenceLength, evalue, score, bias, signature, locations)
@@ -358,13 +390,14 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-    Location(int start, int end, Double score, String targetAlignment) { // Used for Hamap, PrositeProfiles
+    Location(int start, int end, Double score, String targetAlignment, cigarAlignment) { // Used for Hamap, PrositeProfiles
         this.start = start
         this.end = end
         this.score = score
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
         this.targetAlignment = targetAlignment
+        this.cigarAlignment = cigarAlignment
     }
 
     Location(int start, int end, Double pvalue, Double score, Integer motifNumber) { // Used for PRINTS
