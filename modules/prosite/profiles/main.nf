@@ -55,7 +55,9 @@ process PARSE_PFSEARCH {
             Match matchObj = matches[seqId].computeIfAbsent(modelAccession) {
                 new Match(matchData.profile, new Signature(modelAccession, library))
             }
-            Location location = new Location(matchData.start, matchData.end, matchData.normScore, matchData.alignment)
+            String alignment = matchData.alignment
+            String cigarAlignment = Match.encodeCigarAlignment(alignment)
+            Location location = new Location(matchData.start, matchData.end, matchData.normScore, alignment, cigarAlignment)
             matchObj.addLocation(location)
         }
     }

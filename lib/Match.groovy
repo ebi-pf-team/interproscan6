@@ -93,6 +93,35 @@ class Match implements Serializable {
         location.targetAlignment = targetAlignment
     }
 
+    static String encodeCigarAlignment(String alignment) {
+        if (!alignment) return ""
+        StringBuilder cigar = new StringBuilder()
+        char prevOp = '\0'
+        int count = 0
+
+        for (int i = 0; i < alignment.length(); i++) {
+            char c = alignment.charAt(i)
+            char op = (c == '-') ? 'D' : 'M' // Treat all letters (including mismatches) as 'M'
+
+            if (op == prevOp) {
+                count++
+            } else {
+                if (count > 0) {
+                    cigar.append(count).append(prevOp)
+                }
+                prevOp = op
+                count = 1
+            }
+        }
+
+        // Append the final operation
+        if (count > 0) {
+            cigar.append(count).append(prevOp)
+        }
+
+        return cigar.toString()
+    }
+
     @Override
     public int hashCode() {
         int x = Objects.hash(modelAccession, sequenceLength, evalue, score, bias, signature, locations)
@@ -358,13 +387,14 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-    Location(int start, int end, Double score, String targetAlignment) { // Used for Hamap, PrositeProfiles
+    Location(int start, int end, Double score, String targetAlignment, cigarAlignment) { // Used for Hamap, PrositeProfiles
         this.start = start
         this.end = end
         this.score = score
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
         this.targetAlignment = targetAlignment
+        this.cigarAlignment = cigarAlignment
     }
 
     Location(int start, int end, Double pvalue, Double score, Integer motifNumber) { // Used for PRINTS
