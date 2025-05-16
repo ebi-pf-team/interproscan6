@@ -55,7 +55,7 @@ process PARSE_PHOBIUS {
     boolean isSignalPeptide = false
     boolean isTransmembrane = false
 
-    SignatureLibraryRelease library = new SignatureLibraryRelease("Phobius", "1.0.1")
+    SignatureLibraryRelease library = new SignatureLibraryRelease("Phobius", "1.01")
     def signatures = [
         "CYTOPLASMIC_DOMAIN"     : new Signature("CYTOPLASMIC_DOMAIN", "Cytoplasmic domain", 
                                                  "Region of a membrane-bound protein predicted to be outside the membrane, in the cytoplasm", library, null),

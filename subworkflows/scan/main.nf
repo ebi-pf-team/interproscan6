@@ -75,7 +75,8 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("deeptmhmm")) {
         DEEPTMHMM(
             ch_seqs,
-            appsConfig.deeptmhmm.dir
+            appsConfig.deeptmhmm.dir,
+            appsConfig.deeptmhmm.use_gpu
         )
         results = results.mix(DEEPTMHMM.out)
     }
@@ -210,9 +211,11 @@ workflow SCAN_SEQUENCES {
             appsConfig.signalp_euk.organism,
             appsConfig.signalp_euk.mode,
             appsConfig.signalp_euk.dir,
+            appsConfig.signalp_euk.use_gpu,
             appsConfig.signalp_prok.organism,
             appsConfig.signalp_prok.mode,
-            appsConfig.signalp_prok.dir
+            appsConfig.signalp_prok.dir,
+            appsConfig.signalp_prok.use_gpu,
         ).set{ ch_signalp }
         results = results.mix(ch_signalp)
     }
