@@ -132,7 +132,6 @@ process PARSE_HAMAP {
             matches.computeIfAbsent(sequenceId, { [:] })
             matches[sequenceId][modelAccession] = match
         }
-
         Location location = new Location(start, end, score, alignment, cigarAlignment)
         match.addLocation(location)
     }

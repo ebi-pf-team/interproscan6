@@ -147,8 +147,11 @@ def decodeAlignment(cigarAlignment, sequence, startIndex) {
             case 'M':
             case '=':
             case 'X':
-            case 'I':
                 targetAlign << sequence.substring(index, index + len)
+                index += len
+                break
+            case 'I':
+                targetAlign << sequence.substring(index, index + len).toLowerCase()
                 index += len
                 break
             case 'D':
