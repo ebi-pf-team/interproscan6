@@ -397,6 +397,7 @@ def addLocationNodes(String memberDB, String proteinMd5, Map match, def xml) {
                 }
                 if (memberDB in ["hamap", "prosite patterns", "prosite profiles"]) {
                     xml.alignment(loc.targetAlignment ?: "")
+                    xml."cigar-alignment"(loc.cigarAlignment ?: "")
                 }
                 if (loc.containsKey("sites") && loc.sites.size() > 0) {
                     addSiteNodes(loc.sites, memberDB, xml)
