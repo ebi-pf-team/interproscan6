@@ -15,7 +15,7 @@ class Match implements Serializable {
     Integer sequenceLength = null
 
     // PRINTS
-    String graphScan = null
+    String graphscan = null
 
     Match(String modelAccession) {
         this.modelAccession = modelAccession
@@ -26,10 +26,10 @@ class Match implements Serializable {
         this.signature = signature
     }
 
-    Match(String modelAccession, Double evalue, String graphScan, Signature signature) {
+    Match(String modelAccession, Double evalue, String graphscan, Signature signature) {
         this.modelAccession = modelAccession
         this.evalue = evalue
-        this.graphScan = graphScan
+        this.graphscan = graphscan
         this.signature = signature
     }
 
@@ -78,7 +78,7 @@ class Match implements Serializable {
         match.included = data.included
         match.locations = data.locations.collect { Location.fromMap(it) }
         match.treegrafter = TreeGrafter.fromMap(data.treegrafter)
-        match.graphScan = data.graphScan
+        match.graphscan = data.graphscan
         match.representativeInfo = RepresentativeInfo.fromMap(data.representativeInfo)
         return match
     }

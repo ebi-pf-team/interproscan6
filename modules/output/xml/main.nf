@@ -280,7 +280,7 @@ def fmtPantherMatchNode(Map match) {
 def fmtPrintsMatchNode(Map match) {
     return [
         evalue    : match.evalue,
-        graphscan : match.graphScan,
+        graphscan : match.graphscan,
     ]
 }
 
