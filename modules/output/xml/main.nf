@@ -267,11 +267,13 @@ def fmtDefaultMatchNode(Map match) {
 
 def fmtPantherMatchNode(Map match) {
     return [
-        ac            : match.treegrafter.subfamilyAccession,
-        evalue        : match.evalue,
-        "graft-point" : match.treegrafter.graftPoint,
-        name          : match.signature.name,
-        score         : match.score
+        ac                 : match.treegrafter.subfamilyAccession,
+        evalue             : match.evalue,
+        "protein-class"    : match.treegrafter.proteinClass,
+        "graft-point"      : match.treegrafter.graftPoint,
+        "ancestral-node-id": match.treegrafter.ancestralNodeID,
+        name               : match.signature.name,
+        score              : match.score
     ]
 }
 
