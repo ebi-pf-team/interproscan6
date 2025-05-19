@@ -1,8 +1,38 @@
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
-process RUN_SIGNALP {
+process RUN_SIGNALP_CPU {
     label 'medium', 'signalp_container'
+
+    input:
+    tuple val(meta), path(fasta)
+    val organism
+    val mode
+    path signalp_dir
+
+    output:
+    tuple val(meta), val(organism), val(mode), path("outdir")
+
+    script:
+    """
+    cp -Lr ${signalp_dir}/signalp-6-package/signalp signalp
+    sed -i "s|'-tt',\\s*|'-tt', type=int, |" signalp/predict.py
+    python -m signalp.predict \
+        --fastafile ${fasta} \
+        --output_dir outdir \
+        --format none \
+        --organism ${organism} \
+        --mode ${mode} \
+        --torch_num_threads 1 \
+        --write_procs 1 \
+        --model_dir ${signalp_dir}/signalp-6-package/models
+    rm -r signalp
+    chmod -R 777 outdir
+    """
+}
+
+process RUN_SIGNALP_GPU {
+    label 'medium', 'signalp_container', 'use_gpu'
 
     input:
     tuple val(meta), path(fasta)

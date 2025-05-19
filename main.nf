@@ -29,7 +29,6 @@ workflow {
         params.datadir,
         params.formats,
         params.outdir,
-        params.signalpMode,
         params.matchesApiUrl,
         params.interpro,
         params.skipInterpro,
@@ -41,7 +40,6 @@ workflow {
     data_dir             = INIT_PIPELINE.out.datadir.val
     out_dir              = INIT_PIPELINE.out.outdir.val
     formats              = INIT_PIPELINE.out.formats.val
-    signalp_mode         = INIT_PIPELINE.out.signalp_mode.val
     interpro_version     = INIT_PIPELINE.out.version.val
 
     PREPARE_DATABASES(
