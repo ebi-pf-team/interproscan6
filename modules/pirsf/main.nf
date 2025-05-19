@@ -162,9 +162,8 @@ process PARSE_PIRSF {
     def bestMatches = [:]
     processedMatches.each { proteinAccession, proteinMatches ->
         def matchesSorted = proteinMatches.keySet().sort { key ->
-            [proteinMatches[key]?.locations?.get(0)?.evalue ?: Double.MAX_VALUE,
-             -(proteinMatches[key]?.locations?.get(0)?.score ?: 0)]
-        }
+            proteinMatches[key].score ?: 0
+        }.reverse()
 
         // Find the first non-subfamily match (the best one)
         def bestMatch = matchesSorted.find { !(it ==~ /^PIRSF5/) }
