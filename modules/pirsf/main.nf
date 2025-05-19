@@ -158,7 +158,7 @@ process PARSE_PIRSF {
         }
     }
 
-    /* filter to use only the best matches, by evalue ASC, score DESC */
+    /* filter to use only the best matches */
     def bestMatches = [:]
     processedMatches.each { proteinAccession, proteinMatches ->
         def matchesSorted = proteinMatches.keySet().sort { key ->
