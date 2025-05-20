@@ -83,7 +83,7 @@ process PARSE_SFLD {
             matches = matches
                 .collect { match ->
                     if (match.modelAccession.startsWith("SFLDF")) {
-                        // Hihgly specific model (family): always keep
+                        // Highly specific model (family): always keep
                         return match
                     }
 
