@@ -101,7 +101,15 @@ class Match implements Serializable {
 
         for (int i = 0; i < alignment.length(); i++) {
             char c = alignment.charAt(i)
-            char op = (c == '-') ? 'D' : 'M' // Treat all letters (including mismatches) as 'M'
+            char op
+
+            if (c == '-') {
+                op = 'D'
+            } else if (Character.isLowerCase(c)) {
+                op = 'I'
+            } else {
+                op = 'M'
+            }
 
             if (op == prevOp) {
                 count++
