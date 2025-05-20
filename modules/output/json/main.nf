@@ -328,7 +328,7 @@ def writePANTHER(Map match, JsonGenerator jsonWriter) {
         "score"          : match.score,
         "proteinClass"   : match.treegrafter.proteinClass,
         "graftPoint"     : match.treegrafter.graftPoint,
-        "ancestralNodeID": match.treegrafter.ancestralNodeID,
+        "ancestralNode": match.treegrafter.ancestralNodeID,
         "goXRefs"        : match.treegrafter.goXRefs,
         "locations"      : match.locations.collect { loc ->
             [
