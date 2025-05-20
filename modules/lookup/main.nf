@@ -84,7 +84,7 @@ process LOOKUP_MATCHES {
                         String appName = library.toLowerCase().replaceAll("[-\\s]", "")
 
                         if (applications.contains(appName)) {
-                            matchMap = transformMatch(matchMap)
+                            matchMap = transformMatch(matchMap, sequences[proteinMd5])
                             calculatedMatches[proteinMd5][matchMap.modelAccession] = matchMap
                         }
                     }
@@ -112,7 +112,7 @@ process LOOKUP_MATCHES {
     }
 }
 
-def Map transformMatch(Map match) {
+def Map transformMatch(Map match, String seq) {
     // * operator - spread contents of a map or collecion into another map or collection
     return [
         *            : match,
@@ -122,7 +122,8 @@ def Map transformMatch(Map match) {
                 *          : loc,
                 "hmmBounds": loc["hmmBounds"] ? getReverseHmmBounds(loc["hmmBounds"]) : null,
                 "fragments": loc["fragments"].collect { tranformFragment(it) },
-                "sites"    : loc["sites"] ?: []
+                "sites"    : loc["sites"] ?: [],
+                "targetAlignment": loc["cigarAlignment"] ? decodeAlignment(loc["cigarAlignment"], seq, loc["start"]) : null
             ]
         },
     ]
@@ -135,6 +136,34 @@ def getReverseHmmBounds(hmmBounds) {
         "C_TERMINAL_COMPLETE" : ".]",
         "INCOMPLETE"          : ".."
     ][hmmBounds]
+}
+
+def decodeAlignment(cigarAlignment, sequence, startIndex) {
+    def targetAlign = new StringBuilder()
+    def index = startIndex - 1 // convert from 1-based numbering to 0-based numbering
+    def matcher = (cigarAlignment =~ /(\d+)([MID=X])/)
+    matcher.each { match ->
+        def len = match[1].toInteger()
+        def op = match[2]
+        switch(op) {
+            case 'M':
+            case '=':
+            case 'X':
+                targetAlign << sequence.substring(index, index + len)
+                index += len
+                break
+            case 'I':
+                targetAlign << sequence.substring(index, index + len).toLowerCase()
+                index += len
+                break
+            case 'D':
+                targetAlign << '-' * len
+                break
+            default:
+                throw new IllegalArgumentException("Unsupported CIGAR operation: $op")
+        }
+    }
+    return targetAlign.toString()
 }
 
 def Map tranformFragment(Map fragment) {

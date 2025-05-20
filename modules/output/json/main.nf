@@ -296,6 +296,7 @@ def writeHAMAP(Map match, JsonGenerator jsonWriter) {
                 "end"               : loc.end,
                 "representative"    : loc.representative,
                 "score"             : loc.score,
+                "cigarAlignment"    : loc.cigarAlignment,
                 "alignment"         : loc.targetAlignment,
                 "location-fragments": loc.fragments
             ]
@@ -431,6 +432,7 @@ def writePROSITEprofiles(Map match, JsonGenerator jsonWriter) {
                 "end"               : loc.end,
                 "representative"    : loc.representative,
                 "score"             : loc.score,
+                "cigarAlignment"    : loc.cigarAlignment,
                 "alignment"         : loc.targetAlignment,
                 "location-fragments": loc.fragments
             ]
