@@ -271,7 +271,7 @@ def fmtPantherMatchNode(Map match) {
         evalue             : match.evalue,
         "protein-class"    : match.treegrafter.proteinClass,
         "graft-point"      : match.treegrafter.graftPoint,
-        "ancestral-node-id": match.treegrafter.ancestralNodeID,
+        "ancestral-node": match.treegrafter.ancestralNodeID,
         name               : match.signature.name,
         score              : match.score
     ]
