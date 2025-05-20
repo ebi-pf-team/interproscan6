@@ -103,7 +103,6 @@ def filterMatches(Map<String, Map<String, Match>> hmmerMatches, Map<String, Map<
                     // Matches are overlapping
 
                     Map<String, List<String>> filteredFamily = dat[filteredMatch.modelAccession] ?: [:]
-                    // String filteredFamilyClan = filteredFamily?.clan
                     List<String> filteredNested = filteredFamily?.nested ?: []
 
                     boolean canBeNested = (candidateNested.contains(filteredMatch.modelAccession)
