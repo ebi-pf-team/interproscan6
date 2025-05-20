@@ -166,7 +166,7 @@ process PARSE_PIRSF {
         }.reverse()
 
         // Find the first non-subfamily match (the best one)
-        def bestMatch = matchesSorted.find { !(it ==~ /^PIRSF5/) }
+        def bestMatch = matchesSorted.find { !it.startsWith("PIRSF5") }
         bestMatches.computeIfAbsent(proteinAccession, { [:] })
         bestMatches[proteinAccession][bestMatch] = proteinMatches[bestMatch]
 
