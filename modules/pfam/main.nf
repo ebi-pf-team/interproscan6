@@ -88,7 +88,6 @@ def filterMatches(Map<String, Map<String, Match>> hmmerMatches, Map<String, Map<
             boolean keep = true
 
             Map<String, List<String>> candidateFamily = dat[match.modelAccession] ?: [:]
-            // String candidateFamilyClan = candidateFamily?.clan
             List<String> candidateNested = candidateFamily?.nested ?: []
 
             // Compare the current match with matches already accepted
