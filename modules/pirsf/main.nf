@@ -14,7 +14,7 @@ process SEARCH_PIRSF {
     script:
     """
     /opt/hmmer3/bin/hmmsearch \
-        -E 0.01 -Z 61295632 --acc \
+        -E 0.01 --acc \
         --cpu ${task.cpus} \
         --domtblout hmmsearch.dtbl \
         ${dir}/${hmm} ${fasta}
