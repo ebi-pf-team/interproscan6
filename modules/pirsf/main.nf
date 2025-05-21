@@ -14,7 +14,7 @@ process SEARCH_PIRSF {
     script:
     """
     /opt/hmmer3/bin/hmmsearch \
-        -E 0.01 --acc \
+        -E 0.01 -Z 61295632 --acc \
         --cpu ${task.cpus} \
         --domtblout hmmsearch.dtbl \
         ${dir}/${hmm} ${fasta}
@@ -171,11 +171,10 @@ process PARSE_PIRSF {
         bestMatches[proteinAccession][bestMatch] = proteinMatches[bestMatch]
 
         // see if this model has subfamilies that also matched the protein
-        if (datEntries[bestMatch]?.children != null) {
-            datEntries[bestMatch].children.each { subFamAccession ->
-                if (proteinMatches.containsKey(subFamAccession)) {
-                    bestMatches[proteinAccession][subFamAccession] = proteinMatches[subFamAccession]
-                }
+        if (datEntries[bestMatch]?.children) {
+            def bestSubfamily = matchesSorted.find { datEntries[bestMatch]?.children.contains(it) }
+            if (bestSubfamily) {
+                bestMatches[proteinAccession][bestSubfamily] = proteinMatches[bestSubfamily]
             }
         }
     }
