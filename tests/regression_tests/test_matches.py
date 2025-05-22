@@ -12,12 +12,20 @@ def main():
     parser.add_argument("--expected", type=str, default="tests/data/test_prot.fa.json", help="JSON with expected results")
     parser.add_argument("--observed", type=str, default="test_prot.fa.json", help="JSON output file from IPS6")
     parser.add_argument("--summary", action="store_true", help="Print only the summary message")
+    parser.add_argument("--format", choices=["json", "tsv", "xml"], default="json", help="Format of input files. 'json' [default], 'tsv', or 'xml'")
     args = parser.parse_args()
 
     with open(args.expected, "r") as fh:
-        expected = flattern_dict(json.load(fh))
+        if args.format == "json":
+            expected = parse_json(json.load(fh))
+        elif args.format == "tsv":
+            expected = parse_tsv(fh)
+
     with open(args.observed, "r") as fh:
-        observed = flattern_dict(json.load(fh))
+        if args.format == "json":
+            observed = parse_json(json.load(fh))
+        elif args.format == "tsv":
+            observed = parse_tsv(fh)
 
     diff = difflib.ndiff(sorted(expected), sorted(observed))
     expected_only, observed_only, both = 0, 0, 0
@@ -48,7 +56,7 @@ def main():
     )
 
 
-def flattern_dict(iprsn_dict: dict):
+def parse_json(iprsn_dict: dict):
     """Convert all matches into lists, keeping only the data we care about"""
     matches = []  # [[md5, sig_acc, loc start, loc end]]
     for protein_dict in iprsn_dict["results"]:
@@ -59,6 +67,12 @@ def flattern_dict(iprsn_dict: dict):
                 matches.append([md5, sig_acc, loc["start"], loc["end"]])
     return [repr(nested) for nested in matches]
 
+def parse_tsv(file_handle):
+    matches = []
+    for line in file_handle:
+        data = line.split("\t")
+        matches.append([data[1], data[4], data[6], data[7]])
+    return [repr(nested) for nested in matches]
 
 if __name__ == "__main__":
     main()
