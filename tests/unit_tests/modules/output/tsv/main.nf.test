@@ -1,0 +1,42 @@
+nextflow_process {
+
+    name "Test Process WRITE_TSV"
+    script "modules/output/tsv/main.nf"
+    process "WRITE_TSV"
+
+    stage {
+        symlink "tests/unit_tests/test_inputs/subworkflows/output/matches_with_representative.json"
+        symlink "tests/unit_tests/test_inputs/sequences/sequences.db"
+        symlink "tests/unit_tests/test_outputs/subworkflows/output/test.faa.tsv"
+    }
+
+    test("Should run without failures") {
+
+        when {
+            params {}
+            process {
+                """
+                input[0] = [file("meta/tests/unit_tests/test_inputs/subworkflows/output/matches_with_representative.json")]
+                input[1] = "../../../unit_test_output"
+                input[2] = file("meta/tests/unit_tests/test_inputs/sequences/sequences.db")
+                input[3] = false
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            def expected = "tests/unit_tests/test_outputs/subworkflows/output/test.faa.tsv"
+            def observed = "unit_test_output.tsv"
+            def cmd = "python3 tests/regression_tests/test_matches.py --expected ${expected} --observed ${observed} --summary --format tsv"
+            def process = cmd.execute()
+            process.waitFor()
+            def stdout = process.text.trim().readLines()
+            assert stdout[1] == "Matches only in expected : 0"
+            assert stdout[2] == "Matches only in observed : 0"
+            def observedFile = new File(observed)
+            observedFile.delete()
+        }
+    }
+
+}
