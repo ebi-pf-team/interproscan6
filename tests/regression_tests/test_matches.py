@@ -11,6 +11,7 @@ def main():
     parser = argparse.ArgumentParser(prog="IPS_match_regression_test", description="Check presence of matches", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--expected", type=str, default="tests/data/test_prot.fa.json", help="JSON with expected results")
     parser.add_argument("--observed", type=str, default="test_prot.fa.json", help="JSON output file from IPS6")
+    parser.add_argument("--summary", action="store_true", help="Print only the summary message")
     args = parser.parse_args()
 
     with open(args.expected, "r") as fh:
@@ -25,13 +26,16 @@ def main():
             try:
                 tab_separated = '\t'.join(map(str, ast.literal_eval(line[2:])))  # Safely eval str and convert to tab-sep str
                 if line.startswith("-"):
-                    print(f"< {tab_separated}")  # Only in expected
+                    if not args.summary:
+                        print(f"< {tab_separated}")  # Only in expected
                     expected_only += 1
                 elif line.startswith("+"):
-                    print(f"> {tab_separated}")  # Only in observed
+                    if not args.summary:
+                        print(f"> {tab_separated}")  # Only in observed
                     observed_only += 1
                 elif line.startswith(" "):
-                    print(f"- {tab_separated}")  # In both
+                    if not args.summary:
+                        print(f"- {tab_separated}")  # In both
                     both += 1
             except (SyntaxError, ValueError):
                 print(f"Could not parse line {line}")
