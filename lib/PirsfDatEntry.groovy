@@ -1,11 +1,11 @@
 class PirsfDatEntry {
     String modelAccession
     String name
-    Float meanL
-    Float stdL
-    Float minS
-    Float meanS
-    Float stdS
+    BigDecimal meanL
+    BigDecimal stdL
+    BigDecimal minS
+    BigDecimal meanS
+    BigDecimal stdS
     boolean blast
     Set<String> children
 
@@ -18,11 +18,11 @@ class PirsfDatEntry {
     }
 
     void addMeans(String meanL, String stdL, String minS, String meanS, String stdS) {
-        this.meanL = meanL.toFloat()
-        this.stdL = stdL.toFloat()
-        this.minS = minS.toFloat()
-        this.meanS = meanS.toFloat()
-        this.stdS = stdS.toFloat()
+        this.meanL = new BigDecimal(meanL)
+        this.stdL  = new BigDecimal(stdL)
+        this.minS  = new BigDecimal(minS)
+        this.meanS = new BigDecimal(meanS)
+        this.stdS  = new BigDecimal(stdS)
     }
 
     void addBlastBool(String blast) {
