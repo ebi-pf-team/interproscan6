@@ -230,4 +230,230 @@ nextflow_workflow {
         }
     }
 
+    test("Should fail: Invalid formats") {
+        when {
+            params {
+                apps_config = [
+                    pfam: [
+                        name: "Pfam",
+                        dir: "pfam",
+                        hmm: "pfam_a.hmm",
+                        seed: "pfam_a.seed",
+                        clan: "pfam_clans",
+                        dat: "pfam_a.dat",
+                        has_data: true
+                    ],
+                    ncbifam: [
+                        name: "NCBIFAM",
+                        dir: "ncbifam",
+                        hmm: "ncbifam.hmm",
+                        has_data: true
+                    ]
+                ]
+            }
+            workflow {
+                """
+                input[0] = "meta/tests/data/test.faa"        // input
+                input[1] = "pfam,ncbifam"                    // applictaions
+                input[2] = params.apps_config                // apps_config
+                input[3] = false                              // download
+                input[4] = false                              // offline
+                input[5] = "data"                            // datadir
+                input[6] = "json,tsv,xml,FAKE"                    // formats
+                input[7] = "outdir"                          // outdir
+                input[8] = "latest"                          // interpro_version
+                input[9] = false                             // skip_interpro
+                input[10] = false                            // goterms
+                input[11] = false                            // pathways
+                """
+            }
+        }
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 1
+        }
+    }
+
+    test("Should fail: Datadir not provided") {
+        when {
+            params {
+                apps_config = [
+                    pfam: [
+                        name: "Pfam",
+                        dir: "pfam",
+                        hmm: "pfam_a.hmm",
+                        seed: "pfam_a.seed",
+                        clan: "pfam_clans",
+                        dat: "pfam_a.dat",
+                        has_data: true
+                    ],
+                    ncbifam: [
+                        name: "NCBIFAM",
+                        dir: "ncbifam",
+                        hmm: "ncbifam.hmm",
+                        has_data: true
+                    ]
+                ]
+            }
+            workflow {
+                """
+                input[0] = "meta/tests/data/test.faa"        // input
+                input[1] = "pfam,ncbifam"                    // applictaions
+                input[2] = params.apps_config                // apps_config
+                input[3] = false                             // download
+                input[4] = false                             // offline
+                input[5] = null                              // datadir
+                input[6] = "json,tsv,xml"                    // formats
+                input[7] = "outdir"                          // outdir
+                input[8] = "latest"                          // interpro_version
+                input[9] = false                             // skip_interpro
+                input[10] = false                            // goterms
+                input[11] = false                            // pathways
+                """
+            }
+        }
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 1
+        }
+    }
+    
+    test("Should fail: Invalid datadir") {
+        when {
+            params {
+                apps_config = [
+                    pfam: [
+                        name: "Pfam",
+                        dir: "pfam",
+                        hmm: "pfam_a.hmm",
+                        seed: "pfam_a.seed",
+                        clan: "pfam_clans",
+                        dat: "pfam_a.dat",
+                        has_data: true
+                    ],
+                    ncbifam: [
+                        name: "NCBIFAM",
+                        dir: "ncbifam",
+                        hmm: "ncbifam.hmm",
+                        has_data: true
+                    ]
+                ]
+            }
+            workflow {
+                """
+                input[0] = "meta/tests/data/test.faa"        // input
+                input[1] = "pfam,ncbifam"                    // applictaions
+                input[2] = params.apps_config                // apps_config
+                input[3] = false                             // download
+                input[4] = false                             // offline
+                input[5] = "meta/tests/data/test.faa"        // datadir
+                input[6] = "json,tsv,xml"                    // formats
+                input[7] = "outdir"                          // outdir
+                input[8] = "latest"                          // interpro_version
+                input[9] = false                             // skip_interpro
+                input[10] = false                            // goterms
+                input[11] = false                            // pathways
+                """
+            }
+        }
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 1
+        }
+    }
+    
+    test("Should fail: Invalid interpro version") {
+        when {
+            params {
+                apps_config = [
+                    pfam: [
+                        name: "Pfam",
+                        dir: "pfam",
+                        hmm: "pfam_a.hmm",
+                        seed: "pfam_a.seed",
+                        clan: "pfam_clans",
+                        dat: "pfam_a.dat",
+                        has_data: true
+                    ],
+                    ncbifam: [
+                        name: "NCBIFAM",
+                        dir: "ncbifam",
+                        hmm: "ncbifam.hmm",
+                        has_data: true
+                    ]
+                ]
+            }
+            workflow {
+                """
+                input[0] = "meta/tests/data/test.faa"        // input
+                input[1] = "pfam,ncbifam"                    // applictaions
+                input[2] = params.apps_config                // apps_config
+                input[3] = false                             // download
+                input[4] = false                             // offline
+                input[5] = "data"                            // datadir
+                input[6] = "json,tsv,xml"                    // formats
+                input[7] = "outdir"                          // outdir
+                input[8] = "fake-version"                    // interpro_version
+                input[9] = false                             // skip_interpro
+                input[10] = false                            // goterms
+                input[11] = false                            // pathways
+                """
+            }
+        }
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 1
+        }
+    }
+    
+    test("Should fail: Invalid apps for online mode") {
+        when {
+            params {
+                apps_config = [
+                    signalp_euk: [
+                        name: "SignalP-Euk",
+                        organism: "eukarya",
+                        dir: "data",
+                        mode: "fast",
+                        has_data: false,
+                        use_gpu: false
+                    ],
+                    signalp_prok: [
+                        name: "SignalP-Prok",
+                        organism: "eukarya",
+                        dir: "data",
+                        mode: "fast",
+                        has_data: false,
+                        use_gpu: false
+                    ],
+                    deeptmhmm: [
+                        name: "DeepTMHMM",
+                        dir: "data",
+                        has_data: false,
+                        use_gpu: false
+                    ]
+                ]
+            }
+            workflow {
+                """
+                input[0] = "meta/tests/data/test.faa"         // input
+                input[1] = "signap-prok,signap-euk,deeptmhmm" // applictaions
+                input[2] = params.apps_config                 // apps_config
+                input[3] = false                              // download
+                input[4] = false                              // offline
+                input[5] = "data"                             // datadir
+                input[6] = "json,tsv,xml"                     // formats
+                input[7] = "outdir"                           // outdir
+                input[8] = "fake-version"                     // interpro_version
+                input[9] = false                              // skip_interpro
+                input[10] = false                             // goterms
+                input[11] = false                             // pathways
+                """
+            }
+        }
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 1
+        }
+    }
 }
