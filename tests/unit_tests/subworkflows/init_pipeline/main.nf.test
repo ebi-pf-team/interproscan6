@@ -1,0 +1,58 @@
+nextflow_workflow {
+
+    name "Test suborkflow INIT_PIPELINE"
+    script "subworkflows/init/main.nf"
+    workflow "INIT_PIPELINE"
+
+    stage {
+        symlink "tests/data/test.faa"
+        symlink "conf/applications.config"
+    }
+
+    test("Should run without failures") {
+        when {
+            params {
+                apps_config = [
+                    pfam: [
+                        name: "Pfam",
+                        dir: "pfam",
+                        hmm: "pfam_a.hmm",
+                        seed: "pfam_a.seed",
+                        clan: "pfam_clans",
+                        dat: "pfam_a.dat",
+                        has_data: true
+                    ],
+                    ncbifam: [
+                        name: "NCBIFAM",
+                        dir: "ncbifam",
+                        hmm: "ncbifam.hmm",
+                        has_data: true
+                    ]
+                ]
+            }
+            workflow {
+                """
+                input[0] = "meta/tests/data/test.faa"        // input
+                input[1] = "pfam,ncbifam"                    // applictaions
+                input[2] = params.apps_config                // apps_config
+                input[3] = false                             // download
+                input[4] = false                             // offline
+                input[5] = "data"                            // datadir
+                input[6] = "json,tsv,xml"                    // formats
+                input[7] = "outdir"                          // outdir
+                input[8] = "latest"                          // interpro_version
+                input[9] = false                             // skip_interpro
+                input[10] = false                            // goterms
+                input[11] = false                            // pathways
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert snapshot(workflow.out).match()
+        }
+
+    }
+
+}
