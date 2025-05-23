@@ -33,7 +33,7 @@ process PARSE_PIRSF {
 
     exec:
     def datPath = "${dirpath.toString()}/${datfile}"
-    def datData = PirsfDatEntry.parsePirsfDatFile(datPath)  // [datEntries, datChildren]
+    def datData = parsePirsfDatFile(datPath)
     def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "PIRSF")
     Map<String, String> sequences = FastaFile.parse(fasta.toString())
 
@@ -59,7 +59,9 @@ process PARSE_PIRSF {
             int hmmEnd = Integer.MIN_VALUE
             int envStart = 0
             int envEnd = 0
+            double locationScore = 0.0
             rawMatch.locations.each { location ->
+                locationScore = locationScore + location.score
                 if (location.included) {
                     if (location.start < seqStart && location.hmmStart < hmmStart) {
                         seqStart = location.start
@@ -82,30 +84,30 @@ process PARSE_PIRSF {
             // Overall length
             double ovl = (seqEnd - seqStart + 1) / sequenceLength
             // Ratio over coverage of sequence and profile hmm
-            double r = (hmmEnd - hmmStart + 1) / (seqEnd - seqStart + 1)
+            double r = (hmmEnd - hmmStart) / (seqEnd - seqStart)
             // length deviation
             double ld = Math.abs(sequenceLength - datEntries[modelAccession].meanL)
-            match = processMatchLocations(rawMatch, seqStart, seqEnd, hmmStart, hmmEnd)
+            match = buildFinalMatch(rawMatch, seqStart, seqEnd, hmmStart, hmmEnd, envStart, envEnd, locationScore)
             if (datChildren.containsKey(modelAccession)) {
                 // process a subfamily match
-                if (r > LENGTH_RATIO_THRESHOLD && match.score >= datEntries[modelAccession].minS) {
+                if (r > LENGTH_RATIO_THRESHOLD && locationScore >= datEntries[modelAccession].minS) {
                     String parent = datChildren[modelAccession]
                     if (store[proteinAccession]?.containsKey(parent)) {
                         processedMatches.computeIfAbsent(proteinAccession, { [:] })[parent] = store[proteinAccession][parent]
                     } else {
                         promote["${proteinAccession}-${parent}"] = true
                     }
-                    UpdateMatch(processedMatches, proteinAccession, match)
+                    addMatch(processedMatches, proteinAccession, match)
                 }
             } else if (
-                r > LENGTH_RATIO_THRESHOLD &&
-                    ovl >= OVERLAP_THRESHOLD &&
-                    match.score >= datEntries[modelAccession].minS &&
-                    (ld < LENGTH_DEVIATION_THRESHOLD * datEntries[modelAccession].stdL || ld < MINIMUM_LENGTH_DEVIATION)
+                    r > LENGTH_RATIO_THRESHOLD &&
+                            ovl >= OVERLAP_THRESHOLD &&
+                            locationScore >= datEntries[modelAccession].minS &&
+                            (ld < LENGTH_DEVIATION_THRESHOLD * datEntries[modelAccession].stdL || ld < MINIMUM_LENGTH_DEVIATION)
             ) {
-                UpdateMatch(processedMatches, proteinAccession, match)
+                addMatch(processedMatches, proteinAccession, match)
             } else if (promote["${proteinAccession}-${modelAccession}"]) {
-                UpdateMatch(processedMatches, proteinAccession, match)
+                addMatch(processedMatches, proteinAccession, match)
             } else {
                 // store for potential use
                 store.computeIfAbsent(proteinAccession, { [:] })
@@ -140,45 +142,97 @@ process PARSE_PIRSF {
     new File(outputFilePath.toString()).write(json)
 }
 
-def processMatchLocations(
+def buildFinalMatch(
         Match match,
         int seqStart,
         int seqEnd,
         int hmmStart,
-        int hmmEnd) {
+        int hmmEnd,
+        int envStart,
+        int envEnd,
+        double locationScore) {
     Match processedMatch = new Match(
-        match.modelAccession,
-        match.evalue,
-        match.score,
-        match.bias,
-        match.signature
+            match.modelAccession,
+            match.evalue,
+            match.score,
+            match.bias,
+            match.signature
     )
     processedMatch.sequenceLength = match.sequenceLength
     String hmmBoundStart = hmmStart == 1 ? "[" : "."
     String hmmBoundEnd = hmmEnd == match.locations[0].hmmLength ? "]" : "."
-    def minEnvelopeStart = match.locations.collect { it.envelopeStart }.min()
-    def maxEnvelopeEnd = match.locations.collect { it.envelopeEnd }.max()
     processedMatch.addLocation(
-        new Location(
-            seqStart,
-            seqEnd,
-            hmmStart,
-            hmmEnd,
-            match.locations[0].hmmLength,
-            "${hmmBoundStart}${hmmBoundEnd}",
-            minEnvelopeStart,
-            maxEnvelopeEnd,
-            match.evalue,
-            match.score,
-            match.bias
-        )
+            new Location(
+                    seqStart,
+                    seqEnd,
+                    hmmStart,
+                    hmmEnd,
+                    match.locations[0].hmmLength,
+                    "${hmmBoundStart}${hmmBoundEnd}",
+                    envStart,
+                    envEnd,
+                    match.evalue,
+                    locationScore,
+                    match.bias
+            )
     )
     return processedMatch
 }
 
-def UpdateMatch(Map<String, Map<String, Match>> processedMatches, String proteinAccession, Match match) {
+def addMatch(Map<String, Map<String, Match>> processedMatches, String proteinAccession, Match match) {
     processedMatches.computeIfAbsent(proteinAccession, { [:] })
     if (!processedMatches[proteinAccession].containsKey(match.modelAccession)) {
         processedMatches[proteinAccession][match.modelAccession] = match
     }
+}
+
+def parsePirsfDatFile(String pirsfDatPath) {
+    File pirsfDatFile = new File(pirsfDatPath)
+    if (!pirsfDatFile.exists()) {
+        System.exit(1)
+    }
+
+    Map<String, Map> datEntries = [:]  // modelAccession: entry
+    Map<String, String> datChildren = [:]   // subfam: parent
+
+    pirsfDatFile.withReader { reader ->
+        String line
+        Map entry = null
+        while ((line = reader.readLine()) != null) {
+            if (line.startsWith(">")) {
+                if (entry != null) {
+                    datEntries.put(entry.modelAccession, entry)
+                }
+                entry = [modelAccession: line.split("\\s")[0].replace(">","").trim()]
+                def childLineMatcher = line =~ ~/^>PIRSF\d+\schild:\s(.*)$/
+                if (childLineMatcher.find()) {
+                    def children = childLineMatcher.group(1).trim().split("\\s+")
+                    entry.children = children as Set
+                    for (String subfamily : children) {
+                        datChildren.put(subfamily, entry.modelAccession)
+                    }
+                }
+            }
+            else if (line.startsWith("BLAST:")) {
+                entry.blast = (line.replace("BLAST:", "").trim() != "No")
+            }
+            else if (line.matches("\\d+\\.?\\d*\\s+\\d+\\.?\\d*\\s+\\d+\\.?\\d*\\s+\\d+\\.?\\d*\\s+\\d+\\.?\\d*")) {
+                def numbers = line.split("\\s+")
+                entry.meanL = new BigDecimal(numbers[0])
+                entry.stdL  = new BigDecimal(numbers[1])
+                entry.minS  = new BigDecimal(numbers[2])
+                entry.meanS = new BigDecimal(numbers[3])
+                entry.stdS  = new BigDecimal(numbers[4])
+            }
+            else if (!line.trim().isEmpty()) {
+                entry.name = line.trim()
+            }
+        }
+        // Add the last entry if it exists
+        if (entry != null) {
+            datEntries.put(entry.modelAccession, entry)
+        }
+    }
+
+    return [datEntries, datChildren]
 }
