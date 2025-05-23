@@ -80,7 +80,7 @@ process PARSE_PIRSF {
 
             // Calculate ratios
             // Overall length
-            double ovl = Math.abs(seqEnd - seqStart + 1) / sequenceLength
+            double ovl = (seqEnd - seqStart + 1) / sequenceLength
             // Ratio over coverage of sequence and profile hmm
             double r = Math.abs(hmmEnd - hmmStart + 1) / (seqEnd - seqStart + 1)
             // length deviation
