@@ -82,7 +82,7 @@ process PARSE_PIRSF {
             // Overall length
             double ovl = (seqEnd - seqStart + 1) / sequenceLength
             // Ratio over coverage of sequence and profile hmm
-            double r = Math.abs(hmmEnd - hmmStart + 1) / (seqEnd - seqStart + 1)
+            double r = (hmmEnd - hmmStart + 1) / (seqEnd - seqStart + 1)
             // length deviation
             double ld = Math.abs(sequenceLength - datEntries[modelAccession].meanL)
             match = processMatchLocations(rawMatch, seqStart, seqEnd, hmmStart, hmmEnd)
