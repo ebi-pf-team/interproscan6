@@ -36,7 +36,6 @@ process PARSE_PIRSF {
     def datData = PirsfDatEntry.parsePirsfDatFile(datPath)  // [datEntries, datChildren]
     def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "PIRSF")
     Map<String, String> sequences = FastaFile.parse(fasta.toString())
-    SignatureLibraryRelease library = new SignatureLibraryRelease("PIRSF", null)
 
     /* Filter the matches using the data in the dat file */
     def datEntries = datData[0]
@@ -52,8 +51,7 @@ process PARSE_PIRSF {
     def store = [:]
 
     hmmerMatches.each { proteinAccession, modelMatches ->
-        print(sequences[proteinAccession])
-        sequenceLength = sequences[proteinAccession].length()
+        int sequenceLength = sequences[proteinAccession].length()
         modelMatches.each { modelAccession, rawMatch ->
             int seqStart = Integer.MAX_VALUE
             int seqEnd = Integer.MIN_VALUE
@@ -83,7 +81,7 @@ process PARSE_PIRSF {
             double r = Math.abs(hmmEnd - hmmStart + 1) / (seqEnd - seqStart + 1)
             // length deviation
             double ld = Math.abs(sequenceLength - datEntries[modelAccession].meanL)
-            match = processMatchLocations(rawMatch, library)
+            match = processMatchLocations(rawMatch, seqStart, seqEnd, hmmStart, hmmEnd)
             if (datChildren.containsKey(modelAccession)) {
                 // process a subfamily match
                 if (r > LENGTH_RATIO_THRESHOLD && match.score >= datEntries[modelAccession].minS) {
@@ -138,34 +136,39 @@ process PARSE_PIRSF {
     new File(outputFilePath.toString()).write(json)
 }
 
-def processMatchLocations(Match match, SignatureLibraryRelease library) {
+def processMatchLocations(
+        Match match,
+        int seqStart,
+        int seqEnd,
+        int hmmStart,
+        int hmmEnd) {
     Match processedMatch = new Match(
         match.modelAccession,
         match.evalue,
         match.score,
         match.bias,
-        new Signature(match.modelAccession, library)
+        match.signature
     )
     processedMatch.sequenceLength = match.sequenceLength
-    match.locations.each { location ->
-        String hmmBoundStart = location.hmmStart == 1 ? "[" : "."
-        String hmmBoundEnd = location.hmmEnd == location.hmmLength ? "]" : "."
-        processedMatch.addLocation(
-            new Location(
-                location.start,
-                location.end,
-                location.hmmStart,
-                location.hmmEnd,
-                location.hmmLength,
-                "${hmmBoundStart}${hmmBoundEnd}",
-                location.envelopeStart,
-                location.envelopeEnd,
-                location.evalue,
-                location.score,
-                location.bias
-            )
+    String hmmBoundStart = hmmStart == 1 ? "[" : "."
+    String hmmBoundEnd = hmmEnd == match.locations[0].hmmLength ? "]" : "."
+    def minEnvelopeStart = match.locations.collect { it.envelopeStart }.min()
+    def maxEnvelopeEnd = match.locations.collect { it.envelopeEnd }.max()
+    processedMatch.addLocation(
+        new Location(
+            seqStart,
+            seqEnd,
+            hmmStart,
+            hmmEnd,
+            match.locations[0].hmmLength,
+            "${hmmBoundStart}${hmmBoundEnd}",
+            minEnvelopeStart,
+            maxEnvelopeEnd,
+            match.evalue,
+            match.score,
+            match.bias
         )
-    }
+    )
     return processedMatch
 }
 
