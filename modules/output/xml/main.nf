@@ -3,6 +3,9 @@ import groovy.xml.MarkupBuilder
 import java.io.StringWriter
 import java.util.regex.Pattern
 
+// import needed for unit tests
+import Match
+
 process WRITE_XML {
     label    'tiny'
     executor 'local'
