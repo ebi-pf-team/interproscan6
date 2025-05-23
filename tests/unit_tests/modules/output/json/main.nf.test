@@ -5,9 +5,9 @@ nextflow_process {
     process "WRITE_JSON"
 
     stage {
-        symlink "tests/unit_tests/test_inputs/subworkflows/output/matches_with_representative.json"
-        symlink "tests/unit_tests/test_inputs/sequences/sequences.db"
-        symlink "tests/unit_tests/test_outputs/subworkflows/output/test.faa.json"
+        symlink "tests/data/channels/matches_with_representative.json"
+        symlink "tests/data/sequences/sequences.db"
+        symlink "tests/data/output/test.faa.json"
     }
 
     test("Should run without failures") {
@@ -36,9 +36,9 @@ nextflow_process {
             }
             process {
                 """
-                input[0] = [file("meta/tests/unit_tests/test_inputs/subworkflows/output/matches_with_representative.json")]
+                input[0] = [file("meta/tests/data/channels/matches_with_representative.json")]
                 input[1] = "../../../unit_test_output"
-                input[2] = file("meta/tests/unit_tests/test_inputs/sequences/sequences.db")
+                input[2] = file("meta/tests/data/sequences/sequences.db")
                 input[3] = false
                 input[4] = "105.0"
                 input[5] = params.db_releases
@@ -48,7 +48,7 @@ nextflow_process {
 
         then {
             assert process.success
-            def expected = "tests/unit_tests/test_outputs/subworkflows/output/test.faa.json"
+            def expected = "tests/data/output/test.faa.json"
             def observed = "unit_test_output.json"
             def cmd = "python3 tests/regression_tests/test_matches.py --expected ${expected} --observed ${observed} --summary"
             def process = cmd.execute()

@@ -5,9 +5,9 @@ nextflow_process {
     process "WRITE_TSV"
 
     stage {
-        symlink "tests/unit_tests/test_inputs/subworkflows/output/matches_with_representative.json"
-        symlink "tests/unit_tests/test_inputs/sequences/sequences.db"
-        symlink "tests/unit_tests/test_outputs/subworkflows/output/test.faa.tsv"
+        symlink "tests/data/channels/matches_with_representative.json"
+        symlink "tests/data/sequences/sequences.db"
+        symlink "tests/data/output/test.faa.tsv"
     }
 
     test("Should run without failures") {
@@ -16,9 +16,9 @@ nextflow_process {
             params {}
             process {
                 """
-                input[0] = [file("meta/tests/unit_tests/test_inputs/subworkflows/output/matches_with_representative.json")]
+                input[0] = [file("meta/tests/data/channels/matches_with_representative.json")]
                 input[1] = "../../../unit_test_output"
-                input[2] = file("meta/tests/unit_tests/test_inputs/sequences/sequences.db")
+                input[2] = file("meta/tests/data/sequences/sequences.db")
                 input[3] = false
                 """
             }
@@ -26,7 +26,7 @@ nextflow_process {
 
         then {
             assert process.success
-            def expected = "tests/unit_tests/test_outputs/subworkflows/output/test.faa.tsv"
+            def expected = "tests/data/output/test.faa.tsv"
             def observed = "unit_test_output.tsv"
             def cmd = "python3 tests/regression_tests/test_matches.py --expected ${expected} --observed ${observed} --summary --format tsv"
             def process = cmd.execute()
