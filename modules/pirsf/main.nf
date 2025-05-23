@@ -57,15 +57,19 @@ process PARSE_PIRSF {
             int seqEnd = Integer.MIN_VALUE
             int hmmStart = Integer.MAX_VALUE
             int hmmEnd = Integer.MIN_VALUE
+            int envStart = 0
+            int envEnd = 0
             rawMatch.locations.each { location ->
                 if (location.included) {
                     if (location.start < seqStart && location.hmmStart < hmmStart) {
                         seqStart = location.start
                         hmmStart = location.hmmStart
+                        envStart = location.envelopeStart
                     }
                     if (location.end > seqEnd && location.hmmEnd > hmmEnd) {
                         seqEnd = location.end
                         hmmEnd = location.hmmEnd
+                        envEnd = location.envelopeEnd
                     }
                 }
             }
