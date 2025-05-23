@@ -7,25 +7,27 @@ import argparse
 import difflib
 import json
 
+from lxml import etree
+import xml.etree.ElementTree as ET
+
+
 def main():
     parser = argparse.ArgumentParser(prog="IPS_match_regression_test", description="Check presence of matches", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--expected", type=str, default="tests/data/test_prot.fa.json", help="JSON with expected results")
-    parser.add_argument("--observed", type=str, default="test_prot.fa.json", help="JSON output file from IPS6")
+    parser.add_argument("--expected", type=str, default="tests/data/output/test.faa.json", help="JSON with expected results")
+    parser.add_argument("--observed", type=str, default="tests/data/output/test.faa.json", help="JSON output file from IPS6")
     parser.add_argument("--summary", action="store_true", help="Print only the summary message")
     parser.add_argument("--format", choices=["json", "tsv", "xml"], default="json", help="Format of input files. 'json' [default], 'tsv', or 'xml'")
     args = parser.parse_args()
 
-    with open(args.expected, "r") as fh:
-        if args.format == "json":
-            expected = parse_json(json.load(fh))
-        elif args.format == "tsv":
-            expected = parse_tsv(fh)
-
-    with open(args.observed, "r") as fh:
-        if args.format == "json":
-            observed = parse_json(json.load(fh))
-        elif args.format == "tsv":
-            observed = parse_tsv(fh)
+    if args.format == "json":
+        expected = parse_json(args.expected)
+        observed = parse_json(args.observed)
+    elif args.format == "tsv":
+        expected = parse_tsv(args.expected)
+        observed = parse_tsv(args.observed)
+    else:
+        expected = parse_xml(args.expected)
+        observed = parse_xml(args.observed)
 
     diff = difflib.ndiff(sorted(expected), sorted(observed))
     expected_only, observed_only, both = 0, 0, 0
@@ -56,9 +58,11 @@ def main():
     )
 
 
-def parse_json(iprsn_dict: dict):
+def parse_json(iprscan_path: str):
     """Convert all matches into lists, keeping only the data we care about"""
     matches = []  # [[md5, sig_acc, loc start, loc end]]
+    with open(iprscan_path, "r") as fh:
+        iprsn_dict = json.load(fh)
     for protein_dict in iprsn_dict["results"]:
         md5 = protein_dict["md5"].upper()  # account for diff between iprscn 5 and 6
         for match in protein_dict["matches"]:
@@ -67,12 +71,36 @@ def parse_json(iprsn_dict: dict):
                 matches.append([md5, sig_acc, loc["start"], loc["end"]])
     return [repr(nested) for nested in matches]
 
-def parse_tsv(file_handle):
+def parse_tsv(iprscan_path: str):
     matches = []
-    for line in file_handle:
-        data = line.split("\t")
-        matches.append([data[1], data[4], data[6], data[7]])
+    with open(iprscan_path, "r") as fh:
+        for line in fh:
+            data = line.split("\t")
+            matches.append([data[1], data[4], data[6], data[7]])
     return [repr(nested) for nested in matches]
+
+def parse_xml(iprscan_path: str):
+    """Parse with recovery as true because names/desc can
+    contain apostrophes which can cause lxml to be unable to parse the XML"""
+    matches = []
+    parser = etree.XMLParser(recover=True)
+    tree = etree.parse(iprscan_path, parser)
+    root = tree.getroot()
+
+    for protein in root.findall(".//protein"):
+        sequence = protein.find("sequence")
+        md5 = sequence.attrib.get("md5") if sequence is not None else None
+        for match in protein.findall(".//match"):
+            signature = match.find("signature")
+            sig_ac = signature.attrib.get("ac") if signature is not None else None
+            locations = match.find("locations")
+            if locations is not None:
+                for location in locations.findall("location"):
+                    start = location.attrib.get("start")
+                    end = location.attrib.get("end")
+                    matches.append([md5, sig_ac, start, end])
+    return [repr(match) for match in matches]
+
 
 if __name__ == "__main__":
     main()
