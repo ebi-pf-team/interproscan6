@@ -175,7 +175,6 @@ def createMatch(
         match.bias,
         match.signature
     )
-    processedMatch.sequenceLength = match.sequenceLength
     String hmmBoundStart = hmmStart == 1 ? "[" : "."
     String hmmBoundEnd = hmmEnd == match.locations[0].hmmLength ? "]" : "."
     processedMatch.addLocation(
