@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process SEARCH_SFLD {
-    label 'small', 'ips6_container'
+    label 'mini', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -25,7 +25,7 @@ process SEARCH_SFLD {
 }
 
 process POST_PROCESS_SFLD {
-    label 'small'
+    label 'mini', 'ips6_container'
 
     input:
     tuple val(meta), path(hmmsearch_out), val(hmmsearch_dtbl), val(hmmsearch_alignment)
@@ -48,6 +48,7 @@ process POST_PROCESS_SFLD {
 }
 
 process PARSE_SFLD {
+    label    'tiny'
     executor 'local'
 
     input:
@@ -62,7 +63,7 @@ process PARSE_SFLD {
     def outputFilePath = task.workDir.resolve("sfld.json")
     def (hmmLengths, hmmBounds) = getHmmData(hmmsearch_out.toString())
     def sequences = parseOutput(postprocess_out.toString(), hmmLengths, hmmBounds)
-    def hierarchy = parseHierarchy("${dirpath.toString()}/${hierarchydb}")
+    def hierarchies = getHierarchies("${dirpath.toString()}/${hierarchydb}")
     SignatureLibraryRelease library = new SignatureLibraryRelease("SFLD", null)
 
     sequences = sequences.collectEntries { seqId, matches -> 
@@ -77,22 +78,22 @@ process PARSE_SFLD {
         }
 
         if (matches.size() > 1) {
-            // Now resolve matches to remove overlapping matches from the same hierarchy
+            // Remove overlapping matches from models in the same hierarchy (keep the most specific)
             Set<Integer> ignored = [] as Set
             matches = matches
                 .collect { match ->
                     if (match.modelAccession.startsWith("SFLDF")) {
-                        // Hihgly specific model: always add
+                        // Highly specific model (family): always keep
                         return match
                     }
 
-                    boolean overlaps = false
+                    boolean ignore = false
                     for (Match otherMatch: matches) {
-                        if (ignored.contains(otherMatch)) {
-                            // Current match overlaps with another match: ignore
+                        if (match.modelAccession == otherMatch.modelAccession) {
+                            // Two matches/locations from the same mode: keep
                             continue
-                        } else if (match.modelAccession == otherMatch.modelAccession) {
-                            // Two matches/locations from the same model: keep
+                        } else if (ignored.contains(otherMatch)) {
+                            // otherMatch has previously been flagged as to be ignored
                             continue
                         }
 
@@ -102,16 +103,19 @@ process PARSE_SFLD {
                         if (!(l1.start > l2.end || l2.start > l1.end)) {
                             // Matches overlap
                             
-                            def otherParents = hierarchy.get(otherMatch.modelAccession)
+                            def otherParents = hierarchies.get(otherMatch.modelAccession)
                             if (otherParents != null && otherParents.contains(match.modelAccession)) {
-                                // Current match overlaps a more specific match: we want to keep the most specific
-                                overlaps = true
+                                /*
+                                    The current match overlaps a match from a more specific model:
+                                    we want to keep the most specific match, so we ignore the current match
+                                */
+                                ignore = true
                                 break
                             }    
                         }
                     }
 
-                    if (overlaps) {
+                    if (ignore) {
                         // Mark this match as to be ignored
                         ignored.add(match)
                         return null
@@ -122,93 +126,79 @@ process PARSE_SFLD {
                 .findAll { it != null }
         }
 
-        def selectedMatches = [] as Set
+        def matchesWithPromoted = matches.clone()
         matches.each { match ->
-            def parents = hierarchy.get(match.modelAccession)
+            def parents = hierarchies.get(match.modelAccession)
             if (parents) {
                 /*
                     Propagate match up through it hierarchy.
                     If there are Superfamily, Group, and Family models in a tree,
                     and a sequence matches F, it should inherit the S and G annotations
                 */
-                def promotedMatches = parents
-                    .findAll { it != match.modelAccession }
-                    .collect {
-                        Signature signature = new Signature(it, library)
-                        Match promotedMatch = new Match(it, match.evalue, match.score, match.bias, signature)
-                        promotedMatch.addLocation(match.locations[0].clone())
-                        return promotedMatch
-                    }
-                selectedMatches.addAll(promotedMatches)
-            }
-        }
-        
-        if (selectedMatches.size() > 0) {
-            /*
-                Cases where matches have the same locations and the same ancestor (e.g., SFLDF00273
-                and SFLDF00413 have the same ali location and the same ancestor — SFLDS00029 —
-                so SFLDS00029 is duplicated when promoted).
-            */
-            List<Match> uniqueMatches = []
-            Set<String> seenKeys = [] as Set
-            // sorting matches by location evalue ASC, location score DESC to keep the best matches
-            List<Match> sortedMatches = selectedMatches.sort { a, b ->
-                (a.locations[0].evalue <=> b.locations[0].evalue) ?: -(a.locations[0].score <=> b.locations[0].score)
-            }
-            sortedMatches.each { match ->
-                String key = "${match.modelAccession}:${match.locations[0].start}:${match.locations[0].end}"
-                if (seenKeys.contains(key)) {
-                    return
+                parents.each { parent ->
+                    Signature signature = new Signature(parent, library)
+                    Match promotedMatch = new Match(parent, match.evalue, match.score, match.bias, signature)
+                    Location location = match.locations[0].clone()
+                    location.sites.clear()
+                    promotedMatch.addLocation(location)
+                    matchesWithPromoted.add(promotedMatch)
                 }
-                uniqueMatches.add(match)
-                seenKeys.add(key)
             }
-            selectedMatches = uniqueMatches
         }
 
-        // Add initial matches (the ones used for promotion)
-        selectedMatches.addAll(matches)
-
-        // List to Map
-        def finalMatches = [:]
-        selectedMatches.each { match ->
-            Match finalMatch = finalMatches.get(match.modelAccession)
-            if (finalMatch) {
-                finalMatch.addLocation(match.locations[0])
+        // Merge locations from the same model together
+        matches = [:]
+        matchesWithPromoted.each { match ->
+            Match mergedMatch = matches.get(match.modelAccession)
+            if (mergedMatch) {
+                mergedMatch.addLocation(match.locations[0])
             } else {
-                finalMatches[match.modelAccession] = match
+                matches[match.modelAccession] = match
             }
         }
 
-        return [seqId, finalMatches]
+        // Remove nested locations
+        matches.each { modelAccession, match ->
+            def locations = []
+            match.locations
+                .sort { a, b ->
+                    a.start <=> b.start ?: b.end <=> a.end
+                }
+                .each { location ->
+                    boolean isContained = locations.any { loc ->
+                        loc.start <= location.start && loc.end >= location.end
+                    }
+                    if (!isContained) {
+                        locations << location
+                    }
+                }
+
+            match.locations = locations
+        }
+
+        return [seqId, matches]
     }
 
     def json = JsonOutput.toJson(sequences)
     new File(outputFilePath.toString()).write(json)
 }
 
-Map<String, Set<String>> parseHierarchy(String filePath) {
-    def hierarchy = [:]
-    File file = new File(filePath)
-    file.withReader{ reader ->
-        for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-            def accessions = line.split(/\t/).toList()
-            def childAccession = accessions[-2]  // the final component is the description, only take the accs
-            def parents = accessions.subList(0, accessions.size() - 2)
-            hierarchy[childAccession] = parents as Set
-            for (parent in parents) {  // ensure all ancestors are in the hierarchy
-                ancestors = hierarchy.get(parent)
-                if (ancestors.size() > 0) {
-                    hierarchy[childAccession].addAll(ancestors)
-                }
+Map<String, Set<String>> getHierarchies(String filePath) {
+    def hierarchies = [:].withDefault { [] as Set }
+    new File(filePath).eachLine { line ->
+        def nodes = line.split(/\t/).toList()
+        nodes.eachWithIndex { node, idx ->
+            if (idx > 0) {
+                def ancestors = nodes.subList(0, idx) as Set
+                hierarchies[node].addAll(ancestors)
             }
-	    }
+        }
     }
-    return hierarchy
+    return hierarchies
 }
 
 List<Map> getHmmData(String outputFilePath) {
-    def matchesMap = HMMER3.parseOutput(outputFilePath.toString(), "AntiFam")  // proteinMd5: modelAccession: Match
+    def matchesMap = HMMER3.parseOutput(outputFilePath.toString(), "SFLD")  // proteinMd5: modelAccession: Match
     def hmmLengths = [:]  // modelAccession: hmmLength
     def hmmBounds  = [:]  // proteinMd5: modelAccession: (tuple representing loc): hmmbound
     matchesMap.each { String sequenceId, matches ->

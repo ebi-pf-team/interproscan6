@@ -7,6 +7,7 @@ import groovy.json.JsonException
 import java.util.regex.Pattern
 
 process WRITE_JSON {
+    label    'tiny'
     executor 'local'
 
     input:
@@ -15,7 +16,7 @@ process WRITE_JSON {
     val seq_db_file
     val nucleic
     val interproscan_version
-    val interpro_version
+    val db_releases
 
     exec:
     ObjectMapper jacksonMapper = new ObjectMapper()
@@ -25,7 +26,7 @@ process WRITE_JSON {
 
     streamJson(output_file.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
         jsonWriter.writeStringField("interproscan-version", interproscan_version)
-        jsonWriter.writeStringField("interpro-version", interpro_version)
+        jsonWriter.writeStringField("interpro-version", db_releases?.interpro?.version)
         jsonWriter.writeFieldName("results")
         jsonWriter.writeStartArray()  // start of results [...
         matches_files.each { matchFile ->
@@ -295,6 +296,7 @@ def writeHAMAP(Map match, JsonGenerator jsonWriter) {
                 "end"               : loc.end,
                 "representative"    : loc.representative,
                 "score"             : loc.score,
+                "cigarAlignment"    : loc.cigarAlignment,
                 "alignment"         : loc.targetAlignment,
                 "location-fragments": loc.fragments
             ]
@@ -320,15 +322,16 @@ def writeMobiDBlite(Map match, JsonGenerator jsonWriter) {
 
 def writePANTHER(Map match, JsonGenerator jsonWriter) {
     jsonWriter.writeObject([
-        "signature"   : match.signature,
-        "model-ac"    : match.treegrafter.subfamilyAccession ?: match.modelAccession,
-        "name"        : match.treegrafter.subfamilyDescription,
-        "evalue"      : match.evalue,
-        "score"       : match.score,
-        "proteinClass": match.treegrafter.proteinClass,
-        "graftPoint"  : match.treegrafter.graftPoint,
-        "goXRefs"     : match.treegrafter.goXRefs,
-        "locations"   : match.locations.collect { loc ->
+        "signature"      : match.signature,
+        "model-ac"       : match.treegrafter.subfamilyAccession ?: match.modelAccession,
+        "name"           : match.treegrafter.subfamilyDescription,
+        "evalue"         : match.evalue,
+        "score"          : match.score,
+        "proteinClass"   : match.treegrafter.proteinClass,
+        "graftPoint"     : match.treegrafter.graftPoint,
+        "ancestralNode": match.treegrafter.ancestralNodeID,
+        "goXRefs"        : match.treegrafter.goXRefs,
+        "locations"      : match.locations.collect { loc ->
             [
                 "start"             : loc.start,
                 "end"               : loc.end,
@@ -386,7 +389,7 @@ def writePRINTS(Map match, JsonGenerator jsonWriter) {
         "signature": match.signature,
         "model-ac" : match.modelAccession,
         "evalue"   : match.evalue,
-        "graphscan": match.graphScan,
+        "graphscan": match.graphscan,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
@@ -429,6 +432,7 @@ def writePROSITEprofiles(Map match, JsonGenerator jsonWriter) {
                 "end"               : loc.end,
                 "representative"    : loc.representative,
                 "score"             : loc.score,
+                "cigarAlignment"    : loc.cigarAlignment,
                 "alignment"         : loc.targetAlignment,
                 "location-fragments": loc.fragments
             ]

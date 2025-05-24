@@ -1,8 +1,32 @@
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
-process RUN_DEEPTMHMM {
-    label 'medium', 'deeptmhmm_container'
+process RUN_DEEPTMHMM_CPU {
+    label 'large', 'deeptmhmm_container'
+    stageInMode 'copy'
+
+    input:
+    tuple val(meta), path(fasta)
+    path tmhmm_dir
+
+    output:
+    tuple val(meta), path("outdir")
+
+    script:
+    """
+    # deeptmhmm has a hard coded assumption it is being run within its dir
+    cd ${tmhmm_dir}
+    python3 predict.py \
+        --fasta ../${fasta} \
+        --output-dir ../outdir
+    cd ..
+    rm -r ${tmhmm_dir} outdir/embeddings
+    chmod -R 777 outdir
+    """
+}
+
+process RUN_DEEPTMHMM_GPU {
+    label 'large', 'deeptmhmm_container', 'use_gpu'
     stageInMode 'copy'
 
     input:
@@ -26,6 +50,7 @@ process RUN_DEEPTMHMM {
 }
 
 process PARSE_DEEPTMHMM {
+    label    'tiny'
     executor 'local'
 
     input:

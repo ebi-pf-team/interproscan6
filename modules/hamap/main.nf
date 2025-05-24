@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process PREPROCESS_HAMAP {
-    label 'small', 'ips6_container'
+    label 'mini', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -22,6 +22,7 @@ process PREPROCESS_HAMAP {
 }
 
 process PREPARE_HAMAP {
+    label 'tiny'
     executor 'local'
 
     input:
@@ -77,7 +78,7 @@ process PREPARE_HAMAP {
 }
 
 process RUN_HAMAP {
-    label 'small', 'ips6_container'
+    label 'mini', 'ips6_container'
 
     input:
     tuple val(meta), val(profiles), path(fasta_files)
@@ -103,6 +104,7 @@ process RUN_HAMAP {
 }
 
 process PARSE_HAMAP {
+    label 'tiny'
     executor 'local'
 
     input:
@@ -123,6 +125,7 @@ process PARSE_HAMAP {
         int end = fields[5].toInteger()
         Double score = Double.parseDouble(fields[7])
         String alignment = fields[9]
+        String cigarAlignment = Match.encodeCigarAlignment(alignment)
 
         if (matches.containsKey(sequenceId) && matches[sequenceId].containsKey(modelAccession)) {
             match = matches[sequenceId][modelAccession]
@@ -131,8 +134,7 @@ process PARSE_HAMAP {
             matches.computeIfAbsent(sequenceId, { [:] })
             matches[sequenceId][modelAccession] = match
         }
-
-        Location location = new Location(start, end, score, alignment)
+        Location location = new Location(start, end, score, alignment, cigarAlignment)
         match.addLocation(location)
     }
 

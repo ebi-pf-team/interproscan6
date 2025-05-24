@@ -7,7 +7,7 @@ process RUN_PFSCAN {
     pftools developers. It automates running pfscan for all provided patterns and
     includes post-processing of the hits.
     */
-    label 'small', 'ips6_container'
+    label 'mini', 'ips6_container'
 
     input:
         tuple val(meta), path(fasta)
@@ -31,6 +31,7 @@ process RUN_PFSCAN {
 
 
 process PARSE_PFSCAN {
+    label    'tiny'
     executor 'local'
 
     input:
@@ -65,8 +66,7 @@ process PARSE_PFSCAN {
             level = "STRONG"
         }
         String alignment = matchDetails[2].replaceAll('Sequence ', '').replaceAll('"', '').replaceAll('\\.', '').trim()
-        String cigarAlignment = parseCigarAlignment(alignment)
-        cigarAlignment = encodeCigarAlignment(cigarAlignment)
+        String cigarAlignment = Match.encodeCigarAlignment(alignment)
         patternsMatches.computeIfAbsent(seqId) { [:] }
         Match matchObj = patternsMatches[seqId].computeIfAbsent(modelAccession) {
             new Match(modelAccession, new Signature(modelAccession, library))
@@ -78,36 +78,4 @@ process PARSE_PFSCAN {
     def outputFilePath = task.workDir.resolve("prositepatterns.json")
     def json = JsonOutput.toJson(patternsMatches)
     new File(outputFilePath.toString()).write(json)
-}
-
-def parseCigarAlignment(String alignment) {
-    String cigarAlignment = ""
-    alignment.each { baseChar ->
-        if (baseChar.isUpperCase()) {
-            cigarAlignment += "M" // match char
-        } else if (baseChar.isLowerCase()) {
-            cigarAlignment += "I" // insert char
-        } else if (baseChar == "-") {
-            cigarAlignment += "D" // delete char
-        } else {
-            throw new IllegalArgumentException("Unrecognized character ${baseChar} in ${alignment}")
-        }
-    }
-    return cigarAlignment
-}
-
-def encodeCigarAlignment(String cigarAlignment) {  // Compress alignment, to give '5M' instead of 'MMMMM'
-    if (!cigarAlignment) return ""
-    cigarAlignment
-        .split('')
-        .inject([]) { groups, alignChar ->
-            if (groups && groups.last()[1] == alignChar) {
-                groups.last()[0]++  // cigar alignment char matches previous so add 1 to the count
-            } else {
-                groups << [1, alignChar]  // change type of alignment char, restart count
-            }
-            groups
-        }
-        .collect { count, alignChar -> "${count}${alignChar}" }
-        .join()
 }

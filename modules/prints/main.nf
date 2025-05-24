@@ -3,7 +3,7 @@ import Prints
 import HierarchyEntry
 
 process RUN_PRINTS {
-    label 'large'
+    label 'medium', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -23,6 +23,7 @@ process RUN_PRINTS {
 }
 
 process PARSE_PRINTS {
+    label    'tiny'
     executor 'local'
 
     input:
@@ -70,14 +71,14 @@ process PARSE_PRINTS {
             }
 
             else if (line.startsWithAny("2TBH", "2TBN")) {
-                // Line: 2TBH|N  modelId  NumMotifs  SumId  AveId  ProfScore  Ppvalue  Evalue  GraphScan
-                // Retrieve the graphScan value
+                // Line: 2TBH|N  modelId  NumMotifs  SumId  AveId  ProfScore  Ppvalue  Evalue  graphscan
+                // Retrieve the graphscan value
                 def lineData2TBHN = line.split(/\s+/)
                 assert lineData2TBHN.length == 11
                 String modelName = lineData2TBHN[1]
-                String graphScan = lineData2TBHN[-1]
+                String graphscan = lineData2TBHN[-1]
                 if (thisProteinsMatches.containsKey(modelName)) {
-                    thisProteinsMatches[modelName].graphScan = graphScan
+                    thisProteinsMatches[modelName].graphscan = graphscan
                 }
             }
 
@@ -194,7 +195,7 @@ process PARSE_PRINTS {
                 Match match = finalMatches.computeIfAbsent(
                     filteredMatch.modelId,
                     {
-                        new Match(filteredMatch.modelId, filteredMatch.evalue, filteredMatch.graphScan, new Signature(filteredMatch.modelId, library))
+                        new Match(filteredMatch.modelId, filteredMatch.evalue, filteredMatch.graphscan, new Signature(filteredMatch.modelId, library))
                     }
                 )
                 Location location = new Location(

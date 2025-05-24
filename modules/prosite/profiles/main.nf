@@ -2,7 +2,7 @@ import groovy.io.FileType
 import groovy.json.JsonOutput
 
 process RUN_PFSEARCH {
-    label 'small', 'ips6_container'
+    label 'tiny', 'ips6_container'
 
     input:
         tuple val(meta), path(fasta)
@@ -25,6 +25,7 @@ process RUN_PFSEARCH {
 }
 
 process PARSE_PFSEARCH {
+    label    'tiny'
     executor 'local'
 
     input:
@@ -54,7 +55,9 @@ process PARSE_PFSEARCH {
             Match matchObj = matches[seqId].computeIfAbsent(modelAccession) {
                 new Match(matchData.profile, new Signature(modelAccession, library))
             }
-            Location location = new Location(matchData.start, matchData.end, matchData.normScore, matchData.alignment)
+            String alignment = matchData.alignment
+            String cigarAlignment = Match.encodeCigarAlignment(alignment)
+            Location location = new Location(matchData.start, matchData.end, matchData.normScore, alignment, cigarAlignment)
             matchObj.addLocation(location)
         }
     }

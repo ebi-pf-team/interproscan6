@@ -2,6 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 process PREPARE_TREEGRAFTER {
+    label    'tiny'
     executor 'local'
 
     input:
@@ -21,7 +22,7 @@ process PREPARE_TREEGRAFTER {
         def filteredMatches = matches
             .values()
             .collect { m1 ->
-                if (!m1.included || m1.evalue > 0.00000001) {
+                if (!m1.included) {
                     return null
                 }
 
@@ -43,7 +44,7 @@ process PREPARE_TREEGRAFTER {
             }
             .findAll { it != null }
 
-        Match bestMatch = filteredMatches.max { it.locations[0].score }
+        Match bestMatch = filteredMatches.max { it.score }
         return bestMatch ? [(seqId): [(bestMatch.modelAccession): bestMatch]] : [:]
     }
 
@@ -165,6 +166,7 @@ process RUN_TREEGRAFTER {
 }
 
 process PARSE_PANTHER {
+    label    'tiny'
     executor 'local'
 
     input:

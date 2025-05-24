@@ -2,7 +2,7 @@ class Prints {
     String modelName
     String modelId
     Double evalue
-    String graphScan
+    String graphscan
     Integer locationStart
     Integer locationEnd
     Double pvalue
@@ -26,7 +26,7 @@ class Prints {
             int motifCount
     ) {
         Prints newMatch = new Prints(printsMatch.modelName, printsMatch.modelId, printsMatch.evalue)
-        newMatch.graphScan = printsMatch.graphScan
+        newMatch.graphscan = printsMatch.graphscan
         newMatch.locationStart = start
         newMatch.locationEnd = end
         newMatch.pvalue = pvalue

@@ -85,17 +85,9 @@ class InterProScan {
             description: null
         ],
         [
-            name: "signalp-mode",
+            name: "skip-interpro",
             description: null
-        ],
-        [
-            name: "signalp-gpu",
-            description: null
-        ],
-        [
-                name: "skip-interpro",
-                description: null
-                // Used in production. Skips adding InterPro xrefs and identifying representative locations
+            // Used in production. Skips adding InterPro xrefs and identifying representative locations
         ],
         [
             name: "apps-config",
@@ -207,7 +199,7 @@ class InterProScan {
 
     static List<String> getAppsWithData(List<String> applications, Map appsConfig) {
         return applications.findAll { String appName ->
-            appsConfig.get(appName)?.has_data //|| InterProScan.LICENSED_SOFTWARE.contains(appName)
+            appsConfig.get(appName)?.has_data
         }
     }
 
@@ -282,6 +274,16 @@ class InterProScan {
                 return [null, error]
             }
         }
+
+        def invalidApps = appsToRun.findAll { app ->
+            this.LICENSED_SOFTWARE.contains(app) && !appsConfig[app]?.dir
+        }
+
+        if (invalidApps) {
+            def error = "The following applications cannot be run: ${invalidApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses."
+            return [null, error]
+        }
+
         return [appsToRun.toSet().toList(), null]
     }
 
@@ -303,7 +305,7 @@ class InterProScan {
     static List<String> fetchCompatibleVersions(String majorMinorVersion) {
         String url = "${InterProScan.FTP_URL}/${majorMinorVersion}/versions.json"
         Map versions = HTTPRequest.fetch(url, null, 2, false)
-        return versions["interpro"]*.toString() ?: null
+        return versions?.interpro?.collect { it?.toString() } ?: null
     }
 
     static validateXrefFiles(String xref_dir, Map xRefsConfig, boolean goterms, boolean pathways) {

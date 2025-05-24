@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process RUN_COILS {
-    label 'small', 'ips6_container'
+    label 'mini', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -17,6 +17,7 @@ process RUN_COILS {
 
 
 process PARSE_COILS {
+    label    'tiny'
     executor 'local'
 
     input:

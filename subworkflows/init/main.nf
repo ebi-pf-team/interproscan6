@@ -9,7 +9,6 @@ workflow INIT_PIPELINE {
     datadir
     formats
     outdir
-    signalp_mode
     matches_api_url
     interpro_version
     skip_intepro
@@ -64,13 +63,6 @@ workflow INIT_PIPELINE {
         datadir = null
     }
   
-    // SignalP mode validation
-    (signalp_mode, error) = InterProScan.validateSignalpMode(signalp_mode)
-    if (!signalp_mode) {
-        log.error error
-        exit 1
-    }
-
     version = InterProScan.validateInterProVersion(interpro_version)
     if (version == null) {
         log.error "--interpro <VERSION>: invalid format; expecting number of 'latest'"
@@ -83,12 +75,22 @@ workflow INIT_PIPELINE {
         exit 1
     }
 
+    if (!offline) {
+        invalidApps = apps.findAll { app ->
+            ["signalp_euk", "signalp_prok", "deeptmhmm"].contains(app)
+        }
+
+        if (invalidApps) {
+            log.error "Pre-calculated results for DeepTMHMM, SignalP_Euk, and SignalP_Prok are not yet available in the Matches API. To ensure these analyses run locally and produce results, please add the '--offline' flag when invoking the pipeline."
+            exit 1
+        }
+    }
+
     emit:
     fasta            // str: path to input fasta file
     apps             // list: list of application to
     datadir          // str: path to data directory, or null if not needed
     outdir           // str: path to output directory
     formats          // set<String>: output file formats
-    signalp_mode     // str: Models to be used with SignalP
     version          // str: InterPro version (or "latest")
 }

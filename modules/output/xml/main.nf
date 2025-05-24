@@ -4,6 +4,7 @@ import java.io.StringWriter
 import java.util.regex.Pattern
 
 process WRITE_XML {
+    label    'tiny'
     executor 'local'
 
     input:
@@ -12,7 +13,7 @@ process WRITE_XML {
     val seq_db_file
     val nucleic
     val interproscan_version
-    val interpro_version
+    val db_releases
 
     exec:
     def writer = new StringWriter()
@@ -21,7 +22,7 @@ process WRITE_XML {
     xml.setEscapeAttributes(false)
     SeqDB db = new SeqDB(seq_db_file.toString())
 
-    xml."results"("interproscan-version": interproscan_version, "interpro-version": interpro_version) {
+    xml."results"("interproscan-version": interproscan_version, "interpro-version": db_releases?.interpro?.version) {
         matches_files.each { matchFile ->
             if (nucleic) {
                 Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
@@ -266,18 +267,20 @@ def fmtDefaultMatchNode(Map match) {
 
 def fmtPantherMatchNode(Map match) {
     return [
-        ac            : match.treegrafter.subfamilyAccession,
-        evalue        : match.evalue,
-        "graft-point" : match.treegrafter.graftPoint,
-        name          : match.signature.name,
-        score         : match.score
+        ac                 : match.treegrafter.subfamilyAccession,
+        evalue             : match.evalue,
+        "protein-class"    : match.treegrafter.proteinClass,
+        "graft-point"      : match.treegrafter.graftPoint,
+        "ancestral-node": match.treegrafter.ancestralNodeID,
+        name               : match.signature.name,
+        score              : match.score
     ]
 }
 
 def fmtPrintsMatchNode(Map match) {
     return [
         evalue    : match.evalue,
-        graphscan : match.graphScan,
+        graphscan : match.graphscan,
     ]
 }
 
@@ -397,6 +400,7 @@ def addLocationNodes(String memberDB, String proteinMd5, Map match, def xml) {
                 }
                 if (memberDB in ["hamap", "prosite patterns", "prosite profiles"]) {
                     xml.alignment(loc.targetAlignment ?: "")
+                    xml."cigar-alignment"(loc.cigarAlignment ?: "")
                 }
                 if (loc.containsKey("sites") && loc.sites.size() > 0) {
                     addSiteNodes(loc.sites, memberDB, xml)

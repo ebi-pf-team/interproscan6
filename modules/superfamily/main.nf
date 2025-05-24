@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process SEARCH_SUPERFAMILY {
-    label 'small', 'ips6_container'
+    label 'tiny', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -35,6 +35,7 @@ process SEARCH_SUPERFAMILY {
 }
 
 process PARSE_SUPERFAMILY {
+    label    'tiny'
     executor 'local'
 
     input:

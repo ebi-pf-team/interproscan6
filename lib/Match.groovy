@@ -15,7 +15,7 @@ class Match implements Serializable {
     Integer sequenceLength = null
 
     // PRINTS
-    String graphScan = null
+    String graphscan = null
 
     Match(String modelAccession) {
         this.modelAccession = modelAccession
@@ -26,10 +26,10 @@ class Match implements Serializable {
         this.signature = signature
     }
 
-    Match(String modelAccession, Double evalue, String graphScan, Signature signature) {
+    Match(String modelAccession, Double evalue, String graphscan, Signature signature) {
         this.modelAccession = modelAccession
         this.evalue = evalue
-        this.graphScan = graphScan
+        this.graphscan = graphscan
         this.signature = signature
     }
 
@@ -78,7 +78,7 @@ class Match implements Serializable {
         match.included = data.included
         match.locations = data.locations.collect { Location.fromMap(it) }
         match.treegrafter = TreeGrafter.fromMap(data.treegrafter)
-        match.graphScan = data.graphScan
+        match.graphscan = data.graphscan
         match.representativeInfo = RepresentativeInfo.fromMap(data.representativeInfo)
         return match
     }
@@ -91,6 +91,43 @@ class Match implements Serializable {
         Location location = this.locations[locationIndex]
         location.queryAlignment = queryAlignment
         location.targetAlignment = targetAlignment
+    }
+
+    static String encodeCigarAlignment(String alignment) {
+        if (!alignment) return ""
+        StringBuilder cigar = new StringBuilder()
+        char prevOp = '\0'
+        int count = 0
+
+        for (int i = 0; i < alignment.length(); i++) {
+            char c = alignment.charAt(i)
+            char op
+
+            if (c == '-') {
+                op = 'D'
+            } else if (Character.isLowerCase(c)) {
+                op = 'I'
+            } else {
+                op = 'M'
+            }
+
+            if (op == prevOp) {
+                count++
+            } else {
+                if (count > 0) {
+                    cigar.append(count).append(prevOp)
+                }
+                prevOp = op
+                count = 1
+            }
+        }
+
+        // Append the final operation
+        if (count > 0) {
+            cigar.append(count).append(prevOp)
+        }
+
+        return cigar.toString()
     }
 
     @Override
@@ -358,13 +395,14 @@ class Location implements Serializable {
         this.fragments = [fragment]
     }
 
-    Location(int start, int end, Double score, String targetAlignment) { // Used for Hamap, PrositeProfiles
+    Location(int start, int end, Double score, String targetAlignment, cigarAlignment) { // Used for Hamap, PrositeProfiles
         this.start = start
         this.end = end
         this.score = score
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
         this.targetAlignment = targetAlignment
+        this.cigarAlignment = cigarAlignment
     }
 
     Location(int start, int end, Double pvalue, Double score, Integer motifNumber) { // Used for PRINTS
