@@ -35,12 +35,13 @@ workflow PREPARE_DATABASES {
                 error += "with InterPro ${interpro_version} data.\n"
                 error += "Compatible versions are: ${versions.join(', ')}."
                 log.error error
+                exit 1
             }
         } else if (interpro_version == "latest") {
             highest_version = InterProScan.findLocalHighestVersionDir("${data_dir}/interpro")
             if (!highest_version) {
-            log.error "No version of InterPro found in ${data_dir}/interpro"
-            exit 1
+                log.error "No version of InterPro found in ${data_dir}/interpro"
+                exit 1
             }
 
             interpro_version = highest_version
