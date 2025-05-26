@@ -2,6 +2,8 @@ import groovy.json.JsonOutput
 
 process WRITE_FASTA {
     label    'tiny'
+    executor 'local'
+
     input:
     tuple val(meta), val(fasta)
 
