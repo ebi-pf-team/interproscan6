@@ -11,9 +11,6 @@ class Match implements Serializable {
     // PANTHER
     TreeGrafter treegrafter = null
 
-    // PIRSF
-    Integer sequenceLength = null
-
     // PRINTS
     String graphscan = null
 
@@ -73,7 +70,6 @@ class Match implements Serializable {
 
     static Match fromMap(Map data) {
         Match match = new Match(data.modelAccession, data.evalue, data.score, data.bias)
-        match.sequenceLength = data.sequenceLength
         match.signature = Signature.fromMap(data.signature)
         match.included = data.included
         match.locations = data.locations.collect { Location.fromMap(it) }
@@ -132,7 +128,7 @@ class Match implements Serializable {
 
     @Override
     public int hashCode() {
-        int x = Objects.hash(modelAccession, sequenceLength, evalue, score, bias, signature, locations)
+        int x = Objects.hash(modelAccession, evalue, score, bias, signature, locations)
         return x
     }
 
@@ -142,7 +138,6 @@ class Match implements Serializable {
         if (obj == null || getClass() != obj.getClass()) return false
         return (
             modelAccession == obj.modelAccession &&
-            sequenceLength == obj.sequenceLength &&
             evalue == obj.evalue &&
             score == obj.score &&
             bias == obj.bias &&
