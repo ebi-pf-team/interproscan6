@@ -22,7 +22,7 @@ Before you begin, install:
     * [Apptainer](https://apptainer.org/)
 
 You don't need anything else, Nextflow will download the workflow from GitHub, 
-and required data can be automatically downloaded when running InterProScan.
+and required data are automatically downloaded when running InterProScan.
 
 > [!IMPORTANT]  
 > Phobius, SignalP and DeepTMHMM require separate licenses and downloads. See [Licensed analyses](#licensed-analyses).
@@ -38,8 +38,7 @@ nextflow run ebi-pf-team/interproscan6 \
   -r 6.0.0-alpha \
   -profile docker,test \
   --datadir data \
-  --interpro latest \
-  --download
+  --interpro latest
 ```
 
 Explanation of parameters:
@@ -48,9 +47,8 @@ Explanation of parameters:
 * `-profile docker,test`:
   * `docker`: Execute tasks in Docker containers.
   * `test`: Run InterProScan with a small example FASTA file included in the workflow.
-* `--datadir data`: Set `data` as the directory for storing all required InterPro and member database files. The directory is created automatically if it doesn't exist.
+* `--datadir data`: Set `data` as the directory for storing all required InterPro and member database files. The directory is created automatically if it doesn't exist, and any missing required data are downloaded into it.
 * `--interpro latest`: Use the most recent InterPro release.
-* `--download`: Download any missing metadata and database files into the specified `--datadir`
 
 > [!NOTE]
 > `--interpro latest` is the default, but for reproducibility we strongly recommend pinning the release, e.g. `--interpro 105.0`.
