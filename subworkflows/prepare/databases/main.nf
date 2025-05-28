@@ -94,7 +94,7 @@ To ensure you're using the latest compatible data, run InterProScan without the 
         } else {
             // Bye
             log.error """No database release file found in ${data_dir}/interpro/${interpro_version}
-Use the '--download' option to automatically download InterPro release data."""
+Run InterProScan without the '--offline' option to automatically download InterPro release data."""
             exit 1
         }
 
@@ -108,7 +108,7 @@ Use the '--download' option to automatically download InterPro release data."""
                     def details = apps.collect { app -> "  - ${app[0]} ${app[2]}" }.join("\n")
                     log.error """Data is missing in ${data_dir} for the following applications:
 ${details}
-Use the '--download' option to automatically download InterPro release data."""
+Run InterProScan without the '--offline' option to automatically download InterPro release data."""
                     exit 1
                 }
             }
