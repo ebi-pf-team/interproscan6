@@ -4,7 +4,6 @@ workflow INIT_PIPELINE {
     input
     applications
     apps_config
-    download
     offline
     datadir
     formats
@@ -27,11 +26,6 @@ workflow INIT_PIPELINE {
     (apps, error) = InterProScan.validateApplications(applications, apps_config)
     if (!apps) {
         log.error error
-        exit 1
-    }
-
-    if (download && offline) {
-        log.error "--download and --offline are mutually exclusive"
         exit 1
     }
 

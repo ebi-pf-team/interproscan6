@@ -63,10 +63,6 @@ class InterProScan {
             description: "include pathway mapping in output files."
         ],
         [
-            name: "download",
-            description: "download any missing metadata and database files."
-        ],
-        [
             name: "help",
             description: "print the help message and exit."
         ],

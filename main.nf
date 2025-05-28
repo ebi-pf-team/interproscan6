@@ -24,7 +24,6 @@ workflow {
         params.input,
         params.applications,
         params.appsConfig,
-        params.download,
         params.offline,
         params.datadir,
         params.formats,
@@ -48,7 +47,7 @@ workflow {
         data_dir,
         interpro_version,
         workflow.manifest.version,
-        params.download,
+        params.offline,
         params.goterms,
         params.pathways
     )

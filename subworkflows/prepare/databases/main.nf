@@ -13,7 +13,7 @@ workflow PREPARE_DATABASES {
     data_dir
     interpro_version
     iprscan_version
-    download
+    offline
     add_goterms
     add_pathways
 
@@ -23,7 +23,7 @@ workflow PREPARE_DATABASES {
 
     if (data_dir != null) {
         // If data_dir is null, we only run analyses that do not depend on data files (e.g. coils)
-        if (download) {
+        if (!offline) {
             versions = InterProScan.fetchCompatibleVersions(iprscan_major_minor)
             if (versions == null) {
                 log.error "Failed to retrieve compatible InterPro versions from EMBL-EBI FTP."
@@ -45,10 +45,10 @@ workflow PREPARE_DATABASES {
             }
 
             interpro_version = highest_version
-            log.warn """Without the '--download' option enabled, InterProScan uses \
+            log.warn """With the '--offline' mode enabled, InterProScan uses \
 the highest locally available version of InterPro data, but cannot \
 verify compatibility with InterProScan. \
-To ensure you're using the latest compatible data, use the --download option."""
+To ensure you're using the latest compatible data, run InterProScan without the '--offline' option."""
         }
 
         // Most members have a single dir, but CATH-Gene3D and CATH-FuNFam are collated under cath for example
@@ -74,7 +74,7 @@ To ensure you're using the latest compatible data, use the --download option."""
             )
 
             ch_interpro = Channel.value(["interpro", interpro_version, "${data_dir}/interpro/${interpro_version}"])
-        } else if (download) {
+        } else if (!offline) {
             // Not found: download the InterPro metadata archive
             DOWNLOAD_INTERPRO(
                 ["interpro", "interpro", interpro_version, false, "${data_dir}/interpro/${interpro_version}"],
@@ -102,15 +102,7 @@ Use the '--download' option to automatically download InterPro release data."""
         ch_ready = ch_ready.mix(FIND_MISSING_DATA.out.with_data.flatMap())
         ch_to_download = FIND_MISSING_DATA.out.without_data.flatMap()
         
-        if (download) {
-            DOWNLOAD_DATABASE(
-                ch_to_download,
-                iprscan_major_minor,
-                data_dir
-            )
-
-            ch_ready = ch_ready.mix(DOWNLOAD_DATABASE.out)
-        } else {
+        if (offline) {
             ch_to_download.collect(flat: false).subscribe { apps ->
                 if (apps.size() > 0) {
                     def details = apps.collect { app -> "  - ${app[0]} ${app[2]}" }.join("\n")
@@ -120,6 +112,14 @@ Use the '--download' option to automatically download InterPro release data."""
                     exit 1
                 }
             }
+        } else {
+            DOWNLOAD_DATABASE(
+                ch_to_download,
+                iprscan_major_minor,
+                data_dir
+            )
+
+            ch_ready = ch_ready.mix(DOWNLOAD_DATABASE.out)
         }
 
         ch_ready = ch_ready.collect(flat: false)
