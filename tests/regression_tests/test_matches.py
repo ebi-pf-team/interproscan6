@@ -16,7 +16,12 @@ def main():
     parser.add_argument("--expected", type=str, default="tests/data/output/test.faa.json", help="JSON with expected results")
     parser.add_argument("--observed", type=str, default="tests/data/output/test.faa.json", help="JSON output file from IPS6")
     parser.add_argument("--summary", action="store_true", help="Print only the summary message")
-    parser.add_argument("--format", choices=["json", "tsv", "xml"], default="json", help="Format of input files. 'json' [default], 'tsv', or 'xml'")
+    parser.add_argument("--format", choices=["json", "tsv", "xml", "intermediate"], default="json", help=(
+        "Format of input files.\n"
+        "'json' [default], 'tsv', or 'xml' for final output files\n"
+        "or 'intermediate' to compare the temporary working files of InterProScan6."
+    ))
+    parser.add_argument("--applications", type=str, default=None, help="Limit the comparison to a comma-separated list of applicaitons")
     args = parser.parse_args()
 
     if args.format == "json":
@@ -25,9 +30,12 @@ def main():
     elif args.format == "tsv":
         expected = parse_tsv(args.expected)
         observed = parse_tsv(args.observed)
-    else:
+    elif args.format == "xml":
         expected = parse_xml(args.expected)
         observed = parse_xml(args.observed)
+    else:
+        expected = parse_intermediate(args.expected, args.applications)
+        observed = parse_intermediate(args.observed, args.applications)
 
     diff = difflib.ndiff(sorted(expected), sorted(observed))
     expected_only, observed_only, both = 0, 0, 0
@@ -71,6 +79,7 @@ def parse_json(iprscan_path: str):
                 matches.append([md5, sig_acc, loc["start"], loc["end"]])
     return [repr(nested) for nested in matches]
 
+
 def parse_tsv(iprscan_path: str):
     matches = []
     with open(iprscan_path, "r") as fh:
@@ -78,6 +87,7 @@ def parse_tsv(iprscan_path: str):
             data = line.split("\t")
             matches.append([data[1], data[4], data[6], data[7]])
     return [repr(nested) for nested in matches]
+
 
 def parse_xml(iprscan_path: str):
     """Parse with recovery as true because names/desc can
@@ -101,6 +111,21 @@ def parse_xml(iprscan_path: str):
                     matches.append([md5, sig_ac, start, end])
     return [repr(match) for match in matches]
 
+
+def parse_intermediate(iprscan_path: str, applications: str):
+    matches = []
+    apps = {app.strip().lower() for app in applications.split(",")} if applications else None
+    with open(iprscan_path, "r") as fh:
+        matches_dict = json.load(fh)
+
+    for upi, data in matches_dict.items():
+        for model_acc, model_data in data.items():
+            library = model_data.get("signature", {}).get("signatureLibraryRelease", {}).get("library", "").lower()
+            if not apps or library in apps:
+                for location in model_data.get("locations", []):
+                    matches.append([upi, model_acc, location.get("start"), location.get("end")])
+
+    return [repr(nested) for nested in matches]
 
 if __name__ == "__main__":
     main()
