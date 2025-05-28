@@ -215,7 +215,7 @@ def writeDefault(Map match, JsonGenerator jsonWriter) {
                 "score"             : loc.score,
                 "envelopeStart"     : loc.envelopeStart,
                 "envelopeEnd"       : loc.envelopeEnd,
-                "location-fragments": loc.fragments
+                "location-fragments": formatFragments(loc.fragments)
             ]
         }
     ])
@@ -239,7 +239,7 @@ def writeDefaultNoHmmBounds(Map match, JsonGenerator jsonWriter) {
                 "score"             : loc.score,
                 "envelopeStart"     : loc.envelopeStart,
                 "envelopeEnd"       : loc.envelopeEnd,
-                "location-fragments": loc.fragments
+                "location-fragments": formatFragments(loc.fragments)
             ]
         }
     ])
@@ -258,7 +258,7 @@ def writeCDD(Map match, JsonGenerator jsonWriter) {
                 "representative"    : loc.representative,
                 "evalue"            : loc.evalue,
                 "score"             : loc.score,
-                "location-fragments": loc.fragments,
+                "location-fragments": formatFragments(loc.fragments),
                 "sites"             : loc.sites.collect { site ->
                     [
                         "description"  : site.description,
@@ -280,7 +280,7 @@ def writeMinimalist(Map match, JsonGenerator jsonWriter) {
                 "start"             : loc.start,
                 "end"               : loc.end,
                 "representative"    : loc.representative,
-                "location-fragments": loc.fragments
+                "location-fragments": formatFragments(loc.fragments)
             ]
         }
     ])
@@ -298,7 +298,7 @@ def writeHAMAP(Map match, JsonGenerator jsonWriter) {
                 "score"             : loc.score,
                 "cigarAlignment"    : loc.cigarAlignment,
                 "alignment"         : loc.targetAlignment,
-                "location-fragments": loc.fragments
+                "location-fragments": formatFragments(loc.fragments)
             ]
         }
     ])
@@ -313,7 +313,7 @@ def writeMobiDBlite(Map match, JsonGenerator jsonWriter) {
                 "start"             : loc.start,
                 "end"               : loc.end,
                 "representative"    : loc.representative,
-                "location-fragments": loc.fragments,
+                "location-fragments": formatFragments(loc.fragments),
                 "sequence-feature"  : loc.sequenceFeature
             ]
         }
@@ -342,7 +342,7 @@ def writePANTHER(Map match, JsonGenerator jsonWriter) {
                 "hmmBounds"         : Location.getHmmBounds(loc.hmmBounds),
                 "envelopeStart"     : loc.envelopeStart,
                 "envelopeEnd"       : loc.envelopeEnd,
-                "location-fragments": loc.fragments
+                "location-fragments": formatFragments(loc.fragments)
             ]
         }
     ])
@@ -365,7 +365,7 @@ def writePirsr(Map match, JsonGenerator jsonWriter) {
                 "score"             : loc.score,
                 "envelopeStart"     : loc.envelopeStart,
                 "envelopeEnd"       : loc.envelopeEnd,
-                "location-fragments": loc.fragments,
+                "location-fragments": formatFragments(loc.fragments),
                 "sites"             : loc.sites.collect { site ->
                     [
                         "description": site.description,
@@ -398,7 +398,7 @@ def writePRINTS(Map match, JsonGenerator jsonWriter) {
                 "pvalue"            : loc.pvalue,
                 "score"             : loc.score,
                 "motifNumber"       : loc.motifNumber,
-                "location-fragments": loc.fragments
+                "location-fragments": formatFragments(loc.fragments)
             ]
         }
     ])
@@ -416,7 +416,7 @@ def writePROSITEpatterns(Map match, JsonGenerator jsonWriter) {
                 "level"             : loc.level,
                 "cigarAlignment"    : loc.cigarAlignment,
                 "alignment"         : loc.targetAlignment,
-                "location-fragments": loc.fragments
+                "location-fragments": formatFragments(loc.fragments)
             ]
         }
     ])
@@ -434,7 +434,7 @@ def writePROSITEprofiles(Map match, JsonGenerator jsonWriter) {
                 "score"             : loc.score,
                 "cigarAlignment"    : loc.cigarAlignment,
                 "alignment"         : loc.targetAlignment,
-                "location-fragments": loc.fragments
+                "location-fragments": formatFragments(loc.fragments)
             ]
         }
     ])
@@ -472,7 +472,7 @@ def writeSFLD(Map match, JsonGenerator jsonWriter) {
                  "score"             : loc.score,
                  "envelopeStart"     : loc.envelopeStart,
                  "envelopeEnd"       : loc.envelopeEnd,
-                 "location-fragments": loc.fragments,
+                 "location-fragments": formatFragments(loc.fragments),
                  "sites"             : loc.sites.collect { site ->
                      [
                          "description": site.description,
@@ -508,7 +508,7 @@ def writeSMART(Map match, JsonGenerator jsonWriter) {
                 "hmmBounds"         : Location.getHmmBounds(loc.hmmBounds),
                 "evalue"            : loc.evalue,
                 "score"             : loc.score,
-                "location-fragments": loc.fragments
+                "location-fragments": formatFragments(loc.fragments)
             ]
         }
     ])
@@ -525,10 +525,20 @@ def writeSUPERFAMILY(Map match, JsonGenerator jsonWriter) {
                 "end"               : loc.end,
                 "representative"    : loc.representative,
                 "hmmLength"         : loc.hmmLength,
-                "location-fragments": loc.fragments
+                "location-fragments": formatFragments(loc.fragments)
             ]
         }
     ])
+}
+
+def formatFragments(fragments) {
+    return fragments.collect { frag ->
+        [
+            "start"    : frag.start,
+            "end"      : frag.end,
+            "dc-status": frag.dcStatus
+        ]   
+    }
 }
 
 def writeXref(seqData, JsonGenerator jsonWriter) {
