@@ -28,7 +28,7 @@ process WRITE_XML {
                 Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
                 nucleicToProteinMd5 = db.groupProteins(proteins)
                 nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
-                    addNucleotideNode(nucleicMd5, proteinMd5s, matchFile, xml, db)
+                    addNucleotideNode(nucleicMd5, proteinMd5s, proteins, xml, db)
                 }
             } else {
                 Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
