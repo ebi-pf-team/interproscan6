@@ -8,7 +8,7 @@ nextflow_workflow {
         symlink "tests/data/channels/antifam.json"
         symlink "tests/data/channels/pfam.json"
         symlink "tests/data/channels/no_matches.json"
-        symlink "tests/data/databases/interpro"
+        symlink "tests/data/databases/interpro/105.0"
     }
 
     test("Should skip adding interpro data and run without failures") {
@@ -23,7 +23,7 @@ nextflow_workflow {
                     ]
                 ]
                 db_releases = [
-                    interpro: [version: "105.0", dirpath: "meta/tests/data/databases/interpro"],
+                    interpro: [version: "105.0", dirpath: "meta/tests/data/databases/interpro/105.0"],
                     antifam: [version: "8.0", dirpath: ""],
                     cathgene3d: [version: "4.3.0", dirpath: ""],
                     cathfunfam: [version: "4.3.0", dirpath: ""],
@@ -43,7 +43,7 @@ nextflow_workflow {
                 ]
                 add_goterms = true
                 add_pathways = true
-                panther_paint_dir = "meta/tests/data/databases/interpro"
+                panther_paint_dir = "meta/tests/data/databases/interpro/105.0"
                 skip_interpro = true
             }
             workflow {
@@ -74,7 +74,7 @@ nextflow_workflow {
                     ]
                 ]
                 db_releases = [
-                    interpro: [version: "105.0", dirpath: "meta/tests/data/databases/interpro"],
+                    interpro: [version: "105.0", dirpath: "meta/tests/data/databases/interpro/105.0"],
                     antifam: [version: "8.0", dirpath: ""],
                     cathgene3d: [version: "4.3.0", dirpath: ""],
                     cathfunfam: [version: "4.3.0", dirpath: ""],
@@ -94,7 +94,7 @@ nextflow_workflow {
                 ]
                 add_goterms = true
                 add_pathways = true
-                panther_paint_dir = "tests/data/databases/interpro"
+                panther_paint_dir = "tests/data/databases/interpro/105.0"
                 skip_interpro = false
             }
             workflow {
