@@ -50,7 +50,7 @@ process SEARCH_FUNFAM {
     tuple val(meta), val(meta2), path("hmmsearch.out")
 
     script:
-    def commands = ""
+    def commands = "touch hmmsearch.out\n"
     supfams.each { cathId -> 
         String hmmFilePath = cathId.split("\\.").join(File.separator) + ".hmm"
         String hmmPath = "${root_dir.toString()}/${hmmFilePath}"
