@@ -1,5 +1,8 @@
 import groovy.json.JsonOutput
 
+// import needed for unit tests
+import Match
+
 process RUN_COILS {
     label 'mini', 'ips6_container'
 
