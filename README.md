@@ -25,7 +25,7 @@ You don't need anything else, Nextflow will download the workflow from GitHub,
 and required data can be automatically downloaded when running InterProScan.
 
 > [!IMPORTANT]  
-> Phobius, SignalP and DeepTMHMM separate licenses and downloads. See [Licensed analyses](#licensed-analyses).
+> Phobius, SignalP and DeepTMHMM require separate licenses and downloads. See [Licensed analyses](#licensed-analyses).
 
 ## Usage
 
