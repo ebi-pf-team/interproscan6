@@ -1,5 +1,8 @@
 import groovy.json.JsonOutput
 
+// import needed for unit tests
+import Match
+
 process WRITE_FASTA {
     label    'tiny'
     executor 'local'
