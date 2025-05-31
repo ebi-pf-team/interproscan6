@@ -13,7 +13,6 @@ workflow PREPARE_DATABASES {
     data_dir
     interpro_version
     iprscan_version
-    offline
     add_goterms
     add_pathways
 
@@ -23,32 +22,31 @@ workflow PREPARE_DATABASES {
 
     if (data_dir != null) {
         // If data_dir is null, we only run analyses that do not depend on data files (e.g. coils)
-        if (!offline) {
-            versions = InterProScan.fetchCompatibleVersions(iprscan_major_minor)
-            if (versions == null) {
-                log.error "Failed to retrieve compatible InterPro versions from EMBL-EBI FTP."
-                exit 1
-            } else if (interpro_version == "latest") {
-                interpro_version = versions[-1]
-            } else if (!versions.contains(interpro_version)) {
-                error = "InterProScan ${iprscan_version} is not compatible "
-                error += "with InterPro ${interpro_version} data.\n"
-                error += "Compatible versions are: ${versions.join(', ')}."
-                log.error error
-                exit 1
+        versions = InterProScan.fetchCompatibleVersions(iprscan_major_minor)
+        if (versions == null) {
+            log.warn """InterProScan could not retrieve compatibility information \
+for InterPro data versions from EMBL-EBI FTP."""
+
+            if (interpro_version == "latest") {
+                highest_version = InterProScan.findLocalHighestVersionDir("${data_dir}/interpro")
+                if (!highest_version) {
+                    log.error "No version of InterPro found in ${data_dir}/interpro"
+                    exit 1
+                }
+
+                interpro_version = highest_version
+                log.warn """InterProScan is using the highest locally available InterPro \
+data version (${interpro_version}), but compatibility with this version of InterProScan \
+cannot be verified."""
             }
         } else if (interpro_version == "latest") {
-            highest_version = InterProScan.findLocalHighestVersionDir("${data_dir}/interpro")
-            if (!highest_version) {
-                log.error "No version of InterPro found in ${data_dir}/interpro"
-                exit 1
-            }
-
-            interpro_version = highest_version
-            log.warn """With the '--offline' mode enabled, InterProScan uses \
-the highest locally available version of InterPro data, but cannot \
-verify compatibility with InterProScan. \
-To ensure you're using the latest compatible data, run InterProScan without the '--offline' option."""
+            interpro_version = versions[-1]
+        } else if (!versions.contains(interpro_version)) {
+            error = "InterProScan ${iprscan_version} is not compatible "
+            error += "with InterPro ${interpro_version} data.\n"
+            error += "Compatible versions are: ${versions.join(', ')}."
+            log.error error
+            exit 1
         }
 
         // Most members have a single dir, but CATH-Gene3D and CATH-FuNFam are collated under cath for example
@@ -74,7 +72,7 @@ To ensure you're using the latest compatible data, run InterProScan without the 
             )
 
             ch_interpro = Channel.value(["interpro", interpro_version, "${data_dir}/interpro/${interpro_version}"])
-        } else if (!offline) {
+        } else {
             // Not found: download the InterPro metadata archive
             DOWNLOAD_INTERPRO(
                 ["interpro", "interpro", interpro_version, false, "${data_dir}/interpro/${interpro_version}"],
@@ -91,37 +89,19 @@ To ensure you're using the latest compatible data, run InterProScan without the 
                 app_dirs,
                 data_dir
             )
-        } else {
-            // Bye
-            log.error """No database release file found in ${data_dir}/interpro/${interpro_version}
-Run InterProScan without the '--offline' option to automatically download InterPro release data."""
-            exit 1
         }
 
         ch_ready = ch_ready.mix(ch_interpro)
         ch_ready = ch_ready.mix(FIND_MISSING_DATA.out.with_data.flatMap())
         ch_to_download = FIND_MISSING_DATA.out.without_data.flatMap()
-        
-        if (offline) {
-            ch_to_download.collect(flat: false).subscribe { apps ->
-                if (apps.size() > 0) {
-                    def details = apps.collect { app -> "  - ${app[0]} ${app[2]}" }.join("\n")
-                    log.error """Data is missing in ${data_dir} for the following applications:
-${details}
-Run InterProScan without the '--offline' option to automatically download InterPro release data."""
-                    exit 1
-                }
-            }
-        } else {
-            DOWNLOAD_DATABASE(
-                ch_to_download,
-                iprscan_major_minor,
-                data_dir
-            )
+    
+        DOWNLOAD_DATABASE(
+            ch_to_download,
+            iprscan_major_minor,
+            data_dir
+        )
 
-            ch_ready = ch_ready.mix(DOWNLOAD_DATABASE.out)
-        }
-
+        ch_ready = ch_ready.mix(DOWNLOAD_DATABASE.out)
         ch_ready = ch_ready.collect(flat: false)
     }
 

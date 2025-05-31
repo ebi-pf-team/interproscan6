@@ -4,10 +4,10 @@ workflow INIT_PIPELINE {
     input
     applications
     apps_config
-    offline
     datadir
     formats
     outdir
+    no_matches_api
     matches_api_url
     interpro_version
     skip_intepro
@@ -69,13 +69,13 @@ workflow INIT_PIPELINE {
         exit 1
     }
 
-    if (!offline) {
+    if (!no_matches_api) {
         invalidApps = apps.findAll { app ->
             ["signalp_euk", "signalp_prok", "deeptmhmm"].contains(app)
         }
 
         if (invalidApps) {
-            log.error "Pre-calculated results for DeepTMHMM, SignalP_Euk, and SignalP_Prok are not yet available in the Matches API. To ensure these analyses run locally and produce results, please add the '--offline' flag when invoking the pipeline."
+            log.error "Precomputed results for DeepTMHMM, SignalP_Euk, and SignalP_Prok are not yet available in the Matches API. To ensure these analyses run locally and produce results, please add the '--no-matches-api' flag when invoking the pipeline."
             exit 1
         }
     }
