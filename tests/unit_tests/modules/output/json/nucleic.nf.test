@@ -1,6 +1,6 @@
 nextflow_process {
 
-    name "Test Process WRITE_JSON"
+    name "Test Process WRITE_JSON [nucleic]"
     script "modules/output/json/main.nf"
     process "WRITE_JSON"
 

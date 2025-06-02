@@ -1,6 +1,6 @@
 nextflow_process {
 
-    name "Test Process WRITE_TSV"
+    name "Test Process WRITE_TSV [nucleic]"
     script "modules/output/tsv/main.nf"
     process "WRITE_TSV"
 

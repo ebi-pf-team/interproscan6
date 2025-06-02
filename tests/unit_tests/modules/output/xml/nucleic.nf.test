@@ -1,6 +1,6 @@
 nextflow_process {
 
-    name "Test Process WRITE_XML"
+    name "Test Process WRITE_XML [nucleic]"
     script "modules/output/xml/main.nf"
     process "WRITE_XML"
 
