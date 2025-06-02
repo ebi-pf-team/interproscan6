@@ -1,0 +1,53 @@
+{
+    "Should run PREPARE_SMART without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "panther.json:md5,7499c2af21f6cb70371cd76b251fc951"
+                    ]
+                ],
+                "1": [
+                    [
+                        1,
+                        [
+                            "E8872C7A0261B9E88E6FF47EB34E4162"
+                        ],
+                        [
+                            "PTHR13693"
+                        ],
+                        [
+                            "tmp14335088482561019285.fa:md5,6a1e11e8a9ca556a8b6c051378f9b4f2"
+                        ]
+                    ]
+                ],
+                "fasta": [
+                    [
+                        1,
+                        [
+                            "E8872C7A0261B9E88E6FF47EB34E4162"
+                        ],
+                        [
+                            "PTHR13693"
+                        ],
+                        [
+                            "tmp14335088482561019285.fa:md5,6a1e11e8a9ca556a8b6c051378f9b4f2"
+                        ]
+                    ]
+                ],
+                "json": [
+                    [
+                        1,
+                        "panther.json:md5,7499c2af21f6cb70371cd76b251fc951"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-06-02T13:58:08.532039"
+    }
+}

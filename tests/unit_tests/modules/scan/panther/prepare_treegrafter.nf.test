@@ -1,0 +1,29 @@
+nextflow_process {
+
+    name "Test Process PREPARE_TREEGRAFTER"
+    script "modules/panther/main.nf"
+    process "PREPARE_TREEGRAFTER"
+
+    stage {
+        symlink "tests/data/channels/panther.hmmsearch.out"
+        symlink "tests/data/databases/panther/19.0"
+    }
+
+    test("Should run PREPARE_SMART without failures") {
+
+        when {
+            process {
+                """
+                input[0] = [1, file("meta/tests/data/channels/panther.hmmsearch.out")]
+                input[1] = "meta/tests/data/databases/panther/19.0/"
+                input[2] = "Tree_MSF"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+    }
+}
