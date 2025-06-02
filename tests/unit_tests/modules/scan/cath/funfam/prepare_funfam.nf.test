@@ -32,5 +32,4 @@ nextflow_process {
             assert expected == observed
         }
     }
-
 }
