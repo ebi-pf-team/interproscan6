@@ -5,7 +5,7 @@ nextflow_workflow {
     workflow "INIT_PIPELINE"
 
     stage {
-        symlink "tests/data/test.faa"
+        symlink "tests/data/sequences/test.faa"
         symlink "conf/applications.config"
     }
 
@@ -32,7 +32,7 @@ nextflow_workflow {
             }
             workflow {
                 """
-                input[0] = "meta/tests/data/test.faa"        // input
+                input[0] = "meta/tests/data/sequences/test.faa"        // input
                 input[1] = "pfam,ncbifam"                    // applictaions
                 input[2] = params.apps_config                // apps_config
                 input[3] = false                             // download
@@ -121,7 +121,7 @@ nextflow_workflow {
             }
             workflow {
                 """
-                input[0] = "meta/tests/data/test.faa"        // input
+                input[0] = "meta/tests/data/sequences/test.faa"        // input
                 input[1] = "pfam,ncbifam,fake_application"                    // applictaions
                 input[2] = params.apps_config                // apps_config
                 input[3] = false                             // download
@@ -165,7 +165,7 @@ nextflow_workflow {
             }
             workflow {
                 """
-                input[0] = "meta/tests/data/test.faa"        // input
+                input[0] = "meta/tests/data/sequences/test.faa"        // input
                 input[1] = "pfam,ncbifam"                    // applictaions
                 input[2] = params.apps_config                // apps_config
                 input[3] = true                              // download
@@ -209,7 +209,7 @@ nextflow_workflow {
             }
             workflow {
                 """
-                input[0] = "meta/tests/data/test.faa"        // input
+                input[0] = "meta/tests/data/sequences/test.faa"        // input
                 input[1] = "pfam,ncbifam"                    // applictaions
                 input[2] = params.apps_config                // apps_config
                 input[3] = false                             // download
@@ -253,7 +253,7 @@ nextflow_workflow {
             }
             workflow {
                 """
-                input[0] = "meta/tests/data/test.faa"        // input
+                input[0] = "meta/tests/data/sequences/test.faa"        // input
                 input[1] = "pfam,ncbifam"                    // applictaions
                 input[2] = params.apps_config                // apps_config
                 input[3] = false                              // download
@@ -297,7 +297,7 @@ nextflow_workflow {
             }
             workflow {
                 """
-                input[0] = "meta/tests/data/test.faa"        // input
+                input[0] = "meta/tests/data/sequences/test.faa"        // input
                 input[1] = "pfam,ncbifam"                    // applictaions
                 input[2] = params.apps_config                // apps_config
                 input[3] = false                             // download
@@ -341,12 +341,12 @@ nextflow_workflow {
             }
             workflow {
                 """
-                input[0] = "meta/tests/data/test.faa"        // input
+                input[0] = "meta/tests/data/sequences/test.faa"        // input
                 input[1] = "pfam,ncbifam"                    // applictaions
                 input[2] = params.apps_config                // apps_config
                 input[3] = false                             // download
                 input[4] = false                             // offline
-                input[5] = "meta/tests/data/test.faa"        // datadir
+                input[5] = "meta/tests/data/sequences/test.faa"        // datadir
                 input[6] = "json,tsv,xml"                    // formats
                 input[7] = "outdir"                          // outdir
                 input[8] = "latest"                          // interpro_version
@@ -385,7 +385,7 @@ nextflow_workflow {
             }
             workflow {
                 """
-                input[0] = "meta/tests/data/test.faa"        // input
+                input[0] = "meta/tests/data/sequences/test.faa"        // input
                 input[1] = "pfam,ncbifam"                    // applictaions
                 input[2] = params.apps_config                // apps_config
                 input[3] = false                             // download
@@ -436,7 +436,7 @@ nextflow_workflow {
             }
             workflow {
                 """
-                input[0] = "meta/tests/data/test.faa"         // input
+                input[0] = "meta/tests/data/sequences/test.faa"         // input
                 input[1] = "signap-prok,signap-euk,deeptmhmm" // applictaions
                 input[2] = params.apps_config                 // apps_config
                 input[3] = false                              // download
