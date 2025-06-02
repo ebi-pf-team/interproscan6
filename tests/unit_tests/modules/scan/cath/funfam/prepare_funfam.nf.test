@@ -5,7 +5,7 @@ nextflow_process {
     process "PREPARE_FUNFAM"
 
     stage {
-        symlink "tests/data/channels/cathgene3d.json"
+        symlink "tests/data/channels/cathgene3d.funfam.json"
         symlink "tests/data/databases/cath/4.3.0/funfam"
     }
 
@@ -14,7 +14,7 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = [1, 1, file("meta/tests/data/channels/cathgene3d.json")]
+                input[0] = [1, 1, file("meta/tests/data/channels/cathgene3d.funfam.json")]
                 input[1] = "meta/tests/data/databases/cath/4.3.0/funfam"
                 """
             }
