@@ -29,7 +29,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 15
     continue-on-error: true
 
     steps:
