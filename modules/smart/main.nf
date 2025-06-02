@@ -10,13 +10,13 @@ process PREFILTER_SMART {
     val hmmfile
 
     output:
-    tuple val(meta), path("hmmpfam.out"), path(fasta)
+    tuple val(meta), path("hmmsearch.out"), path(fasta)
 
     script:
     """
     /opt/hmmer3/bin/hmmsearch \
         -E 100 --domE 100 --incE 100 --incdomE 100 \
-        ${dirpath}/${hmmfile} ${fasta} > hmmpfam.out
+        ${dirpath}/${hmmfile} ${fasta} > hmmsearch.out
     """
 }
 

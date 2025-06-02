@@ -1,0 +1,35 @@
+nextflow_process {
+
+    name "Test Process PREPARE_SMART"
+    script "modules/smart/main.nf"
+    process "PREPARE_SMART"
+
+    stage {
+        symlink "tests/data/channels/smart.hmmer3.hmmsearch.out"
+        symlink "tests/data/channels/smart.hmmer3.faa"
+        symlink "tests/data/databases/smart/9.0"
+    }
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                input[0] = [1, file("meta/tests/data/channels/smart.hmmer3.hmmsearch.out"), file("meta/tests/data/channels/smart.hmmer3.faa")]
+                input[1] = "meta/tests/data/databases/smart"
+                input[2] = "hmmer3"
+                input[3] = 1000
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            def expected = "tests/data/channels/superfamily.json"
+            def observed_fasta = process.out.get(0).get(0).get(1)
+            def observed_smarts = process.out.get(0).get(0).get(2)
+            println "--\n${observed_fasta}--${observed_fasta}"
+        }
+    }
+}
+
