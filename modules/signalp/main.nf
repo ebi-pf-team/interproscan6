@@ -1,6 +1,9 @@
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
+// import needed for unit tests
+import Match
+
 process RUN_SIGNALP_CPU {
     label 'medium', 'signalp_container'
 
