@@ -10,14 +10,14 @@ nextflow_process {
         symlink "tests/data/databases/smart/9.0"
     }
 
-    test("Should run without failures") {
+    test("Should run PREPARE_SMART without failures") {
 
         when {
             process {
                 """
                 input[0] = [1, file("meta/tests/data/channels/smart.hmmer3.hmmsearch.out"), file("meta/tests/data/channels/smart.hmmer3.faa")]
-                input[1] = "meta/tests/data/databases/smart"
-                input[2] = "hmmer3"
+                input[1] = "meta/tests/data/databases/smart/9.0/"
+                input[2] = "hmmer"
                 input[3] = 1000
                 """
             }
@@ -29,4 +29,3 @@ nextflow_process {
         }
     }
 }
-
