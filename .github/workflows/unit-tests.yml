@@ -79,6 +79,12 @@ jobs:
             type=local,dest=/tmp/.buildx-cache,mode=max
             type=gha,mode=max
 
+      - name: Print environment info
+        run: |
+          java -version
+          nextflow -version
+          env
+
       - name: Run NF-Test unit tests
         shell: bash -l {0}
         run: |
