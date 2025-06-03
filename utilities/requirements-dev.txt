@@ -1,4 +1,1 @@
 lxml==5.4.0
-nextflow==23.0.4
-pip==23.2.1
-python==3.11.4
