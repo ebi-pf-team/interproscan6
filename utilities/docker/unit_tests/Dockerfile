@@ -13,7 +13,7 @@ WORKDIR /opt/
 
 # Install dependencies for the unit tests
 COPY utilities/requirements-dev.txt /tmp/requirements-dev.txt
-RUN pip install --no-cache-dir -r /tmp/requirements-dev.txt
+RUN pip install --no-cache-dir --break-system-packages -r /tmp/requirements-dev.txt
 
 # Copy the files that will form the outputs/inputs to be used in the unit tests
 WORKDIR /opt/interproscan6
