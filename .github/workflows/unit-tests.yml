@@ -83,13 +83,4 @@ jobs:
         shell: bash -l {0}
         run: |
           export PATH=$PATH:$GITHUB_WORKSPACE/nf-test
-          output=$(./nf-test test tests/unit_tests)
-          echo "$output"
-          result_line=$(echo "$output" | tail -n 2 | head -n 1)
-          echo "Result line: $result_line"
-          if [[ "$result_line" == SUCCESS:* ]]; then
-            echo "Tests passed"
-          else
-            echo "Tests failed"
-            exit 1
-          fi
+          ./nf-test test tests/unit_tests
