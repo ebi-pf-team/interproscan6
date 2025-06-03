@@ -11,6 +11,10 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
 # make dirs to store the scripts to mock the bins used in the IRL image
 WORKDIR /opt/
 
+# Install dependencies for the unit tests
+COPY utilities/requirements-dev.txt /tmp/requirements-dev.txt
+RUN pip install --no-cache-dir -r /tmp/requirements-dev.txt
+
 # Copy the files that will form the outputs/inputs to be used in the unit tests
 WORKDIR /opt/interproscan6
 COPY lib/ lib/
