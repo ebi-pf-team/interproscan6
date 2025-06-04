@@ -50,7 +50,7 @@ jobs:
       - name: Install dependencies
         shell: bash -l {0}
         run: |
-          pip install -r utilities/requirements-dev.txt
+          pip install -r utilities/requirements.txt
           pip install nextflow
           wget -qO- https://get.nf-test.com | bash -s 0.8.4
 
