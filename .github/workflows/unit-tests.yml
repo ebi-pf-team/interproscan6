@@ -34,12 +34,12 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Java
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
+          distribution: 'temurin'
           java-version: '11'
 
       - name: Remove unnecessary files
@@ -47,37 +47,42 @@ jobs:
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
 
-      - name: Install dependencies
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-3.11-pip-${{ hashFiles('utilities/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-3.11-pip-
+            ${{ runner.os }}-python-
+
+      - name: Install Python dependencies
+        shell: bash -l {0}
+        run: pip install -r utilities/requirements.txt
+
+      - name: Cache nf-test
+        uses: actions/cache@v4
+        with:
+          path: |
+            nf-test
+            nf-test.jar
+          key: ${{ runner.os }}-nf-test-0.8.4-${{ hashFiles('**/nf-test') }}
+          restore-keys: |
+            ${{ runner.os }}-nf-test-0.8.4-
+            ${{ runner.os }}-nf-test-
+
+      - name: Install nf-test
         shell: bash -l {0}
         run: |
-          pip install -r utilities/requirements.txt
-          pip install nextflow
-          wget -qO- https://get.nf-test.com | bash -s 0.8.4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('utilities/docker/unit_tests/Dockerfile') }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-      - name: Build and load Docker image
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: ./utilities/docker/unit_tests/Dockerfile
-          load: true
-          tags: interproscan6:latest
-          cache-from: |
-            type=local,src=/tmp/.buildx-cache
-            type=gha
-          cache-to: |
-            type=local,dest=/tmp/.buildx-cache,mode=max
-            type=gha,mode=max
+          if [ ! -f nf-test ]; then
+            wget -qO- https://get.nf-test.com | bash -s 0.8.4
+          fi
+          chmod +x nf-test
 
       - name: Run NF-Test unit tests
         shell: bash -l {0}
