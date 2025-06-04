@@ -2,7 +2,6 @@ import groovy.json.JsonOutput
 import Prints
 import HierarchyEntry
 
-// import needed for unit tests
 import Match
 
 process RUN_PRINTS {

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonException
 import java.util.regex.Pattern
 
-// import needed for nf-test
 import Match
 
 process WRITE_JSON {
