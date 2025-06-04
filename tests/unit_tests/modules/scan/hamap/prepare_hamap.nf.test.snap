@@ -1,0 +1,60 @@
+{
+    "Should run PREPARE_SMART without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        [
+                            "MF_00051",
+                            "MF_00205",
+                            "MF_00376",
+                            "MF_00449",
+                            "MF_00796",
+                            "MF_00846",
+                            "MF_00847",
+                            "MF_00848",
+                            "MF_00955",
+                            "MF_00956",
+                            "MF_00985",
+                            "MF_01005",
+                            "MF_01023",
+                            "MF_01166",
+                            "MF_01601",
+                            "MF_01693",
+                            "MF_02038",
+                            "MF_02046",
+                            "MF_03068"
+                        ],
+                        [
+                            "MF_00051.fa:md5,8b94f1ada703e110ddaaa9c2d585fae8",
+                            "MF_00205.fa:md5,e7e4f6e293a7f4815bbf544c880511d1",
+                            "MF_00376.fa:md5,6da943c643c4f0d602016d5621674fc0",
+                            "MF_00449.fa:md5,e7e4f6e293a7f4815bbf544c880511d1",
+                            "MF_00796.fa:md5,c4704223b7c0acac7b780e4d54fe0e54",
+                            "MF_00846.fa:md5,f4286cade965dac2238b6a9dab96c575",
+                            "MF_00847.fa:md5,f4286cade965dac2238b6a9dab96c575",
+                            "MF_00848.fa:md5,f4286cade965dac2238b6a9dab96c575",
+                            "MF_00955.fa:md5,76bc6d95751508387e3f7e31b84839e9",
+                            "MF_00956.fa:md5,76bc6d95751508387e3f7e31b84839e9",
+                            "MF_00985.fa:md5,8b94f1ada703e110ddaaa9c2d585fae8",
+                            "MF_01005.fa:md5,f4286cade965dac2238b6a9dab96c575",
+                            "MF_01023.fa:md5,8b94f1ada703e110ddaaa9c2d585fae8",
+                            "MF_01166.fa:md5,76bc6d95751508387e3f7e31b84839e9",
+                            "MF_01601.fa:md5,76bc6d95751508387e3f7e31b84839e9",
+                            "MF_01693.fa:md5,8b94f1ada703e110ddaaa9c2d585fae8",
+                            "MF_02038.fa:md5,8b94f1ada703e110ddaaa9c2d585fae8",
+                            "MF_02046.fa:md5,76bc6d95751508387e3f7e31b84839e9",
+                            "MF_03068.fa:md5,c4704223b7c0acac7b780e4d54fe0e54"
+                        ]
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-06-02T14:21:12.7798"
+    }
+}

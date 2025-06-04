@@ -1,0 +1,57 @@
+Query:       PTHR13693.orig.30.pir  [M=429]
+Scores for complete sequences (score includes all domains):
+   --- full sequence ---   --- best 1 domain ---    -#dom-
+    E-value  score  bias    E-value  score  bias    exp  N  Sequence                         Description
+    ------- ------ -----    ------- ------ -----   ---- --  --------                         -----------
+   2.5e-108  374.4   0.0   3.1e-108  374.1   0.0    1.0  1  E8872C7A0261B9E88E6FF47EB34E4162  
+
+
+Domain annotation for each sequence (and alignments):
+>> E8872C7A0261B9E88E6FF47EB34E4162  
+   #    score  bias  c-Evalue  i-Evalue hmmfrom  hmm to    alifrom  ali to    envfrom  env to     acc
+ ---   ------ ----- --------- --------- ------- -------    ------- -------    ------- -------    ----
+   1 !  374.1   0.0  4.8e-116  3.1e-108      77     427 ..      37     382 ..       4     384 .. 0.94
+
+  Alignments for each domain:
+  == domain 1  score: 374.1 bits;  conditional E-value: 4.8e-116
+             PTHR13693.orig.30.pir  77 rvlnlgsnnYLGlaahpkvveeakealkkygvgscgsrliyGttdlhlelEeelAkflgkeaailfssgfvtNsaii 153
+                                       ++  ++sn+YLG+ +hp+v++++k+++++yg gs+gsr+ +Gt ++h+ lE+e+A+ +gke+a+lf sg+++N + +
+  E8872C7A0261B9E88E6FF47EB34E4162  37 EISIWCSNDYLGMGQHPDVLDAMKRSVDEYGGGSGGSRNTGGTNHFHVALEREPAEPHGKEDAVLFTSGYSANEGSL 113
+                                       5669************************************************************************* PP
+
+             PTHR13693.orig.30.pir 154 salvkk..gdliisdelnhasiinGirlsgatirvfkHndmehLeelLreaiaegqtrlkrilvvvEgvysmeGdia 228
+                                       s+l++   ++ ++sd+ nhasii+G+r+sga+++vf+H d  hLeelL +a++      k+++++ E+v+sm Gdia
+  E8872C7A0261B9E88E6FF47EB34E4162 114 SVLAGAvdDCQVFSDSANHASIIDGLRHSGARKHVFRHKDGRHLEELLAAADR-----DKPKFIALESVHSMRGDIA 185
+                                       ***766669*****************************************998.....79***************** PP
+
+             PTHR13693.orig.30.pir 229 pLpeivklkkkykalvylDEahsigvlGktGrGvtellgvdpddvdiimgTlgkafGseGGyiagskevidllrlss 305
+                                        L ei  l+k+y+a+++lDE+h++g++G+ G+G++ + gv+  +  ++mgTl+kafG  GGy+ag + ++d +r ++
+  E8872C7A0261B9E88E6FF47EB34E4162 186 LLAEIAGLAKRYGAVTFLDEVHAVGMYGPGGAGIAARDGVH-CEFTVVMGTLAKAFGMTGGYVAGPAVLMDAVRARA 261
+                                       *****************************************.6789******************************* PP
+
+             PTHR13693.orig.30.pir 306 sgyvFstslppavaaaaikalkvlkgeegaellaklrensnlfrkelkegfivlgdndspivplmlgnpakssafsr 382
+                                       +++vF+t+lppavaa+a++a++ l+g+  +e +++ +en++l +  l+e  i++ ++ spivp+++g+   ++++s 
+  E8872C7A0261B9E88E6FF47EB34E4162 262 RSFVFTTALPPAVAAGALAAVRHLRGS--DEERRRPAENARLTHGLLRERDIPVLSDRSPIVPVLVGEDRMCKRMSA 336
+                                       ************************877..5669999******9999999999************************* PP
+
+             PTHR13693.orig.30.pir 383 elleq.nvavvtvkyptvplgkarlRicvsaahteedldkalealk 427
+                                         le+ + +v+++  p vp g++ lRi++sa h+ e++ ++++al+
+  E8872C7A0261B9E88E6FF47EB34E4162 337 LPLERhGAYVQAIDAPSVPAGEEILRIAPSAVHETEEIHRFVDALD 382
+                                       *****88************************************987 PP
+
+
+
+Internal pipeline statistics summary:
+-------------------------------------
+Query model(s):                            1  (429 nodes)
+Target sequences:                          1  (394 residues searched)
+Passed MSV filter:                         1  (1); expected 0.0 (0.02)
+Passed bias filter:                        1  (1); expected 0.0 (0.02)
+Passed Vit filter:                         1  (1); expected 0.0 (0.001)
+Passed Fwd filter:                         1  (1); expected 0.0 (1e-05)
+Initial search space (Z):           65000000  [as set by --Z on cmdline]
+Domain search space  (domZ):               1  [number of targets reported over threshold]
+# CPU time: 0.00u 0.00s 00:00:00.00 Elapsed: 00:00:00.00
+# Mc/sec: 32.33
+//
+[ok]

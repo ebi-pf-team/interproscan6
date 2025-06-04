@@ -29,7 +29,6 @@ workflow {
         params.datadir,
         params.formats,
         params.outdir,
-        params.matchesApiUrl,
         params.interpro,
         params.skipInterpro,
         params.goterms,

@@ -1,5 +1,7 @@
 import groovy.json.JsonOutput
 
+import Match
+
 process PREPROCESS_HAMAP {
     label 'mini', 'ips6_container'
 

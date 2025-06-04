@@ -1,0 +1,30 @@
+nextflow_process {
+
+    name "Test Process LOAD_ORFS"
+    script "modules/prepare_sequences/main.nf"
+    process "LOAD_ORFS"
+
+    // copy the db so we don't add the nt sequences to the original
+    stage {
+        copy "tests/data/channels/translated.fasta"
+        copy "tests/data/sequences/pre_nt_sequences.db"
+    }
+
+    test("Should load nucleotide sequences without failures") {
+
+        when {
+            params {}
+            process {
+                """
+                input[0] = [file("meta/tests/data/channels/translated.fasta")]
+                input[1] = file("meta/tests/data/sequences/pre_nt_sequences.db")
+                """
+            }
+        }
+
+        then {
+            assert process.success
+        }
+    }
+
+}

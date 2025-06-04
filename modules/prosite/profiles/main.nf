@@ -1,6 +1,8 @@
 import groovy.io.FileType
 import groovy.json.JsonOutput
 
+import Match
+
 process RUN_PFSEARCH {
     label 'tiny', 'ips6_container'
 
