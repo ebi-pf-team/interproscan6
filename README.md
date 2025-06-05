@@ -22,7 +22,7 @@ Before you begin, install:
     * [Apptainer](https://apptainer.org/)
 
 You don't need anything else, Nextflow will download the workflow from GitHub, 
-and required data are automatically downloaded when running InterProScan.
+and required data can be automatically downloaded when running InterProScan.
 
 > [!IMPORTANT]  
 > Phobius, SignalP and DeepTMHMM require separate licenses and downloads. See [Licensed analyses](#licensed-analyses).
@@ -38,7 +38,8 @@ nextflow run ebi-pf-team/interproscan6 \
   -r 6.0.0-alpha \
   -profile docker,test \
   --datadir data \
-  --interpro latest
+  --interpro latest \
+  --download
 ```
 
 Explanation of parameters:
@@ -47,8 +48,9 @@ Explanation of parameters:
 * `-profile docker,test`:
   * `docker`: Execute tasks in Docker containers.
   * `test`: Run InterProScan with a small example FASTA file included in the workflow.
-* `--datadir data`: Set `data` as the directory for storing all required InterPro and member database files. The directory is created automatically if it doesn't exist, and any missing required data are downloaded into it.
+* `--datadir data`: Set `data` as the directory for storing all required InterPro and member database files. The directory is created automatically if it doesn't exist.
 * `--interpro latest`: Use the most recent InterPro release.
+* `--download`: Download any missing metadata and database files into the specified `--datadir`
 
 > [!NOTE]
 > `--interpro latest` is the default, but for reproducibility we strongly recommend pinning the release, e.g. `--interpro 105.0`.
@@ -291,11 +293,11 @@ nextflow run ebi-pf-team/interproscan6 \
   -c licensed.conf \
   --input your.fasta \
   --applications deeptmhmm,phobius,signalp_euk,signalp_prok \
-  --no-matches-api
+  --offline
 ```
 
 > [!WARNING]  
-> As DeepTMHMM 1.0 and SignalP 6.0 predictions are not yet available in the [Matches API](https://www.ebi.ac.uk/interpro/matches/api/), the pre-calculated matches lookup must be disabled with `--no-matches-api`.
+> As DeepTMHMM 1.0 and SignalP 6.0 predictions are not yet available in the [Matches API](https://www.ebi.ac.uk/interpro/matches/api/), the pre-calculated matches lookup must be disabled with `--offline`.
 
 > [!NOTE]  
 > Running both `signalp_euk` and `signalp_prok` will execute SignalP twice, once with eukaryotic post-processing and once without. Choose the mode best suited to your dataset.
