@@ -8,13 +8,13 @@ process WRITE_TSV {
 
     input:
     val matchesFiles
-    val outputPath
+    val output_file
     val seqDbPath
     val nucleic
 
     exec:
     SeqDB db = new SeqDB(seqDbPath.toString())
-    def tsvFile = new File("${outputPath}.tsv".toString())
+    def tsvFile = new File(output_file)
     tsvFile.text = "" // clear the file if it already exists
 
     // Each line contains: seqId md5 seqLength memberDb modelAcc sigDesc start end evalue status date entryAcc entryDesc goterms pathways
