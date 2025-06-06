@@ -27,6 +27,7 @@ workflow {
         params.datadir,
         params.formats,
         params.outdir,
+        params.outprefix,
         params.noMatchesApi,
         params.matchesApiUrl,
         params.interpro,
@@ -37,7 +38,7 @@ workflow {
     fasta_file           = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
     applications         = INIT_PIPELINE.out.apps.val
     data_dir             = INIT_PIPELINE.out.datadir.val
-    out_dir              = INIT_PIPELINE.out.outdir.val
+    outprefix            = INIT_PIPELINE.out.outprefix.val
     formats              = INIT_PIPELINE.out.formats.val
     interpro_version     = INIT_PIPELINE.out.version.val
 
@@ -122,7 +123,7 @@ workflow {
         ch_results,
         seq_db_path,
         formats,
-        out_dir,
+        outprefix,
         params.nucleic,
         workflow.manifest.version,
         db_releases
