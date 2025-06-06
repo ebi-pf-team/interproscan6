@@ -48,7 +48,7 @@ workflow INIT_PIPELINE {
             edit 1
         }
     
-        (datadir, error) = InterProScan.resolveDirectory(datadir, false, true)
+        (datadir, error) = InterProScan.resolveDirectory(datadir, false, false)
         if (datadir == null) {
             log.error error
             exit 1
@@ -63,7 +63,7 @@ workflow INIT_PIPELINE {
         exit 1
     }
 
-    (outdir, error) = InterProScan.resolveDirectory(outdir, false, true)
+    (outdir, error) = InterProScan.resolveDirectory(outdir, false, false)
     if (!outdir) {
         log.error error
         exit 1
