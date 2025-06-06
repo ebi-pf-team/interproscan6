@@ -129,15 +129,3 @@ workflow {
         db_releases
     )
 }
-
-workflow.onComplete = {
-    def input_file = file(params.input)
-    def outputFileName = input_file.getName()
-    def outputDir = params.outdir.endsWith('/') ? params.outdir[0..-2] : params.outdir
-
-    if (workflow.success) {
-        println "InterProScan completed successfully."
-        println "Results are located at ${outputDir}/${outputFileName}.*"
-        println "Duration: ${workflow.duration}"
-    }
-}
