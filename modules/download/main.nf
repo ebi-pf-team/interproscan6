@@ -22,13 +22,12 @@ process DOWNLOAD {
         """
     } else {
         """
-        cd ${outdir}
         curl -OJ ${InterProScan.FTP_URL}/${iprscan_version}/${arcname}/${arcname}-${version}.tar.gz
         curl -OJ ${InterProScan.FTP_URL}/${iprscan_version}/${arcname}/${arcname}-${version}.tar.gz.md5
         md5sum -c ${arcname}-${version}.tar.gz.md5 || { echo "Error: MD5 checksum failed" >&2; exit 1; }
-        tar -zxf ${arcname}-${version}.tar.gz
+        tar -C ${outdir} -zxf ${arcname}-${version}.tar.gz
         rm ${arcname}-${version}.tar.gz*
-        chmod 777 -R ${arcname}
+        chmod 777 -R ${outdir}/${arcname}
         """        
     }
     
