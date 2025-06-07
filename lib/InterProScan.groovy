@@ -226,6 +226,9 @@ class InterProScan {
 
     static findLocalHighestVersionDir(String dirPath) {
         Path path = Paths.get(dirPath)
+        if (!Files.exists(path)) {  // check if exists, otherwise it will raise a generic "No such file or dir" err
+            return null
+        }
         def dirs = Files.list(path)
             .findAll { Files.isDirectory(it) && it.fileName.toString() ==~ /^\d+\.\d+$/ }
             .sort { a, b ->

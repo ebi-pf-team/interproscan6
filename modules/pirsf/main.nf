@@ -101,7 +101,7 @@ process PARSE_PIRSF {
             double ld = Math.abs(sequenceLength - meanL)
 
             // Ratio over coverage of sequence and profile hmm
-            double r = (location.hmmEnd - location.hmmStart) / (location.end - location.start)
+            double r = (location.hmmEnd - location.hmmStart + 1) / (location.end - location.start + 1)
 
             return r > LENGTH_RATIO_THRESHOLD
                 && ovl >= OVERLAP_THRESHOLD
@@ -132,7 +132,7 @@ process PARSE_PIRSF {
             
             // Ratio over coverage of sequence and profile hmm
             Location location = match.locations[0]
-            double r = (location.hmmEnd - location.hmmStart) / (location.end - location.start)
+            double r = (location.hmmEnd - location.hmmStart + 1) / (location.end - location.start + 1)
             return r > LENGTH_RATIO_THRESHOLD && match.score >= minS
         }
 
