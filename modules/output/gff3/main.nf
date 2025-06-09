@@ -59,9 +59,39 @@ def formatLine(
         interproGoTerms,
         interproPathways) {
 
-    int start = loc.start
-    int end = loc.end
-    boolean representative = loc.representative
+    def feature_type = null
+    switch (memberDb) {
+        case ["CATH-Gene3D", "CATH-FunFam", "CDD", "PROSITE profiles", "SMART", "SUPERFAMILY"]:
+            feature_type = "polypeptide_domain"
+            break
+        case ["HAMAP", "MobiDB-lite", "PANTHER", "PIRSF", "PIRSR", "SFLD"]:
+            feature_type = "polypeptide_region"
+            break
+        case ["NCBIFAM", "Pfam"]:
+            feature_type = match.signature.type in ["domain", "repeat"] ? "polypeptide_domain" : "polypeptide_region"
+            break
+        case "AntiFam":
+            feature_type = "spurious_protein"
+            break
+        case "COILS":
+            feature_type = "coiled_coil"
+            break
+        case "DeepTMHMM":
+            feature_type = "transmembrane_helix"
+            break
+        case ["PRINTS", "PROSITE patterns"]:
+            feature_type = "polypeptide_motif"
+            break
+        case ["SignalP-Prok", "SignalP-Euk"]:
+            feature_type = "signal_peptide"
+            break
+        case "Phobius":
+            feature_type = match.signature.type == "CYTOPLASMIC_DOMAIN" ? "cytoplasmic_polypeptide_region" :
+                    match.signature.type == "NON_CYTOPLASMIC_DOMAIN" ? "non_cytoplasmic_polypeptide_region" :
+                    match.signature.type == "TRANSMEMBRANE" ? "transmembrane_helix" :
+                    "signal_peptide"
+            break
+    }
 
     def scoringValue
     switch (memberDb) {
@@ -86,21 +116,20 @@ def formatLine(
     scoringValue = (scoringValue == "-" || scoringValue == null) ? "." : scoringValue
 
     def attributes = [
-            representative ? "Representative=${representative}" : null,
-            entryAcc ? "InterPro=${entryAcc}" : null,
-            entryName ? "Description=${entryName}" : null,
-            entryDesc ? "Description=${entryDesc}" : null,
-            entryType ? "Description=${entryType}" : null,
-            interproGoTerms.collect { "Ontology_term=${it.id}" }.join(";"),
-            interproPathways.collect { "Pathway=${it.databaseName}:${it.id}" }.join(";")
+            "Name=${match.signature.accession}",
+            entryDesc ? "Alias=${entryDesc}" : "Alias=${entryName}",
+            interproGoTerms.collect { "Ontology_term=${it.id}" }.join(","),
+            entryAcc ? "Dbxref=InterPro:${entryAcc}" : null,
+            "type=${match.signature.type}",
+            "representative=${loc.representative}",
     ].findAll { it }.join(";")
 
     return [
             seqId,
             memberDb,
-            match.signature.accession,
-            start,
-            end,
+            feature_type,
+            loc.start,
+            loc.end,
             scoringValue,
             ".", // strand
             ".", // phase
