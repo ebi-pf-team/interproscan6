@@ -24,11 +24,10 @@ workflow {
         params.input,
         params.applications,
         params.appsConfig,
-        params.download,
-        params.offline,
         params.datadir,
         params.formats,
         params.outdir,
+        params.noMatchesApi,
         params.matchesApiUrl,
         params.interpro,
         params.skipInterpro,
@@ -48,7 +47,6 @@ workflow {
         data_dir,
         interpro_version,
         workflow.manifest.version,
-        params.download,
         params.goterms,
         params.pathways
     )
@@ -64,7 +62,7 @@ workflow {
 
     match_results = Channel.empty()
 
-    if (params.offline) {
+    if (params.noMatchesApi) {
         SCAN_SEQUENCES(
             ch_seqs,
             db_releases,

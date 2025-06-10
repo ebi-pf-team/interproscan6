@@ -25,7 +25,7 @@ process RUN_RPSBLAST {
 
 process RUN_RPSPROC {
     /*
-    Process output from offline rpsblast to annotate sequence with conserved
+    Process output from rpsblast to annotate sequence with conserved
     domain information
 
     rpsbproc desc:

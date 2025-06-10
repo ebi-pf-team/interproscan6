@@ -4,11 +4,10 @@ workflow INIT_PIPELINE {
     input
     applications
     apps_config
-    download
-    offline
     datadir
     formats
     outdir
+    no_matches_api
     matches_api_url
     interpro_version
     skip_intepro
@@ -27,11 +26,6 @@ workflow INIT_PIPELINE {
     (apps, error) = InterProScan.validateApplications(applications, apps_config)
     if (!apps) {
         log.error error
-        exit 1
-    }
-
-    if (download && offline) {
-        log.error "--download and --offline are mutually exclusive"
         exit 1
     }
 
@@ -54,7 +48,7 @@ workflow INIT_PIPELINE {
             edit 1
         }
     
-        (datadir, error) = InterProScan.resolveDirectory(datadir, false, true)
+        (datadir, error) = InterProScan.resolveDirectory(datadir, false, false)
         if (datadir == null) {
             log.error error
             exit 1
@@ -69,19 +63,19 @@ workflow INIT_PIPELINE {
         exit 1
     }
 
-    (outdir, error) = InterProScan.resolveDirectory(outdir, false, true)
+    (outdir, error) = InterProScan.resolveDirectory(outdir, false, false)
     if (!outdir) {
         log.error error
         exit 1
     }
 
-    if (!offline) {
+    if (!no_matches_api) {
         invalidApps = apps.findAll { app ->
             ["signalp_euk", "signalp_prok", "deeptmhmm"].contains(app)
         }
 
         if (invalidApps) {
-            log.error "Pre-calculated results for DeepTMHMM, SignalP_Euk, and SignalP_Prok are not yet available in the Matches API. To ensure these analyses run locally and produce results, please add the '--offline' flag when invoking the pipeline."
+            log.error "Precomputed results for DeepTMHMM, SignalP_Euk, and SignalP_Prok are not yet available in the Matches API. To ensure these analyses run locally and produce results, please add the '--no-matches-api' flag when invoking the pipeline."
             exit 1
         }
     }
