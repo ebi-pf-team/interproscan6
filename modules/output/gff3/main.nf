@@ -9,11 +9,13 @@ process WRITE_GFF3 {
     val outputPath
     val seqDbPath
     val nucleic
+    val interproscan_version
 
     exec:
     SeqDB db = new SeqDB(seqDbPath.toString())
     def gff3File = new File("${outputPath}.gff3".toString())
     gff3File.text = "##gff-version 3.1.26\n"
+    gff3File.append("##interproscan-version ${interproscan_version}\n")
 
     matchesFiles.each { matchFile ->
         matchFile = new File(matchFile.toString())
@@ -32,10 +34,11 @@ process WRITE_GFF3 {
                 seqData = nucleic ? db.proteinMd5ToNucleicSeq(proteinMd5) : db.proteinMd5ToProteinSeq(proteinMd5)
                 seqData.each { row ->  // Protein or Nucleic: [id, desc, sequence]
                     String seqId = nucleic ? "${row.nid}_${row.pid}" : row.id
+                    int seqLength = row.sequence.trim().length()
                     match.locations.each { Location loc ->
                         gff3File.append(formatLine(
-                                seqId, match, loc, memberDb,
-                                entryAcc, goterms
+                                seqId, seqLength, match, loc,
+                                memberDb, entryAcc, goterms
                         ) + "\n")
                     }
                 }
@@ -46,6 +49,7 @@ process WRITE_GFF3 {
 
 def formatLine(
         seqId,
+        seqLength,
         match,
         loc,
         memberDb,
@@ -112,13 +116,15 @@ def formatLine(
             "Name=${match.signature.accession}",
             match.signature.description ? "Alias=${match.signature.description}" : "Alias=${match.signature.name}",
             interproGoTerms ? "Ontology_term=" + interproGoTerms.collect { it.id }.join(",") : null,
-            entryAcc ? "Dbxref=InterPro:${entryAcc}" : null,
+            entryAcc && entryAcc != "-" ? "Dbxref=InterPro:${entryAcc}" : null,
             "type=${match.signature.type}",
             "representative=${loc.representative}",
     ].findAll { it }.join(";")
 
     return [
+            "##sequence-region",
             seqId,
+            seqLength,
             memberDb,
             feature_type,
             loc.start,

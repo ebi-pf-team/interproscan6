@@ -27,6 +27,6 @@ workflow OUTPUT {
         WRITE_XML(ch_results, "${outFileName}", seq_db_path, nucleic, iprscan_version, db_releases)
     }
     if (formats.contains("GFF3")) {
-        WRITE_GFF3(ch_results, "${outFileName}", seq_db_path, nucleic)
+        WRITE_GFF3(ch_results, "${outFileName}", seq_db_path, nucleic, iprscan_version)
     }
 }
