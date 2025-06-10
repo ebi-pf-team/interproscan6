@@ -22,22 +22,15 @@ process WRITE_GFF3 {
             matchesMap.each { modelAcc, match ->
                 match = Match.fromMap(match)
                 String memberDb = match.signature.signatureLibraryRelease.library
-                String sigDesc = match.signature.description ?: '-'
                 def goterms = match.signature.entry?.goXRefs
-                def pathways = match.signature.entry?.pathwayXRefs
                 String entryAcc = match.signature.entry?.accession ?: '-'
-                String entryName = match.signature.entry?.name ?: '-'
-                String entryDesc = match.signature.entry?.description ?: '-'
-                String entryType = match.signature.entry?.type ?: '-'
                 seqData = nucleic ? db.proteinMd5ToNucleicSeq(proteinMd5) : db.proteinMd5ToProteinSeq(proteinMd5)
                 seqData.each { row ->  // Protein or Nucleic: [id, desc, sequence]
                     String seqId = nucleic ? "${row.nid}_${row.pid}" : row.id
-                    int seqLength = row.sequence.trim().length()
                     match.locations.each { Location loc ->
                         gff3File.append(formatLine(
-                                seqId, match, loc, memberDb, sigDesc,
-                                entryAcc, entryName, entryDesc, entryType,
-                                goterms, pathways
+                                seqId, match, loc, memberDb,
+                                entryAcc, goterms
                         ) + "\n")
                     }
                 }
@@ -51,13 +44,8 @@ def formatLine(
         match,
         loc,
         memberDb,
-        sigDesc,
         entryAcc,
-        entryName,
-        entryDesc,
-        entryType,
-        interproGoTerms,
-        interproPathways) {
+        interproGoTerms) {
 
     def feature_type = null
     switch (memberDb) {
@@ -117,8 +105,8 @@ def formatLine(
 
     def attributes = [
             "Name=${match.signature.accession}",
-            entryDesc ? "Alias=${entryDesc}" : "Alias=${entryName}",
-            interproGoTerms.collect { "Ontology_term=${it.id}" }.join(","),
+            match.signature.description ? "Alias=${match.signature.description}" : "Alias=${match.signature.name}",
+            interproGoTerms ? "Ontology_term=" + interproGoTerms.collect { it.id }.join(",") : null,
             entryAcc ? "Dbxref=InterPro:${entryAcc}" : null,
             "type=${match.signature.type}",
             "representative=${loc.representative}",
