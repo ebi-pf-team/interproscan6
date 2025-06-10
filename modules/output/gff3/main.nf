@@ -68,7 +68,7 @@ def formatLine(
             feature_type = "polypeptide_region"
             break
         case ["NCBIFAM", "Pfam"]:
-            feature_type = match.signature.type in ["domain", "repeat"] ? "polypeptide_domain" : "polypeptide_region"
+            feature_type = ["DOMAIN", "REPEAT"].contains(match.signature.type.toUpperCase()) ? "polypeptide_domain" : "polypeptide_region"
             break
         case "AntiFam":
             feature_type = "spurious_protein"
@@ -86,9 +86,9 @@ def formatLine(
             feature_type = "signal_peptide"
             break
         case "Phobius":
-            feature_type = match.signature.type == "CYTOPLASMIC_DOMAIN" ? "cytoplasmic_polypeptide_region" :
-                    match.signature.type == "NON_CYTOPLASMIC_DOMAIN" ? "non_cytoplasmic_polypeptide_region" :
-                    match.signature.type == "TRANSMEMBRANE" ? "transmembrane_helix" :
+            feature_type = match.signature.type.toUpperCase() == "CYTOPLASMIC_DOMAIN" ? "cytoplasmic_polypeptide_region" :
+                    match.signature.type.toUpperCase() == "NON_CYTOPLASMIC_DOMAIN" ? "non_cytoplasmic_polypeptide_region" :
+                    match.signature.type.toUpperCase() == "TRANSMEMBRANE" ? "transmembrane_helix" :
                     "signal_peptide"
             break
     }
