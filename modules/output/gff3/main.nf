@@ -13,7 +13,7 @@ process WRITE_GFF3 {
     exec:
     SeqDB db = new SeqDB(seqDbPath.toString())
     def gff3File = new File("${outputPath}.gff3".toString())
-    gff3File.text = "##gff-version 3\n"
+    gff3File.text = "##gff-version 3.1.26\n"
 
     matchesFiles.each { matchFile ->
         matchFile = new File(matchFile.toString())
