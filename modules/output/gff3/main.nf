@@ -21,6 +21,10 @@ process WRITE_GFF3 {
         matchFile = new File(matchFile.toString())
         Map proteins = new ObjectMapper().readValue(matchFile, Map)
         proteins.each { String proteinMd5, Map matchesMap ->
+            seqData = nucleic ? db.proteinMd5ToNucleicSeq(proteinMd5) : db.proteinMd5ToProteinSeq(proteinMd5)
+            String seqId = nucleic ? "${seqData[0].nid}_${seqData[0].pid}" : seqData[0].id
+            int seqLength = seqData[0].sequence.trim().length()
+            gff3File.append( "##sequence-region ${seqId} 1 ${seqLength}\n")
             matchesMap.each { modelAcc, match ->
                 match = Match.fromMap(match)
                 String memberDb = match.signature.signatureLibraryRelease.library
@@ -31,10 +35,7 @@ process WRITE_GFF3 {
                     goterms = match.signature.entry?.goXRefs
                 }
                 String entryAcc = match.signature.entry?.accession ?: '-'
-                seqData = nucleic ? db.proteinMd5ToNucleicSeq(proteinMd5) : db.proteinMd5ToProteinSeq(proteinMd5)
                 seqData.each { row ->  // Protein or Nucleic: [id, desc, sequence]
-                    String seqId = nucleic ? "${row.nid}_${row.pid}" : row.id
-                    int seqLength = row.sequence.trim().length()
                     match.locations.each { Location loc ->
                         gff3File.append(formatLine(
                                 seqId, seqLength, match, loc,
@@ -122,9 +123,7 @@ def formatLine(
     ].findAll { it }.join(";")
 
     return [
-            "##sequence-region",
             seqId,
-            seqLength,
             memberDb,
             feature_type,
             loc.start,
