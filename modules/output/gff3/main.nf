@@ -22,7 +22,7 @@ process WRITE_GFF3 {
         Map proteins = new ObjectMapper().readValue(matchFile, Map)
         proteins.each { String proteinMd5, Map matchesMap ->
             seqData = nucleic ? db.proteinMd5ToNucleicSeq(proteinMd5) : db.proteinMd5ToProteinSeq(proteinMd5)
-            String seqId = nucleic ? "${seqData[0].nid}_${seqData[0].pid}" : seqData[0].id
+            String seqId = nucleic ? "${seqData[0].nid}" : seqData[0].id
             int seqLength = seqData[0].sequence.trim().length()
             gff3File.append( "##sequence-region ${seqId} 1 ${seqLength}\n")
             matchesMap.each { modelAcc, match ->
@@ -36,6 +36,7 @@ process WRITE_GFF3 {
                 }
                 String entryAcc = match.signature.entry?.accession ?: '-'
                 seqData.each { row ->  // Protein or Nucleic: [id, desc, sequence]
+                    seqId = nucleic ? "${row.nid}_${row.pid}" : row.id
                     match.locations.each { Location loc ->
                         gff3File.append(formatLine(
                                 seqId, seqLength, match, loc,
