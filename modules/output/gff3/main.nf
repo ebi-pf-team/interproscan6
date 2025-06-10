@@ -22,7 +22,12 @@ process WRITE_GFF3 {
             matchesMap.each { modelAcc, match ->
                 match = Match.fromMap(match)
                 String memberDb = match.signature.signatureLibraryRelease.library
-                def goterms = match.signature.entry?.goXRefs
+                def goterms = null
+                if(memberDb == "PANTHER"){
+                    goterms = match.treegrafter.goXRefs
+                } else {
+                    goterms = match.signature.entry?.goXRefs
+                }
                 String entryAcc = match.signature.entry?.accession ?: '-'
                 seqData = nucleic ? db.proteinMd5ToNucleicSeq(proteinMd5) : db.proteinMd5ToProteinSeq(proteinMd5)
                 seqData.each { row ->  // Protein or Nucleic: [id, desc, sequence]
