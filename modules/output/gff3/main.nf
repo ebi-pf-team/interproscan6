@@ -116,7 +116,7 @@ def formatLine(
 
     def attributes = [
             "Name=${match.signature.accession}",
-            match.signature.description ? "Alias=${match.signature.description}" : "Alias=${match.signature.name}",
+            match.signature.description ? "Alias=${match.signature.description.replace(';',' ')}" : "Alias=${match.signature.name}",
             interproGoTerms ? "Ontology_term=" + interproGoTerms.collect { it.id }.join(",") : null,
             entryAcc && entryAcc != "-" ? "Dbxref=InterPro:${entryAcc}" : null,
             "type=${match.signature.type}",
