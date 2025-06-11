@@ -31,6 +31,7 @@ workflow {
         params.matchesApiUrl,
         params.interpro,
         params.skipInterpro,
+        params.skipApplications,
         params.goterms,
         params.pathways
     )

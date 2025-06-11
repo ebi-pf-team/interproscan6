@@ -11,6 +11,7 @@ workflow INIT_PIPELINE {
     matches_api_url
     interpro_version
     skip_intepro
+    skip_applications
     goterms
     pathways
 
@@ -23,7 +24,7 @@ workflow INIT_PIPELINE {
     }
 
     // Applications validation
-    (apps, error) = InterProScan.validateApplications(applications, apps_config)
+    (apps, error) = InterProScan.validateApplications(applications, skip_applications, apps_config)
     if (!apps) {
         log.error error
         exit 1
