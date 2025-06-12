@@ -256,7 +256,7 @@ class InterProScan {
             }.keySet().toList()
             return [appsToRun, null]
         } else if (applications && skipApplications) {
-            return [null, "You cannot use both '--applications' and '--skip-applications' options at the same time."]
+            return [null, "--applications and --skip-applications are mutually exclusive"]
         }
 
         // Make a collection of recognized application names
