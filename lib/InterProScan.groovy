@@ -83,7 +83,7 @@ class InterProScan {
         [
             name: "skip-applications",
             metavar: "<APPLICATIONS>",
-            description: "comma-separated applications to skip on scan of the sequences.",
+            description: "comma-separated applications to exclude from analysis. Default: none.",
             canBeNull: true
         ],
         [
