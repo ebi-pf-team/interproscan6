@@ -1,5 +1,7 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 
+import java.util.regex.Pattern
+
 process WRITE_GFF3 {
     label    'tiny'
     executor 'local'
@@ -20,43 +22,53 @@ process WRITE_GFF3 {
     matchesFiles.each { matchFile ->
         matchFile = new File(matchFile.toString())
         Map proteins = new ObjectMapper().readValue(matchFile, Map)
-        proteins.each { String proteinMd5, Map matchesMap ->
-            seqData = nucleic ? db.proteinMd5ToNucleicSeq(proteinMd5) : db.proteinMd5ToProteinSeq(proteinMd5)
-            String seqId = nucleic ? "${seqData[0].nid}" : seqData[0].id
-            int seqLength = seqData[0].sequence.trim().length()
-            gff3File.append( "##sequence-region ${seqId} 1 ${seqLength}\n")
-            matchesMap.each { modelAcc, match ->
-                match = Match.fromMap(match)
-                String memberDb = match.signature.signatureLibraryRelease.library
-                def goterms = null
-                if(memberDb == "PANTHER"){
-                    goterms = match.treegrafter.goXRefs
-                } else {
-                    goterms = match.signature.entry?.goXRefs
-                }
-                String entryAcc = match.signature.entry?.accession ?: '-'
-                seqData.each { row ->  // Protein or Nucleic: [id, desc, sequence]
-                    seqId = nucleic ? "${row.nid}_${row.pid}" : row.id
-                    match.locations.each { Location loc ->
-                        gff3File.append(formatLine(
-                                seqId, seqLength, match, loc,
-                                memberDb, entryAcc, goterms
-                        ) + "\n")
+
+        if (nucleic) {
+            nucleicToProteinMd5 = db.groupProteins(proteins)
+            nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
+                seqData = db.nucleicMd5ToNucleicSeq(nucleicMd5)
+                seqId = seqData[0].id
+                int seqLength = seqData[0].sequence.trim().length()
+                gff3File.append("##sequence-region ${seqData[0].id} 1 ${seqLength}\n")
+
+                proteinMd5s.each { String proteinMd5 ->
+                    // a proteinSeq/Md5 may be associated with multiple nt md5s/seq, only pull the data where the nt md5/seq is relevant
+                    proteinSeqData = db.getOrfSeq(proteinMd5, nucleicMd5)
+                    proteinSeqData.each { row ->
+                        gff3File.append(nucleotideLineFormat(seqId, row) + "\n")
                     }
                 }
-            } // end of matches in matchesNode
-        } // end of proteins.each
+            }
+        } else {
+            proteins.each { String proteinMd5, Map matchesMap ->
+                seqData = db.proteinMd5ToProteinSeq(proteinMd5)
+                int seqLength = seqData[0].sequence.trim().length()
+                gff3File.append("##sequence-region ${seqData[0].id} 1 ${seqLength}\n")
+
+                matchesMap.each { modelAcc, match ->
+                    match = Match.fromMap(match)
+                    String memberDb = match.signature.signatureLibraryRelease.library
+                    seqData.each { row ->
+                        match.locations.each { Location loc ->
+                            gff3File.append(proteinFormatLine(row, match, loc) + "\n")
+                        }
+                    }
+                } // end of matches in matchesNode
+            } // end of proteins.each
+        } // end of nucleic else
     } // end of matchesFiles
 }
 
-def formatLine(
-        seqId,
-        seqLength,
-        match,
-        loc,
-        memberDb,
-        entryAcc,
-        interproGoTerms) {
+def proteinFormatLine(seqInfo, match, loc) {
+
+    String memberDb = match.signature.signatureLibraryRelease.library
+    String entryAcc = match.signature.entry?.accession ?: '-'
+    def goTerms = null
+    if(memberDb == "PANTHER"){
+        goTerms = match.treegrafter.goXRefs
+    } else {
+        goTerms = match.signature.entry?.goXRefs
+    }
 
     def feature_type = null
     switch (memberDb) {
@@ -117,14 +129,14 @@ def formatLine(
     def attributes = [
             "Name=${match.signature.accession}",
             match.signature.description ? "Alias=${match.signature.description.replace(';',' ')}" : "Alias=${match.signature.name}",
-            interproGoTerms ? "Ontology_term=" + interproGoTerms.collect { it.id }.join(",") : null,
+            goTerms ? "Ontology_term=" + goTerms.collect { it.id }.join(",") : null,
             entryAcc && entryAcc != "-" ? "Dbxref=InterPro:${entryAcc}" : null,
             "type=${match.signature.type}",
             "representative=${loc.representative}",
     ].findAll { it }.join(";")
 
     return [
-            seqId,
+            seqInfo.id,
             memberDb,
             feature_type,
             loc.start,
@@ -133,5 +145,25 @@ def formatLine(
             ".", // strand
             ".", // phase
             attributes
+    ].join("\t")
+}
+
+def nucleotideLineFormat(seqId, orfInfo){
+    def SOURCE_NT_PATTERN = Pattern.compile(/^source=[^"]+\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=.*$/)
+    def proteinSource = SOURCE_NT_PATTERN.matcher(orfInfo.description)
+    assert proteinSource.matches()
+    println(orfInfo)
+    int start = proteinSource.group(1) as int
+    int end = proteinSource.group(2) as int
+    String strand = proteinSource.group(3) as int < 4 ? "+" : "-"
+    return [
+        seqId,
+        "esl-translate",
+        "CDS",
+        start,
+        end,
+        strand,
+        0,
+        "ID=${seqId}_${orfInfo.id}", // seqId + orfId
     ].join("\t")
 }
