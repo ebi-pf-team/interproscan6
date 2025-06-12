@@ -104,27 +104,7 @@ def proteinFormatLine(seqInfo, match, loc) {
             break
     }
 
-    def scoringValue
-    switch (memberDb) {
-        case ["CDD", "PRINT"]:
-            scoringValue = match.evalue
-            break
-        case ["SignalP-Prok", "SignalP-Euk"]:
-            scoringValue = loc.pvalue
-            break
-        case ["HAMAP", "PROSITE profiles"]:
-            scoringValue = loc.score
-            break
-        case ["COILS", "MobiDB-lite", "Phobius", "PROSITE patterns", "DeepTMHMM"]:
-            scoringValue = "-"
-            break
-        case "PANTHER":
-            scoringValue = loc.evalue
-            break
-        default:
-            scoringValue = loc.evalue
-    }
-    scoringValue = (scoringValue == "-" || scoringValue == null) ? "." : scoringValue
+    def scoringValue = getScoringValue(match, loc)
 
     def attributes = [
             "Name=${match.signature.accession}",
@@ -152,18 +132,45 @@ def nucleotideLineFormat(seqId, orfInfo){
     def SOURCE_NT_PATTERN = Pattern.compile(/^source=[^"]+\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=.*$/)
     def proteinSource = SOURCE_NT_PATTERN.matcher(orfInfo.description)
     assert proteinSource.matches()
-    println(orfInfo)
     int start = proteinSource.group(1) as int
     int end = proteinSource.group(2) as int
     String strand = proteinSource.group(3) as int < 4 ? "+" : "-"
+
     return [
         seqId,
         "esl-translate",
         "CDS",
-        start,
-        end,
+        strand == '-' ? end : start, // check if is reverse
+        strand == '-' ? start : end, // check if is reverse
+        ".", // score
         strand,
-        0,
-        "ID=${seqId}_${orfInfo.id}", // seqId + orfId
+        0, //phase
+        "ID=${seqId}_${orfInfo.id}"
     ].join("\t")
+}
+
+def getScoringValue(match, loc) {
+    String memberDb = match.signature.signatureLibraryRelease.library
+
+    switch (memberDb) {
+        case ["CDD", "PRINT"]:
+            scoringValue = match.evalue
+            break
+        case ["SignalP-Prok", "SignalP-Euk"]:
+            scoringValue = loc.pvalue
+            break
+        case ["HAMAP", "PROSITE profiles"]:
+            scoringValue = loc.score
+            break
+        case ["COILS", "MobiDB-lite", "Phobius", "PROSITE patterns", "DeepTMHMM"]:
+            scoringValue = "-"
+            break
+        case "PANTHER":
+            scoringValue = loc.evalue
+            break
+        default:
+            scoringValue = loc.evalue
+    }
+    def scoringValue = (scoringValue == "-" || scoringValue == null) ? "." : scoringValue
+    return scoringValue
 }
