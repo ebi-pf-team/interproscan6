@@ -293,8 +293,12 @@ class InterProScan {
         }
 
         if (invalidApps) {
-            def error = "The following applications cannot be run: ${invalidApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses."
-            return [null, error]
+            if (skipApplications) {
+                appsToRun.removeAll(invalidApps)
+            } else {
+                def error = "The following applications cannot be run: ${invalidApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses."
+                return [null, error]
+            }
         }
 
         return [appsToRun.toSet().toList(), null]
