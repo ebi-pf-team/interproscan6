@@ -81,6 +81,12 @@ class InterProScan {
             description: null
         ],
         [
+            name: "skip-applications",
+            metavar: "<APPLICATIONS>",
+            description: "comma-separated applications to exclude from analysis. Default: none.",
+            canBeNull: true
+        ],
+        [
             name: "skip-interpro",
             description: null
             // Used in production. Skips adding InterPro xrefs and identifying representative locations
@@ -239,8 +245,8 @@ class InterProScan {
         return dirs ? dirs.last().fileName.toString() : null
     }
 
-    static validateApplications(String applications, Map appsConfig) {
-        if (!applications) {
+    static validateApplications(String applications, String skipApplications, Map appsConfig) {
+        if (!applications && !skipApplications) {
             // Run all applications, except licensed packages with an unpopulated dir field
             def appsToRun = appsConfig.findAll{ it ->
                 if (this.LICENSED_SOFTWARE.contains(it.key)) {
@@ -249,6 +255,8 @@ class InterProScan {
                 return true
             }.keySet().toList()
             return [appsToRun, null]
+        } else if (applications && skipApplications) {
+            return [null, "--applications and --skip-applications are mutually exclusive"]
         }
 
         // Make a collection of recognized application names
@@ -262,12 +270,18 @@ class InterProScan {
                 allApps[stdAlias] = label
             }
         }
-        def appsToRun = []
-        def appsParam = applications.replaceAll("[- ]", "").split(",").collect { it.trim() }.toSet()
+        def appsToRun = applications ? [] : allApps.values().toSet()
+        def applicationsInput = applications ? applications : skipApplications
+        def appsParam = applicationsInput.replaceAll("[- ]", "").split(",").collect { it.trim() }.toSet()
+
         for (appName in appsParam) {
             def key = appName.toLowerCase()
             if (allApps.containsKey(key)) {
-                appsToRun.add(allApps[key])
+                if (skipApplications) {
+                    appsToRun.remove(allApps[key])
+                } else {
+                    appsToRun.add(allApps[key])
+                }
             } else {
                 def error = "Unrecognised application: '${appName}'. Try '--help' to list available applications."
                 return [null, error]
@@ -279,8 +293,12 @@ class InterProScan {
         }
 
         if (invalidApps) {
-            def error = "The following applications cannot be run: ${invalidApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses."
-            return [null, error]
+            if (skipApplications) {
+                appsToRun.removeAll(invalidApps)
+            } else {
+                def error = "The following applications cannot be run: ${invalidApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses."
+                return [null, error]
+            }
         }
 
         return [appsToRun.toSet().toList(), null]
