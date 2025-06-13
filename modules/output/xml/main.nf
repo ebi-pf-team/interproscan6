@@ -20,8 +20,7 @@ process WRITE_XML {
     exec:
     def writer = new StringWriter()
     def xml = new MarkupBuilder(writer)
-    // set the correct encoding so symbols are formatted correctly in the final output
-    xml.setEscapeAttributes(false)
+    xml.setDoubleQuotes(true)
     SeqDB db = new SeqDB(seq_db_file.toString())
 
     xml."results"("interproscan-version": interproscan_version, "interpro-version": db_releases?.interpro?.version) {
