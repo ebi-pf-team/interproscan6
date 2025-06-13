@@ -1,0 +1,67 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    "test.faa:md5,ca69be62364cac44c8083faace76014e"
+                ],
+                "1": [
+                    [
+                        "ncbifam",
+                        "pfam"
+                    ]
+                ],
+                "2": [
+                    [
+                        
+                    ]
+                ],
+                "3": [
+                    "/home/mblum/Projects/i6/interproscan6/.nf-test/tests/aba7a0f4f7a5b34d9d32ab5a3878abae/results/test.faa"
+                ],
+                "4": [
+                    [
+                        "TSV",
+                        "XML",
+                        "JSON"
+                    ]
+                ],
+                "5": [
+                    "latest"
+                ],
+                "apps": [
+                    [
+                        "ncbifam",
+                        "pfam"
+                    ]
+                ],
+                "datadir": [
+                    [
+                        
+                    ]
+                ],
+                "fasta": [
+                    "test.faa:md5,ca69be62364cac44c8083faace76014e"
+                ],
+                "formats": [
+                    [
+                        "TSV",
+                        "XML",
+                        "JSON"
+                    ]
+                ],
+                "outprefix": [
+                    "/home/mblum/Projects/i6/interproscan6/.nf-test/tests/aba7a0f4f7a5b34d9d32ab5a3878abae/results/test.faa"
+                ],
+                "version": [
+                    "latest"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-06-13T11:44:28.164313"
+    }
+}

@@ -2,6 +2,8 @@ import groovy.json.JsonOutput
 import Prints
 import HierarchyEntry
 
+import Match
+
 process RUN_PRINTS {
     label 'medium', 'ips6_container'
 

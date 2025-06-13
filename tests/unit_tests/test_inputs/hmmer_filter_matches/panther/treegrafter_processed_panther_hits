@@ -1,2 +1,0 @@
-query_id	panther_id	score	evalue	dom_score	dom_evalue	hmm_start	hmm_end	ali_start	ali_end	env_start	env_end	node_id
-WP_338726824_1	PTHR42834:SF1	680.1	1.6e-200	679.9	2e-200	14	837	7	851	1	866	AN23

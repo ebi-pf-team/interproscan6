@@ -1,6 +1,7 @@
 *.DS_Store
 .idea/
 .nextflow*
+.nf-test*
 .vscode/
 *__pycache__*
 tests/integration_tests/test_outputs/current_output.json

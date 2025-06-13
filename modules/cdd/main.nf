@@ -1,5 +1,7 @@
 import groovy.json.JsonOutput
 
+import Match
+
 process RUN_RPSBLAST {
     label 'mini', 'ips6_container'
 
