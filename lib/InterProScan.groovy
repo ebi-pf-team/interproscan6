@@ -28,7 +28,7 @@ class InterProScan {
         [
             name: "formats",
             metavar: "<FORMATS>",
-            description: "comma-separated output formats. Available: JSON,TSV,XML. Default: JSON,TSV,XML."
+            description: "comma-separated output formats. Available: JSON,TSV,XML,GFF3. Default: JSON,TSV,XML,GFF3."
         ],
         [
             name: "outdir",
@@ -110,7 +110,7 @@ class InterProScan {
         ],
     ]
 
-    static final def VALID_FORMATS = ["JSON", "TSV", "XML"]
+    static final def VALID_FORMATS = ["JSON", "TSV", "XML", "GFF3"]
 
     static final def LICENSED_SOFTWARE = ["phobius", "signalp_euk", "signalp_prok", "deeptmhmm"]
 
