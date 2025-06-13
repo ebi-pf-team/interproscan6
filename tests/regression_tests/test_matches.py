@@ -6,8 +6,6 @@ import ast
 import argparse
 import difflib
 import json
-
-from lxml import etree
 import xml.etree.ElementTree as ET
 
 
@@ -90,11 +88,8 @@ def parse_tsv(iprscan_path: str):
 
 
 def parse_xml(iprscan_path: str):
-    """Parse with recovery as true because names/desc can
-    contain apostrophes which can cause lxml to be unable to parse the XML"""
     matches = []
-    parser = etree.XMLParser(recover=True)
-    tree = etree.parse(iprscan_path, parser)
+    tree = ET.parse(iprscan_path)
     root = tree.getroot()
 
     for protein in root.findall(".//protein"):
