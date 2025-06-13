@@ -36,6 +36,11 @@ class InterProScan {
             description: "output directory where results will be saved. Default: current working directory."
         ],
         [
+            name: "outprefix",
+            metavar: "<PREFIX>",
+            description: "base name for output files, without directory. Extension will be added automatically. This affects filenames only, not their location. Must not contain slashes or path components. Default: input filename."
+        ],
+        [
             name : "interpro",
             metavar: "<VERSION>",
             description: "the InterPro release to be used. Defaults to 'latest'."

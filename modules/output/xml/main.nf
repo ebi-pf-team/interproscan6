@@ -9,7 +9,7 @@ process WRITE_XML {
 
     input:
     val matches_files  // {query prot seq md5: {model acc: match}}
-    val output_prefix
+    val output_file
     val seq_db_file
     val nucleic
     val interproscan_version
@@ -39,8 +39,7 @@ process WRITE_XML {
         }
     }
 
-    def outputFilePath = "${output_prefix}.xml"
-    new File(outputFilePath).text = writer.toString()
+    new File(output_file).text = writer.toString()
 }
 
 def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, def xml, SeqDB db) {

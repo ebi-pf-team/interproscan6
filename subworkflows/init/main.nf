@@ -7,6 +7,7 @@ workflow INIT_PIPELINE {
     datadir
     formats
     outdir
+    outprefix
     no_matches_api
     matches_api_url
     interpro_version
@@ -70,6 +71,15 @@ workflow INIT_PIPELINE {
         exit 1
     }
 
+    if (outprefix == null) {
+        outprefix = "${outdir}/${fasta.split('/').last()}"
+    } else if (outprefix.contains("/") || outprefix.contains(File.separator)) {
+        log.error "--outprefix must not contain slashes or directory names. Use --outdir to control output location."
+        exit 1
+    } else {
+        outprefix = "${outdir}/${outprefix}"
+    }
+
     if (!no_matches_api) {
         invalidApps = apps.findAll { app ->
             ["signalp_euk", "signalp_prok", "deeptmhmm"].contains(app)
@@ -85,7 +95,7 @@ workflow INIT_PIPELINE {
     fasta            // str: path to input fasta file
     apps             // list: list of application to
     datadir          // str: path to data directory, or null if not needed
-    outdir           // str: path to output directory
+    outprefix        // str: base path for output files
     formats          // set<String>: output file formats
     version          // str: InterPro version (or "latest")
 }
