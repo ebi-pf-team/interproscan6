@@ -32,18 +32,19 @@ nextflow_workflow {
             }
             workflow {
                 """
-                input[0] = "meta/tests/data/sequences/test.faa"        // input
-                input[1] = "pfam,ncbifam"                    // applictaions
-                input[2] = params.apps_config                // apps_config
-                input[3] = false                             // download
-                input[4] = false                             // offline
-                input[5] = "data"                            // datadir
-                input[6] = "json,tsv,xml"                    // formats
-                input[7] = "outdir"                          // outdir
-                input[8] = "latest"                          // interpro_version
-                input[9] = false                             // skip_interpro
-                input[10] = false                            // goterms
-                input[11] = false                            // pathways
+                input[0] = "meta/tests/data/sequences/test.faa"     // input
+                input[1] = "pfam,ncbifam"                           // applictaions
+                input[2] = params.apps_config                       // apps_config
+                input[3] = "data"                                   // datadir
+                input[4] = "json,tsv,xml"                           // formats
+                input[5] = "results"                                // outdir
+                input[6] = null                                     // outprefix  
+                input[7] = false                                    // no_matches_api
+                input[8] = "latest"                                 // interpro_version
+                input[9] = false                                    // skip_intepro
+                input[10] = null                                    // skip_applications
+                input[11] = false                                   // goterms
+                input[12] = false                                   // pathways
                 """
             }
         }
