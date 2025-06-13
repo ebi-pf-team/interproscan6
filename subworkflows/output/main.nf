@@ -7,22 +7,19 @@ workflow OUTPUT {
     ch_results
     seq_db_path
     formats
-    outdir
+    outprefix
     nucleic
     iprscan_version
     db_releases
 
     main:
-    def fileName = params.input.split('/').last()
-    def outFileName = "${outdir}/${fileName}"
-
     if (formats.contains("JSON")) {
-        WRITE_JSON(ch_results, "${outFileName}", seq_db_path, nucleic, iprscan_version, db_releases)
+        WRITE_JSON(ch_results, "${outprefix}.json", seq_db_path, nucleic, iprscan_version, db_releases)
     }
     if (formats.contains("TSV")) {
-        WRITE_TSV(ch_results, "${outFileName}", seq_db_path, nucleic)
+        WRITE_TSV(ch_results, "${outprefix}.tsv", seq_db_path, nucleic)
     }
     if (formats.contains("XML")) {
-        WRITE_XML(ch_results, "${outFileName}", seq_db_path, nucleic, iprscan_version, db_releases)
+        WRITE_XML(ch_results, "${outprefix}.xml", seq_db_path, nucleic, iprscan_version, db_releases)
     }
 }

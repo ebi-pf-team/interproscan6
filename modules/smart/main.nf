@@ -156,7 +156,7 @@ process PARSE_SMART {
     String serThrKinaseAccession = "SM00220"
     def serThrKinasePattern = ~/.*D[LIVM]K\w\wN.*/
 
-    matches.collectEntries { seqId, models ->
+    def filteredMatches = matches.collectEntries { seqId, models ->
         def filteredModels = [:]
 
         if (models.containsKey(tyrKinaseAccession) && models.containsKey(serThrKinaseAccession)) {
@@ -187,6 +187,6 @@ process PARSE_SMART {
     }
 
     def outputFilePath = task.workDir.resolve("smart.json")
-    def json = JsonOutput.toJson(matches)
+    def json = JsonOutput.toJson(filteredMatches)
     new File(outputFilePath.toString()).write(json)
 }

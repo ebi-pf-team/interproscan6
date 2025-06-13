@@ -14,7 +14,7 @@ process WRITE_JSON {
 
     input:
     val matches_files  // {query prot seq md5: {model acc: match}}
-    val output_prefix
+    val output_file
     val seq_db_file
     val nucleic
     val interproscan_version
@@ -22,8 +22,6 @@ process WRITE_JSON {
 
     exec:
     ObjectMapper jacksonMapper = new ObjectMapper()
-    def output_file = "${output_prefix}.json"
-
     SeqDB db = new SeqDB(seq_db_file.toString())
     streamJson(output_file.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
         jsonWriter.writeStringField("interproscan-version", interproscan_version)

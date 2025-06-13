@@ -51,7 +51,7 @@ process XREFS {
 
                 // Handle PANTHER data
                 if (match.signature.signatureLibraryRelease.library == "PANTHER") {
-                    updatePantherData(match, db_releases.panther.dirpath, panther_paint_dir, signatureAcc, entries, goInfo)
+                    updatePantherData(match, db_releases.panther.dirpath, panther_paint_dir, signatureAcc, entries, add_goterms ? goInfo : null)
                 }
 
                 // Update signature info
@@ -76,7 +76,7 @@ process XREFS {
                          match.signature.entry = new Entry(
                              interproAcc, entryInfo["name"], entryInfo["description"], entryInfo["type"]
                          )
-                         addXRefs(match, interproAcc, ipr2go, goInfo, ipr2pa, paInfo)
+                         addXRefs(match, interproAcc, add_goterms ? ipr2go : null, goInfo, ipr2pa, paInfo)
                     }
                 }
 

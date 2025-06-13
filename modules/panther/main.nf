@@ -157,10 +157,11 @@ process RUN_TREEGRAFTER {
             def awk_command = "awk '{print \"${seqID}\",\$0}'"
 
             // Only run Python + Awk if EPA-ng doesn't fail
-            commands += "${epang_command} && ${py_command} | ${awk_command} >> epang.tsv || :\n"
+            commands += "{ ${epang_command} && ${py_command} | ${awk_command} >> epang.tsv; } || :\n"
         }
 
     """
+    touch epang.tsv
     ${commands}
     """
 }
