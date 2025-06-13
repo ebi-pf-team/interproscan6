@@ -29,7 +29,6 @@ workflow {
         params.outdir,
         params.outprefix,
         params.noMatchesApi,
-        params.matchesApiUrl,
         params.interpro,
         params.skipInterpro,
         params.skipApplications,

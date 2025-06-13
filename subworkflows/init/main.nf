@@ -9,7 +9,6 @@ workflow INIT_PIPELINE {
     outdir
     outprefix
     no_matches_api
-    matches_api_url
     interpro_version
     skip_intepro
     skip_applications
