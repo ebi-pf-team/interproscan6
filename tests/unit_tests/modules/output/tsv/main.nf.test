@@ -17,7 +17,7 @@ nextflow_process {
             process {
                 """
                 input[0] = [file("meta/tests/data/channels/matches_with_representative.json")]
-                input[1] = "../../../unit_test_output"
+                input[1] = "../../../unit_test_output.tsv"
                 input[2] = file("meta/tests/data/sequences/sequences.db")
                 input[3] = false
                 """
