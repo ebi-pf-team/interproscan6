@@ -1,0 +1,25 @@
+{
+    "Should run PREPARE_SMART without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "chunk_0.fasta:md5,5546ca8e3faf803b0f4b7c7ebc3d8468",
+                        [
+                            "SM00382",
+                            "SM00826",
+                            "SM00534",
+                            "SM00533"
+                        ]
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-06-02T11:53:03.568958"
+    }
+}

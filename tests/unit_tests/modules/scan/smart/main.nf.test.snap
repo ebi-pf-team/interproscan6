@@ -1,0 +1,22 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "chunk_0.fasta:md5,5546ca8e3faf803b0f4b7c7ebc3d8468",
+                        [
+                            
+                        ]
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-06-02T11:31:11.994091"
+    }
+}

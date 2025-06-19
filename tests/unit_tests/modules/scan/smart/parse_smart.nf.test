@@ -1,0 +1,37 @@
+nextflow_process {
+
+    name "Test Process PARSE_SMART"
+    script "modules/smart/main.nf"
+    process "PARSE_SMART"
+
+    stage {
+        symlink "tests/data/channels/smart.hmmer2.hmmpfam.out"
+        symlink "tests/data/channels/smart.hmmer3.faa"
+        symlink "tests/data/databases/smart/9.0"
+    }
+
+    test("Should run  PARSE_SMART without failures") {
+
+        when {
+            process {
+                """
+                input[0] = [1, file("$baseDir/tests/data/channels/smart.hmmer2.hmmpfam.out"), file("$baseDir/tests/data/channels/smart.hmmer3.faa")]
+                input[1] = "$baseDir/tests/data/databases/smart/9.0"
+                input[2] = "hmmer"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            def expected = "tests/data/channels/smart.json"
+            def observed = process.out.get(0).get(0).get(1)
+            def cmd = "python3 tests/regression_tests/test_matches.py --format intermediate --expected ${expected} --observed ${observed} --summary"
+            def process = cmd.execute()
+            process.waitFor()
+            def stdout = process.text.trim().readLines()
+            assert stdout[1] == "Matches only in expected : 0"
+            assert stdout[2] == "Matches only in observed : 0"
+        }
+    }
+}

@@ -1,0 +1,58 @@
+nextflow_process {
+
+    name "Test Process WRITE_JSON"
+    script "modules/output/json/main.nf"
+    process "WRITE_JSON"
+
+    test("Should run without failures") {
+
+        when {
+            params {
+                db_releases = [
+                    interpro: [version: "105.0", dirpath: ""],
+                    antifam: [version: "8.0", dirpath: ""],
+                    cathgene3d: [version: "4.3.0", dirpath: ""],
+                    cathfunfam: [version: "4.3.0", dirpath: ""],
+                    cdd: [version: "3.21", dirpath: ""],
+                    hamap: [version: "2025_01", dirpath: ""],
+                    ncbifam: [version: "17.0", dirpath: ""],
+                    panther: [version: "19.0", dirpath: ""],
+                    pfam: [version: "37.3", dirpath: ""],
+                    pirsf: [version: "3.10", dirpath: ""],
+                    pirsr: [version: "2025_01", dirpath: ""],
+                    prints: [version: "42.0", dirpath: ""],
+                    prositepatterns: [version: "2025_01", dirpath: ""],
+                    prositeprofiles: [version: "2025_01", dirpath: ""],
+                    sfld: [version: "4", dirpath: ""],
+                    smart: [version: "9.0", dirpath: ""],
+                    superfamily: [version: "1.75", dirpath: ""]
+                ]
+            }
+            process {
+                """
+                input[0] = [file("$baseDir/tests/data/channels/matches_with_representative.json")]
+                input[1] = "../../../unit_test_output.json"
+                input[2] = file("$baseDir/tests/data/sequences/sequences.db")
+                input[3] = false
+                input[4] = "105.0"
+                input[5] = params.db_releases
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            def expected = "tests/data/output/test.faa.json"
+            def observed = "unit_test_output.json"
+            def cmd = "python3 tests/regression_tests/test_matches.py --expected ${expected} --observed ${observed} --summary"
+            def process = cmd.execute()
+            process.waitFor()
+            def stdout = process.text.trim().readLines()
+            assert stdout[1] == "Matches only in expected : 0"
+            assert stdout[2] == "Matches only in observed : 0"
+            def observedFile = new File(observed)
+            observedFile.delete()
+        }
+    }
+
+}

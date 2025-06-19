@@ -1,0 +1,34 @@
+nextflow_process {
+
+    name "Test Process REPORT_NO_MATCHES"
+    script "modules/no_matches/main.nf"
+    process "REPORT_NO_MATCHES"
+
+    test("Should run without failures") {
+
+        when {
+            params {
+
+            }
+            process {
+                """
+                input[0] = [1, [file("$baseDir/tests/data/channels/antifam.json"), file("$baseDir/tests/data/channels/pfam.json")]]
+                input[1] = [1, file("$baseDir/tests/data/sequences/test.faa")]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            def expected = "tests/data/channels/no_matches.json"
+            def observed = process.out.get(0).get(0).get(1)
+            def cmd = "python3 tests/regression_tests/test_matches.py --format intermediate --expected ${expected} --observed ${observed} --summary --applications pfam,antifam"
+            def process = cmd.execute()
+            process.waitFor()
+            def stdout = process.text.trim().readLines()
+            assert stdout[1] == "Matches only in expected : 0"
+            assert stdout[2] == "Matches only in observed : 0"
+        }
+    }
+
+}

@@ -1,0 +1,43 @@
+nextflow_process {
+
+    name "Test Process SPLIT_FASTA"
+    script "modules/prepare_sequences/main.nf"
+    process "SPLIT_FASTA"
+
+    test("Should build a protein fasta without failures") {
+
+        when {
+            params {}
+            process {
+                """
+                input[0] = file("$baseDir/tests/data/sequences/sequences.db")
+                input[1] = 5000
+                input[2] = false
+                """
+            }
+        }
+
+        then {
+            assert process.success
+        }
+    }
+
+    test("Should build a nucleic acid fasta without failures") {
+
+        when {
+            params {}
+            process {
+                """
+                input[0] = file("$baseDir/tests/data/sequences/nt_sequences.db")
+                input[1] = 5000
+                input[2] = false
+                """
+            }
+        }
+
+        then {
+            assert process.success
+        }
+    }
+
+}

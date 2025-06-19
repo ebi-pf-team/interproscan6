@@ -1,0 +1,32 @@
+nextflow_process {
+
+    name "Test Process PARSE_HAMAP"
+    script "modules/hamap/main.nf"
+    process "PARSE_HAMAP"
+
+    test("Should run  PARSE_SMART without failures") {
+
+        when {
+            params {
+                pfsearch_out = new File("tests/data/channels/hamap.pfsearchv3.out").text
+            }
+            process {
+                """
+                input[0] = [1, params.pfsearch_out]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            def expected = "tests/data/channels/hamap.json"
+            def observed = process.out.get(0).get(0).get(1)
+            def cmd = "python3 tests/regression_tests/test_matches.py --format intermediate --expected ${expected} --observed ${observed} --summary"
+            def process = cmd.execute()
+            process.waitFor()
+            def stdout = process.text.trim().readLines()
+            assert stdout[1] == "Matches only in expected : 0"
+            assert stdout[2] == "Matches only in observed : 0"
+        }
+    }
+}

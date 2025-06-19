@@ -1,0 +1,38 @@
+nextflow_process {
+
+    name "Test Process WRITE_TSV"
+    script "modules/output/tsv/main.nf"
+    process "WRITE_TSV"
+
+    test("Should run without failures") {
+
+        when {
+            params {}
+            process {
+                """
+                input[0] = [file("$baseDir/tests/data/channels/matches_with_representative.json")]
+                input[1] = "../../../unit_test_output.tsv"
+                input[2] = file("$baseDir/tests/data/sequences/sequences.db")
+                input[3] = false
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            def expected = "tests/data/output/test.faa.tsv"
+            def observed = "unit_test_output.tsv"
+            def cmd = "python3 tests/regression_tests/test_matches.py --expected ${expected} --observed ${observed} --summary --format tsv"
+            def process = cmd.execute()
+            process.waitFor()
+            def stdout = process.inputStream.text.trim().readLines()
+            def stderr = process.errorStream.text.trim()
+            assert stdout[1] == "Matches only in expected : 0"
+            assert stdout[2] == "Matches only in observed : 0"
+            def observedFile = new File(observed)
+            observedFile.delete()
+        }
+
+    }
+
+}

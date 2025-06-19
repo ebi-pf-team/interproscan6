@@ -1,6 +1,7 @@
 include { WRITE_JSON } from "../../modules/output/json"
 include { WRITE_TSV  } from "../../modules/output/tsv"
 include { WRITE_XML  } from "../../modules/output/xml"
+include { WRITE_GFF3 } from "../../modules/output/gff3"
 
 workflow OUTPUT {
     take:
@@ -13,6 +14,9 @@ workflow OUTPUT {
     db_releases
 
     main:
+    if (formats.contains("GFF3")) {
+        WRITE_GFF3(ch_results, "${outprefix}.gff3", seq_db_path, nucleic, iprscan_version)
+    }
     if (formats.contains("JSON")) {
         WRITE_JSON(ch_results, "${outprefix}.json", seq_db_path, nucleic, iprscan_version, db_releases)
     }

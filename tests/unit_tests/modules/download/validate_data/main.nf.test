@@ -1,0 +1,46 @@
+nextflow_process {
+
+    name "Test Process VALIDATE_DATA"
+    script "modules/download/main.nf"
+    process "VALIDATE_DATA"
+
+    test("Should run without failures") {
+
+        when {
+            params {
+                list_databases = [
+                    ["interpro", "105.0", "/home/ehobbs/Projects/IPS6_cb_2/data-105.0/interpro/105.0"],
+                    ["antifam", "8.0", "/home/ehobbs/Projects/IPS6_cb_2/data-105.0/antifam/8.0"]
+                ]
+            }
+            process {
+                """
+                input[0] = params.list_databases
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            def expected_map_databases = [
+                "interpro": [
+                    "version": "105.0",
+                    "dirpath": "/home/ehobbs/Projects/IPS6_cb_2/data-105.0/interpro/105.0"
+                ],
+                "antifam": [
+                    "version": "8.0",
+                    "dirpath": "/home/ehobbs/Projects/IPS6_cb_2/data-105.0/antifam/8.0"
+                ]
+            ]
+            def observed_map_databases = process.out.get(0)
+            def resultMap = observed_map_databases
+                .collectMany { it.entrySet() }
+                .collectEntries { [(it.key): it.value] }
+            assert expected_map_databases == resultMap
+            assert expected_map_databases.get("interpro") == resultMap.get("interpro")
+            assert expected_map_databases.get("antifam") == resultMap.get("antifam")
+        }
+
+    }
+
+}

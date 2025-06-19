@@ -1,0 +1,24 @@
+nextflow_process {
+
+    name "Test Process LOAD_ORFS"
+    script "modules/prepare_sequences/main.nf"
+    process "LOAD_ORFS"
+
+    test("Should load nucleotide sequences without failures") {
+
+        when {
+            params {}
+            process {
+                """
+                input[0] = [file("$baseDir/tests/data/channels/translated.fasta")]
+                input[1] = file("$baseDir/tests/data/sequences/pre_nt_sequences.db")
+                """
+            }
+        }
+
+        then {
+            assert process.success
+        }
+    }
+
+}

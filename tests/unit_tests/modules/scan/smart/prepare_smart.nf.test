@@ -1,0 +1,25 @@
+nextflow_process {
+
+    name "Test Process PREPARE_SMART"
+    script "modules/smart/main.nf"
+    process "PREPARE_SMART"
+
+    test("Should run PREPARE_SMART without failures") {
+
+        when {
+            process {
+                """
+                input[0] = [1, file("$baseDir/tests/data/channels/smart.hmmer3.hmmsearch.out"), file("$baseDir/tests/data/channels/smart.hmmer3.faa")]
+                input[1] = "$baseDir/tests/data/databases/smart/9.0/"
+                input[2] = "hmmer"
+                input[3] = 1000
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+    }
+}

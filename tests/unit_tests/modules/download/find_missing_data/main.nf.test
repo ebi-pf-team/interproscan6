@@ -1,0 +1,81 @@
+nextflow_process {
+
+    name "Test Process FIND_MISSING_DATA"
+    script "modules/download/main.nf"
+    process "FIND_MISSING_DATA"
+
+    test("Should run without failures") {
+
+        when {
+            params {
+                n = "interpro"
+                v = "105.0"
+                p = "$baseDir/tests/data/databases/interpro/105.0"
+                json_database = "$baseDir/tests/data/databases/interpro/105.0/databases.json"
+                apps_to_run = ["antifam"]
+                app_dirs = [
+                    "antifam": ["antifam", ""],
+                    "pfam"   : ["pfam",    ""]
+                ]
+                datadir = "$baseDir/tests/data/databases"
+            }
+            process {
+                """
+                input[0] = [params.n, params.v, params.p]
+                input[1] = params.json_database
+                input[2] = params.apps_to_run
+                input[3] = params.app_dirs
+                input[4] = params.datadir
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            def expected_with_data = [["antifam", "8.0", "$baseDir/tests/data/databases/antifam/8.0"]]
+            def expected_without_data = [[]]
+            def observed_with_data = process.out.get(0).get(0)
+            def observed_without_data = process.out.get(1)
+            assert expected_with_data == observed_with_data
+            assert expected_without_data == observed_without_data
+        }
+    }
+
+    test("Should find missing data") {
+
+        when {
+            params {
+                n = "interpro"
+                v = "105.0"
+                p = "$baseDir/tests/data/databases/interpro/106.0"
+                json_database = "$baseDir/tests/data/databases/interpro/106.0/databases.json"
+                apps_to_run = ["antifam", "pfam"]
+                app_dirs = [
+                    "antifam": ["antifam", ""],
+                    "pfam"   : ["pfam",    ""]
+                ]
+                datadir = "$baseDir/tests/data/databases"
+            }
+            process {
+                """
+                input[0] = [params.n, params.v, params.p]
+                input[1] = params.json_database
+                input[2] = params.apps_to_run
+                input[3] = params.app_dirs
+                input[4] = params.datadir
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            def expected_with_data = [["antifam", "8.0", "$baseDir/tests/data/databases/antifam/8.0"]]
+            def expected_without_data = [[["pfam", "pfam", "38.0", false, "$baseDir/tests/data/databases/pfam/38.0"]]]
+            def observed_with_data = process.out.get(0).get(0)
+            def observed_without_data = process.out.get(1)
+            assert expected_with_data == observed_with_data
+            assert expected_without_data == observed_without_data
+        }
+    }
+
+}

@@ -1,66 +1,108 @@
 nextflow_workflow {
 
-    name "Test Workflow AGGREGATE_RESULTS"
-    script "interproscan/subworkflows/aggregate_results/main.nf"
-    workflow "AGGREGATE_RESULTS"
+    name "Test suborkflow COMBINE"
+    script "subworkflows/combine/main.nf"
+    workflow "COMBINE"
 
-    stage {
-        symlink "tests/unit_tests/test_inputs/aggregate_results/cdd_matches.json"
-        symlink "tests/unit_tests/test_inputs/aggregate_results/hamap_matches.json"
-        symlink "tests/unit_tests/test_inputs/aggregate_results/corrupted.json"
-    }
-
-    test("Should run successfully") {
+    test("Should skip adding interpro data and run without failures") {
         when {
             params {
-                 }
+                match_results = [
+                    [
+                        1,
+                        file("$baseDir/tests/data/channels/antifam.json"),
+                        file("$baseDir/tests/data/channels/pfam.json"),
+                        file("$baseDir/tests/data/channels/no_matches.json")
+                    ]
+                ]
+                db_releases = [
+                    interpro: [version: "105.0", dirpath: "$baseDir/tests/data/databases/interpro/105.0"],
+                    antifam: [version: "8.0", dirpath: ""],
+                    cathgene3d: [version: "4.3.0", dirpath: ""],
+                    cathfunfam: [version: "4.3.0", dirpath: ""],
+                    cdd: [version: "3.21", dirpath: ""],
+                    hamap: [version: "2025_01", dirpath: ""],
+                    ncbifam: [version: "17.0", dirpath: ""],
+                    panther: [version: "19.0", dirpath: ""],
+                    pfam: [version: "37.3", dirpath: ""],
+                    pirsf: [version: "3.10", dirpath: ""],
+                    pirsr: [version: "2025_01", dirpath: ""],
+                    prints: [version: "42.0", dirpath: ""],
+                    prositepatterns: [version: "2025_01", dirpath: ""],
+                    prositeprofiles: [version: "2025_01", dirpath: ""],
+                    sfld: [version: "4", dirpath: ""],
+                    smart: [version: "9.0", dirpath: ""],
+                    superfamily: [version: "1.75", dirpath: ""]
+                ]
+                add_goterms = true
+                add_pathways = true
+                panther_paint_dir = "$baseDir/tests/data/databases/interpro/105.0"
+                skip_interpro = true
+            }
             workflow {
                 """
-                input[0] = Channel.from(file("meta/tests/unit_tests/test_inputs/aggregate_results/cdd_matches.json"), \
-                file("meta/tests/unit_tests/test_inputs/aggregate_results/hamap_matches.json"))
+                input[0] = params.match_results
+                input[1] = params.db_releases
+                input[2] = params.add_goterms
+                input[3] = params.add_pathways
+                input[4] = params.panther_paint_dir
+                input[5] = params.skip_interpro
                 """
             }
         }
-
         then {
             assert workflow.success
-            assert snapshot(workflow.out).match()
-            assert workflow.exitStatus == 0
-        }
-
-    }
-
-    test("Should handle corrupted JSON file error") {
-        when {
-            params {
-            }
-            workflow {
-                """
-                input[0] = Channel.from(file("meta/tests/unit_tests/test_inputs/aggregate_results/corrupted.json"))
-                """
-            }
-        }
-
-        then {
-            assert workflow.failed
-            assert workflow.exitStatus == 22
         }
     }
 
-    test("Should handle file not found error") {
+    test("Should add interpro data and run without failures") {
         when {
             params {
+                match_results = [
+                    [
+                        1,
+                        file("$baseDir/tests/data/channels/antifam.json"),
+                        file("$baseDir/tests/data/channels/pfam.json"),
+                        file("$baseDir/tests/data/channels/no_matches.json")
+                    ]
+                ]
+                db_releases = [
+                    interpro: [version: "105.0", dirpath: "$baseDir/tests/data/databases/interpro/105.0"],
+                    antifam: [version: "8.0", dirpath: ""],
+                    cathgene3d: [version: "4.3.0", dirpath: ""],
+                    cathfunfam: [version: "4.3.0", dirpath: ""],
+                    cdd: [version: "3.21", dirpath: ""],
+                    hamap: [version: "2025_01", dirpath: ""],
+                    ncbifam: [version: "17.0", dirpath: ""],
+                    panther: [version: "19.0", dirpath: ""],
+                    pfam: [version: "37.3", dirpath: ""],
+                    pirsf: [version: "3.10", dirpath: ""],
+                    pirsr: [version: "2025_01", dirpath: ""],
+                    prints: [version: "42.0", dirpath: ""],
+                    prositepatterns: [version: "2025_01", dirpath: ""],
+                    prositeprofiles: [version: "2025_01", dirpath: ""],
+                    sfld: [version: "4", dirpath: ""],
+                    smart: [version: "9.0", dirpath: ""],
+                    superfamily: [version: "1.75", dirpath: ""]
+                ]
+                add_goterms = true
+                add_pathways = true
+                panther_paint_dir = "tests/data/databases/interpro/105.0"
+                skip_interpro = false
             }
             workflow {
                 """
-                input[0] = Channel.from(file("meta/tests/unit_tests/test_inputs/aggregate_results/no_hay_banda.json"), file("meta/tests/unit_tests/test_inputs/aggregate_results/cdd_matches.json"))
+                input[0] = params.match_results
+                input[1] = params.db_releases
+                input[2] = params.add_goterms
+                input[3] = params.add_pathways
+                input[4] = params.panther_paint_dir
+                input[5] = params.skip_interpro
                 """
             }
         }
-
         then {
-            assert workflow.failed
-            assert workflow.exitStatus == 5
+            assert workflow.success
         }
     }
 }

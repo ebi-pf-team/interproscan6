@@ -1,0 +1,30 @@
+nextflow_process {
+
+    name "Test Process PREPARE_FUNFAM"
+    script "modules/cath/funfam/main.nf"
+    process "PREPARE_FUNFAM"
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                input[0] = [1, 1, file("$baseDir/tests/data/channels/cathgene3d.funfam.json")]
+                input[1] = "$baseDir/tests/data/databases/cath/4.3.0/funfam"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            def expected = [
+                "1.10.540.10", "2.40.110.10", "1.20.140.10", "3.30.70.100",
+                "3.40.50.620", "3.40.109.10", "3.40.630.10", "3.40.30.10",
+                "1.20.1050.10", "1.10.10.10", "3.30.160.810", "2.40.30.10",
+                "3.40.50.1000", "1.10.357.10"
+            ]
+            def observed = process.out.get(0).get(0).get(2)
+            assert expected == observed
+        }
+    }
+}

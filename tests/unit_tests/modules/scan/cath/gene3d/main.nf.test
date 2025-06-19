@@ -1,0 +1,30 @@
+nextflow_process {
+
+    name "Test Process PARSE_CATHGENE3D"
+    script "modules/cath/gene3d/main.nf"
+    process "PARSE_CATHGENE3D"
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                input[0] = [1, 1, file("$baseDir/tests/data/channels/cathgene3d.hmmsearch.out"), file("$baseDir/tests/data/channels/cath.tsv")]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            def expected = "tests/data/channels/cathgene3d.json"
+            def observed = process.out.get(0).get(0).get(2)
+            def cmd = "python3 tests/regression_tests/test_matches.py --format intermediate --expected ${expected} --observed ${observed} --summary --applications gene3d"
+            def process = cmd.execute()
+            process.waitFor()
+            def stdout = process.text.trim().readLines()
+            assert stdout[1] == "Matches only in expected : 0"
+            assert stdout[2] == "Matches only in observed : 0"
+        }
+    }
+}
+

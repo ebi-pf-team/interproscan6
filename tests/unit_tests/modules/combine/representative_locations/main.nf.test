@@ -1,0 +1,31 @@
+nextflow_process {
+
+    name "Test Process REPRESENTATIVE_LOCATIONS"
+    script "modules/representative_locations/main.nf"
+    process "REPRESENTATIVE_LOCATIONS"
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                input[0] = [1, file("$baseDir/tests/data/channels/matches2xrefs.json")]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+            def expected = "tests/data/channels/matches_with_representative.json"
+            def observed = process.out.get(0).get(0).get(1)
+            def cmd = "python3 tests/unit_tests/modules/combine/representative_locations/test_representatives.py --expected ${expected} --observed ${observed} --summary"
+            def process = cmd.execute()
+            process.waitFor()
+            def stdout = process.text.trim().readLines()
+            assert stdout[1] == "Matches only in expected : 0"
+            assert stdout[2] == "Matches only in observed : 0"
+        }
+    }
+
+}

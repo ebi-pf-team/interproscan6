@@ -60,7 +60,7 @@ workflow INIT_PIPELINE {
   
     version = InterProScan.validateInterProVersion(interpro_version)
     if (version == null) {
-        log.error "--interpro <VERSION>: invalid format; expecting number of 'latest'"
+        log.error "--interpro <VERSION>: invalid format; expecting number or 'latest'"
         exit 1
     }
 

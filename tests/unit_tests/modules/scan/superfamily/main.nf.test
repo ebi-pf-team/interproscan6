@@ -1,0 +1,33 @@
+nextflow_process {
+
+    name "Test Process PARSE_SUPERFAMILY"
+    script "modules/superfamily/main.nf"
+    process "PARSE_SUPERFAMILY"
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                input[0] = [1, file("$baseDir/tests/data/channels/superfamily.out")]
+                input[1] = "$baseDir/tests/data/databases/superfamily/1.75"
+                input[2] = "model.tab"
+                input[3] = "hmmlib_1.75_minimalist"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            def expected = "tests/data/channels/superfamily.json"
+            def observed = process.out.get(0).get(0).get(1)
+            def cmd = "python3 tests/regression_tests/test_matches.py --format intermediate --expected ${expected} --observed ${observed} --summary"
+            def process = cmd.execute()
+            process.waitFor()
+            def stdout = process.text.trim().readLines()
+            assert stdout[1] == "Matches only in expected : 0"
+            assert stdout[2] == "Matches only in observed : 0"
+        }
+    }
+}
+

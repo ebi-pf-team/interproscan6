@@ -1,0 +1,39 @@
+nextflow_process {
+
+    name "Test Process WRITE_GFF3"
+    script "modules/output/gff3/main.nf"
+    process "WRITE_GFF3"
+
+    test("Should run without failures") {
+
+        when {
+            params {}
+            process {
+                """
+                input[0] = [file("$baseDir/tests/data/channels/matches_with_representative.json")]
+                input[1] = "../../../unit_test_output.gff3"
+                input[2] = file("$baseDir/tests/data/sequences/sequences.db")
+                input[3] = false
+                input[4] = "6.0.0-alpha"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            def expected = "tests/data/output/test.faa.gff3"
+            def observed = "unit_test_output.gff3"
+            def cmd = "python3 tests/regression_tests/test_matches.py --expected ${expected} --observed ${observed} --summary --format gff3"
+            def process = cmd.execute()
+            process.waitFor()
+            def stdout = process.inputStream.text.trim().readLines()
+            def stderr = process.errorStream.text.trim()
+            assert stdout[1] == "Matches only in expected : 0"
+            assert stdout[2] == "Matches only in observed : 0"
+            def observedFile = new File(observed)
+            observedFile.delete()
+        }
+
+    }
+
+}

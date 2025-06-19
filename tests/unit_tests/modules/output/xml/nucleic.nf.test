@@ -1,0 +1,53 @@
+nextflow_process {
+
+    name "Test Process WRITE_XML [nucleic]"
+    script "modules/output/xml/main.nf"
+    process "WRITE_XML"
+
+    stage {
+        symlink "tests/data/channels/nucleic.matches_with_representative.json"
+        symlink "tests/data/sequences/nt_sequences.db"
+    }
+
+    test("Should run without failures") {
+
+        when {
+            params {
+                db_releases = [
+                    interpro: [version: "105.0", dirpath: ""],
+                    antifam: [version: "8.0", dirpath: ""],
+                    cathgene3d: [version: "4.3.0", dirpath: ""],
+                    cathfunfam: [version: "4.3.0", dirpath: ""],
+                    cdd: [version: "3.21", dirpath: ""],
+                    hamap: [version: "2025_01", dirpath: ""],
+                    ncbifam: [version: "17.0", dirpath: ""],
+                    panther: [version: "19.0", dirpath: ""],
+                    pfam: [version: "37.3", dirpath: ""],
+                    pirsf: [version: "3.10", dirpath: ""],
+                    pirsr: [version: "2025_01", dirpath: ""],
+                    prints: [version: "42.0", dirpath: ""],
+                    prositepatterns: [version: "2025_01", dirpath: ""],
+                    prositeprofiles: [version: "2025_01", dirpath: ""],
+                    sfld: [version: "4", dirpath: ""],
+                    smart: [version: "9.0", dirpath: ""],
+                    superfamily: [version: "1.75", dirpath: ""]
+                ]
+            }
+            process {
+                """
+                input[0] = [file("$baseDir/tests/data/channels/nucleic.matches_with_representative.json")]
+                input[1] = "unit_test_output"
+                input[2] = file("$baseDir/tests/data/sequences/nt_sequences.db")
+                input[3] = true
+                input[4] = "105.0"
+                input[5] = params.db_releases
+                """
+            }
+        }
+
+        then {
+            assert process.success
+        }
+    }
+
+}

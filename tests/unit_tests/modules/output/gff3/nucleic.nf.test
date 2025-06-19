@@ -1,0 +1,31 @@
+nextflow_process {
+
+    name "Test Process WRITE_GFF3 [nucleic]"
+    script "modules/output/gff3/main.nf"
+    process "WRITE_GFF3"
+
+    stage {
+        symlink "tests/data/channels/nucleic.matches_with_representative.json"
+        symlink "tests/data/sequences/nt_sequences.db"
+    }
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                input[0] = [file("$baseDir/tests/data/channels/nucleic.matches_with_representative.json")]
+                input[1] = "unit_test_output.gff3"
+                input[2] = file("$baseDir/tests/data/sequences/nt_sequences.db")
+                input[3] = true
+                input[4] = "6.0.0-alpha"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+        }
+    }
+
+}

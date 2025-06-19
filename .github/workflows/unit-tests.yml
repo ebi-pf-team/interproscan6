@@ -1,0 +1,82 @@
+name: Unit Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+      tags:
+        description: 'Continuous integration'
+
+  push:
+    branches: [ main ]
+    paths:
+      - .github/workflows/unit-tests.yml
+
+  pull_request:
+    branches: [ main ]
+    paths:
+      - lib
+      - modules
+      - subworkflows
+      - tests
+      - nextflow.config
+      - main.nf
+      - .github/workflows/unit-tests.yml
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Remove unnecessary files
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup Nextflow
+        uses: nf-core/setup-nextflow@v1
+        with:
+          version: 24.10.4
+
+      - name: Cache nf-test
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/nf-test
+          key: ${{ runner.os }}-nf-test-0.9.2
+          restore-keys: |
+            ${{ runner.os }}-nf-test-
+
+      - name: Install nf-test
+        run: |
+          mkdir -p ~/.cache/nf-test
+          if [ ! -f ~/.cache/nf-test/nf-test ]; then
+            wget -qO- https://get.nf-test.com | bash -s 0.9.2
+            mv nf-test ~/.cache/nf-test/nf-test
+          fi
+          sudo cp ~/.cache/nf-test/nf-test /usr/local/bin/
+
+      - name: Run NF-Test unit tests
+        shell: bash -l {0}
+        run: |
+          export PATH=$PATH:$GITHUB_WORKSPACE
+          nf-test test tests/unit_tests
+

@@ -1,6 +1,8 @@
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
+import Match
+
 process RUN_SIGNALP_CPU {
     label 'medium', 'signalp_container'
 

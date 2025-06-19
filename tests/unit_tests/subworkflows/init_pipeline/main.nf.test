@@ -1,0 +1,419 @@
+nextflow_workflow {
+
+    name "Test suborkflow INIT_PIPELINE"
+    script "subworkflows/init/main.nf"
+    workflow "INIT_PIPELINE"
+
+    test("Should run without failures") {
+        when {
+            params {
+                apps_config = [
+                    pfam: [
+                        name: "Pfam",
+                        dir: "pfam",
+                        hmm: "pfam_a.hmm",
+                        seed: "pfam_a.seed",
+                        clan: "pfam_clans",
+                        dat: "pfam_a.dat",
+                        has_data: true
+                    ],
+                    ncbifam: [
+                        name: "NCBIFAM",
+                        dir: "ncbifam",
+                        hmm: "ncbifam.hmm",
+                        has_data: true
+                    ]
+                ]
+            }
+            workflow {
+                """
+                input[0] = "$baseDir/tests/data/sequences/test.faa"     // input
+                input[1] = "pfam,ncbifam"                           // applictaions
+                input[2] = params.apps_config                       // apps_config
+                input[3] = "data"                                   // datadir
+                input[4] = "json,tsv,xml"                           // formats
+                input[5] = "results"                                // outdir
+                input[6] = null                                     // outprefix  
+                input[7] = false                                    // no_matches_api
+                input[8] = "latest"                                 // interpro_version
+                input[9] = false                                    // skip_intepro
+                input[10] = null                                    // skip_applications
+                input[11] = false                                   // goterms
+                input[12] = false                                   // pathways
+                """
+            }
+        }
+        then {
+            assert workflow.success
+            // assert snapshot(workflow.out).match()
+        }
+    }
+
+    test("Should fail: No input") {
+        when {
+            params {
+                apps_config = [
+                    pfam: [
+                        name: "Pfam",
+                        dir: "pfam",
+                        hmm: "pfam_a.hmm",
+                        seed: "pfam_a.seed",
+                        clan: "pfam_clans",
+                        dat: "pfam_a.dat",
+                        has_data: true
+                    ],
+                    ncbifam: [
+                        name: "NCBIFAM",
+                        dir: "ncbifam",
+                        hmm: "ncbifam.hmm",
+                        has_data: true
+                    ]
+                ]
+            }
+            workflow {
+                """
+                input[0] = "$baseDir/tests/data/sequences/missing.faa"  // input
+                input[1] = "pfam,ncbifam"                           // applictaions
+                input[2] = params.apps_config                       // apps_config
+                input[3] = "data"                                   // datadir
+                input[4] = "json,tsv,xml"                           // formats
+                input[5] = "results"                                // outdir
+                input[6] = null                                     // outprefix  
+                input[7] = false                                    // no_matches_api
+                input[8] = "latest"                                 // interpro_version
+                input[9] = false                                    // skip_intepro
+                input[10] = null                                    // skip_applications
+                input[11] = false                                   // goterms
+                input[12] = false                                   // pathways
+                """
+            }
+        }
+
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 1
+        }
+    }
+
+    test("Should fail: Invalid applications") {
+        when {
+            params {
+                apps_config = [
+                    pfam: [
+                        name: "Pfam",
+                        dir: "pfam",
+                        hmm: "pfam_a.hmm",
+                        seed: "pfam_a.seed",
+                        clan: "pfam_clans",
+                        dat: "pfam_a.dat",
+                        has_data: true
+                    ],
+                    ncbifam: [
+                        name: "NCBIFAM",
+                        dir: "ncbifam",
+                        hmm: "ncbifam.hmm",
+                        has_data: true
+                    ]
+                ]
+            }
+            workflow {
+                """
+                input[0] = "$baseDir/tests/data/sequences/test.faa"     // input
+                input[1] = "pfam,ncbifam,invalidfam"                // applictaions
+                input[2] = params.apps_config                       // apps_config
+                input[3] = "data"                                   // datadir
+                input[4] = "json,tsv,xml"                           // formats
+                input[5] = "results"                                // outdir
+                input[6] = null                                     // outprefix  
+                input[7] = false                                    // no_matches_api
+                input[8] = "latest"                                 // interpro_version
+                input[9] = false                                    // skip_intepro
+                input[10] = null                                    // skip_applications
+                input[11] = false                                   // goterms
+                input[12] = false                                   // pathways
+                """
+            }
+        }
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 1
+        }
+    }
+
+    test("Should fail: Skip-interpro, goterms and pathways enabled") {
+        when {
+            params {
+                apps_config = [
+                    pfam: [
+                        name: "Pfam",
+                        dir: "pfam",
+                        hmm: "pfam_a.hmm",
+                        seed: "pfam_a.seed",
+                        clan: "pfam_clans",
+                        dat: "pfam_a.dat",
+                        has_data: true
+                    ],
+                    ncbifam: [
+                        name: "NCBIFAM",
+                        dir: "ncbifam",
+                        hmm: "ncbifam.hmm",
+                        has_data: true
+                    ]
+                ]
+            }
+            workflow {
+                """
+                input[0] = "$baseDir/tests/data/sequences/test.faa"     // input
+                input[1] = "pfam,ncbifam"                           // applictaions
+                input[2] = params.apps_config                       // apps_config
+                input[3] = "data"                                   // datadir
+                input[4] = "json,tsv,xml"                           // formats
+                input[5] = "results"                                // outdir
+                input[6] = null                                     // outprefix  
+                input[7] = false                                    // no_matches_api
+                input[8] = "latest"                                 // interpro_version
+                input[9] = true                                    // skip_intepro
+                input[10] = null                                    // skip_applications
+                input[11] = true                                   // goterms
+                input[12] = true                                   // pathways
+                """
+            }
+        }
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 1
+        }
+    }
+
+    test("Should fail: Invalid formats") {
+        when {
+            params {
+                apps_config = [
+                    pfam: [
+                        name: "Pfam",
+                        dir: "pfam",
+                        hmm: "pfam_a.hmm",
+                        seed: "pfam_a.seed",
+                        clan: "pfam_clans",
+                        dat: "pfam_a.dat",
+                        has_data: true
+                    ],
+                    ncbifam: [
+                        name: "NCBIFAM",
+                        dir: "ncbifam",
+                        hmm: "ncbifam.hmm",
+                        has_data: true
+                    ]
+                ]
+            }
+            workflow {
+                """
+                input[0] = "$baseDir/tests/data/sequences/test.faa"     // input
+                input[1] = "pfam,ncbifam"                           // applictaions
+                input[2] = params.apps_config                       // apps_config
+                input[3] = "data"                                   // datadir
+                input[4] = "json,tsv,xml,csv"                       // formats
+                input[5] = "results"                                // outdir
+                input[6] = null                                     // outprefix  
+                input[7] = false                                    // no_matches_api
+                input[8] = "latest"                                 // interpro_version
+                input[9] = false                                    // skip_intepro
+                input[10] = null                                    // skip_applications
+                input[11] = false                                   // goterms
+                input[12] = false                                   // pathways
+                """
+            }
+        }
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 1
+        }
+    }
+
+    test("Should fail: Datadir not provided") {
+        when {
+            params {
+                apps_config = [
+                    pfam: [
+                        name: "Pfam",
+                        dir: "pfam",
+                        hmm: "pfam_a.hmm",
+                        seed: "pfam_a.seed",
+                        clan: "pfam_clans",
+                        dat: "pfam_a.dat",
+                        has_data: true
+                    ],
+                    ncbifam: [
+                        name: "NCBIFAM",
+                        dir: "ncbifam",
+                        hmm: "ncbifam.hmm",
+                        has_data: true
+                    ]
+                ]
+            }
+            workflow {
+                """
+                input[0] = "$baseDir/tests/data/sequences/test.faa"     // input
+                input[1] = "pfam,ncbifam"                           // applictaions
+                input[2] = params.apps_config                       // apps_config
+                input[3] = null                                     // datadir
+                input[4] = "json,tsv,xml,csv"                       // formats
+                input[5] = "results"                                // outdir
+                input[6] = null                                     // outprefix  
+                input[7] = false                                    // no_matches_api
+                input[8] = "latest"                                 // interpro_version
+                input[9] = false                                    // skip_intepro
+                input[10] = null                                    // skip_applications
+                input[11] = false                                   // goterms
+                input[12] = false                                   // pathways
+                """
+            }
+        }
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 1
+        }
+    }
+    
+    test("Should fail: Invalid datadir") {
+        when {
+            params {
+                apps_config = [
+                    pfam: [
+                        name: "Pfam",
+                        dir: "pfam",
+                        hmm: "pfam_a.hmm",
+                        seed: "pfam_a.seed",
+                        clan: "pfam_clans",
+                        dat: "pfam_a.dat",
+                        has_data: true
+                    ],
+                    ncbifam: [
+                        name: "NCBIFAM",
+                        dir: "ncbifam",
+                        hmm: "ncbifam.hmm",
+                        has_data: true
+                    ]
+                ]
+            }
+            workflow {
+                """
+                input[0] = "$baseDir/tests/data/sequences/test.faa"     // input
+                input[1] = "pfam,ncbifam"                           // applictaions
+                input[2] = params.apps_config                       // apps_config
+                input[3] = "$baseDir/tests/data/sequences/test.faa"     // datadir
+                input[4] = "json,tsv,xml,csv"                       // formats
+                input[5] = "results"                                // outdir
+                input[6] = null                                     // outprefix  
+                input[7] = false                                    // no_matches_api
+                input[8] = "latest"                                 // interpro_version
+                input[9] = false                                    // skip_intepro
+                input[10] = null                                    // skip_applications
+                input[11] = false                                   // goterms
+                input[12] = false                                   // pathways
+                """
+            }
+        }
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 1
+        }
+    }
+    
+    test("Should fail: Invalid interpro version") {
+        when {
+            params {
+                apps_config = [
+                    pfam: [
+                        name: "Pfam",
+                        dir: "pfam",
+                        hmm: "pfam_a.hmm",
+                        seed: "pfam_a.seed",
+                        clan: "pfam_clans",
+                        dat: "pfam_a.dat",
+                        has_data: true
+                    ],
+                    ncbifam: [
+                        name: "NCBIFAM",
+                        dir: "ncbifam",
+                        hmm: "ncbifam.hmm",
+                        has_data: true
+                    ]
+                ]
+            }
+            workflow {
+                """
+                input[0] = "$baseDir/tests/data/sequences/test.faa"     // input
+                input[1] = "pfam,ncbifam"                           // applictaions
+                input[2] = params.apps_config                       // apps_config
+                input[3] = "$baseDir/tests/data/sequences/test.faa"     // datadir
+                input[4] = "json,tsv,xml,csv"                       // formats
+                input[5] = "results"                                // outdir
+                input[6] = null                                     // outprefix  
+                input[7] = false                                    // no_matches_api
+                input[8] = "invalid-version"                        // interpro_version
+                input[9] = false                                    // skip_intepro
+                input[10] = null                                    // skip_applications
+                input[11] = false                                   // goterms
+                input[12] = false                                   // pathways
+                """
+            }
+        }
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 1
+        }
+    }
+    
+    test("Should fail: Invalid apps for online mode") {
+        when {
+            params {
+                apps_config = [
+                    signalp_euk: [
+                        name: "SignalP-Euk",
+                        organism: "eukarya",
+                        dir: "data",
+                        mode: "fast",
+                        has_data: false,
+                        use_gpu: false
+                    ],
+                    signalp_prok: [
+                        name: "SignalP-Prok",
+                        organism: "eukarya",
+                        dir: "data",
+                        mode: "fast",
+                        has_data: false,
+                        use_gpu: false
+                    ],
+                    deeptmhmm: [
+                        name: "DeepTMHMM",
+                        dir: "data",
+                        has_data: false,
+                        use_gpu: false
+                    ]
+                ]
+            }
+            workflow {
+                """
+                input[0] = "$baseDir/tests/data/sequences/test.faa"     // input
+                input[1] = "pfam,ncbifam"                           // applictaions
+                input[2] = params.apps_config                       // apps_config
+                input[3] = "$baseDir/tests/data/sequences/test.faa"     // datadir
+                input[4] = "json,tsv,xml,csv"                       // formats
+                input[5] = "results"                                // outdir
+                input[6] = null                                     // outprefix  
+                input[7] = true                                     // no_matches_api
+                input[8] = "latest"                                 // interpro_version
+                input[9] = false                                    // skip_intepro
+                input[10] = null                                    // skip_applications
+                input[11] = false                                   // goterms
+                input[12] = false                                   // pathways
+                """
+            }
+        }
+        then {
+            assert workflow.failed
+            assert workflow.exitStatus == 1
+        }
+    }
+}

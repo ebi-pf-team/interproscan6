@@ -1,0 +1,58 @@
+nextflow_process {
+
+    name "Test Process VALIDATE_FASTA"
+    script "modules/prepare_sequences/main.nf"
+    process "VALIDATE_FASTA"
+
+    test("Should scan protein sequences without failures") {
+
+        when {
+            params {}
+            process {
+                """
+                input[0] = file("$baseDir/tests/data/sequences/test.faa")
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assert process.success
+        }
+    }
+
+    test("Should scan nucleic acid sequences without failures") {
+
+        when {
+            params {}
+            process {
+                """
+                input[0] = file("$baseDir/tests/data/sequences/test.fna")
+                input[1] = true
+                """
+            }
+        }
+
+        then {
+            assert process.success
+        }
+    }
+
+    test("Should fail on finding illegal character") {
+
+        when {
+            params {}
+            process {
+                """
+                input[0] = file("$baseDir/tests/data/sequences/test.illegal.faa")
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assert process.success
+        }
+    }
+
+}

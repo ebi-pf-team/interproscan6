@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonException
 import java.util.regex.Pattern
 
+import Match
+
 process WRITE_JSON {
     label    'tiny'
     executor 'local'
@@ -21,7 +23,6 @@ process WRITE_JSON {
     exec:
     ObjectMapper jacksonMapper = new ObjectMapper()
     SeqDB db = new SeqDB(seq_db_file.toString())
-
     streamJson(output_file.toString(), jacksonMapper) { JsonGenerator jsonWriter ->
         jsonWriter.writeStringField("interproscan-version", interproscan_version)
         jsonWriter.writeStringField("interpro-version", db_releases?.interpro?.version)
