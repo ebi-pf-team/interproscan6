@@ -30,6 +30,7 @@ process PARSE_MOBIDBLITE {
     def outputFilePath = task.workDir.resolve("mobidblite.json")
     Match match = null
     def matches = [:]
+    def seenLocations = [:]
     file(mobidblite_output.toString()).eachLine { line ->
         def fields = line.split(/\t/)
         assert fields.size() == 4
@@ -46,9 +47,14 @@ process PARSE_MOBIDBLITE {
             match.signature = new Signature("mobidb-lite", "disorder_prediction", "consensus disorder prediction", library, null)
             matches[sequenceId] = [:]
             matches[sequenceId]["mobidb-lite"] = match
+            seenLocations[sequenceId] = new HashSet<>()
         }
 
-        match.addLocation(new Location(start, end, feature))
+        def loc = "${start}-${end}"
+        if (!seenLocations[sequenceId].contains(loc)) {
+            match.addLocation(new Location(start, end, feature))
+            seenLocations[sequenceId].add(loc)
+        }
     }
 
     def json = JsonOutput.toJson(matches)
