@@ -99,6 +99,10 @@ class InterProScan {
             description: null
         ],
         [
+            name: "sub-batch-size",
+            description: null
+        ],
+        [
             name: "skip-applications",
             metavar: "<APPLICATIONS>",
             description: "comma-separated applications to exclude from analysis. Default: none.",
