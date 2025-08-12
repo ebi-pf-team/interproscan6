@@ -84,7 +84,8 @@ workflow {
             local_only_apps,
             apps_config,
             data_dir,
-            local_only_apps
+            local_only_apps,
+            params.subBatchSize
         )
         match_results = SCAN_SEQUENCES.out
     } else {
@@ -109,7 +110,8 @@ workflow {
             matches_api_apps,
             apps_config,
             data_dir,
-            matches_api_apps + local_only_apps
+            matches_api_apps + local_only_apps,
+            params.subBatchSize
         )
 
         SCAN_LOCALLY(
@@ -118,7 +120,8 @@ workflow {
             local_only_apps,
             apps_config,
             data_dir,
-            matches_api_apps + local_only_apps
+            matches_api_apps + local_only_apps,
+            params.subBatchSize
         )
 
         def expandedRemainingScan = SCAN_REMAINING.out.flatMap { scan ->
