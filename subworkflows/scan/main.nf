@@ -27,6 +27,7 @@ workflow SCAN_SEQUENCES {
     applications        // list of applications to run
     appsConfig          // map of applications
     datadir             // path to data directory
+    batch_size
 
     main:
     results = Channel.empty()
@@ -50,7 +51,8 @@ workflow SCAN_SEQUENCES {
             appsConfig.cathgene3d.model2sfs,
             appsConfig.cathgene3d.disc_regs,
             applications.contains("cathfunfam"),
-            db_releases.cathfunfam.dirpath
+            db_releases.cathfunfam.dirpath,
+            batch_size
         ).set{ ch_cath }
 
         results = results.mix(ch_cath)
@@ -76,7 +78,8 @@ workflow SCAN_SEQUENCES {
         DEEPTMHMM(
             ch_seqs,
             appsConfig.deeptmhmm.dir,
-            appsConfig.deeptmhmm.use_gpu
+            appsConfig.deeptmhmm.use_gpu,
+            batch_size
         )
         results = results.mix(DEEPTMHMM.out)
     }
@@ -164,7 +167,8 @@ workflow SCAN_SEQUENCES {
             ch_seqs,
             db_releases.prints.dirpath,
             appsConfig.prints.pval,
-            appsConfig.prints.hierarchy
+            appsConfig.prints.hierarchy,
+            batch_size
         )
 
         results = results.mix(PRINTS.out)

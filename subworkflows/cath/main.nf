@@ -11,6 +11,7 @@ workflow CATH {
     cathgene3d_disc_regs
     report_cathfunfam
     cathfunfam_dir
+    batch_size
 
     main:
     results = Channel.empty()
@@ -18,7 +19,7 @@ workflow CATH {
     ch_split = ch_seqs
         .map { meta, fasta ->
             fasta
-                .splitFasta( by: 1000, file: true )
+                .splitFasta( by: batch_size, file: true )
                 .indexed()
                 .collect { index, chunk -> [meta, index, chunk] }
         }
