@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process SEARCH_PIRSF {
-    label 'mini', 'ips6_container'
+    label 'mini', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -13,7 +13,7 @@ process SEARCH_PIRSF {
 
     script:
     """
-    /opt/hmmer3/bin/hmmsearch \
+    hmmsearch \
         -E 0.01 --acc \
         --cpu ${task.cpus} \
         ${dir}/${hmm} ${fasta} > hmmsearch.out

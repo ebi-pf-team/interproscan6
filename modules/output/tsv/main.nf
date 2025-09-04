@@ -87,7 +87,7 @@ def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location
         case ["HAMAP", "PROSITE profiles"]:
             scoringValue = loc.score
             break
-        case ["COILS", "MobiDB-lite", "Phobius", "PROSITE patterns", "DeepTMHMM"]:
+        case ["COILS", "MobiDB-lite", "Phobius", "PROSITE patterns", "DeepTMHMM", "TMbed"]:
             scoringValue = "-"
             break
         case "PANTHER":

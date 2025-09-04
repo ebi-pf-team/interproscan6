@@ -13,7 +13,7 @@ process RUN_COILS {
 
     script:
     """
-    /opt/coils/ncoils -c < ${fasta} > coils.out
+    ncoils -c < ${fasta} > coils.out
     """
 }
 

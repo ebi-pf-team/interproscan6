@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process RUN_MOBIDBLITE {
-    label 'mini', 'mobidblite_container'
+    label 'mini', 'dynamic', 'mobidblite_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -11,7 +11,7 @@ process RUN_MOBIDBLITE {
 
     script:
     """
-    idrpred ${fasta} output.tsv
+    idrpred --tempdir . --threads ${task.cpus} ${fasta} output.tsv
     """
 }
 

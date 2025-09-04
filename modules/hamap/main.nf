@@ -3,7 +3,7 @@ import groovy.json.JsonOutput
 import Match
 
 process PREPROCESS_HAMAP {
-    label 'mini', 'ips6_container'
+    label 'mini', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -15,7 +15,7 @@ process PREPROCESS_HAMAP {
 
     script:
     """
-    /opt/hmmer3/bin/hmmsearch \
+    hmmsearch \
         -E 100 --domE 100 --incE 100 --incdomE 100 \
         --cpu ${task.cpus} \
         --tblout hmmsearch.tab \
@@ -97,7 +97,7 @@ process RUN_HAMAP {
         .transpose()
         .each { profile, fasta ->
             def profilePath = "${dirpath.toString()}/${profiles_dir}/${profile}.prf"
-            commands += "/opt/pftools/pfsearchV3 -f -o 7 ${profilePath} ${fasta}\n"
+            commands += "pfsearchV3 -f -o 7 ${profilePath} ${fasta}\n"
         }
 
     """

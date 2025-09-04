@@ -152,13 +152,22 @@ def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
         case "COILS":
             feature_type = "coiled_coil"
             break
+        case "TMHMM":
         case "DeepTMHMM":
-            feature_type = "transmembrane_helix"
+            feature_type = match.signature.accession.toUpperCase() == "TRANSMEMBRANE ALPHA HELIX" ? "transmembrane_helix" :
+                match.signature.accession.toUpperCase() == "TRANSMEMBRANE BETA BARREL" ? "transmembrane_polypeptide_region" :
+                match.signature.accession.toUpperCase() == "PERIPLASMIC DOMAIN" ? "non_cytoplasmic_polypeptide_region" : "signal_peptide"
             break
         case "Phobius":
-            feature_type = match.signature.type.toUpperCase() == "CYTOPLASMIC_DOMAIN" ? "cytoplasmic_polypeptide_region" :
-                    match.signature.type.toUpperCase() == "NON_CYTOPLASMIC_DOMAIN" ? "non_cytoplasmic_polypeptide_region" :
-                    match.signature.type.toUpperCase() == "TRANSMEMBRANE" ? "transmembrane_helix" : "signal_peptide"
+            feature_type = match.signature.name.toUpperCase() == "CYTOPLASMIC DOMAIN" ? "cytoplasmic_polypeptide_region" :
+                match.signature.name.toUpperCase() == "NON CYTOPLASMIC DOMAIN" ? "non_cytoplasmic_polypeptide_region" :
+                match.signature.name.toUpperCase() == "TRANSMEMBRANE REGION" ? "transmembrane_polypeptide_region" : "signal_peptide"
+            break
+        case "TMbed":
+            feature_type = match.signature.accession.toUpperCase() == "TMHELIX_IN-TO-OUT" ? "transmembrane_helix" :
+                match.signature.accession.toUpperCase() == "TMHELIX_OUT-TO-IN" ? "transmembrane_helix" :
+                match.signature.accession.toUpperCase() == "TMBETA-OUT-TO-IN" ? "transmembrane_polypeptide_region" :
+                match.signature.accession.toUpperCase() == "TMBETA-IN-TO-OUT" ? "transmembrane_polypeptide_region" : "signal_peptide"
             break
         default:
             // HAMAP, MobiDB-lite, Panther, PIRSF, PIRSR, SFLD

@@ -11,17 +11,22 @@ import xml.etree.ElementTree as ET
 
 
 def main():
-    parser = argparse.ArgumentParser(prog="IPS_match_regression_test", description="Check presence of matches", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--expected", type=str, default="tests/data/output/test.faa.json", help="JSON with expected results")
-    parser.add_argument("--observed", type=str, default="tests/data/output/test.faa.json", help="JSON output file from IPS6")
+    parser = argparse.ArgumentParser(prog="IPS_match_regression_test", description="Check presence of matches",
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("--expected", type=str, default="tests/data/output/test.faa.json",
+                        help="JSON with expected results")
+    parser.add_argument("--observed", type=str, default="tests/data/output/test.faa.json",
+                        help="JSON output file from IPS6")
     parser.add_argument("--summary", action="store_true", help="Print only the summary message")
-    parser.add_argument("--format", choices=["gff3", "json", "jsonl", "tsv", "xml", "intermediate", "debug"], default="json", help=(
-        "Format of input files.\n"
-        "'gff3', 'json' [default], 'tsv', or 'xml' for final output files\n"
-        "'intermediate' to compare the temporary working files of InterProScan6\n"
-        "or 'debug' to show information that help to debug"
-    ))
-    parser.add_argument("--applications", type=str, default=None, help="Limit the comparison to a comma-separated list of applications")
+    parser.add_argument("--format", choices=["gff3", "json", "jsonl", "tsv", "xml", "intermediate", "debug"],
+                        default="json", help=(
+            "Format of input files.\n"
+            "'gff3', 'json' [default], 'tsv', or 'xml' for final output files\n"
+            "'intermediate' to compare the temporary working files of InterProScan6\n"
+            "or 'debug' to show information that help to debug"
+        ))
+    parser.add_argument("--applications", type=str, default=None,
+                        help="Limit the comparison to a comma-separated list of applications")
     args = parser.parse_args()
 
     if args.format == "gff3":
@@ -51,7 +56,8 @@ def main():
     for line in diff:
         if line.startswith(("-", "+", " ")):  # skip summary lines such as "?    ^^^^  -    ^^  ^ ^"
             try:
-                tab_separated = '\t'.join(map(str, ast.literal_eval(line[2:])))  # Safely eval str and convert to tab-sep str
+                tab_separated = '\t'.join(
+                    map(str, ast.literal_eval(line[2:])))  # Safely eval str and convert to tab-sep str
                 if line.startswith("-"):
                     if not args.summary:
                         print(f"< {tab_separated}")  # Only in expected
@@ -171,11 +177,13 @@ def debug(iprscan_path: str):
         sequence_id = sorted(item["id"] for item in protein_dict["xref"])[0]
         for match in protein_dict["matches"]:
             sig_acc = match["signature"]["accession"]
-            library = re.sub(r'[\s_]+', '', match["signature"]["signatureLibraryRelease"]["library"]).lower()
+            library = re.sub(r'[\s_]+', '', match["signature"]["signatureLibraryRelease"]["library"]).lower().replace(
+                "cath-", "")
             version = match["signature"]["signatureLibraryRelease"]["version"]
             for loc in match["locations"]:
                 matches.append([sequence_id, library, version, sig_acc, loc["start"], loc["end"]])
     return [repr(nested) for nested in matches]
+
 
 if __name__ == "__main__":
     main()

@@ -3,7 +3,7 @@ import groovy.json.JsonOutput
 import Match
 
 process SEARCH_SUPERFAMILY {
-    label 'tiny', 'ips6_container'
+    label 'tiny', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -19,7 +19,7 @@ process SEARCH_SUPERFAMILY {
 
     script:
     """
-    /opt/hmmer3/bin/hmmscan \
+    hmmscan \
         -E 10 -Z 15438 \
         --cpu ${task.cpus} \
         ${dirpath}/${hmm} ${fasta} > hmmscan.out

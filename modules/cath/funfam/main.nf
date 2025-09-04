@@ -40,7 +40,7 @@ process PREPARE_FUNFAM {
 }
 
 process SEARCH_FUNFAM {
-    label 'medium', 'ips6_container'
+    label 'medium', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), val(meta2), path(fasta), val(supfams)
@@ -54,7 +54,7 @@ process SEARCH_FUNFAM {
     supfams.each { cathId -> 
         String hmmFilePath = cathId.split("\\.").join(File.separator) + ".hmm"
         String hmmPath = "${root_dir.toString()}/${hmmFilePath}"
-        commands += "/opt/hmmer3/bin/hmmsearch"
+        commands += "hmmsearch"
         commands += " -Z 65245 --cut_tc"
         commands += " --cpu ${task.cpus}"
         commands += " ${hmmPath} ${fasta} >> hmmsearch.out\n"
@@ -76,7 +76,7 @@ process RESOLVE_FUNFAM {
 
     script:
     """
-    /opt/cath-tools/cath-resolve-hits \
+    cath-resolve-hits \
         --input-format=hmmsearch_out \
         --min-dc-hmm-coverage=80 \
         --worst-permissible-bitscore=25 \

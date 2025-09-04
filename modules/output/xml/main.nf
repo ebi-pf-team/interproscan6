@@ -189,6 +189,9 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
         case "deeptmhmm":
             matchNodeAttributes = null
             break
+        case "tmbed":
+            matchNodeAttributes = null
+            break
         default:
             throw new UnsupportedOperationException("Unknown database '${memberDB}' for query protein with MD5 ${proteinMd5}")
     }
@@ -358,7 +361,7 @@ def addLocationNodes(String memberDB, String proteinMd5, Map match, def xml) {
                     locationAttributes = fmtDefaultLocationNode(loc)
                     break
                 case "pirsr":
-                    locationAttributes = fmtDefaultLocationNode(loc)
+                    locationAttributes = fmtDefaultNoHbLocationNode(loc)
                     break
                 case "prints":
                     locationAttributes = fmtPrintsLocationNode(loc)
@@ -370,7 +373,7 @@ def addLocationNodes(String memberDB, String proteinMd5, Map match, def xml) {
                     locationAttributes = fmtMinimalistLocationNode(loc)
                     break
                 case "sfld":
-                    locationAttributes = fmtDefaultLocationNode(loc)
+                    locationAttributes = fmtDefaultNoHbLocationNode(loc)
                     break
                 case "signalp":
                     locationAttributes = fmtSignalpLocationNode(loc)
@@ -383,6 +386,9 @@ def addLocationNodes(String memberDB, String proteinMd5, Map match, def xml) {
                     break
                 case "tmhmm":
                 case "deeptmhmm":
+                    locationAttributes = fmMinimalistLoctationNode(loc)
+                    break
+                case "tmbed":
                     locationAttributes = fmMinimalistLoctationNode(loc)
                     break
                 default:
@@ -424,6 +430,21 @@ def fmtDefaultLocationNode(Map loc) {
         "hmm-end"      : loc.hmmEnd,
         "hmm-length"   : loc.hmmLength,
         "hmm-bounds"   : Location.getHmmBounds(loc.hmmBounds),
+        evalue         : loc.evalue,
+        score          : loc.score,
+        "env-start"    : loc.envelopeStart,
+        "env-end"      : loc.envelopeEnd
+    ]
+}
+
+def fmtDefaultNoHbLocationNode(Map loc) {
+    return [
+        start          : loc.start,
+        end            : loc.end,
+        representative : loc.representative,
+        "hmm-start"    : loc.hmmStart,
+        "hmm-end"      : loc.hmmEnd,
+        "hmm-length"   : loc.hmmLength,
         evalue         : loc.evalue,
         score          : loc.score,
         "env-start"    : loc.envelopeStart,

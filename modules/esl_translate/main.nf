@@ -9,6 +9,6 @@ process ESL_TRANSLATE {
 
     script:
     """
-    /opt/easel/miniapps/esl-translate ${fasta} > translated.fasta
+    esl-translate ${fasta} > translated.fasta
     """
 }

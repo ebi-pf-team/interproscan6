@@ -20,10 +20,10 @@ process RUN_PFSCAN {
 
     script:
     """
-        perl /opt/pftools/ps_scan.pl \
+        perl ${projectDir}/bin/prosite/ps_scan.pl \
         ${fasta} \
         -d ${dirpath}/${datfile} \
-        --pfscan /opt/pftools/pfscanV3 \
+        --pfscan pfscanV3 \
         -b ${dirpath}/${evafile} \
         -r -s -o ipro > ps_scan.out
     """

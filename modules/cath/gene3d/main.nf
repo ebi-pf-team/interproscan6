@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process SEARCH_GENE3D {
-    label 'small', 'ips6_container'
+    label 'small', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), val(meta2), path(fasta)
@@ -13,7 +13,7 @@ process SEARCH_GENE3D {
 
     script:
     """
-    /opt/hmmer3/bin/hmmsearch \
+    hmmsearch \
         -Z 65245 -E 0.001 \
         --cpu ${task.cpus} \
         ${hmmdir}/${hmmfile} ${fasta} > hmmsearch.out
@@ -31,7 +31,7 @@ process RESOLVE_GENE3D {
 
     script:
     """
-    /opt/cath-tools/cath-resolve-hits \
+    cath-resolve-hits \
         --input-format=hmmsearch_out \
         --min-dc-hmm-coverage=80 \
         --worst-permissible-bitscore=25 \

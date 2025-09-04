@@ -42,7 +42,7 @@ process PREPARE_TREEGRAFTER {
                 m2.treegrafter = new TreeGrafter(null)
                 return m2
             }
-            .findAll { it != null && it.evalue <= 0.00000001 }
+            .findAll { it != null }
 
         Match bestMatch = filteredMatches.max { it.score }
         return bestMatch ? [(seqId): [(bestMatch.modelAccession): bestMatch]] : [:]
@@ -118,7 +118,7 @@ process PREPARE_TREEGRAFTER {
 
 
 process RUN_TREEGRAFTER {
-    label 'small', 'ips6_container'
+    label 'small', 'dynamic', 'ips6_container'
     
     input:
     tuple val(meta), val(sequenceIds), val(familyIds), val(fastas)
@@ -139,7 +139,7 @@ process RUN_TREEGRAFTER {
             def fastaPath = entry[2]
            
            // Run EPA-ng
-            def epang_command = "/opt/epa-ng/bin/epa-ng"
+            def epang_command = "epa-ng"
             epang_command += " -G 0.05"
             epang_command += " -m WAG"
             epang_command += " -T ${task.cpus}"

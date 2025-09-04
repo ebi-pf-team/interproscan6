@@ -14,6 +14,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+
 # Pull pftools for HAMAP and PROSITE
 FROM sibswiss/pftools AS pftools
 
@@ -21,7 +22,6 @@ FROM sibswiss/pftools AS pftools
 FROM interproscan-base
 COPY --from=pftools /var/lib/pftools/bin/pfsearchV3 /opt/pftools/pfsearchV3
 COPY --from=pftools /var/lib/pftools/bin/pfscanV3 /opt/pftools/pfscanV3
-COPY --from=pftools /var/lib/pftools/bin/ps_scan.pl /opt/pftools/ps_scan.pl
 
 # Get binary for coils, only used by Coils
 WORKDIR /opt/coils
@@ -80,7 +80,7 @@ RUN mkdir /opt/hmmer2 && \
     tar -xzf hmmer-2.3.2.tar.gz && \
     rm hmmer-2.3.2.tar.gz && \
     cd hmmer-2.3.2 && \
-    ./configure --prefix /opt/hmmer2 && \
+    ./configure --enable-threads --prefix /opt/hmmer2 && \
     make && \
     make install && \
     rm -rf /opt/hmmer-2.3.2 && \
@@ -102,6 +102,9 @@ RUN curl -L -o cath-resolve-hits https://github.com/UCLOrengoGroup/cath-tools/re
     chmod +x cath-resolve-hits
 
 WORKDIR /opt/interproscan6
+
+# Add all tool directories to PATH
+ENV PATH="/opt/hmmer3/bin:/opt/cath-tools:/opt/blast:/opt/rpsbproc/RpsbProc-x64-linux:/opt/coils:/opt/easel/miniapps:/opt/pftools:/opt/epa-ng/bin:/opt/hmmer2/bin:$PATH"
 
 # remove tools not needed for running IPS6 to reduce the final image size
 RUN apt-get remove -y autoconf automake autotools-dev bison build-essential flex git libcurl3-gnutls libdivsufsort3 liblmdb0 libdw1 libnghttp2-dev libssl-dev libtool nghttp2 zlib1g-dev && \

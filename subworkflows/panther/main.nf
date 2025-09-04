@@ -13,7 +13,7 @@ workflow PANTHER {
         ch_seqs,
         dir,
         hmm,
-        "-Z 65000000 -E 0.001 --domE 0.00000001 --incdomE 0.00000001"
+        "-Z 65000000 -E 0.001"
     )
     ch_panther = SEARCH_PANTHER.out
 
