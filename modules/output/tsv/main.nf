@@ -9,12 +9,12 @@ process WRITE_TSV {
     input:
     val matchesFiles
     val output_file
-    val seqDbPath
+    val seq_db_file
     val nucleic
 
     exec:
     // Make connection to sequence Db through the JAVA interface for performance
-    def db = new SeqDBQuery(seqDbPath.toString())
+    def db = new SeqDBQuery(seq_db_file.toString())
 
     // Prepare the output file
     def tsvFile = new File(output_file)
