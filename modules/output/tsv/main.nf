@@ -38,25 +38,7 @@ process WRITE_TSV {
         Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
 
         if (nucleic) {
-            nucleicToProteinMd5 = db.groupProteins(proteins)
-            nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
-                if (!seenNucleicMd5s.contains(nucleicMd5)) {
-                    seenNucleicMd5s.add(nucleicMd5)
-                    def ntSeqData = db.nucleicMd5ToNucleicSeq(nucleicMd5)
-                    ntSeqData.each { seq ->
-                        String parentId = seq.id
-                        proteinMd5s.each { String proteinMd5 ->
-                            def proteinMatches = proteins[proteinMd5]
-                            if (proteinMatches == null) return
-                            proteinMatches.each { modelAcc, matchMap ->
-                                def match = Match.fromMap(matchMap)
-                                def proteinSeqData = db.getOrfSeq(proteinMd5, nucleicMd5)
-                                writeMatch(proteinMd5, parentId, proteinSeqData, match, currentDate, tsvFile)
-                            }
-                        }
-                    }   
-                }
-            }
+            processNucleotidesBulk(javaDb, proteins, seenNucleicMd5s, currentDate, lineBuffer, BATCH_SIZE, flushBuffer)
         } else {
             def proteinMd5List = proteins.keySet().toList()
             Map<String, List> seqData = db.proteinMd5sToProteinSeqs(proteinMd5List)
@@ -176,4 +158,53 @@ def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location
       .append(goTermString).append('\t')
       .append(pathwayString)
     return sb.toString()
+}
+
+def processNucleotidesBulk(SeqDBQuery db, Map proteins, Set seenNucleicMd5s, String currentDate, 
+                          List lineBuffer, int batchSize, Closure flushBuffer) {
+    
+    // Get all protein MD5s from this file
+    Set<String> allProteinMd5s = proteins.keySet().toSet()
+    // Group proteins by nucleotide MD5
+    Map<String, Set<String>> nucleicToProteinMd5 = db.groupProteinsBulk(allProteinMd5s)
+    // Filter to only unseen nucleotide MD5s
+    List<String> newNucleicMd5s = nucleicToProteinMd5.keySet().findAll { !seenNucleicMd5s.contains(it) }
+    seenNucleicMd5s.addAll(newNucleicMd5s)
+    if (newNucleicMd5s.isEmpty()) {
+        return
+    }
+
+    // Get all nucleotide sequences
+    Map<String, List> nucleotideSeqData = db.nucleicMd5sToNucleicSeqs(newNucleicMd5s)
+
+    // Get all ORF sequences for relevant protein/nucleotide combinations
+    List<String> relevantProteinMd5s = []
+    newNucleicMd5s.each { nucleicMd5 ->
+        relevantProteinMd5s.addAll(nucleicToProteinMd5[nucleicMd5])
+    }
+    Map<String, Map<String, List>> orfSeqData = db.getOrfSeqsBulk(relevantProteinMd5s, newNucleicMd5s)
+
+    // Process the results
+    newNucleicMd5s.each { String nucleicMd5 ->
+        def ntSeqData = nucleotideSeqData[nucleicMd5]
+        if (!ntSeqData) return
+        
+        Set<String> proteinMd5sForNucleic = nucleicToProteinMd5[nucleicMd5]
+        
+        ntSeqData.each { seq ->
+            String parentId = seq.id
+            proteinMd5sForNucleic.each { String proteinMd5 ->
+                def proteinMatches = proteins[proteinMd5]
+                if (proteinMatches == null) return
+                
+                proteinMatches.each { modelAcc, matchMap ->
+                    def match = Match.fromMap(matchMap)
+                    def proteinSeqData = orfSeqData[proteinMd5]?.get(nucleicMd5)
+                    if (proteinSeqData) {
+                        writeMatch(proteinMd5, parentId, proteinSeqData, match, currentDate, lineBuffer, batchSize, flushBuffer)
+                    }
+                }
+            }
+        }
+    }
 }
