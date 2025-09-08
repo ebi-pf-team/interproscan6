@@ -3,6 +3,9 @@ import groovy.xml.StreamingMarkupBuilder
 import java.io.FileWriter
 import java.util.regex.Pattern
 
+import java.time.format.DateTimeFormatter
+import java.time.LocalDate
+
 import Match
 
 process WRITE_XML {
@@ -20,7 +23,9 @@ process WRITE_XML {
     exec:
     def db = new SeqDBQuery(seq_db_file.toString())
     def fileWriter = new FileWriter(output_file)
-    def BATCH_SIZE = 10000
+
+    def timingFile = new File("${output_file}_timing.log")
+    timingFile.text = "timestamp,operation,duration_ms,details\n"
 
     try {
         Set<String> seenNucleicMd5s = new HashSet<>()
@@ -31,18 +36,49 @@ process WRITE_XML {
             mkp.xmlDeclaration()
             results("interproscan-version": interproscan_version, "interpro-version": db_releases?.interpro?.version) {
                 matches_files.each { matchFile ->
+                    def jsonLoadStartTime = System.currentTimeMillis()
                     Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
+                    def jsonLoadEndTime = System.currentTimeMillis()
+                    def jsonLoadDuration = jsonLoadEndTime - jsonLoadStartTime
+
+                    def timestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
+                    def fileSize = new File(matchFile.toString()).length()
+                    timingFile.append("${timestamp},json_load,${jsonLoadDuration},\"${new File(matchFile.toString()).name} (${fileSize} bytes, ${proteins.size()} proteins)\"\n")
                     if (nucleic) {
-                        processNucleotidesBulk(db, proteins, seenNucleicMd5s, delegate, processedCount, BATCH_SIZE)
+                        processNucleotidesBulk(db, proteins, seenNucleicMd5s, delegate)
                     } else {
+                        def proteinQueryStartTime = System.currentTimeMillis()
                         def proteinMd5List = proteins.keySet().toList()
                         Map<String, List> seqData = db.proteinMd5sToProteinSeqs(proteinMd5List)
-
+                        def proteinQueryEndTime = System.currentTimeMillis()
+                        def proteinQueryDuration = proteinQueryEndTime - proteinQueryStartTime
+                        
+                        def proteinQueryTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
+                        timingFile.append("${proteinQueryTimestamp},protein_bulk_query,${proteinQueryDuration},\"${proteinMd5List.size()} protein sequences\"\n")
+                        
+                        def proteinProcessingStartTime = System.currentTimeMillis()
+                        def proteinProcessedCount = 0
+                        
                         for (Map.Entry<String, Map> entry : proteins.entrySet()) {
                             String proteinMd5 = entry.key
                             Map proteinMatches = entry.value
                             addProteinNodes(proteinMd5, proteinMatches, seqData[proteinMd5], delegate)
+                            proteinProcessedCount++
+                            processedCount++
+                            
+                            if (proteinProcessedCount % BATCH_SIZE == 0) {
+                                def batchTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
+                                def batchDuration = System.currentTimeMillis() - proteinProcessingStartTime
+                                timingFile.append("${batchTimestamp},protein_batch_progress,${batchDuration},\"${proteinProcessedCount} proteins processed from ${new File(matchFile.toString()).name}\"\n")
+                                println "Processed ${processedCount} total sequences (${proteinProcessedCount} from current file)..."
+                            }
                         }
+                        
+                        def proteinProcessingEndTime = System.currentTimeMillis()
+                        def proteinProcessingDuration = proteinProcessingEndTime - proteinProcessingStartTime
+                        
+                        def proteinProcessingTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
+                        timingFile.append("${proteinProcessingTimestamp},protein_processing,${proteinProcessingDuration},\"${proteinProcessedCount} proteins from ${new File(matchFile.toString()).name}\"\n")
                     }
                 }
             }
@@ -55,7 +91,7 @@ process WRITE_XML {
     }
 }
 
-def processNucleotidesBulk(SeqDBQuery db, Map proteins, Set seenNucleicMd5s, def xml, int processedCount, int batchSize) {
+def processNucleotidesBulk(SeqDBQuery db, Map proteins, Set seenNucleicMd5s, def xml) {
     Set<String> allProteinMd5s = proteins.keySet().toSet()
     Map<String, Set<String>> nucleicToProteinMd5 = db.groupProteinsBulk(allProteinMd5s)
     
@@ -83,13 +119,14 @@ def processNucleotidesBulk(SeqDBQuery db, Map proteins, Set seenNucleicMd5s, def
 
         Set<String> proteinMd5sForNucleic = nucleicToProteinMd5[nucleicMd5]
 
-        addNucleotideNodeBulk(nucleicMd5, proteinMd5sForNucleic, proteins, ntSeqData, orfSeqData, xml)
+        addNucleotideNodes(nucleicMd5, proteinMd5sForNucleic, proteins, ntSeqData, orfSeqData, xml)
     }
     
     return processedCount
 }
 
-def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, List ntSeqData, Map orfSeqData,def xml) {
+
+def addNucleotideNodes(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, List ntSeqData, Map orfSeqData,def xml) {
     /* Write data for an input nucleic acid seq, and then the matches for its associated ORFs.
     <nucleotide-sequence>
         <sequence md5="" sequence </sequence>
@@ -152,7 +189,8 @@ def addProteinNodes (String proteinMd5, Map proteinMatches, List proteinSeqData,
 
         // 3. <matches> <m> <m> <m> </matches>
         matches {
-            proteinMatches.each { String modelAcc, Map match ->
+            for (Map.Entry<String, Map> entry : proteinMatches) {
+                def match = entry.value
                 addMatchNode(proteinMd5, match, xml)
             }
         }
@@ -604,7 +642,7 @@ def addSiteNodes(locationSites, memberDB, xml) {
     xml."sites" {
         locationSites.each { siteMap ->
             xml."site"(description: siteMap.description, numLocations: siteMap.numLocations) {
-                "site-locations" {
+                xml."site-locations" {
                     siteMap.siteLocations.each { siteLoc ->
                         xml."site-location"(
                             residue : siteLoc.residue,
