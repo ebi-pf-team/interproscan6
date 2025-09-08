@@ -30,22 +30,12 @@ process WRITE_TSV {
         }
     }
 
-    def timingFile = new File("${output_file}_timing.log")
-    timingFile.text = "timestamp,operation,duration_ms,details\n"
-
     // Each line contains: seqId md5 seqLength memberDb modelAcc sigDesc start end evalue status date entryAcc entryDesc goterms pathways
     def currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
     Set<String> seenNucleicMd5s = new HashSet<>()
 
     matchesFiles.each { matchFile ->
-        def jsonLoadStartTime = System.currentTimeMillis()
         Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
-        def jsonLoadEndTime = System.currentTimeMillis()
-        def jsonLoadDuration = jsonLoadEndTime - jsonLoadStartTime
-
-        def timestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
-        def fileSize = new File(matchFile.toString()).length()
-        timingFile.append("${timestamp},json_load,${jsonLoadDuration},\"${new File(matchFile.toString()).name} (${fileSize} bytes, ${proteins.size()} proteins)\"\n")
 
         if (nucleic) {
             nucleicToProteinMd5 = db.groupProteins(proteins)
@@ -69,46 +59,17 @@ process WRITE_TSV {
             }
         } else {
             def proteinMd5List = proteins.keySet().toList()
-            
-            // Time the database query
-            def queryStartTime = System.currentTimeMillis()
             Map<String, List> seqData = db.proteinMd5sToProteinSeqs(proteinMd5List)
-            def queryEndTime = System.currentTimeMillis()
-            def queryDuration = queryEndTime - queryStartTime
-            
-            // Log query timing
-            timestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
-            timingFile.append("${timestamp},db_query,${queryDuration},\"${proteinMd5List.size()} proteins from ${new File(matchFile.toString()).name}\"\n")
-            
-            // Time the entire proteins.each loop
-            def proteinsLoopStartTime = System.currentTimeMillis()
-            
-            // Time protein processing
+    
             // Don't change to `each`, for loops are faster and better optimised for the JVM
             for (Map.Entry entry : proteins.entrySet()) {
                 String proteinMd5 = entry.key
                 Map proteinMatches = entry.value
-                def proteinStartTime = System.currentTimeMillis()
-                
                 proteinMatches.each { modelAcc, match ->
                     match = Match.fromMap(match)
                     writeMatch(proteinMd5, null, seqData[proteinMd5], match, currentDate,lineBuffer, BATCH_SIZE, flushBuffer)
                 }
-                
-                def proteinEndTime = System.currentTimeMillis()
-                def proteinDuration = proteinEndTime - proteinStartTime
-                
-                // Log protein processing timing
-                timestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
-                timingFile.append("${timestamp},protein_processing,${proteinDuration},\"${proteinMd5} with ${proteinMatches.size()} matches\"\n")
             }
-            
-            def proteinsLoopEndTime = System.currentTimeMillis()
-            def proteinsLoopDuration = proteinsLoopEndTime - proteinsLoopStartTime
-            
-            // Log total proteins.each loop timing
-            timestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
-            timingFile.append("${timestamp},proteins_loop_total,${proteinsLoopDuration},\"${proteins.size()} proteins from ${new File(matchFile.toString()).name}\"\n")
         }
     }
 
