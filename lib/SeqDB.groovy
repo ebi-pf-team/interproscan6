@@ -314,4 +314,37 @@ class SeqDB {
             """
         return this.sql.rows(query, [proteinMD5, nucleicMD5])
     }
+
+    Map<String, List> proteinMd5sToProteinSeqs(List<String> proteinMD5s) {
+        /*
+        [
+            'abc123': [
+                [id: 'P001', description: 'Protein A', sequence: 'MKTAYIA...'],
+                [id: 'P002', description: 'Protein A variant', sequence: 'MKTAYIA...']
+            ],
+        ]
+        */
+        def placeholders = proteinMD5s.collect { '?' }.join(',')
+        def query = """SELECT P.id, P.description, S.sequence, P.md5
+            FROM PROTEIN AS P
+            INNER JOIN PROTEIN_SEQUENCE AS S ON P.md5 = S.md5
+            WHERE P.md5 IN (${placeholders});
+            """
+        
+        // Execute query with the MD5 values as parameters
+        def rows = this.sql.rows(query, proteinMD5s.toList())
+        
+        // Group results by MD5 because a MD5 may be associated with multiple protein IDs
+        def resultMap = [:]
+        rows.each { row ->
+            def md5 = row.md5
+            resultMap.computeIfAbsent(md5) { [] } << [
+                id: row.id,
+                description: row.description,
+                sequence: row.sequence
+            ]
+        }
+
+        return resultMap
+    }
 }
