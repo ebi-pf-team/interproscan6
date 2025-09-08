@@ -18,7 +18,7 @@ process WRITE_XML {
     val db_releases
 
     exec:
-    def db = new SeqDBQueryQuery(seq_db_file.toString())
+    def db = new SeqDBQuery(seq_db_file.toString())
     def fileWriter = new FileWriter(output_file)
     def BATCH_SIZE = 10000
 
@@ -41,7 +41,7 @@ process WRITE_XML {
                         for (Map.Entry<String, Map> entry : proteins.entrySet()) {
                             String proteinMd5 = entry.key
                             Map proteinMatches = entry.value
-                            addProteinNodes(proteinMd5, proteinMatches, delegate, seqData[proteinMd5])
+                            addProteinNodes(proteinMd5, proteinMatches, seqData[proteinMd5], delegate)
                         }
                     }
                 }
@@ -126,7 +126,7 @@ def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMat
                         strand : proteinSource.group(3) as int < 4 ? "SENSE" : "ANTISENSE"
                     ]) {
                         // 4. <protein> ... <\protein>
-                        addProteinNodes(proteinMd5, proteinMatches[proteinMd5], xml, db)
+                        addProteinNodes(proteinMd5, proteinMatches[proteinMd5], proteinSeqData[proteinMd5], xml)
                     }
                 }
             }
@@ -134,7 +134,7 @@ def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMat
     }
 }
 
-def addProteinNodes (String proteinMd5, Map proteinMatches, def xml, SeqDBQuery db) {
+def addProteinNodes (String proteinMd5, Map proteinMatches, List proteinSeqData, def xml) {
     /* Write data for a query protein sequence and its matches:
     <protein>
         <sequence md5="" sequence </sequence>
