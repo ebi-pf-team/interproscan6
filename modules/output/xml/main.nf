@@ -4,6 +4,8 @@ import java.util.regex.Pattern
 import javax.xml.stream.XMLOutputFactory
 import javax.xml.stream.XMLStreamWriter
 import com.fasterxml.jackson.databind.ObjectMapper
+import java.lang.management.ManagementFactory
+import java.lang.management.MemoryMXBean
 
 import java.time.format.DateTimeFormatter
 import java.time.LocalDate
@@ -25,15 +27,21 @@ process WRITE_XML {
     exec:
     def db = new SeqDBQuery(seq_db_file.toString())
 
+    MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean()
+    
     // Use BufferedWriter with custom buffer size
     def bufferedWriter = new BufferedWriter(new FileWriter(output_file), 1024 * 1024) // 1MB buffer
     
     def timingFile = new File("${output_file}_timing.log")
-    timingFile.text = "timestamp,operation,duration_ms,details\n"
+    timingFile.text = "timestamp,operation,duration_ms,heap_used_mb,heap_max_mb,non_heap_used_mb,details\n"
 
     try {
         def factory = XMLOutputFactory.newInstance()
         def writer = factory.createXMLStreamWriter(bufferedWriter)
+        
+        def initialMemory = getMemoryInfo(memoryBean)
+        def startTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
+        timingFile.append("${startTimestamp},xml_start,0,${initialMemory.heapUsed},${initialMemory.heapMax},${initialMemory.nonHeapUsed},\"XML generation starting\"\n")
         
         writer.writeStartDocument("UTF-8", "1.0")
         writer.writeStartElement("results")
@@ -50,12 +58,13 @@ process WRITE_XML {
             def jsonLoadEndTime = System.currentTimeMillis()
             def jsonLoadDuration = jsonLoadEndTime - jsonLoadStartTime
 
+            def memoryAfterJson = getMemoryInfo(memoryBean)
             def timestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
             def fileSize = new File(matchFile.toString()).length()
-            timingFile.append("${timestamp},json_load,${jsonLoadDuration},\"${new File(matchFile.toString()).name} (${fileSize} bytes, ${proteins.size()} proteins)\"\n")
+            timingFile.append("${timestamp},json_load,${jsonLoadDuration},${memoryAfterJson.heapUsed},${memoryAfterJson.heapMax},${memoryAfterJson.nonHeapUsed},\"${new File(matchFile.toString()).name} (${fileSize} bytes, ${proteins.size()} proteins)\"\n")
             
             if (nucleic) {
-                proteinCount = processNucleotidesBulkBuffered(db, proteins, seenNucleicMd5s, writer, bufferedWriter, BUFFER_SIZE, proteinCount, timingFile)
+                proteinCount = processNucleotidesBulkBuffered(db, proteins, seenNucleicMd5s, writer, bufferedWriter, BUFFER_SIZE, proteinCount, timingFile, memoryBean)
             } else {
                 def proteinQueryStartTime = System.currentTimeMillis()
                 def proteinMd5List = proteins.keySet().toList()
@@ -63,8 +72,9 @@ process WRITE_XML {
                 def proteinQueryEndTime = System.currentTimeMillis()
                 def proteinQueryDuration = proteinQueryEndTime - proteinQueryStartTime
                 
+                def memoryAfterQuery = getMemoryInfo(memoryBean)
                 def proteinQueryTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
-                timingFile.append("${proteinQueryTimestamp},db_query,${proteinQueryDuration},\"${proteinMd5List.size()} proteins from ${new File(matchFile.toString()).name}\"\n")
+                timingFile.append("${proteinQueryTimestamp},db_query,${proteinQueryDuration},${memoryAfterQuery.heapUsed},${memoryAfterQuery.heapMax},${memoryAfterQuery.nonHeapUsed},\"${proteinMd5List.size()} proteins from ${new File(matchFile.toString()).name}\"\n")
                 
                 def proteinProcessingStartTime = System.currentTimeMillis()
                 
@@ -87,21 +97,26 @@ process WRITE_XML {
                         def flushEndTime = System.currentTimeMillis()
                         def flushDuration = flushEndTime - flushStartTime
                         
+                        def memoryAfterFlush = getMemoryInfo(memoryBean)
                         def flushTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
-                        timingFile.append("${flushTimestamp},buffer_flush,${flushDuration},\"Flushed after ${proteinCount} proteins\"\n")
-                        println "Flushed buffer after processing ${proteinCount} proteins..."
+                        timingFile.append("${flushTimestamp},buffer_flush,${flushDuration},${memoryAfterFlush.heapUsed},${memoryAfterFlush.heapMax},${memoryAfterFlush.nonHeapUsed},\"Flushed after ${proteinCount} proteins\"\n")
+                        println "Flushed buffer after processing ${proteinCount} proteins... (Heap: ${memoryAfterFlush.heapUsed}MB)"
                     }
                     
-                    def proteinTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
-                    def matchCount = proteinMatches.size()
-                    timingFile.append("${proteinTimestamp},protein_processing,${individualProteinDuration},\"${proteinMd5} with ${matchCount} matches\"\n")
+                    if (proteinCount % 100 == 0) {
+                        def memoryDuringProcessing = getMemoryInfo(memoryBean)
+                        def proteinTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
+                        def matchCount = proteinMatches.size()
+                        timingFile.append("${proteinTimestamp},protein_processing,${individualProteinDuration},${memoryDuringProcessing.heapUsed},${memoryDuringProcessing.heapMax},${memoryDuringProcessing.nonHeapUsed},\"${proteinMd5} with ${matchCount} matches (batch of 100)\"\n")
+                    }
                 }
                 
                 def proteinLoopEndTime = System.currentTimeMillis()
                 def proteinLoopDuration = proteinLoopEndTime - proteinProcessingStartTime
                 
+                def memoryAfterLoop = getMemoryInfo(memoryBean)
                 def proteinLoopTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
-                timingFile.append("${proteinLoopTimestamp},proteins_loop_total,${proteinLoopDuration},\"${proteins.size()} proteins from ${new File(matchFile.toString()).name}\"\n")
+                timingFile.append("${proteinLoopTimestamp},proteins_loop_total,${proteinLoopDuration},${memoryAfterLoop.heapUsed},${memoryAfterLoop.heapMax},${memoryAfterLoop.nonHeapUsed},\"${proteins.size()} proteins from ${new File(matchFile.toString()).name}\"\n")
             }
         }
 
@@ -113,14 +128,30 @@ process WRITE_XML {
         bufferedWriter.flush()
         writer.close()
 
+        def finalMemory = getMemoryInfo(memoryBean)
+        def endTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
+        timingFile.append("${endTimestamp},xml_complete,0,${finalMemory.heapUsed},${finalMemory.heapMax},${finalMemory.nonHeapUsed},\"XML generation complete\"\n")
+
     } finally {
         bufferedWriter.close()
         db.close()
     }
 }
 
+def getMemoryInfo(MemoryMXBean memoryBean) {
+    def heapMemory = memoryBean.getHeapMemoryUsage()
+    def nonHeapMemory = memoryBean.getNonHeapMemoryUsage()
+    
+    return [
+        heapUsed: Math.round(heapMemory.getUsed() / (1024 * 1024)),      // MB
+        heapMax: Math.round(heapMemory.getMax() / (1024 * 1024)),        // MB
+        nonHeapUsed: Math.round(nonHeapMemory.getUsed() / (1024 * 1024)) // MB
+    ]
+}
+
+// Updated nucleotide processing with memory tracking
 def processNucleotidesBulkBuffered(SeqDBQuery db, Map proteins, Set seenNucleicMd5s, XMLStreamWriter writer, 
-                                   BufferedWriter bufferedWriter, int bufferSize, int currentCount, File timingFile) {
+                                   BufferedWriter bufferedWriter, int bufferSize, int currentCount, File timingFile, MemoryMXBean memoryBean) {
     Set<String> allProteinMd5s = proteins.keySet().toSet()
     Map<String, Set<String>> nucleicToProteinMd5 = db.groupProteinsBulk(allProteinMd5s)
     
@@ -156,9 +187,11 @@ def processNucleotidesBulkBuffered(SeqDBQuery db, Map proteins, Set seenNucleicM
             def flushEndTime = System.currentTimeMillis()
             def flushDuration = flushEndTime - flushStartTime
             
+            // Get memory info for nucleotide flush
+            def memoryAfterFlush = getMemoryInfo(memoryBean)
             def flushTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
-            timingFile.append("${flushTimestamp},buffer_flush,${flushDuration},\"Flushed after ${processedCount} nucleotides\"\n")
-            println "Flushed buffer after processing ${processedCount} nucleotides..."
+            timingFile.append("${flushTimestamp},buffer_flush,${flushDuration},${memoryAfterFlush.heapUsed},${memoryAfterFlush.heapMax},${memoryAfterFlush.nonHeapUsed},\"Flushed after ${processedCount} nucleotides\"\n")
+            println "Flushed buffer after processing ${processedCount} nucleotides... (Heap: ${memoryAfterFlush.heapUsed}MB)"
         }
     }
     
