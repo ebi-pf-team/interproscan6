@@ -14,7 +14,10 @@ process WRITE_GFF3 {
     val interproscan_version
 
     exec:
-    SeqDB db = new SeqDB(seq_db_file.toString())
+    Pattern esl_pattern = Pattern.compile(/^source=[^"]+\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=.*$/)
+    Set<String> seenNucleicMd5s = new HashSet<>()
+
+    def db = new SeqDBQuery(seq_db_file.toString())
     def gff3File = new File(output_file.toString())
 
     gff3File.withWriter { gff3Writer ->
@@ -24,10 +27,6 @@ process WRITE_GFF3 {
         def tempFastaFile = new File("temp.fasta")
         tempFastaFile.withWriter { fastaWriter ->
             fastaWriter.writeLine("##FASTA")
-
-            Set<String> seenNucleicMd5s = new HashSet<>()
-
-            Pattern esl_pattern = Pattern.compile(/^source=[^"]+\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=.*$/)
 
             matches_files.each { matchFile ->
                 matchFile = new File(matchFile.toString())
@@ -83,18 +82,22 @@ process WRITE_GFF3 {
                         }
                     }
                 } else {
-                    proteins.each { String proteinMd5, Map matchesMap ->
-                        seqData = db.proteinMd5ToProteinSeq(proteinMd5)
-                        String sequence = seqData[0].sequence.trim()
+                    def proteinMd5List = proteins.keySet().toList()
+                    Map<String, List> seqData = db.proteinMd5sToProteinSeqs(proteinMd5List)
+
+                    for (Map.Entry entry : proteins.entrySet()) {
+                        String proteinMd5 = entry.key
+                        Map matchesMap = entry.value
+                        Map proteinSeqData = seqData[proteinMd5]
+    
+                        String sequence = proteinSeqData[0].sequence.trim()
                         int seqLength = sequence.length()
 
-                        seqData.each { row ->
+                        proteinSeqData.each { row ->
                             gff3Writer.writeLine("##sequence-region ${row.id} 1 ${seqLength}")
 
-                            matchesMap.each { modelAcc, match ->
-                                match = Match.fromMap(match)
-                                
-                                match.locations.each { Location loc ->
+                            matchesMap.each { String modelAcc, Map match ->
+                                for (Location loc : match.locations) {
                                     gff3Writer.writeLine(proteinFormatLine(row.id, match, loc, null, null, null))
                                 }
                             }
@@ -128,9 +131,17 @@ def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
         goTerms += match.signature.entry.goXRefs
     }
 
-    def uniqueTerms = [:]
-    goTerms.each { term -> uniqueTerms[term.id] = term }
-    goTerms = uniqueTerms.values() as List
+    def uniqueTermIds = new HashSet<String>()
+    def goTermBuilder = new StringBuilder()
+    boolean firstGo = true
+    for (term in goTerms) {
+        if (uniqueTermIds.add(term.id)) { // HashSet.add() returns false if already exists
+            if (!firstGo) goTermBuilder.append(',')
+            goTermBuilder.append(term.id)
+            firstGo = false
+        }
+    }
+    String goTermString = goTermBuilder.length() > 0 ? goTermBuilder.toString() : ""
 
     def feature_type = null
     switch (memberDb) {
@@ -196,20 +207,20 @@ def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
         "Alias=${match.signature.accession}",
         parentId ? "Parent=${parentId}" : null,
         interproAccession ? "Dbxref=InterPro:${interproAccession}" : null,
-        goTerms ? "Ontology_term=${goTerms.collect{ it.id }.join(',')}" : null,
+        goTermString ? "Ontology_term=${goTermString}" : null,
         "type=${match.signature.type}",
         "representative=${loc.representative}",
     ].findAll { it }
 
-    return [
-        seqId,
-        memberDb,
-        feature_type,
-        cdsStart ? (loc.start - 1) * 3 + cdsStart : loc.start,
-        cdsStart ? loc.end * 3 + cdsStart -1 : loc.end,
-        score ?: ".",
-        strand ?: ".",
-        parentId ? "0" : ".",
-        attributes.join(";")
-    ].join("\t")
+    StringBuilder sb = new StirngBuilder(256)
+    sb.append(seqId).append("\t")
+      .append(memberDb).append("\t")
+      .append(feature_type).append("\t")
+      .append(cdsStart ? (loc.start - 1) * 3 + cdsStart : loc.start).append("\t")
+      .append(cdsStart ? loc.end * 3 + cdsStart -1 : loc.end).append("\t")
+      .append(score ?: ".").append("\t")
+      .append(strand ?: ".").append("\t")
+      .append(parentId ? "0" : ".").append("\t")
+      .append(attributes.join(";"))
+    return sb.toString()
 }
