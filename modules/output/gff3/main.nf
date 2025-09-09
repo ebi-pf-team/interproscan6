@@ -14,66 +14,104 @@ process WRITE_GFF3 {
     val interproscan_version
 
     exec:
+    def db = new SeqDBQuery(seq_db_file.toString())
+    def gff3File = new File(output_file.toString())
+    gff3File.text = "" // Clear file if it exists
+
+    def tempFastaFile = new File("temp.fasta")
+    tempFastaFile.text = ""
+
+    def BATCH_SIZE = 5000
+    def gff3LineBuffer = []
+    def fastaLineBuffer = []
+
+    def flushGff3Buffer = {
+        if (gff3LineBuffer.size() > 0) {
+            gff3File.append(gff3LineBuffer.join("\n") + "\n")
+            gff3LineBuffer.clear()
+        }
+    }
+    
+    def flushFastaBuffer = {
+        if (fastaLineBuffer.size() > 0) {
+            tempFastaFile.append(fastaLineBuffer.join("\n") + "\n")
+            fastaLineBuffer.clear()
+        }
+    }
+
+    gff3File.append("##gff-version 3.1.26\n")
+    gff3File.append("##interproscan-version ${interproscan_version}\n")
+
+    matches_files.each { matchFile ->
+        Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
+
+        if (nucleic) {
+            processNucleotides(db, proteins, gff3LineBuffer, fastaLineBuffer, BATCH_SIZE, flushGff3Buffer, flushFastaBuffer)
+        } else {
+            def proteinMd5List = proteins.keySet().toList()
+            Map<String, List> seqData = db.proteinMd5sToProteinSeqs(proteinMd5List)
+
+            for (Map.Entry entry : proteins.entrySet()) {
+                String proteinMd5 = entry.key
+                Map matchesMap = entry.value
+                Map proteinSeqData = seqData[proteinMd5]
+
+                String sequence = proteinSeqData[0].sequence.trim()
+                int seqLength = sequence.length()
+
+                proteinSeqData.each { row ->
+                    gff3LineBuffer << "##sequence-region ${row.id} 1 ${seqLength}"
+
+                    matchesMap.each { String modelAcc, Map match ->
+                        Match match = Match.fromMap(matchMap)
+                        for (Location loc : match.locations) {
+                            String line = proteinFormatLine(row.id, match, loc, null, null, null)
+                            gff3LineBuffer << line
+                        }
+                    }
+
+                    if (gff3LineBuffer.size() >= BATCH_SIZE) {
+                        flushGff3Buffer()
+                        System.gc() // Make the jvm tidy up to prevent running out of memory
+                    }
+
+                    fastaLineBuffer << ">${row.id}"
+                    fastaLineBuffer << "${sequence.replaceAll(/(.{60})/, '$1\n')}"
+
+                    if (fastaLineBuffer.size() >= BATCH_SIZE) {
+                        flushFastaBuffer()
+                        System.gc() // Make the jvm tidy up to prevent running out of memory
+                    }
+                }         
+            }
+        }
+    }
+
+    flushGff3Buffer()
+    flushFastaBuffer()
+
+    gff3File.append("##FASTA\n")
+    tempFastaFile.withReader { fastaReader ->
+        fastaReader.eachLine { line ->
+            gff3LineBuffer << "${line}\n"
+
+            if (gff3LineBuffer.size() >= BATCH_SIZE) {
+                flushGff3Buffer()
+                System.gc() // Make the jvm tidy up to prevent running out of memory
+            }
+        }
+    }
+
+    flushGff3Buffer()
+
+    tempFastaFile.delete()
+    db.close()
+}
+
+def processNucleotidesBulkGFF3(SeqDBQuery db, Map proteins, Writer gff3Writer, Writer fastaWriter) {
     Pattern esl_pattern = Pattern.compile(/^source=[^"]+\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=.*$/)
     Set<String> seenNucleicMd5s = new HashSet<>()
 
-    def db = new SeqDBQuery(seq_db_file.toString())
-    def gff3File = new File(output_file.toString())
-
-    gff3File.withWriter { gff3Writer ->
-        gff3Writer.writeLine("##gff-version 3.1.26")
-        gff3Writer.writeLine("##interproscan-version ${interproscan_version}")
-
-        def tempFastaFile = new File("temp.fasta")
-        tempFastaFile.withWriter { fastaWriter ->
-            fastaWriter.writeLine("##FASTA")
-
-            matches_files.each { matchFile ->
-                matchFile = new File(matchFile.toString())
-                Map proteins = new ObjectMapper().readValue(matchFile, Map)
-
-                if (nucleic) {
-                    processNucleotides(db, proteins, seenNucleicMd5s, gff3Writer, fastaWriter, esl_pattern)
-                } else {
-                    def proteinMd5List = proteins.keySet().toList()
-                    Map<String, List> seqData = db.proteinMd5sToProteinSeqs(proteinMd5List)
-
-                    for (Map.Entry entry : proteins.entrySet()) {
-                        String proteinMd5 = entry.key
-                        Map matchesMap = entry.value
-                        Map proteinSeqData = seqData[proteinMd5]
-    
-                        String sequence = proteinSeqData[0].sequence.trim()
-                        int seqLength = sequence.length()
-
-                        proteinSeqData.each { row ->
-                            gff3Writer.writeLine("##sequence-region ${row.id} 1 ${seqLength}")
-
-                            matchesMap.each { String modelAcc, Map match ->
-                                for (Location loc : match.locations) {
-                                    gff3Writer.writeLine(proteinFormatLine(row.id, match, loc, null, null, null))
-                                }
-                            }
-
-                            fastaWriter.writeLine(">${row.id}")
-                            fastaWriter.writeLine("${sequence.replaceAll(/(.{60})/, '$1\n')}")   
-                        }         
-                    }
-                }
-            }
-        }
-
-        tempFastaFile.withReader { fastaReader ->
-            fastaReader.eachLine { line ->
-                gff3Writer.writeLine(line)
-            }
-        }
-        tempFastaFile.delete()
-    }
-}
-
-def processNucleotidesBulkGFF3(SeqDBQuery db, Map proteins, Set seenNucleicMd5s, 
-                               Writer gff3Writer, Writer fastaWriter, Pattern esl_pattern) {
     Set<String> allProteinMd5s = proteins.keySet().toSet()
     Map<String, Set<String>> nucleicToProteinMd5 = db.groupProteinsBulk(allProteinMd5s)
     
