@@ -53,7 +53,7 @@ process WRITE_GFF3 {
             for (Map.Entry entry : proteins.entrySet()) {
                 String proteinMd5 = entry.key
                 Map matchesMap = entry.value
-                Map proteinSeqData = seqData[proteinMd5]
+                List proteinSeqData = seqData[proteinMd5]
 
                 String sequence = proteinSeqData[0].sequence.trim()
                 int seqLength = sequence.length()
