@@ -21,7 +21,7 @@ process WRITE_TSV {
     tsvFile.text = "" // clear the file if it already exists
 
     // Set up buffer writing for faster output
-    BATCH_SIZE = 10000
+    BATCH_SIZE = 5000
     lineBuffer = []
     def flushBuffer = {
         if (lineBuffer.size() > 0) {
