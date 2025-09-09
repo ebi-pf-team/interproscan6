@@ -170,9 +170,8 @@ def addNucleotideNodesDirect(String nucleicMd5, Set<String> proteinMd5s, Map pro
     def SOURCE_NT_PATTERN = Pattern.compile(/^source=[^"]+\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=.*$/)
     
     String sequence = ntSeqData[0].sequence
-    
-    // ✅ FIXED: Correct XML element name
-    writer.writeStartElement("nucleotide-sequence")
+
+    writer.writeStartElement("nucleotide")
     
     // <sequence md5="" sequence </sequence>
     writer.writeStartElement("sequence")
@@ -189,14 +188,12 @@ def addNucleotideNodesDirect(String nucleicMd5, Set<String> proteinMd5s, Map pro
         if (proteinSeqData) {
             proteinSeqData.each { row ->
                 def proteinSource = SOURCE_NT_PATTERN.matcher(row.description)
-                // ✅ FIXED: Replace assert with if check
                 if (proteinSource.matches()) {
                     writer.writeStartElement("orf")
                     writer.writeAttribute("start", proteinSource.group(1))
                     writer.writeAttribute("end", proteinSource.group(2))
                     writer.writeAttribute("strand", proteinSource.group(3) as int < 4 ? "SENSE" : "ANTISENSE")
                     
-                    // ✅ FIXED: Pass the actual row data
                     addProteinNodesDirect(proteinMd5, proteinMatches[proteinMd5], [row], writer)
                     
                     writer.writeEndElement() // orf
