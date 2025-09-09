@@ -44,6 +44,8 @@ process WRITE_XML {
                     def timestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
                     def fileSize = new File(matchFile.toString()).length()
                     timingFile.append("${timestamp},json_load,${jsonLoadDuration},\"${new File(matchFile.toString()).name} (${fileSize} bytes, ${proteins.size()} proteins)\"\n")
+                    
+                    def proteinLoopStartTime = System.currentTimeMillis()
                     if (nucleic) {
                         processNucleotidesBulk(db, proteins, seenNucleicMd5s, delegate)
                     } else {
@@ -54,31 +56,30 @@ process WRITE_XML {
                         def proteinQueryDuration = proteinQueryEndTime - proteinQueryStartTime
                         
                         def proteinQueryTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
-                        timingFile.append("${proteinQueryTimestamp},protein_bulk_query,${proteinQueryDuration},\"${proteinMd5List.size()} protein sequences\"\n")
+                        timingFile.append("${proteinQueryTimestamp},db_query,${proteinQueryDuration},\"${proteinMd5List.size()} proteins from ${new File(matchFile.toString()).name}\"\n")
                         
                         def proteinProcessingStartTime = System.currentTimeMillis()
-                        def proteinProcessedCount = 0
                         
                         for (Map.Entry<String, Map> entry : proteins.entrySet()) {
                             String proteinMd5 = entry.key
                             Map proteinMatches = entry.value
                             addProteinNodes(proteinMd5, proteinMatches, seqData[proteinMd5], delegate)
-                            proteinProcessedCount++
-                            processedCount++
+
+                            def individualProteinStartTime = System.currentTimeMillis()
+                            addProteinNodes(proteinMd5, proteinMatches, seqData[proteinMd5], delegate)
+                            def individualProteinEndTime = System.currentTimeMillis()
+                            def individualProteinDuration = individualProteinEndTime - individualProteinStartTime
                             
-                            if (proteinProcessedCount % BATCH_SIZE == 0) {
-                                def batchTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
-                                def batchDuration = System.currentTimeMillis() - proteinProcessingStartTime
-                                timingFile.append("${batchTimestamp},protein_batch_progress,${batchDuration},\"${proteinProcessedCount} proteins processed from ${new File(matchFile.toString()).name}\"\n")
-                                println "Processed ${processedCount} total sequences (${proteinProcessedCount} from current file)..."
-                            }
+                            def proteinTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
+                            def matchCount = proteinMatches.size()
+                            timingFile.append("${proteinTimestamp},protein_processing,${individualProteinDuration},\"${proteinMd5} with ${matchCount} matches\"\n")
                         }
                         
-                        def proteinProcessingEndTime = System.currentTimeMillis()
-                        def proteinProcessingDuration = proteinProcessingEndTime - proteinProcessingStartTime
+                        def proteinLoopEndTime = System.currentTimeMillis()
+                        def proteinLoopDuration = proteinLoopEndTime - proteinLoopStartTime
                         
-                        def proteinProcessingTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
-                        timingFile.append("${proteinProcessingTimestamp},protein_processing,${proteinProcessingDuration},\"${proteinProcessedCount} proteins from ${new File(matchFile.toString()).name}\"\n")
+                        def proteinLoopTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
+                        timingFile.append("${proteinLoopTimestamp},proteins_loop_total,${proteinLoopDuration},\"${proteins.size()} proteins from ${new File(matchFile.toString()).name}\"\n")
                     }
                 }
             }
@@ -99,7 +100,7 @@ def processNucleotidesBulk(SeqDBQuery db, Map proteins, Set seenNucleicMd5s, def
     List<String> newNucleicMd5s = nucleicToProteinMd5.keySet().findAll { !seenNucleicMd5s.contains(it) }
     seenNucleicMd5s.addAll(newNucleicMd5s)
     if (newNucleicMd5s.isEmpty()) {
-        return processedCount
+        return
     }
 
     // Get all nucleotide sequences
@@ -122,7 +123,7 @@ def processNucleotidesBulk(SeqDBQuery db, Map proteins, Set seenNucleicMd5s, def
         addNucleotideNodes(nucleicMd5, proteinMd5sForNucleic, proteins, ntSeqData, orfSeqData, xml)
     }
     
-    return processedCount
+    return
 }
 
 
