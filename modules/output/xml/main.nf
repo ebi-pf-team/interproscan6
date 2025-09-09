@@ -1,7 +1,9 @@
-import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.xml.StreamingMarkupBuilder
 import java.io.FileWriter
 import java.util.regex.Pattern
+import javax.xml.stream.XMLOutputFactory
+import javax.xml.stream.XMLStreamWriter
+import com.fasterxml.jackson.databind.ObjectMapper
 
 import java.time.format.DateTimeFormatter
 import java.time.LocalDate
@@ -22,329 +24,473 @@ process WRITE_XML {
 
     exec:
     def db = new SeqDBQuery(seq_db_file.toString())
-    def fileWriter = new FileWriter(output_file)
 
+    // Use BufferedWriter with custom buffer size
+    def bufferedWriter = new BufferedWriter(new FileWriter(output_file), 1024 * 1024) // 1MB buffer
+    
     def timingFile = new File("${output_file}_timing.log")
     timingFile.text = "timestamp,operation,duration_ms,details\n"
 
     try {
+        def factory = XMLOutputFactory.newInstance()
+        def writer = factory.createXMLStreamWriter(bufferedWriter)
+        
+        writer.writeStartDocument("UTF-8", "1.0")
+        writer.writeStartElement("results")
+        writer.writeAttribute("interproscan-version", interproscan_version)
+        writer.writeAttribute("interpro-version", db_releases?.interpro?.version ?: "")
+
         Set<String> seenNucleicMd5s = new HashSet<>()
-        def builder = new StreamingMarkupBuilder()
-        builder.encoding = 'UTF-8'
+        def proteinCount = 0
+        def BUFFER_SIZE = 5000  // Flush every 5000 proteins
 
-        def xmlContent = builder.bind { // mkp = Markup Builder; delegate = the XML builder context
-            mkp.xmlDeclaration()
-            results("interproscan-version": interproscan_version, "interpro-version": db_releases?.interpro?.version) {
-                matches_files.each { matchFile ->
-                    def jsonLoadStartTime = System.currentTimeMillis()
-                    Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
-                    def jsonLoadEndTime = System.currentTimeMillis()
-                    def jsonLoadDuration = jsonLoadEndTime - jsonLoadStartTime
+        matches_files.each { matchFile ->
+            def jsonLoadStartTime = System.currentTimeMillis()
+            Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
+            def jsonLoadEndTime = System.currentTimeMillis()
+            def jsonLoadDuration = jsonLoadEndTime - jsonLoadStartTime
 
-                    def timestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
-                    def fileSize = new File(matchFile.toString()).length()
-                    timingFile.append("${timestamp},json_load,${jsonLoadDuration},\"${new File(matchFile.toString()).name} (${fileSize} bytes, ${proteins.size()} proteins)\"\n")
+            def timestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
+            def fileSize = new File(matchFile.toString()).length()
+            timingFile.append("${timestamp},json_load,${jsonLoadDuration},\"${new File(matchFile.toString()).name} (${fileSize} bytes, ${proteins.size()} proteins)\"\n")
+            
+            if (nucleic) {
+                proteinCount = processNucleotidesBulkBuffered(db, proteins, seenNucleicMd5s, writer, bufferedWriter, BUFFER_SIZE, proteinCount, timingFile)
+            } else {
+                def proteinQueryStartTime = System.currentTimeMillis()
+                def proteinMd5List = proteins.keySet().toList()
+                Map<String, List> seqData = db.proteinMd5sToProteinSeqs(proteinMd5List)
+                def proteinQueryEndTime = System.currentTimeMillis()
+                def proteinQueryDuration = proteinQueryEndTime - proteinQueryStartTime
+                
+                def proteinQueryTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
+                timingFile.append("${proteinQueryTimestamp},db_query,${proteinQueryDuration},\"${proteinMd5List.size()} proteins from ${new File(matchFile.toString()).name}\"\n")
+                
+                def proteinProcessingStartTime = System.currentTimeMillis()
+                
+                for (entry in proteins) {
+                    String proteinMd5 = entry.key
+                    Map proteinMatches = entry.value
+                    List proteinSeqData = seqData[proteinMd5]
                     
-                    def proteinLoopStartTime = System.currentTimeMillis()
-                    if (nucleic) {
-                        processNucleotidesBulk(db, proteins, seenNucleicMd5s, delegate)
-                    } else {
-                        def proteinQueryStartTime = System.currentTimeMillis()
-                        def proteinMd5List = proteins.keySet().toList()
-                        Map<String, List> seqData = db.proteinMd5sToProteinSeqs(proteinMd5List)
-                        def proteinQueryEndTime = System.currentTimeMillis()
-                        def proteinQueryDuration = proteinQueryEndTime - proteinQueryStartTime
+                    def individualProteinStartTime = System.currentTimeMillis()
+                    addProteinNodesDirect(proteinMd5, proteinMatches, proteinSeqData, writer)
+                    def individualProteinEndTime = System.currentTimeMillis()
+                    def individualProteinDuration = individualProteinEndTime - individualProteinStartTime
+                    
+                    proteinCount++
+                    
+                    if (proteinCount % BUFFER_SIZE == 0) {
+                        def flushStartTime = System.currentTimeMillis()
+                        writer.flush()
+                        bufferedWriter.flush()
+                        def flushEndTime = System.currentTimeMillis()
+                        def flushDuration = flushEndTime - flushStartTime
                         
-                        def proteinQueryTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
-                        timingFile.append("${proteinQueryTimestamp},db_query,${proteinQueryDuration},\"${proteinMd5List.size()} proteins from ${new File(matchFile.toString()).name}\"\n")
-                        
-                        def proteinProcessingStartTime = System.currentTimeMillis()
-                        
-                        for (Map.Entry<String, Map> entry : proteins.entrySet()) {
-                            String proteinMd5 = entry.key
-                            Map proteinMatches = entry.value
-                            addProteinNodes(proteinMd5, proteinMatches, seqData[proteinMd5], delegate)
-
-                            def individualProteinStartTime = System.currentTimeMillis()
-                            addProteinNodes(proteinMd5, proteinMatches, seqData[proteinMd5], delegate)
-                            def individualProteinEndTime = System.currentTimeMillis()
-                            def individualProteinDuration = individualProteinEndTime - individualProteinStartTime
-                            
-                            def proteinTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
-                            def matchCount = proteinMatches.size()
-                            timingFile.append("${proteinTimestamp},protein_processing,${individualProteinDuration},\"${proteinMd5} with ${matchCount} matches\"\n")
-                        }
-                        
-                        def proteinLoopEndTime = System.currentTimeMillis()
-                        def proteinLoopDuration = proteinLoopEndTime - proteinLoopStartTime
-                        
-                        def proteinLoopTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
-                        timingFile.append("${proteinLoopTimestamp},proteins_loop_total,${proteinLoopDuration},\"${proteins.size()} proteins from ${new File(matchFile.toString()).name}\"\n")
+                        def flushTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
+                        timingFile.append("${flushTimestamp},buffer_flush,${flushDuration},\"Flushed after ${proteinCount} proteins\"\n")
+                        println "Flushed buffer after processing ${proteinCount} proteins..."
                     }
+                    
+                    def proteinTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
+                    def matchCount = proteinMatches.size()
+                    timingFile.append("${proteinTimestamp},protein_processing,${individualProteinDuration},\"${proteinMd5} with ${matchCount} matches\"\n")
                 }
+                
+                def proteinLoopEndTime = System.currentTimeMillis()
+                def proteinLoopDuration = proteinLoopEndTime - proteinProcessingStartTime
+                
+                def proteinLoopTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
+                timingFile.append("${proteinLoopTimestamp},proteins_loop_total,${proteinLoopDuration},\"${proteins.size()} proteins from ${new File(matchFile.toString()).name}\"\n")
             }
         }
 
-        fileWriter << xmlContent
+        writer.writeEndElement() // results
+        writer.writeEndDocument()
+        
+        // Final flush
+        writer.flush()
+        bufferedWriter.flush()
+        writer.close()
+
     } finally {
-        fileWriter.close()
+        bufferedWriter.close()
         db.close()
     }
 }
 
-def processNucleotidesBulk(SeqDBQuery db, Map proteins, Set seenNucleicMd5s, def xml) {
+def processNucleotidesBulkBuffered(SeqDBQuery db, Map proteins, Set seenNucleicMd5s, XMLStreamWriter writer, 
+                                   BufferedWriter bufferedWriter, int bufferSize, int currentCount, File timingFile) {
     Set<String> allProteinMd5s = proteins.keySet().toSet()
     Map<String, Set<String>> nucleicToProteinMd5 = db.groupProteinsBulk(allProteinMd5s)
     
-    // Filter to only unseen nucleotide MD5s
     List<String> newNucleicMd5s = nucleicToProteinMd5.keySet().findAll { !seenNucleicMd5s.contains(it) }
     seenNucleicMd5s.addAll(newNucleicMd5s)
+    
     if (newNucleicMd5s.isEmpty()) {
-        return
+        return currentCount
     }
 
-    // Get all nucleotide sequences
     Map<String, List> nucleotideSeqData = db.nucleicMd5sToNucleicSeqs(newNucleicMd5s)
 
-    // Get all ORF sequences for relevant protein/nucleotide combinations
     List<String> relevantProteinMd5s = []
     newNucleicMd5s.each { nucleicMd5 ->
         relevantProteinMd5s.addAll(nucleicToProteinMd5[nucleicMd5])
     }
     Map<String, Map<String, List>> orfSeqData = db.getOrfSeqsBulk(relevantProteinMd5s, newNucleicMd5s)
 
-    // Process the results
+    def processedCount = currentCount
     newNucleicMd5s.each { String nucleicMd5 ->
         def ntSeqData = nucleotideSeqData[nucleicMd5]
         if (!ntSeqData) return
 
         Set<String> proteinMd5sForNucleic = nucleicToProteinMd5[nucleicMd5]
 
-        addNucleotideNodes(nucleicMd5, proteinMd5sForNucleic, proteins, ntSeqData, orfSeqData, xml)
+        addNucleotideNodesDirect(nucleicMd5, proteinMd5sForNucleic, proteins, ntSeqData, orfSeqData, writer)
+        processedCount++
+        
+        if (processedCount % bufferSize == 0) {
+            def flushStartTime = System.currentTimeMillis()
+            writer.flush()
+            bufferedWriter.flush()
+            def flushEndTime = System.currentTimeMillis()
+            def flushDuration = flushEndTime - flushStartTime
+            
+            def flushTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss.SSS")
+            timingFile.append("${flushTimestamp},buffer_flush,${flushDuration},\"Flushed after ${processedCount} nucleotides\"\n")
+            println "Flushed buffer after processing ${processedCount} nucleotides..."
+        }
     }
     
-    return
+    return processedCount
 }
 
-
-def addNucleotideNodes(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, List ntSeqData, Map orfSeqData,def xml) {
-    /* Write data for an input nucleic acid seq, and then the matches for its associated ORFs.
-    <nucleotide-sequence>
-        <sequence md5="" sequence </sequence>
-        <xref id="id", name="id desc"/>
-        <orf end="", start="", strand="">
-            <protein>
-                <sequence md5="" sequence </sequence>
-                <xref id="id", name="id desc"/>
-                <matches> <> <> </matches>
-            </protein>
-        </orf>
-    */
+def addNucleotideNodesDirect(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, List ntSeqData, 
+                           Map orfSeqData, XMLStreamWriter writer) {
     def SOURCE_NT_PATTERN = Pattern.compile(/^source=[^"]+\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=.*$/)
     
-    // 1. <nt-seq> <sequence md5="" "<seq>" </sequence>
     String sequence = ntSeqData[0].sequence
-    xml."nucleotideNode" {
-        xml.sequence(md5: nucleicMd5, sequence)
+    
+    // ✅ FIXED: Correct XML element name
+    writer.writeStartElement("nucleotide-sequence")
+    
+    // <sequence md5="" sequence </sequence>
+    writer.writeStartElement("sequence")
+    writer.writeAttribute("md5", nucleicMd5)
+    writer.writeCharacters(sequence)
+    writer.writeEndElement()
 
-        // 2. <xref id="id" name="id desc"/>
-        writeXref(ntSeqData, xml)
+    // <xref id="id" name="id desc"/>
+    writeXrefDirect(ntSeqData, writer)
 
-        // 3. <orf end="", start="", strand="">
-        proteinMd5s.each { proteinMd5 ->
-            // a proteinSeq MD5 may be associated with multiple nt seqs, only pull the data where the nt md5/seq is relevant
-            proteinSeqData = orfSeqData[proteinMd5]?.get(nucleicMd5)
-            if (proteinSeqData) {
-                proteinSeqData.each { row ->
-                    def proteinSource = SOURCE_NT_PATTERN.matcher(row.description)
-                    assert proteinSource.matches()
-                    xml.orf([
-                        start  : proteinSource.group(1) as int,
-                        end    : proteinSource.group(2) as int,
-                        strand : proteinSource.group(3) as int < 4 ? "SENSE" : "ANTISENSE"
-                    ]) {
-                        // 4. <protein> ... <\protein>
-                        addProteinNodes(proteinMd5, proteinMatches[proteinMd5], proteinSeqData[proteinMd5], xml)
-                    }
+    // <orf end="", start="", strand="">
+    proteinMd5s.each { proteinMd5 ->
+        def proteinSeqData = orfSeqData[proteinMd5]?.get(nucleicMd5)
+        if (proteinSeqData) {
+            proteinSeqData.each { row ->
+                def proteinSource = SOURCE_NT_PATTERN.matcher(row.description)
+                // ✅ FIXED: Replace assert with if check
+                if (proteinSource.matches()) {
+                    writer.writeStartElement("orf")
+                    writer.writeAttribute("start", proteinSource.group(1))
+                    writer.writeAttribute("end", proteinSource.group(2))
+                    writer.writeAttribute("strand", proteinSource.group(3) as int < 4 ? "SENSE" : "ANTISENSE")
+                    
+                    // ✅ FIXED: Pass the actual row data
+                    addProteinNodesDirect(proteinMd5, proteinMatches[proteinMd5], [row], writer)
+                    
+                    writer.writeEndElement() // orf
                 }
             }
         }
     }
+    
+    writer.writeEndElement() // nucleotide-sequence
 }
 
-def addProteinNodes (String proteinMd5, Map proteinMatches, List proteinSeqData, def xml) {
-    /* Write data for a query protein sequence and its matches:
-    <protein>
-        <sequence md5="" sequence </sequence>
-        <xref id="id", name="id desc"/>
-        <matches> <> <> </matches>
-    </protein>
-    There may be multiple seqIds and desc for the same sequence/md5, use the first entry to get the seq. */
+def addProteinNodesDirect(String proteinMd5, Map proteinMatches, List proteinSeqData, XMLStreamWriter writer) {
+    if (!proteinSeqData || proteinSeqData.size() == 0) return
+    
     String sequence = proteinSeqData[0].sequence
-    xml.protein {
-        // 1. <sequence md5="" sequence </sequence>
-        xml.sequence(md5: proteinMd5, sequence)
+    
+    writer.writeStartElement("protein")
+    
+    // <sequence md5="" sequence </sequence>
+    writer.writeStartElement("sequence")
+    writer.writeAttribute("md5", proteinMd5)
+    writer.writeCharacters(sequence)
+    writer.writeEndElement()
 
-        // 2. <xref id="id", name="id desc"/>
-        writeXref(proteinSeqData, xml)
+    // <xref id="id", name="id desc"/>
+    writeXrefDirect(proteinSeqData, writer)
 
-        // 3. <matches> <m> <m> <m> </matches>
-        matches {
-            for (Map.Entry<String, Map> entry : proteinMatches) {
-                def match = entry.value
-                addMatchNode(proteinMd5, match, xml)
+    // <matches>
+    writer.writeStartElement("matches")
+    for (entry in proteinMatches) {
+        addMatchNodeDirect(proteinMd5, entry.value, writer)
+    }
+    writer.writeEndElement() // matches
+    
+    writer.writeEndElement() // protein
+}
+
+def addMatchNodeDirect(String proteinMd5, Map match, XMLStreamWriter writer) {
+    String memberDB = match.signature.signatureLibraryRelease.library.toLowerCase() ?: ""
+
+    def matchNodeAttributes = getMatchNodeAttributes(memberDB, match)
+
+    writer.writeStartElement("match")
+    
+    // Write match attributes
+    if (matchNodeAttributes) {
+        matchNodeAttributes.each { key, value ->
+            if (value != null) {
+                writer.writeAttribute(key.toString(), value.toString())
             }
         }
     }
+    
+    // <signature>
+    def signatureNodeAttributes = fmtSignatureNode(match)
+    writer.writeStartElement("signature")
+    signatureNodeAttributes.each { key, value ->
+        if (value != null) {
+            writer.writeAttribute(key.toString(), value.toString())
+        }
+    }
+    
+    // <entry> if exists
+    if (match.signature.entry) {
+        addEntryNodeDirect(match.signature.entry, writer)
+    }
+    
+    // <signature-library-release>
+    writer.writeStartElement("signature-library-release")
+    writer.writeAttribute("library", match.signature.signatureLibraryRelease.library)
+    writer.writeAttribute("version", match.signature.signatureLibraryRelease.version)
+    writer.writeEndElement()
+    
+    writer.writeEndElement() // signature
+    
+    // <model-ac>
+    writer.writeStartElement("model-ac")
+    if (memberDB == "panther") {
+        writer.writeCharacters(match.treegrafter?.subfamilyAccession ?: match.modelAccession)
+        writer.writeEndElement() // model-ac
+        
+        // PANTHER go-xrefs
+        match.treegrafter?.goXRefs?.each { goXref ->
+            writer.writeStartElement("go-xref")
+            writer.writeAttribute("category", goXref.category)
+            writer.writeAttribute("db", goXref.databaseName)
+            writer.writeAttribute("id", goXref.id)
+            writer.writeAttribute("name", goXref.name)
+            writer.writeEndElement()
+        }
+    } else {
+        writer.writeCharacters(match.modelAccession)
+        writer.writeEndElement() // model-ac
+    }
+    
+    // <locations>
+    addLocationNodesDirect(memberDB, proteinMd5, match, writer)
+    
+    writer.writeEndElement() // match
 }
 
-def addMatchNode(String proteinMd5, Map match, def xml) {
-    // Write an individual node representing a match. The structure is dependent on the memberDB.
-    String memberDB = match.signature.signatureLibraryRelease.library.toLowerCase() ?: ""
-
-    // Define the name for the match node and it's attributes
+def getMatchNodeAttributes(String memberDB, Map match) {
     switch (memberDB) {
         case "antifam":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
         case "cath-gene3d":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
         case "cath-funfam":
-        case "funfam":  // use groovy case fall to allow multiple options
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
+        case "funfam":
         case "cdd":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "coils":
-            matchNodeAttributes = null
-            break
         case "hamap":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
+        case "ncbifam":
+        case "pfam":
+        case "phobius":
+        case "pirsf":
+        case "pirsr":
+        case "prosite patterns":
+        case "prosite profiles":
+        case "sfld":
+        case "smart":
+            return fmtDefaultMatchNode(match)
+        case "panther":
+            return fmtPantherMatchNode(match)
+        case "prints":
+            return fmtPrintsMatchNode(match)
+        case "superfamily":
+            return fmtSuperfamilyMatchNode(match)
+        case "coils":
         case "mobidb lite":
         case "mobidb-lite":
-        case "mobidb_lite":  // use groovy case fall to allow multiple options
-            matchNodeAttributes = null
-            break
-        case "ncbifam":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "panther":
-            matchNodeAttributes = fmtPantherMatchNode(match)
-            break
-        case "pfam":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "phobius":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "pirsf":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "pirsr":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "prints":
-            matchNodeAttributes = fmtPrintsMatchNode(match)
-            break
-        case "prosite patterns":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "prosite profiles":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "sfld":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
+        case "mobidb_lite":
         case "signalp":
-            matchNodeAttributes =  null
-            break
-        case "smart":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "superfamily":
-            matchNodeAttributes = fmtSuperfamilyMatchNode(match)
-            break
         case "tmhmm":
         case "deeptmhmm":
-            matchNodeAttributes = null
-            break
         case "tmbed":
-            matchNodeAttributes = null
-            break
+            return null
         default:
             throw new UnsupportedOperationException("Unknown database '${memberDB}' for query protein with MD5 ${proteinMd5}")
     }
+}
 
-    def signatureNodeAttributes = fmtSignatureNode(match)
+def addEntryNodeDirect(Map entry, XMLStreamWriter writer) {
+    writer.writeStartElement("entry")
+    writer.writeAttribute("ac", entry.accession)
+    writer.writeAttribute("desc", entry.description)
+    writer.writeAttribute("name", entry.name)
+    writer.writeAttribute("type", entry.type)
+    
+    // GO cross-references
+    entry.goXRefs?.each { goXref ->
+        writer.writeStartElement("go-xref")
+        writer.writeAttribute("category", goXref.category)
+        writer.writeAttribute("db", goXref.databaseName)
+        writer.writeAttribute("id", goXref.id)
+        writer.writeAttribute("name", goXref.name)
+        writer.writeEndElement()
+    }
+    
+    // Pathway cross-references
+    entry.pathwayXRefs?.each { pathwayXref ->
+        writer.writeStartElement("pathway-xref")
+        writer.writeAttribute("db", pathwayXref.databaseName)
+        writer.writeAttribute("id", pathwayXref.id)
+        writer.writeAttribute("name", pathwayXref.name)
+        writer.writeEndElement()
+    }
+    
+    writer.writeEndElement() // entry
+}
 
-    xml."match"(matchNodeAttributes) {
-        xml.signature(signatureNodeAttributes) {
-            if (match.signature.entry && match.signature.entry != null) {
-                addEntryNode(match.signature.entry, xml)
+def addLocationNodesDirect(String memberDB, String proteinMd5, Map match, XMLStreamWriter writer) {
+    writer.writeStartElement("locations")
+    
+    match.locations.each { loc ->
+        def locationAttributes = getLocationAttributes(memberDB, match, loc)
+        
+        writer.writeStartElement("location")
+        locationAttributes.each { key, value ->
+            if (value != null) {
+                writer.writeAttribute(key.toString(), value.toString())
             }
-            xml."signature-library-release"(
-                library: match.signature.signatureLibraryRelease.library,
-                version: match.signature.signatureLibraryRelease.version
-            )
         }
-
-        if (memberDB == "panther") {
-            xml."model-ac"(match.treegrafter.subfamilyAccession ?: match.modelAccession)
-            match.treegrafter.goXRefs.each { goXref ->
-                xml."go-xref"(
-                    category: goXref.category,
-                    db: goXref.databaseName,
-                    id: goXref.id,
-                    name: goXref.name
-                )
+        
+        // fragments if they exist
+        if (loc.containsKey("fragments") && loc.fragments?.size() > 0) {
+            writer.writeStartElement("location-fragments")
+            loc.fragments.each { frag ->
+                writer.writeStartElement("fragment")
+                writer.writeAttribute("start", frag.start.toString())
+                writer.writeAttribute("end", frag.end.toString())
+                writer.writeAttribute("dc-status", frag.dcStatus)
+                writer.writeEndElement()
             }
-        } else {
-            xml."model-ac"(match.modelAccession)
+            writer.writeEndElement() // location-fragments
         }
+        
+        // alignment info for specific databases
+        if (memberDB in ["hamap", "prosite patterns", "prosite profiles"]) {
+            writer.writeStartElement("alignment")
+            writer.writeCharacters(loc.targetAlignment ?: "")
+            writer.writeEndElement()
+            
+            writer.writeStartElement("cigar-alignment")
+            writer.writeCharacters(loc.cigarAlignment ?: "")
+            writer.writeEndElement()
+        }
+        
+        // sites if they exist
+        if (loc.containsKey("sites") && loc.sites?.size() > 0) {
+            addSiteNodesDirect(loc.sites, writer)
+        }
+        
+        writer.writeEndElement() // location
+    }
+    
+    writer.writeEndElement() // locations
+}
 
-        addLocationNodes(memberDB, proteinMd5, match, xml)
+def getLocationAttributes(String memberDB, Map match, Map loc) {
+    switch (memberDB) {
+        case "antifam":
+        case "cath-funfam":
+        case "funfam":
+        case "cath-gene3d":
+        case "gene3d":
+        case "ncbifam":
+        case "pfam":
+        case "pirsf":
+            return fmtDefaultLocationNode(loc)
+        case "cdd":
+            return fmtCddLocationNode(match, loc)
+        case "coils":
+        case "tmhmm":
+        case "deeptmhmm":
+        case "tmbed":
+            return fmMinimalistLoctationNode(loc)
+        case "hamap":
+        case "phobius":
+        case "prosite profiles":
+            return fmtMinimalistLocationNode(loc)
+        case "mobidb lite":
+        case "mobidb-lite":
+        case "mobidb_lite":
+            return fmtMobidbLiteLocationNode(loc)
+        case "panther":
+            return fmtPantherLocationNode(loc)
+        case "prints":
+            return fmtPrintsLocationNode(loc)
+        case "prosite patterns":
+            return fmtPrositePatternsLocationNode(loc)
+        case "pirsr":
+        case "sfld":
+            return fmtDefaultNoHbLocationNode(loc)
+        case "signalp":
+            return fmtSignalpLocationNode(loc)
+        case "smart":
+            return fmtSmartLocationNode(loc)
+        case "superfamily":
+            return fmtSuperfamilyLocationNode(loc)
+        default:
+            throw new UnsupportedOperationException("Unknown database for match in protein MD5 ${proteinMd5}")
     }
 }
 
-def addEntryNode(Map entry, def xml) {
-    /* Add info on the InterPro Entry the signature is integrated into. For example:
-    <entry ac='IPR001584' desc='Integrase, catalytic core' name='Integrase_cat-core' type='Domain'>
-        <go-xref category='BIOLOGICAL_PROCESS' db='GO' id='GO:0015074' name='DNA integration' />
-        <pathway-xref db='MetaCyc' id='PWY-6955' name='lincomycin A biosynthesis' />
-    </entry>
-    */
-    xml.entry(
-        ac: entry.accession,
-        desc: entry.description,
-        name: entry.name,
-        type: entry.type
-    ) {
-        if (entry.goXRefs != null) {
-            entry.goXRefs.each { goXref ->
-                xml."go-xref"(
-                    category: goXref.category,
-                    db: goXref.databaseName,
-                    id: goXref.id,
-                    name: goXref.name
-                )
-            }
+def addSiteNodesDirect(locationSites, XMLStreamWriter writer) {
+    writer.writeStartElement("sites")
+    
+    locationSites.each { siteMap ->
+        writer.writeStartElement("site")
+        writer.writeAttribute("description", siteMap.description)
+        writer.writeAttribute("numLocations", siteMap.numLocations.toString())
+        
+        writer.writeStartElement("site-locations")
+        siteMap.siteLocations.each { siteLoc ->
+            writer.writeStartElement("site-location")
+            writer.writeAttribute("residue", siteLoc.residue)
+            writer.writeAttribute("start", siteLoc.start.toString())
+            writer.writeAttribute("end", siteLoc.end.toString())
+            writer.writeEndElement()
         }
-        if (entry.pathwayXRefs != null) {
-            entry.pathwayXRefs.each { pathwayXref ->
-                xml."pathway-xref"(
-                    db: pathwayXref.databaseName,
-                    id: pathwayXref.id,
-                    name: pathwayXref.name
-                )
-            }
-        }
+        writer.writeEndElement() // site-locations
+        
+        writer.writeEndElement() // site
     }
+    
+    writer.writeEndElement() // sites
 }
 
-// Formating the Match node
+def writeXrefDirect(seqData, XMLStreamWriter writer) {
+    seqData.each { row ->
+        writer.writeStartElement("xref")
+        writer.writeAttribute("id", row.id)
+        writer.writeAttribute("name", "${row.id} ${row.description}".trim())
+        writer.writeEndElement()
+    }
+}
 
 def fmtDefaultMatchNode(Map match) {
     return [
@@ -392,116 +538,7 @@ def fmtSignatureNode(Map match) {
     return signatureNodeAttributes
 }
 
-// Formating and add Location nodes
-
-def addLocationNodes(String memberDB, String proteinMd5, Map match, def xml) {
-    xml.locations {
-        match.locations.each { loc ->
-            def locationAttributes
-            switch (memberDB) {
-                case "antifam":
-                    locationAttributes = fmtDefaultLocationNode(loc)
-                    break
-                case "cath-funfam":
-                case "funfam":
-                    locationAttributes = fmtDefaultLocationNode(loc)
-                    break
-                case "cath-gene3d":
-                case "gene3d":
-                    locationAttributes = fmtDefaultLocationNode(loc)
-                    break
-                case "cdd":
-                    locationAttributes = fmtCddLocationNode(match, loc)
-                    break
-                case "coils":
-                    locationAttributes = fmMinimalistLoctationNode(loc)
-                    break
-                case "deeptmhmm":
-                    locationAttributes = []
-                    break
-                case "hamap":
-                    locationAttributes = fmtMinimalistLocationNode(loc)
-                    break
-                case "mobidb lite":
-                case "mobidb-lite":
-                case "mobidb_lite":
-                    locationAttributes = fmtMobidbLiteLocationNode(loc)
-                    break
-                case "ncbifam":
-                    locationAttributes = fmtDefaultLocationNode(loc)
-                    break
-                case "panther":
-                    locationAttributes = fmtPantherLocationNode(loc)
-                    break
-                case "pfam":
-                    locationAttributes = fmtDefaultLocationNode(loc)
-                    break
-                case "phobius":
-                    locationAttributes = fmtMinimalistLocationNode(loc)
-                    break
-                case "pirsf":
-                    locationAttributes = fmtDefaultLocationNode(loc)
-                    break
-                case "pirsr":
-                    locationAttributes = fmtDefaultNoHbLocationNode(loc)
-                    break
-                case "prints":
-                    locationAttributes = fmtPrintsLocationNode(loc)
-                    break
-                case "prosite patterns":
-                    locationAttributes = fmtPrositePatternsLocationNode(loc)
-                    break
-                case "prosite profiles":
-                    locationAttributes = fmtMinimalistLocationNode(loc)
-                    break
-                case "sfld":
-                    locationAttributes = fmtDefaultNoHbLocationNode(loc)
-                    break
-                case "signalp":
-                    locationAttributes = fmtSignalpLocationNode(loc)
-                    break
-                case "smart":
-                    locationAttributes = fmtSmartLocationNode(loc)
-                    break
-                case "superfamily":
-                    locationAttributes = fmtSuperfamilyLocationNode(loc)
-                    break
-                case "tmhmm":
-                case "deeptmhmm":
-                    locationAttributes = fmMinimalistLoctationNode(loc)
-                    break
-                case "tmbed":
-                    locationAttributes = fmMinimalistLoctationNode(loc)
-                    break
-                default:
-                    throw new UnsupportedOperationException("Unknown database for match ${matchId}")
-            }
-
-            xml.location(locationAttributes) {
-                if (loc.containsKey("fragments") && loc["fragments"].size() > 0) {
-                    xml."location-fragments" {
-                        loc.fragments.each { frag ->
-                            xml.fragment([
-                                start      : frag.start,
-                                end        : frag.end,
-                                "dc-status": frag.dcStatus
-                            ])
-                        }
-                    }
-                }
-                if (memberDB in ["hamap", "prosite patterns", "prosite profiles"]) {
-                    xml.alignment(loc.targetAlignment ?: "")
-                    xml."cigar-alignment"(loc.cigarAlignment ?: "")
-                }
-                if (loc.containsKey("sites") && loc.sites.size() > 0) {
-                    addSiteNodes(loc.sites, memberDB, xml)
-                }
-            }
-        }
-    }
-}
-
-// formate location nodes
+// Keep all your existing location formatting methods:
 
 def fmtDefaultLocationNode(Map loc) {
     return [
@@ -635,31 +672,4 @@ def fmtSuperfamilyLocationNode(Map loc) {
         evalue         : loc.evalue,
         "hmm-length"   : loc.hmmLength
     ]
-}
-
-// add site nodes
-
-def addSiteNodes(locationSites, memberDB, xml) {
-    xml."sites" {
-        locationSites.each { siteMap ->
-            xml."site"(description: siteMap.description, numLocations: siteMap.numLocations) {
-                xml."site-locations" {
-                    siteMap.siteLocations.each { siteLoc ->
-                        xml."site-location"(
-                            residue : siteLoc.residue,
-                            start   : siteLoc.start,
-                            end     : siteLoc.end
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-def writeXref(seqData, xml) {
-    // <xref id="id" name="id desc"/>
-    seqData.each { row ->
-        xml.xref(id: row.id, name: "${row.id} ${row.description}".trim())
-    }
 }
