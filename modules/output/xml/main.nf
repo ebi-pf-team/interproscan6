@@ -1,14 +1,8 @@
-import groovy.xml.StreamingMarkupBuilder
 import java.io.FileWriter
 import java.util.regex.Pattern
 import javax.xml.stream.XMLOutputFactory
 import javax.xml.stream.XMLStreamWriter
 import com.fasterxml.jackson.databind.ObjectMapper
-import java.lang.management.ManagementFactory
-import java.lang.management.MemoryMXBean
-
-import java.time.format.DateTimeFormatter
-import java.time.LocalDate
 
 import Match
 
