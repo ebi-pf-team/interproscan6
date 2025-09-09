@@ -464,7 +464,8 @@ def addSiteNodesDirect(locationSites, XMLStreamWriter writer) {
     
     locationSites.each { siteMap ->
         writer.writeStartElement("site")
-        writer.writeAttribute("description", siteMap.description)
+        description = siteMap.description ?: "null"
+        writer.writeAttribute("description", description)
         writer.writeAttribute("numLocations", siteMap.numLocations.toString())
         
         writer.writeStartElement("site-locations")
