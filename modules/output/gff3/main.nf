@@ -72,7 +72,7 @@ process WRITE_GFF3 {
 
                     if (gff3LineBuffer.size() >= BATCH_SIZE) {
                         flushGff3Buffer()
-                        System.gc() // Make the jvm tidy up to prevent running out of memory
+                        System.gc() // Make the jvm tidies up to prevent running out of memory
                     }
 
                     fastaLineBuffer << ">${row.id}"
@@ -80,7 +80,7 @@ process WRITE_GFF3 {
 
                     if (fastaLineBuffer.size() >= BATCH_SIZE) {
                         flushFastaBuffer()
-                        System.gc() // Make the jvm tidy up to prevent running out of memory
+                        System.gc() // Make the jvm tidies up to prevent running out of memory
                     }
                 }         
             }
@@ -97,7 +97,7 @@ process WRITE_GFF3 {
 
             if (gff3LineBuffer.size() >= BATCH_SIZE) {
                 flushGff3Buffer()
-                System.gc() // Make the jvm tidy up to prevent running out of memory
+                System.gc() // Make the jvm tidies up to prevent running out of memory
             }
         }
     }
@@ -108,7 +108,8 @@ process WRITE_GFF3 {
     db.close()
 }
 
-def processNucleotidesBulkGFF3(SeqDBQuery db, Map proteins, Writer gff3Writer, Writer fastaWriter) {
+def processNucleotidesBulkGFF3(SeqDBQuery db, Map proteins, Writer gff3Writer, Writer fastaWriter,
+    int batchSize, Closure flushGff3Buffer, Closure flushFastaBuffer) {
     Pattern esl_pattern = Pattern.compile(/^source=[^"]+\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=.*$/)
     Set<String> seenNucleicMd5s = new HashSet<>()
 
@@ -140,7 +141,8 @@ def processNucleotidesBulkGFF3(SeqDBQuery db, Map proteins, Writer gff3Writer, W
             String seqId = seq.id
             String sequence = seq.sequence.trim()
             int seqLength = sequence.length()
-            gff3Writer.writeLine("##sequence-region ${seqId} 1 ${seqLength}")
+
+            gff3LineBuffer << "##sequence-region ${seqId} 1 ${seqLength}"
 
             proteinMd5sForNucleic.each { String proteinMd5 ->
                 def proteinMatches = proteins[proteinMd5]
@@ -162,21 +164,35 @@ def processNucleotidesBulkGFF3(SeqDBQuery db, Map proteins, Writer gff3Writer, W
                         line = "${seqId}\tesl-translate\tCDS\t${end}\t${start}\t.\t${strand}\t0\tID=${parentId}"
                     }
 
-                    gff3Writer.writeLine(line)
+                    gff3LineBuffer << line
 
                     proteinMatches.each { modelAcc, matchMap ->
                         def match = Match.fromMap(matchMap)
                         match.locations.each { Location loc ->
-                            gff3Writer.writeLine(proteinFormatLine(seqId, match, loc, parentId, strand == "+" ? start : end, strand))
+                            String matchLine = proteinFormatLine(seqId, match, loc, parentId, strand == "+" ? start : end, strand)
+                            gff3LineBuffer << matchLine
+
+                            if (gff3LineBuffer.size() >= batchSize) {
+                                flushGff3Buffer()
+                                System.gc() // Make the jvm tidies up to prevent running out of memory
+                            }
                         }
                     }
                 }
             }
 
-            fastaWriter.writeLine(">${seqId}")
-            fastaWriter.writeLine("${sequence.replaceAll(/(.{60})/, '$1\n')}")  
+            fastaLineBuffer << ">${seqId}"
+            fastaLineBuffer << "${sequence.replaceAll(/(.{60})/, '$1\n')}"
+
+            if (fastaLineBuffer.size() >= batchSize) {
+                flushFastaBuffer()
+                System.gc() // Make the jvm tidies up to prevent running out of memory
+            } 
         }
     }
+
+    flushGff3Buffer()
+    flushFastaBuffer()
 }
 
 def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
