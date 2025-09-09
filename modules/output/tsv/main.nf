@@ -13,14 +13,11 @@ process WRITE_TSV {
     val nucleic
 
     exec:
-    // Make connection to sequence Db through the JAVA interface for performance
     def db = new SeqDBQuery(seqDbPath.toString())
 
-    // Prepare the output file
     def tsvFile = new File(output_file)
     tsvFile.text = "" // clear the file if it already exists
 
-    // Set up buffer writing for faster output
     BATCH_SIZE = 5000
     lineBuffer = []
     def flushBuffer = {
@@ -55,7 +52,6 @@ process WRITE_TSV {
         }
     }
 
-    // Flush any remaining lines
     flushBuffer()
 }
 
@@ -74,9 +70,7 @@ def writeMatch(String proteinMd5, String proteinParentId, List seqData, Match ma
 }
 
 
-// Keep this optimized Groovy formatLine method
 def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location loc, String currentDate) {
-    // Extract data using native Groovy property access (fastest)
     String memberDb = match.signature.signatureLibraryRelease.library
     String sigDesc = match.signature.description ?: '-'
     String accession = match.signature.accession
@@ -90,7 +84,6 @@ def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location
     def scoringValue = "-"
     def pantherGoTerms = []
     
-    // Optimized scoring value logic
     switch (memberDb) {
         case ["CDD", "PRINT"]:
             scoringValue = match.evalue
@@ -115,7 +108,6 @@ def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location
             break
     }
 
-    // Optimized GO terms building
     def goTermBuilder = new StringBuilder()
     boolean firstGo = true
     for (term in interproGoTerms) {
@@ -130,7 +122,6 @@ def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location
     }
     String goTermString = goTermBuilder.length() > 0 ? goTermBuilder.toString() : "-"
 
-    // Optimized pathways building
     def pathwayBuilder = new StringBuilder()
     boolean first = true
     for (pathway in interproPathways) {
@@ -140,7 +131,6 @@ def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location
     }
     String pathwayString = pathwayBuilder.length() > 0 ? pathwayBuilder.toString() : "-"
 
-    // Optimized final string building - pre-sized StringBuilder
     StringBuilder sb = new StringBuilder(256)
     sb.append(seqId).append('\t')
       .append(seqMd5).append('\t')
@@ -163,18 +153,14 @@ def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location
 def processNucleotidesBulk(SeqDBQuery db, Map proteins, Set seenNucleicMd5s, String currentDate, 
                           List lineBuffer, int batchSize, Closure flushBuffer) {
     
-    // Get all protein MD5s from this file
     Set<String> allProteinMd5s = proteins.keySet().toSet()
-    // Group proteins by nucleotide MD5
     Map<String, Set<String>> nucleicToProteinMd5 = db.groupProteinsBulk(allProteinMd5s)
-    // Filter to only unseen nucleotide MD5s
     List<String> newNucleicMd5s = nucleicToProteinMd5.keySet().findAll { !seenNucleicMd5s.contains(it) }
     seenNucleicMd5s.addAll(newNucleicMd5s)
     if (newNucleicMd5s.isEmpty()) {
         return
     }
 
-    // Get all nucleotide sequences
     Map<String, List> nucleotideSeqData = db.nucleicMd5sToNucleicSeqs(newNucleicMd5s)
 
     // Get all ORF sequences for relevant protein/nucleotide combinations
