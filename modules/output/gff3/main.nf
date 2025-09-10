@@ -1,5 +1,4 @@
 import com.fasterxml.jackson.databind.ObjectMapper
-
 import java.util.regex.Pattern
 
 process WRITE_GFF3 {
@@ -54,7 +53,7 @@ process WRITE_GFF3 {
             for (Map.Entry entry : proteins.entrySet()) {
                 String proteinMd5 = entry.key
                 Map matchesMap = entry.value
-                Map proteinSeqData = seqData[proteinMd5]
+                List proteinSeqData = seqData[proteinMd5]
 
                 String sequence = proteinSeqData[0].sequence.trim()
                 int seqLength = sequence.length()
@@ -62,7 +61,7 @@ process WRITE_GFF3 {
                 proteinSeqData.each { row ->
                     gff3LineBuffer << "##sequence-region ${row.id} 1 ${seqLength}"
 
-                    matchesMap.each { String modelAcc, Map match ->
+                    matchesMap.each { String modelAcc, Map matchMap ->
                         Match match = Match.fromMap(matchMap)
                         for (Location loc : match.locations) {
                             String line = proteinFormatLine(row.id, match, loc, null, null, null)
@@ -280,7 +279,7 @@ def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
         "representative=${loc.representative}",
     ].findAll { it }
 
-    StringBuilder sb = new StirngBuilder(256)
+    StringBuilder sb = new StringBuilder(256)
     sb.append(seqId).append("\t")
       .append(memberDb).append("\t")
       .append(feature_type).append("\t")
