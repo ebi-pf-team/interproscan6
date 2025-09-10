@@ -13,6 +13,10 @@ process WRITE_GFF3 {
     val interproscan_version
 
     exec:
+    Pattern esl_pattern = Pattern.compile(/^source=[^"]+\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=.*$/)
+    Pattern fasta_pattern = Pattern.compile(/(.{60})/)
+    Set<String> seenNucleicMd5s = new HashSet<>()
+
     def db = new SeqDBQuery(seq_db_file.toString())
     def gff3File = new File(output_file.toString())
     gff3File.text = "" // Clear file if it exists
@@ -45,7 +49,7 @@ process WRITE_GFF3 {
         Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
 
         if (nucleic) {
-            processNucleotides(db, proteins, gff3LineBuffer, fastaLineBuffer, BATCH_SIZE, flushGff3Buffer, flushFastaBuffer)
+            processNucleotides(db, proteins, gff3LineBuffer, fastaLineBuffer, BATCH_SIZE, flushGff3Buffer, flushFastaBuffer, esl_pattern, seenNucleicMd5s)
         } else {
             def proteinMd5List = proteins.keySet().toList()
             Map<String, List> seqData = db.proteinMd5sToProteinSeqs(proteinMd5List)
@@ -75,7 +79,7 @@ process WRITE_GFF3 {
                     }
 
                     fastaLineBuffer << ">${row.id}"
-                    fastaLineBuffer << "${sequence.replaceAll(/(.{60})/, '$1\n')}"
+                    fastaLineBuffer << "${sequence.replaceAll(fasta_pattern, '$1\n')}"
 
                     if (fastaLineBuffer.size() >= BATCH_SIZE) {
                         flushFastaBuffer()
@@ -100,9 +104,8 @@ process WRITE_GFF3 {
 }
 
 def processNucleotidesBulkGFF3(SeqDBQuery db, Map proteins, Writer gff3Writer, Writer fastaWriter,
-    int batchSize, Closure flushGff3Buffer, Closure flushFastaBuffer) {
-    Pattern esl_pattern = Pattern.compile(/^source=[^"]+\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=.*$/)
-    Set<String> seenNucleicMd5s = new HashSet<>()
+    int batchSize, Closure flushGff3Buffer, Closure flushFastaBuffer,
+    Pattern esl_pattern, Set seenNucleicMd5s) {
 
     Set<String> allProteinMd5s = proteins.keySet().toSet()
     Map<String, Set<String>> nucleicToProteinMd5 = db.groupProteinsBulk(allProteinMd5s)
@@ -189,26 +192,31 @@ def processNucleotidesBulkGFF3(SeqDBQuery db, Map proteins, Writer gff3Writer, W
 def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
     String memberDb = match.signature.signatureLibraryRelease.library
 
-    def goTerms = []
-    if(memberDb == "PANTHER" && match.treegrafter.goXRefs){
-        goTerms += match.treegrafter.goXRefs
-    }
-    
-    if (match.signature.entry?.goXRefs) {
-        goTerms += match.signature.entry.goXRefs
-    }
-
     def uniqueTermIds = new HashSet<String>()
-    def goTermBuilder = new StringBuilder()
-    boolean firstGo = true
-    for (term in goTerms) {
-        if (uniqueTermIds.add(term.id)) { // HashSet.add() returns false if already exists
-            if (!firstGo) goTermBuilder.append(',')
-            goTermBuilder.append(term.id)
-            firstGo = false
+    if (memberDb == "PANTHER" && match.treegrafter?.goXRefs) {
+        for (term in match.treegrafter.goXRefs) {
+            uniqueTermIds.add(term.id)
         }
     }
-    String goTermString = goTermBuilder.length() > 0 ? goTermBuilder.toString() : ""
+    if (match.signature.entry?.goXRefs) {
+        for (term in match.signature.entry.goXRefs) {
+            uniqueTermIds.add(term.id)
+        }
+    }
+
+    String goTermString = ""
+    if (uniqueTermIds.size() > 0) {
+        def estimatedLength = uniqueTermIds.size() * 12
+        def goTermBuilder = new StringBuilder(estimatedLength)  // pre-size for efficiency
+        
+        boolean firstGo = true
+        for (termId in uniqueTermIds) {
+            if (!firstGo) goTermBuilder.append(',')
+            goTermBuilder.append(termId)
+            firstGo = false
+        }
+        goTermString = goTermBuilder.toString()
+    }
 
     def feature_type = null
     switch (memberDb) {
