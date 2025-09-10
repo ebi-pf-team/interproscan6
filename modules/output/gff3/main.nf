@@ -91,18 +91,10 @@ process WRITE_GFF3 {
     flushFastaBuffer()
 
     gff3File.append("##FASTA\n")
-    tempFastaFile.withReader { fastaReader ->
-        fastaReader.eachLine { line ->
-            gff3LineBuffer << "${line}\n"
 
-            if (gff3LineBuffer.size() >= BATCH_SIZE) {
-                flushGff3Buffer()
-                System.gc() // Make the jvm tidies up to prevent running out of memory
-            }
-        }
-    }
-
-    flushGff3Buffer()
+    def command = "cat ${tempFastaFile} >> ${output_file}"
+    def process = ["bash", "-c", command].execute()
+    process.waitFor()
 
     tempFastaFile.delete()
     db.close()
