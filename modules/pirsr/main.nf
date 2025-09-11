@@ -34,6 +34,9 @@ process PARSE_PIRSR {
             }
             List<Location> selectedLocations = []
             sortedLocations.each { location ->
+                if (!location.included) {
+                    return
+                }
                 if (!location.targetAlignment || !location.queryAlignment) {
                     return
                 }
