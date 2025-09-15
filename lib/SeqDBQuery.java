@@ -160,8 +160,61 @@ public class SeqDB {
 
             } // end of prepared statement 2
         } // end of prepared statement 1
+    }
 
+    public void splitFasta(String outputPrefix, int maxSequencesPerFile, boolean nucleic) throw SQLException, IOException {
+        String query = nucleic ? """SELECT P2N.nt_md5, S.md5, S.sequence
+            FROM PROTEIN_SEQUENCE AS S
+            INNER JOIN PROTEIN AS P ON S.md5 = P.md5
+            INNER JOIN PROTEIN_TO_NUCLEOTIDE AS P2N ON P.md5 = P2N.protein_md5
+            ORDER BY P2N.nt_md5""" : "SELECT NULL AS nt_md5, md5, sequence FROM PROTEIN_SEQUENCE ORDER BY md5";
+        int fileIndex = 1;
+        List batch = [];
+        String currentMD5 = null;
+        Set seenProteinMd5s = [] as Set;
+        PrintStream writer = null;
 
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    // If we encounter a new nt_md5 and the batch is full --> write to a new batch
+                    if (currentMD5 && currentMD5 != rs.getString("nt_md5") && batch.size() >= maxSequencesPerFile) {
+                        writer = new PrintStream(new File(outputPrefix + "_" + fileIndex + ".fasta"));
+                        for (String record : batch) {
+                            writer.println(">" + record.md5);
+                            String sequence = record.sequence;
+                            for (int i = 0; i < sequence.length(); i += 60) {
+                                writer.println(sequence.substring(i, Math.min(i + 60, sequence.length())));
+                            }
+                        }
+                        writer.close();
+                        fileIndex++;
+                        batch.clear();
+                        seenProteinMd5s.clear();
+                    }
+
+                    if (!seenProteinMd5s.contains(rs.getString("md5"))) {
+                        batch.add([md5: rs.getString("md5"), sequence: rs.getString("sequence")]);
+                        seenProteinMd5s.add(rs.getString("md5"));
+                    }
+
+                    currentMD5 = nucleic ? rs.getString("nt_md5") : rs.getString("md5");
+                }
+            }
+        }
+
+        // Write any remaining records in the batch
+        if (!batch.isEmpty()) {
+            writer = new PrintStream(new File(outputPrefix + "_" + fileIndex + ".fasta"));
+            for (String record : batch) {
+                writer.println(">" + record.md5);
+                String sequence = record.sequence;
+                for (int i = 0; i < sequence.length(); i += 60) {
+                    writer.println(sequence.substring(i, Math.min(i + 60, sequence.length())));
+                }
+            }
+            writer.close();
+        }
     }
 
     private static Map processRecord(String header, String sequences) {
@@ -218,14 +271,14 @@ public class SeqDB {
     public List<NucleotideData> nucleicMd5ToNucleicSeq(String nucleicMd5) throws SQLException {
         List<NucleotideData> result = new ArrayList<>();
         
-        String sql = """
+        String query = """
             SELECT N.id, S.sequence
             FROM NUCLEOTIDE AS N
             INNER JOIN NUCLEOTIDE_SEQUENCE AS S ON N.md5 = S.md5
             WHERE N.md5 = ?
             """;
         
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, nucleicMd5);
 
             try (ResultSet rs = stmt.executeQuery()) {
