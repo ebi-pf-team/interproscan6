@@ -26,9 +26,9 @@ workflow SCAN_SEQUENCES {
     ch_seqs             // channel of tuples (index, fasta file)
     db_releases         // map: [db: version, dirpath]
     applications        // list of applications to run
-    appsConfig          // map of applications
+    apps_config         // map of applications
     datadir             // path to data directory
-    batch_size
+    batch_size          // sub-batch size for computationally demanding apps
 
     main:
     results = Channel.empty()
@@ -37,7 +37,7 @@ workflow SCAN_SEQUENCES {
         ANTIFAM(
             ch_seqs,
             db_releases.antifam.dirpath,
-            appsConfig.antifam.hmm
+            apps_config.antifam.hmm
         )
 
         results = results.mix(ANTIFAM.out)
@@ -48,9 +48,9 @@ workflow SCAN_SEQUENCES {
             ch_seqs,
             applications.contains("cathgene3d"),
             db_releases.cathgene3d.dirpath,
-            appsConfig.cathgene3d.hmm,
-            appsConfig.cathgene3d.model2sfs,
-            appsConfig.cathgene3d.disc_regs,
+            apps_config.cathgene3d.hmm,
+            apps_config.cathgene3d.model2sfs,
+            apps_config.cathgene3d.disc_regs,
             applications.contains("cathfunfam"),
             db_releases.cathfunfam.dirpath,
             batch_size
@@ -63,8 +63,8 @@ workflow SCAN_SEQUENCES {
         CDD(
             ch_seqs,
             db_releases.cdd.dirpath,
-            appsConfig.cdd.rpsblast_db,
-            appsConfig.cdd.rpsproc_db
+            apps_config.cdd.rpsblast_db,
+            apps_config.cdd.rpsproc_db
         )
 
         results = results.mix(CDD.out)
@@ -78,8 +78,8 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("deeptmhmm")) {
         DEEPTMHMM(
             ch_seqs,
-            appsConfig.deeptmhmm.dir,
-            appsConfig.deeptmhmm.use_gpu,
+            apps_config.deeptmhmm.dir,
+            apps_config.deeptmhmm.use_gpu,
             batch_size
         )
         results = results.mix(DEEPTMHMM.out)
@@ -89,8 +89,8 @@ workflow SCAN_SEQUENCES {
         HAMAP(
             ch_seqs,
             db_releases.hamap.dirpath,
-            appsConfig.hamap.hmm,
-            appsConfig.hamap.profiles
+            apps_config.hamap.hmm,
+            apps_config.hamap.profiles
         )
 
         results = results.mix(HAMAP.out)
@@ -105,7 +105,7 @@ workflow SCAN_SEQUENCES {
         NCBIFAM(
             ch_seqs,
             db_releases.ncbifam.dirpath,
-            appsConfig.ncbifam.hmm
+            apps_config.ncbifam.hmm
         )
 
         results = results.mix(NCBIFAM.out)
@@ -115,8 +115,8 @@ workflow SCAN_SEQUENCES {
         PANTHER(
             ch_seqs,
             db_releases.panther.dirpath,
-            appsConfig.panther.hmm,
-            appsConfig.panther.msf
+            apps_config.panther.hmm,
+            apps_config.panther.msf
         )
 
         results = results.mix(PANTHER.out)
@@ -126,8 +126,8 @@ workflow SCAN_SEQUENCES {
         PFAM(
             ch_seqs,
             db_releases.pfam.dirpath,
-            appsConfig.pfam.hmm,
-            appsConfig.pfam.dat
+            apps_config.pfam.hmm,
+            apps_config.pfam.dat
         )
 
         results = results.mix(PFAM.out)
@@ -136,7 +136,7 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("phobius")) {
         PHOBIUS(
             ch_seqs,
-            appsConfig.phobius.dir
+            apps_config.phobius.dir
         )
         results = results.mix(PHOBIUS.out)
     }
@@ -145,8 +145,8 @@ workflow SCAN_SEQUENCES {
         PIRSF(
             ch_seqs,
             db_releases.pirsf.dirpath,
-            appsConfig.pirsf.hmm,
-            appsConfig.pirsf.dat
+            apps_config.pirsf.hmm,
+            apps_config.pirsf.dat
         )
 
         results = results.mix(PIRSF.out)
@@ -156,8 +156,8 @@ workflow SCAN_SEQUENCES {
         PIRSR(
             ch_seqs,
             db_releases.pirsr.dirpath,
-            appsConfig.pirsr.hmm,
-            appsConfig.pirsr.rules
+            apps_config.pirsr.hmm,
+            apps_config.pirsr.rules
         )
 
         results = results.mix(PIRSR.out)
@@ -167,8 +167,8 @@ workflow SCAN_SEQUENCES {
         PRINTS(
             ch_seqs,
             db_releases.prints.dirpath,
-            appsConfig.prints.pval,
-            appsConfig.prints.hierarchy,
+            apps_config.prints.pval,
+            apps_config.prints.hierarchy,
             batch_size
         )
 
@@ -179,8 +179,8 @@ workflow SCAN_SEQUENCES {
         PROSITE_PATTERNS(
             ch_seqs,
             db_releases.prositepatterns.dirpath,
-            appsConfig.prositepatterns.dat,
-            appsConfig.prositepatterns.evaluator
+            apps_config.prositepatterns.dat,
+            apps_config.prositepatterns.evaluator
         )
 
         results = results.mix(PROSITE_PATTERNS.out)
@@ -190,8 +190,8 @@ workflow SCAN_SEQUENCES {
         PROSITE_PROFILES(
             ch_seqs,
             db_releases.prositeprofiles.dirpath,
-            appsConfig.prositeprofiles.profiles,
-            appsConfig.prositeprofiles.skip_flagged_profiles
+            apps_config.prositeprofiles.profiles,
+            apps_config.prositeprofiles.skip_flagged_profiles
         )
 
         results = results.mix(PROSITE_PROFILES.out)
@@ -201,9 +201,9 @@ workflow SCAN_SEQUENCES {
         SFLD(
             ch_seqs,
             db_releases.sfld.dirpath,
-            appsConfig.sfld.hmm,
-            appsConfig.sfld.sites_annotation,
-            appsConfig.sfld.hierarchy
+            apps_config.sfld.hmm,
+            apps_config.sfld.sites_annotation,
+            apps_config.sfld.hierarchy
         )
 
         results = results.mix(SFLD.out)
@@ -213,14 +213,14 @@ workflow SCAN_SEQUENCES {
         SIGNALP(
             ch_seqs,
             applications,
-            appsConfig.signalp_euk.organism,
-            appsConfig.signalp_euk.mode,
-            appsConfig.signalp_euk.dir,
-            appsConfig.signalp_euk.use_gpu,
-            appsConfig.signalp_prok.organism,
-            appsConfig.signalp_prok.mode,
-            appsConfig.signalp_prok.dir,
-            appsConfig.signalp_prok.use_gpu,
+            apps_config.signalp_euk.organism,
+            apps_config.signalp_euk.mode,
+            apps_config.signalp_euk.dir,
+            apps_config.signalp_euk.use_gpu,
+            apps_config.signalp_prok.organism,
+            apps_config.signalp_prok.mode,
+            apps_config.signalp_prok.dir,
+            apps_config.signalp_prok.use_gpu,
         ).set{ ch_signalp }
         results = results.mix(ch_signalp)
     }
@@ -229,9 +229,9 @@ workflow SCAN_SEQUENCES {
         SMART(
             ch_seqs,
             db_releases.smart.dirpath,
-            appsConfig.smart.hmm3,
-            appsConfig.smart.hmm2,
-            appsConfig.smart.chunk_size
+            apps_config.smart.hmm3,
+            apps_config.smart.hmm2,
+            apps_config.smart.chunk_size
         )
 
         results = results.mix(SMART.out)
@@ -241,11 +241,11 @@ workflow SCAN_SEQUENCES {
         SUPERFAMILY(
             ch_seqs,
             db_releases.superfamily.dirpath,
-            appsConfig.superfamily.hmm,
-            appsConfig.superfamily.selfhits,
-            appsConfig.superfamily.cla,
-            appsConfig.superfamily.model,
-            appsConfig.superfamily.pdbj95d
+            apps_config.superfamily.hmm,
+            apps_config.superfamily.selfhits,
+            apps_config.superfamily.cla,
+            apps_config.superfamily.model,
+            apps_config.superfamily.pdbj95d
         )
 
         results = results.mix(SUPERFAMILY.out)
@@ -254,7 +254,8 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("tmbed")) {
         TMBED(
             ch_seqs,
-            appsConfig.tmbed.use_gpu
+            apps_config.tmbed.use_gpu,
+            batch_size
         )
 
         results = results.mix(TMBED.out)

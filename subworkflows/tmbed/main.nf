@@ -4,6 +4,7 @@ workflow TMBED {
     take:
     ch_seqs
     use_gpu
+    batch_size
 
     main:
     if (use_gpu) {
@@ -13,7 +14,7 @@ workflow TMBED {
         ch_tmbed = RUN_TMBED_GPU.out
     } else {
         ch_split = ch_seqs
-            .splitFasta( by: 1000, file: true )
+            .splitFasta( by: batch_size, file: true )
 
         RUN_TMBED_CPU (
             ch_split

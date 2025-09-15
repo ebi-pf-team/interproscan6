@@ -115,7 +115,8 @@ workflow {
             db_releases,
             local_only_apps,
             params.appsConfig,
-            data_dir
+            data_dir,
+            params.subBatchSize
         )
 
         def expandedRemainingScan = SCAN_REMAINING.out.flatMap { scan ->
