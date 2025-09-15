@@ -22,11 +22,15 @@ public class SeqDBQuery {
         String url = "jdbc:sqlite:" + dbPath;
         this.connection = DriverManager.getConnection(url);
         
-        // Enable (potential) performance optimizations
-        connection.createStatement().execute("PRAGMA cache_size = 10000");
-        connection.createStatement().execute("PRAGMA temp_store = MEMORY");
-        connection.createStatement().execute("PRAGMA synchronous = OFF");
-        connection.createStatement().execute("PRAGMA journal_mode = MEMORY");
+        // Enable (potential) performance optimisations
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute("PRAGMA cache_size = 10000");
+            stmt.execute("PRAGMA temp_store = MEMORY");
+            stmt.execute("PRAGMA synchronous = OFF");
+            stmt.execute("PRAGMA journal_mode = MEMORY");
+        }
+
+        this.createTables();
     }
 
     public void createTables() throws SQLException {
@@ -83,12 +87,15 @@ public class SeqDBQuery {
         StringBuilder currentSeq = null;
         Map<String, Set<String>> ntSequences = new HashMap<>();
 
-        String table = isNucleic ? "NUCLEOTIDE" : "PROTEIN";
-        String insertSeqQuery = "INSERT OR IGNORE INTO " + table + " (id, md5) VALUES (?, ?)";
-        String insertSeqDataQuery = "INSERT OR IGNORE INTO " + table + "(md5, id, description) VALUES (?, ?, ?)";
+        String table = isNucleic ? "NUCLEOTIDE_SEQUENCE" : "PROTEIN_SEQUENCE";
+        String insertSeqQuery = "INSERT OR IGNORE INTO " + table + " (md5, sequence) VALUES (?, ?)";
+        String insertSeqDataQuery = "INSERT OR IGNORE INTO " + (isNucleic ? "NUCLEOTIDE" : "PROTEIN") + " (md5, id, description) VALUES (?, ?, ?)";
 
         int recordCount = 0;
 
+        // Start transaction
+        connection.setAutoCommit(false);
+        
         try (PreparedStatement stmt1 = connection.prepareStatement(insertSeqQuery)) {
             try (PreparedStatement stmt2 = connection.prepareStatement(insertSeqDataQuery)) {
                 try (BufferedReader br = new BufferedReader(new FileReader(fastaFile))) {
@@ -98,15 +105,18 @@ public class SeqDBQuery {
                             if (currentHeader != null) { // Process the previous record
                                 String sequence = currentSeq.toString();
                                 Map<String, String> seqData = this.processRecord(currentHeader, sequence);
+                                
+                                // Fix: First insert sequence, then metadata
                                 stmt1.setString(1, seqData.get("md5"));
                                 stmt1.setString(2, seqData.get("sequence"));
                                 stmt1.addBatch();
+                                
                                 stmt2.setString(1, seqData.get("md5"));
                                 stmt2.setString(2, seqData.get("id"));
                                 stmt2.setString(3, seqData.get("description"));
                                 stmt2.addBatch();
 
-                                if (isTranslated)  {
+                                if (isTranslated) {
                                     // Extract the source nucleotide id and add to ntSequences
                                     Matcher matcher = eslDescriptionPattern.matcher(seqData.get("description"));
                                     if (matcher.find()) {
@@ -123,30 +133,34 @@ public class SeqDBQuery {
                                     stmt2.executeBatch();
                                     stmt1.clearBatch();
                                     stmt2.clearBatch();
-                                    recordCount = 0;
+                                    connection.commit(); // Commit periodically
                                 }
                             }
                             currentHeader = line.substring(1).trim();
                             currentSeq = new StringBuilder();
                         } else {
-                            currentSeq.append(line.trim());
+                            if (currentSeq != null) {
+                                currentSeq.append(line.trim());
+                            }
                         }
                     }
                 } // end of buffered reader
 
-                // Finished parsing the file, now process the last recrd
+                // Process the last record
                 if (currentHeader != null) {
                     String sequence = currentSeq.toString();
                     Map<String, String> seqData = this.processRecord(currentHeader, sequence);
+                    
                     stmt1.setString(1, seqData.get("md5"));
                     stmt1.setString(2, seqData.get("sequence"));
                     stmt1.addBatch();
+                    
                     stmt2.setString(1, seqData.get("md5"));
                     stmt2.setString(2, seqData.get("id"));
                     stmt2.setString(3, seqData.get("description"));
                     stmt2.addBatch();
 
-                    if (isTranslated)  {
+                    if (isTranslated) {
                         // Extract the source nucleotide id and add to ntSequences
                         Matcher matcher = eslDescriptionPattern.matcher(seqData.get("description"));
                         if (matcher.find()) {
@@ -158,14 +172,53 @@ public class SeqDBQuery {
                     }
                 }
 
-                // insert any remaining batched records
+                // Execute any remaining batched records
                 stmt1.executeBatch();
                 stmt2.executeBatch();
                 stmt1.clearBatch();
                 stmt2.clearBatch();
-
+                
+                // Handle protein-to-nucleotide mapping for translated sequences
+                if (isTranslated && !ntSequences.isEmpty()) {
+                    try (PreparedStatement p2nStmt = connection.prepareStatement(
+                        "INSERT OR IGNORE INTO PROTEIN_TO_NUCLEOTIDE (protein_md5, nt_md5) VALUES (?, ?)")) {
+                        
+                        for (Map.Entry<String, Set<String>> entry : ntSequences.entrySet()) {
+                            String sourceId = entry.getKey();
+                            
+                            // Get nucleotide MD5 from ID
+                            try (PreparedStatement ntQuery = connection.prepareStatement(
+                                "SELECT md5 FROM NUCLEOTIDE WHERE id = ?")) {
+                                ntQuery.setString(1, sourceId);
+                                try (ResultSet rs = ntQuery.executeQuery()) {
+                                    if (rs.next()) {
+                                        String ntMd5 = rs.getString("md5");
+                                        for (String proteinMd5 : entry.getValue()) {
+                                            p2nStmt.setString(1, proteinMd5);
+                                            p2nStmt.setString(2, ntMd5);
+                                            p2nStmt.addBatch();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        p2nStmt.executeBatch();
+                    }
+                }
+                
+                // Commit the transaction
+                connection.commit();
+                
             } // end of prepared statement 2
         } // end of prepared statement 1
+        catch (Exception e) {
+            // Rollback on error
+            connection.rollback();
+            throw e;
+        } finally {
+            // Restore auto-commit
+            connection.setAutoCommit(true);
+        }
     }
 
     public void splitFasta(String outputPrefix, int maxSequencesPerFile, boolean nucleic) throws SQLException, FileNotFoundException {
@@ -519,6 +572,10 @@ public class SeqDBQuery {
 
     public void close() throws SQLException {
         if (connection != null && !connection.isClosed()) {
+            // Ensure all transactions are committed
+            if (!connection.getAutoCommit()) {
+                connection.commit();
+            }
             connection.close();
         }
     }
