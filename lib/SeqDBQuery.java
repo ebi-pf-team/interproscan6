@@ -1,10 +1,14 @@
 import java.sql.*;
 import java.util.*;
+import java.security.MessageDigest;
+java.util.regex.Pattern;
 
-public class SeqDBQuery {
+public class SeqDB {
     private Connection connection;
+    private static final int insertBatchSize = 100;
+    private static final Pattern eslDescriptionPattern = Pattern.compile("^source=(.+?)\\s+coords=");
 
-    public SeqDBQuery(String dbPath) throws SQLException {
+    public SeqDB(String dbPath) throws SQLException {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
@@ -14,26 +18,169 @@ public class SeqDBQuery {
         String url = "jdbc:sqlite:" + dbPath;
         this.connection = DriverManager.getConnection(url);
         
-        // Enable performance optimizations
+        // Enable (potential) performance optimizations
         connection.createStatement().execute("PRAGMA cache_size = 10000");
         connection.createStatement().execute("PRAGMA temp_store = MEMORY");
         connection.createStatement().execute("PRAGMA synchronous = OFF");
         connection.createStatement().execute("PRAGMA journal_mode = MEMORY");
     }
 
-    // Fixed to match Groovy SeqDB.proteinMd5sToProteinSeqs()
-    public Map<String, List<ProteinData>> proteinMd5sToProteinSeqs(List<String> proteinMD5s) throws SQLException {
-        if (proteinMD5s == null || proteinMD5s.isEmpty()) {
-            return new HashMap<>();
-        }
+    public void createTables() throws SQLException {
+        String createProteinTable = """
+            CREATE TABLE IF NOT EXISTS PROTEIN (
+                id TEXT PRIMARY KEY,
+                md5 TEXT,
+                description TEXT
+            );
+            """;
 
+        String createProteinSeqTable = """
+            CREATE TABLE IF NOT EXISTS PROTEIN_SEQUENCE (
+                md5 TEXT PRIMARY KEY,
+                sequence TEXT
+            );
+            """;
+
+        String createNucleotideTable = """
+            CREATE TABLE IF NOT EXISTS NUCLEOTIDE (
+                id TEXT PRIMARY KEY,
+                md5 TEXT
+            );
+            """;
+
+        String createNucleotideSeqTable = """
+            CREATE TABLE IF NOT EXISTS NUCLEOTIDE_SEQUENCE (
+                md5 TEXT PRIMARY KEY,
+                sequence TEXT
+            );
+            """;
+
+        String createProteinToNucleotideTable = """
+            CREATE TABLE IF NOT EXISTS PROTEIN_TO_NUCLEOTIDE (
+                protein_md5 TEXT,
+                nt_md5 TEXT,
+                PRIMARY KEY (protein_md5, nt_md5)
+            );
+            """;
+
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(createProteinTable);
+            stmt.execute(createProteinSeqTable);
+            stmt.execute(createNucleotideTable);
+            stmt.execute(createNucleotideSeqTable);
+            stmt.execute(createProteinToNucleotideTable);
+        }
+    }
+
+
+    public void loadFastaFile(String fastaFilePath, boolean isNucleic, boolean isTranslated) {
+        File fastaFile = new File(fastaFilePath);
+        String currentHeaeder = null;
+        String currentSeq = null;
+        Map<String, Set<String>> ntSequences = [:];
+
+        String table = isNucleic ? "NUCLEOTIDE" : "PROTEIN";
+        String insertSeqQuery = "INSERT OR IGNORE INTO " + table + " (id, md5) VALUES (?, ?)";
+        String insertSeqDataQuery = "INSERT OR IGNORE INTO " + table + "(md5, id, description) VALUES (?, ?, ?)";
+
+        int recordCount = 0;
+
+        try (PreparedStatement stmt1 = connection.prepareStatement(insertSeqQuery)) {
+            try (PreparedStatement stmt2 = connection.prepareStatement(insertSeqDataQuery)) {
+                try (BufferedReader br = new BufferedReader(new FileReader(fastaFile))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        if (line.startsWith(">")) {
+                            if (currentHeader) { // Process the previous record
+                                String sequence = currentSeq.toString();
+                                Map<String, String> seqData = this.processRecord(currentHeader, sequence)
+                                stmt1.setString(1, seqData.get("md5"));
+                                stmt1.setString(2, seqData.get("sequence"));
+                                stmt1.addBatch();
+                                stmt2.setString(1, seqData.get("md5"));
+                                stmt2.setString(2, seqData.get("id"));
+                                stmt2.setString(3, seqData.get("description"));
+                                stmt2.addBatch();
+
+                                if (isTranslated)  {
+                                    // Extract the source nucleotide id and add to ntSequences
+                                    Matcher matcher = eslDescriptionPattern.matcher(seqData.get("description"));
+                                    if (matcher.find()) {
+                                        String sourceId = matcher.group(1);
+                                        ntSequences.computeIfAbsent(sourceId, k -> new HashSet<>()).add(seqData.get("md5"));
+                                    } else {
+                                        throw new IllegalArgumentException("Invalid esl-translate FASTA header: " + seqData.get("description"));
+                                    }
+                                }
+
+                                recordCount++;
+                                if (recordCount % insertBatchSize == 0) {
+                                    stmt1.executeBatch();
+                                    stmt2.executeBatch();
+                                    stmt1.clearBatch();
+                                    stmt2.clearBatch();
+                                    recordCount = 0;
+                                }
+                            }
+                            currentHeader = line.substring(1).trim();
+                            currentSeq = new StringBuilder();
+                        }
+                    }
+                } // end of buffered reader
+
+                // Finished parsing the file, now process the last recrd
+                if (currentHeader) {
+                    String sequence = currentSeq.toString();
+                    Map<String, String> seqData = this.processRecord(currentHeader, sequence)
+                    stmt1.setString(1, seqData.get("md5"));
+                    stmt1.setString(2, seqData.get("sequence"));
+                    stmt1.addBatch();
+                    stmt2.setString(1, seqData.get("md5"));
+                    stmt2.setString(2, seqData.get("id"));
+                    stmt2.setString(3, seqData.get("description"));
+                    stmt2.addBatch();
+
+                    if (isTranslated)  {
+                        // Extract the source nucleotide id and add to ntSequences
+                        Matcher matcher = eslDescriptionPattern.matcher(seqData.get("description"));
+                        if (matcher.find()) {
+                            String sourceId = matcher.group(1);
+                            ntSequences.computeIfAbsent(sourceId, k -> new HashSet<>()).add(seqData.get("md5"));
+                        } else {
+                            throw new IllegalArgumentException("Invalid esl-translate FASTA header: " + seqData.get("description"));
+                        }
+                    }
+                }
+
+                // insert any remaining batched records
+                stmt1.executeBatch();
+                stmt2.executeBatch();
+                stmt1.clearBatch();
+                stmt2.clearBatch();
+
+            } // end of prepared statement 2
+        } // end of prepared statement 1
+
+
+    }
+
+    private static Map processRecord(String header, String sequences) {
+        List<String> tokens = header.split("\\s+", 2);
+        String id = tokens[0];
+        String description = tokens.length > 1 ? tokens[1] : "";
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] digest = md.digest(sequence.toUpperCase().getBytes(StandardCharsets.UTF_8));
+        String md5 = bytesToHex(digest);
+        return Map.of("id", id, "description", description, "md5", md5, "sequence", sequence);
+    }
+
+    public Map<String, List<ProteinData>> proteinMd5sToProteinSeqs(List<String> proteinMD5s) throws SQLException {
         StringBuilder placeholders = new StringBuilder();
         for (int i = 0; i < proteinMD5s.size(); i++) {
             if (i > 0) placeholders.append(',');
             placeholders.append('?');
         }
 
-        // Fixed table names to match your Groovy schema
         String query = String.format(
             """
             SELECT P.id, P.description, S.sequence, P.md5
@@ -68,11 +215,9 @@ public class SeqDBQuery {
         return resultMap;
     }
 
-    // Fixed to match Groovy SeqDB.nucleicMd5ToNucleicSeq()
     public List<NucleotideData> nucleicMd5ToNucleicSeq(String nucleicMd5) throws SQLException {
         List<NucleotideData> result = new ArrayList<>();
         
-        // Fixed table names and query structure
         String sql = """
             SELECT N.id, S.sequence
             FROM NUCLEOTIDE AS N
@@ -95,7 +240,6 @@ public class SeqDBQuery {
         return result;
     }
 
-    // Bulk version of nucleicMd5ToNucleicSeq for performance
     public Map<String, List<NucleotideData>> nucleicMd5sToNucleicSeqs(List<String> nucleicMd5s) throws SQLException {
         if (nucleicMd5s == null || nucleicMd5s.isEmpty()) {
             return new HashMap<>();
@@ -136,11 +280,9 @@ public class SeqDBQuery {
         return result;
     }
 
-    // Fixed to match Groovy SeqDB.getOrfSeq()
     public List<ProteinData> getOrfSeq(String proteinMd5, String nucleicMd5) throws SQLException {
         List<ProteinData> result = new ArrayList<>();
         
-        // Fixed query to match Groovy version exactly
         String sql = """
             SELECT P.id, P.description, S.sequence, N.id AS nt_id
             FROM PROTEIN AS P
@@ -167,7 +309,6 @@ public class SeqDBQuery {
         return result;
     }
 
-    // Bulk version of getOrfSeq for performance
     public Map<String, Map<String, List<ProteinData>>> getOrfSeqsBulk(List<String> proteinMd5s, List<String> nucleicMd5s) throws SQLException {
         if (proteinMd5s == null || proteinMd5s.isEmpty() || nucleicMd5s == null || nucleicMd5s.isEmpty()) {
             return new HashMap<>();
@@ -187,7 +328,6 @@ public class SeqDBQuery {
             nucleicPlaceholders.append("?");
         }
 
-        // Fixed query to match Groovy getOrfSeq logic
         String sql = String.format("""
             SELECT P.md5 as protein_md5, N.md5 as nucleic_md5, P.id, P.description, S.sequence
             FROM PROTEIN AS P
@@ -224,8 +364,6 @@ public class SeqDBQuery {
 
         return result;
     }
-
-    // Fixed to match Groovy SeqDB.groupProteins()
     public Map<String, Set<String>> groupProteins(Map<String, Object> proteins) throws SQLException {
         Map<String, Set<String>> nucleicToProteins = new HashMap<>();
         Set<String> proteinMd5s = proteins.keySet();
@@ -241,7 +379,6 @@ public class SeqDBQuery {
             placeholders.append("?");
         }
 
-        // Fixed query to match Groovy groupProteins exactly
         String sql = String.format("""
             SELECT DISTINCT protein_md5, nt_md5
             FROM PROTEIN_TO_NUCLEOTIDE
@@ -267,7 +404,6 @@ public class SeqDBQuery {
         return nucleicToProteins;
     }
 
-    // Bulk version of groupProteins for performance
     public Map<String, Set<String>> groupProteinsBulk(Set<String> allProteinMd5s) throws SQLException {
         if (allProteinMd5s == null || allProteinMd5s.isEmpty()) {
             return new HashMap<>();
