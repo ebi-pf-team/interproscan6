@@ -18,7 +18,7 @@
 
 Before you begin, install:
 
-* [Nextflow](https://www.nextflow.io/) 24.10.04 or later
+* [Nextflow](https://www.nextflow.io/) 25.04 or later
 * A container runtime. The currently supported are:
     * [Docker](https://www.docker.com/)
     * [SingularityCE](https://sylabs.io/singularity/)

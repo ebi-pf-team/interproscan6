@@ -4,16 +4,19 @@ workflow INIT_PIPELINE {
     input
     applications
     apps_config
+    runML
     datadir
     formats
     outdir
     outprefix
     no_matches_api
+    matches_api_url
     interpro_version
     skip_intepro
     skip_applications
     goterms
     pathways
+    workflow_manifest
 
     main:
     // Check the input
@@ -24,10 +27,12 @@ workflow INIT_PIPELINE {
     }
 
     // Applications validation
-    (apps, error) = InterProScan.validateApplications(applications, skip_applications, apps_config)
+    (apps, error, warn) = InterProScan.validateApplications(applications, skip_applications, apps_config, runML)
     if (!apps) {
         log.error error
         exit 1
+    } else if (warn) {
+        log.warn warn
     }
 
     if (skip_intepro && (goterms || pathways)) {
@@ -79,20 +84,25 @@ workflow INIT_PIPELINE {
         outprefix = "${outdir}/${outprefix}"
     }
 
-    if (!no_matches_api) {
-        invalidApps = apps.findAll { app ->
-            ["signalp_euk", "signalp_prok", "deeptmhmm", "tmbed"].contains(app)
-        }
-
-        if (invalidApps) {
-            log.error "Precomputed results for DeepTMHMM, SignalP_Euk, SignalP_Prok and TMbed are not yet available in the Matches API. To ensure these analyses run locally and produce results, please add the '--no-matches-api' flag when invoking the pipeline."
-            exit 1
-        }
+    (matches_api_apps, local_only_apps, api_version, error) = Lookup.prepareLookup(
+        apps,
+        no_matches_api,
+        matches_api_url,
+        workflow_manifest
+    )
+    if (error) {
+        log.warn error
+    } else if (!no_matches_api && !local_only_apps.isEmpty()) {
+        log.warn "The following analyses are not available in the Matches API: " +
+                local_only_apps.join(", ") +
+                ". They will be executed locally."
     }
 
     emit:
     fasta            // str: path to input fasta file
-    apps             // list: list of application to
+    local_only_apps  // list: list of application to that are not in the matches API
+    matches_api_apps // list: list of applications that are in the matches API
+    api_version      // str: version of the matches API
     datadir          // str: path to data directory, or null if not needed
     outprefix        // str: base path for output files
     formats          // set<String>: output file formats

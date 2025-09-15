@@ -28,16 +28,19 @@ nextflow_workflow {
                 input[0] = "$baseDir/tests/data/sequences/test.faa"     // input
                 input[1] = "pfam,ncbifam"                           // applictaions
                 input[2] = params.apps_config                       // apps_config
-                input[3] = "data"                                   // datadir
-                input[4] = "json,tsv,xml"                           // formats
-                input[5] = "results"                                // outdir
-                input[6] = null                                     // outprefix  
-                input[7] = false                                    // no_matches_api
-                input[8] = "latest"                                 // interpro_version
-                input[9] = false                                    // skip_intepro
-                input[10] = null                                    // skip_applications
-                input[11] = false                                   // goterms
-                input[12] = false                                   // pathways
+                input[3] = false                                    // run-ml
+                input[4] = "data"                                   // datadir
+                input[5] = "json,tsv,xml"                           // formats
+                input[6] = "results"                                // outdir
+                input[7] = null                                     // outprefix  
+                input[8] = false                                    // no_matches_api
+                input[9] = null                                     // matches_api_url
+                input[10] = "latest"                                 // interpro_version
+                input[11] = false                                   // skip_intepro
+                input[12] = null                                    // skip_applications
+                input[13] = false                                   // goterms
+                input[14] = false                                   // pathways
+                input[15] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -71,16 +74,19 @@ nextflow_workflow {
                 input[0] = "$baseDir/tests/data/sequences/missing.faa"  // input
                 input[1] = "pfam,ncbifam"                           // applictaions
                 input[2] = params.apps_config                       // apps_config
-                input[3] = "data"                                   // datadir
-                input[4] = "json,tsv,xml"                           // formats
-                input[5] = "results"                                // outdir
-                input[6] = null                                     // outprefix  
-                input[7] = false                                    // no_matches_api
-                input[8] = "latest"                                 // interpro_version
-                input[9] = false                                    // skip_intepro
-                input[10] = null                                    // skip_applications
-                input[11] = false                                   // goterms
-                input[12] = false                                   // pathways
+                input[3] = false                                    // run-ml
+                input[4] = "data"                                   // datadir
+                input[5] = "json,tsv,xml"                           // formats
+                input[6] = "results"                                // outdir
+                input[7] = null                                     // outprefix  
+                input[8] = false                                    // no_matches_api
+                input[9] = null                                     // matches_api_url
+                input[10] = "latest"                                 // interpro_version
+                input[11] = false                                    // skip_intepro
+                input[12] = null                                    // skip_applications
+                input[13] = false                                   // goterms
+                input[14] = false                                   // pathways
+                input[15] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -115,16 +121,19 @@ nextflow_workflow {
                 input[0] = "$baseDir/tests/data/sequences/test.faa"     // input
                 input[1] = "pfam,ncbifam,invalidfam"                // applictaions
                 input[2] = params.apps_config                       // apps_config
-                input[3] = "data"                                   // datadir
-                input[4] = "json,tsv,xml"                           // formats
-                input[5] = "results"                                // outdir
-                input[6] = null                                     // outprefix  
-                input[7] = false                                    // no_matches_api
-                input[8] = "latest"                                 // interpro_version
-                input[9] = false                                    // skip_intepro
-                input[10] = null                                    // skip_applications
-                input[11] = false                                   // goterms
-                input[12] = false                                   // pathways
+                input[3] = false                                    // run-ml
+                input[4] = "data"                                   // datadir
+                input[5] = "json,tsv,xml"                           // formats
+                input[6] = "results"                                // outdir
+                input[7] = null                                     // outprefix  
+                input[8] = false                                    // no_matches_api
+                input[9] = null                                     // matches_api_url
+                input[10] = "latest"                                 // interpro_version
+                input[11] = false                                    // skip_intepro
+                input[12] = null                                    // skip_applications
+                input[13] = false                                   // goterms
+                input[14] = false                                   // pathways
+                input[15] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -158,16 +167,19 @@ nextflow_workflow {
                 input[0] = "$baseDir/tests/data/sequences/test.faa"     // input
                 input[1] = "pfam,ncbifam"                           // applictaions
                 input[2] = params.apps_config                       // apps_config
-                input[3] = "data"                                   // datadir
-                input[4] = "json,tsv,xml"                           // formats
-                input[5] = "results"                                // outdir
-                input[6] = null                                     // outprefix  
-                input[7] = false                                    // no_matches_api
-                input[8] = "latest"                                 // interpro_version
-                input[9] = true                                    // skip_intepro
-                input[10] = null                                    // skip_applications
-                input[11] = true                                   // goterms
-                input[12] = true                                   // pathways
+                input[3] = false                                    // run-ml
+                input[4] = "data"                                   // datadir
+                input[5] = "json,tsv,xml"                           // formats
+                input[6] = "results"                                // outdir
+                input[7] = null                                     // outprefix  
+                input[8] = false                                    // no_matches_api
+                input[9] = null                                     // matches_api_url
+                input[10] = "latest"                                 // interpro_version
+                input[11] = true                                    // skip_intepro
+                input[12] = null                                    // skip_applications
+                input[13] = true                                    // goterms
+                input[14] = true                                    // pathways
+                input[15] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -201,16 +213,19 @@ nextflow_workflow {
                 input[0] = "$baseDir/tests/data/sequences/test.faa"     // input
                 input[1] = "pfam,ncbifam"                           // applictaions
                 input[2] = params.apps_config                       // apps_config
-                input[3] = "data"                                   // datadir
-                input[4] = "json,tsv,xml,csv"                       // formats
-                input[5] = "results"                                // outdir
-                input[6] = null                                     // outprefix  
-                input[7] = false                                    // no_matches_api
-                input[8] = "latest"                                 // interpro_version
-                input[9] = false                                    // skip_intepro
-                input[10] = null                                    // skip_applications
-                input[11] = false                                   // goterms
-                input[12] = false                                   // pathways
+                input[3] = false                                    // run-ml
+                input[4] = "data"                                   // datadir
+                input[5] = "json,tsv,xml,csv"                       // formats
+                input[6] = "results"                                // outdir
+                input[7] = null                                     // outprefix  
+                input[8] = false                                    // no_matches_api
+                input[9] = null                                     // matches_api_url
+                input[10] = "latest"                                 // interpro_version
+                input[11] = false                                    // skip_intepro
+                input[12] = null                                    // skip_applications
+                input[13] = false                                   // goterms
+                input[14] = false                                   // pathways
+                input[15] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -238,22 +253,29 @@ nextflow_workflow {
                         has_data: true
                     ]
                 ]
+                workflow_manifest = [
+                    name: "interproscan6-unit-test",
+                    version: "6.0.0-beta"
+                ]
             }
             workflow {
                 """
                 input[0] = "$baseDir/tests/data/sequences/test.faa"     // input
                 input[1] = "pfam,ncbifam"                           // applictaions
                 input[2] = params.apps_config                       // apps_config
-                input[3] = null                                     // datadir
-                input[4] = "json,tsv,xml,csv"                       // formats
-                input[5] = "results"                                // outdir
-                input[6] = null                                     // outprefix  
-                input[7] = false                                    // no_matches_api
-                input[8] = "latest"                                 // interpro_version
-                input[9] = false                                    // skip_intepro
-                input[10] = null                                    // skip_applications
-                input[11] = false                                   // goterms
-                input[12] = false                                   // pathways
+                input[3] = false                                    // run-ml
+                input[4] = null                                     // datadir
+                input[5] = "json,tsv,xml,csv"                       // formats
+                input[6] = "results"                                // outdir
+                input[7] = null                                     // outprefix  
+                input[8] = false                                    // no_matches_api
+                input[9] = null                                     // matches_api_url
+                input[10] = "latest"                                 // interpro_version
+                input[11] = false                                    // skip_intepro
+                input[12] = null                                    // skip_applications
+                input[13] = false                                   // goterms
+                input[14] = false                                   // pathways
+                input[15] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -287,16 +309,19 @@ nextflow_workflow {
                 input[0] = "$baseDir/tests/data/sequences/test.faa"     // input
                 input[1] = "pfam,ncbifam"                           // applictaions
                 input[2] = params.apps_config                       // apps_config
-                input[3] = "$baseDir/tests/data/sequences/test.faa"     // datadir
-                input[4] = "json,tsv,xml,csv"                       // formats
-                input[5] = "results"                                // outdir
-                input[6] = null                                     // outprefix  
-                input[7] = false                                    // no_matches_api
-                input[8] = "latest"                                 // interpro_version
-                input[9] = false                                    // skip_intepro
-                input[10] = null                                    // skip_applications
-                input[11] = false                                   // goterms
-                input[12] = false                                   // pathways
+                input[3] = false                                    // run-ml
+                input[4] = "$baseDir/tests/data/sequences/test.faa" // datadir
+                input[5] = "json,tsv,xml,csv"                       // formats
+                input[6] = "results"                                // outdir
+                input[7] = null                                     // outprefix  
+                input[8] = false                                    // no_matches_api
+                input[9] = null                                     // matches_api_url
+                input[10] = "latest"                                 // interpro_version
+                input[11] = false                                    // skip_intepro
+                input[12] = null                                    // skip_applications
+                input[13] = false                                   // goterms
+                input[14] = false                                   // pathways
+                input[15] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -330,16 +355,19 @@ nextflow_workflow {
                 input[0] = "$baseDir/tests/data/sequences/test.faa"     // input
                 input[1] = "pfam,ncbifam"                           // applictaions
                 input[2] = params.apps_config                       // apps_config
-                input[3] = "$baseDir/tests/data/sequences/test.faa"     // datadir
-                input[4] = "json,tsv,xml,csv"                       // formats
-                input[5] = "results"                                // outdir
-                input[6] = null                                     // outprefix  
-                input[7] = false                                    // no_matches_api
-                input[8] = "invalid-version"                        // interpro_version
-                input[9] = false                                    // skip_intepro
-                input[10] = null                                    // skip_applications
-                input[11] = false                                   // goterms
-                input[12] = false                                   // pathways
+                input[3] = false                                    // run-ml
+                input[4] = "$baseDir/tests/data/sequences/test.faa" // datadir
+                input[5] = "json,tsv,xml,csv"                       // formats
+                input[6] = "results"                                // outdir
+                input[7] = null                                     // outprefix  
+                input[8] = false                                    // no_matches_api
+                input[9] = null                                     // matches_api_url
+                input[10] = "latest"                                 // interpro_version
+                input[11] = false                                    // skip_intepro
+                input[12] = null                                    // skip_applications
+                input[13] = false                                   // goterms
+                input[14] = false                                   // pathways
+                input[15] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -382,16 +410,19 @@ nextflow_workflow {
                 input[0] = "$baseDir/tests/data/sequences/test.faa"     // input
                 input[1] = "pfam,ncbifam"                           // applictaions
                 input[2] = params.apps_config                       // apps_config
-                input[3] = "$baseDir/tests/data/sequences/test.faa"     // datadir
-                input[4] = "json,tsv,xml,csv"                       // formats
-                input[5] = "results"                                // outdir
-                input[6] = null                                     // outprefix  
-                input[7] = true                                     // no_matches_api
-                input[8] = "latest"                                 // interpro_version
-                input[9] = false                                    // skip_intepro
-                input[10] = null                                    // skip_applications
-                input[11] = false                                   // goterms
-                input[12] = false                                   // pathways
+                input[3] = false                                    // run-ml
+                input[4] = "$baseDir/tests/data/sequences/test.faa" // datadir
+                input[5] = "json,tsv,xml,csv"                       // formats
+                input[6] = "results"                                // outdir
+                input[7] = null                                     // outprefix  
+                input[8] = false                                    // no_matches_api
+                input[9] = null                                     // matches_api_url
+                input[10] = "latest"                                 // interpro_version
+                input[11] = false                                    // skip_intepro
+                input[12] = null                                    // skip_applications
+                input[13] = false                                   // goterms
+                input[14] = false                                   // pathways
+                input[15] = params.workflow_manifest                // workflow manifest
                 """
             }
         }

@@ -3,43 +3,28 @@ import java.net.URL
 import groovy.json.JsonOutput
 
 process PREPARE_LOOKUP {
+    /* A Simple process to check API and InterPro version compatibility
+    Retain as a process so that this process and the LOOKUP subworkflow wait for the
+    channels to be ready before determining if the API is available */
     label    'tiny'
     executor 'local'
 
     input:
-    val _url
+    val matches_api_apps
+    val api_interpro_version
     val db_releases
-    val interproscan_version  // major.minor iprscan version number
-    val workflow_manifest
+    val url
 
     output:
-    val matchesApiUrl
+    val api_url
 
     exec:
-    String _matchesApiUrl = _url  // reassign to avoid 'variable' already used error when logging
-    // Get MLS metadata: api (version), release, release_date
-    Map info = HTTPRequest.fetch("${HTTPRequest.sanitizeURL(_matchesApiUrl)}/info".toString(), null, 0, true)
-    if (info == null) {
-        log.warn "An error occurred while querying the Matches API; analyses will be run locally"
-        matchesApiUrl = null
-    } else {
-        def apiVersion = info.api ?: "X.Y.Z"
-        def majorVersion = apiVersion.split("\\.")[0]
-        if (majorVersion != "0") {
-            log.warn "${workflow_manifest.name} ${workflow_manifest.version}" +
-                    " is not compatible with the Matches API at ${_matchesApiUrl};" +
-                    " analyses will be run locally"
-            matchesApiUrl = null
-        } else if (db_releases) {  // can be null if we don't need data for the selected apps (e.g. mobidblite)
-            if (db_releases["interpro"]["version"] != info.release) {
-                log.warn "The local InterPro version does not match the match API release (Local: ${db_releases['interpro']}, Matches API: ${info.release}).\n" +
-                        "Pre-calculated matches will not be retrieved, and analyses will be run locally"
-                matchesApiUrl = null
-            }
-        }
+    _url = url // reassign to avoid variable already declared error
+    if (db_releases["interpro"]["version"] != api_interpro_version) {
+            log.warn "The local InterPro version (${db_releases['interpro']}) does not match the Matches API release (${api_interpro_version}). Pre-calculated matches will not be retrieved and analyses will run locally."
+            _url = null
     }
-    matchesApiUrl = _matchesApiUrl
-    return matchesApiUrl
+    api_url = _url
 }
 
 process LOOKUP_MATCHES {
@@ -55,25 +40,27 @@ process LOOKUP_MATCHES {
     tuple val(index), path("noLookup.fasta"), optional: true
 
     exec:
+    def seqFasta = fasta.toString()  // reassign to avoid variable already declared error
+
     def calculatedMatchesPath = task.workDir.resolve("calculatedMatches.json")
-    def calculatedMatches = [:]
-
     def noLookupFastaPath = task.workDir.resolve("noLookup.fasta")
-    def noLookupFasta = new StringBuilder()
 
-    Map<String, String> sequences = FastaFile.parse(fasta.toString())  // [md5: sequence]
+    def calculatedMatches = [:]
+    def noLookupFasta = new StringBuilder()
+    Map<String, String> sequences = FastaFile.parse(seqFasta)  // [md5: sequence]
     def md5List = sequences.keySet().toList().sort()
     def chunks = md5List.collate(chunkSize)
 
     String baseUrl = HTTPRequest.sanitizeURL(url.toString())
     boolean success = true
+
     for (chunk in chunks) {
-        String data = JsonOutput.toJson([md5: chunk])
-        def response = HTTPRequest.fetch("${baseUrl}/matches", data, maxRetries, true)
+        data = JsonOutput.toJson([md5: chunk])
+        response = HTTPRequest.fetch("${baseUrl}/matches", data, maxRetries, true)
 
         if (response != null) {
             response.results.each {
-                String proteinMd5 = it.md5.toUpperCase() // ensure it matches the local seq Db case
+                String proteinMd5 = it.md5.toUpperCase()
                 if (it.found) {
                     calculatedMatches[proteinMd5] = [:]
                     it.matches.each { matchMap ->
@@ -81,9 +68,7 @@ process LOOKUP_MATCHES {
                         if (library == "MobiDB Lite") {
                             matchMap.signature.signatureLibraryRelease.library = "MobiDB-lite"
                         }
-                        
                         String appName = library.toLowerCase().replaceAll("[-\\s]", "")
-
                         if (applications.contains(appName)) {
                             matchMap = transformMatch(matchMap, sequences[proteinMd5])
                             calculatedMatches[proteinMd5][matchMap.modelAccession] = matchMap
@@ -102,14 +87,14 @@ process LOOKUP_MATCHES {
     }
 
     if (success) {
-        def jsonMatches = JsonOutput.toJson(calculatedMatches)
         new File(calculatedMatchesPath.toString()).write(JsonOutput.toJson(calculatedMatches))
-        if (noLookupFasta.length() != 0) { new File(noLookupFastaPath.toString()).write(noLookupFasta.toString()) }
+        if (noLookupFasta.length() != 0) {
+            new File(noLookupFastaPath.toString()).write(noLookupFasta.toString())
+        }
     } else {
         log.warn "An error occurred while querying the Matches API, analyses will be run locally"
-        // when the connection fails, write out all sequences to "noLookup.fasta"
         new File(calculatedMatchesPath.toString()).write(JsonOutput.toJson([:]))
-        if (noLookupFasta.length() != 0) { new File(noLookupFastaPath.toString()).write(noLookupFasta.toString()) }
+        new File(noLookupFastaPath.toString()).write(new File(fasta.toString()).text)
     }
 }
 

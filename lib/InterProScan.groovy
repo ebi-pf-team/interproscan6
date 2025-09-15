@@ -24,6 +24,10 @@ class InterProScan {
             description: "comma-separated applications to scan the sequences with. Default: all.",
         ],
         [
+            name: "run-ml",
+            description: "run available activated machine learning (ML) based applications (e.g. DeepTMHMM, SignalP 6, TMbed). By default, ML analyses are disabled due to their high resource requirements."
+        ],
+        [
             name: "formats",
             metavar: "<FORMATS>",
             description: "comma-separated output formats. Available: JSON,TSV,XML,GFF3. Default: JSON,TSV,XML,GFF3."
@@ -259,21 +263,37 @@ class InterProScan {
         return dirs ? dirs.last().fileName.toString() : null
     }
 
-    static validateApplications(String applications, String skipApplications, Map appsConfig) {
+    static validateApplications(String applications, String skipApplications, Map appsConfig, Boolean runML) {
+        if (applications && skipApplications) {
+            return [null, "--applications and --skip-applications are mutually exclusive"]
+        }
+
         if (!applications && !skipApplications) {
             // Run all applications, except licensed packages with an unpopulated dir field
+            // and only include deeplearning apps in the default apps if enabled
             def appsToRun = appsConfig.findAll{ it ->
+                if (it.value?.enabled == false ) {
+                    if (!runML) {
+                        return false
+                    }
+                }
                 if (this.LICENSED_SOFTWARE.contains(it.key)) {
                     return it.value?.dir
                 }
                 return true
             }.keySet().toList()
-            return [appsToRun, null]
-        } else if (applications && skipApplications) {
-            return [null, "--applications and --skip-applications are mutually exclusive"]
+    
+            if (runML) {
+                def invalidApps = appsConfig.findAll { it.value.containsKey('enabled') && this.LICENSED_SOFTWARE.contains(it.key) && !it.value?.dir }.keySet().toList()
+                if (invalidApps) {
+                    def warn = "The following machine learning-based analyses are unavailable and will be skipped, even though --run-ml was specified: ${invalidApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses."
+                    return [appsToRun, null, warn]
+                }
+            }
+            return [appsToRun, null, null]
         }
-
-        // Make a collection of recognized application names
+        
+        // Make a collection of recognized application names [alias: standardised]
         def allApps = [:]
         appsConfig.each { label, appl ->
             allApps[label] = label
@@ -284,7 +304,19 @@ class InterProScan {
                 allApps[stdAlias] = label
             }
         }
-        def appsToRun = applications ? [] : allApps.values().toSet()
+        def appsToRun = applications ? [] : allApps.findAll { it ->
+            if (appsConfig[it.value].containsKey('enabled')) {
+                if (runML) {
+                    if (this.LICENSED_SOFTWARE.contains(it.value)) {
+                        return appsConfig[it.value]?.dir
+                    } else {
+                        return true
+                    }
+                }
+                return appsConfig[it.value]?.enabled
+            }
+            return true
+        }.values().toSet()
         def applicationsInput = applications ? applications : skipApplications
         def appsParam = applicationsInput.replaceAll("[- ]", "").split(",").collect { it.trim() }.toSet()
 
@@ -298,24 +330,40 @@ class InterProScan {
                 }
             } else {
                 def error = "Unrecognised application: '${appName}'. Try '--help' to list available applications."
-                return [null, error]
+                return [null, error, null]
             }
         }
 
-        def invalidApps = appsToRun.findAll { app ->
-            this.LICENSED_SOFTWARE.contains(app) && !appsConfig[app]?.dir
-        }
-
-        if (invalidApps) {
-            if (skipApplications) {
-                appsToRun.removeAll(invalidApps)
-            } else {
+        if (applications) {
+            def userApps = applications.replaceAll("[- ]", "").split(",")*.trim()
+            def invalidApps = userApps.findAll { appsConfig[allApps[it]].containsKey('enabled') && this.LICENSED_SOFTWARE.contains(it) && !appsConfig[allApps[it]]?.dir }
+            if (invalidApps) {
                 def error = "The following applications cannot be run: ${invalidApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses."
-                return [null, error]
+                return [null, error, null]
             }
         }
 
-        return [appsToRun.toSet().toList(), null]
+        if (runML) {
+            def invalidApps = []
+            if (applications) {
+                invalidApps = appsConfig.findAll { it.value.containsKey('enabled') && this.LICENSED_SOFTWARE.contains(it.key) && !it.value?.dir }.keySet().toList()
+            } else if (skipApplications) { // Subtract skipped ml-based apps
+                invalidApps = appsConfig.findAll { appName, appConfig ->
+                    if (appConfig.containsKey('enabled') && !appConfig?.dir && this.LICENSED_SOFTWARE.contains(appName)) {
+                        def appAliases = allApps.findAll { it.value == appName }.keySet()
+                        return !appAliases.any { appsParam.contains(it) }
+                    }
+                    return false
+                }.keySet().toList()
+            }
+
+            if (invalidApps) {
+                def warn = "The following machine learning-based analyses are unavailable and will be skipped even though --run-ml was specified: ${invalidApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses."
+                return [appsToRun.toSet().toList(), null, warn]
+            }
+        }
+
+        return [appsToRun.toSet().toList(), null, null]
     }
 
     static String validateInterProVersion(versionParam) {

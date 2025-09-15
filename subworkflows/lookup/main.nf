@@ -4,47 +4,50 @@ workflow LOOKUP {
     // Prepare connection and retrieve precalculated matched from the InterPro API
     take:
     ch_seqs               // fasta files of protein sequences to analyse
-    apps                  // member db analyses to run
+    matches_api_apps      // member db analyses to run that are in the matches API
     db_releases           // map: [db: version, dirpath]           
     interproscan_version  // major.minor interproscan version number
-    workflow_manifest     // map, from nextflow.conf
-    matches_api_url       // str, from cmd-line
+    api_version           // version of the matches API
+    url                   // str, url to matches api
     chunk_size            // int
     max_retries           // int
 
     main:
-    // Initialise channels for outputs
-    precalculatedMatches = Channel.empty()
-    noMatchesFasta = Channel.empty()
-
     PREPARE_LOOKUP(
-        matches_api_url,
+        matches_api_apps,
+        api_version,
         db_releases,
-        interproscan_version,
-        workflow_manifest
+        url
     )
-    matches_api_url = PREPARE_LOOKUP.out[0]
 
-    matches_api_url
-        .filter { it }
+    // Branch sequences based on API availability
+    api_result = PREPARE_LOOKUP.out[0]
         .combine(ch_seqs)
-        .map { url, index, fasta ->
-            tuple(index, fasta, apps, url, chunk_size, max_retries)
+        .branch {
+            available: it[0] != null
+            unavailable: it[0] == null
         }
-        .set { lookup_input }
 
-    LOOKUP_MATCHES(lookup_input)
+    // Run LOOKUP_MATCHES only on available branch
+    LOOKUP_MATCHES(
+        api_result.available.map { api_url, index, fasta ->
+            tuple(index, fasta, matches_api_apps, api_url, chunk_size, max_retries)
+        }
+    )
 
     precalculatedMatches = LOOKUP_MATCHES.out[0]
-    noMatchesFasta = LOOKUP_MATCHES.out[1]
+        .mix(
+            api_result.unavailable.map { _, index, fasta -> 
+                tuple(index, null)
+            }
+        )
 
-    // fallback when no API URL is available
-    matches_api_url
-        .filter { !it }
-        .map { _ ->
-            precalculatedMatches = Channel.empty()
-            noMatchesFasta = ch_seqs
-        }
+    noMatchesFasta = LOOKUP_MATCHES.out[1]
+        .mix(
+            api_result.unavailable.map { _, index, fasta -> 
+                tuple(index, fasta)
+            }
+        )
 
     emit:
     precalculatedMatches

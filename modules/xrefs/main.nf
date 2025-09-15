@@ -18,7 +18,7 @@ process XREFS {
 
     exec:
     def (databaseInfo, entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null, null]
-    if (db_releases.interpro) {
+    if (db_releases.interpro.dirpath != null) {
         String interproDir = db_releases.interpro.dirpath.toString()
         String databasesPath = "${interproDir}/databases.json"
         File databasesJson = new File(databasesPath)
