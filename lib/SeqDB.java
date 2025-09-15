@@ -7,12 +7,12 @@ import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SeqDBQuery {
+public class SeqDB {
     private Connection connection;
     private static final int insertBatchSize = 100;
     private static final Pattern eslDescriptionPattern = Pattern.compile("^source=(.+?)\\s+coords=");
 
-    public SeqDBQuery(String dbPath) throws SQLException {
+    public SeqDB(String dbPath) throws SQLException {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
