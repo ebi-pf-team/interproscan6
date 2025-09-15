@@ -1,14 +1,18 @@
+import java.io.*;
 import java.sql.*;
 import java.util.*;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-java.util.regex.Pattern;
+import java.security.NoSuchAlgorithmException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class SeqDB {
+public class SeqDBQuery {
     private Connection connection;
     private static final int insertBatchSize = 100;
     private static final Pattern eslDescriptionPattern = Pattern.compile("^source=(.+?)\\s+coords=");
 
-    public SeqDB(String dbPath) throws SQLException {
+    public SeqDBQuery(String dbPath) throws SQLException {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
@@ -73,11 +77,11 @@ public class SeqDB {
     }
 
 
-    public void loadFastaFile(String fastaFilePath, boolean isNucleic, boolean isTranslated) {
+    public void loadFastaFile(String fastaFilePath, boolean isNucleic, boolean isTranslated) throws SQLException, IOException, FileNotFoundException, NoSuchAlgorithmException {
         File fastaFile = new File(fastaFilePath);
-        String currentHeaeder = null;
-        String currentSeq = null;
-        Map<String, Set<String>> ntSequences = [:];
+        String currentHeader = null;
+        StringBuilder currentSeq = null;
+        Map<String, Set<String>> ntSequences = new HashMap<>();
 
         String table = isNucleic ? "NUCLEOTIDE" : "PROTEIN";
         String insertSeqQuery = "INSERT OR IGNORE INTO " + table + " (id, md5) VALUES (?, ?)";
@@ -91,9 +95,9 @@ public class SeqDB {
                     String line;
                     while ((line = br.readLine()) != null) {
                         if (line.startsWith(">")) {
-                            if (currentHeader) { // Process the previous record
+                            if (currentHeader != null) { // Process the previous record
                                 String sequence = currentSeq.toString();
-                                Map<String, String> seqData = this.processRecord(currentHeader, sequence)
+                                Map<String, String> seqData = this.processRecord(currentHeader, sequence);
                                 stmt1.setString(1, seqData.get("md5"));
                                 stmt1.setString(2, seqData.get("sequence"));
                                 stmt1.addBatch();
@@ -124,14 +128,16 @@ public class SeqDB {
                             }
                             currentHeader = line.substring(1).trim();
                             currentSeq = new StringBuilder();
+                        } else {
+                            currentSeq.append(line.trim());
                         }
                     }
                 } // end of buffered reader
 
                 // Finished parsing the file, now process the last recrd
-                if (currentHeader) {
+                if (currentHeader != null) {
                     String sequence = currentSeq.toString();
-                    Map<String, String> seqData = this.processRecord(currentHeader, sequence)
+                    Map<String, String> seqData = this.processRecord(currentHeader, sequence);
                     stmt1.setString(1, seqData.get("md5"));
                     stmt1.setString(2, seqData.get("sequence"));
                     stmt1.addBatch();
@@ -162,27 +168,34 @@ public class SeqDB {
         } // end of prepared statement 1
     }
 
-    public void splitFasta(String outputPrefix, int maxSequencesPerFile, boolean nucleic) throw SQLException, IOException {
-        String query = nucleic ? """SELECT P2N.nt_md5, S.md5, S.sequence
+    public void splitFasta(String outputPrefix, int maxSequencesPerFile, boolean nucleic) throws SQLException, FileNotFoundException {
+        String query;
+        if (nucleic) {
+            query = """
+            SELECT P2N.nt_md5, S.md5, S.sequence
             FROM PROTEIN_SEQUENCE AS S
             INNER JOIN PROTEIN AS P ON S.md5 = P.md5
             INNER JOIN PROTEIN_TO_NUCLEOTIDE AS P2N ON P.md5 = P2N.protein_md5
-            ORDER BY P2N.nt_md5""" : "SELECT NULL AS nt_md5, md5, sequence FROM PROTEIN_SEQUENCE ORDER BY md5";
+            ORDER BY P2N.nt_md5
+            """;
+        } else {
+            query = "SELECT NULL AS nt_md5, md5, sequence FROM PROTEIN_SEQUENCE ORDER BY md5";
+        }
         int fileIndex = 1;
-        List batch = [];
+        List<Map<String, String>> batch = new ArrayList<>();
         String currentMD5 = null;
-        Set seenProteinMd5s = [] as Set;
+        Set<String> seenProteinMd5s = new HashSet<>();
         PrintStream writer = null;
 
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     // If we encounter a new nt_md5 and the batch is full --> write to a new batch
-                    if (currentMD5 && currentMD5 != rs.getString("nt_md5") && batch.size() >= maxSequencesPerFile) {
+                    if (currentMD5 != null && !currentMD5.equals(rs.getString("nt_md5")) && batch.size() >= maxSequencesPerFile) {
                         writer = new PrintStream(new File(outputPrefix + "_" + fileIndex + ".fasta"));
-                        for (String record : batch) {
-                            writer.println(">" + record.md5);
-                            String sequence = record.sequence;
+                        for (Map<String, String> record : batch) {
+                            writer.println(">" + record.get("md5"));
+                            String sequence = record.get("sequence").toString();
                             for (int i = 0; i < sequence.length(); i += 60) {
                                 writer.println(sequence.substring(i, Math.min(i + 60, sequence.length())));
                             }
@@ -194,7 +207,7 @@ public class SeqDB {
                     }
 
                     if (!seenProteinMd5s.contains(rs.getString("md5"))) {
-                        batch.add([md5: rs.getString("md5"), sequence: rs.getString("sequence")]);
+                        batch.add(Map.of("md5", rs.getString("md5"), "sequence", rs.getString("sequence")));
                         seenProteinMd5s.add(rs.getString("md5"));
                     }
 
@@ -206,9 +219,9 @@ public class SeqDB {
         // Write any remaining records in the batch
         if (!batch.isEmpty()) {
             writer = new PrintStream(new File(outputPrefix + "_" + fileIndex + ".fasta"));
-            for (String record : batch) {
-                writer.println(">" + record.md5);
-                String sequence = record.sequence;
+            for (Map record : batch) {
+                writer.println(">" + record.get("md5"));
+                String sequence = record.get("sequence").toString();
                 for (int i = 0; i < sequence.length(); i += 60) {
                     writer.println(sequence.substring(i, Math.min(i + 60, sequence.length())));
                 }
@@ -217,14 +230,22 @@ public class SeqDB {
         }
     }
 
-    private static Map processRecord(String header, String sequences) {
-        List<String> tokens = header.split("\\s+", 2);
+    private static Map<String, String> processRecord(String header, String sequence) throws NoSuchAlgorithmException {
+        String[] tokens = header.split("\\s+", 2);
         String id = tokens[0];
         String description = tokens.length > 1 ? tokens[1] : "";
         MessageDigest md = MessageDigest.getInstance("MD5");
         byte[] digest = md.digest(sequence.toUpperCase().getBytes(StandardCharsets.UTF_8));
         String md5 = bytesToHex(digest);
         return Map.of("id", id, "description", description, "md5", md5, "sequence", sequence);
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+        StringBuilder result = new StringBuilder();
+        for (byte b : bytes) {
+            result.append(String.format("%02x", b));
+        }
+        return result.toString();
     }
 
     public Map<String, List<ProteinData>> proteinMd5sToProteinSeqs(List<String> proteinMD5s) throws SQLException {
