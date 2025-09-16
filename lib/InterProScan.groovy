@@ -360,7 +360,7 @@ class InterProScan {
     static Set<String> validateFormats(String userFormats) {
         Set<String> formats = userFormats.toUpperCase().split(',') as Set
         def invalidFormats = formats - VALID_FORMATS
-        return invalidFormats ? [null, "Invalid output file format provided:\n${invalidFormats.join('\n')}"] : [formats, null]
+        return invalidFormats ? [null, "Invalid output file format provided:\n${invalidFormats.join('\n')}\nAccepted formats: ${VALID_FORMATS.join(', ')}"] : [formats, null]
     }
 
     static List<String> validateSignalpMode(String signalpMode) {
