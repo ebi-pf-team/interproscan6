@@ -107,11 +107,11 @@ public class SeqDB {
                                 Map<String, String> seqData = this.processRecord(currentHeader, sequence);
                                 
                                 // Fix: First insert sequence, then metadata
-                                stmt1.setString(1, seqData.get("md5"));
+                                stmt1.setString(1, seqData.get("md5").toUpperCase());
                                 stmt1.setString(2, seqData.get("sequence"));
                                 stmt1.addBatch();
-                                
-                                stmt2.setString(1, seqData.get("md5"));
+
+                                stmt2.setString(1, seqData.get("md5").toUpperCase());
                                 stmt2.setString(2, seqData.get("id"));
                                 stmt2.setString(3, seqData.get("description"));
                                 stmt2.addBatch();
@@ -150,12 +150,12 @@ public class SeqDB {
                 if (currentHeader != null) {
                     String sequence = currentSeq.toString();
                     Map<String, String> seqData = this.processRecord(currentHeader, sequence);
-                    
-                    stmt1.setString(1, seqData.get("md5"));
+
+                    stmt1.setString(1, seqData.get("md5").toUpperCase());
                     stmt1.setString(2, seqData.get("sequence"));
                     stmt1.addBatch();
-                    
-                    stmt2.setString(1, seqData.get("md5"));
+
+                    stmt2.setString(1, seqData.get("md5").toUpperCase());
                     stmt2.setString(2, seqData.get("id"));
                     stmt2.setString(3, seqData.get("description"));
                     stmt2.addBatch();

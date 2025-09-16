@@ -87,11 +87,9 @@ process WRITE_GFF3 {
                         seqData = db.proteinMd5sToProteinSeqs([proteinMd5])
                         String sequence = seqData[proteinMd5].sequence
                         int seqLength = sequence.length()
-                        println "seqData: -- ${proteinMd5}"
                         seqData.each { data ->
                             def proteinData = data.value
                             proteinData.each { row ->
-                                println "row: ${row}"
                                 gff3Writer.writeLine("##sequence-region ${row.id} 1 ${seqLength}")
 
                                 matchesMap.each { modelAcc, match ->
