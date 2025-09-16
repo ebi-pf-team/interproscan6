@@ -151,8 +151,8 @@ def writeProtein(String proteinMd5, Map proteinMatches, JsonGenerator jsonWriter
     jsonWriter.writeStartObject()
 
     // 1. {"sequence": seq, "md5": proteinMd5}
-    proteinSeqData = db.proteinMd5ToProteinSeq(proteinMd5)
-    String sequence = proteinSeqData[0].sequence
+    proteinSeqData = db.proteinMd5sToProteinSeqs([proteinMd5])
+    String sequence = proteinSeqData[proteinMd5].sequence
     jsonWriter.writeStringField("sequence", sequence)
     jsonWriter.writeStringField("md5", proteinMd5)
 
@@ -603,11 +603,15 @@ def writeXref(seqData, JsonGenerator jsonWriter) {
     } ] */
     jsonWriter.writeStartArray()
     seqData.each { row ->
-        // jsonWrite.writeObject([name: "$seqId $seqDesc"]) does not correctly handle the formatted str
-        jsonWriter.writeStartObject()
-        jsonWriter.writeStringField("name", "${row.id} ${row.description}".trim())
-        jsonWriter.writeStringField("id", row.id)
-        jsonWriter.writeEndObject()
+        def proteinMd5 = row.key
+        def proteinData = row.value
+        proteinData.each { seq ->
+            // jsonWrite.writeObject([name: "$seqId $seqDesc"]) does not correctly handle the formatted str
+            jsonWriter.writeStartObject()
+            jsonWriter.writeStringField("name", "${seq.id} ${seq.description}".trim())
+            jsonWriter.writeStringField("id", seq.id)
+            jsonWriter.writeEndObject()
+        }
     }
     jsonWriter.writeEndArray()
 }

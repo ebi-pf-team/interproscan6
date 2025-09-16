@@ -100,8 +100,8 @@ def addProteinNodes (String proteinMd5, Map proteinMatches, def xml, SeqDB db) {
     There may be multiple seqIds and desc for the same sequence/md5, use the first entry to get the seq. */
     xml.protein {
         // 1. <sequence md5="" sequence </sequence>
-        proteinSeqData = db.proteinMd5ToProteinSeq(proteinMd5)
-        String sequence = proteinSeqData[0].sequence
+        proteinSeqData = db.proteinMd5sToProteinSeqs([proteinMd5])
+        String sequence = proteinSeqData[proteinMd5].sequence
         xml.sequence(md5: proteinMd5, sequence)
 
         // 2. <xref id="id", name="id desc"/>
@@ -578,6 +578,10 @@ def addSiteNodes(locationSites, memberDB, xml) {
 def writeXref(seqData, xml) {
     // <xref id="id" name="id desc"/>
     seqData.each { row ->
-        xml.xref(id: row.id, name: "${row.id} ${row.description}".trim())
+        def proteinMd5 = row.key
+        def proteinData = row.value
+        proteinData.each { seq ->
+            xml.xref(id: seq.id, name: "${seq.id} ${seq.description}".trim())
+        }
     }
 }

@@ -13,7 +13,7 @@ process WRITE_TSV {
     val nucleic
 
     exec:
-    def db = new SeqDBQuery(seqDbPath.toString())
+    def db = new SeqDB(seqDbPath.toString())
 
     def tsvFile = new File(output_file)
     tsvFile.text = "" // clear the file if it already exists
@@ -39,7 +39,6 @@ process WRITE_TSV {
         } else {
             def proteinMd5List = proteins.keySet().toList()
             Map<String, List> seqData = db.proteinMd5sToProteinSeqs(proteinMd5List)
-    
             // Don't change to `each`, for loops are faster and better optimised for the JVM
             for (Map.Entry entry : proteins.entrySet()) {
                 String proteinMd5 = entry.key
@@ -150,7 +149,7 @@ def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location
     return sb.toString()
 }
 
-def processNucleotidesBulk(SeqDBQuery db, Map proteins, Set seenNucleicMd5s, String currentDate, 
+def processNucleotidesBulk(SeqDB db, Map proteins, Set seenNucleicMd5s, String currentDate, 
                           List lineBuffer, int batchSize, Closure flushBuffer) {
     
     Set<String> allProteinMd5s = proteins.keySet().toSet()

@@ -84,23 +84,27 @@ process WRITE_GFF3 {
                     }
                 } else {
                     proteins.each { String proteinMd5, Map matchesMap ->
-                        seqData = db.proteinMd5ToProteinSeq(proteinMd5)
-                        String sequence = seqData[0].sequence.trim()
+                        seqData = db.proteinMd5sToProteinSeqs([proteinMd5])
+                        String sequence = seqData[proteinMd5].sequence
                         int seqLength = sequence.length()
+                        println "seqData: -- ${proteinMd5}"
+                        seqData.each { data ->
+                            def proteinData = data.value
+                            proteinData.each { row ->
+                                println "row: ${row}"
+                                gff3Writer.writeLine("##sequence-region ${row.id} 1 ${seqLength}")
 
-                        seqData.each { row ->
-                            gff3Writer.writeLine("##sequence-region ${row.id} 1 ${seqLength}")
-
-                            matchesMap.each { modelAcc, match ->
-                                match = Match.fromMap(match)
-                                
-                                match.locations.each { Location loc ->
-                                    gff3Writer.writeLine(proteinFormatLine(row.id, match, loc, null, null, null))
+                                matchesMap.each { modelAcc, match ->
+                                    match = Match.fromMap(match)
+                                    
+                                    match.locations.each { Location loc ->
+                                        gff3Writer.writeLine(proteinFormatLine(row.id, match, loc, null, null, null))
+                                    }
                                 }
-                            }
 
-                            fastaWriter.writeLine(">${row.id}")
-                            fastaWriter.writeLine("${sequence.replaceAll(/(.{60})/, '$1\n')}")   
+                                fastaWriter.writeLine(">${row.id}")
+                                fastaWriter.writeLine("${sequence.replaceAll(/(.{60})/, '$1\n')}")   
+                            }
                         }         
                     }
                 }
