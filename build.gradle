@@ -22,7 +22,7 @@ sourceSets {
 }
 
 jar {
-    archiveFileName = 'interproscan6-utils.jar'
+    archiveFileName = 'SeqDB.jar'
     destinationDirectory = file('lib')
 
     from {
@@ -32,7 +32,7 @@ jar {
     
     manifest {
         attributes(
-            'Implementation-Title': 'InterProScan6 Utils',
+            'Implementation-Title': 'SeqDB',
             'Implementation-Version': '1.0'
         )
     }
