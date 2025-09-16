@@ -581,14 +581,6 @@ public class SeqDB {
     }
 }
 
-class NucleotideData {
-    public final String id;
-    public final String sequence;
-
-    public NucleotideData(String id, String sequence) {
-        this.id = id;
-        this.sequence = sequence;
-    }
-}
+record NucleotideData(String id, String sequence) {}
 
 record ProteinData(String id, String description, String sequence) {}
