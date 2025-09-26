@@ -44,10 +44,20 @@ process WRITE_TSV {
                 }
             }
         } else {
+            // Batch query all MD5s once
+            def allMd5s = proteins.keySet() as List
+            def md5ToSeqData = [:]
+
+            allMd5s.collate(1000).each { batch ->
+                def result = db.proteinMd5ToProteinSeqs(batch)
+                md5ToSeqData.putAll(result)
+            }
+
+            // Now reuse the lookup map
             proteins.each { String proteinMd5, Map proteinMatches ->
+                def seqData = md5ToSeqData[proteinMd5]
                 proteinMatches.each { modelAcc, match ->
                     match = Match.fromMap(match)
-                    seqData = db.proteinMd5ToProteinSeq(proteinMd5)
                     writeMatch(proteinMd5, null, seqData, match, currentDate, tsvFile)
                 }
             }
