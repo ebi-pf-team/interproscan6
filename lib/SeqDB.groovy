@@ -292,14 +292,18 @@ class SeqDB {
 
     Map<String, List<List<Object>>> proteinMd5ToProteinSeqs(List<String> proteinMD5s) {
         def placeholders = proteinMD5s.collect { "?" }.join(", ")
-        def query = """SELECT P.id, P.description, S.sequence
+        def query = """SELECT S.md5, P.id, P.description, S.sequence
             FROM PROTEIN AS P
             INNER JOIN PROTEIN_SEQUENCE AS S ON P.md5 = S.md5
             WHERE S.md5 IN (${placeholders});
             """
         def result = [:].withDefault { [] }
         this.sql.eachRow(query, proteinMD5s) { row ->
-            result[row.md5] << [row.id, row.description, row.sequence]
+            result[row.md5] << [
+                id         : row.id,
+                description: row.description,
+                sequence   : row.sequence
+            ]
         }
         return result
     }
