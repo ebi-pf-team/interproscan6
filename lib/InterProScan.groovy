@@ -331,7 +331,7 @@ class InterProScan {
         }
 
         if (applications) {
-            def userApps = applications.replaceAll("[- ]", "").split(",")*.trim()
+            def userApps = applications.replaceAll("[- ]", "").split(",").collect { it.trim().toLowerCase() }
             def invalidApps = userApps.findAll { appsConfig[allApps[it]].containsKey('enabled') && this.LICENSED_SOFTWARE.contains(it) && !appsConfig[allApps[it]]?.dir }
             if (invalidApps) {
                 def error = "The following applications cannot be run: ${invalidApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses."
