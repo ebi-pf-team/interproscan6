@@ -130,7 +130,7 @@ process PARSE_INTERPRO_N {
                 results[seqId].computeIfAbsent(matchKey) {   
                     SignatureLibraryRelease library = new SignatureLibraryRelease(sigLib.library, sigLib.version)
                     Signature signature = new Signature(accession, library)
-                    Match match = new Match(matchKey)
+                    Match match = new Match(accession)
                     match.signature = signature
                     match.source = "InterPro-N"
                     match
