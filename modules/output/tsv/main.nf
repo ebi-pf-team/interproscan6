@@ -77,26 +77,37 @@ def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location
     int end = loc.end
     def scoringValue = "-"
     def pantherGoTerms = []
-    switch (memberDb) {
-        case ["CDD", "PRINT"]:
-            scoringValue = match.evalue
-            break
-        case ["SignalP-Prok", "SignalP-Euk"]:
-            scoringValue = loc.pvalue
-            break
-        case ["HAMAP", "PROSITE profiles"]:
-            scoringValue = loc.score
-            break
-        case ["COILS", "MobiDB-lite", "Phobius", "PROSITE patterns", "DeepTMHMM", "TMbed"]:
-            scoringValue = "-"
-            break
-        case "PANTHER":
-            pantherGoTerms = match.treegrafter.goXRefs.collect { "${it.id}(PANTHER)" }
-            scoringValue = loc.evalue
-            break
-        default:
-            scoringValue = loc.evalue
-            break
+    if (match.source == "InterPro-N") {
+        scoringValue = loc.score
+    } else {
+        switch (memberDb) {
+            case ["CDD", "PRINT"]:
+                scoringValue = match.evalue
+                break
+            case ["SignalP-Prok", "SignalP-Euk"]:
+                scoringValue = loc.pvalue
+                break
+            case ["HAMAP", "PROSITE profiles"]:
+                scoringValue = loc.score
+                break
+            case ["COILS", "MobiDB-lite", "Phobius", "PROSITE patterns", "DeepTMHMM", "TMbed"]:
+                scoringValue = "-"
+                break
+            case "PANTHER":
+                pantherGoTerms = match.treegrafter.goXRefs.collect { "${it.id}(PANTHER)" }
+                scoringValue = loc.evalue
+                break
+            default:
+                scoringValue = loc.evalue
+                break
+        }
+    }
+
+    def memberDbPrefix
+    if (match.source in ["InterPro", "InterPro-N"]) {
+        memberDbPrefix = "${match.source}:${memberDb}".toString()
+    } else {
+        memberDbPrefix = memberDb
     }
 
     goTerms = interproGoTerms.collect { "${it.id}(InterPro)" } + pantherGoTerms
@@ -104,7 +115,7 @@ def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location
         seqId, 
         seqMd5,
         seqLength,
-        memberDb,
+        memberDbPrefix,
         match.signature.accession,
         sigDesc,
         start,
