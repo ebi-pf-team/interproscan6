@@ -35,13 +35,9 @@ process XREFS {
     def matchesFileMap = new ObjectMapper().readValue(new File(matches_path.toString()), Map.class)
     matchesFileMap.each { String seqMd5, Map matches ->
         matches.each { modelAcc, matchMap ->
-            match = Match.fromMap(matchMap)  // convert Map to Match object
-            if (match.source == "InterPro-N") {) {
-                // InterPro-N match, skip
-                return
-            }
+            Match match = Match.fromMap(matchMap)  // convert Map to Match object
 
-            if (entries || entries != null) {
+            if (match.source == "InterPro" && entries) {
                 String signatureAcc = match.signature.accession
                 def signatureInfo = entries[signatureAcc] ?: entries[modelAcc]
 
