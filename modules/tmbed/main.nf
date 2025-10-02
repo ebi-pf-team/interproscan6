@@ -86,6 +86,7 @@ process PARSE_TMBED {
                         currentMatch = hits[seqMd5].computeIfAbsent(signature.accession) {
                             Match newMatch = new Match(signature.accession)
                             newMatch.signature = signature
+                            newMatch.source = "TMbed"
                             newMatch
                         }
                         start = position + 1
@@ -96,6 +97,7 @@ process PARSE_TMBED {
                         currentMatch = hits[seqMd5].computeIfAbsent(signature.accession) {
                             Match newMatch = new Match(signature.accession)
                             newMatch.signature = signature
+                            newMatch.source = "TMbed"
                             newMatch
                         }
                         start = position + 1

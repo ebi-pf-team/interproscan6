@@ -150,6 +150,7 @@ process PARSE_PHOBIUS {
             } else {
                 match = new Match(modelAccession)
                 match.signature = signatures[modelAccession]
+                match.source = "Phobius"
                 tmpMatches[modelAccession] = match
             }
 

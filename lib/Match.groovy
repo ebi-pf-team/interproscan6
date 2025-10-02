@@ -7,6 +7,7 @@ class Match implements Serializable {
     List<Location> locations = []
     boolean included = true  // for HMMER3 matches (inclusion threshold)
     RepresentativeInfo representativeInfo = null
+    String source = "InterPro"
 
     // PANTHER
     TreeGrafter treegrafter = null
@@ -76,6 +77,7 @@ class Match implements Serializable {
         match.treegrafter = TreeGrafter.fromMap(data.treegrafter)
         match.graphscan = data.graphscan
         match.representativeInfo = RepresentativeInfo.fromMap(data.representativeInfo)
+        match.source = data.source
         return match
     }
 
@@ -415,6 +417,13 @@ class Location implements Serializable {
         this.end = end
         this.hmmLength = hmmLength
         this.evalue = evalue
+        this.fragments = fragments
+    }
+
+    Location(int start, int end, Double score, List<LocationFragment> fragments) { // Used for InterPro-N
+        this.start = start
+        this.end = end
+        this.score = score
         this.fragments = fragments
     }
 

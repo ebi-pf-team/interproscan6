@@ -111,6 +111,7 @@ process PARSE_SIGNALP {
         assert signature != null
         Match match = new Match(modelAcc)    
         match.signature = signature
+        match.source = "SignalP"
         Location location = new Location(start, end)
         location.score = score
         match.addLocation(location)

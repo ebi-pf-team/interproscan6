@@ -42,6 +42,7 @@ process PARSE_COILS {
             matches[sequenceId] = [:]
 
             Match match = new Match("Coil", new Signature("Coil", "Coil", null, library, null))
+            match.source = "COILS"
             matches[sequenceId]["Coil"] = match
         } else if (line != "//" && sequenceId) {
             def fields = line.split(/\s+/)
