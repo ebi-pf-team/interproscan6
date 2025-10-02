@@ -103,25 +103,18 @@ def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location
         }
     }
 
-    def memberDbPrefix
-    if (match.source in ["InterPro", "InterPro-N"]) {
-        memberDbPrefix = "${match.source}:${memberDb}".toString()
-    } else {
-        memberDbPrefix = memberDb
-    }
-
     goTerms = interproGoTerms.collect { "${it.id}(InterPro)" } + pantherGoTerms
     return [
         seqId, 
         seqMd5,
         seqLength,
-        memberDbPrefix,
+        memberDb,
         match.signature.accession,
         sigDesc,
         start,
         end,
         scoringValue,
-        "T",
+        match.source,
         currentDate,
         entryAcc,
         entryDesc,
