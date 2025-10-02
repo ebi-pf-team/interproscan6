@@ -172,6 +172,11 @@ def writeProtein(String proteinMd5, Map proteinMatches, JsonGenerator jsonWriter
 
 def writeMatch(String proteinMd5, Map match, JsonGenerator jsonWriter) {
     // Write out an individual match to an array of matches. The structure is dependent on the memberDB.
+    if (match.source == "InterPro-N") {
+        writeInterProN(match, jsonWriter)
+        return
+    }
+
     String memberDB = match.signature.signatureLibraryRelease.library.toLowerCase() ?: ""
     switch (memberDB) {
         case "antifam":
@@ -214,7 +219,7 @@ def writeMatch(String proteinMd5, Map match, JsonGenerator jsonWriter) {
             writeDefault(match, jsonWriter)
             break
         case "pirsr":
-            writePirsr(match, jsonWriter)
+            writePIRSR(match, jsonWriter)
             break
         case "prints":
             writePRINTS(match, jsonWriter)
@@ -255,6 +260,7 @@ def writeDefault(Map match, JsonGenerator jsonWriter) {
         "model-ac" : match.modelAccession,
         "evalue"   : match.evalue,
         "score"    : match.score,
+        "source"   : match.source,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
@@ -280,6 +286,7 @@ def writeDefaultNoHmmBounds(Map match, JsonGenerator jsonWriter) {
         "model-ac" : match.modelAccession,
         "evalue"   : match.evalue,
         "score"    : match.score,
+        "source"   : match.source,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
@@ -304,6 +311,7 @@ def writeCDD(Map match, JsonGenerator jsonWriter) {
         "model-ac" : match.modelAccession,
         "evalue"   : match.evalue,
         "score"    : match.score,
+        "source"   : match.source,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
@@ -328,6 +336,7 @@ def writeMinimalist(Map match, JsonGenerator jsonWriter) {
     jsonWriter.writeObject([
         "signature": match.signature,
         "model-ac" : match.modelAccession,
+        "source"   : match.source,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
@@ -343,6 +352,7 @@ def writeHAMAP(Map match, JsonGenerator jsonWriter) {
     jsonWriter.writeObject([
         "signature": match.signature,
         "model-ac" : match.modelAccession,
+        "source"   : match.source,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
@@ -361,6 +371,7 @@ def writeMobiDBlite(Map match, JsonGenerator jsonWriter) {
     jsonWriter.writeObject([
         "signature": match.signature,
         "model-ac" : match.modelAccession,
+        "source"   : match.source,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
@@ -382,8 +393,9 @@ def writePANTHER(Map match, JsonGenerator jsonWriter) {
         "score"          : match.score,
         "proteinClass"   : match.treegrafter.proteinClass,
         "graftPoint"     : match.treegrafter.graftPoint,
-        "ancestralNode": match.treegrafter.ancestralNodeID,
+        "ancestralNode"  : match.treegrafter.ancestralNodeID,
         "goXRefs"        : match.treegrafter.goXRefs,
+        "source"         : match.source,
         "locations"      : match.locations.collect { loc ->
             [
                 "start"             : loc.start,
@@ -401,12 +413,13 @@ def writePANTHER(Map match, JsonGenerator jsonWriter) {
     ])
 }
 
-def writePirsr(Map match, JsonGenerator jsonWriter) {
+def writePIRSR(Map match, JsonGenerator jsonWriter) {
     jsonWriter.writeObject([
         "signature": match.signature,
         "model-ac" : match.modelAccession,
         "evalue"   : match.evalue,
         "score"    : match.score,
+        "source"   : match.source,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
@@ -421,8 +434,8 @@ def writePirsr(Map match, JsonGenerator jsonWriter) {
                 "location-fragments": formatFragments(loc.fragments),
                 "sites"             : loc.sites.collect { site ->
                     [
-                        "description": site.description,
-                        "numLocations": site.numLocations,
+                        "description"  : site.description,
+                        "numLocations" : site.numLocations,
                         "siteLocations": site.siteLocations.collect { siteLoc ->
                             [
                                 "start"  : siteLoc.start,
@@ -443,6 +456,7 @@ def writePRINTS(Map match, JsonGenerator jsonWriter) {
         "model-ac" : match.modelAccession,
         "evalue"   : match.evalue,
         "graphscan": match.graphscan,
+        "source"   : match.source,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
@@ -461,6 +475,7 @@ def writePROSITEpatterns(Map match, JsonGenerator jsonWriter) {
     jsonWriter.writeObject([
         "signature": match.signature,
         "model-ac" : match.modelAccession,
+        "source"   : match.source,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
@@ -479,6 +494,7 @@ def writePROSITEprofiles(Map match, JsonGenerator jsonWriter) {
     jsonWriter.writeObject([
         "signature": match.signature,
         "model-ac" : match.modelAccession,
+        "source"   : match.source,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
@@ -497,6 +513,7 @@ def writeSignalp(Map match, JsonGenerator jsonWriter) {
     jsonWriter.writeObject([
         "signature": match.signature,
         "model-ac" : match.modelAccession,
+        "source"   : match.source,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
@@ -515,6 +532,7 @@ def writeSFLD(Map match, JsonGenerator jsonWriter) {
         "model-ac" : match.modelAccession,
         "evalue"   : match.evalue,
         "score"    : match.score,
+        "source"   : match.source,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
@@ -551,7 +569,8 @@ def writeSMART(Map match, JsonGenerator jsonWriter) {
         "signature": match.signature,
         "model-ac" : match.modelAccession,
         "evalue"   : match.evalue,
-        "score"     : match.score,
+        "score"    : match.score,
+        "source"   : match.source,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
@@ -574,12 +593,30 @@ def writeSUPERFAMILY(Map match, JsonGenerator jsonWriter) {
         "signature": match.signature,
         "model-ac" : match.modelAccession,
         "evalue"   : match.evalue,
+        "source"   : match.source,
         "locations": match.locations.collect { loc ->
             [
                 "start"             : loc.start,
                 "end"               : loc.end,
                 "representative"    : loc.representative,
                 "hmmLength"         : loc.hmmLength,
+                "location-fragments": formatFragments(loc.fragments)
+            ]
+        }
+    ])
+}
+
+def writeInterProN(Map match, JsonGenerator jsonWriter) {
+    jsonWriter.writeObject([
+        "signature": match.signature,
+        "model-ac" : match.modelAccession,
+        "source"   : match.source,
+        "locations": match.locations.collect { loc ->
+            [
+                "start"             : loc.start,
+                "end"               : loc.end,
+                "score"             : loc.score,
+                "representative"    : loc.representative,
                 "location-fragments": formatFragments(loc.fragments)
             ]
         }
