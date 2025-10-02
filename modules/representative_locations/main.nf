@@ -21,7 +21,12 @@ process REPRESENTATIVE_LOCATIONS {
         // Serialise the matches so we don't need to edit the map manually later
         Map<String, Match> currentMatches = [:]
         matchesInMap.each { String modelAcc, Map matchMap ->
-            currentMatches[modelAcc] = Match.fromMap(matchMap)
+            Match match = Match.fromMap(matchMap)
+
+            if (match.source == "InterPro") {
+                // Only consider matches identified by InterPro, not InterPro-N or other ML tools
+                currentMatches[modelAcc] = Match.fromMap(matchMap)
+            }
         }
 
         // Look for representatives for matches of a specific type, e.g. "Domain":
