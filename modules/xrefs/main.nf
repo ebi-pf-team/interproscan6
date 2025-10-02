@@ -36,6 +36,10 @@ process XREFS {
     matchesFileMap.each { String seqMd5, Map matches ->
         matches.each { modelAcc, matchMap ->
             match = Match.fromMap(matchMap)  // convert Map to Match object
+            if (match.source == "InterPro-N") {) {
+                // InterPro-N match, skip
+                return
+            }
 
             if (entries || entries != null) {
                 String signatureAcc = match.signature.accession
