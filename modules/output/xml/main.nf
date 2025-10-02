@@ -119,81 +119,76 @@ def addProteinNodes (String proteinMd5, Map proteinMatches, def xml, SeqDB db) {
 def addMatchNode(String proteinMd5, Map match, def xml) {
     // Write an individual node representing a match. The structure is dependent on the memberDB.
     String memberDB = match.signature.signatureLibraryRelease.library.toLowerCase() ?: ""
-
-    // Define the name for the match node and it's attributes
-    switch (memberDB) {
-        case "antifam":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "cath-gene3d":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "cath-funfam":
-        case "funfam":  // use groovy case fall to allow multiple options
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "cdd":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "coils":
-            matchNodeAttributes = null
-            break
-        case "hamap":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "mobidb lite":
-        case "mobidb-lite":
-        case "mobidb_lite":  // use groovy case fall to allow multiple options
-            matchNodeAttributes = null
-            break
-        case "ncbifam":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "panther":
-            matchNodeAttributes = fmtPantherMatchNode(match)
-            break
-        case "pfam":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "phobius":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "pirsf":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "pirsr":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "prints":
-            matchNodeAttributes = fmtPrintsMatchNode(match)
-            break
-        case "prosite patterns":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "prosite profiles":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "sfld":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "signalp":
-            matchNodeAttributes =  null
-            break
-        case "smart":
-            matchNodeAttributes = fmtDefaultMatchNode(match)
-            break
-        case "superfamily":
-            matchNodeAttributes = fmtSuperfamilyMatchNode(match)
-            break
-        case "tmhmm":
-        case "deeptmhmm":
-            matchNodeAttributes = null
-            break
-        case "tmbed":
-            matchNodeAttributes = null
-            break
-        default:
-            throw new UnsupportedOperationException("Unknown database '${memberDB}' for query protein with MD5 ${proteinMd5}")
+    def matchNodeAttributes = [source: match.source]
+    if (match.source != "InterPro-N") {
+        switch (memberDB) {
+            case "antifam":
+                matchNodeAttributes = fmtDefaultMatchNode(match)
+                break
+            case "cath-gene3d":
+                matchNodeAttributes = fmtDefaultMatchNode(match)
+                break
+            case "cath-funfam":
+            case "funfam":
+                matchNodeAttributes = fmtDefaultMatchNode(match)
+                break
+            case "cdd":
+                matchNodeAttributes = fmtDefaultMatchNode(match)
+                break
+            case "coils":
+                break
+            case "hamap":
+                matchNodeAttributes = fmtDefaultMatchNode(match)
+                break
+            case "mobidb lite":
+            case "mobidb-lite":
+            case "mobidb_lite":
+                break
+            case "ncbifam":
+                matchNodeAttributes = fmtDefaultMatchNode(match)
+                break
+            case "panther":
+                matchNodeAttributes = fmtPantherMatchNode(match)
+                break
+            case "pfam":
+                matchNodeAttributes = fmtDefaultMatchNode(match)
+                break
+            case "phobius":
+                matchNodeAttributes = fmtDefaultMatchNode(match)
+                break
+            case "pirsf":
+                matchNodeAttributes = fmtDefaultMatchNode(match)
+                break
+            case "pirsr":
+                matchNodeAttributes = fmtDefaultMatchNode(match)
+                break
+            case "prints":
+                matchNodeAttributes = fmtPrintsMatchNode(match)
+                break
+            case "prosite patterns":
+                matchNodeAttributes = fmtDefaultMatchNode(match)
+                break
+            case "prosite profiles":
+                matchNodeAttributes = fmtDefaultMatchNode(match)
+                break
+            case "sfld":
+                matchNodeAttributes = fmtDefaultMatchNode(match)
+                break
+            case "signalp":
+                break
+            case "smart":
+                matchNodeAttributes = fmtDefaultMatchNode(match)
+                break
+            case "superfamily":
+                matchNodeAttributes = fmtSuperfamilyMatchNode(match)
+                break
+            case "tmhmm":
+            case "deeptmhmm":
+            case "tmbed":
+                break
+            default:
+                throw new UnsupportedOperationException("Unknown database '${memberDB}' for query protein with MD5 ${proteinMd5}")
+        }
     }
 
     def signatureNodeAttributes = fmtSignatureNode(match)
@@ -209,7 +204,7 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
             )
         }
 
-        if (memberDB == "panther") {
+        if (match.source == "InterPro" && memberDB == "panther") {
             xml."model-ac"(match.treegrafter.subfamilyAccession ?: match.modelAccession)
             match.treegrafter.goXRefs.each { goXref ->
                 xml."go-xref"(
@@ -267,19 +262,21 @@ def addEntryNode(Map entry, def xml) {
 def fmtDefaultMatchNode(Map match) {
     return [
         evalue : match.evalue,
-        score  : match.score
+        score  : match.score,
+        source : match.source
     ]
 }
 
 def fmtPantherMatchNode(Map match) {
     return [
-        ac                 : match.treegrafter.subfamilyAccession,
-        evalue             : match.evalue,
-        "protein-class"    : match.treegrafter.proteinClass,
-        "graft-point"      : match.treegrafter.graftPoint,
-        "ancestral-node": match.treegrafter.ancestralNodeID,
-        name               : match.signature.name,
-        score              : match.score
+        ac               : match.treegrafter.subfamilyAccession,
+        evalue           : match.evalue,
+        "protein-class"  : match.treegrafter.proteinClass,
+        "graft-point"    : match.treegrafter.graftPoint,
+        "ancestral-node" : match.treegrafter.ancestralNodeID,
+        name             : match.signature.name,
+        score            : match.score,
+        source           : match.source
     ]
 }
 
@@ -287,12 +284,14 @@ def fmtPrintsMatchNode(Map match) {
     return [
         evalue    : match.evalue,
         graphscan : match.graphscan,
+        source    : match.source
     ]
 }
 
 def fmtSuperfamilyMatchNode(Map match) {
     return [
-        evalue : match.evalue
+        evalue : match.evalue,
+        source : match.source
     ]
 }
 
@@ -316,83 +315,92 @@ def addLocationNodes(String memberDB, String proteinMd5, Map match, def xml) {
     xml.locations {
         match.locations.each { loc ->
             def locationAttributes
-            switch (memberDB) {
-                case "antifam":
-                    locationAttributes = fmtDefaultLocationNode(loc)
-                    break
-                case "cath-funfam":
-                case "funfam":
-                    locationAttributes = fmtDefaultLocationNode(loc)
-                    break
-                case "cath-gene3d":
-                case "gene3d":
-                    locationAttributes = fmtDefaultLocationNode(loc)
-                    break
-                case "cdd":
-                    locationAttributes = fmtCddLocationNode(match, loc)
-                    break
-                case "coils":
-                    locationAttributes = fmMinimalistLoctationNode(loc)
-                    break
-                case "deeptmhmm":
-                    locationAttributes = []
-                    break
-                case "hamap":
-                    locationAttributes = fmtMinimalistLocationNode(loc)
-                    break
-                case "mobidb lite":
-                case "mobidb-lite":
-                case "mobidb_lite":
-                    locationAttributes = fmtMobidbLiteLocationNode(loc)
-                    break
-                case "ncbifam":
-                    locationAttributes = fmtDefaultLocationNode(loc)
-                    break
-                case "panther":
-                    locationAttributes = fmtPantherLocationNode(loc)
-                    break
-                case "pfam":
-                    locationAttributes = fmtDefaultLocationNode(loc)
-                    break
-                case "phobius":
-                    locationAttributes = fmtMinimalistLocationNode(loc)
-                    break
-                case "pirsf":
-                    locationAttributes = fmtDefaultLocationNode(loc)
-                    break
-                case "pirsr":
-                    locationAttributes = fmtDefaultNoHbLocationNode(loc)
-                    break
-                case "prints":
-                    locationAttributes = fmtPrintsLocationNode(loc)
-                    break
-                case "prosite patterns":
-                    locationAttributes = fmtPrositePatternsLocationNode(loc)
-                    break
-                case "prosite profiles":
-                    locationAttributes = fmtMinimalistLocationNode(loc)
-                    break
-                case "sfld":
-                    locationAttributes = fmtDefaultNoHbLocationNode(loc)
-                    break
-                case "signalp":
-                    locationAttributes = fmtSignalpLocationNode(loc)
-                    break
-                case "smart":
-                    locationAttributes = fmtSmartLocationNode(loc)
-                    break
-                case "superfamily":
-                    locationAttributes = fmtSuperfamilyLocationNode(loc)
-                    break
-                case "tmhmm":
-                case "deeptmhmm":
-                    locationAttributes = fmMinimalistLoctationNode(loc)
-                    break
-                case "tmbed":
-                    locationAttributes = fmMinimalistLoctationNode(loc)
-                    break
-                default:
-                    throw new UnsupportedOperationException("Unknown database for match ${matchId}")
+            if (match.source == "InterPro-N") {
+                locationAttributes = [
+                    start          : loc.start,
+                    end            : loc.end,
+                    representative : loc.representative,
+                    score          : loc.score
+                ]
+            } else {
+                switch (memberDB) {
+                    case "antifam":
+                        locationAttributes = fmtDefaultLocationNode(loc)
+                        break
+                    case "cath-funfam":
+                    case "funfam":
+                        locationAttributes = fmtDefaultLocationNode(loc)
+                        break
+                    case "cath-gene3d":
+                    case "gene3d":
+                        locationAttributes = fmtDefaultLocationNode(loc)
+                        break
+                    case "cdd":
+                        locationAttributes = fmtCddLocationNode(match, loc)
+                        break
+                    case "coils":
+                        locationAttributes = fmMinimalistLoctationNode(loc)
+                        break
+                    case "deeptmhmm":
+                        locationAttributes = []
+                        break
+                    case "hamap":
+                        locationAttributes = fmtMinimalistLocationNode(loc)
+                        break
+                    case "mobidb lite":
+                    case "mobidb-lite":
+                    case "mobidb_lite":
+                        locationAttributes = fmtMobidbLiteLocationNode(loc)
+                        break
+                    case "ncbifam":
+                        locationAttributes = fmtDefaultLocationNode(loc)
+                        break
+                    case "panther":
+                        locationAttributes = fmtPantherLocationNode(loc)
+                        break
+                    case "pfam":
+                        locationAttributes = fmtDefaultLocationNode(loc)
+                        break
+                    case "phobius":
+                        locationAttributes = fmtMinimalistLocationNode(loc)
+                        break
+                    case "pirsf":
+                        locationAttributes = fmtDefaultLocationNode(loc)
+                        break
+                    case "pirsr":
+                        locationAttributes = fmtDefaultNoHbLocationNode(loc)
+                        break
+                    case "prints":
+                        locationAttributes = fmtPrintsLocationNode(loc)
+                        break
+                    case "prosite patterns":
+                        locationAttributes = fmtPrositePatternsLocationNode(loc)
+                        break
+                    case "prosite profiles":
+                        locationAttributes = fmtMinimalistLocationNode(loc)
+                        break
+                    case "sfld":
+                        locationAttributes = fmtDefaultNoHbLocationNode(loc)
+                        break
+                    case "signalp":
+                        locationAttributes = fmtSignalpLocationNode(loc)
+                        break
+                    case "smart":
+                        locationAttributes = fmtSmartLocationNode(loc)
+                        break
+                    case "superfamily":
+                        locationAttributes = fmtSuperfamilyLocationNode(loc)
+                        break
+                    case "tmhmm":
+                    case "deeptmhmm":
+                        locationAttributes = fmMinimalistLoctationNode(loc)
+                        break
+                    case "tmbed":
+                        locationAttributes = fmMinimalistLoctationNode(loc)
+                        break
+                    default:
+                        throw new UnsupportedOperationException("Unknown database for match ${matchId}")
+                }
             }
 
             xml.location(locationAttributes) {
