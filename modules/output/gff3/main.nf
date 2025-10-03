@@ -120,7 +120,7 @@ def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
     String memberDb = match.signature.signatureLibraryRelease.library
 
     def goTerms = []
-    if(memberDb == "PANTHER" && match.treegrafter.goXRefs){
+    if (memberDb == "PANTHER" && match.treegrafter?.goXRefs){
         goTerms += match.treegrafter.goXRefs
     }
     
@@ -138,7 +138,7 @@ def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
             feature_type = "polypeptide_domain"
             break
         case ["NCBIFAM", "Pfam"]:
-            feature_type = ["DOMAIN", "REPEAT"].contains(match.signature.type.toUpperCase()) ? "polypeptide_domain" : "polypeptide_region"
+            feature_type = ["DOMAIN", "REPEAT"].contains(match.signature.type?.toUpperCase()) ? "polypeptide_domain" : "polypeptide_region"
             break
         case ["PRINTS", "PROSITE patterns"]:
             feature_type = "polypeptide_motif"
@@ -159,9 +159,9 @@ def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
                 match.signature.accession.toUpperCase() == "PERIPLASMIC DOMAIN" ? "non_cytoplasmic_polypeptide_region" : "signal_peptide"
             break
         case "Phobius":
-            feature_type = match.signature.description.toUpperCase() == "CYTOPLASMIC DOMAIN" ? "cytoplasmic_polypeptide_region" :
-                match.signature.description.toUpperCase() == "NON CYTOPLASMIC DOMAIN" ? "non_cytoplasmic_polypeptide_region" :
-                match.signature.description.toUpperCase() == "TRANSMEMBRANE REGION" ? "transmembrane_polypeptide_region" : "signal_peptide"
+            feature_type = match.signature.description?.toUpperCase() == "CYTOPLASMIC DOMAIN" ? "cytoplasmic_polypeptide_region" :
+                match.signature.description?.toUpperCase() == "NON CYTOPLASMIC DOMAIN" ? "non_cytoplasmic_polypeptide_region" :
+                match.signature.description?.toUpperCase() == "TRANSMEMBRANE REGION" ? "transmembrane_polypeptide_region" : "signal_peptide"
             break
         case "TMbed":
             feature_type = match.signature.accession.toUpperCase() == "TMHELIX_IN-TO-OUT" ? "transmembrane_helix" :
@@ -175,18 +175,16 @@ def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
     }
 
     def score = null
-    switch (memberDb) {
-        case ["CDD", "PRINT"]:
-            score = match.evalue
-            break
-        case ["HAMAP", "PROSITE profiles"]:
-            score = loc.score
-            break
-        case ["SignalP-Prok", "SignalP-Euk"]:
-            score = loc.pvalue
-            break
-        default:
-            score = loc.evalue
+    if (match.source == "InterPro-N") {
+        score = loc.score
+    } else if (["CDD", "PRINTS"].contains(memberDb)) {
+        score = match.evalue
+    } else if (["HAMAP", "PROSITE profiles"].contains(memberDb)) {
+        score = loc.score
+    } else if (["SignalP-Prok", "SignalP-Euk"].contains(memberDb)) {
+        score = loc.pvalue
+    } else {
+        score = loc.evalue
     }
 
     String interproAccession = match.signature.entry?.accession
@@ -197,13 +195,13 @@ def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
         parentId ? "Parent=${parentId}" : null,
         interproAccession ? "Dbxref=InterPro:${interproAccession}" : null,
         goTerms ? "Ontology_term=${goTerms.collect{ it.id }.join(',')}" : null,
-        "type=${match.signature.type}",
+        match.signature.type ? "type=${match.signature.type}" : null,
         "representative=${loc.representative}",
     ].findAll { it }
 
     return [
         seqId,
-        memberDb,
+        match.source == "InterPro-N" ? match.source : memberDb,
         feature_type,
         cdsStart ? (loc.start - 1) * 3 + cdsStart : loc.start,
         cdsStart ? loc.end * 3 + cdsStart -1 : loc.end,
