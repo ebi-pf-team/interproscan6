@@ -28,6 +28,10 @@ class InterProScan {
             description: "run available activated machine learning (ML) based applications (e.g. DeepTMHMM, SignalP 6, TMbed). By default, ML analyses are disabled due to their high resource requirements."
         ],
         [
+            name: "use-gpu",
+            description: "use GPU acceleration for applicable applications (e.g. DeepTMHMM, Signalp6, TMbed)."
+        ],
+        [
             name: "formats",
             metavar: "<FORMATS>",
             description: "comma-separated output formats. Available: JSON,TSV,XML,GFF3. Default: JSON,TSV,XML,GFF3."
@@ -360,6 +364,30 @@ class InterProScan {
         }
 
         return [appsToRun.toSet().toList(), null, null]
+    }
+
+    static enableGpuAcceleration(Boolean useGpu, List<String> applications, Map appsConfig) {
+        // return apps_config, warn
+        if (!useGpu) {
+            return [appsConfig, null]
+        }
+
+        // no gpu compatible apps requested
+        def gpuApps = applications.findAll { appName ->
+            appsConfig[appName]?.containsKey('use_gpu')
+        }
+        if (!gpuApps) {
+            return [appsConfig, "'--use-gpu' was specified, but no GPU-compatible applications were requested, so GPU acceleration will not be used."]
+        }
+        
+        // enable gpu for requested apps
+        def updatedAppsConfig = appsConfig.collectEntries { appName, thisAppConfig ->
+            if (gpuApps.contains(appName)) {
+                thisAppConfig.use_gpu = true
+            }
+            return [(appName): thisAppConfig]
+        }
+        return [updatedAppsConfig, null]
     }
 
     static String validateInterProVersion(versionParam) {
