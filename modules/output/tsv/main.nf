@@ -23,11 +23,48 @@ process WRITE_TSV {
         matchesFiles.each { matchFile ->
             Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
             if (nucleic) {
-                nucleicToProteinMd5 = db.groupProteins(proteins)
+                // Collect all protein MD5s
+                def allProteinMd5s = proteins.keySet() as List
+
+                // Retrieve nucleic-protein associations in batches
+                def nucleicToProteinMd5 = [:].withDefault { [] as Set }
+                allProteinMd5s.collate(1000).each { batch ->
+                    def partial = db.groupProteins(batch)
+                    partial.each { ntMd5, protMd5s ->
+                        nucleicToProteinMd5[ntMd5].addAll(protMd5s)
+                    }
+                }
+
+                // Retrieve nucleotide sequences in batches
+                def allNtMd5s = nucleicToProteinMd5.keySet() as List
+                def ntSeqDataMap = [:].withDefault { [] }
+                allNtMd5s.collate(1000).each { batch ->
+                    def partial = db.nucleicMd5ToNucleicSeqs(batch)
+                    ntSeqDataMap.putAll(partial)
+                }
+
+                // Build all (protein, nucleotide) pairs
+                def allPairs = []
+                nucleicToProteinMd5.each { ntMd5, protMd5s ->
+                    protMd5s.each { pMd5 -> allPairs << [pMd5, ntMd5] }
+                }
+
+                // Retrieve ORF data in batches
+                def orfDataMap = [:].withDefault { [:].withDefault { [] } }
+                allPairs.collate(500).each { batch ->
+                    def partial = db.getOrfSeqs(batch)
+                    partial.each { ntMd5, protMap ->
+                        protMap.each { protMd5, dataList ->
+                            orfDataMap[ntMd5][protMd5].addAll(dataList)
+                        }
+                    }
+                }
+
+                // Write TSV output
                 nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
                     if (!seenNucleicMd5s.contains(nucleicMd5)) {
                         seenNucleicMd5s.add(nucleicMd5)
-                        def ntSeqData = db.nucleicMd5ToNucleicSeq(nucleicMd5)
+                        def ntSeqData = ntSeqDataMap[nucleicMd5]
                         ntSeqData.each { seq ->
                             String parentId = seq.id
                             proteinMd5s.each { String proteinMd5 ->
@@ -35,11 +72,11 @@ process WRITE_TSV {
                                 if (proteinMatches == null) return
                                 proteinMatches.each { modelAcc, matchMap ->
                                     def match = Match.fromMap(matchMap)
-                                    def proteinSeqData = db.getOrfSeq(proteinMd5, nucleicMd5)
+                                    def proteinSeqData = orfDataMap[nucleicMd5][proteinMd5]
                                     writeMatch(proteinMd5, parentId, proteinSeqData, match, currentDate, writer)
                                 }
                             }
-                        }   
+                        }
                     }
                 }
             } else {
