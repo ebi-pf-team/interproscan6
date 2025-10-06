@@ -377,7 +377,7 @@ class InterProScan {
             appsConfig[appName]?.containsKey('use_gpu')
         }
         if (!gpuApps) {
-            return [appsConfig, "'--use-gpu' was specified, but no GPU-compatible applications were requested, so GPU acceleration will not be used."]
+            return [appsConfig, "'--use-gpu' was specified but no GPU-compatible applications were requested, so GPU acceleration will not be used."]
         }
         
         // enable gpu for requested apps
