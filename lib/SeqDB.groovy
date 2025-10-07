@@ -340,7 +340,7 @@ class SeqDB {
                     INNER JOIN PROTEIN AS P ON P.md5 = S.md5
                     INNER JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON S.md5 = N2P.protein_md5
                     INNER JOIN NUCLEOTIDE AS N ON N2P.nt_md5 = N.md5
-                    WHERE ${conditions}
+                    WHERE (${conditions})
                       AND P.description LIKE 'source=' || N.id || '%';"""
 
         def result = [:].withDefault { [:].withDefault { [] } }

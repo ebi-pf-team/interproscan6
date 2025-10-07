@@ -45,8 +45,15 @@ process WRITE_TSV {
 
                 // Build all (protein, nucleotide) pairs
                 def allPairs = []
+                def seenPairKeys = new HashSet<String>()
                 nucleicToProteinMd5.each { ntMd5, protMd5s ->
-                    protMd5s.each { pMd5 -> allPairs << [pMd5, ntMd5] }
+                    protMd5s.each { pMd5 ->
+                        def key = "${pMd5}\t${ntMd5}"
+                        if (!seenPairKeys.contains(key)) {
+                            seenPairKeys.add(key)
+                            allPairs << [pMd5, ntMd5]
+                        }
+                    }
                 }
 
                 // Retrieve ORF data in batches
