@@ -357,4 +357,56 @@ class SeqDB {
         return result
     }
 
+    Tuple3<
+        Map<String, Set<String>>, 
+        Map<String, List<Map>>, 
+        Map<String, Map<String, List<Map>>>
+    >  retrieveAllNucleicSequenceData(List<String> proteinMd5s) {
+        if (!proteinMd5s) {
+            return [[:], [:], [:]] as Tuple3
+        }
+
+        // Retrieve nucleic-protein associations in batches
+        def nucleicToProteinMd5 = [:].withDefault { [] as Set }
+        proteinMd5s.collate(1000).each { batch ->
+            def partial = this.groupProteins(batch)
+            partial.each { ntMd5, protMd5s ->
+                nucleicToProteinMd5[ntMd5].addAll(protMd5s)
+            }
+        }
+
+        // Retrieve nucleotide sequences in batches
+        def allNtMd5s = nucleicToProteinMd5.keySet() as List
+        def ntSeqDataMap = [:].withDefault { [] }
+        allNtMd5s.collate(1000).each { batch ->
+            def partial = this.nucleicMd5ToNucleicSeqs(batch)
+            ntSeqDataMap.putAll(partial)
+        }
+
+        // Build all (protein, nucleotide) pairs
+        def seenPairKeys = new HashSet<String>()
+        def allPairs = []
+        nucleicToProteinMd5.each { ntMd5, protMd5s ->
+            protMd5s.each { pMd5 ->
+                def key = "${pMd5}\t${ntMd5}"
+                if (!seenPairKeys.contains(key)) {
+                    seenPairKeys.add(key)
+                    allPairs << [pMd5, ntMd5]
+                }
+            }
+        }
+
+        // Retrieve ORF data in batches
+        def orfDataMap = [:].withDefault { [:].withDefault { [] } }
+        allPairs.collate(500).each { batch ->
+            def partial = this.getOrfSeqs(batch)
+            partial.each { ntMd5, protMap ->
+                protMap.each { protMd5, dataList ->
+                    orfDataMap[ntMd5][protMd5].addAll(dataList)
+                }
+            }
+        }
+
+        return [nucleicToProteinMd5, ntSeqDataMap, orfDataMap] as Tuple3
+    }
 }
