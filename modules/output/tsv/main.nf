@@ -77,9 +77,10 @@ process WRITE_TSV {
                             proteinMd5s.each { String proteinMd5 ->
                                 def proteinMatches = proteins[proteinMd5]
                                 if (proteinMatches == null) return
+
+                                def proteinSeqData = orfDataMap[nucleicMd5][proteinMd5]
                                 proteinMatches.each { modelAcc, matchMap ->
                                     def match = Match.fromMap(matchMap)
-                                    def proteinSeqData = orfDataMap[nucleicMd5][proteinMd5]
                                     writeMatch(proteinMd5, parentId, proteinSeqData, match, currentDate, writer)
                                 }
                             }
