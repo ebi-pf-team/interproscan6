@@ -634,37 +634,9 @@ def writeXref(List seqData, JsonGenerator jsonWriter) {
 }
 
 def streamJson(String filePath, ObjectMapper mapper, boolean jsonlines, Closure closure) {
-    FileWriter fileWriter = null
-    JsonGenerator generator = null
-
-    JsonFactory factory = mapper.getFactory()
-    fileWriter = new FileWriter(new File(filePath))
-    generator = factory.createGenerator(fileWriter)
-    closure.call(generator)  // Call the closure to write key-value pairs
-
-    if (generator != null) {
-            generator.close()
-        }
-
-            if (fileWriter != null) {
-            fileWriter.close()
-        }
-
-    // try {
-    //     JsonFactory factory = mapper.getFactory()
-    //     fileWriter = new FileWriter(new File(filePath))
-    //     generator = factory.createGenerator(fileWriter)
-    //     closure.call(generator)  // Call the closure to write key-value pairs
-    // } catch (IOException e) {
-    //     throw new JsonException("IO error writing file: $filePath\nException: $e\nCause: ${e.getCause()}", e)
-    // } catch (Exception e) {
-    //     throw new Exception("Error occurred when writing Json file $filePath\nException: $e\nCause: ${e.getCause()}", e)
-    // } finally {
-    //     if (generator != null) {
-    //         generator.close()
-    //     }
-    //     if (fileWriter != null) {
-    //         fileWriter.close()
-    //     }
-    // }
+    try (FileWriter fileWriter = new FileWriter(new File(filePath))) {
+        try (JsonGenerator generator = mapper.getFactory().createGenerator(fileWriter)) {
+            closure.call(generator)
+        }    
+    }
 }
