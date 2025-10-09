@@ -267,26 +267,6 @@ class SeqDB {
         return result
     }
 
-    List<String> proteinMd5ToNucleicSeq(String proteinMD5) {
-        def query = """SELECT N.id AS nid, N.description, S.sequence, P.id AS pid
-            FROM NUCLEOTIDE AS N
-            INNER JOIN NUCLEOTIDE_SEQUENCE AS S ON N.md5 = S.md5
-            INNER JOIN PROTEIN_TO_NUCLEOTIDE AS N2P ON N.md5 = N2P.nt_md5
-            INNER JOIN PROTEIN AS P ON N2P.protein_md5 = P.md5
-            WHERE P.md5 = ?;
-            """
-        return this.sql.rows(query, [proteinMD5])
-    }
-
-    List<String> proteinMd5ToProteinSeq(String proteinMD5) {
-        def query = """SELECT P.id, P.description, S.sequence
-            FROM PROTEIN AS P
-            INNER JOIN PROTEIN_SEQUENCE AS S ON P.md5 = S.md5
-            WHERE P.md5 = ?;
-            """
-        return this.sql.rows(query, [proteinMD5])
-    }
-
     Map<String, List<List<Object>>> proteinMd5ToProteinSeqs(List<String> proteinMD5s) {
         def placeholders = proteinMD5s.collect { "?" }.join(", ")
         def query = """SELECT S.md5, P.id, P.description, S.sequence
