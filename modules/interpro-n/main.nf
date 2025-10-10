@@ -257,8 +257,8 @@ process PARSE_INTERPRO_N {
 
             SignatureLibraryRelease library = new SignatureLibraryRelease(sigLib.library, sigLib.version)
             Signature signature = new Signature(accession, library)
-            Match match = new Match(accession)
-            match.signature = signature
+            Match match = new Match(accession, signature)
+            // Override source set in Match constructor
             match.source = "InterPro-N"
 
             rawMatch.locations.each { loc ->
