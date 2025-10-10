@@ -22,6 +22,7 @@ class Match implements Serializable {
     Match(String modelAccession, Signature signature) {
         this.modelAccession = modelAccession
         this.signature = signature
+        this.source = signature.signatureLibraryRelease.library
     }
 
     Match(String modelAccession, Double evalue, String graphscan, Signature signature) {
