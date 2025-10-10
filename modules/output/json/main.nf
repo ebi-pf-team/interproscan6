@@ -39,20 +39,20 @@ process WRITE_JSON {
                         db.retrieveAllNucleicSequenceData(proteins.keySet() as List)
 
                     nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
-                        generator.writeStartObject()
-                        generator.writeStringField("interproscan-version", interproscan_version)
-                        generator.writeStringField("interpro-version", db_releases?.interpro?.version)
-                        generator.writeFieldName("results")
-                        generator.writeStartArray()
                         if (!seenNucleicMd5s.contains(nucleicMd5)) {
+                            generator.writeStartObject()
+                            generator.writeStringField("interproscan-version", interproscan_version)
+                            generator.writeStringField("interpro-version", db_releases?.interpro?.version)
+                            generator.writeFieldName("results")
+                            generator.writeStartArray()
                             def seqData = ntSeqDataMap[nucleicMd5]
                             def protMd5ToOrfs = orfDataMap[nucleicMd5]
                             writeNucleic(nucleicMd5, proteinMd5s, proteins, generator, seqData, protMd5ToOrfs)
+                            generator.writeEndArray()
+                            generator.writeEndObject()
+                            generator.writeRaw('\n')
                             seenNucleicMd5s.add(nucleicMd5)
                         }
-                        generator.writeEndArray()
-                        generator.writeEndObject()
-                        generator.writeRaw('\n')
                     }
                 } else {
                     def allMd5s = proteins.keySet() as List
