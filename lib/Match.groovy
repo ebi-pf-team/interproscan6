@@ -48,8 +48,8 @@ class Match implements Serializable {
         this.modelAccession = modelAccession
         this.evalue = evalue
         this.score = score
-        this.bias = bias
         this.signature = signature
+        this.source = signature.signatureLibraryRelease.library
     }
 
     Match(String modelAccession, Double evalue, Double score, Double bias, Signature signature) {
@@ -71,7 +71,10 @@ class Match implements Serializable {
     }
 
     static Match fromMap(Map data) {
-        Match match = new Match(data.modelAccession, data.evalue, data.score, data.bias)
+        Match match = new Match(data.modelAccession)
+        match.evalue = data.evalue
+        match.score = data.score
+        match.bias = data.bias
         match.signature = Signature.fromMap(data.signature)
         match.included = data.included
         match.locations = data.locations.collect { Location.fromMap(it) }
