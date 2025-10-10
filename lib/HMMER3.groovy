@@ -1,3 +1,5 @@
+import Match
+
 class HMMER3 {
     static parseOutput(String filePath, String memberDb) {
         File file = new File(filePath)
@@ -6,6 +8,8 @@ class HMMER3 {
         Integer queryLength
         String queryAccession
         String targetId
+        SignatureLibraryRelease libraryRelease = new SignatureLibraryRelease(memberDb, null)
+
         def hits = [:].withDefault { [:] }
         file.withReader { reader ->
             while (true) {
@@ -61,9 +65,8 @@ class HMMER3 {
                         Double.parseDouble(fields[0]),
                         Double.parseDouble(fields[1]),
                         Double.parseDouble(fields[2]),
-                        new Signature(queryAccession)
+                        new Signature(queryAccession, libraryRelease)
                     )
-                    match.signature.signatureLibraryRelease.library = memberDb
                     match.included = isIncluded
                     targetId = fields[8].trim()
                     hits[targetId][queryAccession] = match

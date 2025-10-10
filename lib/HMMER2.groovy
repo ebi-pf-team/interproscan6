@@ -1,3 +1,5 @@
+import Match
+
 class HMMER2 {
     static parseOutput(String filePath, Map<String, Integer> hmmLengths, String memberDb) {
         File file = new File(filePath)
