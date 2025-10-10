@@ -37,7 +37,7 @@ process XREFS {
         matches.each { modelAcc, matchMap ->
             Match match = Match.fromMap(matchMap)  // convert Map to Match object
 
-            if (match.source == "InterPro" && entries) {
+            if (match.source != "InterPro-N" && entries) {
                 String signatureAcc = match.signature.accession
                 def signatureInfo = entries[signatureAcc] ?: entries[modelAcc]
 
