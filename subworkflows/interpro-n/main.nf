@@ -2,10 +2,6 @@ include { PREPARE_INTERPRO_N } from  "../../modules/interpro-n"
 include { RUN_INTERPRO_N_CPU } from  "../../modules/interpro-n"
 include { RUN_INTERPRO_N_GPU } from  "../../modules/interpro-n"
 include { PARSE_INTERPRO_N   } from  "../../modules/interpro-n"
-// include { PARSE_SIGNALP as PARSE_SIGNALP_EUK          } from  "../../modules/signalp"
-// include { RUN_SIGNALP_CPU as RUN_SIGNALP_CPU_PROK     } from  "../../modules/signalp"
-// include { RUN_SIGNALP_GPU as RUN_SIGNALP_GPU_PROK     } from  "../../modules/signalp"
-// include { PARSE_SIGNALP as PARSE_SIGNALP_PROK         } from  "../../modules/signalp"
 
 workflow INTERPRO_N {
     take:
