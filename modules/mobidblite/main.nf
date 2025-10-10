@@ -41,9 +41,9 @@ process PARSE_MOBIDBLITE {
         if (matches.containsKey(sequenceId)) {
             match = matches[sequenceId]["mobidb-lite"]
         } else {
-            match = new Match("mobidb-lite")
             SignatureLibraryRelease library = new SignatureLibraryRelease("MobiDB-lite", "4.0")
-            match.signature = new Signature("mobidb-lite", "disorder_prediction", "consensus disorder prediction", library, null)
+            Signature signature = new Signature("mobidb-lite", "disorder_prediction", "consensus disorder prediction", library, null)
+            match = new Match("mobidb-lite", signature)
             matches[sequenceId] = [:]
             matches[sequenceId]["mobidb-lite"] = match
         }
