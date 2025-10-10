@@ -7,7 +7,7 @@ class Match implements Serializable {
     List<Location> locations = []
     boolean included = true  // for HMMER3 matches (inclusion threshold)
     RepresentativeInfo representativeInfo = null
-    String source = "InterPro"
+    String source = null
 
     // PANTHER
     TreeGrafter treegrafter = null
@@ -58,6 +58,7 @@ class Match implements Serializable {
         this.score = score
         this.bias = bias
         this.signature = signature
+        this.source = signature.signatureLibraryRelease.library
     }
 
     void addSite(Site site) {
