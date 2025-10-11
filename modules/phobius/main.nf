@@ -148,9 +148,8 @@ process PARSE_PHOBIUS {
             if (tmpMatches.containsKey(modelAccession)) {
                 match = tmpMatches[modelAccession]
             } else {
-                match = new Match(modelAccession)
-                match.signature = signatures[modelAccession]
-                match.source = "Phobius"
+                Signature signature = signatures[modelAccession]
+                match = new Match(modelAccession, signature)
                 tmpMatches[modelAccession] = match
             }
 
