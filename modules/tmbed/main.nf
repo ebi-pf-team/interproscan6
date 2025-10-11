@@ -84,9 +84,7 @@ process PARSE_TMBED {
                     if (!currentMatch) {  // Start a new match
                         Signature signature = MODEL_TYPES[symbol]
                         currentMatch = hits[seqMd5].computeIfAbsent(signature.accession) {
-                            Match newMatch = new Match(signature.accession)
-                            newMatch.signature = signature
-                            newMatch.source = "TMbed"
+                            Match newMatch = new Match(signature.accession, signature)
                             newMatch
                         }
                         start = position + 1
@@ -95,9 +93,7 @@ process PARSE_TMBED {
                         currentMatch.addLocation(new Location(start, position))
                         Signature signature = MODEL_TYPES[symbol]
                         currentMatch = hits[seqMd5].computeIfAbsent(signature.accession) {
-                            Match newMatch = new Match(signature.accession)
-                            newMatch.signature = signature
-                            newMatch.source = "TMbed"
+                            Match newMatch = new Match(signature.accession, signature)
                             newMatch
                         }
                         start = position + 1

@@ -109,9 +109,7 @@ process PARSE_SIGNALP {
         String spType = matcher.find() ? matcher.group(1) : null
         Signature signature = signatures.get(spType)
         assert signature != null
-        Match match = new Match(modelAcc)    
-        match.signature = signature
-        match.source = "SignalP"
+        Match match = new Match(modelAcc, signature)
         Location location = new Location(start, end)
         location.score = score
         match.addLocation(location)
