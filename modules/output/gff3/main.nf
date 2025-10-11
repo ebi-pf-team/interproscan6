@@ -187,21 +187,30 @@ def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
         score = loc.evalue
     }
 
-    String interproAccession = match.signature.entry?.accession
+    def name
+    def alias = null
+    if (match.signature.name) {
+        name = match.signature.name
+        alias = match.signature.accession
+    } else {
+        name = match.signature.accession
+    }
 
+    String interproAccession = match.signature.entry?.accession
     def attributes = [
-        match.signature.name ? "Name=${match.signature.name}" : null,
-        "Alias=${match.signature.accession}",
+        "Name=${name}",
+        alias ? "Alias=${alias}" : null,
         parentId ? "Parent=${parentId}" : null,
         interproAccession ? "Dbxref=InterPro:${interproAccession}" : null,
-        goTerms ? "Ontology_term=${goTerms.collect{ it.id }.join(',')}" : null,
+        (match.source == "InterPro-N") ? "Dbxref=${memberDb}:${match.signature.accession}" : null,
+        goTerms ? "Ontology_term=${goTerms.collect { it.id }.join(',')}" : null,
         match.signature.type ? "type=${match.signature.type}" : null,
         "representative=${loc.representative}",
     ].findAll { it }
 
     return [
         seqId,
-        match.source == "InterPro-N" ? match.source : memberDb,
+        match.source,
         feature_type,
         cdsStart ? (loc.start - 1) * 3 + cdsStart : loc.start,
         cdsStart ? loc.end * 3 + cdsStart -1 : loc.end,
