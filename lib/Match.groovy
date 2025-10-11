@@ -30,6 +30,7 @@ class Match implements Serializable {
         this.evalue = evalue
         this.graphscan = graphscan
         this.signature = signature
+        this.source = signature.signatureLibraryRelease.library
     }
 
     Match(String modelAccession, Double evalue, Double score) {
