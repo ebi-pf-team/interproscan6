@@ -28,6 +28,7 @@ workflow {
         params.applications,
         params.appsConfig,
         params.runMl,
+        params.useGpu,
         params.datadir,
         params.formats,
         params.outdir,
@@ -42,6 +43,7 @@ workflow {
         workflow.manifest
     )
     fasta_file           = Channel.fromPath(INIT_PIPELINE.out.fasta.val)
+    apps_config          = INIT_PIPELINE.out.apps_config.val
     local_only_apps      = INIT_PIPELINE.out.local_only_apps.val
     matches_api_apps     = INIT_PIPELINE.out.matches_api_apps.val
     api_version          = INIT_PIPELINE.out.api_version.val
@@ -53,7 +55,7 @@ workflow {
     PREPARE_DATABASES(
         local_only_apps,
         matches_api_apps,
-        params.appsConfig,
+        apps_config,
         data_dir,
         interpro_version,
         workflow.manifest.version,
@@ -80,9 +82,8 @@ workflow {
             ch_seqs,
             db_releases,
             local_only_apps,
-            params.appsConfig,
-            data_dir,
-            params.subBatchSize
+            apps_config,
+            data_dir
         )
         match_results = SCAN_SEQUENCES.out
     } else {
@@ -105,18 +106,16 @@ workflow {
             no_matches_fastas,
             db_releases,
             matches_api_apps,
-            params.appsConfig,
-            data_dir,
-            params.subBatchSize
+            apps_config,
+            data_dir
         )
 
         SCAN_LOCALLY(
             ch_seqs,
             db_releases,
             local_only_apps,
-            params.appsConfig,
-            data_dir,
-            params.subBatchSize
+            apps_config,
+            data_dir
         )
 
         def expandedRemainingScan = SCAN_REMAINING.out.flatMap { scan ->
@@ -142,7 +141,7 @@ workflow {
         db_releases,
         params.goterms,
         params.pathways,
-        params.appsConfig.panther.paint,
+        apps_config.panther.paint,
         params.skipInterpro
     )
 

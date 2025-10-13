@@ -34,7 +34,7 @@ process PARSE_PIRSR {
             }
             List<Location> selectedLocations = []
             sortedLocations.each { location ->
-                if (!location.targetAlignment || !location.queryAlignment) {
+                if (!location.included || !location.targetAlignment || !location.queryAlignment) {
                     return
                 }
                 List<Integer> map = mapHMMToSeq(location.hmmStart,

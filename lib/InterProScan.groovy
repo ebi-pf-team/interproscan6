@@ -28,6 +28,10 @@ class InterProScan {
             description: "run available activated machine learning (ML) based applications (e.g. DeepTMHMM, SignalP 6, TMbed). By default, ML analyses are disabled due to their high resource requirements."
         ],
         [
+            name: "use-gpu",
+            description: "use GPU acceleration for applicable applications (e.g. DeepTMHMM, Signalp6, TMbed)."
+        ],
+        [
             name: "formats",
             metavar: "<FORMATS>",
             description: "comma-separated output formats. Available: JSON,TSV,XML,GFF3. Default: JSON,TSV,XML,GFF3."
@@ -335,7 +339,7 @@ class InterProScan {
         }
 
         if (applications) {
-            def userApps = applications.replaceAll("[- ]", "").split(",")*.trim()
+            def userApps = applications.replaceAll("[- ]", "").split(",").collect { it.trim().toLowerCase() }
             def invalidApps = userApps.findAll { appsConfig[allApps[it]].containsKey('enabled') && this.LICENSED_SOFTWARE.contains(it) && !appsConfig[allApps[it]]?.dir }
             if (invalidApps) {
                 def error = "The following applications cannot be run: ${invalidApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses."
@@ -364,6 +368,30 @@ class InterProScan {
         }
 
         return [appsToRun.toSet().toList(), null, null]
+    }
+
+    static enableGpuAcceleration(Boolean useGpu, List<String> applications, Map appsConfig) {
+        // return apps_config, warn
+        if (!useGpu) {
+            return [appsConfig, null]
+        }
+
+        // no gpu compatible apps requested
+        def gpuApps = applications.findAll { appName ->
+            appsConfig[appName]?.containsKey('use_gpu')
+        }
+        if (!gpuApps) {
+            return [appsConfig, "'--use-gpu' was specified but no GPU-compatible applications were requested, so GPU acceleration will not be used."]
+        }
+        
+        // enable gpu for requested apps
+        def updatedAppsConfig = appsConfig.collectEntries { appName, thisAppConfig ->
+            if (gpuApps.contains(appName)) {
+                thisAppConfig.use_gpu = true
+            }
+            return [(appName): thisAppConfig]
+        }
+        return [updatedAppsConfig, null]
     }
 
     static String validateInterProVersion(versionParam) {

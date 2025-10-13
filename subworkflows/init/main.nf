@@ -3,8 +3,9 @@ workflow INIT_PIPELINE {
     take:
     input
     applications
-    apps_config
-    runML
+    applications_config
+    run_ml
+    use_gpu
     datadir
     formats
     outdir
@@ -27,11 +28,17 @@ workflow INIT_PIPELINE {
     }
 
     // Applications validation
-    (apps, error, warn) = InterProScan.validateApplications(applications, skip_applications, apps_config, runML)
+    (apps, error, warn) = InterProScan.validateApplications(applications, skip_applications, applications_config, run_ml)
     if (!apps) {
         log.error error
         exit 1
     } else if (warn) {
+        log.warn warn
+    }
+
+    // Enable gpu acceleration if requested
+    (apps_config, warn) = InterProScan.enableGpuAcceleration(use_gpu, apps, applications_config)
+    if (warn) {
         log.warn warn
     }
 
@@ -100,6 +107,7 @@ workflow INIT_PIPELINE {
 
     emit:
     fasta            // str: path to input fasta file
+    apps_config      // map: updated applications configuration
     local_only_apps  // list: list of application to that are not in the matches API
     matches_api_apps // list: list of applications that are in the matches API
     api_version      // str: version of the matches API
