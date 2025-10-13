@@ -35,29 +35,41 @@ process WRITE_JSON {
                 Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
 
                 if (nucleic) {
-                    nucleicToProteinMd5 = db.groupProteins(proteins)
+                    def (nucleicToProteinMd5, ntSeqDataMap, orfDataMap) = 
+                        db.retrieveAllNucleicSequenceData(proteins.keySet() as List)
+
                     nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
-                        generator.writeStartObject()
-                        generator.writeStringField("interproscan-version", interproscan_version)
-                        generator.writeStringField("interpro-version", db_releases?.interpro?.version)
-                        generator.writeFieldName("results")
-                        generator.writeStartArray()
                         if (!seenNucleicMd5s.contains(nucleicMd5)) {
-                            writeNucleic(nucleicMd5, proteinMd5s, proteins, generator, db)
+                            generator.writeStartObject()
+                            generator.writeStringField("interproscan-version", interproscan_version)
+                            generator.writeStringField("interpro-version", db_releases?.interpro?.version)
+                            generator.writeFieldName("results")
+                            generator.writeStartArray()
+                            def seqData = ntSeqDataMap[nucleicMd5]
+                            def protMd5ToOrfs = orfDataMap[nucleicMd5]
+                            writeNucleic(nucleicMd5, proteinMd5s, proteins, generator, seqData, protMd5ToOrfs)
+                            generator.writeEndArray()
+                            generator.writeEndObject()
+                            generator.writeRaw('\n')
                             seenNucleicMd5s.add(nucleicMd5)
                         }
-                        generator.writeEndArray()
-                        generator.writeEndObject()
-                        generator.writeRaw('\n')
                     }
                 } else {
+                    def allMd5s = proteins.keySet() as List
+                    def md5ToSeqData = [:]
+                    allMd5s.collate(1000).each { batch ->
+                        def result = db.proteinMd5ToProteinSeqs(batch)
+                        md5ToSeqData.putAll(result)
+                    }
+                    
                     proteins.each { String proteinMd5, Map proteinMatches ->
+                        def seqData = md5ToSeqData[proteinMd5]
                         generator.writeStartObject()
                         generator.writeStringField("interproscan-version", interproscan_version)
                         generator.writeStringField("interpro-version", db_releases?.interpro?.version)
                         generator.writeFieldName("results")
                         generator.writeStartArray()
-                        writeProtein(proteinMd5, proteinMatches, generator, db)
+                        writeProtein(proteinMd5, proteinMatches, generator, seqData)
                         generator.writeEndArray()
                         generator.writeEndObject()
                         generator.writeRaw('\n')
@@ -78,16 +90,27 @@ process WRITE_JSON {
             matches_files.each { matchFile ->
                 Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
                 if (nucleic) {  // input was nucleic acid sequence
-                    nucleicToProteinMd5 = db.groupProteins(proteins)
+                    def (nucleicToProteinMd5, ntSeqDataMap, orfDataMap) = 
+                        db.retrieveAllNucleicSequenceData(proteins.keySet() as List)
                     nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
                         if (!seenNucleicMd5s.contains(nucleicMd5)) {
-                            writeNucleic(nucleicMd5, proteinMd5s, proteins, generator, db)
+                            def seqData = ntSeqDataMap[nucleicMd5]
+                            def protMd5ToOrfs = orfDataMap[nucleicMd5]
+                            writeNucleic(nucleicMd5, proteinMd5s, proteins, generator, seqData, protMd5ToOrfs)
                             seenNucleicMd5s.add(nucleicMd5)
                         }
                     }
                 } else {  // input was protein sequences
+                    def allMd5s = proteins.keySet() as List
+                    def md5ToSeqData = [:]
+                    allMd5s.collate(1000).each { batch ->
+                        def result = db.proteinMd5ToProteinSeqs(batch)
+                        md5ToSeqData.putAll(result)
+                    }
+
                     proteins.each { String proteinMd5, Map proteinMatches ->
-                        writeProtein(proteinMd5, proteinMatches, generator, db)
+                        def seqData = md5ToSeqData[proteinMd5]
+                        writeProtein(proteinMd5, proteinMatches, generator, seqData)
                     }
                 }
             }
@@ -97,7 +120,7 @@ process WRITE_JSON {
     }
 }
 
-def writeNucleic(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, JsonGenerator jsonWriter, SeqDB db) {
+def writeNucleic(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, JsonGenerator jsonWriter, List seqData, Map protMd5ToOrfs) {
     /* Write data for an input nucleic acid sequence, and then the matches for its associated ORFs
     {"sequence: nt seq, "md5": nt md5,
     "crossReferences": [{ntSeqData}, {ntSeqData}],
@@ -106,29 +129,28 @@ def writeNucleic(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches,
     jsonWriter.writeStartObject()
 
     // 1. {"sequence": seq, "md5": ntMd5}
-    ntSeqData = db.nucleicMd5ToNucleicSeq(nucleicMd5)
-    String sequence = ntSeqData[0].sequence
+    String sequence = seqData[0].sequence
     jsonWriter.writeStringField("sequence", sequence)
     jsonWriter.writeStringField("md5", nucleicMd5)
 
     // 2. {..., "crossReferences": [{ntSeqXref}, {ntSeqXref}]}
     jsonWriter.writeFieldName("crossReferences")
-    writeXref(ntSeqData, jsonWriter)
+    writeXref(seqData, jsonWriter)
 
     // 3. {..., "openReadingFrames": [{protein}, {protein}]}
     jsonWriter.writeFieldName("openReadingFrames")
-    writeOpenReadingFrames(nucleicMd5, proteinMd5s, proteinMatches, jsonWriter, db)
+    writeOpenReadingFrames(nucleicMd5, proteinMd5s, proteinMatches, jsonWriter, protMd5ToOrfs)
 
     jsonWriter.writeEndObject()
 }
 
-def writeOpenReadingFrames(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, JsonGenerator jsonWriter, SeqDB db){
+def writeOpenReadingFrames(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, JsonGenerator jsonWriter, Map protMd5ToOrfs){
     def SOURCE_NT_PATTERN = Pattern.compile(/^source=[^"]+\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=.*$/)
 
     jsonWriter.writeStartArray()
     proteinMd5s.each { String proteinMd5 ->
         // a proteinSeq/Md5 may be associated with multiple nt md5s/seq, only pull the data where the nt md5/seq is relevant
-        proteinSeqData = db.getOrfSeq(proteinMd5, nucleicMd5)
+        def proteinSeqData = protMd5ToOrfs[proteinMd5]
         proteinSeqData.each { row ->
             def proteinSource = SOURCE_NT_PATTERN.matcher(row.description)
             assert proteinSource.matches()
@@ -137,21 +159,20 @@ def writeOpenReadingFrames(String nucleicMd5, Set<String> proteinMd5s, Map prote
             jsonWriter.writeNumberField("end", proteinSource.group(2) as int)
             jsonWriter.writeStringField("strand", (proteinSource.group(3) as int) < 4 ? "SENSE" : "ANTISENSE")
             jsonWriter.writeFieldName("protein")
-            writeProtein(proteinMd5, proteinMatches[proteinMd5], jsonWriter, db)
+            writeProtein(proteinMd5, proteinMatches[proteinMd5], jsonWriter, proteinSeqData)
             jsonWriter.writeEndObject()
         }
     }
     jsonWriter.writeEndArray()
 }
 
-def writeProtein(String proteinMd5, Map proteinMatches, JsonGenerator jsonWriter, SeqDB db) {
+def writeProtein(String proteinMd5, Map proteinMatches, JsonGenerator jsonWriter, List proteinSeqData) {
     /* Write data for a query protein sequence and its matches:
     { "sequence": sequence, "md5": proteinMd5, "matches": [], "xrefs": []}
     There may be multiple seqIds and desc for the same sequence/md5, use the first entry to get the seq. */
     jsonWriter.writeStartObject()
 
     // 1. {"sequence": seq, "md5": proteinMd5}
-    proteinSeqData = db.proteinMd5ToProteinSeq(proteinMd5)
     String sequence = proteinSeqData[0].sequence
     jsonWriter.writeStringField("sequence", sequence)
     jsonWriter.writeStringField("md5", proteinMd5)
@@ -596,7 +617,7 @@ def formatFragments(fragments) {
     }
 }
 
-def writeXref(seqData, JsonGenerator jsonWriter) {
+def writeXref(List seqData, JsonGenerator jsonWriter) {
     /* "xref"/"crossReferences" : [ {
         "name" : "tr|A0A011PH51|A0A011PH51_9PROT OX=1454000",
         "id" : "tr|A0A011PH51|A0A011PH51_9PROT"
@@ -613,23 +634,9 @@ def writeXref(seqData, JsonGenerator jsonWriter) {
 }
 
 def streamJson(String filePath, ObjectMapper mapper, boolean jsonlines, Closure closure) {
-    FileWriter fileWriter = null
-    JsonGenerator generator = null
-    try {
-        JsonFactory factory = mapper.getFactory()
-        fileWriter = new FileWriter(new File(filePath))
-        generator = factory.createGenerator(fileWriter)
-        closure.call(generator)  // Call the closure to write key-value pairs
-    } catch (IOException e) {
-        throw new JsonException("IO error writing file: $filePath\nException: $e\nCause: ${e.getCause()}", e)
-    } catch (Exception e) {
-        throw new Exception("Error occurred when writing Json file $filePath\nException: $e\nCause: ${e.getCause()}", e)
-    } finally {
-        if (generator != null) {
-            generator.close()
-        }
-        if (fileWriter != null) {
-            fileWriter.close()
-        }
+    try (FileWriter fileWriter = new FileWriter(new File(filePath))) {
+        try (JsonGenerator generator = mapper.getFactory().createGenerator(fileWriter)) {
+            closure.call(generator)
+        }    
     }
 }

@@ -1,7 +1,7 @@
 
 class FastaFile {
     // DNA, RNA, gaps
-    static final String NUCLEIC_ALPHABET = "ACGTUN\\.\\s-"
+    static final String NUCLEIC_ALPHABET = "ACGTURYMKSWHBVDN\\.\\s"
     // 20 standard AAs, Sec, Pyl, any/unknown, Asx, Glx, Xle
     static final String PROTEIN_ALPHABET = "ACDEFGHIKLMNPQRSTVWYUOXBZJ\\s"
 
