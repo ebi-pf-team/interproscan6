@@ -263,6 +263,7 @@ class InterProScan {
         return dirs ? dirs.last().fileName.toString() : null
     }
 
+    // BOOKMARK
     static validateApplications(String applications, String skipApplications, Map appsConfig, Boolean runML) {
         if (applications && skipApplications) {
             return [null, "--applications and --skip-applications are mutually exclusive"]
@@ -304,16 +305,21 @@ class InterProScan {
                 allApps[stdAlias] = label
             }
         }
+        // Note: All licensed software has a dir property in appsConfig
+        // All non-licensed software does not have a dir property
         def appsToRun = applications ? [] : allApps.findAll { it ->
-            if (appsConfig[it.value].containsKey('enabled')) {
-                if (runML) {
-                    if (this.LICENSED_SOFTWARE.contains(it.value)) {
-                        return appsConfig[it.value]?.dir
+            if (this.LICENSED_SOFTWARE.contains(it.value)) {       // Licensed method
+                if (appsConfig[it.value].containsKey('enabled')) { // Licensed ML-method
+                    if (runML || appsConfig[it.value].enabled) {   // Licensed ML is enabled
+                        return appsConfig[it.value]?.dir           // Check dir is set
                     } else {
-                        return true
+                        return false
                     }
+                } else {  // Non-ML licensed method, just check the dir is set
+                    return appsConfig[it.value]?.dir
                 }
-                return appsConfig[it.value]?.enabled
+            } else if (appsConfig[it.value].containsKey('enabled')) { // Non-licensed ML-method
+                return runML || appsConfig[it.value].enabled          // Check ML is enabled
             }
             return true
         }.values().toSet()
@@ -336,7 +342,7 @@ class InterProScan {
 
         if (applications) {
             def userApps = applications.replaceAll("[- ]", "").split(",").collect { it.trim().toLowerCase() }
-            def invalidApps = userApps.findAll { appsConfig[allApps[it]].containsKey('enabled') && this.LICENSED_SOFTWARE.contains(it) && !appsConfig[allApps[it]]?.dir }
+            def invalidApps = userApps.findAll { this.LICENSED_SOFTWARE.contains(it) && !appsConfig[allApps[it]]?.dir }
             if (invalidApps) {
                 def error = "The following applications cannot be run: ${invalidApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses."
                 return [null, error, null]
@@ -349,7 +355,7 @@ class InterProScan {
                 invalidApps = appsConfig.findAll { it.value.containsKey('enabled') && this.LICENSED_SOFTWARE.contains(it.key) && !it.value?.dir }.keySet().toList()
             } else if (skipApplications) { // Subtract skipped ml-based apps
                 invalidApps = appsConfig.findAll { appName, appConfig ->
-                    if (appConfig.containsKey('enabled') && !appConfig?.dir && this.LICENSED_SOFTWARE.contains(appName)) {
+                    if (!appConfig?.dir && this.LICENSED_SOFTWARE.contains(appName)) {
                         def appAliases = allApps.findAll { it.value == appName }.keySet()
                         return !appAliases.any { appsParam.contains(it) }
                     }
