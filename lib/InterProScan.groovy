@@ -265,7 +265,7 @@ class InterProScan {
 
     // BOOKMARK
     static List<String>validateApplications(String applications, String skipApplications, Map appsConfig, Boolean runML) {
-        // Returns a (1) list of applications to run or null, (2) an error message if invalid input or null, and(3) a warning or null
+        // Returns a list of (1) list of applications to run or null, (2) an error message if invalid input or null, and(3) a warning or null
         if (applications && skipApplications) {
             def error = "--applications and --skip-applications are mutually exclusive"
             return [null, error, null]
