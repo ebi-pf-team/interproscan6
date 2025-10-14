@@ -321,7 +321,7 @@ class InterProScan {
             } else if (appsConfig[it.value].containsKey('enabled')) { // Non-licensed ML-method
                 return runML || appsConfig[it.value].enabled          // Check ML is enabled
             }
-            return true
+            return true // Non-licensed non-ML method, always include
         }.values().toSet()
         def applicationsInput = applications ? applications : skipApplications
         def appsParam = applicationsInput.replaceAll("[- ]", "").split(",").collect { it.trim() }.toSet()
