@@ -377,6 +377,7 @@ class InterProScan {
             }
         }
 
+        // Warn the user if any apps specified using --runML are not activated
         if (runML) {
             def unavailableApps = []
 
