@@ -263,7 +263,6 @@ class InterProScan {
         return dirs ? dirs.last().fileName.toString() : null
     }
 
-    // BOOKMARK
     static List<String>validateApplications(String applications, String skipApplications, Map appsConfig, Boolean runML) {
         // Returns a list of (1) list of applications to run or null, (2) an error message if invalid input or null, and(3) a warning or null
         if (applications && skipApplications) {
@@ -291,7 +290,7 @@ class InterProScan {
                     it.value.containsKey('enabled') && this.LICENSED_SOFTWARE.contains(it.key) && !it.value?.dir 
                 }.keySet().toList()
                 if (invalidApps) {
-                    def warn = "The following machine learning-based analyses are unavailable and will be skipped, even though --run-ml was specified: ${invalidApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses."
+                    def warn = "The following machine learning-based analyses are unavailable and will be skipped, even though --run-ml was specified: ${invalidApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses for more information."
                     return [appsToRun, null, warn]
                 }
             }
@@ -369,7 +368,7 @@ class InterProScan {
             }
             if (unavailableApps) {
                 if (error) { error += "\n" }
-                error += "The following applications cannot be run: ${unavailableApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses."
+                error += "The following applications cannot be run: ${unavailableApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses for more information."
             }
 
             if (error) {
@@ -394,7 +393,7 @@ class InterProScan {
             }
 
             if (unavailableApps) {
-                def warn = "The following machine learning-based analyses are unavailable and will be skipped even though --run-ml was specified: ${unavailableApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses."
+                def warn = "The following machine learning-based analyses are unavailable and will be skipped even though --run-ml was specified: ${unavailableApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses for more information."
                 return [appsToRun.toSet().toList(), null, warn]
             }
         }
