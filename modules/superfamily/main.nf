@@ -6,7 +6,7 @@ process SEARCH_SUPERFAMILY {
     label 'tiny', 'dynamic', 'ips6_container'
 
     input:
-    tuple val(meta), path(fasta)
+    tuple val(meta), val(meta2), path(fasta)
     path dirpath
     val hmm
     val selfhits
@@ -15,7 +15,7 @@ process SEARCH_SUPERFAMILY {
     val pdbj95d
 
     output:
-    tuple val(meta), path("superfamily.out")
+    tuple val(meta), val(meta2), path("superfamily.out")
 
     script:
     """
@@ -41,13 +41,13 @@ process PARSE_SUPERFAMILY {
     executor 'local'
 
     input:
-    tuple val(meta), val(superfamily_out)
+    tuple val(meta), val(meta2), val(superfamily_out)
     val dirpath
     val model_tsv
     val hmm
 
     output:
-    tuple val(meta), path("superfamily.json")
+    tuple val(meta), val(meta2), path("superfamily.json")
 
     exec:
     SignatureLibraryRelease library = new SignatureLibraryRelease("SUPERFAMILY", null)

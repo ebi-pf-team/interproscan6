@@ -111,7 +111,7 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("mobidblite")) {
-        MOBIDBLITE(ch_seqs)
+        MOBIDBLITE(ch_seqs, batch_size)
         results = results.mix(MOBIDBLITE.out)
     }
 
@@ -259,7 +259,8 @@ workflow SCAN_SEQUENCES {
             apps_config.superfamily.selfhits,
             apps_config.superfamily.cla,
             apps_config.superfamily.model,
-            apps_config.superfamily.pdbj95d
+            apps_config.superfamily.pdbj95d,
+            batch_size
         )
 
         results = results.mix(SUPERFAMILY.out)

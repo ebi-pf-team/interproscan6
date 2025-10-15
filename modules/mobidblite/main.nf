@@ -4,10 +4,10 @@ process RUN_MOBIDBLITE {
     label 'mini', 'dynamic', 'mobidblite_container'
 
     input:
-    tuple val(meta), path(fasta)
+    tuple val(meta), val(meta2), path(fasta)
 
     output:
-    tuple val(meta), path("output.tsv")
+    tuple val(meta), val(meta2), path("output.tsv")
 
     script:
     """
@@ -21,10 +21,10 @@ process PARSE_MOBIDBLITE {
     executor 'local'
 
     input:
-    tuple val(meta), val(mobidblite_output)
+    tuple val(meta), val(meta2), val(mobidblite_output)
 
     output:
-    tuple val(meta), path("mobidblite.json")
+    tuple val(meta), val(meta2), path("mobidblite.json")
 
     exec:
     def outputFilePath = task.workDir.resolve("mobidblite.json")
