@@ -1,6 +1,27 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
+process SEARCH_PANTHER {
+    label 'mini', 'dynamic', 'ips6_container'
+
+    input:
+    tuple val(meta), path(fasta)
+    path hmmdir
+    val hmmfile
+    val options    // e.g. "-Z 65245 -E 0.001"
+
+    output:
+    tuple val(meta), path("hmmsearch.out")
+
+    script:
+    """
+    hmmsearch \
+        ${options} \
+        --cpu ${task.cpus} \
+        ${hmmdir}/${hmmfile} ${fasta} > hmmsearch.out
+    """
+}
+
 process PREPARE_TREEGRAFTER {
     label    'tiny'
     executor 'local'
@@ -121,12 +142,12 @@ process RUN_TREEGRAFTER {
     label 'small', 'dynamic', 'ips6_container'
     
     input:
-    tuple val(meta), val(sequenceIds), val(familyIds), val(fastas)
+    tuple val(meta), val(meta2), val(sequenceIds), val(familyIds), val(fastas)
     path dir
     val msf
 
     output:
-    tuple val(meta), path("epang.tsv")
+    tuple val(meta), val(meta2), path("epang.tsv")
 
     script:
     def commands = ""

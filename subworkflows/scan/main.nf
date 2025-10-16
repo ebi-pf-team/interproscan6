@@ -130,7 +130,8 @@ workflow SCAN_SEQUENCES {
             ch_seqs,
             db_releases.panther.dirpath,
             apps_config.panther.hmm,
-            apps_config.panther.msf
+            apps_config.panther.msf,
+            batch_size
         )
 
         results = results.mix(PANTHER.out)

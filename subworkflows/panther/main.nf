@@ -7,32 +7,51 @@ workflow PANTHER {
     dir
     hmm
     msf
+    batch_size
     
     main:
+    results = Channel.empty()
+
     SEARCH_PANTHER(
         ch_seqs,
         dir,
         hmm,
         "-Z 65000000 -E 0.001"
     )
-    ch_panther = SEARCH_PANTHER.out
 
     PREPARE_TREEGRAFTER(
-        ch_panther,
+        SEARCH_PANTHER.out,
         dir,
         msf
     )
+
+    PREPARE_TREEGRAFTER.out.fasta
+        .map { meta, sequenceIds, familyIds, fastas ->
+            // Collate into batches of 500
+            def batches = (0..<sequenceIds.size()).collect { i ->
+                [sequenceIds[i], familyIds[i], fastas[i]]
+            }.collate(500)
+            // Return a list of tuples: [meta, [seqIds], [famIds], [fastas]]
+            batches.withIndex().collect { batch, index ->
+                def (seqs, fams, fas) = batch.transpose()
+                tuple(meta, index, seqs, fams, fas)
+            }
+        }
+        .flatten()
+        .set { batched_fasta }
+
+    batched_fasta.view()
 
     RUN_TREEGRAFTER(
-        PREPARE_TREEGRAFTER.out.fasta,
+        batched_fasta,
         dir,
         msf
     )
 
-    ch_panther = PARSE_PANTHER(
+    results = results.mix(PARSE_PANTHER(
         PREPARE_TREEGRAFTER.out.json.join(RUN_TREEGRAFTER.out)
-    )
+    ))
         
     emit:
-    ch_panther
+    results.map { meta, meta2, json -> tuple (meta, json) }
 }
