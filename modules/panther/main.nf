@@ -192,10 +192,10 @@ process PARSE_PANTHER {
     executor 'local'
 
     input:
-    tuple val(meta), val(hmmseach_json), val(epagn_tsv)
+    tuple val(meta), val(meta2), val(hmmseach_json), val(epagn_tsv)
 
     output:
-    tuple val(meta), path("panther.json")
+    tuple val(meta), val(meta2), path("panther.json")
 
     exec:
     File jsonFile = new File(hmmseach_json.toString())
