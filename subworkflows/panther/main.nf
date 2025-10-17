@@ -1,5 +1,4 @@
-include { RUN_HMMER as SEARCH_PANTHER                         } from  "../../modules/hmmer"
-include { PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER } from  "../../modules/panther"
+include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER } from  "../../modules/panther"
 
 workflow PANTHER {
     take:
@@ -12,8 +11,17 @@ workflow PANTHER {
     main:
     results = Channel.empty()
 
+    ch_split = ch_seqs
+        .map { meta, fasta ->
+            fasta
+                .splitFasta( by: batch_size, file: true )
+                .indexed()
+                .collect { index, chunk -> [meta, index, chunk] }
+        }
+        .flatMap()
+
     SEARCH_PANTHER(
-        ch_seqs,
+        ch_split,
         dir,
         hmm,
         "-Z 65000000 -E 0.001"
@@ -25,25 +33,8 @@ workflow PANTHER {
         msf
     )
 
-    PREPARE_TREEGRAFTER.out.fasta
-        .map { meta, sequenceIds, familyIds, fastas ->
-            // Collate into batches of 500
-            def batches = (0..<sequenceIds.size()).collect { i ->
-                [sequenceIds[i], familyIds[i], fastas[i]]
-            }.collate(500)
-            // Return a list of tuples: [meta, [seqIds], [famIds], [fastas]]
-            batches.withIndex().collect { batch, index ->
-                def (seqs, fams, fas) = batch.transpose()
-                tuple(meta, index, seqs, fams, fas)
-            }
-        }
-        .flatten()
-        .set { batched_fasta }
-
-    batched_fasta.view()
-
     RUN_TREEGRAFTER(
-        batched_fasta,
+        PREPARE_TREEGRAFTER.out.fasta,
         dir,
         msf
     )
