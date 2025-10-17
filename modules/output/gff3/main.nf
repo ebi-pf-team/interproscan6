@@ -34,15 +34,16 @@ process WRITE_GFF3 {
                 Map proteins = new ObjectMapper().readValue(matchFile, Map)
 
                 if (nucleic) {
-                    nucleicToProteinMd5 = db.groupProteins(proteins)
+                    def (nucleicToProteinMd5, ntSeqDataMap, orfDataMap) = 
+                        db.retrieveAllNucleicSequenceData(proteins.keySet() as List)
+
                     nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
                         if (seenNucleicMd5s.contains(nucleicMd5)) {
                             return
                         }
                         seenNucleicMd5s.add(nucleicMd5)
 
-                        seqData = db.nucleicMd5ToNucleicSeq(nucleicMd5)
-
+                        def seqData = ntSeqDataMap[nucleicMd5]
                         seqData.each { seq ->
                             String seqId = seq.id
                             String sequence = seq.sequence.trim()
@@ -50,8 +51,7 @@ process WRITE_GFF3 {
                             gff3Writer.writeLine("##sequence-region ${seqId} 1 ${seqLength}")
 
                             proteinMd5s.each { String proteinMd5 ->
-                                // a proteinSeq/Md5 may be associated with multiple nt md5s/seq, only pull the data where the nt md5/seq is relevant
-                                proteinSeqData = db.getOrfSeq(proteinMd5, nucleicMd5)
+                                def proteinSeqData = orfDataMap[nucleicMd5][proteinMd5]
                                 proteinSeqData.each { row ->
                                     def matcher = esl_pattern.matcher(row.description)
                                     assert matcher.matches()
@@ -83,8 +83,15 @@ process WRITE_GFF3 {
                         }
                     }
                 } else {
+                    def allMd5s = proteins.keySet() as List
+                    def md5ToSeqData = [:]
+                    allMd5s.collate(1000).each { batch ->
+                        def result = db.proteinMd5ToProteinSeqs(batch)
+                        md5ToSeqData.putAll(result)
+                    }
+
                     proteins.each { String proteinMd5, Map matchesMap ->
-                        seqData = db.proteinMd5ToProteinSeq(proteinMd5)
+                        def seqData = md5ToSeqData[proteinMd5]
                         String sequence = seqData[0].sequence.trim()
                         int seqLength = sequence.length()
 

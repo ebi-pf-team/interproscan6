@@ -28,16 +28,28 @@ process WRITE_XML {
         matches_files.each { matchFile ->
             Map proteins = new ObjectMapper().readValue(new File(matchFile.toString()), Map)
             if (nucleic) {
-                nucleicToProteinMd5 = db.groupProteins(proteins)
+                def (nucleicToProteinMd5, ntSeqDataMap, orfDataMap) = 
+                    db.retrieveAllNucleicSequenceData(proteins.keySet() as List)
+
                 nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
                     if (!seenNucleicMd5s.contains(nucleicMd5)) {
-                        addNucleotideNode(nucleicMd5, proteinMd5s, proteins, xml, db)
+                        def seqData = ntSeqDataMap[nucleicMd5]
+                        def protMd5ToOrfs = orfDataMap[nucleicMd5]
+                        addNucleotideNode(nucleicMd5, proteinMd5s, proteins, xml, seqData, protMd5ToOrfs)
                         seenNucleicMd5s.add(nucleicMd5)
                     }
                 }
             } else {
+                def allMd5s = proteins.keySet() as List
+                def md5ToSeqData = [:]
+                allMd5s.collate(1000).each { batch ->
+                    def result = db.proteinMd5ToProteinSeqs(batch)
+                    md5ToSeqData.putAll(result)
+                }
+
                 proteins.each { String proteinMd5, Map proteinMatches ->
-                    addProteinNodes(proteinMd5, proteinMatches, xml, db)
+                    def seqData = md5ToSeqData[proteinMd5]
+                    addProteinNodes(proteinMd5, proteinMatches, xml, seqData)
                 }
             }
         }
@@ -46,7 +58,7 @@ process WRITE_XML {
     new File(output_file).text = writer.toString()
 }
 
-def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, def xml, SeqDB db) {
+def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, def xml, List ntSeqData, Map proteinMd5ToOrfs) {
     /* Write data for an input nucleic acid seq, and then the matches for its associated ORFs.
     <nucleotide-sequence>
         <sequence md5="" sequence </sequence>
@@ -62,7 +74,6 @@ def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMat
     def SOURCE_NT_PATTERN = Pattern.compile(/^source=[^"]+\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=.*$/)
 
     // 1. <nt-seq> <sequence md5="" "<seq>" </sequence>
-    ntSeqData = db.nucleicMd5ToNucleicSeq(nucleicMd5)
     String sequence = ntSeqData[0].sequence
     xml."nucleotideNode" {
         xml.sequence(md5: nucleicMd5, sequence)
@@ -73,7 +84,7 @@ def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMat
         // 3. <orf end="", start="", strand="">
         proteinMd5s.each { proteinMd5 ->
             // a proteinSeq MD5 may be associated with multiple nt seqs, only pull the data where the nt md5/seq is relevant
-            proteinSeqData = db.getOrfSeq(proteinMd5, nucleicMd5)
+            def proteinSeqData = proteinMd5ToOrfs[proteinMd5]
             proteinSeqData.each { row ->
                 def proteinSource = SOURCE_NT_PATTERN.matcher(row.description)
                 assert proteinSource.matches()
@@ -83,14 +94,14 @@ def addNucleotideNode(String nucleicMd5, Set<String> proteinMd5s, Map proteinMat
                     strand : proteinSource.group(3) as int < 4 ? "SENSE" : "ANTISENSE"
                 ]) {
                     // 4. <protein> ... <\protein>
-                    addProteinNodes(proteinMd5, proteinMatches[proteinMd5], xml, db)
+                    addProteinNodes(proteinMd5, proteinMatches[proteinMd5], xml, proteinSeqData)
                 }
             }
         }
     }
 }
 
-def addProteinNodes (String proteinMd5, Map proteinMatches, def xml, SeqDB db) {
+def addProteinNodes (String proteinMd5, Map proteinMatches, def xml, List proteinSeqData) {
     /* Write data for a query protein sequence and its matches:
     <protein>
         <sequence md5="" sequence </sequence>
@@ -100,7 +111,6 @@ def addProteinNodes (String proteinMd5, Map proteinMatches, def xml, SeqDB db) {
     There may be multiple seqIds and desc for the same sequence/md5, use the first entry to get the seq. */
     xml.protein {
         // 1. <sequence md5="" sequence </sequence>
-        proteinSeqData = db.proteinMd5ToProteinSeq(proteinMd5)
         String sequence = proteinSeqData[0].sequence
         xml.sequence(md5: proteinMd5, sequence)
 
