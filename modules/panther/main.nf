@@ -5,13 +5,13 @@ process SEARCH_PANTHER {
     label 'mini', 'dynamic', 'ips6_container'
 
     input:
-    tuple val(meta), path(fasta)
+    tuple val(meta), val(meta2), path(fasta)
     path hmmdir
     val hmmfile
     val options    // e.g. "-Z 65245 -E 0.001"
 
     output:
-    tuple val(meta), path("hmmsearch.out")
+    tuple val(meta), val(meta2), path("hmmsearch.out")
 
     script:
     """
@@ -27,13 +27,13 @@ process PREPARE_TREEGRAFTER {
     executor 'local'
 
     input:
-    tuple val(meta), val(hmmseach_out)
+    tuple val(meta), val(meta2), val(hmmseach_out)
     val dir
     val msf
 
     output:
-    tuple val(meta), path("panther.json"),                             emit: json
-    tuple val(meta), val(sequenceIds), val(familyIds), val(fastas),    emit: fasta
+    tuple val(meta), val(meta2), path("panther.json"),                             emit: json
+    tuple val(meta), val(meta2), val(sequenceIds), val(familyIds), val(fastas),    emit: fasta
     
     exec:
     def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString(), "PANTHER")
@@ -192,10 +192,10 @@ process PARSE_PANTHER {
     executor 'local'
 
     input:
-    tuple val(meta), val(meta2), val(hmmseach_json), val(epagn_tsv)
+    tuple val(meta), val(meta2a), val(hmmseach_json), val(meta3b), val(epagn_tsv)
 
     output:
-    tuple val(meta), val(meta2), path("panther.json")
+    tuple val(meta), val(meta2a), path("panther.json")
 
     exec:
     File jsonFile = new File(hmmseach_json.toString())
