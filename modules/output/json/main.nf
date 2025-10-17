@@ -192,14 +192,11 @@ def writeProtein(String proteinMd5, Map proteinMatches, JsonGenerator jsonWriter
 }
 
 def writeMatch(String proteinMd5, Map match, JsonGenerator jsonWriter) {
-    // Write out an individual match to an array of matches. The structure is dependent on the memberDB.
-    if (match.source == "InterPro-N") {
-        writeInterProN(match, jsonWriter)
-        return
-    }
-
-    String memberDB = match.signature.signatureLibraryRelease.library.toLowerCase() ?: ""
-    switch (memberDB) {
+    // Write out an individual match to an array of matches. The structure is dependent on the application.
+    String appl = (match.source == "InterPro-N" ? "InterPro-N" 
+                                                : match.signature.signatureLibraryRelease.library
+                                                ).toLowerCase()
+    switch (appl) {
         case "antifam":
             writeDefault(match, jsonWriter)
             break
@@ -218,6 +215,9 @@ def writeMatch(String proteinMd5, Map match, JsonGenerator jsonWriter) {
             break
         case "hamap":
             writeHAMAP(match, jsonWriter)
+            break
+        case "interpro-n":
+            writeInterProN(match, jsonWriter)
             break
         case "mobidb lite":
         case "mobidb-lite":
@@ -271,7 +271,7 @@ def writeMatch(String proteinMd5, Map match, JsonGenerator jsonWriter) {
             writeMinimalist(match, jsonWriter)
             break
         default:
-            throw new UnsupportedOperationException("Unknown database '${memberDB}' for query protein with MD5 ${proteinMd5}")
+            throw new UnsupportedOperationException("Unknown application '${appl}' for query protein with MD5 ${proteinMd5}")
     }
 }
 

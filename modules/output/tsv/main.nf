@@ -81,7 +81,6 @@ def writeMatch(String proteinMd5, String proteinParentId, List seqData, Match ma
 }
 
 def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location loc, String currentDate) {
-    String memberDb = match.signature.signatureLibraryRelease.library
     String sigDesc = match.signature.description ?: '-'
     String entryAcc = match.signature.entry?.accession ?: '-'
     String entryDesc = match.signature.entry?.description ?: '-'
@@ -91,30 +90,29 @@ def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location
     int end = loc.end
     def scoringValue = "-"
     def pantherGoTerms = []
-    if (match.source == "InterPro-N") {
-        scoringValue = loc.score
-    } else {
-        switch (memberDb) {
-            case ["CDD", "PRINT"]:
-                scoringValue = match.evalue
-                break
-            case ["SignalP-Prok", "SignalP-Euk"]:
-                scoringValue = loc.pvalue
-                break
-            case ["HAMAP", "PROSITE profiles"]:
-                scoringValue = loc.score
-                break
-            case ["COILS", "MobiDB-lite", "Phobius", "PROSITE patterns", "DeepTMHMM", "TMbed"]:
-                scoringValue = "-"
-                break
-            case "PANTHER":
-                pantherGoTerms = match.treegrafter.goXRefs.collect { "${it.id}(PANTHER)" }
-                scoringValue = loc.evalue
-                break
-            default:
-                scoringValue = loc.evalue
-                break
-        }
+    String appl = (match.source == "InterPro-N" ? "InterPro-N" 
+                                                : match.signature.signatureLibraryRelease.library
+                                                ).toLowerCase()
+    switch (appl) {
+        case ["cdd", "prints"]:
+            scoringValue = match.evalue
+            break
+        case ["signalp-prok", "signalp-euk"]:
+            scoringValue = loc.pvalue
+            break
+        case ["hamap", "interpro-n", "prosite profiles"]:
+            scoringValue = loc.score
+            break
+        case ["coils", "mobidb-lite", "phobius", "prosite patterns", "deeptmhmm", "tmbed"]:
+            scoringValue = "-"
+            break
+        case "panther":
+            pantherGoTerms = match.treegrafter.goXRefs.collect { "${it.id}(PANTHER)" }
+            scoringValue = loc.evalue
+            break
+        default:
+            scoringValue = loc.evalue
+            break
     }
 
     goTerms = interproGoTerms.collect { "${it.id}(InterPro)" } + pantherGoTerms
@@ -122,7 +120,7 @@ def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location
         seqId, 
         seqMd5,
         seqLength,
-        memberDb,
+        match.signature.signatureLibraryRelease.library,
         match.signature.accession,
         sigDesc,
         start,
