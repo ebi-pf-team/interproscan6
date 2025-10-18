@@ -5,15 +5,15 @@
                 "0": [
                     [
                         1,
-                        "matches_with_representative.json:md5,40d94c6bc74e52202b783469a881d9c6"
+                        "matches_with_representative.json:md5,1595a6cda9fd55a897c6f0d327efca83"
                     ]
                 ]
             }
         ],
         "meta": {
-            "nf-test": "0.8.4",
-            "nextflow": "24.10.4"
+            "nf-test": "0.9.3",
+            "nextflow": "25.04.7"
         },
-        "timestamp": "2025-05-27T15:54:30.954917"
+        "timestamp": "2025-10-18T11:52:34.988504225"
     }
 }
