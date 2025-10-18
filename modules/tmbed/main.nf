@@ -31,7 +31,7 @@ process PREPARE_TMBED {
 
     writer = openNewFile()
     sequences.each { seq ->
-        if (seqCount >= max_seqs_per_file) {
+        if (max_seqs_per_file > 0 && seqCount >= max_seqs_per_file) {
             writer = openNewFile()
         }
         seq.chunks.eachWithIndex { chunk, idx ->

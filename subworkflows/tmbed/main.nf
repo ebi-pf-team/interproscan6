@@ -14,7 +14,8 @@ workflow TMBED {
         PREPARE_TMBED(
             ch_seqs,
             chunk_size,
-            chunk_overlap
+            chunk_overlap,
+            0
         )
 
         RUN_TMBED_GPU(PREPARE_TMBED.out, batch_size)
