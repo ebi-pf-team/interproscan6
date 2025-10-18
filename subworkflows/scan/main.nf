@@ -263,7 +263,11 @@ workflow SCAN_SEQUENCES {
     if (applications.contains("tmbed")) {
         TMBED(
             ch_seqs,
-            appsConfig.tmbed.use_gpu
+            appsConfig.tmbed.use_gpu,
+            appsConfig.tmbed.chunk_size,
+            appsConfig.tmbed.chunk_overlap,
+            appsConfig.tmbed.smooth_window,
+            appsConfig.tmbed.batch_size
         )
 
         results = results.mix(TMBED.out)
