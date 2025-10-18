@@ -1,0 +1,19 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "interpro-n.json:md5,15ed0cf8677741576cef86e9e415ab2f"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.04.7"
+        },
+        "timestamp": "2025-10-18T01:45:53.706458611"
+    }
+}
