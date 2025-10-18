@@ -34,6 +34,7 @@ process RUN_TMBED_CPU {
 
     input:
     tuple val(meta), path(fasta)
+    val batch_size
 
     output:
     tuple val(meta), path("tmbed.pred")
@@ -54,6 +55,7 @@ process RUN_TMBED_GPU {
 
     input:
     tuple val(meta), path(fasta)
+    val batch_size
 
     output:
     tuple val(meta), path("tmbed.pred")
