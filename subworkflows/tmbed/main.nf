@@ -15,7 +15,7 @@ workflow TMBED {
             ch_seqs,
             chunk_size,
             chunk_overlap,
-            0
+            5000 // max number of sequences per FASTA file
         )
 
         RUN_TMBED_GPU(PREPARE_TMBED.out, batch_size)
@@ -25,7 +25,7 @@ workflow TMBED {
             ch_seqs,
             chunk_size,
             chunk_overlap,
-            100 // max number of sequences per FASTA file
+            100
         )
 
         ch_split = PREPARE_TMBED.out
