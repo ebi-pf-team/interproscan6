@@ -1,7 +1,4 @@
-include { PREPARE_INTERPRO_N } from  "../../modules/interpro-n"
-include { RUN_INTERPRO_N_CPU } from  "../../modules/interpro-n"
-include { RUN_INTERPRO_N_GPU } from  "../../modules/interpro-n"
-include { PARSE_INTERPRO_N   } from  "../../modules/interpro-n"
+include { PREPARE_INTERPRO_N; RUN_INTERPRO_N_CPU; RUN_INTERPRO_N_GPU; PARSE_INTERPRO_N } from  "../../modules/interpro-n"
 
 workflow INTERPRO_N {
     take:
