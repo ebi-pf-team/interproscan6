@@ -124,7 +124,7 @@ class FastaFile {
             if (!line) return
             if (line.startsWith(">")) {
                 if (identifier) {
-                    sequences << [id: identifier, seq: sequence.toString()]
+                    sequences << [id: identifier, sequence: sequence.toString()]
                 }
                 identifier = line.substring(1).trim()
                 sequence.setLength(0)
@@ -141,7 +141,7 @@ class FastaFile {
         sequences.each { it ->
             def seqLength = it.sequence.length()
 
-            if (seqLength <= chunkSize) {
+            if (chunkSize <= 0 || seqLength <= chunkSize) {
                 result << [id: it.id, chunks: [it.sequence]]
                 return
             }
