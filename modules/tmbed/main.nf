@@ -10,23 +10,38 @@ process PREPARE_TMBED {
     tuple val(meta), val(fasta)
     val chunk_size
     val chunk_overlap
+    val max_seqs_per_file
 
     output:
-    tuple val(meta), path("tmbed.fasta")
+    tuple val(meta), path("tmbed_*.fasta", arity: '1..*')
 
     exec:
     def sequences = FastaFile.chunkSequences(fasta.toString(), chunk_size, chunk_overlap)
-    def outputFilePath = task.workDir.resolve("tmbed.fasta")
-    new File(outputFilePath.toString()).withWriter("UTF-8") { writer ->
-        sequences.each { seq ->
-            seq.chunks.eachWithIndex { chunk, idx ->
-                writer.writeLine(">${seq.id}_${idx + 1}")
-                chunk.eachMatch(/.{1,60}/) { 
-                    writer.writeLine(it) 
-                }
-            }
+    def fileIndex = 1
+    def seqCount = 0
+    def writer = null
+    def openNewFile = {
+        if (writer) writer.close()
+        def filePath = task.workDir.resolve("tmbed_${fileIndex}.fasta").toFile()
+        writer = filePath.newWriter("UTF-8")
+        fileIndex++
+        seqCount = 0
+        return writer
+    }
+
+    writer = openNewFile()
+    sequences.each { seq ->
+        if (seqCount >= max_seqs_per_file) {
+            writer = openNewFile()
+        }
+        seq.chunks.eachWithIndex { chunk, idx ->
+            writer.writeLine(">${seq.id}_${idx + 1}")
+            chunk.eachMatch(/.{1,60}/) { writer.writeLine(it) }
+            seqCount++
         }
     }
+
+    if (writer) writer.close()
 }
 
 process RUN_TMBED_CPU {

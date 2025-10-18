@@ -20,16 +20,21 @@ workflow TMBED {
         RUN_TMBED_GPU(PREPARE_TMBED.out, batch_size)
         ch_tmbed = RUN_TMBED_GPU.out
     } else {
-        ch_split = ch_seqs
-            .splitFasta( by: 100, file: true )
-
         PREPARE_TMBED(
-            ch_split,
+            ch_seqs,
             chunk_size,
-            chunk_overlap
+            chunk_overlap,
+            100 // max number of sequences per FASTA file
         )
 
-        RUN_TMBED_CPU(PREPARE_TMBED.out, batch_size)
+        ch_split = PREPARE_TMBED.out
+            .flatMap { meta, files ->
+                files.collect { f -> tuple(meta, f) }
+            }
+
+        ch_split.view()
+
+        RUN_TMBED_CPU(ch_split, batch_size)
         ch_tmbed = RUN_TMBED_CPU.out
     }
 
