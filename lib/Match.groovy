@@ -1,5 +1,4 @@
-import GoXRefs
-import PathwayXRefs
+import Entry
 import Signature
 
 class Match implements Serializable {
