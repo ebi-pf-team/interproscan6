@@ -32,8 +32,6 @@ workflow TMBED {
                 files.collect { f -> tuple(meta, f) }
             }
 
-        ch_split.view()
-
         RUN_TMBED_CPU(ch_split, batch_size)
         ch_tmbed = RUN_TMBED_CPU.out
     }
