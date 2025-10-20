@@ -9,10 +9,21 @@ workflow SUPERFAMILY {
     cla
     model
     pdbj95d
+    batch_size
 
     main:
+    results = Channel.empty()
+    ch_split = ch_seqs
+        .map { meta, fasta ->
+            fasta
+                .splitFasta( by: batch_size, file: true )
+                .indexed()
+                .collect { index, chunk -> [meta, index, chunk] }
+        }
+        .flatMap()
+
     SEARCH_SUPERFAMILY(
-        ch_seqs,
+        ch_split,
         dirpath,
         hmm,
         selfhits,
@@ -21,13 +32,13 @@ workflow SUPERFAMILY {
         pdbj95d
     )
 
-    ch_superfams = PARSE_SUPERFAMILY(
+    results = results.mix(PARSE_SUPERFAMILY(
         SEARCH_SUPERFAMILY.out,
         dirpath,
         model,
         hmm
-    )
+    ))
 
     emit:
-    ch_superfams
+    results.map { meta, meta2, json -> tuple (meta, json) }
 }
