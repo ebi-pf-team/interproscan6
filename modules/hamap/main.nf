@@ -3,7 +3,7 @@ import groovy.json.JsonOutput
 import Match
 
 process PREPROCESS_HAMAP {
-    label 'mini', 'dynamic', 'ips6_container'
+    label 'tiny', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
