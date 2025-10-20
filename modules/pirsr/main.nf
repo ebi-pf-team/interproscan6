@@ -3,7 +3,7 @@ import groovy.json.JsonSlurper
 import java.util.regex.Pattern
 
 process PARSE_PIRSR {
-    label    'tiny'
+    label    'small'
     executor 'local'
 
     input:
