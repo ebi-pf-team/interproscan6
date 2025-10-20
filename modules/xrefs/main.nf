@@ -18,7 +18,7 @@ process XREFS {
 
     exec:
     def (databaseInfo, entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null, null]
-    if (db_releases.interpro.dirpath != null) {
+    if (db_releases?.interpro?.dirpath != null) {
         String interproDir = db_releases.interpro.dirpath.toString()
         String databasesPath = "${interproDir}/databases.json"
         File databasesJson = new File(databasesPath)
@@ -35,9 +35,9 @@ process XREFS {
     def matchesFileMap = new ObjectMapper().readValue(new File(matches_path.toString()), Map.class)
     matchesFileMap.each { String seqMd5, Map matches ->
         matches.each { modelAcc, matchMap ->
-            match = Match.fromMap(matchMap)  // convert Map to Match object
+            Match match = Match.fromMap(matchMap)  // convert Map to Match object
 
-            if (entries || entries != null) {
+            if (match.source != "InterPro-N" && entries) {
                 String signatureAcc = match.signature.accession
                 def signatureInfo = entries[signatureAcc] ?: entries[modelAcc]
 

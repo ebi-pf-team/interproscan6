@@ -108,14 +108,14 @@ class CATH {
                 if (sequenceDomains.containsKey(domId)) {
                     sequenceDomains[domId].addLocation(location)
                 } else {
+                    Signature sig = new Signature(cathDomain.accession, new SignatureLibraryRelease(memberDb, null))
                     Match domain = new Match(
                         domId, 
                         hmmerDomain.evalue,
                         hmmerDomain.score, 
-                        hmmerDomain.bias
+                        hmmerDomain.bias,
+                        sig
                     )
-                    domain.signature = new Signature(cathDomain.accession)
-                    domain.signature.signatureLibraryRelease.library = memberDb
                     domain.addLocation(location)
                     sequenceDomains[domId] = domain
                 }

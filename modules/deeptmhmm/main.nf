@@ -81,8 +81,7 @@ process PARSE_DEEPTMHMM {
             hits.computeIfAbsent(seqId) { [:] }
             (modelAcc, modelSig) = MODEL_TYPES[lineData[1]]
             hits[seqId].computeIfAbsent(modelAcc) {
-                Match match = new Match(modelAcc)
-                match.signature = modelSig
+                Match match = new Match(modelAcc, modelSig)
                 match
             }
             int start = lineData[2].toInteger()

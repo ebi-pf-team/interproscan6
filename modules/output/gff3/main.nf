@@ -127,7 +127,7 @@ def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
     String memberDb = match.signature.signatureLibraryRelease.library
 
     def goTerms = []
-    if(memberDb == "PANTHER" && match.treegrafter.goXRefs){
+    if (memberDb == "PANTHER" && match.treegrafter?.goXRefs){
         goTerms += match.treegrafter.goXRefs
     }
     
@@ -145,7 +145,7 @@ def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
             feature_type = "polypeptide_domain"
             break
         case ["NCBIFAM", "Pfam"]:
-            feature_type = ["DOMAIN", "REPEAT"].contains(match.signature.type.toUpperCase()) ? "polypeptide_domain" : "polypeptide_region"
+            feature_type = ["DOMAIN", "REPEAT"].contains(match.signature.type?.toUpperCase()) ? "polypeptide_domain" : "polypeptide_region"
             break
         case ["PRINTS", "PROSITE patterns"]:
             feature_type = "polypeptide_motif"
@@ -182,35 +182,42 @@ def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
     }
 
     def score = null
-    switch (memberDb) {
-        case ["CDD", "PRINT"]:
-            score = match.evalue
-            break
-        case ["HAMAP", "PROSITE profiles"]:
-            score = loc.score
-            break
-        case ["SignalP-Prok", "SignalP-Euk"]:
-            score = loc.pvalue
-            break
-        default:
-            score = loc.evalue
+    if (match.source == "InterPro-N") {
+        score = loc.score
+    } else if (["CDD", "PRINTS"].contains(memberDb)) {
+        score = match.evalue
+    } else if (["HAMAP", "PROSITE profiles"].contains(memberDb)) {
+        score = loc.score
+    } else if (["SignalP-Prok", "SignalP-Euk"].contains(memberDb)) {
+        score = loc.pvalue
+    } else {
+        score = loc.evalue
+    }
+
+    def name
+    def alias = null
+    if (match.signature.name) {
+        name = match.signature.name
+        alias = match.signature.accession
+    } else {
+        name = match.signature.accession
     }
 
     String interproAccession = match.signature.entry?.accession
-
     def attributes = [
-        match.signature.name ? "Name=${match.signature.name}" : null,
-        "Alias=${match.signature.accession}",
+        "Name=${name}",
+        alias ? "Alias=${alias}" : null,
         parentId ? "Parent=${parentId}" : null,
         interproAccession ? "Dbxref=InterPro:${interproAccession}" : null,
-        goTerms ? "Ontology_term=${goTerms.collect{ it.id }.join(',')}" : null,
-        "type=${match.signature.type}",
+        (match.source == "InterPro-N") ? "Dbxref=${memberDb}:${match.signature.accession}" : null,
+        goTerms ? "Ontology_term=${goTerms.collect { it.id }.join(',')}" : null,
+        match.signature.type ? "type=${match.signature.type}" : null,
         "representative=${loc.representative}",
     ].findAll { it }
 
     return [
         seqId,
-        memberDb,
+        match.source,
         feature_type,
         cdsStart ? (loc.start - 1) * 3 + cdsStart : loc.start,
         cdsStart ? loc.end * 3 + cdsStart -1 : loc.end,

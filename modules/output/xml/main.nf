@@ -127,11 +127,12 @@ def addProteinNodes (String proteinMd5, Map proteinMatches, def xml, List protei
 }
 
 def addMatchNode(String proteinMd5, Map match, def xml) {
-    // Write an individual node representing a match. The structure is dependent on the memberDB.
-    String memberDB = match.signature.signatureLibraryRelease.library.toLowerCase() ?: ""
-
-    // Define the name for the match node and it's attributes
-    switch (memberDB) {
+    // Write an individual node representing a match. The structure is dependent on the application.
+    String appl = (match.source == "InterPro-N" ? "InterPro-N" 
+                                                : match.signature.signatureLibraryRelease.library
+                                                ).toLowerCase()
+    def matchNodeAttributes = [source: match.source]
+    switch (appl) {
         case "antifam":
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
@@ -139,22 +140,23 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "cath-funfam":
-        case "funfam":  // use groovy case fall to allow multiple options
+        case "funfam":
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "cdd":
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "coils":
-            matchNodeAttributes = null
             break
         case "hamap":
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
+        case "interpro-n":
+            // No specific attributes for InterPro-N matches
+            break
         case "mobidb lite":
         case "mobidb-lite":
-        case "mobidb_lite":  // use groovy case fall to allow multiple options
-            matchNodeAttributes = null
+        case "mobidb_lite":
             break
         case "ncbifam":
             matchNodeAttributes = fmtDefaultMatchNode(match)
@@ -187,7 +189,6 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
             matchNodeAttributes = fmtDefaultMatchNode(match)
             break
         case "signalp":
-            matchNodeAttributes =  null
             break
         case "smart":
             matchNodeAttributes = fmtDefaultMatchNode(match)
@@ -197,13 +198,10 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
             break
         case "tmhmm":
         case "deeptmhmm":
-            matchNodeAttributes = null
-            break
         case "tmbed":
-            matchNodeAttributes = null
             break
         default:
-            throw new UnsupportedOperationException("Unknown database '${memberDB}' for query protein with MD5 ${proteinMd5}")
+            throw new UnsupportedOperationException("Unknown application '${appl}' for query protein with MD5 ${proteinMd5}")
     }
 
     def signatureNodeAttributes = fmtSignatureNode(match)
@@ -219,7 +217,7 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
             )
         }
 
-        if (memberDB == "panther") {
+        if (match.source != "InterPro-N" && appl == "panther") {
             xml."model-ac"(match.treegrafter.subfamilyAccession ?: match.modelAccession)
             match.treegrafter.goXRefs.each { goXref ->
                 xml."go-xref"(
@@ -233,7 +231,7 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
             xml."model-ac"(match.modelAccession)
         }
 
-        addLocationNodes(memberDB, proteinMd5, match, xml)
+        addLocationNodes(appl, proteinMd5, match, xml)
     }
 }
 
@@ -277,19 +275,21 @@ def addEntryNode(Map entry, def xml) {
 def fmtDefaultMatchNode(Map match) {
     return [
         evalue : match.evalue,
-        score  : match.score
+        score  : match.score,
+        source : match.source
     ]
 }
 
 def fmtPantherMatchNode(Map match) {
     return [
-        ac                 : match.treegrafter.subfamilyAccession,
-        evalue             : match.evalue,
-        "protein-class"    : match.treegrafter.proteinClass,
-        "graft-point"      : match.treegrafter.graftPoint,
-        "ancestral-node": match.treegrafter.ancestralNodeID,
-        name               : match.signature.name,
-        score              : match.score
+        ac               : match.treegrafter.subfamilyAccession,
+        evalue           : match.evalue,
+        "protein-class"  : match.treegrafter.proteinClass,
+        "graft-point"    : match.treegrafter.graftPoint,
+        "ancestral-node" : match.treegrafter.ancestralNodeID,
+        name             : match.signature.name,
+        score            : match.score,
+        source           : match.source
     ]
 }
 
@@ -297,12 +297,14 @@ def fmtPrintsMatchNode(Map match) {
     return [
         evalue    : match.evalue,
         graphscan : match.graphscan,
+        source    : match.source
     ]
 }
 
 def fmtSuperfamilyMatchNode(Map match) {
     return [
-        evalue : match.evalue
+        evalue : match.evalue,
+        source : match.source
     ]
 }
 
@@ -322,11 +324,11 @@ def fmtSignatureNode(Map match) {
 
 // Formating and add Location nodes
 
-def addLocationNodes(String memberDB, String proteinMd5, Map match, def xml) {
+def addLocationNodes(String appl, String proteinMd5, Map match, def xml) {
     xml.locations {
         match.locations.each { loc ->
             def locationAttributes
-            switch (memberDB) {
+            switch (appl) {
                 case "antifam":
                     locationAttributes = fmtDefaultLocationNode(loc)
                     break
@@ -342,13 +344,16 @@ def addLocationNodes(String memberDB, String proteinMd5, Map match, def xml) {
                     locationAttributes = fmtCddLocationNode(match, loc)
                     break
                 case "coils":
-                    locationAttributes = fmMinimalistLoctationNode(loc)
+                    locationAttributes = fmMinimalistLocationNode(loc)
                     break
                 case "deeptmhmm":
                     locationAttributes = []
                     break
                 case "hamap":
-                    locationAttributes = fmtMinimalistLocationNode(loc)
+                    locationAttributes = fmtMinimalistLocationWithScoreNode(loc)
+                    break
+                case "interpro-n":
+                    locationAttributes = fmtMinimalistLocationWithScoreNode(loc)
                     break
                 case "mobidb lite":
                 case "mobidb-lite":
@@ -365,7 +370,7 @@ def addLocationNodes(String memberDB, String proteinMd5, Map match, def xml) {
                     locationAttributes = fmtDefaultLocationNode(loc)
                     break
                 case "phobius":
-                    locationAttributes = fmtMinimalistLocationNode(loc)
+                    locationAttributes = fmtMinimalistLocationWithScoreNode(loc)
                     break
                 case "pirsf":
                     locationAttributes = fmtDefaultLocationNode(loc)
@@ -380,7 +385,7 @@ def addLocationNodes(String memberDB, String proteinMd5, Map match, def xml) {
                     locationAttributes = fmtPrositePatternsLocationNode(loc)
                     break
                 case "prosite profiles":
-                    locationAttributes = fmtMinimalistLocationNode(loc)
+                    locationAttributes = fmtMinimalistLocationWithScoreNode(loc)
                     break
                 case "sfld":
                     locationAttributes = fmtDefaultNoHbLocationNode(loc)
@@ -396,10 +401,10 @@ def addLocationNodes(String memberDB, String proteinMd5, Map match, def xml) {
                     break
                 case "tmhmm":
                 case "deeptmhmm":
-                    locationAttributes = fmMinimalistLoctationNode(loc)
+                    locationAttributes = fmMinimalistLocationNode(loc)
                     break
                 case "tmbed":
-                    locationAttributes = fmMinimalistLoctationNode(loc)
+                    locationAttributes = fmMinimalistLocationNode(loc)
                     break
                 default:
                     throw new UnsupportedOperationException("Unknown database for match ${matchId}")
@@ -417,12 +422,12 @@ def addLocationNodes(String memberDB, String proteinMd5, Map match, def xml) {
                         }
                     }
                 }
-                if (memberDB in ["hamap", "prosite patterns", "prosite profiles"]) {
+                if (appl in ["hamap", "prosite patterns", "prosite profiles"]) {
                     xml.alignment(loc.targetAlignment ?: "")
                     xml."cigar-alignment"(loc.cigarAlignment ?: "")
                 }
                 if (loc.containsKey("sites") && loc.sites.size() > 0) {
-                    addSiteNodes(loc.sites, memberDB, xml)
+                    addSiteNodes(loc.sites, xml)
                 }
             }
         }
@@ -462,7 +467,7 @@ def fmtDefaultNoHbLocationNode(Map loc) {
     ]
 }
 
-def fmtMinimalistLocationNode(Map loc) {
+def fmtMinimalistLocationWithScoreNode(Map loc) {
     return [
         start          : loc.start,
         end            : loc.end,
@@ -481,7 +486,7 @@ def fmtCddLocationNode(Map match, Map loc) {
     ]
 }
 
-def fmMinimalistLoctationNode(Map loc) {
+def fmMinimalistLocationNode(Map loc) {
     return [
         start          : loc.start,
         end            : loc.end,
@@ -567,7 +572,7 @@ def fmtSuperfamilyLocationNode(Map loc) {
 
 // add site nodes
 
-def addSiteNodes(locationSites, memberDB, xml) {
+def addSiteNodes(locationSites, xml) {
     xml."sites" {
         locationSites.each { siteMap ->
             xml."site"(description: siteMap.description, numLocations: siteMap.numLocations) {

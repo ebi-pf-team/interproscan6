@@ -124,7 +124,7 @@ class InterProScan {
 
     static final def VALID_FORMATS = ["JSON", "JSONL", "TSV", "XML", "GFF3"]
 
-    static final def LICENSED_SOFTWARE = ["phobius", "signalp_euk", "signalp_prok", "deeptmhmm"]
+    static final def LICENSED_SOFTWARE = ["interpro_n", "phobius", "signalp_euk", "signalp_prok", "deeptmhmm"]
 
     static final def DATA_TYPE = [
             "FILE": ["cla", "clan", "dat", "disc_regs", "evaluator", "hierarchy", "hmm", "hmmbin",

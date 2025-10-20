@@ -81,7 +81,6 @@ def writeMatch(String proteinMd5, String proteinParentId, List seqData, Match ma
 }
 
 def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location loc, String currentDate) {
-    String memberDb = match.signature.signatureLibraryRelease.library
     String sigDesc = match.signature.description ?: '-'
     String entryAcc = match.signature.entry?.accession ?: '-'
     String entryDesc = match.signature.entry?.description ?: '-'
@@ -91,20 +90,23 @@ def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location
     int end = loc.end
     def scoringValue = "-"
     def pantherGoTerms = []
-    switch (memberDb) {
-        case ["CDD", "PRINT"]:
+    String appl = (match.source == "InterPro-N" ? "InterPro-N" 
+                                                : match.signature.signatureLibraryRelease.library
+                                                ).toLowerCase()
+    switch (appl) {
+        case ["cdd", "prints"]:
             scoringValue = match.evalue
             break
-        case ["SignalP-Prok", "SignalP-Euk"]:
+        case ["signalp-prok", "signalp-euk"]:
             scoringValue = loc.pvalue
             break
-        case ["HAMAP", "PROSITE profiles"]:
+        case ["hamap", "interpro-n", "prosite profiles"]:
             scoringValue = loc.score
             break
-        case ["COILS", "MobiDB-lite", "Phobius", "PROSITE patterns", "DeepTMHMM", "TMbed"]:
+        case ["coils", "mobidb-lite", "phobius", "prosite patterns", "deeptmhmm", "tmbed"]:
             scoringValue = "-"
             break
-        case "PANTHER":
+        case "panther":
             pantherGoTerms = match.treegrafter.goXRefs.collect { "${it.id}(PANTHER)" }
             scoringValue = loc.evalue
             break
@@ -118,13 +120,13 @@ def formatLine(String seqId, String seqMd5, int seqLength, Match match, Location
         seqId, 
         seqMd5,
         seqLength,
-        memberDb,
+        match.signature.signatureLibraryRelease.library,
         match.signature.accession,
         sigDesc,
         start,
         end,
         scoringValue,
-        "T",
+        match.source,
         currentDate,
         entryAcc,
         entryDesc,

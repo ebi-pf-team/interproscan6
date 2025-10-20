@@ -18,7 +18,7 @@ process REPRESENTATIVE_LOCATIONS {
 
     def matchesMap = new ObjectMapper().readValue(new File(matches_path.toString()), Map)
     matchesMap.each { String md5, Map matchesInMap ->
-        // Serialise the matches so we don't need to edit the map manually later
+        // Deserialise all matches
         Map<String, Match> currentMatches = [:]
         matchesInMap.each { String modelAcc, Map matchMap ->
             currentMatches[modelAcc] = Match.fromMap(matchMap)
@@ -125,7 +125,7 @@ process REPRESENTATIVE_LOCATIONS {
 List<CandidateLocation> getCandidateLocations(Map matches, String reprType) {
     List<CandidateLocation> candidateLocations = []
     matches.each { String modelAccession, Match match ->
-        if (match.representativeInfo?.type == reprType) {
+        if (match.source != "InterPro-N" && match.representativeInfo?.type == reprType) {
             match.locations.each { Location loc ->
                 CandidateLocation candidate = new CandidateLocation(loc, match.representativeInfo.rank)
                 candidateLocations.add(candidate)
