@@ -31,11 +31,15 @@ process PREPARE_SMART {
     val chunk_size
 
     output:
-    tuple val(meta), path("chunk_*.fasta"), val(smarts)
+    tuple val(meta), path(fastaFiles), val(smarts)
 
     exec:
-    // Extract model accessions against which at least one sequence match was found
+    /* Only run seqs against a HMMER2 model where a HMMER3 match was found.
+        Return tuple val(meta), val(fastaFiles), val(smarts) where the Nth item of
+        fastaFiles corresponds to the sequences to scan against the Nth element of smarts. */
     def matches = HMMER3.parseOutput(hmmseach_out.toString(), "SMART")
+
+    // Extract model accessions against which at least one sequence match was found
     smarts = matches.values()
         .collect { jsonMatches -> jsonMatches.keySet() }
         .flatten()
@@ -44,52 +48,30 @@ process PREPARE_SMART {
             new File("${dirpath.toString()}/${hmmdir}/${smartId}.hmm").exists()
         }
 
-    // Build a custom FASTA file with only the seqs that at least one SMART model matches
-    def matchedSeqIds = matches.keySet()
+    // Map model accessions to seq Ids -> [modelAcc: [seqIds]]
+    Map<String, List<String>> model2seqs = [:].withDefault { [] }
+    matches.each { seqId, seqMatches ->
+        seqMatches.each { modelAcc, _ ->
+            model2seqs[modelAcc] << seqId
+        }
+    }
+
+    // Build custom FASTA files with only seqs that matched the HMMER3 smart model
     Map<String, String> allSeqs = FastaFile.parse(fasta.toString())
-    // Filter to only the matching sequences
-    def matchedSeqs = matchedSeqIds.collectEntries { [(it): allSeqs[it]] }
-
-    // Chunk the sequences
-    def chunkedFastaPaths = []
-    def chunk = []
-    int chunkIndex = 0
-
-    if (matchedSeqs.isEmpty()) {
-        // Create an empty file if no sequences match to avoid missing output
-        new File("${task.workDir}/chunk_empty.fasta").createNewFile()
-    } else {
-        matchedSeqs.each { seqId, seq ->
-            if (chunk.size() >= chunk_size) {
-                def chunkFile = file("${task.workDir}/chunk_${chunkIndex}.fasta")
-                chunkFile.withWriter { writer ->
-                    chunk.each { chunkSeqId, chunkSeq ->
-                        writer.writeLine(">${chunkSeqId}")
-                        for (int i = 0; i < chunkSeq.length(); i += 60) {
-                            writer.writeLine(chunkSeq.substring(i, Math.min(i + 60, chunkSeq.length())))
-                        }
-                    }
-                }
-                chunkedFastaPaths << chunkFile
-                chunk = []
-                chunkIndex++
-            } else {
-                chunk << [seqId, seq]
-            }
-        }
-        // Write the final chunk
-        if (!chunk.isEmpty()) {
-            def chunkFile = file("${task.workDir}/chunk_${chunkIndex}.fasta")
-            chunkFile.withWriter { writer ->
-                chunk.each { chunkSeqId, chunkSeq ->
-                    writer.writeLine(">${chunkSeqId}")
-                    for (int i = 0; i < chunkSeq.length(); i += 60) {
-                        writer.writeLine(chunkSeq.substring(i, Math.min(i + 60, chunkSeq.length())))
-                    }
+    fastaFiles = []
+    smarts.each { modelAcc ->
+        seqIds = model2seqs[modelAcc]
+        Path fastaPath = task.workDir.resolve("model_fasta_${modelAcc}.fasta")
+        new File(fastaPath.toString()).withWriter('UTF-8') { writer ->
+            seqIds.each { seqId ->
+                seq = allSeqs[seqId]
+                writer.writeLine(">${seqId}")
+                for (int i = 0; i < seq.length(); i += 60) {
+                    writer.writeLine(seq.substring(i, Math.min(i + 60, seq.length())))
                 }
             }
-            chunkedFastaPaths << chunkFile
         }
+        fastaFiles.add( fastaPath )
     }
 }
 
