@@ -4,7 +4,7 @@ import groovy.json.JsonOutput
 import Match
 
 process RUN_PFSEARCH {
-    label 'medium', 'ips6_container'
+    label 'mini', 'ips6_container'
 
     input:
         tuple val(meta), path(fasta)
