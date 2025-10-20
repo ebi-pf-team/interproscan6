@@ -125,7 +125,7 @@ process REPRESENTATIVE_LOCATIONS {
 List<CandidateLocation> getCandidateLocations(Map matches, String reprType) {
     List<CandidateLocation> candidateLocations = []
     matches.each { String modelAccession, Match match ->
-        if (match.source == "InterPro" && match.representativeInfo?.type == reprType) {
+        if (match.source != "InterPro-N" && match.representativeInfo?.type == reprType) {
             match.locations.each { Location loc ->
                 CandidateLocation candidate = new CandidateLocation(loc, match.representativeInfo.rank)
                 candidateLocations.add(candidate)

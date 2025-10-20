@@ -217,7 +217,7 @@ def addMatchNode(String proteinMd5, Map match, def xml) {
             )
         }
 
-        if (match.source == "InterPro" && appl == "panther") {
+        if (match.source != "InterPro-N" && appl == "panther") {
             xml."model-ac"(match.treegrafter.subfamilyAccession ?: match.modelAccession)
             match.treegrafter.goXRefs.each { goXref ->
                 xml."go-xref"(
