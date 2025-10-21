@@ -93,11 +93,11 @@ process SEARCH_SMART {
         commands = "touch hmmpfam.out"
     } else {
         smarts.each { smartFile ->
-            fasta.each { chunkFile ->
+            fasta.each { fastaFile ->
                 String hmmFilePath = "${dirpath.toString()}/${hmmdir}/${smartFile}.hmm"  // reassign to a var so the cmd can run
                 commands += "hmmpfam"
                 commands += " --acc -A 0 -E 0.01 -Z 350000 --cpu ${task.cpus}"
-                commands += " $hmmFilePath ${chunkFile} >> hmmpfam.out\n"
+                commands += " $hmmFilePath ${fastaFile} >> hmmpfam.out\n"
             }
         }
     }
