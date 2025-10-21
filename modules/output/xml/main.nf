@@ -6,7 +6,7 @@ import java.util.regex.Pattern
 import Match
 
 process WRITE_XML {
-    label    'small'
+    label    'long'
     executor 'local'
 
     input:

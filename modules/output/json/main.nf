@@ -11,7 +11,7 @@ import java.util.regex.Pattern
 import Match
 
 process WRITE_JSON {
-    label    'small'
+    label    'long'
     executor 'local'
 
     input:
