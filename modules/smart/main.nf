@@ -37,16 +37,8 @@ process PREPARE_SMART {
     /* Only run seqs against a HMMER2 model where a HMMER3 match was found.
         Return tuple val(meta), val(fastaFiles), val(smarts) where the Nth item of
         fastaFiles corresponds to the sequences to scan against the Nth element of smarts. */
-    def matches = HMMER3.parseOutput(hmmseach_out.toString(), "SMART")
-
-    // Extract model accessions against which at least one sequence match was found
-    smarts = matches.values()
-        .collect { jsonMatches -> jsonMatches.keySet() }
-        .flatten()
-        .unique()
-        .findAll { smartId ->
-            new File("${dirpath.toString()}/${hmmdir}/${smartId}.hmm").exists()
-        }
+    Map<String, String> sequences = FastaFile.parse(fasta.toString())  // [md5: sequence]
+    Map<String, Map> matches = HMMER3.parseOutput(hmmseach_out.toString(), "SMART")
 
     // Map model accessions to seq Ids -> [modelAcc: [seqIds]]
     Map<String, List<String>> model2seqs = [:].withDefault { [] }
@@ -56,21 +48,24 @@ process PREPARE_SMART {
         }
     }
 
-    // Build custom FASTA files with only seqs that matched the HMMER3 smart model
-    Map<String, String> allSeqs = FastaFile.parse(fasta.toString())
+    // Do not use `def` so lists are globally scoped and can be used in the `output` block
+    smarts = []
     fasta_files = []
-    smarts.each { modelAcc ->
-        seqIds = model2seqs[modelAcc]
-        Path fastaPath = task.workDir.resolve("${modelAcc}.fasta")
-        new File(fastaPath.toString()).withWriter('UTF-8') { writer ->
-            seqIds.each { seqId ->
-                String seq = allSeqs[seqId]
-                writer.writeLine(">${seqId}")
-                writer.writeLine(fmtSequence(seq))
+    // Create a FASTA file for each profile to search with
+    model2seqs
+        .each { modelAcc, seqIds ->
+            Path fastaPath = task.workDir.resolve("${modelAcc}.fa")
+            new File(fastaPath.toString()).withWriter('UTF-8') { writer ->
+                seqIds.each { seqId ->
+                    String seq = sequences[seqId]
+                    writer.writeLine(">${seqId}")
+                    writer.writeLine(fmtSequence(seq))
+                }
             }
+            smarts.add( modelAcc )
+            fasta_files.add( fastaPath )
         }
-        fasta_files.add( fastaPath )
-    }
+
 }
 
 def fmtSequence(String sequence) {
@@ -104,6 +99,7 @@ process SEARCH_SMART {
         // Create an empty hmmpfam.out file if input is empty
         commands = "touch hmmpfam.out"
     } else {
+        fasta_files.sort()
         smarts.each { smartFile ->
             fasta_files.each { fastaFile ->
                 String hmmFilePath = "${dirpath.toString()}/${hmmdir}/${smartFile}.hmm"  // reassign to a var so the cmd can run
