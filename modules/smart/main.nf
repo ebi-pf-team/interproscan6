@@ -64,7 +64,7 @@ process PREPARE_SMART {
                     writer.writeLine(fmtSequence(seq))
                 }
             }
-            smarts.add( modelAcc )
+            smarts.add( mdlPath )
             fasta_files.add( fastaPath )
         }
 
