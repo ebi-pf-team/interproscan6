@@ -54,8 +54,9 @@ process PREPARE_SMART {
     // Create a FASTA file for each profile to search with
     model2seqs
         .each { modelAcc, seqIds ->
-            Path mdlPath = new File("${dirpath.toString()}/${hmmdir}/${smartId}.hmm")
-            if (!mdlPath.exists()) return
+            Path mdlPath = file("${dirpath.toString()}/${hmmdir}/${modelAcc}.hmm")
+            File mdlFile = new File(mdlPath.toString())
+            if (!mdlFile.exists()) return
             Path fastaPath = task.workDir.resolve("${modelAcc}.fa")
             new File(fastaPath.toString()).withWriter('UTF-8') { writer ->
                 seqIds.each { seqId ->
@@ -67,7 +68,7 @@ process PREPARE_SMART {
             smarts.add( mdlPath )
             fasta_files.add( fastaPath )
         }
-
+    println "Debug: ${smarts.size()} ${fasta_files.size()}"
 }
 
 def fmtSequence(String sequence) {
