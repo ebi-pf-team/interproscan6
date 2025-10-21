@@ -31,7 +31,7 @@ process PREPARE_SMART {
     val chunk_size
 
     output:
-    tuple val(meta), path(fastaFiles), val(smarts)
+    tuple val(meta), val(smarts), path(fasta_files)
 
     exec:
     /* Only run seqs against a HMMER2 model where a HMMER3 match was found.
@@ -58,42 +58,54 @@ process PREPARE_SMART {
 
     // Build custom FASTA files with only seqs that matched the HMMER3 smart model
     Map<String, String> allSeqs = FastaFile.parse(fasta.toString())
-    fastaFiles = []
+    fasta_files = []
     smarts.each { modelAcc ->
         seqIds = model2seqs[modelAcc]
-        Path fastaPath = task.workDir.resolve("model_fasta_${modelAcc}.fasta")
+        Path fastaPath = task.workDir.resolve("${modelAcc}.fasta")
         new File(fastaPath.toString()).withWriter('UTF-8') { writer ->
             seqIds.each { seqId ->
-                seq = allSeqs[seqId]
+                String seq = allSeqs[seqId]
                 writer.writeLine(">${seqId}")
-                for (int i = 0; i < seq.length(); i += 60) {
-                    writer.writeLine(seq.substring(i, Math.min(i + 60, seq.length())))
-                }
+                writer.writeLine(fmtSequence(seq))
             }
         }
-        fastaFiles.add( fastaPath )
+        fasta_files.add( fastaPath )
     }
+}
+
+def fmtSequence(String sequence) {
+    /* Use a stringBuild for efficiency, this stops a new str being created
+    with each addition of a new line char.*/
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < sequence.length(); i += 60) {
+        int j = Math.min(i + 60, sequence.length());
+        sb.append(sequence, i, j);
+        if (j < sequence.length()) {
+            sb.append('\n');
+        }
+    }
+    return sb.toString()
 }
 
 process SEARCH_SMART {
     label 'medium', 'dynamic', 'ips6_container'
 
     input:
-    tuple val(meta), path(fasta), val(smarts)
+    tuple val(meta), val(smarts), path(fasta_files)
     path dirpath
     val hmmdir
 
     output:
-    tuple val(meta), path("hmmpfam.out"), path(fasta)
+    tuple val(meta), path("hmmpfam.out"), path(fasta_files)
 
     script:
     def commands = ""
-    if (fasta.size() == 0) {
+    if (fasta_files.size() == 0) {
         // Create an empty hmmpfam.out file if input is empty
         commands = "touch hmmpfam.out"
     } else {
         smarts.each { smartFile ->
-            fasta.each { fastaFile ->
+            fasta_files.each { fastaFile ->
                 String hmmFilePath = "${dirpath.toString()}/${hmmdir}/${smartFile}.hmm"  // reassign to a var so the cmd can run
                 commands += "hmmpfam"
                 commands += " --acc -A 0 -E 0.01 -Z 350000 --cpu ${task.cpus}"
@@ -112,7 +124,7 @@ process PARSE_SMART {
     executor 'local'
 
     input:
-    tuple val(meta), val(hmmpfam_out), val(fasta)
+    tuple val(meta), val(hmmpfam_out), val(fasta_files)
     val dirpath
     val hmmdir
 
@@ -122,12 +134,12 @@ process PARSE_SMART {
     exec:
     // fasta may be a single file or multiple
     Map<String, String> sequences = [:] // [md5: sequence]
-    if (fasta instanceof List) {
-        fasta.each { fastaFile ->
+    if (fasta_files instanceof List) {
+        fasta_files.each { fastaFile ->
             sequences = sequences + FastaFile.parse(fastaFile.toString())
         }
-    } else if (Files.exists(fasta)) {
-        sequences = FastaFile.parse(fasta.toString())
+    } else if (Files.exists(fasta_files)) {
+        sequences = FastaFile.parse(fasta_files.toString())
     }
 
     def hmmLengths = HMMER2.parseHMMs("${dirpath.toString()}/${hmmdir}")
