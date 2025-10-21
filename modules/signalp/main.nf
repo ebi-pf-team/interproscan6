@@ -4,7 +4,7 @@ import groovy.json.JsonOutput
 import Match
 
 process RUN_SIGNALP_CPU {
-    label 'medium', 'signalp_container'
+    label 'signalpCPU', 'signalp_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -34,7 +34,7 @@ process RUN_SIGNALP_CPU {
 }
 
 process RUN_SIGNALP_GPU {
-    label 'medium', 'signalp_container', 'use_gpu'
+    label 'signalpGPU', 'signalp_container', 'use_gpu'
 
     input:
     tuple val(meta), path(fasta)
