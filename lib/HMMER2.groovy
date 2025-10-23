@@ -1,3 +1,5 @@
+import Match
+
 class HMMER2 {
     static parseOutput(String filePath, Map<String, Integer> hmmLengths, String memberDb) {
         File file = new File(filePath)
@@ -66,8 +68,8 @@ class HMMER2 {
                     double evalue = Double.parseDouble(tail[1])
                     int numDomains = tail[2].toInteger()
 
-                    Match match = new Match(modelAccession, evalue, score)
-                    match.signature = new Signature(modelAccession, library)
+                    Signature signature = new Signature(modelAccession, library)
+                    Match match = new Match(modelAccession, evalue, score, signature)
                     sequenceHits[modelAccession] = match
                     domainsPerHit[modelAccession] = numDomains
                 }

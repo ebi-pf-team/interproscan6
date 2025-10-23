@@ -84,6 +84,7 @@ workflow {
             local_only_apps,
             apps_config,
             data_dir,
+            local_only_apps,
             params.subBatchSize
         )
         match_results = SCAN_SEQUENCES.out
@@ -109,6 +110,7 @@ workflow {
             matches_api_apps,
             apps_config,
             data_dir,
+            matches_api_apps + local_only_apps,
             params.subBatchSize
         )
 
@@ -118,6 +120,7 @@ workflow {
             local_only_apps,
             apps_config,
             data_dir,
+            matches_api_apps + local_only_apps,
             params.subBatchSize
         )
 

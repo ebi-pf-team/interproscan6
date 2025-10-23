@@ -102,7 +102,7 @@ def Map transformMatch(Map match, String seq) {
     // * operator - spread contents of a map or collecion into another map or collection
     return [
         *            : match,
-        "treegrafter": ["ancestralNodeID": match["annotationNode"]],
+        "treegrafter": ["ancestralNodeID": match["ancestralNode"]],
         "locations"  : match["locations"].collect { loc ->
             return [
                 *          : loc,

@@ -31,7 +31,7 @@ process PREPARE_SMART {
     val chunk_size
 
     output:
-    tuple val(meta), val(smarts), path(fasta_files)
+    tuple val(meta), val(smart_fasta_pairs)
 
     exec:
     /* Only run seqs against a HMMER2 model where a HMMER3 match was found.
@@ -49,26 +49,27 @@ process PREPARE_SMART {
     }
 
     // Do not use `def` so lists are globally scoped and can be used in the `output` block
-    smarts = []
-    fasta_files = []
+    smart_fasta_pairs = []
     // Create a FASTA file for each profile to search with
-    model2seqs
-        .each { modelAcc, seqIds ->
+    if (model2seqs.isEmpty()) {
+        // Create an empty file if no seqs match to avoid missing output
+        new File("${task.workDir}/model_empty.fa").createNewFile()
+    } else {
+        model2seqs.each { modelAcc, seqIds ->
             Path mdlPath = file("${dirpath.toString()}/${hmmdir}/${modelAcc}.hmm")
             File mdlFile = new File(mdlPath.toString())
             if (!mdlFile.exists()) return
-            Path fastaPath = task.workDir.resolve("${modelAcc}.fa")
-            new File(fastaPath.toString()).withWriter('UTF-8') { writer ->
+            String fasta = "${task.workDir}/${modelAcc}.fa"
+            new File(fasta).withWriter('UTF-8') { writer ->
                 seqIds.each { seqId ->
                     String seq = sequences[seqId]
                     writer.writeLine(">${seqId}")
                     writer.writeLine(fmtSequence(seq))
                 }
             }
-            smarts.add( mdlPath )
-            fasta_files.add( fastaPath )
+            smart_fasta_pairs.add ( [modelAcc, fasta] )
         }
-    println "Debug: ${smarts.size()} ${fasta_files.size()}"
+    }
 }
 
 def fmtSequence(String sequence) {
@@ -89,27 +90,26 @@ process SEARCH_SMART {
     label 'medium', 'dynamic', 'ips6_container'
 
     input:
-    tuple val(meta), val(smarts), path(fasta_files)
+    tuple val(meta), val(smart_fasta_pairs)
     path dirpath
     val hmmdir
 
     output:
-    tuple val(meta), path("hmmpfam.out"), path(fasta_files)
+    tuple val(meta), path("hmmpfam.out"), val(smart_fasta_pairs)
 
     script:
     def commands = ""
-    if (fasta_files.size() == 0) {
+    if (smart_fasta_pairs.size() == 0) {
         // Create an empty hmmpfam.out file if input is empty
         commands = "touch hmmpfam.out"
     } else {
-        fasta_files.sort()
-        smarts.each { smartFile ->
-            fasta_files.each { fastaFile ->
-                String hmmFilePath = "${dirpath.toString()}/${hmmdir}/${smartFile}.hmm"  // reassign to a var so the cmd can run
-                commands += "hmmpfam"
-                commands += " --acc -A 0 -E 0.01 -Z 350000 --cpu ${task.cpus}"
-                commands += " $hmmFilePath ${fastaFile} >> hmmpfam.out\n"
-            }
+        smart_fasta_pairs.each { pair ->
+            String smartModelAcc = pair[0]
+            def fastaFile = pair[1]
+            String hmmFilePath = "${dirpath.toString()}/${hmmdir}/${smartModelAcc}.hmm"  // reassign to a var so the cmd can run
+            commands += "hmmpfam"
+            commands += " --acc -A 0 -E 0.01 -Z 350000 --cpu ${task.cpus}"
+            commands += " $hmmFilePath $fastaFile >> hmmpfam.out\n"
         }
     }
 
@@ -123,7 +123,7 @@ process PARSE_SMART {
     executor 'local'
 
     input:
-    tuple val(meta), val(hmmpfam_out), val(fasta_files)
+    tuple val(meta), val(hmmpfam_out), val(smart_fasta_pairs)
     val dirpath
     val hmmdir
 
@@ -133,8 +133,9 @@ process PARSE_SMART {
     exec:
     // fasta may be a single file or multiple
     Map<String, String> sequences = [:] // [md5: sequence]
-    if (fasta_files instanceof List) {
-        fasta_files.each { fastaFile ->
+    if (smart_fasta_pairs instanceof List) {
+        smart_fasta_pairs.each { pair ->
+            fastaFile = pair[1]
             sequences = sequences + FastaFile.parse(fastaFile.toString())
         }
     } else if (Files.exists(fasta_files)) {

@@ -35,8 +35,8 @@ Stored in `./tests/unit_tests`.
 
 ### Requirements
 
-* nextflow==24.10.4
-* nf-test==0.9.2
+* nextflow==25.05.6
+* nf-test==0.9.3
 
 ### Usage
 
