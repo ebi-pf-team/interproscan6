@@ -9,7 +9,7 @@ workflow DEEPTMHMM {
     main:
     if (use_gpu) {
         ch_split = ch_seqs
-            .splitFasta( by: 5000, file: true )
+            .splitFasta( by: 1000, file: true )
         RUN_DEEPTMHMM_GPU(
             ch_split,
             deeptmhmm_dir
