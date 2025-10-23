@@ -30,7 +30,7 @@ workflow SCAN_SEQUENCES {
     apps_config          // map of applications
     datadir             // path to data directory
     all_appls           // applications to run across all workflows 
-    batch_size
+    batch_size          // sub-batch size for computationally demanding apps
 
     main:
     results = Channel.empty()
