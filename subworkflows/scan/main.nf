@@ -27,7 +27,7 @@ workflow SCAN_SEQUENCES {
     ch_seqs             // channel of tuples (index, fasta file)
     db_releases         // map: [db: version, dirpath]
     applications        // applications to run in this workflow
-    appsConfig          // map of applications
+    apps_config          // map of applications
     datadir             // path to data directory
     all_appls           // applications to run across all workflows 
     batch_size
@@ -101,9 +101,9 @@ workflow SCAN_SEQUENCES {
         INTERPRO_N(
             ch_seqs,
             all_appls,
-            appsConfig.interpro_n.dir,
-            appsConfig.interpro_n.use_gpu,
-            appsConfig.interpro_n.batch_size
+            apps_config.interpro_n.dir,
+            apps_config.interpro_n.use_gpu,
+            apps_config.interpro_n.batch_size
         )
 
         results = results.mix(INTERPRO_N.out)
