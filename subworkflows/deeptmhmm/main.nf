@@ -5,19 +5,18 @@ workflow DEEPTMHMM {
     ch_seqs
     deeptmhmm_dir
     use_gpu
-    batch_size
 
     main:
-    ch_split = ch_seqs
-        .splitFasta( by: batch_size, file: true )
-
     if (use_gpu) {
         RUN_DEEPTMHMM_GPU(
-            ch_split,
+            ch_seqs,
             deeptmhmm_dir
         )
         ch_deeptmhmm = RUN_DEEPTMHMM_GPU.out
     } else {
+        ch_split = ch_seqs
+            .splitFasta( by: 100, file: true )
+
         RUN_DEEPTMHMM_CPU(
             ch_split,
             deeptmhmm_dir
