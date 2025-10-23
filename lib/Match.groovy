@@ -1,3 +1,6 @@
+import Entry
+import Signature
+
 class Match implements Serializable {
     String modelAccession
     Double evalue
@@ -7,6 +10,7 @@ class Match implements Serializable {
     List<Location> locations = []
     boolean included = true  // for HMMER3 matches (inclusion threshold)
     RepresentativeInfo representativeInfo = null
+    String source = null
 
     // PANTHER
     TreeGrafter treegrafter = null
@@ -21,6 +25,7 @@ class Match implements Serializable {
     Match(String modelAccession, Signature signature) {
         this.modelAccession = modelAccession
         this.signature = signature
+        this.source = signature.signatureLibraryRelease.library
     }
 
     Match(String modelAccession, Double evalue, String graphscan, Signature signature) {
@@ -28,6 +33,7 @@ class Match implements Serializable {
         this.evalue = evalue
         this.graphscan = graphscan
         this.signature = signature
+        this.source = signature.signatureLibraryRelease.library
     }
 
     Match(String modelAccession, Double evalue, Double score) {
@@ -47,8 +53,8 @@ class Match implements Serializable {
         this.modelAccession = modelAccession
         this.evalue = evalue
         this.score = score
-        this.bias = bias
         this.signature = signature
+        this.source = signature.signatureLibraryRelease.library
     }
 
     Match(String modelAccession, Double evalue, Double score, Double bias, Signature signature) {
@@ -57,6 +63,7 @@ class Match implements Serializable {
         this.score = score
         this.bias = bias
         this.signature = signature
+        this.source = signature.signatureLibraryRelease.library
     }
 
     void addSite(Site site) {
@@ -69,13 +76,17 @@ class Match implements Serializable {
     }
 
     static Match fromMap(Map data) {
-        Match match = new Match(data.modelAccession, data.evalue, data.score, data.bias)
+        Match match = new Match(data.modelAccession)
+        match.evalue = data.evalue
+        match.score = data.score
+        match.bias = data.bias
         match.signature = Signature.fromMap(data.signature)
         match.included = data.included
         match.locations = data.locations.collect { Location.fromMap(it) }
         match.treegrafter = TreeGrafter.fromMap(data.treegrafter)
         match.graphscan = data.graphscan
         match.representativeInfo = RepresentativeInfo.fromMap(data.representativeInfo)
+        match.source = data.source
         return match
     }
 
@@ -144,141 +155,6 @@ class Match implements Serializable {
             signature == obj.signature &&
             locations == obj.locations
         )
-    }
-}
-
-class Signature implements Serializable {
-    // The order of the fields here determines their order in the final output files
-    String accession
-    String name
-    String description
-    String type
-    SignatureLibraryRelease signatureLibraryRelease = new SignatureLibraryRelease(null, null)
-    Entry entry = null
-
-    Signature(String accession) {
-        this.accession = accession
-    }
-
-    Signature(String accession, SignatureLibraryRelease library) {
-        this.accession = accession
-        this.signatureLibraryRelease = library
-    }
-
-    Signature(String accession,
-              String name,
-              String description,
-              SignatureLibraryRelease library,
-              Entry entry) {
-        this.accession = accession
-        this.name = name
-        this.description = description
-        this.signatureLibraryRelease = library
-        this.entry = entry
-    }
-
-    Signature(String accession,
-              String name,
-              String description,
-              String type,
-              SignatureLibraryRelease library,
-              Entry entry) {
-        this.accession = accession
-        this.name = name
-        this.description = description
-        this.type = type
-        this.signatureLibraryRelease = library
-        this.entry = entry
-    }
-
-    void setType(String type) {
-        this.type = type
-    }
-
-    static Signature fromMap(Map data) {
-        if (data == null) {
-            return null
-        }
-        return new Signature(
-                data.accession,
-                data.name,
-                data.description,
-                data.containsKey("type") ? data.type : null,  // Provide a default value (null) if 'type' is missing
-                SignatureLibraryRelease.fromMap(data.signatureLibraryRelease),
-                Entry.fromMap(data.entry)
-        )
-    }
-}
-
-class SignatureLibraryRelease implements Serializable {
-    String library
-    String version
-
-    SignatureLibraryRelease(String library, String version) {
-        this.library = library
-        this.version = version
-    }
-
-    static SignatureLibraryRelease fromMap(Map data) {
-        if (data == null) {
-            return null
-        }
-        return new SignatureLibraryRelease(data.library, data.version)
-    }
-}
-
-class Entry implements Serializable {
-    String accession
-    String name
-    String description
-    String type
-    List<GoXRefs> goXRefs = []
-    List<PathwayXRefs> pathwayXRefs = []
-
-    Entry(String accession,
-          String name,
-          String description,
-          String type) {
-        this.accession = accession
-        this.name = name
-        this.description = description
-        this.type = type
-    }
-
-    Entry(String accession,
-          String name,
-          String description,
-          String type,
-          List<GoXRefs> goXRefs,
-          List<PathwayXRefs> pathwayXRefs) {
-        this.accession = accession
-        this.name = name
-        this.description = description
-        this.type = type
-        this.goXRefs = goXRefs
-        this.pathwayXRefs = pathwayXRefs
-    }
-
-    static Entry fromMap(Map data) {
-        if (data == null) {
-            return null
-        }
-        return new Entry(
-                data.accession,
-                data.name,
-                data.description,
-                data.type,
-                data.goXRefs.collect { GoXRefs.fromMap(it) },
-                data.pathwayXRefs.collect { PathwayXRefs.fromMap(it) }
-        )
-    }
-
-    void addGoXRefs(GoXRefs go) {
-        this.goXRefs.add(go)
-    }
-
-    void addPathwayXRefs(PathwayXRefs pa) {
-        this.pathwayXRefs.add(pa)
     }
 }
 
@@ -415,6 +291,13 @@ class Location implements Serializable {
         this.end = end
         this.hmmLength = hmmLength
         this.evalue = evalue
+        this.fragments = fragments
+    }
+
+    Location(int start, int end, Double score, List<LocationFragment> fragments) { // Used for InterPro-N
+        this.start = start
+        this.end = end
+        this.score = score
         this.fragments = fragments
     }
 
@@ -743,42 +626,3 @@ class RepresentativeInfo implements Serializable {
     }
 }
 
-class GoXRefs implements Serializable {
-    String name
-    String databaseName
-    String category
-    String id
-
-    GoXRefs(String name, String databaseName, String category, String id) {
-        this.name = name
-        this.databaseName = databaseName
-        this.category = category
-        this.id = id
-    }
-
-    static GoXRefs fromMap(Map data) {
-        if (data == null) {
-            return null
-        }
-        return new GoXRefs(data.name, data.databaseName, data.category, data.id)
-    }
-}
-
-class PathwayXRefs implements Serializable {
-    String name
-    String databaseName
-    String id
-
-    PathwayXRefs(String name, String databaseName, String id) {
-        this.name = name
-        this.databaseName = databaseName
-        this.id = id
-    }
-
-    static PathwayXRefs fromMap(Map data) {
-        if (data == null) {
-            return null
-        }
-        return new PathwayXRefs(data.name, data.databaseName, data.id)
-    }
-}

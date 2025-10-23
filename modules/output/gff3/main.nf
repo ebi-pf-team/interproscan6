@@ -34,15 +34,16 @@ process WRITE_GFF3 {
                 Map proteins = new ObjectMapper().readValue(matchFile, Map)
 
                 if (nucleic) {
-                    nucleicToProteinMd5 = db.groupProteins(proteins)
+                    def (nucleicToProteinMd5, ntSeqDataMap, orfDataMap) = 
+                        db.retrieveAllNucleicSequenceData(proteins.keySet() as List)
+
                     nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
                         if (seenNucleicMd5s.contains(nucleicMd5)) {
                             return
                         }
                         seenNucleicMd5s.add(nucleicMd5)
 
-                        seqData = db.nucleicMd5ToNucleicSeq(nucleicMd5)
-
+                        def seqData = ntSeqDataMap[nucleicMd5]
                         seqData.each { seq ->
                             String seqId = seq.id
                             String sequence = seq.sequence.trim()
@@ -50,8 +51,7 @@ process WRITE_GFF3 {
                             gff3Writer.writeLine("##sequence-region ${seqId} 1 ${seqLength}")
 
                             proteinMd5s.each { String proteinMd5 ->
-                                // a proteinSeq/Md5 may be associated with multiple nt md5s/seq, only pull the data where the nt md5/seq is relevant
-                                proteinSeqData = db.getOrfSeq(proteinMd5, nucleicMd5)
+                                def proteinSeqData = orfDataMap[nucleicMd5][proteinMd5]
                                 proteinSeqData.each { row ->
                                     def matcher = esl_pattern.matcher(row.description)
                                     assert matcher.matches()
@@ -83,8 +83,15 @@ process WRITE_GFF3 {
                         }
                     }
                 } else {
+                    def allMd5s = proteins.keySet() as List
+                    def md5ToSeqData = [:]
+                    allMd5s.collate(1000).each { batch ->
+                        def result = db.proteinMd5ToProteinSeqs(batch)
+                        md5ToSeqData.putAll(result)
+                    }
+
                     proteins.each { String proteinMd5, Map matchesMap ->
-                        seqData = db.proteinMd5ToProteinSeq(proteinMd5)
+                        def seqData = md5ToSeqData[proteinMd5]
                         String sequence = seqData[0].sequence.trim()
                         int seqLength = sequence.length()
 
@@ -120,7 +127,7 @@ def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
     String memberDb = match.signature.signatureLibraryRelease.library
 
     def goTerms = []
-    if(memberDb == "PANTHER" && match.treegrafter.goXRefs){
+    if (memberDb == "PANTHER" && match.treegrafter?.goXRefs){
         goTerms += match.treegrafter.goXRefs
     }
     
@@ -138,7 +145,7 @@ def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
             feature_type = "polypeptide_domain"
             break
         case ["NCBIFAM", "Pfam"]:
-            feature_type = ["DOMAIN", "REPEAT"].contains(match.signature.type.toUpperCase()) ? "polypeptide_domain" : "polypeptide_region"
+            feature_type = ["DOMAIN", "REPEAT"].contains(match.signature.type?.toUpperCase()) ? "polypeptide_domain" : "polypeptide_region"
             break
         case ["PRINTS", "PROSITE patterns"]:
             feature_type = "polypeptide_motif"
@@ -175,35 +182,42 @@ def proteinFormatLine(seqId, match, loc, parentId, cdsStart, strand) {
     }
 
     def score = null
-    switch (memberDb) {
-        case ["CDD", "PRINT"]:
-            score = match.evalue
-            break
-        case ["HAMAP", "PROSITE profiles"]:
-            score = loc.score
-            break
-        case ["SignalP-Prok", "SignalP-Euk"]:
-            score = loc.pvalue
-            break
-        default:
-            score = loc.evalue
+    if (match.source == "InterPro-N") {
+        score = loc.score
+    } else if (["CDD", "PRINTS"].contains(memberDb)) {
+        score = match.evalue
+    } else if (["HAMAP", "PROSITE profiles"].contains(memberDb)) {
+        score = loc.score
+    } else if (["SignalP-Prok", "SignalP-Euk"].contains(memberDb)) {
+        score = loc.pvalue
+    } else {
+        score = loc.evalue
+    }
+
+    def name
+    def alias = null
+    if (match.signature.name) {
+        name = match.signature.name
+        alias = match.signature.accession
+    } else {
+        name = match.signature.accession
     }
 
     String interproAccession = match.signature.entry?.accession
-
     def attributes = [
-        match.signature.name ? "Name=${match.signature.name}" : null,
-        "Alias=${match.signature.accession}",
+        "Name=${name}",
+        alias ? "Alias=${alias}" : null,
         parentId ? "Parent=${parentId}" : null,
         interproAccession ? "Dbxref=InterPro:${interproAccession}" : null,
-        goTerms ? "Ontology_term=${goTerms.collect{ it.id }.join(',')}" : null,
-        "type=${match.signature.type}",
+        (match.source == "InterPro-N") ? "Dbxref=${memberDb}:${match.signature.accession}" : null,
+        goTerms ? "Ontology_term=${goTerms.collect { it.id }.join(',')}" : null,
+        match.signature.type ? "type=${match.signature.type}" : null,
         "representative=${loc.representative}",
     ].findAll { it }
 
     return [
         seqId,
-        memberDb,
+        match.source,
         feature_type,
         cdsStart ? (loc.start - 1) * 3 + cdsStart : loc.start,
         cdsStart ? loc.end * 3 + cdsStart -1 : loc.end,

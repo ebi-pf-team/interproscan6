@@ -4,6 +4,7 @@ include { CDD               } from "../cdd"
 include { COILS             } from "../coils"
 include { DEEPTMHMM         } from "../deeptmhmm"
 include { HAMAP             } from "../hamap"
+include { INTERPRO_N        } from "../interpro-n"
 include { MOBIDBLITE        } from "../mobidblite"
 include { NCBIFAM           } from "../ncbifam"
 include { PANTHER           } from "../panther"
@@ -28,6 +29,7 @@ workflow SCAN_SEQUENCES {
     applications        // list of applications to run
     apps_config         // map of applications
     datadir             // path to data directory
+    all_appls           // applications to run across all workflows 
     batch_size          // sub-batch size for computationally demanding apps
 
     main:
@@ -93,6 +95,18 @@ workflow SCAN_SEQUENCES {
         )
 
         results = results.mix(HAMAP.out)
+    }
+
+    if (applications.contains("interpro_n")) {
+        INTERPRO_N(
+            ch_seqs,
+            all_appls,
+            appsConfig.interpro_n.dir,
+            appsConfig.interpro_n.use_gpu,
+            appsConfig.interpro_n.batch_size
+        )
+
+        results = results.mix(INTERPRO_N.out)
     }
 
     if (applications.contains("mobidblite")) {
