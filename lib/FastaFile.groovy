@@ -112,4 +112,30 @@ class FastaFile {
                   .eachMatch(/.{1,60}/) { writer.writeLine(it) }
         }
     }
+
+    static List<Map> chunkSequences(String path, int chunkSize, int overlap) {
+        // Parse sequences
+        def sequences = this.parse(path)
+
+        // Chunk sequences
+        def result = sequences.collect { seqId, sequence ->
+            def seqLength = sequence.length()
+
+            if (chunkSize <= 0 || seqLength <= chunkSize) {
+                return [id: seqId, chunks: [sequence]]
+            }
+
+            def chunks = []
+            int step = chunkSize - overlap
+            for (int start = 0; start < seqLength; start += step) {
+                int end = Math.min(start + chunkSize, seqLength)
+                chunks << sequence.substring(start, end)
+                if (end == seqLength) break
+            }
+
+            return [id: seqId, chunks: chunks]
+        }
+
+        return result
+    }
 }
