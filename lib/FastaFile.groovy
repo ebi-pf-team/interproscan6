@@ -114,47 +114,26 @@ class FastaFile {
     }
 
     static List<Map> chunkSequences(String path, int chunkSize, int overlap) {
-        def sequences = []
-        def identifier = null
-        def sequence = new StringBuilder()
-
         // Parse sequences
-        new File(path).eachLine { line ->
-            line = line.trim()
-            if (!line) return
-            if (line.startsWith(">")) {
-                if (identifier) {
-                    sequences << [id: identifier, sequence: sequence.toString()]
-                }
-                identifier = line.substring(1).trim()
-                sequence.setLength(0)
-            } else {
-                sequence.append(line)
-            }
-        }
-        if (identifier) {
-            sequences << [id: identifier, sequence: sequence.toString()]
-        }
+        def sequences = this.parse(path)
 
         // Chunk sequences
-        def result = []
-        sequences.each { it ->
-            def seqLength = it.sequence.length()
+        def result = sequences.collect { seqId, sequence ->
+            def seqLength = sequence.length()
 
             if (chunkSize <= 0 || seqLength <= chunkSize) {
-                result << [id: it.id, chunks: [it.sequence]]
-                return
+                return [id: seqId, chunks: [sequence]]
             }
 
             def chunks = []
             int step = chunkSize - overlap
             for (int start = 0; start < seqLength; start += step) {
                 int end = Math.min(start + chunkSize, seqLength)
-                chunks << it.sequence.substring(start, end)
+                chunks << sequence.substring(start, end)
                 if (end == seqLength) break
             }
 
-            result << [id: it.id, chunks: chunks]
+            return [id: seqId, chunks: chunks]
         }
 
         return result
