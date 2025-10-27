@@ -8,9 +8,9 @@ process PREPARE_TMBED {
 
     input:
     tuple val(meta), val(fasta)
-    val chunk_size
-    val chunk_overlap
-    val max_seqs_per_file
+    val chunk_size    // max number of aa per chunked sequence
+    val chunk_overlap // overlap between two chunks of a sequence
+    val batch_size    // max number of sequences in output fasta files
 
     output:
     tuple val(meta), path("tmbed_*.fasta", arity: '1..*')
@@ -31,7 +31,7 @@ process PREPARE_TMBED {
 
     writer = openNewFile()
     sequences.each { seq ->
-        if (max_seqs_per_file > 0 && seqCount >= max_seqs_per_file) {
+        if (batch_size > 0 && seqCount >= batch_size) {
             writer = openNewFile()
         }
         seq.chunks.eachWithIndex { chunk, idx ->

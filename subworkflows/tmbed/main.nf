@@ -4,10 +4,10 @@ workflow TMBED {
     take:
     ch_seqs
     use_gpu
-    chunk_size
-    chunk_overlap
-    smooth_window
-    batch_size
+    chunk_size    // max number of aa per chunked sequence
+    chunk_overlap // overlap between two chunks of a sequence
+    smooth_window // length of the sliding window used during smoothing
+    batch_size    // max number of aa per TMbed batch
 
     main:
     PREPARE_TMBED(
