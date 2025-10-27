@@ -103,8 +103,17 @@ RUN curl -L -o cath-resolve-hits https://github.com/UCLOrengoGroup/cath-tools/re
 
 WORKDIR /opt/interproscan6
 
+# Create entrypoint script to ensure PATH is set correctly for both Docker and Singularity
+RUN echo '#!/bin/bash' > /entrypoint.sh && \
+    echo 'export PATH="/opt/hmmer3/bin:/opt/cath-tools:/opt/blast:/opt/rpsbproc/RpsbProc-x64-linux:/opt/coils:/opt/easel/miniapps:/opt/pftools:/opt/epa-ng/bin:/opt/hmmer2/bin:$PATH"' >> /entrypoint.sh && \
+    echo 'exec "$@"' >> /entrypoint.sh && \
+    chmod +x /entrypoint.sh
+
 # Add all tool directories to PATH
 ENV PATH="/opt/hmmer3/bin:/opt/cath-tools:/opt/blast:/opt/rpsbproc/RpsbProc-x64-linux:/opt/coils:/opt/easel/miniapps:/opt/pftools:/opt/epa-ng/bin:/opt/hmmer2/bin:$PATH"
+
+# Set entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
 
 # remove tools not needed for running IPS6 to reduce the final image size
 RUN apt-get remove -y autoconf automake autotools-dev bison build-essential flex git libcurl3-gnutls libdivsufsort3 liblmdb0 libdw1 libnghttp2-dev libssl-dev libtool nghttp2 zlib1g-dev && \
