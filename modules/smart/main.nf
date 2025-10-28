@@ -51,24 +51,19 @@ process PREPARE_SMART {
     // Do not use `def` so lists are globally scoped and can be used in the `output` block
     smart_fasta_pairs = []
     // Create a FASTA file for each profile to search with
-    if (model2seqs.isEmpty()) {
-        // Create an empty file if no seqs match to avoid missing output
-        new File("${task.workDir}/model_empty.fa").createNewFile()
-    } else {
-        model2seqs.each { modelAcc, seqIds ->
-            Path mdlPath = file("${dirpath.toString()}/${hmmdir}/${modelAcc}.hmm")
-            File mdlFile = new File(mdlPath.toString())
-            if (!mdlFile.exists()) return
-            String fasta = "${task.workDir}/${modelAcc}.fa"
-            new File(fasta).withWriter('UTF-8') { writer ->
-                seqIds.each { seqId ->
-                    String seq = sequences[seqId]
-                    writer.writeLine(">${seqId}")
-                    seq.eachMatch(/.{1,60}/) { writer.writeLine(it) }
-                }
+    model2seqs.each { modelAcc, seqIds ->
+        Path mdlPath = file("${dirpath.toString()}/${hmmdir}/${modelAcc}.hmm")
+        File mdlFile = new File(mdlPath.toString())
+        if (!mdlFile.exists()) return
+        String fasta = "${task.workDir}/${modelAcc}.fa"
+        new File(fasta).withWriter('UTF-8') { writer ->
+            seqIds.each { seqId ->
+                String seq = sequences[seqId]
+                writer.writeLine(">${seqId}")
+                seq.eachMatch(/.{1,60}/) { writer.writeLine(it) }
             }
-            smart_fasta_pairs.add ( [modelAcc, fasta] )
         }
+        smart_fasta_pairs.add ( [modelAcc, fasta] )
     }
 }
 
