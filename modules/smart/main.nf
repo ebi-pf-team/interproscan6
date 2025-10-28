@@ -87,7 +87,7 @@ def fmtSequence(String sequence) {
 }
 
 process SEARCH_SMART {
-    label 'medium', 'dynamic', 'ips6_container'
+    label 'medium', 'long', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), val(smart_fasta_pairs)

@@ -3,7 +3,7 @@ import groovy.json.JsonOutput
 import Match
 
 process SEARCH_SUPERFAMILY {
-    label 'tiny', 'dynamic', 'ips6_container'
+    label 'tiny', 'short', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), val(meta2), path(fasta)

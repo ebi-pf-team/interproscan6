@@ -139,7 +139,7 @@ process PREPARE_TREEGRAFTER {
 
 
 process RUN_TREEGRAFTER {
-    label 'small', 'dynamic', 'ips6_container'
+    label 'small', 'long', 'dynamic', 'ips6_container'
     
     input:
     tuple val(meta), val(meta2), val(sequenceIds), val(familyIds), val(fastas)
