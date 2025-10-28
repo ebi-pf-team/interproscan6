@@ -23,8 +23,7 @@ workflow PANTHER {
     SEARCH_PANTHER(
         ch_split,
         dir,
-        hmm,
-        "-Z 65000000 -E 0.001"
+        hmm
     )
 
     PREPARE_TREEGRAFTER(

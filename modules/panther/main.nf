@@ -8,7 +8,6 @@ process SEARCH_PANTHER {
     tuple val(meta), val(meta2), path(fasta)
     path hmmdir
     val hmmfile
-    val options    // e.g. "-Z 65245 -E 0.001"
 
     output:
     tuple val(meta), val(meta2), path("hmmsearch.out")
@@ -16,7 +15,7 @@ process SEARCH_PANTHER {
     script:
     """
     hmmsearch \
-        ${options} \
+        -Z 65000000 -E 0.001 \
         --cpu ${task.cpus} \
         ${hmmdir}/${hmmfile} ${fasta} > hmmsearch.out
     """

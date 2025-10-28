@@ -64,26 +64,12 @@ process PREPARE_SMART {
                 seqIds.each { seqId ->
                     String seq = sequences[seqId]
                     writer.writeLine(">${seqId}")
-                    writer.writeLine(fmtSequence(seq))
+                    seq.eachMatch(/.{1,60}/) { writer.writeLine(it) }
                 }
             }
             smart_fasta_pairs.add ( [modelAcc, fasta] )
         }
     }
-}
-
-def fmtSequence(String sequence) {
-    /* Use a stringBuild for efficiency, this stops a new str being created
-    with each addition of a new line char.*/
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < sequence.length(); i += 60) {
-        int j = Math.min(i + 60, sequence.length());
-        sb.append(sequence, i, j);
-        if (j < sequence.length()) {
-            sb.append('\n');
-        }
-    }
-    return sb.toString()
 }
 
 process SEARCH_SMART {
