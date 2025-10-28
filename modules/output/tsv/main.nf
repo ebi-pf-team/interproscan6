@@ -3,7 +3,7 @@ import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 
 process WRITE_TSV {
-    label    'long'
+    label    'tiny', 'long'
     executor 'local'
 
     input:

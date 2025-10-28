@@ -3,7 +3,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import java.util.regex.Pattern
 
 process WRITE_GFF3 {
-    label    'long'
+    label    'tiny', 'long'
     executor 'local'
 
     input:

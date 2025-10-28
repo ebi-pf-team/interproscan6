@@ -5,7 +5,7 @@ import HierarchyEntry
 import Match
 
 process RUN_PRINTS {
-    label 'bigmem', 'ips6_container'
+    label 'small', 'bigmem', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
