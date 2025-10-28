@@ -39,7 +39,7 @@ workflow PANTHER {
     )
 
     results = results.mix(PARSE_PANTHER(
-        PREPARE_TREEGRAFTER.out.json.join(RUN_TREEGRAFTER.out)
+        PREPARE_TREEGRAFTER.out.json.join(RUN_TREEGRAFTER.out, by: [0, 1])
     ))
         
     emit:
