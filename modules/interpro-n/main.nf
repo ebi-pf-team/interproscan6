@@ -1,6 +1,8 @@
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
+import FastaFile
+
 def MAX_LENGTH    = 2047  // Maximum sequence length
 def CHUNK_OVERLAP = 1000  // Number of overlapping residues between consecutive chunks
 def MATCH_OVERLAP = 0.25  // Fractional overlap threshold for merging matches
@@ -31,45 +33,16 @@ process PREPARE_INTERPRO_N {
     tuple val(meta), path("sequences.tsv")
 
     exec:
+    def sequences = FastaFile.chunkSequences(fasta.toString(), MAX_LENGTH, CHUNK_OVERLAP)
+
     def outputFilePath = task.workDir.resolve("sequences.tsv")
     new File(outputFilePath.toString()).withWriter("UTF-8") { writer ->
         writer.writeLine("accession\tsequence")
 
-        def identifier = ""
-        def sequence = new StringBuilder()
-
-        new File(fasta.toString()).eachLine { line ->
-            line = line.trim()
-            if (line.startsWith(">")) {
-                if (identifier) {
-                    writeChunks(writer, identifier, sequence.toString(), MAX_LENGTH, CHUNK_OVERLAP)
-                }
-                identifier = line.substring(1).split("\\s+")[0]
-                sequence.setLength(0)
-            } else {
-                sequence.append(line)
+        sequences.each { seq ->
+            seq.chunks.eachWithIndex { chunk, idx ->
+                writer.writeLine("${seq.id}_${idx + 1}\t${chunk}")
             }
-        }
-
-        if (identifier) {
-            writeChunks(writer, identifier, sequence.toString(), MAX_LENGTH, CHUNK_OVERLAP)
-        }
-    }
-}
-
-def writeChunks(writer, seqId, sequence, maxLength, overlap) {
-    def chunkId = 1
-    if (sequence.length() <= maxLength) {
-        writer.writeLine("${seqId}_${chunkId}\t${sequence}")
-    } else {
-        def start = 0
-        while (start < sequence.length()) {
-            def end = Math.min(start + maxLength, sequence.length())
-            def chunk = sequence.substring(start, end)
-            writer.writeLine("${seqId}_${chunkId}\t${chunk}")
-            if (end >= sequence.length()) break
-            start = end - overlap
-            chunkId++
         }
     }
 }
