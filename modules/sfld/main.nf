@@ -9,9 +9,10 @@ process SEARCH_SFLD {
     tuple val(meta), path(fasta)
     path dirpath
     val hmmfile
+    val annofile
 
     output:
-    tuple val(meta), path("hmmsearch.out"), path("hmmsearch.tab"), path("hmmsearch.sto")
+    tuple val(meta), path("hmmsearch.out"), path("sfld.tsv")
 
     script:
     """
@@ -23,29 +24,13 @@ process SEARCH_SFLD {
         --domtblout hmmsearch.tab \
         -A hmmsearch.sto \
         ${dirpath}/${hmmfile} ${fasta}
-    """
-}
 
-process POST_PROCESS_SFLD {
-    label 'mem_min', 'time_short', 'ips6_container'
-
-    input:
-    tuple val(meta), path(hmmsearch_out), val(hmmsearch_dtbl), val(hmmsearch_alignment)
-    path dirpath
-    val annofile
-
-    output:
-    tuple val(meta), path("sfld.tsv"), path(hmmsearch_out)
-
-    script:
-    """
     ${projectDir}/bin/sfld/sfld_postprocess \
-        --alignment "${hmmsearch_alignment}" \
-        --dom "${hmmsearch_dtbl}" \
-        --hmmer-out "${hmmsearch_out}" \
+        --alignment hmmsearch.sto \
+        --dom hmmsearch.tab \
+        --hmmer-out hmmsearch.out \
         --site-info "${dirpath}/${annofile}" \
         --output sfld.tsv
-    # ${hmmsearch_out} "hmmsearch.out"
     """
 }
 
