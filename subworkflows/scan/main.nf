@@ -81,7 +81,8 @@ workflow SCAN_SEQUENCES {
         DEEPTMHMM(
             ch_seqs,
             apps_config.deeptmhmm.dir,
-            apps_config.deeptmhmm.use_gpu
+            apps_config.deeptmhmm.use_gpu,
+            batch_size
         )
         results = results.mix(DEEPTMHMM.out)
     }
