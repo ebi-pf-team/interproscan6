@@ -68,7 +68,7 @@ process PREPARE_SMART {
 }
 
 process SEARCH_SMART {
-    label 'medium', 'long', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), val(smart_fasta_pairs)
