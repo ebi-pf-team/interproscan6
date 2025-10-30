@@ -25,7 +25,7 @@ process RUN_PRINTS {
 }
 
 process PARSE_PRINTS {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

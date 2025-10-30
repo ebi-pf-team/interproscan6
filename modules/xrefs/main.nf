@@ -3,7 +3,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 
 process XREFS {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

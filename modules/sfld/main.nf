@@ -50,7 +50,7 @@ process POST_PROCESS_SFLD {
 }
 
 process PARSE_SFLD {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

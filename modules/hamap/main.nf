@@ -24,7 +24,7 @@ process PREPROCESS_HAMAP {
 }
 
 process PREPARE_HAMAP {
-    label 'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:
@@ -106,7 +106,7 @@ process RUN_HAMAP {
 }
 
 process PARSE_HAMAP {
-    label 'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

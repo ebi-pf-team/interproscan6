@@ -2,7 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 process PREPARE_FUNFAM {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:
@@ -66,7 +66,7 @@ process SEARCH_FUNFAM {
 }
 
 process RESOLVE_FUNFAM {
-    label 'tiny', 'ips6_container'
+    label 'mem_low', 'time_short', 'ips6_container'
 
     input:
     tuple val(meta), val(meta2), path(hmmseach_out)
@@ -86,7 +86,7 @@ process RESOLVE_FUNFAM {
 
 
 process PARSE_FUNFAM {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

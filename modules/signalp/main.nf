@@ -64,7 +64,7 @@ process RUN_SIGNALP_GPU {
 }
 
 process PARSE_SIGNALP {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

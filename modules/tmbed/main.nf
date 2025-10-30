@@ -3,7 +3,7 @@ import groovy.json.JsonOutput
 import Match
 
 process PREPARE_TMBED {
-    label 'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:
@@ -87,7 +87,7 @@ process RUN_TMBED_GPU {
 }
 
 process PARSE_TMBED {
-    label 'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

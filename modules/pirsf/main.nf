@@ -21,7 +21,7 @@ process SEARCH_PIRSF {
 }
 
 process PARSE_PIRSF {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

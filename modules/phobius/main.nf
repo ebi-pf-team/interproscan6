@@ -3,7 +3,7 @@ import groovy.json.JsonOutput
 import Match
 
 process WRITE_FASTA {
-    label    'tiny'
+    label    'mem_min', 'time_short'
     executor 'local'
 
     input:
@@ -42,7 +42,7 @@ process SEARCH_PHOBIUS {
 }
 
 process PARSE_PHOBIUS {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

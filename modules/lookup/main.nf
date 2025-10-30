@@ -6,7 +6,7 @@ process PREPARE_LOOKUP {
     /* A Simple process to check API and InterPro version compatibility
     Retain as a process so that this process and the LOOKUP subworkflow wait for the
     channels to be ready before determining if the API is available */
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:
@@ -29,7 +29,7 @@ process PREPARE_LOOKUP {
 
 process LOOKUP_MATCHES {
     maxForks 1
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

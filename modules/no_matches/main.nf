@@ -2,7 +2,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 
 process REPORT_NO_MATCHES {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

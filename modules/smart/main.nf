@@ -21,7 +21,7 @@ process PREFILTER_SMART {
 }
 
 process PREPARE_SMART {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:
@@ -100,7 +100,7 @@ process SEARCH_SMART {
 }
 
 process PARSE_SMART {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

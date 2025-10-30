@@ -23,7 +23,7 @@ def DATABASES = [         // Databases supported by InterPro-N
 ]
 
 process PREPARE_INTERPRO_N {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:
@@ -98,7 +98,7 @@ process RUN_INTERPRO_N_GPU {
 }
 
 process PARSE_INTERPRO_N {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

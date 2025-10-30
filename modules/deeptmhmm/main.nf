@@ -50,7 +50,7 @@ process RUN_DEEPTMHMM_GPU {
 }
 
 process PARSE_DEEPTMHMM {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

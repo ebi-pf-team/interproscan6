@@ -21,7 +21,7 @@ process SEARCH_GENE3D {
 }
 
 process RESOLVE_GENE3D {
-    label 'tiny', 'ips6_container'
+    label 'mem_min', 'time_short', 'ips6_container'
 
     input:
     tuple val(meta), val(meta2), path(hmmseach_out)
@@ -40,7 +40,7 @@ process RESOLVE_GENE3D {
 }
 
 process ASSIGN_CATH {
-    label 'tiny', 'ips6_container'
+    label 'mem_min', 'time_short', 'ips6_container'
 
     input:
     tuple val(meta), val(meta2), path(cath_resolve_out)
@@ -62,7 +62,7 @@ process ASSIGN_CATH {
 }
 
 process PARSE_CATHGENE3D {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

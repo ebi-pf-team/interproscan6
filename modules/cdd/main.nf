@@ -65,7 +65,7 @@ process RUN_RPSPROC {
 
 
 process PARSE_RPSPROC {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

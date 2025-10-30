@@ -19,7 +19,7 @@ process RUN_COILS {
 
 
 process PARSE_COILS {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:
