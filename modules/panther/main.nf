@@ -2,7 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 process SEARCH_PANTHER {
-    label 'small', 'dynamic', 'ips6_container'
+    label 'mem_low', 'time_short', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), val(meta2), path(fasta)
@@ -138,7 +138,7 @@ process PREPARE_TREEGRAFTER {
 
 
 process RUN_TREEGRAFTER {
-    label 'small', 'long', 'dynamic', 'ips6_container'
+    label 'mem_low', 'time_short', 'dynamic', 'ips6_container'
     
     input:
     tuple val(meta), val(meta2), val(sequenceIds), val(familyIds), val(fastas)

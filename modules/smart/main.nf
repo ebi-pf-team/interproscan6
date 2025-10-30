@@ -2,7 +2,7 @@ import java.nio.file.Files
 import groovy.json.JsonOutput
 
 process PREFILTER_SMART {
-    label 'small', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)

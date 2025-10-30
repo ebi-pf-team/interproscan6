@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process SEARCH_PIRSF {
-    label 'small', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)

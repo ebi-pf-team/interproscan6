@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process SEARCH_GENE3D {
-    label 'small', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), val(meta2), path(fasta)
