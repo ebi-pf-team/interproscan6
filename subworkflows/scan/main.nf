@@ -271,6 +271,7 @@ workflow SCAN_SEQUENCES {
         TMBED(
             ch_seqs,
             apps_config.tmbed.use_gpu,
+            batch_size,
             apps_config.tmbed.chunk_size,
             apps_config.tmbed.chunk_overlap,
             apps_config.tmbed.smooth_window,

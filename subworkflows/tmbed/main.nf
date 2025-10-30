@@ -4,17 +4,18 @@ workflow TMBED {
     take:
     ch_seqs
     use_gpu
-    chunk_size    // max number of aa per chunked sequence
-    chunk_overlap // overlap between two chunks of a sequence
-    smooth_window // length of the sliding window used during smoothing
-    batch_size    // max number of aa per TMbed batch
+    subbatch_size       // params.subBatchSize
+    chunk_size          // max number of aa per chunked sequence
+    chunk_overlap       // overlap between two chunks of a sequence
+    smooth_window       // length of the sliding window used during smoothing
+    tmbed_batch_size    // max number of aa per TMbed batch
 
     main:
     PREPARE_TMBED(
         ch_seqs,
         chunk_size,
         chunk_overlap,
-        use_gpu ? 5000 : 100 // max number of sequences per FASTA file
+        use_gpu ? subbatch_size * 10 : subbatch_size.intdiv(5)
     )
 
     ch_split = PREPARE_TMBED.out
