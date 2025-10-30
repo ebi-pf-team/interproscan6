@@ -5,58 +5,31 @@ process SEARCH_GENE3D {
 
     input:
     tuple val(meta), val(meta2), path(fasta)
-    path hmmdir
+    path dirpath
     val hmmfile
+    val dom2fam
+    val disc_pickle
 
     output:
-    tuple val(meta), val(meta2), path("hmmsearch.out")
+    tuple val(meta), val(meta2), path("hmmsearch.out"), path("cath.tsv")
 
     script:
     """
     hmmsearch \
         -Z 65245 -E 0.001 \
         --cpu ${task.cpus} \
-        ${hmmdir}/${hmmfile} ${fasta} > hmmsearch.out
-    """
-}
+        ${dirpath}/${hmmfile} ${fasta} > hmmsearch.out
 
-process RESOLVE_GENE3D {
-    label 'mem_min', 'time_short', 'ips6_container'
-
-    input:
-    tuple val(meta), val(meta2), path(hmmseach_out)
-
-    output:
-    tuple val(meta), val(meta2), path("resolved.out")
-
-    script:
-    """
     cath-resolve-hits \
         --input-format=hmmsearch_out \
         --min-dc-hmm-coverage=80 \
         --worst-permissible-bitscore=25 \
-        --output-hmmer-aln ${hmmseach_out} > resolved.out
-    """
-}
+        --output-hmmer-aln hmmsearch.out > resolved.out
 
-process ASSIGN_CATH {
-    label 'mem_min', 'time_short', 'ips6_container'
-
-    input:
-    tuple val(meta), val(meta2), path(cath_resolve_out)
-    path dirpath
-    val dom2fam
-    val disc_pickle
-
-    output:
-    tuple val(meta), val(meta2), path("cath.tsv")
-
-    script:
-    """
     python ${projectDir}/bin/cath/assign_cath_superfamilies.py \
         ${dirpath}/${dom2fam} \
         ${dirpath}/${disc_pickle} \
-        ${cath_resolve_out} \
+        resolved.out \
         cath.tsv
     """
 }

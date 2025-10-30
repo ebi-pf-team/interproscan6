@@ -47,7 +47,7 @@ process SEARCH_FUNFAM {
     path root_dir
 
     output:
-    tuple val(meta), val(meta2), path("hmmsearch.out")
+    tuple val(meta), val(meta2), path("hmmsearch.out"), path("resolved.out")
 
     script:
     def commands = "touch hmmsearch.out\n"
@@ -62,25 +62,12 @@ process SEARCH_FUNFAM {
 
     """
     ${commands}
-    """
-}
 
-process RESOLVE_FUNFAM {
-    label 'mem_low', 'time_short', 'ips6_container'
-
-    input:
-    tuple val(meta), val(meta2), path(hmmseach_out)
-
-    output:
-    tuple val(meta), val(meta2), path("resolved.out")
-
-    script:
-    """
     cath-resolve-hits \
         --input-format=hmmsearch_out \
         --min-dc-hmm-coverage=80 \
         --worst-permissible-bitscore=25 \
-        --output-hmmer-aln ${hmmseach_out} > resolved.out
+        --output-hmmer-aln hmmsearch.out > resolved.out
     """
 }
 
