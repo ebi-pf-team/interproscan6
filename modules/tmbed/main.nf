@@ -66,7 +66,7 @@ process RUN_TMBED_CPU {
 }
 
 process RUN_TMBED_GPU {
-    label 'mem_max', 'time_medium', 'tmbed_container', 'use_gpu'
+    label 'mem_high', 'time_short', 'tmbed_container', 'use_gpu'
 
     input:
     tuple val(meta), path(fasta)

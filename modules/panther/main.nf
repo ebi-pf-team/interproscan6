@@ -138,7 +138,7 @@ process PREPARE_TREEGRAFTER {
 
 
 process RUN_TREEGRAFTER {
-    label 'mem_low', 'time_short', 'dynamic', 'ips6_container'
+    label 'mem_medium', 'time_short', 'dynamic', 'ips6_container'
     
     input:
     tuple val(meta), val(meta2), val(sequenceIds), val(familyIds), val(fastas)
