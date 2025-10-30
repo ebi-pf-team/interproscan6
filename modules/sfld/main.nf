@@ -3,7 +3,7 @@ import groovy.json.JsonOutput
 import Match
 
 process SEARCH_SFLD {
-    label 'mini', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -27,7 +27,7 @@ process SEARCH_SFLD {
 }
 
 process POST_PROCESS_SFLD {
-    label 'mini', 'ips6_container'
+    label 'mem_min', 'time_short', 'ips6_container'
 
     input:
     tuple val(meta), path(hmmsearch_out), val(hmmsearch_dtbl), val(hmmsearch_alignment)

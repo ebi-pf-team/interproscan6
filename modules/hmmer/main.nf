@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process RUN_HMMER {
-    label 'mini', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)

@@ -7,7 +7,7 @@ process RUN_PFSCAN {
     pftools developers. It automates running pfscan for all provided patterns and
     includes post-processing of the hits.
     */
-    label 'mini', 'ips6_container'
+    label 'mem_min', 'time_short', 'ips6_container'
 
     input:
         tuple val(meta), path(fasta)

@@ -3,7 +3,7 @@ import groovy.json.JsonOutput
 import Match
 
 process PREPROCESS_HAMAP {
-    label 'mini', 'brief', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -80,7 +80,7 @@ process PREPARE_HAMAP {
 }
 
 process RUN_HAMAP {
-    label 'mini', 'ips6_container'
+    label 'mem_min', 'time_short', 'ips6_container'
 
     input:
     tuple val(meta), val(profiles), path(fasta_files)

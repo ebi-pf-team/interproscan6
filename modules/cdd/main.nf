@@ -3,7 +3,7 @@ import groovy.json.JsonOutput
 import Match
 
 process RUN_RPSBLAST {
-    label 'mini', 'ips6_container'
+    label 'mem_min', 'time_short', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -43,7 +43,7 @@ process RUN_RPSPROC {
     processes dumped datafiles to obtain required information. All data files
     are downloadable from NCBI ftp site. Read README file for details
     */
-    label 'mini', 'ips6_container'
+    label 'mem_min', 'time_short', 'ips6_container'
 
     input:
     tuple val(meta), val(rpsblast_out)
