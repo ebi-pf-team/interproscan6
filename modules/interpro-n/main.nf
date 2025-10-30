@@ -48,7 +48,7 @@ process PREPARE_INTERPRO_N {
 }
 
 process RUN_INTERPRO_N_CPU {
-    label 'large', 'interpro_n_container'
+    label 'mem_max', 'time_medium', 'interpro_n_container'
 
     input:
     tuple val(meta), path(tsv)
@@ -73,7 +73,7 @@ process RUN_INTERPRO_N_CPU {
 }
 
 process RUN_INTERPRO_N_GPU {
-    label 'large', 'interpro_n_container', 'use_gpu'
+    label 'mem_max', 'time_medium', 'interpro_n_container', 'use_gpu'
 
     input:
     tuple val(meta), path(tsv)

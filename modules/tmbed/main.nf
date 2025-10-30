@@ -45,7 +45,7 @@ process PREPARE_TMBED {
 }
 
 process RUN_TMBED_CPU {
-    label 'large', 'dynamic', 'tmbed_container'
+    label 'mem_max', 'time_medium', 'dynamic', 'tmbed_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -66,7 +66,7 @@ process RUN_TMBED_CPU {
 }
 
 process RUN_TMBED_GPU {
-    label 'large', 'tmbed_container', 'use_gpu'
+    label 'mem_max', 'time_medium', 'tmbed_container', 'use_gpu'
 
     input:
     tuple val(meta), path(fasta)
