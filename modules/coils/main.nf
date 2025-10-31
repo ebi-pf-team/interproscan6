@@ -3,7 +3,7 @@ import groovy.json.JsonOutput
 import Match
 
 process RUN_COILS {
-    label 'mem_min', 'time_short', 'ips6_container'
+    label 'mem_min', 'time_veryshort', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -19,7 +19,7 @@ process RUN_COILS {
 
 
 process PARSE_COILS {
-    label    'mem_low', 'time_short'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

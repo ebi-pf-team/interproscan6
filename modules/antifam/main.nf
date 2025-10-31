@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 
 process PARSE_ANTIFAM {
-    label    'mem_low','time_short'
+    label    'mem_low','time_veryshort'
     executor 'local'
 
     input:
