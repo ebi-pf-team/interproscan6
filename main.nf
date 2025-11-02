@@ -148,7 +148,8 @@ workflow {
         params.goterms,
         params.pathways,
         apps_config.panther.paint,
-        params.skipInterpro
+        params.skipInterpro,
+        params.batchSize
     )
 
     OUTPUT(
