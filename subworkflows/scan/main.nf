@@ -104,7 +104,8 @@ workflow SCAN_SEQUENCES {
             all_appls,
             apps_config.interpro_n.dir,
             apps_config.interpro_n.use_gpu,
-            apps_config.interpro_n.batch_size
+            apps_config.interpro_n.batch_size,
+            batch_size
         )
 
         results = results.mix(INTERPRO_N.out)

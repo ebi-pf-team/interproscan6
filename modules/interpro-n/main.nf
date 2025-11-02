@@ -28,23 +28,38 @@ process PREPARE_INTERPRO_N {
 
     input:
     tuple val(meta), val(fasta)
+    val batch_size    // max number of sequences in output fasta files
 
     output:
-    tuple val(meta), path("sequences.tsv")
+    tuple val(meta), path("sequences_*.tsv", arity: '1..*')
 
     exec:
     def sequences = FastaFile.chunkSequences(fasta.toString(), MAX_LENGTH, CHUNK_OVERLAP)
-
-    def outputFilePath = task.workDir.resolve("sequences.tsv")
-    new File(outputFilePath.toString()).withWriter("UTF-8") { writer ->
+    def fileIndex = 1
+    def seqCount = 0
+    def writer = null
+    def openNewFile = {
+        if (writer) writer.close()
+        def filePath = task.workDir.resolve("sequences_${fileIndex}.tsv").toFile()
+        writer = filePath.newWriter("UTF-8")
         writer.writeLine("accession\tsequence")
+        fileIndex++
+        seqCount = 0
+        return writer
+    }
 
-        sequences.each { seq ->
-            seq.chunks.eachWithIndex { chunk, idx ->
-                writer.writeLine("${seq.id}_${idx + 1}\t${chunk}")
-            }
+    writer = openNewFile()
+    sequences.each { seq ->
+        if (batch_size > 0 && seqCount >= batch_size) {
+            writer = openNewFile()
+        }
+        seq.chunks.eachWithIndex { chunk, idx ->
+            writer.writeLine("${seq.id}_${idx + 1}\t${chunk}")
+            seqCount++
         }
     }
+
+    if (writer) writer.close()
 }
 
 process RUN_INTERPRO_N_CPU {
