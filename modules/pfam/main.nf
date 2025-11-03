@@ -1,4 +1,5 @@
 import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.HMMER3
 import uk.ac.ebi.interpro.LocationFragment
 import uk.ac.ebi.interpro.Match
 
