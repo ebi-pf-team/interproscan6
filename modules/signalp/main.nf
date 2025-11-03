@@ -6,7 +6,7 @@ import uk.ac.ebi.interpro.Signature
 import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_SIGNALP_CPU {
-    label 'mem_high', 'time_medium', 'signalp_container'
+    label 'mem_medium', 'time_medium', 'signalp_container'
 
     input:
     tuple val(meta), path(fasta)
