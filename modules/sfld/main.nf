@@ -42,7 +42,7 @@ process PARSE_SFLD {
     executor 'local'
 
     input:
-    tuple val(meta), val(postprocess_out), val(hmmsearch_out)
+    tuple val(meta), val(hmmsearch_out), val(postprocess_out)
     val dirpath
     val hierarchydb
 
