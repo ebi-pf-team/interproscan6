@@ -1,5 +1,6 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import uk.ac.ebi.interpro.FastaFile
 import uk.ac.ebi.interpro.HMMER3
 import uk.ac.ebi.interpro.Location
 import uk.ac.ebi.interpro.Match

@@ -38,7 +38,7 @@ class FingerPrint {
         return newMatch
     }
 
-    class HierarchyEntry { // represents a row in the HierarchyDB
+    static class HierarchyEntry { // represents a row in the HierarchyDB
         String modelId
         String modelAccession
         Double evalueCutoff

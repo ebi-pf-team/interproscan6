@@ -1,6 +1,7 @@
 import java.nio.file.Files
 import groovy.json.JsonOutput
 import uk.ac.ebi.interpro.FastaFile
+import uk.ac.ebi.interpro.HMMER2
 import uk.ac.ebi.interpro.HMMER3
 
 process PREFILTER_SMART {
