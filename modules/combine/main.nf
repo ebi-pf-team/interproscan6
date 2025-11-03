@@ -30,7 +30,7 @@ process COMBINE_MATCHES {
     label    'mem_high', 'time_medium'
 
     input:
-    tuple val(meta), path(members_matches)
+    tuple val(meta), val(members_matches)
 
     output:
     tuple val(meta), path("combined_matches.json")
