@@ -1,7 +1,11 @@
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
-
-import FastaFile
+import uk.ac.ebi.interpro.FastaFile
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.LocationFragment
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 def MAX_LENGTH    = 2047  // Maximum sequence length
 def CHUNK_OVERLAP = 1000  // Number of overlapping residues between consecutive chunks

@@ -1,4 +1,6 @@
-class Lookup {
+package uk.ac.ebi.interpro
+
+class MatchesApiClient {
     static prepareLookup(List<String> apps, Boolean noMatchesApi, String matchesApiUrl, workflowManifest) {
         List<String> allMatchesApiApps = []
         List<String> matchesApiApps = []

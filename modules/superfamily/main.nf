@@ -1,6 +1,9 @@
 import groovy.json.JsonOutput
-
-import Match
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.LocationFragment
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process SEARCH_SUPERFAMILY {
     label 'mem_min', 'time_short', 'dynamic', 'ips6_container'

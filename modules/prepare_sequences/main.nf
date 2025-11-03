@@ -1,3 +1,6 @@
+import uk.ac.ebi.interpro.FastaFile
+import uk.ac.ebi.interpro.SeqDB
+
 process VALIDATE_FASTA {
     // check the formating of the intput FASTA, i.e. look for illegal characters
     label         'mem_low', 'time_short'

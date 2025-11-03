@@ -1,9 +1,9 @@
-// Class and methods for validating the user inputs
+package uk.ac.ebi.interpro
 
 import groovy.json.JsonSlurper
 import java.security.MessageDigest
 import java.nio.file.*
-import HTTPRequest
+import uk.ac.ebi.interpro.HTTPRequest
 
 class InterProScan {
     static final def PARAMS = [

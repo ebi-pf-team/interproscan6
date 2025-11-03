@@ -1,6 +1,8 @@
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import java.net.URL
-import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.FastaFile
+import uk.ac.ebi.interpro.HTTPRequest
 
 process PREPARE_LOOKUP {
     /* A Simple process to check API and InterPro version compatibility

@@ -6,8 +6,9 @@ import com.fasterxml.jackson.dataformat.xml.util.DefaultXmlPrettyPrinter
 import java.io.StringWriter
 import java.util.regex.Pattern
 import javax.xml.namespace.QName
-
-import Match
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.SeqDB
 
 process WRITE_XML {
     label    'mem_low', 'time_long'

@@ -1,4 +1,5 @@
 import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.HMMER3
 
 process PARSE_NCBIFAM {
     label    'mem_low', 'time_short'

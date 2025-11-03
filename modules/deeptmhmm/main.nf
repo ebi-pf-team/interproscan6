@@ -1,5 +1,9 @@
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.Location  
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_DEEPTMHMM_CPU {
     label       'mem_high', 'time_medium', 'deeptmhmm_container'

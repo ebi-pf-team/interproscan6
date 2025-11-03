@@ -1,3 +1,5 @@
+package uk.ac.ebi.interpro
+
 import java.net.URI
 import groovy.json.JsonSlurper
 

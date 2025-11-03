@@ -1,7 +1,9 @@
 import groovy.io.FileType
 import groovy.json.JsonOutput
-
-import Match
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_PFSEARCH {
     label 'mem_min', 'time_medium', 'ips6_container'

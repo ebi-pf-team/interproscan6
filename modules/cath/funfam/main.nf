@@ -1,5 +1,8 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import uk.ac.ebi.interpro.CATH
+import uk.ac.ebi.interpro.HMMER3
+import uk.ac.ebi.interpro.Match
 
 process PREPARE_FUNFAM {
     label    'mem_low', 'time_short'

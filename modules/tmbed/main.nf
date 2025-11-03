@@ -1,6 +1,8 @@
 import groovy.json.JsonOutput
-
-import Match
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process PREPARE_TMBED {
     label    'mem_low', 'time_short'

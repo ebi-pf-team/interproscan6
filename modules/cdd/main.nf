@@ -1,6 +1,9 @@
 import groovy.json.JsonOutput
-
-import Match
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
+import uk.ac.ebi.interpro.Site
 
 process SEARCH_CDD {
     label 'mem_min', 'time_short', 'ips6_container'

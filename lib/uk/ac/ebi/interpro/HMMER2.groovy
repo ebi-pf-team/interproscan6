@@ -1,4 +1,4 @@
-import Match
+package uk.ac.ebi.interpro
 
 class HMMER2 {
     static parseOutput(String filePath, Map<String, Integer> hmmLengths, String memberDb) {

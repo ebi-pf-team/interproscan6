@@ -1,6 +1,11 @@
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.Entry
+import uk.ac.ebi.interpro.GoXRefs
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.PathwayXRefs
+import uk.ac.ebi.interpro.RepresentativeInfo
 
 process XREFS {
     label    'mem_low', 'time_short'

@@ -1,3 +1,6 @@
+import uk.ac.ebi.interpro.InterProScan
+import uk.ac.ebi.interpro.MatchesApiClient
+
 workflow INIT_PIPELINE {
     // Validate pipeline input parameters
     take:
@@ -91,7 +94,7 @@ workflow INIT_PIPELINE {
         outprefix = "${outdir}/${outprefix}"
     }
 
-    (matches_api_apps, local_only_apps, api_version, error) = Lookup.prepareLookup(
+    (matches_api_apps, local_only_apps, api_version, error) = MatchesApiClient.prepareLookup(
         apps,
         no_matches_api,
         matches_api_url,

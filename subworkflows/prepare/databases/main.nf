@@ -1,4 +1,5 @@
 import groovy.json.JsonSlurper
+import uk.ac.ebi.interpro.InterProScan
 
 include { DOWNLOAD as DOWNLOAD_INTERPRO } from "../../../modules/download"
 include { DOWNLOAD as DOWNLOAD_DATABASE } from "../../../modules/download"

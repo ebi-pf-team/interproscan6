@@ -1,6 +1,8 @@
 import com.fasterxml.jackson.databind.ObjectMapper
-
 import java.util.regex.Pattern
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.SeqDB
 
 process WRITE_GFF3 {
     label    'mem_low', 'time_long'

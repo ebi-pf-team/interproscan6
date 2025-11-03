@@ -1,5 +1,7 @@
 import java.nio.file.Files
 import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.FastaFile
+import uk.ac.ebi.interpro.HMMER3
 
 process PREFILTER_SMART {
     label 'mem_min', 'time_short', 'dynamic', 'ips6_container'

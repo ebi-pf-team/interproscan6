@@ -1,5 +1,9 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_PFSCAN {
     /*

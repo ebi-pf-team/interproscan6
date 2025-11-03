@@ -1,4 +1,6 @@
 import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
 
 process SEARCH_PIRSF {
     label 'mem_low', 'time_short', 'dynamic', 'ips6_container'

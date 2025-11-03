@@ -1,5 +1,8 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.CandidateLocation
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
 
 process REPRESENTATIVE_LOCATIONS {
     label    'mem_low', 'time_short'

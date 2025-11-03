@@ -1,4 +1,7 @@
 import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.CATH
+import uk.ac.ebi.interpro.HMMER3
+import uk.ac.ebi.interpro.Match
 
 process SEARCH_GENE3D {
     label 'mem_min', 'time_short', 'dynamic', 'ips6_container'

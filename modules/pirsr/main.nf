@@ -1,6 +1,10 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import java.util.regex.Pattern
+import uk.ac.ebi.interpro.HMMER3
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Site
+import uk.ac.ebi.interpro.SiteLocation
 
 process PARSE_PIRSR {
     label    'mem_low', 'time_short'
