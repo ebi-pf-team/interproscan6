@@ -1,5 +1,6 @@
 package uk.ac.ebi.interpro
 
+import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 
@@ -16,7 +17,11 @@ class Process {
             }
         }
 
-        def json = JsonOutput.toJson(aggregatedMatches)
-        new File(outputPath).text = json
+        def jf = new JsonFactory()
+        new File(outputPath).withWriter { writer ->
+            def gen = jf.createGenerator(writer)
+            mapper.writeValue(gen, aggregatedMatches)
+            gen.close()
+        }
     }
 }
