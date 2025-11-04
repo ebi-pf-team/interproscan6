@@ -41,7 +41,7 @@ process SEARCH_CDD {
 }
 
 process PARSE_CDD {
-    label    'mem_low', 'time_short'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

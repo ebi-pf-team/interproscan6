@@ -36,7 +36,7 @@ process DOWNLOAD {
 }
 
 process FIND_MISSING_DATA {
-    label    'mem_min', 'time_short'
+    label    'mem_min', 'time_veryshort'
     executor 'local'
 
     input:
@@ -91,7 +91,7 @@ process FIND_MISSING_DATA {
 }
 
 process VALIDATE_DATA {
-    label    'mem_min', 'time_short'
+    label    'mem_min', 'time_veryshort'
     executor 'local'
     cache false  // Stops the esotericsoftware.kryo.serializers warning
 

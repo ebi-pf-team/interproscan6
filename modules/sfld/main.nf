@@ -7,7 +7,7 @@ import uk.ac.ebi.interpro.SignatureLibraryRelease
 import uk.ac.ebi.interpro.Site
 
 process SEARCH_SFLD {
-    label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_veryshort', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -39,7 +39,7 @@ process SEARCH_SFLD {
 }
 
 process PARSE_SFLD {
-    label    'mem_low', 'time_short'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

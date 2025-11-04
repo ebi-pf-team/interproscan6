@@ -29,7 +29,7 @@ process RUN_PFSEARCH {
 }
 
 process PARSE_PFSEARCH {
-    label    'mem_low', 'time_short'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

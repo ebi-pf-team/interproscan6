@@ -40,7 +40,7 @@ process SEARCH_SUPERFAMILY {
 }
 
 process PARSE_SUPERFAMILY {
-    label    'mem_low', 'time_short'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

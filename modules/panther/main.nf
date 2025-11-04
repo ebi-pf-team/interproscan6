@@ -27,7 +27,7 @@ process SEARCH_PANTHER {
 }
 
 process PREPARE_TREEGRAFTER {
-    label    'mem_low', 'time_short'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
@@ -192,7 +192,7 @@ process RUN_TREEGRAFTER {
 }
 
 process PARSE_PANTHER {
-    label    'mem_low', 'time_short'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

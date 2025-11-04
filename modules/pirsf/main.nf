@@ -25,7 +25,7 @@ process SEARCH_PIRSF {
 }
 
 process PARSE_PIRSF {
-    label    'mem_low', 'time_short'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

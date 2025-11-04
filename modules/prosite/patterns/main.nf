@@ -35,7 +35,7 @@ process RUN_PFSCAN {
 
 
 process PARSE_PFSCAN {
-    label    'mem_low', 'time_short'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

@@ -6,7 +6,7 @@ import uk.ac.ebi.interpro.Signature
 import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process WRITE_FASTA {
-    label    'mem_min', 'time_short'
+    label    'mem_min', 'time_veryshort'
     executor 'local'
 
     input:
@@ -26,7 +26,7 @@ process WRITE_FASTA {
 }
 
 process SEARCH_PHOBIUS {
-    label       'mem_low', 'time_short', 'ips6_container'
+    label       'mem_min', 'time_short', 'ips6_container'
     stageInMode 'copy'
 
     input:
@@ -45,7 +45,7 @@ process SEARCH_PHOBIUS {
 }
 
 process PARSE_PHOBIUS {
-    label    'mem_low', 'time_short'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

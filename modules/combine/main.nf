@@ -4,7 +4,7 @@ import groovy.json.JsonOutput
 import uk.ac.ebi.interpro.Process
 
 process COMBINE_MATCHES_LOCAL {
-    label    'mem_low', 'time_short'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
@@ -19,7 +19,7 @@ process COMBINE_MATCHES_LOCAL {
 }
 
 process COMBINE_MATCHES {
-    label    'mem_high', 'time_medium', 'groovy_container'
+    label    'mem_high', 'time_veryshort', 'groovy_container'
 
     input:
     tuple val(meta), path(jsons, arity: '1..*', name: '?/*')

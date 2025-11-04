@@ -7,7 +7,7 @@ import uk.ac.ebi.interpro.Site
 import uk.ac.ebi.interpro.SiteLocation
 
 process PARSE_PIRSR {
-    label    'mem_low', 'time_short'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

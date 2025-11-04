@@ -5,7 +5,7 @@ import uk.ac.ebi.interpro.HMMER3
 import uk.ac.ebi.interpro.Match
 
 process PREPARE_FUNFAM {
-    label    'mem_low', 'time_short'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
@@ -76,7 +76,7 @@ process SEARCH_FUNFAM {
 
 
 process PARSE_FUNFAM {
-    label    'mem_low', 'time_short'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

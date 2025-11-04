@@ -5,7 +5,7 @@ import uk.ac.ebi.interpro.HMMER2
 import uk.ac.ebi.interpro.HMMER3
 
 process PREFILTER_SMART {
-    label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_veryshort', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -24,7 +24,7 @@ process PREFILTER_SMART {
 }
 
 process PREPARE_SMART {
-    label    'mem_low', 'time_short'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
@@ -71,7 +71,7 @@ process PREPARE_SMART {
 }
 
 process SEARCH_SMART {
-    label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_veryshort', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), val(smart_fasta_pairs)

@@ -4,7 +4,7 @@ import uk.ac.ebi.interpro.LocationFragment
 import uk.ac.ebi.interpro.Match
 
 process PARSE_PFAM {
-    label    'mem_low', 'time_short'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
