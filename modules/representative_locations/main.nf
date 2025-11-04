@@ -1,5 +1,5 @@
+import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
-import groovy.json.JsonOutput
 import uk.ac.ebi.interpro.CandidateLocation
 import uk.ac.ebi.interpro.Location
 import uk.ac.ebi.interpro.Match
@@ -121,8 +121,13 @@ process REPRESENTATIVE_LOCATIONS {
     }
 
     def outputFilePath = task.workDir.resolve("matches_with_representative.json")
-    def json = JsonOutput.toJson(matchesMap)
-    new File(outputFilePath.toString()).write(json)
+    def jf = new JsonFactory()
+    new File(outputFilePath.toString()).withWriter { writer ->
+        def gen = jf.createGenerator(writer)
+        def mapper = new ObjectMapper()
+        mapper.writeValue(gen, matchesMap)
+        gen.close()
+    }
 }
 
 List<CandidateLocation> getCandidateLocations(Map matches, String reprType) {

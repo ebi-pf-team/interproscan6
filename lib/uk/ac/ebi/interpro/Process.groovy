@@ -2,7 +2,6 @@ package uk.ac.ebi.interpro
 
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
-import groovy.json.JsonOutput
 
 class Process {
     static void combineMatches(List<String> inputPaths, String outputPath) {
