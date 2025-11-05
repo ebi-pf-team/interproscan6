@@ -237,6 +237,7 @@ workflow SCAN_SEQUENCES {
             apps_config.signalp_prok.mode,
             apps_config.signalp_prok.dir,
             apps_config.signalp_prok.use_gpu,
+            batch_size
         ).set{ ch_signalp }
         results = results.mix(ch_signalp)
     }
