@@ -38,6 +38,7 @@ nextflow_workflow {
                 add_pathways = true
                 panther_paint_dir = "$baseDir/tests/data/databases/interpro/105.0"
                 skip_interpro = true
+                batch_size = 5000
             }
             workflow {
                 """
@@ -47,6 +48,7 @@ nextflow_workflow {
                 input[3] = params.add_pathways
                 input[4] = params.panther_paint_dir
                 input[5] = params.skip_interpro
+                input[6] = params.batch_size
                 """
             }
         }
@@ -89,6 +91,7 @@ nextflow_workflow {
                 add_pathways = true
                 panther_paint_dir = "tests/data/databases/interpro/105.0"
                 skip_interpro = false
+                batch_size = 5000
             }
             workflow {
                 """
@@ -98,6 +101,7 @@ nextflow_workflow {
                 input[3] = params.add_pathways
                 input[4] = params.panther_paint_dir
                 input[5] = params.skip_interpro
+                input[6] = params.batch_size
                 """
             }
         }
