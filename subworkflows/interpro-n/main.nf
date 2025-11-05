@@ -12,7 +12,7 @@ workflow INTERPRO_N {
     main:
     PREPARE_INTERPRO_N(
         ch_seqs, 
-        use_gpu ? seq_batch_size * 10 : seq_batch_size
+        use_gpu ? seq_batch_size * 10 : seq_batch_size.intdiv(5)
     )
 
     ch_tsv = PREPARE_INTERPRO_N.out
