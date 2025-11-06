@@ -1,18 +1,12 @@
 # InterProScan 6
 
-[![Nextflow](https://img.shields.io/badge/%E2%89%A524.10.4-0dc09d?style=flat&logo=nextflow&label=nextflow&labelColor=f5fafe)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/%E2%89%A525.04.6-0dc09d?style=flat&logo=nextflow&label=nextflow&labelColor=f5fafe)](https://www.nextflow.io/)
 [![run with docker](https://img.shields.io/badge/docker-1D63ED?logo=docker&logoColor=1D63ED&label=run%20with&labelColor=f5fafe)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/singularity-1E4383?label=run%20with&labelColor=f5fafe)](https://sylabs.io/docs/)
 
 [InterPro](http://www.ebi.ac.uk/interpro/) is a database that brings together predictive information on protein function from multiple partner resources. It provides an integrated view of the families, domains and functional sites to which a given protein belongs.
 
 **InterProScan** is the command‑line tool that allows you to scan protein or nucleotide sequences against the InterPro member‑database signatures in a single workflow. Researchers with novel sequences can use InterProScan to annotate their data with family classifications, domain architectures and site predictions.
-
-> [!WARNING]
-> **InterProScan 6 is now in beta**.
-> The core functionality is complete, and results have been benchmarked against InterProScan 5 with high similarity across all analyses.
->
-> We encourage users to test this version and report any issues or suggestions. Minor changes and refinements may still occur before the final release.
 
 ## Installation
 
@@ -38,7 +32,7 @@ If you have Docker and Nextflow installed, you can quickly test InterProScan and
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.0-beta \
+  -r 6.0.0 \
   -profile docker,test \
   --datadir data \
   --interpro latest
@@ -46,7 +40,7 @@ nextflow run ebi-pf-team/interproscan6 \
 
 Explanation of parameters:
 
-* `-r 6.0.0-beta`: Specifies the version of InterProScan to run. We strongly recommend always specifying a version to ensure consistent and reproducible results.
+* `-r 6.0.0`: Specifies the version of InterProScan to run. We strongly recommend always specifying a version to ensure consistent and reproducible results.
 * `-profile docker,test`:
   * `docker`: Executes tasks in Docker containers.
   * `test`: Uses a small test FASTA file included in the workflow.
@@ -54,16 +48,17 @@ Explanation of parameters:
 * `--interpro latest`: Uses the latest available InterPro data release.
 
 > [!NOTE]
-> While `--interpro latest` is the default, we strongly recommend pinning a specific version (e.g. `--interpro 106.0`) to ensure reproducibility.
+> While `--interpro latest` is the default, we strongly recommend pinning a specific version (e.g. `--interpro 107.0`) to ensure reproducibility.
 
 After the run completes, the following files will be created in your working directory:
 
 * `test.faa.gff3`: annotations in GFF3 format
 * `test.faa.json`: Full annotations in JSON format
+* `test.faa.jsonl`: Full annotations in JSON Lines format (one line for each input sequence)
 * `test.faa.tsv`: Tabular summary of matches (TSV format)
 * `test.faa.xml`: Full annotations in XML format
 
-The JSON and XML outputs are more comprehensive, the TSV is a concise summary, and the GFF3 is a standard format suitable for genome browsers and annotation pipelines.
+The JSON, JSON Lines, and XML outputs are more comprehensive, the TSV is a concise summary, and the GFF3 is a standard format suitable for genome browsers and annotation pipelines.
 
 ### Scanning your own sequences
 
@@ -71,7 +66,7 @@ To annotate your own sequences FASTA file, omit the `test` profile and specify `
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.0-beta \
+  -r 6.0.0 \
   -profile docker \
   --datadir data \
   --input /path/to/sequences.faa
@@ -81,7 +76,7 @@ For nucleotide sequences, add `--nucleic`:
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.0-beta \
+  -r 6.0.0 \
   -profile docker \
   --datadir data \
   --input /path/to/sequences.fna \
@@ -90,11 +85,13 @@ nextflow run ebi-pf-team/interproscan6 \
 
 ### Selecting specific analyses
 
-To run only certain analyses, e.g. Pfam and MobiDB-lite:
+By default, only non-ML/AI analyses are enabled. DeepTMHMM, TMbed, and SignalP 6 are not executed unless explicitly requested. TMbed is bundled; DeepTMHMM and SignalP 6 require separate installation due to licensing.
+
+Specific analyses can be selected using `--applications`. Example: run Pfam and MobiDB-lite only:
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.0-beta \
+  -r 6.0.0 \
   -profile docker \
   --datadir data \
   --input /path/to/sequences.faa \
@@ -102,10 +99,39 @@ nextflow run ebi-pf-team/interproscan6 \
 ```
 
 > [!TIP]
-> Analysis names are case-insensitive and ignore hyphens and underscores: `MobiDB-lite`, `mobidblite`, and `MOBIDB_LITE` are all valid.
+> Analysis names are case-insensitive, and hyphens and underscores are ignored: `MobiDB-lite`, `mobidblite`, and `MOBIDB_LITE` are all valid.
 
 > [!NOTE]  
-> Not sure which analyses to choose? See the [Available analyses](#available-analyses) table for descriptions of each tool and license requirements.
+> Refer to the [Available analyses](#available-analyses) section for descriptions and licensing details.
+
+Specific analyses can be excluded with `--skip-applications`, e.g.:
+
+```sh
+nextflow run ebi-pf-team/interproscan6 \
+  -r 6.0.0 \
+  -profile docker \
+  --datadir data \
+  --input /path/to/sequences.faa \
+  --skip-applications CDD,NCBIFAM,SUPERFAMILY
+```
+
+#### Enabling AI/ML analyses
+
+AI/ML analyses are disabled by default because they are substantially more computationally expensive than traditional profile-based analyses.
+
+Individual analyses may be enabled with `--applications`, or all ML-capable analyses may be enabled with `--run-ml`. AI/ML analyses run on CPU unless GPU execution is requested using `--use-gpu`:
+
+```sh
+nextflow run ebi-pf-team/interproscan6 \
+  -r 6.0.0 \
+  -profile docker \
+  --datadir data \
+  --input /path/to/sequences.faa \
+  --run-ml \
+  --use-gpu
+```
+
+Omit `--use-gpu` to run on CPU.
 
 ### Including GO terms and pathway annotations
 
@@ -113,7 +139,7 @@ To include Gene Ontology terms and pathway annotations:
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.0-beta \
+  -r 6.0.0 \
   -profile docker \
   --datadir data \
   --input /path/to/sequences.faa \
@@ -129,7 +155,7 @@ Most HPC systems do not support Docker, but they often support Singularity or Ap
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.0-beta \
+  -r 6.0.0 \
   -profile singularity,slurm \
   --datadir data \
   --input /path/to/sequences.faa
@@ -142,28 +168,29 @@ nextflow run ebi-pf-team/interproscan6 \
 
 | Name             | Description                                                                             | Included |
 |------------------|-----------------------------------------------------------------------------------------|----------|
-| AntiFam          | Identifies sequences likely to be spurious or misannotated                              | ✅ Yes    |
-| CATH-Gene3D      | Identifies structural domains from the CATH classification                              | ✅ Yes    |
-| CATH-FunFam      | Groups protein domains into functional families based on CATH                           | ✅ Yes    |
-| CDD              | Detects conserved domains using position-specific scoring matrices from NCBI            | ✅ Yes    |
-| COILS            | Predicts coiled-coil regions based on sequence patterns                                 | ✅ Yes    |
-| DeepTMHMM        | Predicts transmembrane helices                                                          | ❌ No     |
-| HAMAP            | Identifies high-confidence protein families in microbial and organellar proteomes       | ✅Yes     |
-| MobiDB-lite      | Predicts intrinsically disordered regions                                               | ✅ Yes    |
-| NCBIFAM          | Matches proteins to curated HMMs from NCBI, including TIGRFAMs                          | ✅ Yes    |
-| PANTHER          | Classifies proteins into families and subfamilies with curated GO terms                 | ✅ Yes    |
-| Pfam             | Detects protein domains and families using HMMs built from multiple sequence alignments | ✅ Yes    |
-| Phobius          | Predicts transmembrane topology and signal peptides                                     | ❌ No     |
-| PIRSF            | Classifies proteins into evolutionary families based on full-length sequence similarity | ✅ Yes    |
-| PIRSR            | Identifies conserved residues using manually curated site rules                         | ✅ Yes    |
-| PRINTS           | Detects protein families using groups of conserved motifs                               | ✅ Yes    |
-| PROSITE-patterns | Identifies protein features based on short sequence motifs                              | ✅ Yes    |
-| PROSITE-profiles | Detects protein families and domains using position-specific scoring profiles           | ✅ Yes    |
-| SFLD             | Classifies enzymes by relating sequence features to chemical function                   | ✅ Yes    |
-| SMART            | Identifies signaling and extracellular domains                                          | ✅ Yes    |
-| SUPERFAMILY      | Assigns structural domains using HMMs based on the SCOP superfamily classification.     | ✅ Yes    |
-| SignalP-Euk      | Predicts signal peptides in eukaryotic proteins                                         | ❌ No     |
-| SignalP-Prok     | Predicts signal peptides in prokaryotic proteins                                        | ❌ No     |
+| AntiFam          | Identifies sequences likely to be spurious or misannotated                              | ✅ Yes   |
+| CATH-Gene3D      | Identifies structural domains from the CATH classification                              | ✅ Yes   |
+| CATH-FunFam      | Groups protein domains into functional families based on CATH                           | ✅ Yes   |
+| CDD              | Detects conserved domains using position-specific scoring matrices from NCBI            | ✅ Yes   |
+| COILS            | Predicts coiled-coil regions based on sequence patterns                                 | ✅ Yes   |
+| DeepTMHMM        | Predicts transmembrane helices                                                          | ❌ No    |
+| HAMAP            | Identifies high-confidence protein families in microbial and organellar proteomes       | ✅Yes    |
+| MobiDB-lite      | Predicts intrinsically disordered regions                                               | ✅ Yes   |
+| NCBIFAM          | Matches proteins to curated HMMs from NCBI, including TIGRFAMs                          | ✅ Yes   |
+| PANTHER          | Classifies proteins into families and subfamilies with curated GO terms                 | ✅ Yes   |
+| Pfam             | Detects protein domains and families using HMMs built from multiple sequence alignments | ✅ Yes   |
+| Phobius          | Predicts transmembrane topology and signal peptides                                     | ❌ No    |
+| PIRSF            | Classifies proteins into evolutionary families based on full-length sequence similarity | ✅ Yes   |
+| PIRSR            | Identifies conserved residues using manually curated site rules                         | ✅ Yes   |
+| PRINTS           | Detects protein families using groups of conserved motifs                               | ✅ Yes   |
+| PROSITE-patterns | Identifies protein features based on short sequence motifs                              | ✅ Yes   |
+| PROSITE-profiles | Detects protein families and domains using position-specific scoring profiles           | ✅ Yes   |
+| SFLD             | Classifies enzymes by relating sequence features to chemical function                   | ✅ Yes   |
+| SMART            | Identifies signaling and extracellular domains                                          | ✅ Yes   |
+| SUPERFAMILY      | Assigns structural domains using HMMs based on the SCOP superfamily classification.     | ✅ Yes   |
+| SignalP-Euk      | Predicts signal peptides in eukaryotic proteins                                         | ❌ No    |
+| SignalP-Prok     | Predicts signal peptides in prokaryotic proteins                                        | ❌ No    |
+| TMbed            | Predicts transmembrane helices, transmembrane strands, and signal peptides              | ✅ Yes   |
 
 ## Licensed analyses
 
@@ -256,7 +283,7 @@ params {
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.0-beta \
+  -r 6.0.0 \
   -profile docker \
   -c licensed.conf \
   --input /path/to/sequences.faa \
@@ -290,16 +317,13 @@ And run with:
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.0-beta \
+  -r 6.0.0 \
   -profile docker \
   -c licensed.conf \
   --input /path/to/sequences.faayour.fasta \
   --applications deeptmhmm,phobius,signalp_euk,signalp_prok \
-  --no-matches-api
+  --use-gpu
 ```
-
-> [!WARNING]  
-> As DeepTMHMM 1.0 and SignalP 6.0 predictions are not yet available in the [Matches API](https://www.ebi.ac.uk/interpro/matches/api/), the pre-calculated matches lookup must be disabled with `--no-matches-api`.
 
 > [!NOTE]  
 > Running both `signalp_euk` and `signalp_prok` will execute SignalP twice, once with eukaryotic post-processing and once without. Choose the mode best suited to your dataset.
