@@ -1,3 +1,5 @@
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import java.net.URL
@@ -56,11 +58,17 @@ process LOOKUP_MATCHES {
     String baseUrl = HTTPRequest.sanitizeURL(url.toString())
     boolean success = true
 
+    int i = 0
     for (chunk in chunks) {
+        i++
+        def start = System.currentTimeMillis();
+
         data = JsonOutput.toJson([md5: chunk])
         response = HTTPRequest.fetch("${baseUrl}/matches", data, maxRetries, true)
 
         if (response != null) {
+            long elapsedMs = System.currentTimeMillis() - start
+            log.info "chunk: ${i}; elapsed: ${elapsedMs} ms"
             response.results.each {
                 String proteinMd5 = it.md5.toUpperCase()
                 if (it.found) {
@@ -89,7 +97,13 @@ process LOOKUP_MATCHES {
     }
 
     if (success) {
-        new File(calculatedMatchesPath.toString()).write(JsonOutput.toJson(calculatedMatches))
+        def jf = new JsonFactory()
+        new File(calculatedMatchesPath.toString()).withWriter { writer ->
+        def mapper = new ObjectMapper()
+            def gen = jf.createGenerator(writer)
+            mapper.writeValue(gen, calculatedMatches)
+            gen.close()
+        }
         if (noLookupFasta.length() != 0) {
             new File(noLookupFastaPath.toString()).write(noLookupFasta.toString())
         }
