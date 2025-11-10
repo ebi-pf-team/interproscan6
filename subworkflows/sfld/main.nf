@@ -1,4 +1,4 @@
-include { SEARCH_SFLD; POST_PROCESS_SFLD; PARSE_SFLD } from  "../../modules/sfld"
+include { SEARCH_SFLD; PARSE_SFLD } from  "../../modules/sfld"
 
 workflow SFLD {
     take:
@@ -12,17 +12,12 @@ workflow SFLD {
     SEARCH_SFLD(
         ch_seqs,
         dirpath,
-        hmmfile
-    )
-
-    POST_PROCESS_SFLD(
-        SEARCH_SFLD.out,
-        dirpath,
+        hmmfile,
         annofile
     )
 
     ch_sfld = PARSE_SFLD(
-        POST_PROCESS_SFLD.out,
+        SEARCH_SFLD.out,
         dirpath,
         hierarchyfile
     )

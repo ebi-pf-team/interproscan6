@@ -6,10 +6,7 @@ workflow PHOBIUS {
     phobius_dir
 
     main:
-    ch_split = ch_seqs
-        .splitFasta( by: 5000, file: true )
-
-    WRITE_FASTA(ch_split)
+    WRITE_FASTA(ch_seqs)
 
     SEARCH_PHOBIUS(
         WRITE_FASTA.out,

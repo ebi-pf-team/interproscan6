@@ -1,3 +1,8 @@
+package uk.ac.ebi.interpro
+
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.LocationFragment
+
 class CandidateLocation {
     // Used during selection of representative locations
     Location location

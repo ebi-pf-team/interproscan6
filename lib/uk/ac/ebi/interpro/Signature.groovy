@@ -1,5 +1,4 @@
-import Entry
-import SignatureLibraryRelease
+package uk.ac.ebi.interpro
 
 class Signature implements Serializable {
     // The order of the fields here determines their order in the final output files

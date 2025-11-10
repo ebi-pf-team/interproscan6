@@ -1,17 +1,21 @@
 import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
+import uk.ac.ebi.interpro.Site
 
-import Match
-
-process RUN_RPSBLAST {
-    label 'mini', 'ips6_container'
+process SEARCH_CDD {
+    label 'mem_min', 'time_short', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
     path cdd_dir
     val rpsblast_db
+    val rpsproc_db
 
     output:
-    tuple val(meta), path("rpsblast.out")
+    tuple val(meta), path("rpsbproc.out")
 
     script:
     """
@@ -27,45 +31,17 @@ process RUN_RPSBLAST {
         -db "${cdd_dir}/${rpsblast_db}" \
         -out rpsblast.out \
         -evalue 0.01 -seg no -outfmt 11
-    """
-}
 
-
-process RUN_RPSPROC {
-    /*
-    Process output from rpsblast to annotate sequence with conserved
-    domain information
-
-    rpsbproc desc:
-    This utility processes domain hit data produced by local RPS-BLAST and
-    generates domain family and/or superfamily annotations on the query
-    sequences. Instead of retrieving domain data from database, this program
-    processes dumped datafiles to obtain required information. All data files
-    are downloadable from NCBI ftp site. Read README file for details
-    */
-    label 'mini', 'ips6_container'
-
-    input:
-    tuple val(meta), val(rpsblast_out)
-    path cdd_dir
-    val rpsproc_db
-
-    output:
-    tuple val(meta), path("rpsbproc.out")
-
-    script:
-    """
     rpsbproc \
-        --infile ${rpsblast_out} \
+        --infile rpsblast.out \
         --outfile rpsbproc.out \
         --data-path ${cdd_dir}/${rpsproc_db} \
         -m std
     """
 }
 
-
-process PARSE_RPSPROC {
-    label    'tiny'
+process PARSE_CDD {
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

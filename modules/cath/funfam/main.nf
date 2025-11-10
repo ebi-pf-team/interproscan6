@@ -1,8 +1,11 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import uk.ac.ebi.interpro.CATH
+import uk.ac.ebi.interpro.HMMER3
+import uk.ac.ebi.interpro.Match
 
 process PREPARE_FUNFAM {
-    label    'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
@@ -40,14 +43,14 @@ process PREPARE_FUNFAM {
 }
 
 process SEARCH_FUNFAM {
-    label 'small', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), val(meta2), path(fasta), val(supfams)
     path root_dir
 
     output:
-    tuple val(meta), val(meta2), path("hmmsearch.out")
+    tuple val(meta), val(meta2), path("hmmsearch.out"), path("resolved.out")
 
     script:
     def commands = "touch hmmsearch.out\n"
@@ -62,31 +65,18 @@ process SEARCH_FUNFAM {
 
     """
     ${commands}
-    """
-}
 
-process RESOLVE_FUNFAM {
-    label 'tiny', 'ips6_container'
-
-    input:
-    tuple val(meta), val(meta2), path(hmmseach_out)
-
-    output:
-    tuple val(meta), val(meta2), path("resolved.out")
-
-    script:
-    """
     cath-resolve-hits \
         --input-format=hmmsearch_out \
         --min-dc-hmm-coverage=80 \
         --worst-permissible-bitscore=25 \
-        --output-hmmer-aln ${hmmseach_out} > resolved.out
+        --output-hmmer-aln hmmsearch.out > resolved.out
     """
 }
 
 
 process PARSE_FUNFAM {
-    label    'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

@@ -1,8 +1,9 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.FastaFile
 
 process REPORT_NO_MATCHES {
-    label    'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

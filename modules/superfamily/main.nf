@@ -1,9 +1,12 @@
 import groovy.json.JsonOutput
-
-import Match
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.LocationFragment
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process SEARCH_SUPERFAMILY {
-    label 'tiny', 'short', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), val(meta2), path(fasta)
@@ -37,7 +40,7 @@ process SEARCH_SUPERFAMILY {
 }
 
 process PARSE_SUPERFAMILY {
-    label    'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

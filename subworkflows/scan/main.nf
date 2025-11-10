@@ -81,7 +81,8 @@ workflow SCAN_SEQUENCES {
         DEEPTMHMM(
             ch_seqs,
             apps_config.deeptmhmm.dir,
-            apps_config.deeptmhmm.use_gpu
+            apps_config.deeptmhmm.use_gpu,
+            batch_size
         )
         results = results.mix(DEEPTMHMM.out)
     }
@@ -103,7 +104,8 @@ workflow SCAN_SEQUENCES {
             all_appls,
             apps_config.interpro_n.dir,
             apps_config.interpro_n.use_gpu,
-            apps_config.interpro_n.batch_size
+            apps_config.interpro_n.batch_size,
+            batch_size
         )
 
         results = results.mix(INTERPRO_N.out)
@@ -235,6 +237,7 @@ workflow SCAN_SEQUENCES {
             apps_config.signalp_prok.mode,
             apps_config.signalp_prok.dir,
             apps_config.signalp_prok.use_gpu,
+            batch_size
         ).set{ ch_signalp }
         results = results.mix(ch_signalp)
     }
@@ -270,6 +273,7 @@ workflow SCAN_SEQUENCES {
         TMBED(
             ch_seqs,
             apps_config.tmbed.use_gpu,
+            batch_size,
             apps_config.tmbed.chunk_size,
             apps_config.tmbed.chunk_overlap,
             apps_config.tmbed.smooth_window,

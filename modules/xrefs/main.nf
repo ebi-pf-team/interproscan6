@@ -1,9 +1,13 @@
-import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
-import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.Entry
+import uk.ac.ebi.interpro.GoXRefs
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.PathwayXRefs
+import uk.ac.ebi.interpro.RepresentativeInfo
 
 process XREFS {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:
@@ -87,8 +91,13 @@ process XREFS {
     }  // end of Json reader / seq Id
 
     String outputFilePath = task.workDir.resolve("matches2xrefs.json")
-    def json = JsonOutput.toJson(matchesFileMap)
-    new File(outputFilePath.toString()).write(json)
+    def jf = new JsonFactory()
+    new File(outputFilePath.toString()).withWriter { writer ->
+        def gen = jf.createGenerator(writer)
+        def mapper = new ObjectMapper()
+        mapper.writeValue(gen, matchesFileMap)
+        gen.close()
+    }
 }
 
 def loadXRefFiles(prefix) {

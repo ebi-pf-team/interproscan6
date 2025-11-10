@@ -1,9 +1,9 @@
-// Class and methods for validating the user inputs
+package uk.ac.ebi.interpro
 
 import groovy.json.JsonSlurper
 import java.security.MessageDigest
 import java.nio.file.*
-import HTTPRequest
+import uk.ac.ebi.interpro.HTTPRequest
 
 class InterProScan {
     static final def PARAMS = [
@@ -24,6 +24,11 @@ class InterProScan {
             description: "comma-separated applications to scan the sequences with. Default: all.",
         ],
         [
+            name: "skip-applications",
+            metavar: "<APPLICATIONS>",
+            description: "comma-separated applications to exclude from analysis. Default: none.",
+        ],
+        [
             name: "run-ml",
             description: "run available activated machine learning (ML) based applications (e.g. DeepTMHMM, SignalP 6, TMbed). By default, ML analyses are disabled due to their high resource requirements."
         ],
@@ -34,7 +39,7 @@ class InterProScan {
         [
             name: "formats",
             metavar: "<FORMATS>",
-            description: "comma-separated output formats. Available: JSON,TSV,XML,GFF3. Default: JSON,TSV,XML,GFF3."
+            description: "comma-separated output formats. Available: gff3,json,jsonl,tsv,xml. Default: all."
         ],
         [
             name: "outdir",
@@ -92,7 +97,7 @@ class InterProScan {
         ],
         [
             name: "cpus",
-            description: null
+            description: "specify the number of CPU cores to allocate to processes that support multithreading. Default: 1."
         ],
         [
             name: "batch-size",
@@ -101,11 +106,6 @@ class InterProScan {
         [
             name: "sub-batch-size",
             description: null
-        ],
-        [
-            name: "skip-applications",
-            metavar: "<APPLICATIONS>",
-            description: "comma-separated applications to exclude from analysis. Default: none.",
         ],
         [
             name: "skip-interpro",

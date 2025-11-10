@@ -7,11 +7,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import groovy.json.JsonException
 import java.util.regex.Pattern
-
-import Match
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.SeqDB
 
 process WRITE_JSON {
-    label    'tiny', 'long'
+    label    'mem_low', 'time_long'
     executor 'local'
 
     input:

@@ -1,8 +1,11 @@
 import java.nio.file.Files
 import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.FastaFile
+import uk.ac.ebi.interpro.HMMER2
+import uk.ac.ebi.interpro.HMMER3
 
 process PREFILTER_SMART {
-    label 'small', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_veryshort', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -21,7 +24,7 @@ process PREFILTER_SMART {
 }
 
 process PREPARE_SMART {
-    label    'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
@@ -68,7 +71,7 @@ process PREPARE_SMART {
 }
 
 process SEARCH_SMART {
-    label 'medium', 'long', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_veryshort', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), val(smart_fasta_pairs)
@@ -100,7 +103,7 @@ process SEARCH_SMART {
 }
 
 process PARSE_SMART {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

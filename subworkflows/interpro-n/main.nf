@@ -6,17 +6,25 @@ workflow INTERPRO_N {
     applications
     checkpoint_dir
     use_gpu
-    batch_size
+    res_batch_size      // Max number of residues per InterPro-N batch
+    seq_batch_size      // params.subBatchSize
 
     main:
+    PREPARE_INTERPRO_N(
+        ch_seqs, 
+        use_gpu ? seq_batch_size * 10 : seq_batch_size.intdiv(5)
+    )
 
-    ch_tsv = PREPARE_INTERPRO_N(ch_seqs)
+    ch_tsv = PREPARE_INTERPRO_N.out
+        .flatMap { meta, files ->
+            files.collect { f -> tuple(meta, f) }
+        }
 
     if (use_gpu) {
         RUN_INTERPRO_N_GPU(
             ch_tsv,
             checkpoint_dir,
-            batch_size
+            res_batch_size
         )
 
         ch_json = RUN_INTERPRO_N_GPU.out
@@ -24,7 +32,7 @@ workflow INTERPRO_N {
         RUN_INTERPRO_N_CPU(
             ch_tsv,
             checkpoint_dir,
-            batch_size
+            res_batch_size
         )
         ch_json = RUN_INTERPRO_N_CPU.out
     }

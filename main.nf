@@ -1,5 +1,6 @@
 nextflow.enable.dsl=2
 import java.time.format.DateTimeFormatter
+import uk.ac.ebi.interpro.InterProScan
 
 include { INIT_PIPELINE      } from "./subworkflows/init"
 include { PREPARE_DATABASES  } from "./subworkflows/prepare/databases"
@@ -148,7 +149,8 @@ workflow {
         params.goterms,
         params.pathways,
         apps_config.panther.paint,
-        params.skipInterpro
+        params.skipInterpro,
+        params.batchSize
     )
 
     OUTPUT(

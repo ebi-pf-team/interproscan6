@@ -1,8 +1,8 @@
 nextflow_process {
 
-    name "Test Process PARSE_RPSPROC"
+    name "Test Process PARSE_CDD"
     script "modules/cdd/main.nf"
-    process "PARSE_RPSPROC"
+    process "PARSE_CDD"
 
     test("Should run without failures") {
 

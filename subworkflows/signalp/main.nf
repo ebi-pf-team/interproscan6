@@ -17,6 +17,7 @@ workflow SIGNALP {
     prok_mode
     prok_dir
     prok_gpu
+    batch_size  // params.subBatchSize
 
     main:
     results = Channel.empty()
@@ -31,8 +32,10 @@ workflow SIGNALP {
             )
             ch_euk = RUN_SIGNALP_GPU_EUK.out
         } else {
+            ch_euk_split = ch_seqs
+                .splitFasta( by: batch_size * 10, file: true )
             RUN_SIGNALP_CPU_EUK(
-                ch_seqs,
+                ch_euk_split,
                 euk_organism,
                 euk_mode,
                 euk_dir
@@ -53,8 +56,10 @@ workflow SIGNALP {
             )
             ch_prok = RUN_SIGNALP_GPU_PROK.out
         } else {
+            ch_prok_split = ch_seqs
+                .splitFasta( by: batch_size * 10, file: true )
             RUN_SIGNALP_CPU_PROK(
-                ch_seqs,
+                ch_prok_split,
                 prok_organism,
                 prok_mode,
                 prok_dir

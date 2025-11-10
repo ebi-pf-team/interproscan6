@@ -1,7 +1,11 @@
 import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_MOBIDBLITE {
-    label 'mini', 'brief', 'dynamic', 'mobidblite_container'
+    label 'mem_min', 'time_veryshort', 'dynamic', 'mobidblite_container'
 
     input:
     tuple val(meta), val(meta2), path(fasta)
@@ -17,7 +21,7 @@ process RUN_MOBIDBLITE {
 
 
 process PARSE_MOBIDBLITE {
-    label    'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

@@ -1,8 +1,13 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import uk.ac.ebi.interpro.FastaFile
+import uk.ac.ebi.interpro.HMMER3
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.TreeGrafter
 
 process SEARCH_PANTHER {
-    label 'small', 'dynamic', 'ips6_container'
+    label 'mem_low', 'time_short', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), val(meta2), path(fasta)
@@ -22,7 +27,7 @@ process SEARCH_PANTHER {
 }
 
 process PREPARE_TREEGRAFTER {
-    label    'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
@@ -138,7 +143,7 @@ process PREPARE_TREEGRAFTER {
 
 
 process RUN_TREEGRAFTER {
-    label 'small', 'long', 'dynamic', 'ips6_container'
+    label 'mem_medium', 'time_short', 'dynamic', 'ips6_container'
     
     input:
     tuple val(meta), val(meta2), val(sequenceIds), val(familyIds), val(fastas)
@@ -187,7 +192,7 @@ process RUN_TREEGRAFTER {
 }
 
 process PARSE_PANTHER {
-    label    'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

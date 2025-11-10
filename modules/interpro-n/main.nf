@@ -1,7 +1,11 @@
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
-
-import FastaFile
+import uk.ac.ebi.interpro.FastaFile
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.LocationFragment
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 def MAX_LENGTH    = 2047  // Maximum sequence length
 def CHUNK_OVERLAP = 1000  // Number of overlapping residues between consecutive chunks
@@ -23,32 +27,47 @@ def DATABASES = [         // Databases supported by InterPro-N
 ]
 
 process PREPARE_INTERPRO_N {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:
     tuple val(meta), val(fasta)
+    val batch_size    // max number of sequences in output fasta files
 
     output:
-    tuple val(meta), path("sequences.tsv")
+    tuple val(meta), path("sequences_*.tsv", arity: '1..*')
 
     exec:
     def sequences = FastaFile.chunkSequences(fasta.toString(), MAX_LENGTH, CHUNK_OVERLAP)
-
-    def outputFilePath = task.workDir.resolve("sequences.tsv")
-    new File(outputFilePath.toString()).withWriter("UTF-8") { writer ->
+    def fileIndex = 1
+    def seqCount = 0
+    def writer = null
+    def openNewFile = {
+        if (writer) writer.close()
+        def filePath = task.workDir.resolve("sequences_${fileIndex}.tsv").toFile()
+        writer = filePath.newWriter("UTF-8")
         writer.writeLine("accession\tsequence")
+        fileIndex++
+        seqCount = 0
+        return writer
+    }
 
-        sequences.each { seq ->
-            seq.chunks.eachWithIndex { chunk, idx ->
-                writer.writeLine("${seq.id}_${idx + 1}\t${chunk}")
-            }
+    writer = openNewFile()
+    sequences.each { seq ->
+        if (batch_size > 0 && seqCount >= batch_size) {
+            writer = openNewFile()
+        }
+        seq.chunks.eachWithIndex { chunk, idx ->
+            writer.writeLine("${seq.id}_${idx + 1}\t${chunk}")
+            seqCount++
         }
     }
+
+    if (writer) writer.close()
 }
 
 process RUN_INTERPRO_N_CPU {
-    label 'large', 'interpro_n_container'
+    label 'mem_high', 'time_medium', 'interpro_n_container'
 
     input:
     tuple val(meta), path(tsv)
@@ -73,7 +92,7 @@ process RUN_INTERPRO_N_CPU {
 }
 
 process RUN_INTERPRO_N_GPU {
-    label 'large', 'interpro_n_container', 'use_gpu'
+    label 'mem_high', 'time_short', 'interpro_n_container', 'use_gpu'
 
     input:
     tuple val(meta), path(tsv)
@@ -98,7 +117,7 @@ process RUN_INTERPRO_N_GPU {
 }
 
 process PARSE_INTERPRO_N {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:
