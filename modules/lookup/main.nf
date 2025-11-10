@@ -58,17 +58,11 @@ process LOOKUP_MATCHES {
     String baseUrl = HTTPRequest.sanitizeURL(url.toString())
     boolean success = true
 
-    int i = 0
     for (chunk in chunks) {
-        i++
-        def start = System.currentTimeMillis();
-
         data = JsonOutput.toJson([md5: chunk])
         response = HTTPRequest.fetch("${baseUrl}/matches", data, maxRetries, true)
 
         if (response != null) {
-            long elapsedMs = System.currentTimeMillis() - start
-            log.info "chunk: ${i}; elapsed: ${elapsedMs} ms"
             response.results.each {
                 String proteinMd5 = it.md5.toUpperCase()
                 if (it.found) {
