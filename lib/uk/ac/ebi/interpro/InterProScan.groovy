@@ -369,7 +369,7 @@ class InterProScan {
         if (runML && !applications) {
             // ML requested; warn if any ML is unavailable
             def unavailableML = mlAppls.findAll { label ->
-                !isAvailable(label) && appsConfig[label].enabled
+                !isAvailable(label)
             }
             if (!unavailableML.isEmpty()) {
                 def warn = "Unavailable ML analyses will be skipped: ${unavailableML.join(', ')}"
