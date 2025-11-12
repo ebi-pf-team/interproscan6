@@ -1,5 +1,3 @@
-import com.fasterxml.jackson.core.JsonFactory
-import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import uk.ac.ebi.interpro.Process
 
