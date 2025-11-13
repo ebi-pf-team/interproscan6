@@ -1,5 +1,5 @@
 import groovy.json.JsonOutput
-import uk.ac.ebi.interpro.Process
+import uk.ac.ebi.interpro.ProcessXrefs
 
 process XREFS {
     label    'mem_high', 'time_veryshort', 'groovy_container'
@@ -44,6 +44,6 @@ process XREFS_LOCAL {
 
     exec:
     String outputFilePath = task.workDir.resolve('matches2xrefs.json')
-    Process.addXrefs(matches_path.toString(), db_releases, add_goterms, add_pathways, panther_paint_dir, outputFilePath)
+    ProcessXrefs.run(matches_path.toString(), db_releases, add_goterms, add_pathways, panther_paint_dir, outputFilePath)
 }
 

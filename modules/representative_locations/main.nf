@@ -1,4 +1,4 @@
-import uk.ac.ebi.interpro.Process
+import uk.ac.ebi.interpro.ProcessReprLocations
 
 process REPRESENTATIVE_LOCATIONS {
     label    'mem_high', 'time_short', 'groovy_container'
@@ -27,5 +27,5 @@ process REPRESENTATIVE_LOCATIONS_LOCAL {
 
     exec:
     String outputFilePath = task.workDir.resolve('matches_with_representative.json')
-    Process.selectRepresentativeLocations(matches_path.toString(), outputFilePath)
+    ProcessReprLocations.run(matches_path.toString(), outputFilePath)
 }

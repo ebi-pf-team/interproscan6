@@ -1,5 +1,5 @@
 import groovy.json.JsonSlurper
-import uk.ac.ebi.interpro.Process
+import uk.ac.ebi.interpro.ProcessXrefs
 
 if (args.size() != 6) {
     System.err.println "Usage: add-xrefs.groovy <input.json> <metadata.json> <add-go-terms> <add-pathways> <panther-paint-dir> <output.json>"
@@ -15,4 +15,4 @@ def outputPath = args[5]
 
 def dbReleases = new JsonSlurper().parse(new File(metadataPath))
 
-Process.addXrefs(inputPath, dbReleases, addGoTerms, addPathways, pantherPaintDirectory, outputPath)
+ProcessXrefs.run(inputPath, dbReleases, addGoTerms, addPathways, pantherPaintDirectory, outputPath)
