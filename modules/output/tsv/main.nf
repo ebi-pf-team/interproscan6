@@ -1,6 +1,6 @@
 import uk.ac.ebi.interpro.ProcessOutputTSV
 
-process WRITE_TSV {
+process WRITE_TSV_LOCAL {
     label    'mem_low', 'time_long'
     executor 'local'
 
@@ -19,3 +19,25 @@ process WRITE_TSV {
     )
 }
 
+process WRITE_TSV {
+    label    'mem_high', 'time_long', 'groovy_container'
+
+    input:
+    path(input_files, arity: '1..*', name: '?/*')
+    val output_file
+    path seq_db_file
+    val nucleic
+
+    script:
+    """
+    groovy -cp "${projectDir}/lib:${projectDir}/lib/*:." ${projectDir}/bin/interpro/write-output.groovy \
+        tsv \
+        . \
+        - \
+        ${seq_db_file} \
+        ${nucleic ? 'true' : 'false'} \
+        - \
+        ${output_file}
+    chmod 666 ${output_file}
+    """
+}

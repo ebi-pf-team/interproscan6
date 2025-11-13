@@ -1,8 +1,8 @@
-include { WRITE_JSON                     } from "../../modules/output/json"
-include { WRITE_JSON as WRITE_JSON_LINES } from "../../modules/output/json"
-include { WRITE_TSV                      } from "../../modules/output/tsv"
-include { WRITE_XML                      } from "../../modules/output/xml"
-include { WRITE_GFF3                     } from "../../modules/output/gff3"
+include { WRITE_GFF3; WRITE_GFF3_LOCAL                                     } from "../../modules/output/gff3"
+include { WRITE_JSON; WRITE_JSON_LOCAL                                     } from "../../modules/output/json"
+include { WRITE_JSON as WRITE_JSONL; WRITE_JSON_LOCAL as WRITE_JSONL_LOCAL } from "../../modules/output/json"
+include { WRITE_TSV; WRITE_TSV_LOCAL                                       } from "../../modules/output/tsv"
+include { WRITE_XML; WRITE_XML_LOCAL                                       } from "../../modules/output/xml"
 
 workflow OUTPUT {
     take:
@@ -13,21 +13,40 @@ workflow OUTPUT {
     nucleic
     iprscan_version
     db_releases
+    batch_size  // params.batchSize
 
     main:
-    if (formats.contains("GFF3")) {
-        WRITE_GFF3(ch_results, "${outprefix}.gff3", seq_db_path, nucleic, iprscan_version)
-    }
-    if (formats.contains("JSON")) {
-        WRITE_JSON(ch_results, "${outprefix}.json", seq_db_path, nucleic, iprscan_version, db_releases, false)
-    }
-    if (formats.contains("JSONL")) {
-        WRITE_JSON_LINES(ch_results, "${outprefix}.jsonl", seq_db_path, nucleic, iprscan_version, db_releases, true)
-    }
-    if (formats.contains("TSV")) {
-        WRITE_TSV(ch_results, "${outprefix}.tsv", seq_db_path, nucleic)
-    }
-    if (formats.contains("XML")) {
-        WRITE_XML(ch_results, "${outprefix}.xml", seq_db_path, nucleic, iprscan_version, db_releases)
+    if (batch_size < 50000) {
+        if (formats.contains("GFF3")) {
+            WRITE_GFF3_LOCAL(ch_results, "${outprefix}.gff3", seq_db_path, nucleic, iprscan_version)
+        }
+        if (formats.contains("JSON")) {
+            WRITE_JSON_LOCAL(ch_results, "${outprefix}.json", seq_db_path, nucleic, iprscan_version, db_releases, false)
+        }
+        if (formats.contains("JSONL")) {
+            WRITE_JSONL_LOCAL(ch_results, "${outprefix}.jsonl", seq_db_path, nucleic, iprscan_version, db_releases, true)
+        }
+        if (formats.contains("TSV")) {
+            WRITE_TSV_LOCAL(ch_results, "${outprefix}.tsv", seq_db_path, nucleic)
+        }
+        if (formats.contains("XML")) {
+            WRITE_XML_LOCAL(ch_results, "${outprefix}.xml", seq_db_path, nucleic, iprscan_version, db_releases)
+        }
+    } else {
+        if (formats.contains("GFF3")) {
+            WRITE_GFF3(ch_results, "${outprefix}.gff3", seq_db_path, nucleic, iprscan_version)
+        }
+        if (formats.contains("JSON")) {
+            WRITE_JSON(ch_results, "${outprefix}.json", seq_db_path, nucleic, iprscan_version, db_releases, false)
+        }
+        if (formats.contains("JSONL")) {
+            WRITE_JSONL(ch_results, "${outprefix}.jsonl", seq_db_path, nucleic, iprscan_version, db_releases, true)
+        }
+        if (formats.contains("TSV")) {
+            WRITE_TSV(ch_results, "${outprefix}.tsv", seq_db_path, nucleic)
+        }
+        if (formats.contains("XML")) {
+            WRITE_XML(ch_results, "${outprefix}.xml", seq_db_path, nucleic, iprscan_version, db_releases)
+        }
     }
 }

@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 import uk.ac.ebi.interpro.ProcessOutputJSON
 
-process WRITE_JSON {
+process WRITE_JSON_LOCAL {
     label    'mem_low', 'time_long'
     executor 'local'
 
@@ -22,4 +22,32 @@ process WRITE_JSON {
                           interproscan_version,
                           jsonlines,
                           output_file.toString())
+}
+
+process WRITE_JSON {
+    label    'mem_high', 'time_long', 'groovy_container'
+
+    input:
+    path(input_files, arity: '1..*', name: '?/*')
+    val output_file
+    path seq_db_file
+    val nucleic
+    val interproscan_version
+    val db_releases
+    val jsonlines
+
+    script:
+    def json = JsonOutput.toJson(db_releases)
+    """
+    echo '${json}' > metadata.json
+    groovy -cp "${projectDir}/lib:${projectDir}/lib/*:." ${projectDir}/bin/interpro/write-output.groovy \
+        ${jsonlines ? 'jsonl' : 'json'} \
+        . \
+        metadata.json \
+        ${seq_db_file} \
+        ${nucleic ? 'true' : 'false'} \
+        ${interproscan_version} \
+        ${output_file}
+    chmod 666 ${output_file}
+    """
 }
