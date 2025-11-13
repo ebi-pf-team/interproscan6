@@ -121,29 +121,29 @@ class ProcessOutputJSON {
         }
     }
 
-def writeNucleic(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, JsonGenerator jsonWriter, List seqData, Map protMd5ToOrfs) {
-    /* Write data for an input nucleic acid sequence, and then the matches for its associated ORFs
-    {"sequence: nt seq, "md5": nt md5,
-    "crossReferences": [{ntSeqData}, {ntSeqData}],
-    "openReadingFrames": [{protein}, {protein}, {protein}]}
-    There may be multiple nt seq Ids associated with the same nt seq, use the first entry to get the seq. */
-    jsonWriter.writeStartObject()
+    static void writeNucleic(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, JsonGenerator jsonWriter, List seqData, Map protMd5ToOrfs) {
+        /* Write data for an input nucleic acid sequence, and then the matches for its associated ORFs
+        {"sequence: nt seq, "md5": nt md5,
+        "crossReferences": [{ntSeqData}, {ntSeqData}],
+        "openReadingFrames": [{protein}, {protein}, {protein}]}
+        There may be multiple nt seq Ids associated with the same nt seq, use the first entry to get the seq. */
+        jsonWriter.writeStartObject()
 
-    // 1. {"sequence": seq, "md5": ntMd5}
-    String sequence = seqData[0].sequence
-    jsonWriter.writeStringField("sequence", sequence)
-    jsonWriter.writeStringField("md5", nucleicMd5)
+        // 1. {"sequence": seq, "md5": ntMd5}
+        String sequence = seqData[0].sequence
+        jsonWriter.writeStringField("sequence", sequence)
+        jsonWriter.writeStringField("md5", nucleicMd5)
 
-    // 2. {..., "crossReferences": [{ntSeqXref}, {ntSeqXref}]}
-    jsonWriter.writeFieldName("crossReferences")
-    writeXref(seqData, jsonWriter)
+        // 2. {..., "crossReferences": [{ntSeqXref}, {ntSeqXref}]}
+        jsonWriter.writeFieldName("crossReferences")
+        writeXref(seqData, jsonWriter)
 
-    // 3. {..., "openReadingFrames": [{protein}, {protein}]}
-    jsonWriter.writeFieldName("openReadingFrames")
-    writeOpenReadingFrames(nucleicMd5, proteinMd5s, proteinMatches, jsonWriter, protMd5ToOrfs)
+        // 3. {..., "openReadingFrames": [{protein}, {protein}]}
+        jsonWriter.writeFieldName("openReadingFrames")
+        writeOpenReadingFrames(nucleicMd5, proteinMd5s, proteinMatches, jsonWriter, protMd5ToOrfs)
 
-    jsonWriter.writeEndObject()
-}
+        jsonWriter.writeEndObject()
+    }
 
     static void writeOpenReadingFrames(String nucleicMd5, Set<String> proteinMd5s, Map proteinMatches, JsonGenerator jsonWriter, Map protMd5ToOrfs){
         def SOURCE_NT_PATTERN = Pattern.compile(/^source=[^"]+\s+coords=(\d+)\.\.(\d+)\s+length=\d+\s+frame=(\d+)\s+desc=.*$/)
