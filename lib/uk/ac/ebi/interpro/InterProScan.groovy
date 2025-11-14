@@ -268,141 +268,116 @@ class InterProScan {
     }
 
     static List<String>validateApplications(String applications, String skipApplications, Map appsConfig, Boolean runML) {
-        // Returns a list of (1) list of applications to run or null, (2) an error message if invalid input or null, and(3) a warning or null
-        if (applications && skipApplications) {
-            def error = "--applications and --skip-applications are mutually exclusive"
-            return [null, error, null]
-        }
-
-        if (!applications && !skipApplications) {
-            // Run all applications, except licensed packages with an unpopulated dir field
-            // and only include deeplearning apps in the default apps if enabled
-            def appsToRun = appsConfig.findAll{ it ->
-                if (it.value?.enabled == false ) {
-                    if (!runML) {
-                        return false
-                    }
-                }
-                if (this.LICENSED_SOFTWARE.contains(it.key)) {
-                    return it.value?.dir
-                }
-                return true
-            }.keySet().toList()
-    
-            if (runML) {
-                def invalidApps = appsConfig.findAll { 
-                    it.value.containsKey('enabled') && this.LICENSED_SOFTWARE.contains(it.key) && !it.value?.dir 
-                }.keySet().toList()
-                if (invalidApps) {
-                    def warn = "The following machine learning-based analyses are unavailable and will be skipped, even though --run-ml was specified: ${invalidApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses for more information."
-                    return [appsToRun, null, warn]
-                }
-            }
-            return [appsToRun, null, null]
-        }
-
-        // Make a collection of standardised application names [alias: standardised]
-        def allApps = [:]
-        appsConfig.each { label, appl ->
-            allApps[label] = label
-            def stdName = appl.name.toLowerCase().replaceAll("[- ]", "")
-            allApps[stdName] = label
-            (appl.aliases ?: []).each { alias ->
-                def stdAlias = alias.toLowerCase().replaceAll("[- ]", "")
-                allApps[stdAlias] = label
-            }
-        }
-
-        // If using --applications start with an empty list to add to, else identify all apps to run by default.
-        def appsToRun = applications ? [] : allApps.findAll { it ->
-            if (this.LICENSED_SOFTWARE.contains(it.value)) {
-                if (appsConfig[it.value].containsKey('enabled')) { // Licensed ML-method, check enabled and dir
-                    return (appsConfig[it.value].enabled && appsConfig[it.value].dir)
-                } else {                                           // Non-ML licensed method, just check the dir
-                    return appsConfig[it.value]?.dir
-                }
-            } else if (appsConfig[it.value].containsKey('enabled')) { // Non-licensed ML-method
-                return appsConfig[it.value].enabled                   // Check ML is enabled
-            }
-            return true // Non-licensed, non-ML method, always include
-        }.values().toSet()
-
-        // Add ML-methods if specified. This was already done in the last closure if applications is null
-        // Warn the user if any are not activated at the end, after applying the potential --skip-applications filter
+        // Return: [appsToRun | null, errorMessage | null, warningMessage | null]
         if (applications && runML) {
-            allApps.each { it ->
-                if (appsConfig[it.value].containsKey('enabled')) {  // ML-method
-                    if (this.LICENSED_SOFTWARE.contains(it.value)) {
-                        if (appsConfig[it.value].dir) {             // Licensed, check dir is set
-                            appsToRun.add(it.value)
-                        }
-                    } else {                                        // Not licensed, just add it
-                        appsToRun.add(it.value)
-                    }
+            return [null, "--applications and --run-ml are mutually exclusive", null]
+        }
+        if (applications && skipApplications) {
+            return [null, "--applications and --skip-applications are mutually exclusive", null]
+        }
+
+        // Normalize "catalogue" of applications
+        Map<String, String> aliases = [:]
+        appsConfig.each { label, cfg ->
+            def std = cfg.name.toLowerCase().replaceAll(/[- ]/, "")
+            aliases[std] = label
+            (cfg.aliases ?: []).each { alias ->
+                def stdAlias = alias.toLowerCase().replaceAll(/[- ]/, "")
+                aliases[stdAlias] = label
+            }
+        }
+
+        Set<String> mlAppls = appsConfig.findAll { k, v ->
+            v.containsKey("enabled")
+        }.keySet() as Set
+
+        Closure<Boolean> isAvailable = { label ->
+            def cfg = appsConfig[label]
+            assert cfg != null
+            if (this.LICENSED_SOFTWARE.contains(label)) {
+                return cfg.dir != null && !cfg.dir.isEmpty()
+            }
+            return true
+        }
+
+        // Initialize selection
+        Set<String> base = [] as Set
+        if (!applications) {
+            // default: include all non-ML, and add ML if runML is set
+            appsConfig.keySet().each { label ->
+                boolean isML = mlAppls.contains(label)
+                if (isAvailable(label) && (!isML || (isML && runML))) {
+                    base << label
                 }
             }
         }
 
-        // Standardise the user input from --applications or --skip-applications
-        def applicationsInput = applications ? applications : skipApplications
-        def appsParam = applicationsInput.replaceAll("[- ]", "").split(",").collect { it.trim().toLowerCase() }.toSet()
-
-        // Add or remove applications from appsToRun as specified by the user
-        for (appName in appsParam) {
-            def error = ""
-            def unavailableApps = []
-            def unrecognisedApps = []
-            if (allApps.containsKey(appName)) {
-                def stdName = allApps[appName]
-                if (skipApplications) {
-                    appsToRun.remove(stdName)
-                } else {
-                    if ( this.LICENSED_SOFTWARE.contains(stdName) && !appsConfig[stdName]?.dir ) {
-                        unavailableApps << appName
-                    } else {
-                        appsToRun.add(stdName)
-                    }
+        // Explicit --applications
+        if (applications) {
+            Set<String> req = applications.split(",")
+                                          .collect { it.trim().toLowerCase().replaceAll(/[- ]/, "") }
+                                          .findAll { it }
+                                          .toSet()
+            Set<String> unrec = []
+            Set<String> unavail = []
+            req.each { raw ->
+                def label = aliases[raw]
+                if (!label) {
+                    unrec << raw
+                    return
                 }
-            } else {
-                unrecognisedApps << appName
+                if (!isAvailable(label)) {
+                    unavail << raw
+                    return
+                }
+                base << label
             }
 
-            if (unrecognisedApps) {
-                error += "The following applications are not recognised: ${unrecognisedApps.join(', ')}. See --help for a list of available applications."
+            if (!unrec.isEmpty() || !unavail.isEmpty()) {
+                def msg = []
+                if (!unrec.isEmpty())
+                    msg << "Unrecognised applications: ${unrec.join(', ')}"
+                if (!unavail.isEmpty())
+                    msg << "Unavailable applications: ${unavail.join(', ')}"
+                return [null, msg.join('. '), null]
             }
-            if (unavailableApps) {
-                if (error) { error += "\n" }
-                error += "The following applications cannot be run: ${unavailableApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses for more information."
+        }
+        
+        // Explicit --skip--applications
+        if (skipApplications) {
+            Set<String> req = skipApplications.split(",")
+                                              .collect { it.trim().toLowerCase().replaceAll(/[- ]/, "") }
+                                              .findAll { it }
+                                              .toSet()
+            Set<String> unrec = []
+            req.each { raw ->
+                def label = aliases[raw]
+                if (!label) {
+                    unrec << raw
+                    return
+                }
+                base.remove(label)
             }
 
-            if (error) {
-                return [null, error, null]
+            if (!unrec.isEmpty()) {
+                def msg = "Unrecognised applications: ${unrec.join(', ')}"
+                return [null, msg, null]
             }
         }
 
-        // Warn the user if any apps specified using --runML are not activated
-        if (runML) {
-            def unavailableApps = []
-
-            if (skipApplications) { // Subtract skipped licensed ml-based apps
-                unavailableApps = appsConfig.findAll { appName, appConfig ->
-                    if (!appConfig?.dir && this.LICENSED_SOFTWARE.contains(appName) && appConfig.containsKey('enabled')) {
-                        def appAliases = allApps.findAll { it.value == appName }.keySet()
-                        return !appAliases.any { appsParam.contains(it) }
-                    }
-                    return false
-                }.keySet().toList()
-            } else { // Look at all licensed ml-based apps
-                unavailableApps = appsConfig.findAll { it.value.containsKey('enabled') && this.LICENSED_SOFTWARE.contains(it.key) && !it.value?.dir }.keySet().toList()
+        // Warnings
+        if (runML && !applications) {
+            // ML requested; warn if any ML is unavailable
+            def unavailableML = mlAppls.findAll { label ->
+                !isAvailable(label)
             }
-
-            if (unavailableApps) {
-                def warn = "The following machine learning-based analyses are unavailable and will be skipped even though --run-ml was specified: ${unavailableApps.join(', ')}. See https://github.com/ebi-pf-team/interproscan6#licensed-analyses for more information."
-                return [appsToRun.toSet().toList(), null, warn]
+            if (!unavailableML.isEmpty()) {
+                def warn = "Unavailable ML analyses will be skipped: ${unavailableML.join(', ')}"
+                return [base.toList(), null, warn]
             }
         }
 
-        return [appsToRun.toSet().toList(), null, null]
+        return [base.toList(), null, null]
     }
 
     static enableGpuAcceleration(Boolean useGpu, List<String> applications, Map appsConfig) {
