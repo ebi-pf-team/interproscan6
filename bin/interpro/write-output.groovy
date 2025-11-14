@@ -30,7 +30,6 @@ assert inputPaths.size() > 0
 def dbReleases = null
 if (metadataPath != "-") {
     dbReleases = new JsonSlurper().parse(new File(metadataPath))
-
 } else {
     dbReleases = null
 }

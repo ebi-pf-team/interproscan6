@@ -21,7 +21,7 @@ process WRITE_GFF3_LOCAL {
 }
 
 process WRITE_GFF3 {
-    label    'mem_high', 'time_long', 'groovy_container'
+    label    'mem_veryhigh', 'time_long', 'groovy_container'
 
     input:
     path(input_files, arity: '1..*', name: '?/*')

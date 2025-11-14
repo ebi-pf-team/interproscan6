@@ -20,7 +20,7 @@ process WRITE_TSV_LOCAL {
 }
 
 process WRITE_TSV {
-    label    'mem_high', 'time_long', 'groovy_container'
+    label    'mem_veryhigh', 'time_long', 'groovy_container'
 
     input:
     path(input_files, arity: '1..*', name: '?/*')
