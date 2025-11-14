@@ -1,7 +1,4 @@
-import com.fasterxml.jackson.databind.ObjectMapper
-import groovy.json.JsonOutput
-
-import uk.ac.ebi.interpro.Process
+import uk.ac.ebi.interpro.ProcessCombine
 
 process COMBINE_MATCHES_LOCAL {
     label    'mem_low', 'time_veryshort'
@@ -15,7 +12,7 @@ process COMBINE_MATCHES_LOCAL {
 
     exec:
     String outputFilePath = task.workDir.resolve('combined.json')
-    Process.combineMatches(members_matches.collect { it.toString() }, outputFilePath)
+    ProcessCombine.run(members_matches.collect { it.toString() }, outputFilePath)
 }
 
 process COMBINE_MATCHES {

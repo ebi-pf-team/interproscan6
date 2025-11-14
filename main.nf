@@ -160,7 +160,8 @@ workflow {
         outprefix,
         params.nucleic,
         workflow.manifest.version,
-        db_releases
+        db_releases,
+        params.batchSize
     )
 
     workflow.onComplete = {

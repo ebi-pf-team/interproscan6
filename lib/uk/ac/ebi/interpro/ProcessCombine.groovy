@@ -3,8 +3,9 @@ package uk.ac.ebi.interpro
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 
-class Process {
-    static void combineMatches(List<String> inputPaths, String outputPath) {
+
+class ProcessCombine {
+    static void run(List<String> inputPaths, String outputPath) {
         def mapper = new ObjectMapper()
         def aggregatedMatches = [:]  // seqMd5 -> (modelAcc -> match)
 

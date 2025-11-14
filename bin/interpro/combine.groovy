@@ -1,4 +1,4 @@
-import uk.ac.ebi.interpro.Process
+import uk.ac.ebi.interpro.ProcessCombine
 
 if (args.size() != 2) {
     System.err.println "Usage: combine.groovy <input_dir> <output.json>"
@@ -15,4 +15,4 @@ inputDir.eachFileRecurse { file ->
 }
 
 assert inputPaths.size() > 0
-Process.combineMatches(inputPaths, outputPath)
+ProcessCombine.run(inputPaths, outputPath)
