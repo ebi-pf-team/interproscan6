@@ -4,8 +4,8 @@ include { PARSE_NCBIFAM               } from "../../modules/ncbifam"
 workflow NCBIFAM {
     take:
     ch_seqs             // channel of tuples (index, fasta file)
-    dir                  // data directory path
-    hmm                  // path to the HMM file in the data dir -> datadir/hmmFile
+    dir                 // str repr of the data directory path
+    hmm                 // str repr of the path to the HMM file in the data dir -> datadir/hmmFile
 
     main:
     SEARCH_NCBIFAM(

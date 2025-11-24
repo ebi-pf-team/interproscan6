@@ -4,11 +4,11 @@ workflow TMBED {
     take:
     ch_seqs             // channel of tuples (index, fasta file)
     use_gpu             // boolean to use GPU for prediction
-    chunk_size          // max number of aa per chunked sequence
-    chunk_overlap       // overlap between two chunks of a sequence
-    smooth_window       // length of the sliding window used during smoothing
-    tmbed_batch_size    // max number of aa per TMbed batch
-    batch_size          // number of sequences per sub-batch for preparing
+    chunk_size          // int, max number of aa per chunked sequence
+    chunk_overlap       // int, overlap between two chunks of a sequence
+    smooth_window       // int, length of the sliding window used during smoothing
+    tmbed_batch_size    // int, max number of aa per TMbed batch
+    batch_size          // int, number of sequences per sub-batch for preparing
 
     main:
     PREPARE_TMBED(

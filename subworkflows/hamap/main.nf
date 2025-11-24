@@ -3,9 +3,9 @@ include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP } from  "../..
 workflow HAMAP {
     take:
     ch_seqs        // channel of tuples (index, fasta file)
-    hamap_dir      // data directory path
-    hmm_file       // path to the HMM file in the data dir -> datadir/hmmFile
-    profiles_dir   // path to the profiles directory in the data dir -> datadir/profiles
+    hamap_dir      // str repr of the data directory path
+    hmm_file       // str repr of the path to the HMM file in the data dir -> datadir/hmmFile
+    profiles_dir   // str repr of the path to the profiles directory in the data dir -> datadir/profiles
 
     main:
     PREPROCESS_HAMAP(

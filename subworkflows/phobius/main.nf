@@ -3,7 +3,7 @@ include { WRITE_FASTA; SEARCH_PHOBIUS; PARSE_PHOBIUS } from  "../../modules/phob
 workflow PHOBIUS {
     take:
     ch_seqs      // channel of tuples (index, fasta file)
-    phobius_dir  // data directory path
+    phobius_dir  // str repr of the data directory path
 
     main:
     WRITE_FASTA(ch_seqs)

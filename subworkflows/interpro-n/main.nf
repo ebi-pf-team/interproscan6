@@ -3,11 +3,11 @@ include { PREPARE_INTERPRO_N; RUN_INTERPRO_N_CPU; RUN_INTERPRO_N_GPU; PARSE_INTE
 workflow INTERPRO_N {
     take:
     ch_seqs             // channel of tuples (index, fasta file)
-    applications        // list of applications to report InterPro-N matches
-    checkpoint_dir      // path to the checkpoint directory
-    use_gpu             // boolean to run on GPU
-    res_batch_size      // Max number of residues per InterPro-N batch
-    seq_batch_size      // params.subBatchSize
+    applications        // list of applications (str) to report InterPro-N matches
+    checkpoint_dir      // str repr of the path to the checkpoint directory
+    use_gpu             // str repr of the boolean to run on GPU
+    res_batch_size      // int, max number of residues per InterPro-N batch
+    seq_batch_size      // int, number of sequences per sub batch for searching
 
     main:
     PREPARE_INTERPRO_N(

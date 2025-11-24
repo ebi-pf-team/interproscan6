@@ -4,9 +4,9 @@ include { PARSE_PIRSR               } from  "../../modules/pirsr"
 workflow PIRSR {
     take:
     ch_seqs           // channel of tuples (index, fasta file)
-    dirpath           // data directory path
-    hmmfile           // path to the HMM file in the data dir -> datadir/hmmFile
-    rulesfile         // path to the rules file in the data dir -> datadir/rulesFile
+    dirpath           // str repr of the data directory path
+    hmmfile           // str repr of the path to the HMM file in the data dir -> datadir/hmmFile
+    rulesfile         // str repr of the path to the rules file in the data dir -> datadir/rulesFile
 
     main:
     SEARCH_PIRSR(
