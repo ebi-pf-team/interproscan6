@@ -541,7 +541,7 @@ class ProcessOutputJSON {
                     "start"             : loc.start,
                     "end"               : loc.end,
                     "representative"    : loc.representative,
-                    "pvalue"            : loc.score,
+                    "score"             : loc.score,
                     "location-fragments": formatFragments(loc.fragments),
                 ]
             }

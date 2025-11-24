@@ -16,6 +16,7 @@ class ProcessOutputGFF3 {
             gff3Writer.writeLine("##interproscan-version ${iprscanVersion}")
 
             def tempFastaFile = new File("temp.fasta")
+
             tempFastaFile.withWriter { fastaWriter ->
                 fastaWriter.writeLine("##FASTA")
 
@@ -184,8 +185,8 @@ class ProcessOutputGFF3 {
             score = match.evalue
         } else if (["HAMAP", "PROSITE profiles"].contains(memberDb)) {
             score = loc.score
-        } else if (["SignalP-Prok", "SignalP-Euk"].contains(memberDb)) {
-            score = loc.pvalue
+        } else if (memberDb == "SignalP") {
+            score = loc.score
         } else {
             score = loc.evalue
         }

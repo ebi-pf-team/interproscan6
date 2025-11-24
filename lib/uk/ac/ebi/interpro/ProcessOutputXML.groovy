@@ -616,7 +616,7 @@ class ProcessOutputXML {
             start          : loc.start,
             end            : loc.end,
             representative : loc.representative,
-            pvalue         : loc.score
+            score          : loc.score
         ]
     }
 
