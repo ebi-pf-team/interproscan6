@@ -1,5 +1,5 @@
-include { RUN_HMMER as SEARCH_NCBIFAM } from "${moduleDir}/../../modules/hmmer"
-include { PARSE_NCBIFAM               } from "${moduleDir}/../../modules/ncbifam"
+include { RUN_HMMER as SEARCH_NCBIFAM } from "../../modules/hmmer"
+include { PARSE_NCBIFAM               } from "../../modules/ncbifam"
 
 workflow NCBIFAM {
     take:

@@ -1,4 +1,4 @@
-include { PREPARE_INTERPRO_N; RUN_INTERPRO_N_CPU; RUN_INTERPRO_N_GPU; PARSE_INTERPRO_N } from  "${moduleDir}/../../modules/interpro-n"
+include { PREPARE_INTERPRO_N; RUN_INTERPRO_N_CPU; RUN_INTERPRO_N_GPU; PARSE_INTERPRO_N } from  "../../modules/interpro-n"
 
 workflow INTERPRO_N {
     take:

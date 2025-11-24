@@ -1,10 +1,10 @@
 import groovy.json.JsonSlurper
 import uk.ac.ebi.interpro.InterProScan
 
-include { DOWNLOAD as DOWNLOAD_INTERPRO } from "${moduleDir}/../../../modules/download"
-include { DOWNLOAD as DOWNLOAD_DATABASE } from "${moduleDir}/../../../modules/download"
-include { FIND_MISSING_DATA             } from "${moduleDir}/../../../modules/download"
-include { VALIDATE_DATA                 } from "${moduleDir}/../../../modules/download"
+include { DOWNLOAD as DOWNLOAD_INTERPRO } from "../../../modules/download"
+include { DOWNLOAD as DOWNLOAD_DATABASE } from "../../../modules/download"
+include { FIND_MISSING_DATA             } from "../../../modules/download"
+include { VALIDATE_DATA                 } from "../../../modules/download"
 
 
 workflow PREPARE_DATABASES {

@@ -1,4 +1,4 @@
-include { RUN_COILS; PARSE_COILS } from  "${moduleDir}/../../modules/coils"
+include { RUN_COILS; PARSE_COILS } from  "../../modules/coils"
 
 workflow COILS {
     take:

@@ -1,4 +1,4 @@
-include { SEARCH_CDD; PARSE_CDD } from  "${moduleDir}/../../modules/cdd"
+include { SEARCH_CDD; PARSE_CDD } from  "../../modules/cdd"
 
 workflow CDD {
     take:

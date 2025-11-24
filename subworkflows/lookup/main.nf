@@ -1,4 +1,4 @@
-include { PREPARE_LOOKUP; LOOKUP_MATCHES } from "${moduleDir}/../../modules/lookup"
+include { PREPARE_LOOKUP; LOOKUP_MATCHES } from "../../modules/lookup"
 
 workflow LOOKUP {
     // Prepare connection and retrieve precalculated matched from the InterPro API

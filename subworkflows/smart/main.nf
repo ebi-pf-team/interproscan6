@@ -1,4 +1,4 @@
-include { PREFILTER_SMART; PREPARE_SMART; SEARCH_SMART; PARSE_SMART } from  "${moduleDir}/../../modules/smart"
+include { PREFILTER_SMART; PREPARE_SMART; SEARCH_SMART; PARSE_SMART } from  "../../modules/smart"
 
 workflow SMART {
     take:

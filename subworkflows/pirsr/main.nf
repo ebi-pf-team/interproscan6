@@ -1,5 +1,5 @@
-include { RUN_HMMER as SEARCH_PIRSR } from  "${moduleDir}/../../modules/hmmer"
-include { PARSE_PIRSR               } from  "${moduleDir}/../../modules/pirsr"
+include { RUN_HMMER as SEARCH_PIRSR } from  "../../modules/hmmer"
+include { PARSE_PIRSR               } from  "../../modules/pirsr"
 
 workflow PIRSR {
     take:

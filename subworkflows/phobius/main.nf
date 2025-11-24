@@ -1,4 +1,4 @@
-include { WRITE_FASTA; SEARCH_PHOBIUS; PARSE_PHOBIUS } from  "${moduleDir}/../../modules/phobius"
+include { WRITE_FASTA; SEARCH_PHOBIUS; PARSE_PHOBIUS } from  "../../modules/phobius"
 
 workflow PHOBIUS {
     take:

@@ -1,5 +1,5 @@
-include { RUN_HMMER as SEARCH_ANTIFAM } from "${moduleDir}/../../modules/hmmer"
-include { PARSE_ANTIFAM               } from "${moduleDir}/../../modules/antifam"
+include { RUN_HMMER as SEARCH_ANTIFAM } from "../../modules/hmmer"
+include { PARSE_ANTIFAM               } from "../../modules/antifam"
 
 workflow ANTIFAM {
     take:
