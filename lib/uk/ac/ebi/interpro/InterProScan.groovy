@@ -505,7 +505,7 @@ class InterProScan {
         return text.padRight(40) + ": ${option.description}"
     }
 
-    static List parseAppsConfig(Boolean useGpu, List<String> apps, String appsConfigFile) {
+    static List parseAppsConfig(Boolean useGpu, List<String> apps, File appsConfigFile) {
         ConfigSlurper configSlurper = new ConfigSlurper()
         def config = configSlurper.parse(appsConfigFile.toURI().toURL())
         def warn = null
