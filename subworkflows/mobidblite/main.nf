@@ -2,8 +2,8 @@ include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE } from  "../../modules/mobidblite"
 
 workflow MOBIDBLITE {
     take:
-    ch_seqs
-    batch_size
+    ch_seqs     // channel of tuples (meta, fasta file)
+    batch_size  // number of sequences per sub batch for searching
 
     main:
     results = Channel.empty()

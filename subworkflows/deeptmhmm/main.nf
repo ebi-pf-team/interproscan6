@@ -2,10 +2,10 @@ include { RUN_DEEPTMHMM_CPU; RUN_DEEPTMHMM_GPU; PARSE_DEEPTMHMM } from  "../../m
 
 workflow DEEPTMHMM {
     take:
-    ch_seqs
-    deeptmhmm_dir
-    use_gpu
-    batch_size
+    ch_seqs       // channel of tuples (index, fasta file)
+    deeptmhmm_dir // data directory path
+    use_gpu       // boolean to run on GPU
+    batch_size    // number of sequences per sub batch for searching
 
     main:
     if (use_gpu) {

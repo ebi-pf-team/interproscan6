@@ -3,10 +3,10 @@ include { PARSE_PFAM               } from  "../../modules/pfam"
 
 workflow PFAM {
     take:
-    ch_seqs
-    dir
-    hmm
-    dat
+    ch_seqs          // channel of tuples (index, fasta file)
+    dir              // data directory path
+    hmm              // path to the HMM file in the data dir -> datadir/hmmFile
+    dat              // path to the DAT file in the data dir -> datadir/datFile
 
     main:
     SEARCH_PFAM(

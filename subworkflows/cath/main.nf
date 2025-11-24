@@ -3,15 +3,15 @@ include { PREPARE_FUNFAM; SEARCH_FUNFAM; PARSE_FUNFAM  } from  "../../modules/ca
 
 workflow CATH {
     take:
-    ch_seqs
-    report_cathgene3d
-    cathgene3d_dir
-    cathgene3d_hmm
-    cathgene3d_model2sfs
-    cathgene3d_disc_regs
-    report_cathfunfam
-    cathfunfam_dir
-    batch_size
+    ch_seqs               // channel of tuples (index, fasta file)
+    report_cathgene3d     // boolean to report Gene3D results
+    cathgene3d_dir        // data directory path for Gene3D
+    cathgene3d_hmm        // path to the HMM file in the data dir -> datadir/hmmFile
+    cathgene3d_model2sfs  // path to the model2sf file in the data dir -> datadir/model2sfsFile
+    cathgene3d_disc_regs  // path to the disordered regions file in the data dir -> datadir/discRegsFile
+    report_cathfunfam     // boolean to report FunFam results
+    cathfunfam_dir        // data directory path for FunFam
+    batch_size            // number of sequences per sub batch for searching
 
     main:
     results = Channel.empty()

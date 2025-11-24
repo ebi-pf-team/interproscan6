@@ -5,7 +5,7 @@ workflow ANTIFAM {
     take:
     ch_seqs             // channel of tuples (index, fasta file)
     dirpath             // data directory path
-    hmmfile             // HMM file
+    hmmfile             // path to the HMM file in the data dir -> datadir/hmmFile
 
     main:
     SEARCH_ANTIFAM(
