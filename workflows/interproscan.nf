@@ -17,12 +17,13 @@ workflow INTERPROSCAN {
     apps_config           // map, contents of the conf/applications.conf file
     data_dir              // str, path to the data directory
     outprefix             // str, prefix for output files
-    formats               // list, output formats
+    formats               // list[str], output formats
     interpro_version      // str, version of InterPro
     interproscan_version  // str, version of InterProScan
     interproscan_name     // str, name of the InterProScan workflow: "InterProScan6"
 
     main:
+
     PREPARE_APPLICATIONS(
         applications,
         no_matches_api,

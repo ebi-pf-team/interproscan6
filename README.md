@@ -304,6 +304,57 @@ nextflow run ebi-pf-team/interproscan6 \
 > [!NOTE]  
 > Running both `signalp_euk` and `signalp_prok` will execute SignalP twice, once with eukaryotic post-processing and once without. Choose the mode best suited to your dataset.
 
+## Integration with existing pipelines
+
+You can integrate InterProScan 6 into your own Nextflow pipeline using Git Submoules.
+
+1. Set up the submodule
+
+```bash
+# Add the submodule to a 'subworkflows' directory
+git submodule add https://github.com/ebi-pf-team/interproscan6.git subworkflows/interproscan6
+
+# Initialise and update the submodule
+git submodule update --init --recursive
+```
+
+2. Include InterProScan 6 in your Nextflow workflow:
+
+```groovy
+// main.nf
+include { INTERPROSCAN } from './subworkflows/interproscan6/workflows/interproscan'
+
+workflow {
+    // Your input channel (FASTA files)
+    input_ch = Channel.fromPath(params.input)
+    applications = ["pfam", "cdd", "coils", "mobidblite"]
+    no_matches_api = false  // boolean, whether to retrieve pre-calulcated matches from the Matches API
+    matches_api_url = "https://www.ebi.ac.uk/interpro/matches/api"
+    apps_conf = [:]
+    data_dir = "data"
+    outprefix = "integrated-iprscan-test"
+    formats = ["json", "gff3"]
+    interpro_version = "107.0"
+    interproscan_version = "6.0.0-beta"
+    interproscan_name = "InterProScan6"
+
+    // Run InterProScan
+    INTERPROSCAN(
+        input_ch,
+        applications,
+        no_matches_api,
+        matches_api_url,
+        apps_conf,
+        data_dir,
+        outprefix,
+        formats,
+        interpro_version,
+        interproscan_version,
+        interproscan_name
+    )
+}
+```
+
 ## Documentation
 
 Our full documentation is available on [ReadTheDocs](https://interproscan-docs.readthedocs.io/en/v6/).
