@@ -26,11 +26,11 @@ workflow SCAN_SEQUENCES {
     take:
     ch_seqs             // channel of tuples (index, fasta file)
     db_releases         // map: [db: version, dirpath]
-    applications        // applications to run in this workflow
-    apps_config          // map of applications
-    datadir             // path to data directory
-    all_appls           // applications to run across all workflows 
-    batch_size          // sub-batch size for computationally demanding apps
+    applications        // list[str], applications to run in this workflow
+    apps_config         // map of applications
+    datadir             // str repr of path to data directory
+    all_appls           // list[str], applications to run across all workflows 
+    batch_size          // int, sub-batch size for computationally demanding apps
 
     main:
     results = Channel.empty()
