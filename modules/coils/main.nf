@@ -1,9 +1,11 @@
 import groovy.json.JsonOutput
-
-import Match
+import uk.ac.ebi.interpro.Location  
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_COILS {
-    label 'mini', 'ips6_container'
+    label 'mem_min', 'time_veryshort', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -19,7 +21,7 @@ process RUN_COILS {
 
 
 process PARSE_COILS {
-    label    'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

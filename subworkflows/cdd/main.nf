@@ -1,4 +1,4 @@
-include { RUN_RPSBLAST; RUN_RPSPROC; PARSE_RPSPROC } from  "../../modules/cdd"
+include { SEARCH_CDD; PARSE_CDD } from  "../../modules/cdd"
 
 workflow CDD {
     take:
@@ -8,19 +8,14 @@ workflow CDD {
     rpsproc_db
 
     main:
-    RUN_RPSBLAST(
+    SEARCH_CDD(
         ch_seqs,
         cdd_dir,
-        rpsblast_db
-    )
-
-    RUN_RPSPROC(
-        RUN_RPSBLAST.out,
-        cdd_dir,
+        rpsblast_db,
         rpsproc_db
     )
 
-    ch_cdd = PARSE_RPSPROC(RUN_RPSPROC.out)
+    ch_cdd = PARSE_CDD(SEARCH_CDD.out)
 
     emit:
     ch_cdd

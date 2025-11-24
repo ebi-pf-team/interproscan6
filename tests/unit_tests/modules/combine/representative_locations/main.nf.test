@@ -1,8 +1,8 @@
 nextflow_process {
 
-    name "Test Process REPRESENTATIVE_LOCATIONS"
+    name "Test Process REPRESENTATIVE_LOCATIONS_LOCAL"
     script "modules/representative_locations/main.nf"
-    process "REPRESENTATIVE_LOCATIONS"
+    process "REPRESENTATIVE_LOCATIONS_LOCAL"
 
     test("Should run without failures") {
 

@@ -1,4 +1,7 @@
-import HMMER3
+package uk.ac.ebi.interpro
+
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.LocationFragment
 
 class CATH {
     static parseAssignedFile(String filePath) {

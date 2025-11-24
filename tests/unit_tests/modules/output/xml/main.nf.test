@@ -1,8 +1,8 @@
 nextflow_process {
 
-    name "Test Process WRITE_XML"
+    name "Test Process WRITE_XML_LOCAL"
     script "modules/output/xml/main.nf"
-    process "WRITE_XML"
+    process "WRITE_XML_LOCAL"
 
     test("Should run without failures") {
 

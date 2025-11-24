@@ -1,3 +1,4 @@
+package uk.ac.ebi.interpro
 
 class FastaFile {
     // DNA, RNA, gaps

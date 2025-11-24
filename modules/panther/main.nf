@@ -1,18 +1,43 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import uk.ac.ebi.interpro.FastaFile
+import uk.ac.ebi.interpro.HMMER3
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.TreeGrafter
+
+process SEARCH_PANTHER {
+    label 'mem_low', 'time_short', 'dynamic', 'ips6_container'
+
+    input:
+    tuple val(meta), val(meta2), path(fasta)
+    path hmmdir
+    val hmmfile
+
+    output:
+    tuple val(meta), val(meta2), path("hmmsearch.out")
+
+    script:
+    """
+    hmmsearch \
+        -Z 65000000 -E 0.001 \
+        --cpu ${task.cpus} \
+        ${hmmdir}/${hmmfile} ${fasta} > hmmsearch.out
+    """
+}
 
 process PREPARE_TREEGRAFTER {
-    label    'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
-    tuple val(meta), val(hmmseach_out)
+    tuple val(meta), val(meta2), val(hmmseach_out)
     val dir
     val msf
 
     output:
-    tuple val(meta), path("panther.json"),                             emit: json
-    tuple val(meta), val(sequenceIds), val(familyIds), val(fastas),    emit: fasta
+    tuple val(meta), val(meta2), path("panther.json"),                             emit: json
+    tuple val(meta), val(meta2), val(sequenceIds), val(familyIds), val(fastas),    emit: fasta
     
     exec:
     def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString(), "PANTHER")
@@ -118,15 +143,15 @@ process PREPARE_TREEGRAFTER {
 
 
 process RUN_TREEGRAFTER {
-    label 'small', 'dynamic', 'ips6_container'
+    label 'mem_medium', 'time_short', 'dynamic', 'ips6_container'
     
     input:
-    tuple val(meta), val(sequenceIds), val(familyIds), val(fastas)
+    tuple val(meta), val(meta2), val(sequenceIds), val(familyIds), val(fastas)
     path dir
     val msf
 
     output:
-    tuple val(meta), path("epang.tsv")
+    tuple val(meta), val(meta2), path("epang.tsv")
 
     script:
     def commands = ""
@@ -167,14 +192,14 @@ process RUN_TREEGRAFTER {
 }
 
 process PARSE_PANTHER {
-    label    'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
-    tuple val(meta), val(hmmseach_json), val(epagn_tsv)
+    tuple val(meta), val(meta2), val(hmmseach_json), val(epagn_tsv)
 
     output:
-    tuple val(meta), path("panther.json")
+    tuple val(meta), val(meta2), path("panther.json")
 
     exec:
     File jsonFile = new File(hmmseach_json.toString())

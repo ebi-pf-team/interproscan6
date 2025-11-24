@@ -1,9 +1,12 @@
 import groovy.json.JsonOutput
-
-import Match
+import uk.ac.ebi.interpro.FastaFile
+import uk.ac.ebi.interpro.Location  
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process PREPROCESS_HAMAP {
-    label 'mini', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -24,7 +27,7 @@ process PREPROCESS_HAMAP {
 }
 
 process PREPARE_HAMAP {
-    label 'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
@@ -80,7 +83,7 @@ process PREPARE_HAMAP {
 }
 
 process RUN_HAMAP {
-    label 'mini', 'ips6_container'
+    label 'mem_min', 'time_veryshort', 'ips6_container'
 
     input:
     tuple val(meta), val(profiles), path(fasta_files)
@@ -106,7 +109,7 @@ process RUN_HAMAP {
 }
 
 process PARSE_HAMAP {
-    label 'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

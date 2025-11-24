@@ -1,5 +1,4 @@
-include { RUN_HMMER as SEARCH_PANTHER                         } from  "../../modules/hmmer"
-include { PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER } from  "../../modules/panther"
+include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER } from  "../../modules/panther"
 
 workflow PANTHER {
     take:
@@ -7,18 +6,28 @@ workflow PANTHER {
     dir
     hmm
     msf
+    batch_size
     
     main:
+    results = Channel.empty()
+
+    ch_split = ch_seqs
+        .map { meta, fasta ->
+            fasta
+                .splitFasta( by: batch_size, file: true )
+                .indexed()
+                .collect { index, chunk -> [meta, index, chunk] }
+        }
+        .flatMap()
+
     SEARCH_PANTHER(
-        ch_seqs,
+        ch_split,
         dir,
-        hmm,
-        "-Z 65000000 -E 0.001"
+        hmm
     )
-    ch_panther = SEARCH_PANTHER.out
 
     PREPARE_TREEGRAFTER(
-        ch_panther,
+        SEARCH_PANTHER.out,
         dir,
         msf
     )
@@ -29,10 +38,10 @@ workflow PANTHER {
         msf
     )
 
-    ch_panther = PARSE_PANTHER(
-        PREPARE_TREEGRAFTER.out.json.join(RUN_TREEGRAFTER.out)
-    )
+    results = results.mix(PARSE_PANTHER(
+        PREPARE_TREEGRAFTER.out.json.join(RUN_TREEGRAFTER.out, by: [0, 1])
+    ))
         
     emit:
-    ch_panther
+    results.map { meta, meta2, json -> tuple (meta, json) }
 }

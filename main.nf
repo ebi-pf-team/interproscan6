@@ -1,5 +1,6 @@
 nextflow.enable.dsl=2
 import java.time.format.DateTimeFormatter
+import uk.ac.ebi.interpro.InterProScan
 
 include { INIT_PIPELINE      } from "./subworkflows/init"
 include { PREPARE_DATABASES  } from "./subworkflows/prepare/databases"
@@ -84,7 +85,8 @@ workflow {
             local_only_apps,
             apps_config,
             data_dir,
-            local_only_apps
+            local_only_apps,
+            params.subBatchSize
         )
         match_results = SCAN_SEQUENCES.out
     } else {
@@ -109,7 +111,8 @@ workflow {
             matches_api_apps,
             apps_config,
             data_dir,
-            matches_api_apps + local_only_apps
+            matches_api_apps + local_only_apps,
+            params.subBatchSize
         )
 
         SCAN_LOCALLY(
@@ -118,7 +121,8 @@ workflow {
             local_only_apps,
             apps_config,
             data_dir,
-            matches_api_apps + local_only_apps
+            matches_api_apps + local_only_apps,
+            params.subBatchSize
         )
 
         def expandedRemainingScan = SCAN_REMAINING.out.flatMap { scan ->
@@ -145,7 +149,8 @@ workflow {
         params.goterms,
         params.pathways,
         apps_config.panther.paint,
-        params.skipInterpro
+        params.skipInterpro,
+        params.batchSize
     )
 
     OUTPUT(
@@ -155,7 +160,8 @@ workflow {
         outprefix,
         params.nucleic,
         workflow.manifest.version,
-        db_releases
+        db_releases,
+        params.batchSize
     )
 
     workflow.onComplete = {

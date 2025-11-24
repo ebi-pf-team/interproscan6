@@ -6,10 +6,11 @@ workflow PRINTS {
     dirpath
     pvalfile
     hierarchyfile
+    batch_size
 
     main:
     ch_split = ch_seqs
-        .splitFasta( by: 1000, file: true )
+        .splitFasta( by: batch_size, file: true )
 
     RUN_PRINTS(
         ch_split,

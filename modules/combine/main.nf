@@ -1,27 +1,31 @@
-import com.fasterxml.jackson.databind.ObjectMapper
-import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.ProcessCombine
 
-process COMBINE_MATCHES {
-    label    'tiny'
+process COMBINE_MATCHES_LOCAL {
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
     tuple val(meta), val(members_matches)
 
     output:
-    tuple val(meta), path("combined_matches.json")
+    tuple val(meta), path('combined.json')
 
     exec:
-    def aggregatedMatches = [:]  // seqMd5: {modelAcc: Match} -- stops a seqMd5 appearing multiple times in the output
-    members_matches.each { matchesPath ->
-        if (matchesPath) {  // can be null if LOOKUP_MATCHES failed or was skipped
-            new ObjectMapper().readValue(new File(matchesPath.toString()), Map).each { seqMd5, matches ->
-                aggregatedMatches.computeIfAbsent(seqMd5, { [:] }).putAll(matches)
-            }
-        }
-    }
+    String outputFilePath = task.workDir.resolve('combined.json')
+    ProcessCombine.run(members_matches.collect { it.toString() }, outputFilePath)
+}
 
-    String outputFilePath = task.workDir.resolve("combined_matches.json")
-    def json = JsonOutput.toJson(aggregatedMatches)
-    new File(outputFilePath.toString()).write(json)
+process COMBINE_MATCHES {
+    label    'mem_high', 'time_veryshort', 'groovy_container'
+
+    input:
+    tuple val(meta), path(jsons, arity: '1..*', name: '?/*')
+
+    output:
+    tuple val(meta), path('combined.json')
+
+    script:
+    """
+    groovy -cp "${projectDir}/lib:." ${projectDir}/bin/interpro/combine.groovy . combined.json
+    """
 }
