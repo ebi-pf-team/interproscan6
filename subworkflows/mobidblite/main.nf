@@ -1,4 +1,4 @@
-include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE } from  "../../modules/mobidblite"
+include { RUN_MOBIDBLITE; PARSE_MOBIDBLITE } from  "${moduleDir}/../../modules/mobidblite"
 
 workflow MOBIDBLITE {
     take:

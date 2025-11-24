@@ -1,4 +1,4 @@
-include { RUN_PRINTS; PARSE_PRINTS } from  "../../modules/prints"
+include { RUN_PRINTS; PARSE_PRINTS } from  "${moduleDir}/../../modules/prints"
 
 workflow PRINTS {
     take:

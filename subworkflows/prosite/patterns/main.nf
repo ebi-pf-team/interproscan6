@@ -1,4 +1,4 @@
-include { RUN_PFSCAN; PARSE_PFSCAN } from  "../../../modules/prosite/patterns"
+include { RUN_PFSCAN; PARSE_PFSCAN } from  "${moduleDir}/../../../modules/prosite/patterns"
 
 workflow PROSITE_PATTERNS {
     take:

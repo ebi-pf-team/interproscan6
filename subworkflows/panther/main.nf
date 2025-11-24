@@ -1,4 +1,4 @@
-include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER } from  "../../modules/panther"
+include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER } from  "${moduleDir}/../../modules/panther"
 
 workflow PANTHER {
     take:

@@ -1,4 +1,4 @@
-include { RUN_PFSEARCH ; PARSE_PFSEARCH } from  "../../../modules/prosite/profiles"
+include { RUN_PFSEARCH ; PARSE_PFSEARCH } from  "${moduleDir}/../../../modules/prosite/profiles"
 
 workflow PROSITE_PROFILES {
     take:

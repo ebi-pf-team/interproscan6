@@ -1,4 +1,4 @@
-include { PREPARE_TMBED; RUN_TMBED_CPU; RUN_TMBED_GPU; PARSE_TMBED } from "../../modules/tmbed"
+include { PREPARE_TMBED; RUN_TMBED_CPU; RUN_TMBED_GPU; PARSE_TMBED } from "${moduleDir}/../../modules/tmbed"
 
 workflow TMBED {
     take:

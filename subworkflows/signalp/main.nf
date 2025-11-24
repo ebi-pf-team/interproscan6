@@ -1,9 +1,9 @@
-include { RUN_SIGNALP_CPU as RUN_SIGNALP_CPU_EUK      } from  "../../modules/signalp"
-include { RUN_SIGNALP_GPU as RUN_SIGNALP_GPU_EUK      } from  "../../modules/signalp"
-include { PARSE_SIGNALP as PARSE_SIGNALP_EUK          } from  "../../modules/signalp"
-include { RUN_SIGNALP_CPU as RUN_SIGNALP_CPU_PROK     } from  "../../modules/signalp"
-include { RUN_SIGNALP_GPU as RUN_SIGNALP_GPU_PROK     } from  "../../modules/signalp"
-include { PARSE_SIGNALP as PARSE_SIGNALP_PROK         } from  "../../modules/signalp"
+include { RUN_SIGNALP_CPU as RUN_SIGNALP_CPU_EUK      } from  "${moduleDir}/../../modules/signalp"
+include { RUN_SIGNALP_GPU as RUN_SIGNALP_GPU_EUK      } from  "${moduleDir}/../../modules/signalp"
+include { PARSE_SIGNALP as PARSE_SIGNALP_EUK          } from  "${moduleDir}/../../modules/signalp"
+include { RUN_SIGNALP_CPU as RUN_SIGNALP_CPU_PROK     } from  "${moduleDir}/../../modules/signalp"
+include { RUN_SIGNALP_GPU as RUN_SIGNALP_GPU_PROK     } from  "${moduleDir}/../../modules/signalp"
+include { PARSE_SIGNALP as PARSE_SIGNALP_PROK         } from  "${moduleDir}/../../modules/signalp"
 
 workflow SIGNALP {
     take:

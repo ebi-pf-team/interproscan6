@@ -1,5 +1,5 @@
-include { RUN_HMMER as SEARCH_PFAM } from "../../modules/hmmer"
-include { PARSE_PFAM               } from  "../../modules/pfam"
+include { RUN_HMMER as SEARCH_PFAM } from "${moduleDir}/../../modules/hmmer"
+include { PARSE_PFAM               } from "${moduleDir}/../../modules/pfam"
 
 workflow PFAM {
     take:

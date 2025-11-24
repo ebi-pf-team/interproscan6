@@ -1,8 +1,8 @@
-include { WRITE_GFF3; WRITE_GFF3_LOCAL                                     } from "../../modules/output/gff3"
-include { WRITE_JSON; WRITE_JSON_LOCAL                                     } from "../../modules/output/json"
-include { WRITE_JSON as WRITE_JSONL; WRITE_JSON_LOCAL as WRITE_JSONL_LOCAL } from "../../modules/output/json"
-include { WRITE_TSV; WRITE_TSV_LOCAL                                       } from "../../modules/output/tsv"
-include { WRITE_XML; WRITE_XML_LOCAL                                       } from "../../modules/output/xml"
+include { WRITE_GFF3; WRITE_GFF3_LOCAL                                     } from "${moduleDir}/../../modules/output/gff3"
+include { WRITE_JSON; WRITE_JSON_LOCAL                                     } from "${moduleDir}/../../modules/output/json"
+include { WRITE_JSON as WRITE_JSONL; WRITE_JSON_LOCAL as WRITE_JSONL_LOCAL } from "${moduleDir}/../../modules/output/json"
+include { WRITE_TSV; WRITE_TSV_LOCAL                                       } from "${moduleDir}/../../modules/output/tsv"
+include { WRITE_XML; WRITE_XML_LOCAL                                       } from "${moduleDir}/../../modules/output/xml"
 
 workflow OUTPUT {
     take:

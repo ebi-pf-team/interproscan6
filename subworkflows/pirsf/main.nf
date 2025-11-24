@@ -1,4 +1,4 @@
-include { SEARCH_PIRSF; PARSE_PIRSF } from  "../../modules/pirsf"
+include { SEARCH_PIRSF; PARSE_PIRSF } from  "${moduleDir}/../../modules/pirsf"
 
 workflow PIRSF {
     take:

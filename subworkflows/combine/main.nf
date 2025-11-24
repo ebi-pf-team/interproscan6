@@ -1,6 +1,6 @@
-include { COMBINE_MATCHES; COMBINE_MATCHES_LOCAL                   } from "../../modules/combine"
-include { XREFS; XREFS_LOCAL                                       } from "../../modules/xrefs"
-include { REPRESENTATIVE_LOCATIONS; REPRESENTATIVE_LOCATIONS_LOCAL } from "../../modules/representative_locations"
+include { COMBINE_MATCHES; COMBINE_MATCHES_LOCAL                   } from "${moduleDir}/../../modules/combine"
+include { XREFS; XREFS_LOCAL                                       } from "${moduleDir}/../../modules/xrefs"
+include { REPRESENTATIVE_LOCATIONS; REPRESENTATIVE_LOCATIONS_LOCAL } from "${moduleDir}/../../modules/representative_locations"
 
 workflow COMBINE {
     take:

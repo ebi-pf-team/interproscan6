@@ -2,8 +2,8 @@ nextflow.enable.dsl=2
 import java.time.format.DateTimeFormatter
 import uk.ac.ebi.interpro.InterProScan
 
-include { INIT_PIPELINE      } from "./subworkflows/init"
-include { INTERPROSCAN       } from "./workflows/interproscan.nf"
+include { INIT_PIPELINE      } from "${moduleDir}/subworkflows/init"
+include { INTERPROSCAN       } from "${moduleDir}/workflows/interproscan.nf"
 
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"

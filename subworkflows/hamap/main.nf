@@ -1,4 +1,4 @@
-include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP } from  "../../modules/hamap"
+include { PREPROCESS_HAMAP; PREPARE_HAMAP; RUN_HAMAP; PARSE_HAMAP } from  "${moduleDir}/../../modules/hamap"
 
 workflow HAMAP {
     take:

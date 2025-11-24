@@ -1,4 +1,4 @@
-include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY } from  "../../modules/superfamily"
+include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY } from  "${moduleDir}/../../modules/superfamily"
 
 workflow SUPERFAMILY {
     take:

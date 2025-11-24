@@ -1,4 +1,4 @@
-include { SEARCH_SFLD; PARSE_SFLD } from  "../../modules/sfld"
+include { SEARCH_SFLD; PARSE_SFLD } from  "${moduleDir}/../../modules/sfld"
 
 workflow SFLD {
     take:

@@ -1,12 +1,12 @@
-include { PREPARE_APPLICATIONS } from "../subworkflows/prepare/applications"
-include { PREPARE_DATABASES    } from "../subworkflows/prepare/databases"
-include { PREPARE_SEQUENCES    } from "../subworkflows/prepare/sequences"
-include { LOOKUP               } from "../subworkflows/lookup"
+include { PREPARE_APPLICATIONS } from "${moduleDir}/../subworkflows/prepare/applications"
+include { PREPARE_DATABASES    } from "${moduleDir}/../subworkflows/prepare/databases"
+include { PREPARE_SEQUENCES    } from "${moduleDir}/../subworkflows/prepare/sequences"
+include { LOOKUP               } from "${moduleDir}/../subworkflows/lookup"
 include { SCAN_SEQUENCES as SCAN_REMAINING;
           SCAN_SEQUENCES as SCAN_LOCALLY;
-          SCAN_SEQUENCES       } from "../subworkflows/scan"
-include { COMBINE              } from "../subworkflows/combine"
-include { OUTPUT               } from "../subworkflows/output"
+          SCAN_SEQUENCES       } from "${moduleDir}/../subworkflows/scan"
+include { COMBINE              } from "${moduleDir}/../subworkflows/combine"
+include { OUTPUT               } from "${moduleDir}/../subworkflows/output"
 
 workflow INTERPROSCAN {
     take:
