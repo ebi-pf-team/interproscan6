@@ -1,19 +1,17 @@
-include { PREPARE_APPLICATIONS } from "${moduleDir}/../subworkflows/prepare/applications"
-include { PREPARE_DATABASES    } from "${moduleDir}/../subworkflows/prepare/databases"
-include { PREPARE_SEQUENCES    } from "${moduleDir}/../subworkflows/prepare/sequences"
-include { LOOKUP               } from "${moduleDir}/../subworkflows/lookup"
+include { PREPARE_APPLICATIONS } from "../subworkflows/prepare/applications"
+include { PREPARE_DATABASES    } from "../subworkflows/prepare/databases"
+include { PREPARE_SEQUENCES    } from "../subworkflows/prepare/sequences"
+include { LOOKUP               } from "../subworkflows/lookup"
 include { SCAN_SEQUENCES as SCAN_REMAINING;
           SCAN_SEQUENCES as SCAN_LOCALLY;
-          SCAN_SEQUENCES       } from "${moduleDir}/../subworkflows/scan"
-include { COMBINE              } from "${moduleDir}/../subworkflows/combine"
-include { OUTPUT               } from "${moduleDir}/../subworkflows/output"
+          SCAN_SEQUENCES       } from "../subworkflows/scan"
+include { COMBINE              } from "../subworkflows/combine"
+include { OUTPUT               } from "../subworkflows/output"
 
 workflow INTERPROSCAN {
     take:
     fasta_file            // Channel.fromPath(input fasta file)
     applications          // list[str], names of applications to run
-    no_matches_api        // boolean, whether to use the Matches API
-    matches_api_url       // str, url to the Matches API
     apps_config           // map, contents of the conf/applications.conf file
     data_dir              // str, path to the data directory
     outprefix             // str, prefix for output files
@@ -21,6 +19,17 @@ workflow INTERPROSCAN {
     interpro_version      // str, version of InterPro
     interproscan_version  // str, version of InterProScan
     interproscan_name     // str, name of the InterProScan workflow: "InterProScan6"
+    no_matches_api        // boolean, use the Matches API
+    matches_api_url       // str, url to the Matches API
+    matches_api_chunk_size  // int, chunk size for Matches API requests
+    matches_api_max_retries // int, max retries for Matches API requests
+    batch_size            // int, number of sequences to process per batch
+    sub_batch_size        // int, number of sequences per subbatch
+    nucleic               // boolean, input is nucleic acid sequences
+    skip_interpro         // boolean, skip adding InterPro (cross-refs and repr domains) annotations
+    goterms               // boolean, include GO terms in the output files
+    pathways              // boolean, include pathway terms in the output files
+    globus                // boolean, use Globus to download databases
 
     main:
 
@@ -42,25 +51,25 @@ workflow INTERPROSCAN {
         data_dir,
         interpro_version,
         interproscan_version,
-        params.noMatchesApi,
-        params.goterms,
-        params.pathways,
-        params.globus
+        matches_api_url,
+        goterms,
+        pathways,
+        globus
     )
     db_releases = PREPARE_DATABASES.out.versions
     interproscan_version = PREPARE_DATABASES.out.iprscan_major_minor
 
     PREPARE_SEQUENCES(
         fasta_file,
-        params.nucleic,
-        params.batchSize
+        nucleic,
+        batch_size
     )
     ch_seqs              = PREPARE_SEQUENCES.out.ch_seqs
     seq_db_path          = PREPARE_SEQUENCES.out.seq_db_path
 
     match_results = Channel.empty()
 
-    if (params.noMatchesApi || matches_api_apps.isEmpty()) {
+    if (no_matches_api || matches_api_apps.isEmpty()) {
         SCAN_SEQUENCES(
             ch_seqs,
             db_releases,
@@ -68,7 +77,7 @@ workflow INTERPROSCAN {
             apps_config,
             data_dir,
             local_only_apps,
-            params.subBatchSize
+            sub_batch_size
         )
         match_results = SCAN_SEQUENCES.out
     } else {
@@ -80,9 +89,9 @@ workflow INTERPROSCAN {
             db_releases,
             interproscan_version,
             api_version,
-            params.matchesApiUrl,
-            params.matchesApiChunkSize,
-            params.matchesApiMaxRetries
+            matches_api_url,
+            matches_api_chunk_size,
+            matches_api_max_retries
         )
         precalculated_matches = LOOKUP.out.precalculatedMatches
         no_matches_fastas     = LOOKUP.out.noMatchesFasta
@@ -94,7 +103,7 @@ workflow INTERPROSCAN {
             apps_config,
             data_dir,
             matches_api_apps + local_only_apps,
-            params.subBatchSize
+            sub_batch_size
         )
 
         SCAN_LOCALLY(
@@ -104,7 +113,7 @@ workflow INTERPROSCAN {
             apps_config,
             data_dir,
             matches_api_apps + local_only_apps,
-            params.subBatchSize
+            sub_batch_size
         )
 
         def expandedRemainingScan = SCAN_REMAINING.out.flatMap { scan ->
@@ -128,11 +137,11 @@ workflow INTERPROSCAN {
     ch_results = COMBINE(
         match_results,
         db_releases,
-        params.goterms,
-        params.pathways,
+        goterms,
+        pathways,
         apps_config.panther.paint,
-        params.skipInterpro,
-        params.batchSize
+        skip_interpro,
+        batch_size
     )
 
     OUTPUT(
@@ -140,10 +149,10 @@ workflow INTERPROSCAN {
         seq_db_path,
         formats,
         outprefix,
-        params.nucleic,
+        nucleic,
         interproscan_version,
         db_releases,
-        params.batchSize
+        batch_size
     )
 
 }

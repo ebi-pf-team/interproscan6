@@ -44,15 +44,24 @@ workflow {
     INTERPROSCAN(
         fasta_file,
         apps,
-        params.noMatchesApi,
-        params.matchesApiUrl,
         apps_config,
         data_dir,
         outprefix,
         formats,
         interpro_version,
         workflow.manifest.version,
-        workflow.manifest.name
+        workflow.manifest.name,
+        params.noMatchesApi,
+        params.matchesApiUrl,
+        params.matchesApiChunkSize,
+        params.matchesApiMaxRetries,
+        params.batchSize,
+        params.subBatchSize,
+        params.nucleic,
+        params.skipInterpro,
+        params.goterms,
+        params.pathways,
+        params.globus
     )
 
     workflow.onComplete = {
