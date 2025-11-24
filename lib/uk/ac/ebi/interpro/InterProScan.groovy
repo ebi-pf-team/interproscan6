@@ -504,4 +504,19 @@ class InterProScan {
 
         return text.padRight(40) + ": ${option.description}"
     }
+
+    static List parseAppsConfig(Boolean useGpu, List<String> apps, File appsConfigFile) {
+        ConfigSlurper configSlurper = new ConfigSlurper()
+        def config = configSlurper.parse(appsConfigFile.toURI().toURL())
+        def warn = null
+        def appsConfig = config.params.appsConfig
+        
+        // set all keys to lowercase to simplify matching with user input
+        appsConfig = appsConfig.collectEntries { appName, cfg ->
+            [(appName.toLowerCase()): cfg]
+        }
+        
+        (appsConfig, warn) = this.enableGpuAcceleration(useGpu, apps, appsConfig)
+        return [appsConfig, warn]
+    }
 }
