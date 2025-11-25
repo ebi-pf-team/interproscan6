@@ -146,7 +146,7 @@ workflow INTERPROSCAN {
         batch_size
     )
 
-    OUTPUT(
+    output_files = OUTPUT(
         ch_results,
         seq_db_path,
         formats,
@@ -157,27 +157,23 @@ workflow INTERPROSCAN {
         batch_size
     )
 
+    emit:
+    output_files
 }
 
-workflow PREPARE_INTRPROSCAN {
+workflow PREPARE_INTERPROSCAN {
+    // Parses an interproscan applications.config file and prepares it for use
     take:
-    data_dir     // str repr of path to the data directory
     apps_config  // str repr of path to the applications.config file
     applications // list[str], names of applications to prepare
     use_gpu      // boolean, use GPU acceleration where applicable
 
     main:
-    (data_dir, error) = InterProScan.resolveDirectory(data_dir, false, false)
-    if (data_dir == null) {
-        log.error error
-        exit 1
-    }
-    (apps_config, warn) = InterProScan.parseAppsConfig(use_gpu, applications, "subworkflows/interproscan6/conf/applications.config")
+    (apps_config, warn) = InterProScan.parseAppsConfig(use_gpu, applications, apps_config)
     if (warn) {
         log.warn warn
     }
 
     emit:
-    data_dir
     apps_config
 }

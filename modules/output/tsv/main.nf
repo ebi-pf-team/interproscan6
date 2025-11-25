@@ -10,6 +10,9 @@ process WRITE_TSV_LOCAL {
     val seq_db_file
     val nucleic
 
+    output:
+    val output_file
+
     exec:
     ProcessOutputTSV.run(
         matches_files.collect { it.toString() },
@@ -27,6 +30,9 @@ process WRITE_TSV {
     val output_file
     path seq_db_file
     val nucleic
+
+    output:
+    val output_file
 
     script:
     """

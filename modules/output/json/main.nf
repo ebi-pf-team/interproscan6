@@ -14,6 +14,9 @@ process WRITE_JSON_LOCAL {
     val db_releases
     val jsonlines
 
+    output:
+    val output_file
+
     exec:
     ProcessOutputJSON.run(matches_files.collect { it.toString() }, 
                           seq_db_file.toString(), 
@@ -35,6 +38,9 @@ process WRITE_JSON {
     val interproscan_version
     val db_releases
     val jsonlines
+
+    output:
+    val output_file
 
     script:
     def json = JsonOutput.toJson(db_releases)
