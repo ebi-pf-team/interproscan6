@@ -304,9 +304,9 @@ nextflow run ebi-pf-team/interproscan6 \
 > [!NOTE]  
 > Running both `signalp_euk` and `signalp_prok` will execute SignalP twice, once with eukaryotic post-processing and once without. Choose the mode best suited to your dataset.
 
-## Integration with existing pipelines
+## Integration into existing Nextflow pipelines
 
-You can integrate InterProScan 6 into your own Nextflow pipeline using Git Submoules.
+You can integrate InterProScan 6 directly into your own Nextflow pipeline using Git Submoules.
 
 1. Set up the submodule
 
@@ -318,42 +318,17 @@ git submodule add https://github.com/ebi-pf-team/interproscan6.git subworkflows/
 git submodule update --init --recursive
 ```
 
-2. Include InterProScan 6 in your Nextflow workflow:
+2. Copy the InterProScan6 library into your projects library `cp -r subworkflows/lib* lib`
+
+3. Add the containers from the corresponding InterProScan6 profile (e.g. `conf/profiles/docker.config`) to your Nextflow config file (`nextflow.config`)
+
+4. Include the `PREPARE_INTERPROSCAN` and `INTERPROSCAN` workflows from InterProScan 6 in your Nextflow workflow.
 
 ```groovy
-// main.nf
-include { INTERPROSCAN } from './subworkflows/interproscan6/workflows/interproscan'
-
-workflow {
-    // Your input channel (FASTA files)
-    input_ch = Channel.fromPath(params.input)
-    applications = ["pfam", "cdd", "coils", "mobidblite"]
-    no_matches_api = false  // boolean, whether to retrieve pre-calulcated matches from the Matches API
-    matches_api_url = "https://www.ebi.ac.uk/interpro/matches/api"
-    apps_conf = [:]
-    data_dir = "data"
-    outprefix = "integrated-iprscan-test"
-    formats = ["json", "gff3"]
-    interpro_version = "107.0"
-    interproscan_version = "6.0.0-beta"
-    interproscan_name = "InterProScan6"
-
-    // Run InterProScan
-    INTERPROSCAN(
-        input_ch,
-        applications,
-        no_matches_api,
-        matches_api_url,
-        apps_conf,
-        data_dir,
-        outprefix,
-        formats,
-        interpro_version,
-        interproscan_version,
-        interproscan_name
-    )
-}
+include { PREPARE_INTERPROSCAN; INTERPROSCAN } from './subworkflows/interproscan6/workflows/interproscan6'
 ```
+
+You can find a minimal working example at [Read The Docs](https://interproscan-docs.readthedocs.io/en/v6/). 
 
 ## Documentation
 
