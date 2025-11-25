@@ -33,15 +33,13 @@ nextflow_workflow {
                 input[5] = "data"                                   // datadir
                 input[6] = "json,tsv,xml"                           // formats
                 input[7] = "results"                                // outdir
-                input[8] = null                                     // outprefix  
-                input[9] = false                                    // no_matches_api
-                input[10] = null                                    // matches_api_url
-                input[11] = "latest"                                // interpro_version
-                input[12] = false                                   // skip_intepro
-                input[13] = null                                    // skip_applications
-                input[14] = false                                   // goterms
-                input[15] = false                                   // pathways
-                input[16] = params.workflow_manifest                // workflow manifest
+                input[8] = null                                     // outprefix
+                input[9] = "latest"                                 // interpro_version
+                input[10] = false                                   // skip_intepro
+                input[11] = null                                    // skip_applications
+                input[12] = false                                   // goterms
+                input[13] = false                                   // pathways
+                input[14] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -80,15 +78,13 @@ nextflow_workflow {
                 input[5] = "data"                                   // datadir
                 input[6] = "json,tsv,xml"                           // formats
                 input[7] = "results"                                // outdir
-                input[8] = null                                     // outprefix  
-                input[9] = false                                    // no_matches_api
-                input[10] = null                                    // matches_api_url
-                input[11] = "latest"                                // interpro_version
-                input[12] = false                                   // skip_intepro
-                input[13] = null                                    // skip_applications
-                input[14] = false                                   // goterms
-                input[15] = false                                   // pathways
-                input[16] = params.workflow_manifest                // workflow manifest
+                input[8] = null                                     // outprefix
+                input[9] = "latest"                                 // interpro_version
+                input[10] = false                                   // skip_intepro
+                input[11] = null                                    // skip_applications
+                input[12] = false                                   // goterms
+                input[13] = false                                   // pathways
+                input[14] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -132,15 +128,13 @@ nextflow_workflow {
                 input[5] = "data"                                   // datadir
                 input[6] = "json,tsv,xml"                           // formats
                 input[7] = "results"                                // outdir
-                input[8] = null                                     // outprefix  
-                input[9] = false                                    // no_matches_api
-                input[10] = null                                    // matches_api_url
-                input[11] = "latest"                                // interpro_version
-                input[12] = false                                   // skip_intepro
-                input[13] = null                                    // skip_applications
-                input[14] = false                                   // goterms
-                input[15] = false                                   // pathways
-                input[16] = params.workflow_manifest                // workflow manifest
+                input[8] = null                                     // outprefix
+                input[9] = "latest"                                 // interpro_version
+                input[10] = false                                   // skip_intepro
+                input[11] = null                                    // skip_applications
+                input[12] = false                                   // goterms
+                input[13] = false                                   // pathways
+                input[14] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -179,15 +173,13 @@ nextflow_workflow {
                 input[5] = "data"                                   // datadir
                 input[6] = "json,tsv,xml"                           // formats
                 input[7] = "results"                                // outdir
-                input[8] = null                                     // outprefix  
-                input[9] = false                                    // no_matches_api
-                input[10] = null                                    // matches_api_url
-                input[11] = "latest"                                // interpro_version
-                input[12] = false                                   // skip_intepro
-                input[13] = null                                    // skip_applications
-                input[14] = false                                   // goterms
-                input[15] = false                                   // pathways
-                input[16] = params.workflow_manifest                // workflow manifest
+                input[8] = null                                     // outprefix
+                input[9] = "latest"                                 // interpro_version
+                input[10] = false                                   // skip_intepro
+                input[11] = null                                    // skip_applications
+                input[12] = false                                   // goterms
+                input[13] = false                                   // pathways
+                input[14] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -227,15 +219,13 @@ nextflow_workflow {
                 input[5] = "data"                                   // datadir
                 input[6] = "json,tsv,xml"                           // formats
                 input[7] = "results"                                // outdir
-                input[8] = null                                     // outprefix  
-                input[9] = false                                    // no_matches_api
-                input[10] = null                                    // matches_api_url
-                input[11] = "latest"                                // interpro_version
-                input[12] = false                                   // skip_intepro
-                input[13] = null                                    // skip_applications
-                input[14] = false                                   // goterms
-                input[15] = false                                   // pathways
-                input[16] = params.workflow_manifest                // workflow manifest
+                input[8] = null                                     // outprefix
+                input[9] = "latest"                                 // interpro_version
+                input[10] = false                                   // skip_intepro
+                input[11] = null                                    // skip_applications
+                input[12] = false                                   // goterms
+                input[13] = false                                   // pathways
+                input[14] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -274,15 +264,13 @@ nextflow_workflow {
                 input[5] = "data"                                   // datadir
                 input[6] = "json,tsv,xml"                           // formats
                 input[7] = "results"                                // outdir
-                input[8] = null                                     // outprefix  
-                input[9] = false                                    // no_matches_api
-                input[10] = null                                    // matches_api_url
-                input[11] = "latest"                                // interpro_version
-                input[12] = true                                   // skip_intepro
-                input[13] = null                                    // skip_applications
-                input[14] = true                                    // goterms
-                input[15] = true                                    // pathways
-                input[16] = params.workflow_manifest                // workflow manifest
+                input[8] = null                                     // outprefix
+                input[9] = "latest"                                 // interpro_version
+                input[10] = true                                    // skip_intepro
+                input[11] = null                                    // skip_applications
+                input[12] = true                                    // goterms
+                input[13] = true                                    // pathways
+                input[14] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -321,15 +309,13 @@ nextflow_workflow {
                 input[5] = "data"                                   // datadir
                 input[6] = "json,tsv,xml,csv"                       // formats
                 input[7] = "results"                                // outdir
-                input[8] = null                                     // outprefix  
-                input[9] = false                                    // no_matches_api
-                input[10] = null                                    // matches_api_url
-                input[11] = "latest"                                // interpro_version
-                input[12] = false                                   // skip_intepro
-                input[13] = null                                    // skip_applications
-                input[14] = false                                   // goterms
-                input[15] = false                                   // pathways
-                input[16] = params.workflow_manifest                // workflow manifest
+                input[8] = null                                     // outprefix
+                input[9] = "latest"                                 // interpro_version
+                input[10] = false                                   // skip_intepro
+                input[11] = null                                    // skip_applications
+                input[12] = false                                   // goterms
+                input[13] = false                                   // pathways
+                input[14] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -373,14 +359,12 @@ nextflow_workflow {
                 input[6] = "json,tsv,xml,csv"                       // formats
                 input[7] = "results"                                // outdir
                 input[8] = null                                     // outprefix
-                input[9] = false                                    // no_matches_api
-                input[10] = null                                    // matches_api_url
-                input[11] = "latest"                                // interpro_version
-                input[12] = false                                   // skip_intepro
-                input[13] = null                                    // skip_applications
-                input[14] = false                                   // goterms
-                input[15] = false                                   // pathways
-                input[16] = params.workflow_manifest                // workflow manifest
+                input[9] = "latest"                                // interpro_version
+                input[10] = false                                   // skip_intepro
+                input[11] = null                                    // skip_applications
+                input[12] = false                                   // goterms
+                input[13] = false                                   // pathways
+                input[14] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -420,14 +404,12 @@ nextflow_workflow {
                 input[6] = "json,tsv,xml,csv"                       // formats
                 input[7] = "results"                                // outdir
                 input[8] = null                                     // outprefix
-                input[9] = false                                    // no_matches_api
-                input[10] = null                                    // matches_api_url
-                input[11] = "latest"                                // interpro_version
-                input[12] = false                                   // skip_intepro
-                input[13] = null                                    // skip_applications
-                input[14] = false                                   // goterms
-                input[15] = false                                   // pathways
-                input[16] = params.workflow_manifest                // workflow manifest
+                input[9] = "latest"                                // interpro_version
+                input[10] = false                                   // skip_intepro
+                input[11] = null                                    // skip_applications
+                input[12] = false                                   // goterms
+                input[13] = false                                   // pathways
+                input[14] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -467,14 +449,12 @@ nextflow_workflow {
                 input[6] = "json,tsv,xml,csv"                       // formats
                 input[7] = "results"                                // outdir
                 input[8] = null                                     // outprefix
-                input[9] = false                                    // no_matches_api
-                input[10] = null                                   // matches_api_url
-                input[11] = "latest"                                // interpro_version
-                input[12] = false                                   // skip_intepro
-                input[13] = null                                    // skip_applications
-                input[14] = false                                   // goterms
-                input[15] = false                                   // pathways
-                input[16] = params.workflow_manifest                // workflow manifest
+                input[9] = "latest"                                // interpro_version
+                input[10] = false                                   // skip_intepro
+                input[11] = null                                    // skip_applications
+                input[12] = false                                   // goterms
+                input[13] = false                                   // pathways
+                input[14] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
@@ -523,14 +503,12 @@ nextflow_workflow {
                 input[6] = "json,tsv,xml,csv"                       // formats
                 input[7] = "results"                                // outdir
                 input[8] = null                                     // outprefix
-                input[9] = false                                    // no_matches_api
-                input[10] = null                                    // matches_api_url
-                input[11] = "latest"                                // interpro_version
-                input[12] = false                                   // skip_intepro
-                input[13] = null                                    // skip_applications
-                input[14] = false                                   // goterms
-                input[15] = false                                   // pathways
-                input[16] = params.workflow_manifest                // workflow manifest
+                input[9] = "latest"                                // interpro_version
+                input[10] = false                                   // skip_intepro
+                input[11] = null                                    // skip_applications
+                input[12] = false                                   // goterms
+                input[13] = false                                   // pathways
+                input[14] = params.workflow_manifest                // workflow manifest
                 """
             }
         }
