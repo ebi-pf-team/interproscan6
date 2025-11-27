@@ -15,7 +15,7 @@ class ProcessOutputGFF3 {
             gff3Writer.writeLine("##gff-version 3.1.26")
             gff3Writer.writeLine("##interproscan-version ${iprscanVersion}")
 
-            def tempFastaFile = new File("temp.fasta")
+            def tempFastaFile = new File(outputPath + ".fasta")
             tempFastaFile.withWriter { fastaWriter ->
                 fastaWriter.writeLine("##FASTA")
 
