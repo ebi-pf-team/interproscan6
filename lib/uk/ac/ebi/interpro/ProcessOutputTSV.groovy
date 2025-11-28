@@ -124,7 +124,7 @@ class ProcessOutputTSV {
             start,
             end,
             scoringValue,
-            appl == "signalp"? match.modelAccession : match.source,
+            match.source,
             currentDate,
             entryAcc,
             entryDesc,
