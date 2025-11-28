@@ -19,7 +19,7 @@ workflow OUTPUT {
     outfiles = Channel.empty()
 
     // convert to uppercase in case iprscan is imported directly into another workflow
-    formats_upper = formats.collect { it.toUpperCase() }
+    def formats_upper = formats.collect { it.toUpperCase() }
 
     if (batch_size < 50000) {
         if (formats_upper.contains("GFF3")) {

@@ -306,29 +306,7 @@ nextflow run ebi-pf-team/interproscan6 \
 
 ## Integration into existing Nextflow pipelines
 
-You can integrate InterProScan 6 directly into your own Nextflow pipeline using Git Submoules.
-
-1. Set up the submodule
-
-```bash
-# Add the submodule to a 'subworkflows' directory
-git submodule add https://github.com/ebi-pf-team/interproscan6.git subworkflows/interproscan6
-
-# Initialise and update the submodule
-git submodule update --init --recursive
-```
-
-2. Copy the InterProScan6 library into your projects library `cp -r subworkflows/lib* lib`
-
-3. Add the containers from the corresponding InterProScan6 profile (e.g. `conf/profiles/docker.config`) to your Nextflow config file (`nextflow.config`)
-
-4. Include the `PREPARE_INTERPROSCAN` and `INTERPROSCAN` workflows from InterProScan 6 in your Nextflow workflow.
-
-```groovy
-include { PREPARE_INTERPROSCAN; INTERPROSCAN } from './subworkflows/interproscan6/workflows/interproscan6'
-```
-
-You can find a minimal working example at [Read The Docs](https://interproscan-docs.readthedocs.io/en/v6/). 
+For instructions on integrating InterProScan 6 into a Nextflow pipeline as a Git submodule, see the [integration documentation](https://interproscan-docs.readthedocs.io/en/v6/Integrating.html).
 
 ## Documentation
 
