@@ -279,10 +279,10 @@ class InterProScan {
         // Normalize "catalogue" of applications
         Map<String, String> aliases = [:]
         appsConfig.each { label, cfg ->
-            def std = cfg.name.toLowerCase().replaceAll(/[- ]/, "")
+            def std = cfg.name.toLowerCase().replaceAll(/[-_ ]/, "")
             aliases[std] = label
             (cfg.aliases ?: []).each { alias ->
-                def stdAlias = alias.toLowerCase().replaceAll(/[- ]/, "")
+                def stdAlias = alias.toLowerCase().replaceAll(/[-_ ]/, "")
                 aliases[stdAlias] = label
             }
         }
@@ -315,7 +315,7 @@ class InterProScan {
         // Explicit --applications
         if (applications) {
             Set<String> req = applications.split(",")
-                                          .collect { it.trim().toLowerCase().replaceAll(/[- ]/, "") }
+                                          .collect { it.trim().toLowerCase().replaceAll(/[-_ ]/, "") }
                                           .findAll { it }
                                           .toSet()
             Set<String> unrec = []
@@ -346,7 +346,7 @@ class InterProScan {
         // Explicit --skip--applications
         if (skipApplications) {
             Set<String> req = skipApplications.split(",")
-                                              .collect { it.trim().toLowerCase().replaceAll(/[- ]/, "") }
+                                              .collect { it.trim().toLowerCase().replaceAll(/[-_ ]/, "") }
                                               .findAll { it }
                                               .toSet()
             Set<String> unrec = []
