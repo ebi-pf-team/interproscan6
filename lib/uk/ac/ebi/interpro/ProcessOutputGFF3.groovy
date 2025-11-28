@@ -146,7 +146,7 @@ class ProcessOutputGFF3 {
             case ["PRINTS", "PROSITE patterns"]:
                 feature_type = "polypeptide_motif"
                 break
-            case ["SignalP-Prok", "SignalP-Euk"]:
+            case "SignalP":
                 feature_type = "signal_peptide"
                 break
             case "AntiFam":
@@ -199,10 +199,20 @@ class ProcessOutputGFF3 {
             name = match.signature.accession
         }
 
+        def signalpMode = null
+        def signalpOrganism = null
+        if (memberDb == "SignalP") {
+            def parts = match.modelAccession.split("_")
+            signalpMode = parts[1]
+            signalpOrganism = parts[2]
+        }
+
         String interproAccession = match.signature.entry?.accession
         def attributes = [
             "Name=${name}",
             alias ? "Alias=${alias}" : null,
+            signalpMode ? "Mode=${signalpMode}" : null,
+            signalpOrganism ? "Organism=${signalpOrganism}" : null,
             parentId ? "Parent=${parentId}" : null,
             interproAccession ? "Dbxref=InterPro:${interproAccession}" : null,
             (match.source == "InterPro-N") ? "Dbxref=${memberDb}:${match.signature.accession}" : null,
