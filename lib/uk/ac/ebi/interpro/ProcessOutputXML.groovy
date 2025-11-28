@@ -471,7 +471,7 @@ class ProcessOutputXML {
             locationAttributes.each { k, v ->
                 if (v != null) {
                     if (v instanceof Number) {
-                        gen.writeNumberField(k.toString(), ((Number) v).longValue())
+                        gen.writeNumberField(k.toString(), ((Number) v).doubleValue())
                     } else {
                         gen.writeStringField(k.toString(), v.toString())
                     }
@@ -616,7 +616,7 @@ class ProcessOutputXML {
             start          : loc.start,
             end            : loc.end,
             representative : loc.representative,
-            pvalue         : loc.score
+            score          : loc.score
         ]
     }
 

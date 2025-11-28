@@ -95,8 +95,8 @@ class ProcessOutputTSV {
             case ["cdd", "prints"]:
                 scoringValue = match.evalue
                 break
-            case ["signalp-prok", "signalp-euk"]:
-                scoringValue = loc.pvalue
+            case "signalp":
+                scoringValue = loc.score
                 break
             case ["hamap", "interpro-n", "prosite profiles"]:
                 scoringValue = loc.score
