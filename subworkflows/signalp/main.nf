@@ -7,17 +7,17 @@ include { PARSE_SIGNALP as PARSE_SIGNALP_PROK         } from  "../../modules/sig
 
 workflow SIGNALP {
     take:
-    ch_seqs
-    applications
-    euk_organism
-    euk_mode
-    euk_dir
-    euk_gpu
-    prok_organism
-    prok_mode
-    prok_dir
-    prok_gpu
-    batch_size  // params.subBatchSize
+    ch_seqs        // channel of tuples (index, fasta file)
+    applications   // list of applications to run: signalp_euk, signalp_prok
+    euk_organism   // str, signalp organism option, always 'eukarya' for eukaryotes
+    euk_mode       // str, signalp mode option, e.g. 'fast' or 'slow'
+    euk_dir        // str repr of the path to the eukaryotic signalp data dir
+    euk_gpu        // boolean, use GPU for eukaryotic signalp
+    prok_organism  // str, signalp organism option, always 'prokarya' for prokaryotes
+    prok_mode      // str, signalp mode option, e.g. 'fast' or 'slow'
+    prok_dir       // str repr of the path to the prokaryotic signalp data dir
+    prok_gpu       // boolean, use GPU for prokaryotic signalp
+    batch_size     // int, number of sequences per sub-batch for searching
 
     main:
     results = Channel.empty()

@@ -53,7 +53,8 @@ process LOOKUP_MATCHES {
     def noLookupFasta = new StringBuilder()
     Map<String, String> sequences = FastaFile.parse(seqFasta)  // [md5: sequence]
     def md5List = sequences.keySet().toList().sort()
-    def chunks = md5List.collate(chunkSize)
+    def requestChunkSize = chunkSize > 100 ? 100 : chunkSize       // API set max to 100
+    def chunks = md5List.collate(requestChunkSize)
 
     String baseUrl = HTTPRequest.sanitizeURL(url.toString())
     boolean success = true
@@ -102,7 +103,7 @@ process LOOKUP_MATCHES {
             new File(noLookupFastaPath.toString()).write(noLookupFasta.toString())
         }
     } else {
-        log.warn "An error occurred while querying the Matches API, analyses will be run locally"
+        log.warn "An error occurred while querying the Matches API, analyses will be run locally -- '${response}'"
         new File(calculatedMatchesPath.toString()).write(JsonOutput.toJson([:]))
         new File(noLookupFastaPath.toString()).write(new File(fasta.toString()).text)
     }

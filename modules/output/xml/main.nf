@@ -13,6 +13,9 @@ process WRITE_XML_LOCAL {
     val interproscan_version
     val db_releases
 
+    output:
+    val output_file
+
     exec:
     ProcessOutputXML.run(matches_files.collect { it.toString() }, 
                          seq_db_file.toString(), 
@@ -32,6 +35,9 @@ process WRITE_XML {
     val nucleic
     val interproscan_version
     val db_releases
+
+    output:
+    val output_file
 
     script:
     def json = JsonOutput.toJson(db_releases)

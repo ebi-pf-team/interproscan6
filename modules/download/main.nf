@@ -3,6 +3,8 @@ import java.nio.file.*
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
+import uk.ac.ebi.interpro.InterProScan
+
 process DOWNLOAD {
     maxForks 1
     executor 'local'

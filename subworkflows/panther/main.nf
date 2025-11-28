@@ -2,12 +2,12 @@ include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER } 
 
 workflow PANTHER {
     take:
-    ch_seqs
-    dir
-    hmm
-    msf
-    batch_size
-    
+    ch_seqs    // channel of tuples (meta, fasta file)
+    dir        // str repr of the data directory path
+    hmm        // str repr of the path to the HMM file in the data dir -> datadir/hmmFile
+    msf        // str repr of the path to the MSF file in the data dir -> datadir/msfFile
+    batch_size // int, number of sequences per sub batch for searching
+
     main:
     results = Channel.empty()
 

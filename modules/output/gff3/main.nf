@@ -12,12 +12,15 @@ process WRITE_GFF3_LOCAL {
     val nucleic
     val interproscan_version
 
+    output:
+    val output_file
+
     exec:
     ProcessOutputGFF3.run(matches_files.collect { it.toString() }, 
-                          seq_db_file.toString(), 
-                          nucleic, 
-                          interproscan_version, 
-                          output_file.toString())
+        seq_db_file.toString(), 
+        nucleic, 
+        interproscan_version, 
+        output_file.toString())
 }
 
 process WRITE_GFF3 {
@@ -29,6 +32,9 @@ process WRITE_GFF3 {
     path seq_db_file
     val nucleic
     val interproscan_version
+
+    output:
+    val output_file
 
     script:
     """

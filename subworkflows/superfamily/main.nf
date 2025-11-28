@@ -2,14 +2,14 @@ include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY } from  "../../modules/superfami
 
 workflow SUPERFAMILY {
     take:
-    ch_seqs
-    dirpath
-    hmm
-    selfhits
-    cla
-    model
-    pdbj95d
-    batch_size
+    ch_seqs      // channel of tuples (meta, fasta file)
+    dirpath      // str repr of the data directory path
+    hmm          // str repr of the path to the HMM file in the data dir -> datadir/hmm
+    selfhits     // str repr of the path to the selfhits file in the data dir -> datadir/selfhits
+    cla          // str repr of the path to the cla file in the data dir -> datadir/cla
+    model        // str repr of the path to the model dir in the data dir -> datadir/model
+    pdbj95d      // str repr of the path to the pdbj95d file in the data dir -> datadir/pdbj95d
+    batch_size   // int, number of sequences per sub-batch for searching
 
     main:
     results = Channel.empty()
