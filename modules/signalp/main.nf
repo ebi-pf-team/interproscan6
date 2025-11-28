@@ -104,6 +104,9 @@ process PARSE_SIGNALP {
         String seqId = seqHeader.split(/\s+/)[0]
         int start = fields[3].toInteger()
         int end = fields[4].toInteger()
+        if (start < 0 || end < 0) {
+            return
+        }
         Double score = Double.parseDouble(fields[5])
         String prediction = jsonOutput["SEQUENCES"][seqHeader]["Prediction"]
 
