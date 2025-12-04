@@ -241,20 +241,17 @@ echo "${PWD}/phobius"
 
 #### SignalP 6.0
 
-SignalP 6.0 supports two modes: 
+SignalP 6.0 provides two model variants:
 
-* Slow (full model)
-* Fast (distilled model), recommended for most users
+* Full (slow) model
+* Distilled (fast) model, recommended for most users
 
-You need a license to download either model:
-
-* full model: [slow_sequential](https://services.healthtech.dtu.dk/cgi-bin/sw_request?software=signalp&version=6.0&packageversion=6.0h&platform=slow_sequential)
-* distilled model: [fast](https://services.healthtech.dtu.dk/cgi-bin/sw_request?software=signalp&version=6.0&packageversion=6.0h&platform=fast)
+A license is required to download either model. Licenses and model archives are available [from the DTU website](https://services.healthtech.dtu.dk/services/SignalP-6.0/).
 
 Extract the archive:
 
 ```sh
-tar -zxf signalp-6.0h.fast.tar.gz
+tar -zxf signalp-6.0i.fast.tar.gz
 ```
 
 Then get the full path:
