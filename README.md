@@ -135,7 +135,7 @@ Omit `--use-gpu` to run on CPU.
 
 ### Including GO terms and pathway annotations
 
-To include Gene Ontology terms and pathway annotations:
+Add `--goterms` and `--pathways` to include Gene Ontology terms and pathway annotations in the output files:
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
