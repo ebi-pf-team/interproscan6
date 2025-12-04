@@ -4,21 +4,24 @@ on:
   push:
     branches: [ main ]
     paths:
-      - lib
-      - modules
-      - subworkflows
-      - tests
-      - nextflow.config
-      - main.nf
       - .github/workflows/unit-tests.yml
+      - bin/**
+      - conf/**
+      - lib/**
+      - modules/**
+      - subworkflows/**
+      - tests/**
+      - main.nf
+      - nextflow.config
 
   pull_request:
     branches: [ main ]
     paths:
-      - lib
-      - modules
-      - subworkflows
-      - tests
+      - lib/**
+      - modules/**
+      - subworkflows/**
+      - tests/**
+      - workflows/**
       - nextflow.config
       - main.nf
       - .github/workflows/unit-tests.yml
