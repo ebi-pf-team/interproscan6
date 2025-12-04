@@ -471,7 +471,11 @@ class ProcessOutputXML {
             locationAttributes.each { k, v ->
                 if (v != null) {
                     if (v instanceof Number) {
-                        gen.writeNumberField(k.toString(), ((Number) v).doubleValue())
+                        if (["evalue", "pvalue", "score"].contains(k)) {
+                            gen.writeNumberField(k.toString(), ((Number) v).doubleValue())
+                        } else {
+                            gen.writeNumberField(k.toString(), ((Number) v).longValue())
+                        }
                     } else {
                         gen.writeStringField(k.toString(), v.toString())
                     }
