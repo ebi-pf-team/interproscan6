@@ -1,11 +1,13 @@
 import groovy.json.JsonOutput
-import Prints
-import HierarchyEntry
 
-import Match
+import uk.ac.ebi.interpro.FingerPrint
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_PRINTS {
-    label 'medium', 'ips6_container'
+    label 'mem_medium', 'time_short', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -25,7 +27,7 @@ process RUN_PRINTS {
 }
 
 process PARSE_PRINTS {
-    label    'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
@@ -40,14 +42,14 @@ process PARSE_PRINTS {
     SignatureLibraryRelease library = new SignatureLibraryRelease("PRINTS", null)
     String hierarchyFilePath = "${dirpath.toString()}/${hierarchydb}"
     // Build up a map of the Model ID to fingerprint hierarchies
-    Map<String, HierarchyEntry> hierarchyMap = HierarchyEntry.parseHierarchyDbFile(hierarchyFilePath)
+    Map<String, FingerPrint.HierarchyEntry> hierarchyMap = FingerPrint.HierarchyEntry.parseHierarchyDbFile(hierarchyFilePath)
 
     // Parse the prints output into simple raw prints matches
     // Each location is represented by its own Print object
     File printsFile = new File(prints_output.toString())
     String queryAccession = null                   // protein seq ID
-    Map<String, Prints> thisProteinsMatches = [:]  // modelName: Prints()
-    Map<String, List<Prints>> rawMatches = [:]      // <protein ID <Prints()>>
+    Map<String, FingerPrint> thisProteinsMatches = [:]  // modelName: FingerPrint()
+    Map<String, List<FingerPrint>> rawMatches = [:]      // <protein ID <FingerPrint()>>
     printsFile.withReader { reader ->
         String line
         while ((line = reader.readLine()) != null) {
@@ -68,7 +70,7 @@ process PARSE_PRINTS {
                 double evalue = lineData1TBH[2] as double
                 String modelId = lineData1TBH[-1]
 
-                Prints printMatch = new Prints(modelName, modelId, evalue)
+                FingerPrint printMatch = new FingerPrint(modelName, modelId, evalue)
                 thisProteinsMatches.computeIfAbsent(modelName, {printMatch})
             }
 
@@ -122,7 +124,7 @@ process PARSE_PRINTS {
                         locationEnd = locationEnd - (motifSeqLength - indexCheck) + 1
                     }
 
-                    Prints matchLocation = Prints.buildLocationMatch(
+                    FingerPrint matchLocation = FingerPrint.buildLocationMatch(
                             thisProteinsMatches[modelName],
                             locationStart,
                             locationEnd,
@@ -152,16 +154,16 @@ process PARSE_PRINTS {
     */
     Map<String, Map<String, Match>> matches = [:]
     rawMatches.each { proteinAccession, proteinMatches ->
-        List<Prints> sortedMatches = sortMatches(proteinMatches)
-        List<Prints> filteredMatches = []
+        List<FingerPrint> sortedMatches = sortMatches(proteinMatches)
+        List<FingerPrint> filteredMatches = []
         String currentModelAcc = null
-        List<Prints> motifMatchesForCurrentModel = []
+        List<FingerPrint> motifMatchesForCurrentModel = []
         boolean currentMatchesPass = true
         boolean passed = false
-        HierarchyEntry currentHierarchyEntry = null
+        FingerPrint.HierarchyEntry currentHierarchyEntry = null
         Set<String> hierarchyEntryIdLimitation = hierarchyMap.keySet() // initialise with all models
 
-        for (Prints rawMatch in sortedMatches) {
+        for (FingerPrint rawMatch in sortedMatches) {
             if (currentModelAcc == null || currentModelAcc != rawMatch.modelName) {
                 // just started or moved onto a match for a different model
                 if (currentModelAcc != null && currentMatchesPass) {
@@ -179,7 +181,7 @@ process PARSE_PRINTS {
 
                 // reset the values
                 currentMatchesPass = true
-                motifMatchesForCurrentModel = []  as List<Prints>
+                motifMatchesForCurrentModel = []  as List<FingerPrint>
                 currentModelAcc = rawMatch.modelName
                 assert hierarchyMap[currentModelAcc] != null
                 currentHierarchyEntry = hierarchyMap[currentModelAcc]
@@ -199,7 +201,7 @@ process PARSE_PRINTS {
         // add the filteredMatches to matches
         if (!filteredMatches.isEmpty()) {
             def finalMatches = matches.computeIfAbsent(proteinAccession, { [:] })
-            for (Prints filteredMatch: filteredMatches) {
+            for (FingerPrint filteredMatch: filteredMatches) {
                 // the modelName has been used up to this point, but we need to convert to the model ID
                 Match match = finalMatches.computeIfAbsent(
                     filteredMatch.modelId,
@@ -224,7 +226,7 @@ process PARSE_PRINTS {
     new File(outputFilePath.toString()).write(json)
 }
 
-List<Prints> sortMatches(List<Prints> matches) {
+List<FingerPrint> sortMatches(List<FingerPrint> matches) {
     // This comparator is CRITICAL to the working of PRINTS post-processing
     return matches.sort { matchA, matchB ->
         int evalueComparison = matchA.evalue <=> matchB.evalue
@@ -246,7 +248,7 @@ List<Prints> sortMatches(List<Prints> matches) {
 boolean selectMatches(  // check if the matches should be selected. Returns a boolean
         List<Match> motifMatchesForCurrentModel,
         String modelName,
-        HierarchyEntry hierarchy,
+        FingerPrint.HierarchyEntry hierarchy,
         Set<String> hierarchyEntryIdLimitation
 ) {
     // Belt and braces check

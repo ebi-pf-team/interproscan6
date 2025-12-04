@@ -1,3 +1,5 @@
+import uk.ac.ebi.interpro.InterProScan
+
 workflow INIT_PIPELINE {
     // Validate pipeline input parameters
     take:
@@ -10,8 +12,6 @@ workflow INIT_PIPELINE {
     formats
     outdir
     outprefix
-    no_matches_api
-    matches_api_url
     interpro_version
     skip_intepro
     skip_applications
@@ -91,26 +91,10 @@ workflow INIT_PIPELINE {
         outprefix = "${outdir}/${outprefix}"
     }
 
-    (matches_api_apps, local_only_apps, api_version, error) = Lookup.prepareLookup(
-        apps,
-        no_matches_api,
-        matches_api_url,
-        workflow_manifest
-    )
-    if (error) {
-        log.warn error
-    } else if (!no_matches_api && !local_only_apps.isEmpty()) {
-        log.warn "The following analyses are not available in the Matches API: " +
-                local_only_apps.join(", ") +
-                ". They will be executed locally."
-    }
-
     emit:
     fasta            // str: path to input fasta file
+    apps             // list: selected applications
     apps_config      // map: updated applications configuration
-    local_only_apps  // list: list of application to that are not in the matches API
-    matches_api_apps // list: list of applications that are in the matches API
-    api_version      // str: version of the matches API
     datadir          // str: path to data directory, or null if not needed
     outprefix        // str: base path for output files
     formats          // set<String>: output file formats

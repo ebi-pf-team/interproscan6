@@ -1,8 +1,11 @@
 import java.nio.file.Files
 import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.FastaFile
+import uk.ac.ebi.interpro.HMMER2
+import uk.ac.ebi.interpro.HMMER3
 
 process PREFILTER_SMART {
-    label 'small', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_veryshort', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -21,7 +24,7 @@ process PREFILTER_SMART {
 }
 
 process PREPARE_SMART {
-    label    'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
@@ -31,92 +34,66 @@ process PREPARE_SMART {
     val chunk_size
 
     output:
-    tuple val(meta), path("chunk_*.fasta"), val(smarts)
+    tuple val(meta), val(smart_fasta_pairs)
 
     exec:
-    // Extract model accessions against which at least one sequence match was found
-    def matches = HMMER3.parseOutput(hmmseach_out.toString(), "SMART")
-    smarts = matches.values()
-        .collect { jsonMatches -> jsonMatches.keySet() }
-        .flatten()
-        .unique()
-        .findAll { smartId ->
-            new File("${dirpath.toString()}/${hmmdir}/${smartId}.hmm").exists()
+    /* Only run seqs against a HMMER2 model where a HMMER3 match was found.
+        Return tuple val(meta), val(fastaFiles), val(smarts) where the Nth item of
+        fastaFiles corresponds to the sequences to scan against the Nth element of smarts. */
+    Map<String, String> sequences = FastaFile.parse(fasta.toString())  // [md5: sequence]
+    Map<String, Map> matches = HMMER3.parseOutput(hmmseach_out.toString(), "SMART")
+
+    // Map model accessions to seq Ids -> [modelAcc: [seqIds]]
+    Map<String, List<String>> model2seqs = [:].withDefault { [] }
+    matches.each { seqId, seqMatches ->
+        seqMatches.each { modelAcc, _ ->
+            model2seqs[modelAcc] << seqId
         }
+    }
 
-    // Build a custom FASTA file with only the seqs that at least one SMART model matches
-    def matchedSeqIds = matches.keySet()
-    Map<String, String> allSeqs = FastaFile.parse(fasta.toString())
-    // Filter to only the matching sequences
-    def matchedSeqs = matchedSeqIds.collectEntries { [(it): allSeqs[it]] }
-
-    // Chunk the sequences
-    def chunkedFastaPaths = []
-    def chunk = []
-    int chunkIndex = 0
-
-    if (matchedSeqs.isEmpty()) {
-        // Create an empty file if no sequences match to avoid missing output
-        new File("${task.workDir}/chunk_empty.fasta").createNewFile()
-    } else {
-        matchedSeqs.each { seqId, seq ->
-            if (chunk.size() >= chunk_size) {
-                def chunkFile = file("${task.workDir}/chunk_${chunkIndex}.fasta")
-                chunkFile.withWriter { writer ->
-                    chunk.each { chunkSeqId, chunkSeq ->
-                        writer.writeLine(">${chunkSeqId}")
-                        for (int i = 0; i < chunkSeq.length(); i += 60) {
-                            writer.writeLine(chunkSeq.substring(i, Math.min(i + 60, chunkSeq.length())))
-                        }
-                    }
-                }
-                chunkedFastaPaths << chunkFile
-                chunk = []
-                chunkIndex++
-            } else {
-                chunk << [seqId, seq]
+    // Do not use `def` so lists are globally scoped and can be used in the `output` block
+    smart_fasta_pairs = []
+    // Create a FASTA file for each profile to search with
+    model2seqs.each { modelAcc, seqIds ->
+        Path mdlPath = file("${dirpath.toString()}/${hmmdir}/${modelAcc}.hmm")
+        File mdlFile = new File(mdlPath.toString())
+        if (!mdlFile.exists()) return
+        String fasta = "${task.workDir}/${modelAcc}.fa"
+        new File(fasta).withWriter('UTF-8') { writer ->
+            seqIds.each { seqId ->
+                String seq = sequences[seqId]
+                writer.writeLine(">${seqId}")
+                seq.eachMatch(/.{1,60}/) { writer.writeLine(it) }
             }
         }
-        // Write the final chunk
-        if (!chunk.isEmpty()) {
-            def chunkFile = file("${task.workDir}/chunk_${chunkIndex}.fasta")
-            chunkFile.withWriter { writer ->
-                chunk.each { chunkSeqId, chunkSeq ->
-                    writer.writeLine(">${chunkSeqId}")
-                    for (int i = 0; i < chunkSeq.length(); i += 60) {
-                        writer.writeLine(chunkSeq.substring(i, Math.min(i + 60, chunkSeq.length())))
-                    }
-                }
-            }
-            chunkedFastaPaths << chunkFile
-        }
+        smart_fasta_pairs.add ( [modelAcc, fasta] )
     }
 }
 
 process SEARCH_SMART {
-    label 'medium', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_veryshort', 'dynamic', 'ips6_container'
 
     input:
-    tuple val(meta), path(fasta), val(smarts)
+    tuple val(meta), val(smart_fasta_pairs)
     path dirpath
     val hmmdir
 
     output:
-    tuple val(meta), path("hmmpfam.out"), path(fasta)
+    tuple val(meta), path("hmmpfam.out"), val(smart_fasta_pairs)
 
     script:
     def commands = ""
-    if (fasta.size() == 0) {
+    if (smart_fasta_pairs.size() == 0) {
         // Create an empty hmmpfam.out file if input is empty
         commands = "touch hmmpfam.out"
     } else {
-        smarts.each { smartFile ->
-            fasta.each { chunkFile ->
-                String hmmFilePath = "${dirpath.toString()}/${hmmdir}/${smartFile}.hmm"  // reassign to a var so the cmd can run
-                commands += "hmmpfam"
-                commands += " --acc -A 0 -E 0.01 -Z 350000 --cpu ${task.cpus}"
-                commands += " $hmmFilePath ${chunkFile} >> hmmpfam.out\n"
-            }
+        smart_fasta_pairs.each { pair ->
+            String smartModelAcc = pair[0]
+            def fastaFile = pair[1]
+            String hmmFilePath = "${dirpath.toString()}/${hmmdir}/${smartModelAcc}.hmm"  // reassign to a var so the cmd can run
+            commands += "hmmpfam"
+            commands += " --acc -A 0 -E 0.01 -Z 350000 --cpu ${task.cpus}"
+            commands += " $hmmFilePath $fastaFile >> hmmpfam.out\n"
         }
     }
 
@@ -126,11 +103,11 @@ process SEARCH_SMART {
 }
 
 process PARSE_SMART {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:
-    tuple val(meta), val(hmmpfam_out), val(fasta)
+    tuple val(meta), val(hmmpfam_out), val(smart_fasta_pairs)
     val dirpath
     val hmmdir
 
@@ -140,12 +117,9 @@ process PARSE_SMART {
     exec:
     // fasta may be a single file or multiple
     Map<String, String> sequences = [:] // [md5: sequence]
-    if (fasta instanceof List) {
-        fasta.each { fastaFile ->
-            sequences = sequences + FastaFile.parse(fastaFile.toString())
-        }
-    } else if (Files.exists(fasta)) {
-        sequences = FastaFile.parse(fasta.toString())
+    smart_fasta_pairs.each { pair ->
+        fastaFile = pair[1]
+        sequences = sequences + FastaFile.parse(fastaFile.toString())
     }
 
     def hmmLengths = HMMER2.parseHMMs("${dirpath.toString()}/${hmmdir}")

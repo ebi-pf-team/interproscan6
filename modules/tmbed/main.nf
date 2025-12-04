@@ -1,9 +1,12 @@
 import groovy.json.JsonOutput
-
-import Match
+import uk.ac.ebi.interpro.FastaFile
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process PREPARE_TMBED {
-    label 'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:
@@ -45,7 +48,7 @@ process PREPARE_TMBED {
 }
 
 process RUN_TMBED_CPU {
-    label 'large', 'dynamic', 'tmbed_container'
+    label 'mem_high', 'time_medium', 'dynamic', 'tmbed_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -66,7 +69,7 @@ process RUN_TMBED_CPU {
 }
 
 process RUN_TMBED_GPU {
-    label 'large', 'tmbed_container', 'use_gpu'
+    label 'mem_medium', 'time_short', 'tmbed_container', 'use_gpu'
 
     input:
     tuple val(meta), path(fasta)
@@ -87,7 +90,7 @@ process RUN_TMBED_GPU {
 }
 
 process PARSE_TMBED {
-    label 'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:

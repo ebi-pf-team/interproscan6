@@ -3,11 +3,11 @@ include { PREPARE_LOOKUP; LOOKUP_MATCHES } from "../../modules/lookup"
 workflow LOOKUP {
     // Prepare connection and retrieve precalculated matched from the InterPro API
     take:
-    ch_seqs               // fasta files of protein sequences to analyse
-    matches_api_apps      // member db analyses to run that are in the matches API
-    db_releases           // map: [db: version, dirpath]           
-    interproscan_version  // major.minor interproscan version number
-    api_version           // version of the matches API
+    ch_seqs               // channel of tuples (index, fasta) - fasta files of protein sequences to analyse
+    matches_api_apps      // list[str], member db analyses to run that are in the matches API
+    db_releases           // map: [db: version (str), dirpath (str)]           
+    interproscan_version  // str, major.minor interproscan version number
+    api_version           // str, version of the matches API
     url                   // str, url to matches api
     chunk_size            // int
     max_retries           // int

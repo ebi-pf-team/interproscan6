@@ -3,6 +3,8 @@ import java.nio.file.*
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
+import uk.ac.ebi.interpro.InterProScan
+
 process DOWNLOAD {
     maxForks 1
     executor 'local'
@@ -36,7 +38,7 @@ process DOWNLOAD {
 }
 
 process FIND_MISSING_DATA {
-    label    'tiny'
+    label    'mem_min', 'time_veryshort'
     executor 'local'
 
     input:
@@ -91,7 +93,7 @@ process FIND_MISSING_DATA {
 }
 
 process VALIDATE_DATA {
-    label    'tiny'
+    label    'mem_min', 'time_veryshort'
     executor 'local'
     cache false  // Stops the esotericsoftware.kryo.serializers warning
 

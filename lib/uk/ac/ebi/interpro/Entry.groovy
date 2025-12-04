@@ -1,3 +1,8 @@
+package uk.ac.ebi.interpro
+
+import uk.ac.ebi.interpro.GoXRefs
+import uk.ac.ebi.interpro.PathwayXRefs
+
 class Entry implements Serializable {
     String accession
     String name
@@ -50,45 +55,5 @@ class Entry implements Serializable {
 
     void addPathwayXRefs(PathwayXRefs pa) {
         this.pathwayXRefs.add(pa)
-    }
-}
-
-class GoXRefs implements Serializable {
-    String name
-    String databaseName
-    String category
-    String id
-
-    GoXRefs(String name, String databaseName, String category, String id) {
-        this.name = name
-        this.databaseName = databaseName
-        this.category = category
-        this.id = id
-    }
-
-    static GoXRefs fromMap(Map data) {
-        if (data == null) {
-            return null
-        }
-        return new GoXRefs(data.name, data.databaseName, data.category, data.id)
-    }
-}
-
-class PathwayXRefs implements Serializable {
-    String name
-    String databaseName
-    String id
-
-    PathwayXRefs(String name, String databaseName, String id) {
-        this.name = name
-        this.databaseName = databaseName
-        this.id = id
-    }
-
-    static PathwayXRefs fromMap(Map data) {
-        if (data == null) {
-            return null
-        }
-        return new PathwayXRefs(data.name, data.databaseName, data.id)
     }
 }

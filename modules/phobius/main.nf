@@ -1,9 +1,12 @@
 import groovy.json.JsonOutput
-
-import Match
+import uk.ac.ebi.interpro.FastaFile
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process WRITE_FASTA {
-    label    'tiny'
+    label    'mem_min', 'time_veryshort'
     executor 'local'
 
     input:
@@ -23,7 +26,7 @@ process WRITE_FASTA {
 }
 
 process SEARCH_PHOBIUS {
-    label       'small', 'ips6_container'
+    label       'mem_min', 'time_short', 'ips6_container'
     stageInMode 'copy'
 
     input:
@@ -42,7 +45,7 @@ process SEARCH_PHOBIUS {
 }
 
 process PARSE_PHOBIUS {
-    label    'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:

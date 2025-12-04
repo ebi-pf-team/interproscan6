@@ -1,3 +1,5 @@
+package uk.ac.ebi.interpro
+
 class SignatureLibraryRelease implements Serializable {
     String library
     String version

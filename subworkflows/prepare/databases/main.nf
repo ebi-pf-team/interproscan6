@@ -1,4 +1,5 @@
 import groovy.json.JsonSlurper
+import uk.ac.ebi.interpro.InterProScan
 
 include { DOWNLOAD as DOWNLOAD_INTERPRO } from "../../../modules/download"
 include { DOWNLOAD as DOWNLOAD_DATABASE } from "../../../modules/download"
@@ -8,16 +9,16 @@ include { VALIDATE_DATA                 } from "../../../modules/download"
 
 workflow PREPARE_DATABASES {
     take:
-    local_only_apps
-    matches_api_apps
-    apps_config
-    data_dir
-    interpro_version
-    iprscan_version
-    no_matches_api
-    add_goterms
-    add_pathways
-    use_globus
+    local_only_apps   // list[str], member db that are not listed in the Matches API
+    matches_api_apps  // list[str], member db that are listed in the Matches API
+    apps_config       // map, contents of conf/applications.conf
+    data_dir          // str, path to data directory
+    interpro_version  // str, InterPro data version
+    iprscan_version   // str, major.minor interproscan version number
+    no_matches_api    // boolean, whether to use the Matches API
+    add_goterms       // boolean, whether to add GO terms
+    add_pathways      // boolean, whether to add pathways
+    use_globus        // boolean, whether to use Globus for data transfer
 
     main:
     applications = local_only_apps + matches_api_apps

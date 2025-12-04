@@ -1,10 +1,12 @@
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
-
-import Match
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_SIGNALP_CPU {
-    label 'medium', 'signalp_container'
+    label 'mem_medium', 'time_medium', 'signalp_container'
 
     input:
     tuple val(meta), path(fasta)
@@ -34,7 +36,7 @@ process RUN_SIGNALP_CPU {
 }
 
 process RUN_SIGNALP_GPU {
-    label 'medium', 'signalp_container', 'use_gpu'
+    label 'mem_medium', 'time_short', 'signalp_container', 'use_gpu'
 
     input:
     tuple val(meta), path(fasta)
@@ -64,7 +66,7 @@ process RUN_SIGNALP_GPU {
 }
 
 process PARSE_SIGNALP {
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:
@@ -102,6 +104,9 @@ process PARSE_SIGNALP {
         String seqId = seqHeader.split(/\s+/)[0]
         int start = fields[3].toInteger()
         int end = fields[4].toInteger()
+        if (start < 0 || end < 0) {
+            return
+        }
         Double score = Double.parseDouble(fields[5])
         String prediction = jsonOutput["SEQUENCES"][seqHeader]["Prediction"]
 

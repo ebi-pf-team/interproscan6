@@ -1,13 +1,17 @@
 import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_MOBIDBLITE {
-    label 'mini', 'dynamic', 'mobidblite_container'
+    label 'mem_min', 'time_veryshort', 'dynamic', 'mobidblite_container'
 
     input:
-    tuple val(meta), path(fasta)
+    tuple val(meta), val(meta2), path(fasta)
 
     output:
-    tuple val(meta), path("output.tsv")
+    tuple val(meta), val(meta2), path("output.tsv")
 
     script:
     """
@@ -17,14 +21,14 @@ process RUN_MOBIDBLITE {
 
 
 process PARSE_MOBIDBLITE {
-    label    'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
-    tuple val(meta), val(mobidblite_output)
+    tuple val(meta), val(meta2), val(mobidblite_output)
 
     output:
-    tuple val(meta), path("mobidblite.json")
+    tuple val(meta), val(meta2), path("mobidblite.json")
 
     exec:
     def outputFilePath = task.workDir.resolve("mobidblite.json")

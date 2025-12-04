@@ -1,8 +1,8 @@
 nextflow_process {
 
-    name "Test Process WRITE_XML [nucleic]"
+    name "Test Process WRITE_XML_LOCAL [nucleic]"
     script "modules/output/xml/main.nf"
-    process "WRITE_XML"
+    process "WRITE_XML_LOCAL"
 
     stage {
         symlink "tests/data/channels/nucleic.matches_with_representative.json"

@@ -9,7 +9,7 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = [1, file("$baseDir/tests/data/channels/mobidblite.output.tsv")]
+                input[0] = [1, 1, file("$baseDir/tests/data/channels/mobidblite.output.tsv")]
                 """
             }
         }
@@ -17,7 +17,7 @@ nextflow_process {
         then {
             assert process.success
             def expected = "tests/data/channels/mobidblite.json"
-            def observed = process.out.get(0).get(0).get(1)
+            def observed = process.out.get(0).get(0).get(2)
             def cmd = "python3 tests/regression_tests/test_matches.py --format intermediate --expected ${expected} --observed ${observed} --summary --applications mobidblite"
             def process = cmd.execute()
             process.waitFor()

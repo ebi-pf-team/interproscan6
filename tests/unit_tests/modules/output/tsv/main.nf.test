@@ -1,8 +1,8 @@
 nextflow_process {
 
-    name "Test Process WRITE_TSV"
+    name "Test Process WRITE_TSV_LOCAL"
     script "modules/output/tsv/main.nf"
-    process "WRITE_TSV"
+    process "WRITE_TSV_LOCAL"
 
     test("Should run without failures") {
 

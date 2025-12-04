@@ -9,6 +9,7 @@ nextflow_process {
             process {
                 """
                 input[0] = [1, file("$baseDir/tests/data/sequences/test.faa")]
+                input[1] = 5000
                 """
             }
         }

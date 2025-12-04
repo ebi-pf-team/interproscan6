@@ -1,5 +1,7 @@
-class Lookup {
-    static prepareLookup(List<String> apps, Boolean noMatchesApi, String matchesApiUrl, workflowManifest) {
+package uk.ac.ebi.interpro
+
+class MatchesApiClient {
+    static prepareLookup(List<String> apps, Boolean noMatchesApi, String matchesApiUrl, String name, String version) {
         List<String> allMatchesApiApps = []
         List<String> matchesApiApps = []
         List<String> localOnlyApps  = []
@@ -16,7 +18,7 @@ class Lookup {
                 apiVersion = info.api ?: "X.Y.Z"
                 def majorVersion = apiVersion.split("\\.")[0]
                 if (majorVersion != "0") {
-                    error = "${workflowManifest.name} ${workflowManifest.version}" +
+                    error = "${name} ${version}" +
                             " is not compatible with the Matches API at ${matchesApiUrl};" +
                             " analyses will be run locally"
                 } else {

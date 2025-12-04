@@ -328,6 +328,10 @@ nextflow run ebi-pf-team/interproscan6 \
 > [!NOTE]  
 > Running both `signalp_euk` and `signalp_prok` will execute SignalP twice, once with eukaryotic post-processing and once without. Choose the mode best suited to your dataset.
 
+## Integration into existing Nextflow pipelines
+
+For instructions on integrating InterProScan 6 into a Nextflow pipeline as a Git submodule, see the [integration documentation](https://interproscan-docs.readthedocs.io/en/v6/Integrating.html).
+
 ## Documentation
 
 Our full documentation is available on [ReadTheDocs](https://interproscan-docs.readthedocs.io/en/v6/).

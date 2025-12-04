@@ -1,12 +1,15 @@
 import groovy.json.JsonOutput
-
-import Match
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.LocationFragment
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process SEARCH_SUPERFAMILY {
-    label 'tiny', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
 
     input:
-    tuple val(meta), path(fasta)
+    tuple val(meta), val(meta2), path(fasta)
     path dirpath
     val hmm
     val selfhits
@@ -15,7 +18,7 @@ process SEARCH_SUPERFAMILY {
     val pdbj95d
 
     output:
-    tuple val(meta), path("superfamily.out")
+    tuple val(meta), val(meta2), path("superfamily.out")
 
     script:
     """
@@ -37,17 +40,17 @@ process SEARCH_SUPERFAMILY {
 }
 
 process PARSE_SUPERFAMILY {
-    label    'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
-    tuple val(meta), val(superfamily_out)
+    tuple val(meta), val(meta2), val(superfamily_out)
     val dirpath
     val model_tsv
     val hmm
 
     output:
-    tuple val(meta), path("superfamily.json")
+    tuple val(meta), val(meta2), path("superfamily.json")
 
     exec:
     SignatureLibraryRelease library = new SignatureLibraryRelease("SUPERFAMILY", null)

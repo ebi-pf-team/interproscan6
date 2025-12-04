@@ -4,12 +4,12 @@ nextflow_process {
     script "modules/panther/main.nf"
     process "PARSE_PANTHER"
 
-    test("Should run PREPARE_SMART without failures") {
+    test("Should run PARSE_PANTHER without failures") {
 
         when {
             process {
                 """
-                input[0] = [1, file("$baseDir/tests/data/channels/panther.treegrafter.json"), file("$baseDir/tests/data/channels/epang.tsv")]
+                input[0] = [1, 1, file("$baseDir/tests/data/channels/panther.treegrafter.json"), file("$baseDir/tests/data/channels/epang.tsv")]
                 """
             }
         }
@@ -17,7 +17,7 @@ nextflow_process {
         then {
             assert process.success
             def expected = "tests/data/channels/panther.json"
-            def observed = process.out.get(0).get(0).get(1)
+            def observed = process.out.get(0).get(0).get(2)
             def cmd = "python3 tests/regression_tests/test_matches.py --format intermediate --expected ${expected} --observed ${observed} --summary"
             def process = cmd.execute()
             process.waitFor()

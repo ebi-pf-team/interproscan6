@@ -1,12 +1,16 @@
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.databind.ObjectMapper
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import java.net.URL
-import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.FastaFile
+import uk.ac.ebi.interpro.HTTPRequest
 
 process PREPARE_LOOKUP {
     /* A Simple process to check API and InterPro version compatibility
     Retain as a process so that this process and the LOOKUP subworkflow wait for the
     channels to be ready before determining if the API is available */
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:
@@ -29,7 +33,7 @@ process PREPARE_LOOKUP {
 
 process LOOKUP_MATCHES {
     maxForks 1
-    label    'tiny'
+    label    'mem_low', 'time_short'
     executor 'local'
 
     input:
@@ -49,7 +53,8 @@ process LOOKUP_MATCHES {
     def noLookupFasta = new StringBuilder()
     Map<String, String> sequences = FastaFile.parse(seqFasta)  // [md5: sequence]
     def md5List = sequences.keySet().toList().sort()
-    def chunks = md5List.collate(chunkSize)
+    def requestChunkSize = chunkSize > 100 ? 100 : chunkSize       // API set max to 100
+    def chunks = md5List.collate(requestChunkSize)
 
     String baseUrl = HTTPRequest.sanitizeURL(url.toString())
     boolean success = true
@@ -87,12 +92,18 @@ process LOOKUP_MATCHES {
     }
 
     if (success) {
-        new File(calculatedMatchesPath.toString()).write(JsonOutput.toJson(calculatedMatches))
+        def jf = new JsonFactory()
+        new File(calculatedMatchesPath.toString()).withWriter { writer ->
+        def mapper = new ObjectMapper()
+            def gen = jf.createGenerator(writer)
+            mapper.writeValue(gen, calculatedMatches)
+            gen.close()
+        }
         if (noLookupFasta.length() != 0) {
             new File(noLookupFastaPath.toString()).write(noLookupFasta.toString())
         }
     } else {
-        log.warn "An error occurred while querying the Matches API, analyses will be run locally"
+        log.warn "An error occurred while querying the Matches API, analyses will be run locally -- '${response}'"
         new File(calculatedMatchesPath.toString()).write(JsonOutput.toJson([:]))
         new File(noLookupFastaPath.toString()).write(new File(fasta.toString()).text)
     }

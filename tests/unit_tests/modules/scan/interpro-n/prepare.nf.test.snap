@@ -5,7 +5,9 @@
                 "0": [
                     [
                         1,
-                        "sequences.tsv:md5,f8cd676b6a785ed47468dac43b2f425f"
+                        [
+                            "sequences_1.tsv:md5,f8cd676b6a785ed47468dac43b2f425f"
+                        ]
                     ]
                 ]
             }
@@ -14,6 +16,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.04.7"
         },
-        "timestamp": "2025-10-23T10:00:42.651891703"
+        "timestamp": "2025-11-05T12:01:09.150125906"
     }
 }

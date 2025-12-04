@@ -7,16 +7,17 @@ include { PARSE_SIGNALP as PARSE_SIGNALP_PROK         } from  "../../modules/sig
 
 workflow SIGNALP {
     take:
-    ch_seqs
-    applications
-    euk_organism
-    euk_mode
-    euk_dir
-    euk_gpu
-    prok_organism
-    prok_mode
-    prok_dir
-    prok_gpu
+    ch_seqs        // channel of tuples (index, fasta file)
+    applications   // list of applications to run: signalp_euk, signalp_prok
+    euk_organism   // str, signalp organism option, always 'eukarya' for eukaryotes
+    euk_mode       // str, signalp mode option, e.g. 'fast' or 'slow'
+    euk_dir        // str repr of the path to the eukaryotic signalp data dir
+    euk_gpu        // boolean, use GPU for eukaryotic signalp
+    prok_organism  // str, signalp organism option, always 'prokarya' for prokaryotes
+    prok_mode      // str, signalp mode option, e.g. 'fast' or 'slow'
+    prok_dir       // str repr of the path to the prokaryotic signalp data dir
+    prok_gpu       // boolean, use GPU for prokaryotic signalp
+    batch_size     // int, number of sequences per sub-batch for searching
 
     main:
     results = Channel.empty()
@@ -31,8 +32,10 @@ workflow SIGNALP {
             )
             ch_euk = RUN_SIGNALP_GPU_EUK.out
         } else {
+            ch_euk_split = ch_seqs
+                .splitFasta( by: batch_size * 10, file: true )
             RUN_SIGNALP_CPU_EUK(
-                ch_seqs,
+                ch_euk_split,
                 euk_organism,
                 euk_mode,
                 euk_dir
@@ -53,8 +56,10 @@ workflow SIGNALP {
             )
             ch_prok = RUN_SIGNALP_GPU_PROK.out
         } else {
+            ch_prok_split = ch_seqs
+                .splitFasta( by: batch_size * 10, file: true )
             RUN_SIGNALP_CPU_PROK(
-                ch_seqs,
+                ch_prok_split,
                 prok_organism,
                 prok_mode,
                 prok_dir

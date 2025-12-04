@@ -1,7 +1,8 @@
 import groovy.json.JsonOutput
+import uk.ac.ebi.interpro.HMMER3
 
 process PARSE_ANTIFAM {
-    label    'tiny'
+    label    'mem_min','time_veryshort'
     executor 'local'
 
     input:

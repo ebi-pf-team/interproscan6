@@ -1,17 +1,22 @@
 import groovy.json.JsonOutput
-
-import Match
+import uk.ac.ebi.interpro.HMMER3
+import uk.ac.ebi.interpro.Location
+import uk.ac.ebi.interpro.Match
+import uk.ac.ebi.interpro.Signature
+import uk.ac.ebi.interpro.SignatureLibraryRelease
+import uk.ac.ebi.interpro.Site
 
 process SEARCH_SFLD {
-    label 'mini', 'dynamic', 'ips6_container'
+    label 'mem_min', 'time_veryshort', 'dynamic', 'ips6_container'
 
     input:
     tuple val(meta), path(fasta)
     path dirpath
     val hmmfile
+    val annofile
 
     output:
-    tuple val(meta), path("hmmsearch.out"), path("hmmsearch.tab"), path("hmmsearch.sto")
+    tuple val(meta), path("hmmsearch.out"), path("sfld.tsv")
 
     script:
     """
@@ -23,38 +28,22 @@ process SEARCH_SFLD {
         --domtblout hmmsearch.tab \
         -A hmmsearch.sto \
         ${dirpath}/${hmmfile} ${fasta}
-    """
-}
 
-process POST_PROCESS_SFLD {
-    label 'mini', 'ips6_container'
-
-    input:
-    tuple val(meta), path(hmmsearch_out), val(hmmsearch_dtbl), val(hmmsearch_alignment)
-    path dirpath
-    val annofile
-
-    output:
-    tuple val(meta), path("sfld.tsv"), path(hmmsearch_out)
-
-    script:
-    """
     ${projectDir}/bin/sfld/sfld_postprocess \
-        --alignment "${hmmsearch_alignment}" \
-        --dom "${hmmsearch_dtbl}" \
-        --hmmer-out "${hmmsearch_out}" \
+        --alignment hmmsearch.sto \
+        --dom hmmsearch.tab \
+        --hmmer-out hmmsearch.out \
         --site-info "${dirpath}/${annofile}" \
         --output sfld.tsv
-    # ${hmmsearch_out} "hmmsearch.out"
     """
 }
 
 process PARSE_SFLD {
-    label    'tiny'
+    label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
-    tuple val(meta), val(postprocess_out), val(hmmsearch_out)
+    tuple val(meta), val(hmmsearch_out), val(postprocess_out)
     val dirpath
     val hierarchydb
 

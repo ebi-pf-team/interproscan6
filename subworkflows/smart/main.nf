@@ -2,11 +2,11 @@ include { PREFILTER_SMART; PREPARE_SMART; SEARCH_SMART; PARSE_SMART } from  "../
 
 workflow SMART {
     take:
-    ch_seqs
-    dirpath
-    hmmer3_hmm
-    hmmer2_dir
-    chunksize
+    ch_seqs     // channel of tuples (index, fasta file)
+    dirpath     // str repr of the data directory path
+    hmmer3_hmm  // str repr of the path to the HMM3 file in the data dir -> datadir/hmmer3_hmm
+    hmmer2_dir  // str repr of the path to the HMM2 directory in the data dir -> datadir/hmmer2_dir
+    batch_size  // int, number of sequences per sub-batch for searching
 
     main:
     PREFILTER_SMART(
@@ -19,7 +19,7 @@ workflow SMART {
         PREFILTER_SMART.out,
         dirpath,
         hmmer2_dir,
-        chunksize
+        batch_size
     )
 
     SEARCH_SMART(
