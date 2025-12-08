@@ -166,31 +166,31 @@ nextflow run ebi-pf-team/interproscan6 \
 
 ## Available analyses
 
-| Name             | Description                                                                             | Included |
-|------------------|-----------------------------------------------------------------------------------------|----------|
-| AntiFam          | Identifies sequences likely to be spurious or misannotated                              | ✅ Yes   |
-| CATH-Gene3D      | Identifies structural domains from the CATH classification                              | ✅ Yes   |
-| CATH-FunFam      | Groups protein domains into functional families based on CATH                           | ✅ Yes   |
-| CDD              | Detects conserved domains using position-specific scoring matrices from NCBI            | ✅ Yes   |
-| COILS            | Predicts coiled-coil regions based on sequence patterns                                 | ✅ Yes   |
-| DeepTMHMM        | Predicts transmembrane helices                                                          | ❌ No    |
-| HAMAP            | Identifies high-confidence protein families in microbial and organellar proteomes       | ✅Yes    |
-| MobiDB-lite      | Predicts intrinsically disordered regions                                               | ✅ Yes   |
-| NCBIFAM          | Matches proteins to curated HMMs from NCBI, including TIGRFAMs                          | ✅ Yes   |
-| PANTHER          | Classifies proteins into families and subfamilies with curated GO terms                 | ✅ Yes   |
-| Pfam             | Detects protein domains and families using HMMs built from multiple sequence alignments | ✅ Yes   |
-| Phobius          | Predicts transmembrane topology and signal peptides                                     | ❌ No    |
-| PIRSF            | Classifies proteins into evolutionary families based on full-length sequence similarity | ✅ Yes   |
-| PIRSR            | Identifies conserved residues using manually curated site rules                         | ✅ Yes   |
-| PRINTS           | Detects protein families using groups of conserved motifs                               | ✅ Yes   |
-| PROSITE-patterns | Identifies protein features based on short sequence motifs                              | ✅ Yes   |
-| PROSITE-profiles | Detects protein families and domains using position-specific scoring profiles           | ✅ Yes   |
-| SFLD             | Classifies enzymes by relating sequence features to chemical function                   | ✅ Yes   |
-| SMART            | Identifies signaling and extracellular domains                                          | ✅ Yes   |
-| SUPERFAMILY      | Assigns structural domains using HMMs based on the SCOP superfamily classification.     | ✅ Yes   |
-| SignalP-Euk      | Predicts signal peptides in eukaryotic proteins                                         | ❌ No    |
-| SignalP-Prok     | Predicts signal peptides in prokaryotic proteins                                        | ❌ No    |
-| TMbed            | Predicts transmembrane helices, transmembrane strands, and signal peptides              | ✅ Yes   |
+| Name             | Description                                                                             | Included by default |
+|------------------|-----------------------------------------------------------------------------------------|---------------------|
+| AntiFam          | Identifies sequences likely to be spurious or misannotated                              | ✅ Yes               |
+| CATH-Gene3D      | Identifies structural domains from the CATH classification                              | ✅ Yes               |
+| CATH-FunFam      | Groups protein domains into functional families based on CATH                           | ✅ Yes               |
+| CDD              | Detects conserved domains using position-specific scoring matrices from NCBI            | ✅ Yes               |
+| COILS            | Predicts coiled-coil regions based on sequence patterns                                 | ✅ Yes               |
+| DeepTMHMM        | Predicts transmembrane helices                                                          | ❌ No                |
+| HAMAP            | Identifies high-confidence protein families in microbial and organellar proteomes       | ✅Yes                |
+| MobiDB-lite      | Predicts intrinsically disordered regions                                               | ✅ Yes               |
+| NCBIFAM          | Matches proteins to curated HMMs from NCBI, including TIGRFAMs                          | ✅ Yes               |
+| PANTHER          | Classifies proteins into families and subfamilies with curated GO terms                 | ✅ Yes               |
+| Pfam             | Detects protein domains and families using HMMs built from multiple sequence alignments | ✅ Yes               |
+| Phobius          | Predicts transmembrane topology and signal peptides                                     | ❌ No                |
+| PIRSF            | Classifies proteins into evolutionary families based on full-length sequence similarity | ✅ Yes               |
+| PIRSR            | Identifies conserved residues using manually curated site rules                         | ✅ Yes               |
+| PRINTS           | Detects protein families using groups of conserved motifs                               | ✅ Yes               |
+| PROSITE-patterns | Identifies protein features based on short sequence motifs                              | ✅ Yes               |
+| PROSITE-profiles | Detects protein families and domains using position-specific scoring profiles           | ✅ Yes               |
+| SFLD             | Classifies enzymes by relating sequence features to chemical function                   | ✅ Yes               |
+| SMART            | Identifies signaling and extracellular domains                                          | ✅ Yes               |
+| SUPERFAMILY      | Assigns structural domains using HMMs based on the SCOP superfamily classification.     | ✅ Yes               |
+| SignalP-Euk      | Predicts signal peptides in eukaryotic proteins                                         | ❌ No                |
+| SignalP-Prok     | Predicts signal peptides in prokaryotic proteins                                        | ❌ No                |
+| TMbed            | Predicts transmembrane helices, transmembrane strands, and signal peptides              | ✅ Yes               |
 
 ## Licensed analyses
 
