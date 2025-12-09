@@ -92,7 +92,7 @@ class ProcessOutputTSV {
                                                     : match.signature.signatureLibraryRelease.library
                                                     ).toLowerCase()
         switch (appl) {
-            case ["cdd", "prints"]:
+            case "prints":
                 scoringValue = match.evalue
                 break
             case "signalp":

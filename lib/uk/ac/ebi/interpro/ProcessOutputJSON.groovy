@@ -331,8 +331,6 @@ class ProcessOutputJSON {
         jsonWriter.writeObject([
             "signature": match.signature,
             "model-ac" : match.modelAccession,
-            "evalue"   : match.evalue,
-            "score"    : match.score,
             "source"   : match.source,
             "locations": match.locations.collect { loc ->
                 [

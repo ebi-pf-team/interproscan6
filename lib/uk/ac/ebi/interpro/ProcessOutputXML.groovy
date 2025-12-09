@@ -160,7 +160,7 @@ class ProcessOutputXML {
                 matchNodeAttributes = fmtDefaultMatchNode(match)
                 break
             case "cdd":
-                matchNodeAttributes = fmtDefaultMatchNode(match)
+                matchNodeAttributes = fmtCDDMatchNode(match)
                 break
             case "coils":
                 break
@@ -329,6 +329,12 @@ class ProcessOutputXML {
         return [
             evalue : match.evalue,
             score  : match.score,
+            source : match.source
+        ]
+    }
+
+    static Map fmtCDDMatchNode(Map match) {
+        return [
             source : match.source
         ]
     }
