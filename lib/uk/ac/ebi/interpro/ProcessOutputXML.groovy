@@ -590,7 +590,10 @@ class ProcessOutputXML {
             "hmm-length"   : loc.hmmLength,
             "hmm-bounds"   : Location.getHmmBounds(loc.hmmBounds),
             "env-start"    : loc.envelopeStart,
-            "env-end"      : loc.envelopeEnd
+            "env-end"      : loc.envelopeEnd,
+            // TODO: add when available in Matches API
+            // evalue         : loc.evalue,
+            // score          : loc.score,
         ]
     }
 

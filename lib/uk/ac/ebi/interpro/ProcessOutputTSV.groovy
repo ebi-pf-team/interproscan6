@@ -106,7 +106,7 @@ class ProcessOutputTSV {
                 break
             case "panther":
                 pantherGoTerms = match.treegrafter.goXRefs.collect { "${it.id}(PANTHER)" }
-                scoringValue = match.evalue
+                scoringValue = match.evalue  // Could be loc.evalue, but there is only one location per match in PANTHER
                 break
             default:
                 scoringValue = loc.evalue

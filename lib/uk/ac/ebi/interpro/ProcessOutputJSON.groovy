@@ -421,6 +421,9 @@ class ProcessOutputJSON {
                     "start"             : loc.start,
                     "end"               : loc.end,
                     "representative"    : loc.representative,
+                    // TODO: add when available in Matches API
+                    // "evalue"            : loc.evalue,
+                    // "score"             : loc.score,
                     "hmmStart"          : loc.hmmStart,
                     "hmmEnd"            : loc.hmmEnd,
                     "hmmLength"         : loc.hmmLength,
