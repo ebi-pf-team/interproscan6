@@ -612,7 +612,6 @@ class ProcessOutputJSON {
         jsonWriter.writeObject([
             "signature": match.signature,
             "model-ac" : match.modelAccession,
-            "evalue"   : match.evalue,
             "source"   : match.source,
             "locations": match.locations.collect { loc ->
                 [
@@ -620,6 +619,7 @@ class ProcessOutputJSON {
                     "end"               : loc.end,
                     "representative"    : loc.representative,
                     "hmmLength"         : loc.hmmLength,
+                    "evalue"            : loc.evalue,
                     "location-fragments": formatFragments(loc.fragments)
                 ]
             }

@@ -210,7 +210,7 @@ class ProcessOutputXML {
                 matchNodeAttributes = fmtDefaultMatchNode(match)
                 break
             case "superfamily":
-                matchNodeAttributes = fmtSuperfamilyMatchNode(match)
+                matchNodeAttributes = fmtSourceOnlyMatchNode(match)
                 break
             case "tmhmm":
             case "deeptmhmm":
@@ -360,9 +360,8 @@ class ProcessOutputXML {
         ]
     }
 
-    static Map fmtSuperfamilyMatchNode(Map match) {
+    static Map fmtSourceOnlyMatchNode(Map match) {
         return [
-            evalue : match.evalue,
             source : match.source
         ]
     }
