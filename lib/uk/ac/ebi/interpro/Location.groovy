@@ -101,10 +101,19 @@ class Location implements Serializable {
         this.fragments = fragments
     }
 
-    Location(int start, int end, String sequenceFeature = null) { // Used for CDD, Coils, MobiDB, Phobius
+    Location(int start, int end, String sequenceFeature = null) { // Used for Coils, MobiDB, Phobius
         this.start = start
         this.end = end
         this.sequenceFeature = sequenceFeature
+        LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
+        this.fragments = [fragment]
+    }
+
+    Location(int start, int end, Double evalue, Double score) { // Used for CDD
+        this.start = start
+        this.end = end
+        this.evalue = evalue
+        this.score = score
         LocationFragment fragment = new LocationFragment(start, end, "CONTINUOUS")
         this.fragments = [fragment]
     }
