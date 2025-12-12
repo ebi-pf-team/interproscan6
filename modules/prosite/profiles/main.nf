@@ -6,7 +6,7 @@ import uk.ac.ebi.interpro.Signature
 import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_PFSEARCH {
-    label 'mem_min', 'time_medium', 'ips6_container'
+    label 'mem_min', 'time_medium', 'dynamic', 'ips6_container'
 
     input:
         tuple val(meta), path(fasta)
@@ -20,7 +20,7 @@ process RUN_PFSEARCH {
     """
     touch prosite_profiles.out
     find ${dirpath}/${profiles_dir} -type f | while read profile; do
-        output=\$(pfsearchV3 "\${profile}" "${fasta}" -f -o 7 -t 4)
+        output=\$(pfsearchV3 -f -o 7 -t ${task.cpus} "\${profile}" "${fasta}")
         if [[ -n "\${output}" ]]; then
             echo "\${output}" >> prosite_profiles.out
         fi
