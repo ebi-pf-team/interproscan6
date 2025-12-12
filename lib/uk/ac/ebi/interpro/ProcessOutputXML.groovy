@@ -156,7 +156,6 @@ class ProcessOutputXML {
                 matchNodeAttributes = fmtDefaultMatchNode(match)
                 break
             case "cath-funfam":
-            case "funfam":
                 matchNodeAttributes = fmtDefaultMatchNode(match)
                 break
             case "cdd":
@@ -170,9 +169,7 @@ class ProcessOutputXML {
             case "interpro-n":
                 // No specific attributes for InterPro-N matches
                 break
-            case "mobidb lite":
             case "mobidb-lite":
-            case "mobidb_lite":
                 break
             case "ncbifam":
                 matchNodeAttributes = fmtDefaultMatchNode(match)
@@ -212,7 +209,6 @@ class ProcessOutputXML {
             case "superfamily":
                 matchNodeAttributes = fmtSourceOnlyMatchNode(match)
                 break
-            case "tmhmm":
             case "deeptmhmm":
             case "tmbed":
                 break

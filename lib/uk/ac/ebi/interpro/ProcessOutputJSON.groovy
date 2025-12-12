@@ -205,7 +205,6 @@ class ProcessOutputJSON {
                 writeDefault(match, jsonWriter)
                 break
             case "cath-funfam":
-            case "funfam":  // use groovy case fall to allow multiple options
                 writeDefault(match, jsonWriter)
                 break
             case "cdd":
@@ -220,9 +219,7 @@ class ProcessOutputJSON {
             case "interpro-n":
                 writeInterProN(match, jsonWriter)
                 break
-            case "mobidb lite":
             case "mobidb-lite":
-            case "mobidb_lite":  // use groovy case fall to allow multiple options
                 writeMobiDBlite(match, jsonWriter)
                 break
             case "ncbifam":
@@ -264,7 +261,6 @@ class ProcessOutputJSON {
             case "superfamily":
                 writeSUPERFAMILY(match, jsonWriter)
                 break
-            case "tmhmm":
             case "deeptmhmm":
                 writeMinimalist(match, jsonWriter)
                 break
