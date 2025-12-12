@@ -20,10 +20,7 @@ process RUN_PFSEARCH {
     """
     touch prosite_profiles.out
     find ${dirpath}/${profiles_dir} -type f | while read profile; do
-        output=\$(pfsearchV3 -f -o 7 -t ${task.cpus} "\${profile}" "${fasta}")
-        if [[ -n "\${output}" ]]; then
-            echo "\${output}" >> prosite_profiles.out
-        fi
+        pfsearchV3 -f -o 7 -t ${task.cpus} "\${profile}" "${fasta}" >> prosite_profiles.out
     done
     """
 }
