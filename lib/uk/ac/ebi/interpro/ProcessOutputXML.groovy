@@ -160,7 +160,7 @@ class ProcessOutputXML {
                 matchNodeAttributes = fmtDefaultMatchNode(match)
                 break
             case "cdd":
-                matchNodeAttributes = fmtDefaultMatchNode(match)
+                matchNodeAttributes = fmtSourceOnlyMatchNode(match)
                 break
             case "coils":
                 break
@@ -210,7 +210,7 @@ class ProcessOutputXML {
                 matchNodeAttributes = fmtDefaultMatchNode(match)
                 break
             case "superfamily":
-                matchNodeAttributes = fmtSuperfamilyMatchNode(match)
+                matchNodeAttributes = fmtSourceOnlyMatchNode(match)
                 break
             case "tmhmm":
             case "deeptmhmm":
@@ -354,9 +354,8 @@ class ProcessOutputXML {
         ]
     }
 
-    static Map fmtSuperfamilyMatchNode(Map match) {
+    static Map fmtSourceOnlyMatchNode(Map match) {
         return [
-            evalue : match.evalue,
             source : match.source
         ]
     }
@@ -591,7 +590,9 @@ class ProcessOutputXML {
             "hmm-length"   : loc.hmmLength,
             "hmm-bounds"   : Location.getHmmBounds(loc.hmmBounds),
             "env-start"    : loc.envelopeStart,
-            "env-end"      : loc.envelopeEnd
+            "env-end"      : loc.envelopeEnd,
+            evalue         : loc.evalue,
+            score          : loc.score,
         ]
     }
 

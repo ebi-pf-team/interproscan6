@@ -99,10 +99,10 @@ process PARSE_CDD {
                         match = pssmHits[pssmId]
                     } else {
                         Signature signature = new Signature(modelAccession, library)
-                        match = new Match(modelAccession, evalue, bitscore, signature)
+                        match = new Match(modelAccession, signature)
                         pssmHits[pssmId] = match
                     }
-                    match.addLocation(new Location(start, end))
+                    match.addLocation(new Location(start, end, evalue, bitscore))
                 }
             } else {
                 // #<session-ordinal>      <query-id[readingframe]>        <annot-type>    <title> <residue(coordinates)>  <complete-size> <mapped-size>   <source-domain>
