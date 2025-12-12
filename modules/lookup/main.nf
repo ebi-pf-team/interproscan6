@@ -109,15 +109,17 @@ process LOOKUP_MATCHES {
 def Map transformMatch(Map match, String seq) {
     // * operator - spread contents of a map or collecion into another map or collection
     return [
-        *            : match,
-        "treegrafter": ["ancestralNodeID": match["ancestralNode"]],
-        "locations"  : match["locations"].collect { loc ->
+        *                : match,
+        "modelAccession" : match["model-ac"],
+        "treegrafter"    : ["ancestralNodeID": match["ancestralNode"]],
+        "locations"      : match["locations"].collect { loc ->
             return [
-                *          : loc,
-                "hmmBounds": loc["hmmBounds"] ? getReverseHmmBounds(loc["hmmBounds"]) : null,
-                "fragments": loc["fragments"].collect { tranformFragment(it) },
-                "sites"    : loc["sites"] ?: [],
-                "targetAlignment": loc["cigarAlignment"] ? decodeAlignment(loc["cigarAlignment"], seq, loc["start"]) : null
+                *                 : loc,
+                "sequenceFeature" : loc["sequence-feature"],
+                "hmmBounds"       : loc["hmmBounds"] ? getReverseHmmBounds(loc["hmmBounds"]) : null,
+                "fragments"       : loc["location-fragments"].collect { tranformFragment(it) },
+                "sites"           : loc["sites"] ?: [],
+                "targetAlignment" : loc["cigarAlignment"] ? decodeAlignment(loc["cigarAlignment"], seq, loc["start"]) : null
             ]
         },
     ]
@@ -164,6 +166,6 @@ def Map tranformFragment(Map fragment) {
     return [
         "start"   : fragment["start"],
         "end"     : fragment["end"],
-        "dcStatus": fragment["type"]
+        "dcStatus": fragment["dc-status"]
     ]
 }
