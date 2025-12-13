@@ -53,6 +53,10 @@ jobs:
         with:
           version: '25.04.6'
 
+      - name: Check help message exits cleanly
+        run: |
+          nextflow run main.nf --help
+
       - name: Install nf-test
         run: |
           wget -qO- https://get.nf-test.com | bash -s 0.9.3
