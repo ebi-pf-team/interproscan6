@@ -490,7 +490,9 @@ class InterProScan {
 
         result << "\nAvailable applications:\n"
         appsConfig.each { label, appl ->
-            result << "  ${appl.name.replace(' ', '-')}\n"
+            if (appl.name != "InterPro-N") {
+                result << "  ${appl.name.replace(' ', '-')}\n"
+            }
         }
 
         print result.toString()
