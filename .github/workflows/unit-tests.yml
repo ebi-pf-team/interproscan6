@@ -4,21 +4,24 @@ on:
   push:
     branches: [ main ]
     paths:
-      - lib
-      - modules
-      - subworkflows
-      - tests
-      - nextflow.config
-      - main.nf
       - .github/workflows/unit-tests.yml
+      - bin/**
+      - conf/**
+      - lib/**
+      - modules/**
+      - subworkflows/**
+      - tests/**
+      - main.nf
+      - nextflow.config
 
   pull_request:
     branches: [ main ]
     paths:
-      - lib
-      - modules
-      - subworkflows
-      - tests
+      - lib/**
+      - modules/**
+      - subworkflows/**
+      - tests/**
+      - workflows/**
       - nextflow.config
       - main.nf
       - .github/workflows/unit-tests.yml
@@ -49,6 +52,10 @@ jobs:
         uses: nf-core/setup-nextflow@v1
         with:
           version: '25.04.6'
+
+      - name: Check help message exits cleanly
+        run: |
+          nextflow run main.nf --help
 
       - name: Install nf-test
         run: |

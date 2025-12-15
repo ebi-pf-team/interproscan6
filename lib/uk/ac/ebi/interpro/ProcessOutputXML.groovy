@@ -156,11 +156,10 @@ class ProcessOutputXML {
                 matchNodeAttributes = fmtDefaultMatchNode(match)
                 break
             case "cath-funfam":
-            case "funfam":
                 matchNodeAttributes = fmtDefaultMatchNode(match)
                 break
             case "cdd":
-                matchNodeAttributes = fmtDefaultMatchNode(match)
+                matchNodeAttributes = fmtSourceOnlyMatchNode(match)
                 break
             case "coils":
                 break
@@ -170,9 +169,7 @@ class ProcessOutputXML {
             case "interpro-n":
                 // No specific attributes for InterPro-N matches
                 break
-            case "mobidb lite":
             case "mobidb-lite":
-            case "mobidb_lite":
                 break
             case "ncbifam":
                 matchNodeAttributes = fmtDefaultMatchNode(match)
@@ -210,9 +207,8 @@ class ProcessOutputXML {
                 matchNodeAttributes = fmtDefaultMatchNode(match)
                 break
             case "superfamily":
-                matchNodeAttributes = fmtSuperfamilyMatchNode(match)
+                matchNodeAttributes = fmtSourceOnlyMatchNode(match)
                 break
-            case "tmhmm":
             case "deeptmhmm":
             case "tmbed":
                 break
@@ -354,9 +350,8 @@ class ProcessOutputXML {
         ]
     }
 
-    static Map fmtSuperfamilyMatchNode(Map match) {
+    static Map fmtSourceOnlyMatchNode(Map match) {
         return [
-            evalue : match.evalue,
             source : match.source
         ]
     }
@@ -471,7 +466,11 @@ class ProcessOutputXML {
             locationAttributes.each { k, v ->
                 if (v != null) {
                     if (v instanceof Number) {
-                        gen.writeNumberField(k.toString(), ((Number) v).doubleValue())
+                        if (["evalue", "pvalue", "score"].contains(k)) {
+                            gen.writeNumberField(k.toString(), ((Number) v).doubleValue())
+                        } else {
+                            gen.writeNumberField(k.toString(), ((Number) v).longValue())
+                        }
                     } else {
                         gen.writeStringField(k.toString(), v.toString())
                     }
@@ -587,7 +586,9 @@ class ProcessOutputXML {
             "hmm-length"   : loc.hmmLength,
             "hmm-bounds"   : Location.getHmmBounds(loc.hmmBounds),
             "env-start"    : loc.envelopeStart,
-            "env-end"      : loc.envelopeEnd
+            "env-end"      : loc.envelopeEnd,
+            evalue         : loc.evalue,
+            score          : loc.score,
         ]
     }
 

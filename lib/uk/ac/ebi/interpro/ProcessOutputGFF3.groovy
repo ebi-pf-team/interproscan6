@@ -180,11 +180,9 @@ class ProcessOutputGFF3 {
         def score = null
         if (match.source == "InterPro-N") {
             score = loc.score
-        } else if (["CDD", "PRINTS"].contains(memberDb)) {
+        } else if (memberDb == "PRINTS") {
             score = match.evalue
-        } else if (["HAMAP", "PROSITE profiles"].contains(memberDb)) {
-            score = loc.score
-        } else if (memberDb == "SignalP") {
+        } else if (memberDb == "SignalP" || ["HAMAP", "PROSITE profiles"].contains(memberDb)) {
             score = loc.score
         } else {
             score = loc.evalue

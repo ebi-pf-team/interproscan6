@@ -8,97 +8,98 @@ import uk.ac.ebi.interpro.HTTPRequest
 class InterProScan {
     static final def PARAMS = [
         [
-            name: "input",
-            required: true,
-            metavar: "<FASTA>",
-            description: "path to FASTA file of sequences to be analysed."
+            name: "applications",
+            metavar: "<LIST>",
+            description: "Comma-separated list of applications to run. Default: all available applications.",
+        ],
+        [
+            name: "cpus",
+            metavar: "<N>",
+            description: "Number of CPU threads allocated per task for applications that support multithreading. Default: 1."
         ],
         [
             name: "datadir",  // only required when using members with datafiles
-            metavar: "<DATA-DIR>",
-            description: "path to data directory.",
-        ],
-        [
-            name: "applications",
-            metavar: "<APPLICATIONS>",
-            description: "comma-separated applications to scan the sequences with. Default: all.",
-        ],
-        [
-            name: "skip-applications",
-            metavar: "<APPLICATIONS>",
-            description: "comma-separated applications to exclude from analysis. Default: none.",
-        ],
-        [
-            name: "run-ml",
-            description: "run available activated machine learning (ML) based applications (e.g. DeepTMHMM, SignalP 6, TMbed). By default, ML analyses are disabled due to their high resource requirements."
-        ],
-        [
-            name: "use-gpu",
-            description: "use GPU acceleration for applicable applications (e.g. DeepTMHMM, Signalp6, TMbed)."
+            metavar: "<DATADIR>",
+            description: "Path to the data directory. Required when running applications that depend on external data files (e.g. Pfam, CDD). Not required when using only self-contained applications (e.g. COILS, MobiDB-lite).",
         ],
         [
             name: "formats",
-            metavar: "<FORMATS>",
-            description: "comma-separated output formats. Available: gff3,json,jsonl,tsv,xml. Default: all."
+            metavar: "<LIST>",
+            description: "Comma-separated output formats. Available: gff3, json, jsonl, tsv, xml. Default: all formats."
         ],
         [
-            name: "outdir",
-            metavar: "<OUTDIR>",
-            description: "output directory where results will be saved. Default: current working directory."
+            name: "globus",
+            description: "Use the Globus mirror of the EMBL-EBI FTP site to download InterProScan data files.",
         ],
         [
-            name: "outprefix",
-            metavar: "<PREFIX>",
-            description: "base name for output files, without directory. Extension will be added automatically. This affects filenames only, not their location. Must not contain slashes or path components. Default: input filename."
+            name: "goterms",
+            description: "Include Gene Ontology (GO) annotations in output files."
+        ],
+        [
+            name: "help",
+            description: "Output the usage message and exit."
+        ],
+        [
+            name: "input",
+            required: true,
+            metavar: "<FASTA>",
+            description: "Path to FASTA file of sequences to be analysed."
         ],
         [
             name : "interpro",
             metavar: "<VERSION>",
-            description: "the InterPro release to be used. Defaults to 'latest'."
+            description: "InterPro release version to use. Default: latest available."
         ],
         [
             name: "matches-api-url",
             metavar: "<URL>",
-            description: "override the default InterPro Matches API, hosted at EMBL-EBI. Use this option to specify the URL of an alternative Matches API instance.",
+            description: "URL of an alternative InterPro Matches API instance to retrieve precomputed results.",
+        ],
+        [
+            name: "max-workers",
+            metavar: "<N>",
+            description: "Maximum number of parallel tasks executed when running locally."
         ],
         [
             name: "no-matches-api",
-            description: "disable fetching precomputed matches from the Matches API. All analyses will be run locally, regardless of whether precomputed results are available."
+            description: "Disable use of the Matches API. All analyses are executed locally."
         ],
         [
             name: "nucleic",
-            description: "interpret input as nucleotide sequences and translate them in all six reading frames to identify open reading frames (ORFs) for annotation."
+            description: "Interpret input sequences as nucleotides. Sequences are translated in all six reading frames and resulting ORFs are analysed."
         ],
         [
-            name: "goterms",
-            description: "include Gene Ontology (GO) mapping in output files."
+            name: "outdir",
+            metavar: "<DIR>",
+            description: "Directory where output files are written. Default: current working directory."
+        ],
+        [
+            name: "outprefix",
+            metavar: "<PREFIX>",
+            description: "Base name for output files (no directory or extension). Default: input filename."
         ],
         [
             name: "pathways",
-            description: "include pathway mapping in output files."
+            description: "Include pathway annotations in output files."
         ],
         [
-            name: "globus",
-            description: "use the Globus mirror of the EMBL-EBI FTP site to download InterProScan data files.",
+            name: "run-ml",
+            description: "Enable machine learning (ML) based analyses (e.g. DeepTMHMM, SignalP, TMbed). Disabled by default due to high resource usage."
         ],
         [
-            name: "help",
-            description: "print the help message and exit."
+            name: "skip-applications",
+            metavar: "<LIST>",
+            description: "Comma-separated list of applications to exclude from the analysis. Default: none.",
+        ],
+        [
+            name: "use-gpu",
+            description: "Enable GPU acceleration for supported ML-based applications."
         ],
         /*
         If an option's description is set to null, it will be hidden from the help message
         and no "Unrecognised option" warning will be produced.
         Use this for params defined in config files that should not be available on the command line
         */
-        [
-            name: "max-workers",
-            description: null
-            // description: "define maximum number of workers available for the InterProScan when running locally."
-        ],
-        [
-            name: "cpus",
-            description: "specify the number of CPU cores to allocate to processes that support multithreading. Default: 1."
-        ],
         [
             name: "batch-size",
             description: null
@@ -474,35 +475,88 @@ class InterProScan {
     }
 
     static void printHelp(appsConfig) {
+        def optionsMap = this.PARAMS
+            .findAll { it.description }
+            .collectEntries { opt ->
+                [
+                    (opt.name): [
+                        description: opt.description,
+                        metavar    : opt.metavar
+                    ]
+                ]
+            }
+
         def result = new StringBuilder()
-        result << "Usage: nextflow run ebi-pf-team/interproscan6 -profile <PROFILE> --input <FASTA> --datadir <DATADIR> \n\n"
+        result << "Usage: nextflow run ebi-pf-team/interproscan6 -profile <PROFILE> --input <FASTA> [--datadir <DATADIR>] [options]\n\n"
         result << "Mandatory parameters:\n"
-        result << "  -profile <PROFILE>: use this parameter to choose a configuration profile.\n"
+        result << this.formatOption("profile",
+                                    [
+                                        metavar    : "<PROFILE>", 
+                                        description: "Execution profile defining the runtime environment (e.g. slurm, lsf, docker)."
+                                    ],
+                                    " -")
+        result << this.formatOption("input", optionsMap.input)
 
-        this.PARAMS.findAll{ it.required }.each { param ->
-            result << this.formatOption(param) << "\n"
+        result << "\nConditional parameters:\n"
+        ["datadir"].each { paramName ->
+            assert optionsMap.containsKey(paramName)
+            result << this.formatOption(paramName, optionsMap[paramName])
         }
 
-        result << "\nOptional parameters:\n"
-        this.PARAMS.findAll{ !it.required && it.description }.each { param ->
-            result << this.formatOption(param) << "\n"
+        result << "\nExecution and resource control:\n"
+        ["cpus", "max-workers", "use-gpu"].each { paramName ->
+            assert optionsMap.containsKey(paramName)
+            result << this.formatOption(paramName, optionsMap[paramName])
         }
 
+        result << "\nInput interpretation:\n"
+        ["nucleic"].each { paramName ->
+            assert optionsMap.containsKey(paramName)
+            result << this.formatOption(paramName, optionsMap[paramName])
+        }
+
+        result << "\nAnalysis selection:\n"
+        ["applications", "skip-applications", "run-ml"].each { paramName ->
+            assert optionsMap.containsKey(paramName)
+            result << this.formatOption(paramName, optionsMap[paramName])
+        }
+
+        result << "\nOutput control:\n"
+        ["outdir", "outprefix", "formats", "goterms", "pathways"].each { paramName ->
+            assert optionsMap.containsKey(paramName)
+            result << this.formatOption(paramName, optionsMap[paramName])
+        }
+
+        result << "\nExternal services and data:\n"
+        ["interpro", "matches-api-url", "no-matches-api", "globus"].each { paramName ->
+            assert optionsMap.containsKey(paramName)
+            result << this.formatOption(paramName, optionsMap[paramName])
+        }
+
+        result << "\nOther options:\n"
+        ["help"].each { paramName ->
+            assert optionsMap.containsKey(paramName)
+            result << this.formatOption(paramName, optionsMap[paramName])
+        }
+        
         result << "\nAvailable applications:\n"
         appsConfig.each { label, appl ->
-            result << "  ${appl.name.replace(' ', '-')}\n"
+            if (appl.name != "InterPro-N") {
+                result << "  ${appl.name.replace(' ', '-')}\n"
+            }
         }
 
         print result.toString()
     }
 
-    static String formatOption(option) {
-        def text = "  --${option.name}"
-        if (option.metavar) {
-            text += " ${option.metavar}"
+    static String formatOption(String name, Map<String, String> props, String prefix = "--") {
+        def text = "  ${prefix}${name}"
+        if (props.metavar) {
+            text += " ${props.metavar}"
         }
 
-        return text.padRight(40) + ": ${option.description}"
+        assert props.description != null
+        return text.padRight(35) + "${props.description}\n"
     }
 
     static List parseAppsConfig(Boolean useGpu, List<String> apps, String appsConfigFile) {
