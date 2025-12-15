@@ -52,7 +52,7 @@ Explanation of parameters:
 
 After the run completes, the following files will be created in your working directory:
 
-* `test.faa.gff3`: annotations in GFF3 format
+* `test.faa.gff3`: Annotations in GFF3 format
 * `test.faa.json`: Full annotations in JSON format
 * `test.faa.jsonl`: Full annotations in JSON Lines format (one line for each input sequence)
 * `test.faa.tsv`: Tabular summary of matches (TSV format)
