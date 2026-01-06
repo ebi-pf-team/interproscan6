@@ -86,7 +86,7 @@ process RUN_HAMAP {
     label 'mem_min', 'time_veryshort', 'dynamic', 'ips6_container'
 
     input:
-    tuple val(meta), val(profiles), path(fasta_files)
+    tuple val(meta), path(fasta)
     path dirpath
     val profiles_dir
 
@@ -94,17 +94,10 @@ process RUN_HAMAP {
     tuple val(meta), stdout
 
     script:
-    def commands = ""
-
-    [profiles, fasta_files]
-        .transpose()
-        .each { profile, fasta ->
-            def profilePath = "${dirpath.toString()}/${profiles_dir}/${profile}.prf"
-            commands += "pfsearchV3 -f -o 7 -t ${task.cpus} ${profilePath} ${fasta}\n"
-        }
-
     """
-    ${commands}
+    find ${dirpath}/${profiles_dir} -type f | while read profile; do
+        pfsearchV3 -f -o 7 -t ${task.cpus} "\${profile}" "${fasta}"
+    done
     """
 }
 
