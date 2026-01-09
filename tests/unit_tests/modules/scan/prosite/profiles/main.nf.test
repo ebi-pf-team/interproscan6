@@ -10,8 +10,9 @@ nextflow_process {
             process {
                 """
                 input[0] = [1, file("$baseDir/tests/data/channels/prosite_profiles.out")]
-                input[1] = "$baseDir/tests/data/databases/prosite/2025_01"
-                input[2] = "skip_flagged_profiles.txt"
+                input[1] = "PROSITE profiles"
+                input[2] = "$baseDir/tests/data/databases/prosite/2025_01"
+                input[3] = "skip_flagged_profiles.txt"
                 """
             }
         }
@@ -29,4 +30,3 @@ nextflow_process {
         }
     }
 }
-

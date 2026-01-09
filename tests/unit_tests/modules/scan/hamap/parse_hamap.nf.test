@@ -1,18 +1,18 @@
 nextflow_process {
 
-    name "Test Process PARSE_HAMAP"
-    script "modules/hamap/main.nf"
-    process "PARSE_HAMAP"
+    name "Test Process PARSE_PFSEARCH"
+    script "modules/prosite/profiles/main.nf"
+    process "PARSE_PFSEARCH"
 
-    test("Should run  PARSE_SMART without failures") {
+    test("Should run without failures") {
 
         when {
-            params {
-                pfsearch_out = new File("tests/data/channels/hamap.pfsearchv3.out").text
-            }
             process {
                 """
-                input[0] = [1, params.pfsearch_out]
+                input[0] = [1, file("$baseDir/tests/data/channels/hamap.pfsearchv3.out")]
+                input[1] = "HAMAP"
+                input[2] = ""
+                input[3] = ""
                 """
             }
         }
