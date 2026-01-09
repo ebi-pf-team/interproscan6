@@ -15,6 +15,7 @@ workflow PROSITE_PROFILES {
     )
     ch_prosite = PARSE_PFSEARCH(
         RUN_PFSEARCH.out,
+        "PROSITE profiles",
         dirpath,
         blacklist_file
     )
