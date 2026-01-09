@@ -1,86 +1,8 @@
 import groovy.json.JsonOutput
-import uk.ac.ebi.interpro.FastaFile
 import uk.ac.ebi.interpro.Location  
 import uk.ac.ebi.interpro.Match
 import uk.ac.ebi.interpro.Signature
 import uk.ac.ebi.interpro.SignatureLibraryRelease
-
-process PREPROCESS_HAMAP {
-    label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
-
-    input:
-    tuple val(meta), path(fasta)
-    path dirpath
-    val hmmfile
-
-    output:
-    tuple val(meta), path("hmmsearch.tab"), path(fasta)
-
-    script:
-    """
-    hmmsearch \
-        -E 100 --domE 100 --incE 100 --incdomE 100 \
-        --cpu ${task.cpus} \
-        --tblout hmmsearch.tab \
-        ${dirpath}/${hmmfile} ${fasta} > /dev/null
-    """
-}
-
-process PREPARE_HAMAP {
-    label    'mem_low', 'time_veryshort'
-    executor 'local'
-
-    input:
-    tuple val(meta), val(hmmsearch_tab), val(fasta)
-    val dirpath
-    val profiles_dir
-
-    output:
-    tuple val(meta), val(profiles), path(fasta_files)
-
-    exec:
-    Map<String, String> sequences = FastaFile.parse(fasta.toString())  // [md5: sequence]
-
-    // Find profiles with matches
-    def matches = [:]
-    file(hmmsearch_tab.toString()).eachLine { line ->
-        if (line[0] != "#") {
-            def fields = line.trim().split(/\s+/, 19)
-            String target = fields[0]
-            String query = fields[2]
-
-            if (matches.containsKey(query)) {
-                matches[query].add(target)
-            } else {
-                matches[query] = [target]
-            }
-        }
-    }
-
-    // Do not use `def` so lists are globally scoped and can be used in the `output` block
-    profiles = []
-    fasta_files = []
-
-    // Create a FASTA file for each profile to search with
-    matches
-        .each { query, targets ->
-            Path prfPath = file("${dirpath.toString()}/${profiles_dir}/${query}.prf")
-            File prfFile = new File(prfPath.toString())
-            if (prfFile.exists()) {
-                Path fastaPath = task.workDir.resolve("${query}.fa")
-                new File(fastaPath.toString()).withWriter('UTF-8') { writer ->
-                    targets.each { seqId ->
-                        String seq = sequences[seqId]
-                        writer.writeLine(">${seqId}")
-                        writer.writeLine(fmtSequence(seq))
-                    }
-                }
-
-                profiles.add( query )
-                fasta_files.add( fastaPath )
-            }
-        }
-}
 
 process RUN_HAMAP {
     label 'mem_min', 'time_veryshort', 'dynamic', 'ips6_container'
