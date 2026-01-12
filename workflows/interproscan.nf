@@ -28,7 +28,7 @@ workflow INTERPROSCAN {
     batch_size            // int, number of sequences to process per batch
     sub_batch_size        // int, number of sequences per subbatch
     nucleic               // boolean, input is nucleic acid sequences
-    skip_interpro         // boolean, skip adding InterPro (cross-refs and repr domains) annotations
+    skip_repr_locations   // boolean, skip indentifying representative locations
     goterms               // boolean, include GO terms in the output files
     pathways              // boolean, include pathway terms in the output files
     globus                // boolean, use Globus to download databases
@@ -142,7 +142,7 @@ workflow INTERPROSCAN {
         goterms,
         pathways,
         apps_config.panther.paint,
-        skip_interpro,
+        skip_repr_locations,
         batch_size
     )
 

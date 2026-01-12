@@ -109,9 +109,9 @@ class InterProScan {
             description: null
         ],
         [
-            name: "skip-interpro",
+            name: "skip-repr-locations",
             description: null
-            // Used in production. Skips adding InterPro xrefs and identifying representative locations
+            // Used in production. Skips identifying representative locations
         ],
         [
             name: "apps-config",

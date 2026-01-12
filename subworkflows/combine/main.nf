@@ -9,49 +9,45 @@ workflow COMBINE {
     add_goterms
     add_pathways
     panther_paint_dir
-    skip_interpro      // boolean used in production
+    skip_repr_locations      // boolean used in production
     batch_size
 
     main:
-    parsed_matches = Channel.empty()
+    ch_xrefs = Channel.empty()
+    ch_combined = Channel.empty()
 
-    if (skip_interpro) {
-        // COMBINE_MATCHES: Aggregate matches across all members for each sequence -> single JSON with all matches for the batch
-        if (batch_size < 50000) {
-            parsed_matches = COMBINE_MATCHES_LOCAL(match_results)
-        } else {
-            parsed_matches = COMBINE_MATCHES(match_results)
-        }
+    if (batch_size < 50000) {
+        COMBINE_MATCHES_LOCAL(match_results)
+
+        ch_xrefs = XREFS_LOCAL(
+            COMBINE_MATCHES_LOCAL.out,
+            db_releases,
+            add_goterms,
+            add_pathways,
+            panther_paint_dir
+        )
     } else {
-        if (batch_size < 50000) {
-            COMBINE_MATCHES_LOCAL(match_results)
+        COMBINE_MATCHES(match_results)
 
-            XREFS_LOCAL(
-                COMBINE_MATCHES_LOCAL.out,
-                db_releases,
-                add_goterms,
-                add_pathways,
-                panther_paint_dir
-            )
+        ch_xrefs = XREFS(
+            COMBINE_MATCHES.out,
+            db_releases,
+            add_goterms,
+            add_pathways,
+            panther_paint_dir
+        )
+    }
 
-            parsed_matches = REPRESENTATIVE_LOCATIONS_LOCAL(XREFS_LOCAL.out)
-        } else {
-            COMBINE_MATCHES(match_results)
-
-            XREFS(
-                COMBINE_MATCHES.out,
-                db_releases,
-                add_goterms,
-                add_pathways,
-                panther_paint_dir
-            )
-
-            parsed_matches = REPRESENTATIVE_LOCATIONS(XREFS.out)
-        }
+    if (skip_repr_locations) {
+        ch_combined = ch_xrefs
+    } else if (batch_size < 50000) {
+        ch_combined = REPRESENTATIVE_LOCATIONS_LOCAL(ch_xrefs)
+    } else {
+        ch_combined = REPRESENTATIVE_LOCATIONS(ch_xrefs)
     }
 
     // Collect all JSON files into a single channel so we don't have cocurrent writing to the output files
-    ch_results = parsed_matches
+    ch_results = ch_combined
         .map { meta, json -> json }
         .collect()
 
