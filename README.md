@@ -317,7 +317,7 @@ nextflow run ebi-pf-team/interproscan6 \
   -r 6.0.0 \
   -profile docker \
   -c licensed.conf \
-  --input /path/to/sequences.faayour.fasta \
+  --input /path/to/sequences.faa \
   --applications deeptmhmm,phobius,signalp_euk,signalp_prok \
   --use-gpu
 ```
