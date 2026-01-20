@@ -1,8 +1,8 @@
 nextflow_process {
 
-    name "Test Process PARSE_PFSCAN"
-    script "modules/prosite/patterns/main.nf"
-    process "PARSE_PFSCAN"
+    name "Test Process PARSE_PSSCAN"
+    script "modules/pftools/main.nf"
+    process "PARSE_PSSCAN"
 
     test("Should run without failures") {
 

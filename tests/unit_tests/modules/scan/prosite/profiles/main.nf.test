@@ -1,7 +1,7 @@
 nextflow_process {
 
     name "Test Process PARSE_PFSEARCH"
-    script "modules/prosite/profiles/main.nf"
+    script "modules/pftools/main.nf"
     process "PARSE_PFSEARCH"
 
     test("Should run without failures") {
