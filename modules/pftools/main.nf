@@ -5,7 +5,7 @@ import uk.ac.ebi.interpro.Match
 import uk.ac.ebi.interpro.Signature
 import uk.ac.ebi.interpro.SignatureLibraryRelease
 
-process RUN_PFSCAN {
+process RUN_PSSCAN {
     /*
     The ps_scan.pl script is a wrapper for the pfscan tool that is provided by the
     pftools developers. It automates running pfscan for all provided patterns and
@@ -34,20 +34,20 @@ process RUN_PFSCAN {
 }
 
 
-process PARSE_PFSCAN {
+process PARSE_PSSCAN {
     label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
-        tuple val(meta), val(pfscan_out)
+        tuple val(meta), val(ps_scan_out)
 
     output:
-        tuple val(meta), path("prositepatterns.json")
+        tuple val(meta), path("ps_scan.json")
 
     exec:
     Map<String, Map<String, Match>> patternsMatches = [:]
     SignatureLibraryRelease library = new SignatureLibraryRelease("PROSITE patterns", null)
-    pfscan_out.eachLine { line ->
+    ps_scan_out.eachLine { line ->
         line = line.trim()
         if (!line || line.startsWith("pfscanV3 is not meant to be used with a single profile")) {
             return
@@ -79,7 +79,7 @@ process PARSE_PFSCAN {
         matchObj.addLocation(location)
     }
 
-    def outputFilePath = task.workDir.resolve("prositepatterns.json")
+    def outputFilePath = task.workDir.resolve("ps_scan.json")
     def json = JsonOutput.toJson(patternsMatches)
     new File(outputFilePath.toString()).write(json)
 }

@@ -1,4 +1,4 @@
-include { RUN_PFSCAN; PARSE_PFSCAN } from  "../../../modules/prosite/patterns"
+include { RUN_PSSCAN; PARSE_PSSCAN } from  "../../../modules/pftools"
 
 workflow PROSITE_PATTERNS {
     take:
@@ -8,14 +8,14 @@ workflow PROSITE_PATTERNS {
     evafile         // str repr of the path to the eva file in the data dir -> datadir/evafile
 
     main:
-    RUN_PFSCAN(
+    RUN_PSSCAN(
         ch_seqs,
         dirpath,
         datfile,
         evafile
     )
 
-    ch_prosite = PARSE_PFSCAN(RUN_PFSCAN.out)
+    ch_prosite = PARSE_PSSCAN(RUN_PSSCAN.out)
 
     emit:
     ch_prosite
