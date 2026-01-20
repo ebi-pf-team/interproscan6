@@ -27,7 +27,7 @@ workflow {
         params.outdir,
         params.outprefix,
         params.interpro,
-        params.skipInterpro,
+        params.skipReprLocations,
         params.skipApplications,
         params.goterms,
         params.pathways,
@@ -58,7 +58,7 @@ workflow {
         params.batchSize,
         params.subBatchSize,
         params.nucleic,
-        params.skipInterpro,
+        params.skipReprLocations,
         params.goterms,
         params.pathways,
         params.globus

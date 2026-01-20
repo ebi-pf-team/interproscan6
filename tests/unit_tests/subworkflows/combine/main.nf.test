@@ -4,7 +4,7 @@ nextflow_workflow {
     script "subworkflows/combine/main.nf"
     workflow "COMBINE"
 
-    test("Should skip adding interpro data and run without failures") {
+    test("Should skip finding representative locations and run without failures") {
         when {
             params {
                 match_results = [
@@ -37,7 +37,7 @@ nextflow_workflow {
                 add_goterms = true
                 add_pathways = true
                 panther_paint_dir = "$baseDir/tests/data/databases/interpro/105.0"
-                skip_interpro = true
+                skip_repr_locations = true
                 batch_size = 5000
             }
             workflow {
@@ -47,7 +47,7 @@ nextflow_workflow {
                 input[2] = params.add_goterms
                 input[3] = params.add_pathways
                 input[4] = params.panther_paint_dir
-                input[5] = params.skip_interpro
+                input[5] = params.skip_repr_locations
                 input[6] = params.batch_size
                 """
             }
@@ -57,7 +57,7 @@ nextflow_workflow {
         }
     }
 
-    test("Should add interpro data and run without failures") {
+    test("Should find representative locations and run without failures") {
         when {
             params {
                 match_results = [
@@ -90,7 +90,7 @@ nextflow_workflow {
                 add_goterms = true
                 add_pathways = true
                 panther_paint_dir = "tests/data/databases/interpro/105.0"
-                skip_interpro = false
+                skip_repr_locations = false
                 batch_size = 5000
             }
             workflow {
@@ -100,7 +100,7 @@ nextflow_workflow {
                 input[2] = params.add_goterms
                 input[3] = params.add_pathways
                 input[4] = params.panther_paint_dir
-                input[5] = params.skip_interpro
+                input[5] = params.skip_repr_locations
                 input[6] = params.batch_size
                 """
             }
