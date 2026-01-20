@@ -9,18 +9,17 @@ process RUN_PFSEARCH {
     label 'mem_min', 'time_medium', 'dynamic', 'ips6_container'
 
     input:
-        tuple val(meta), path(fasta)
-        path dirpath
-        val profiles_dir
+    tuple val(meta), path(fasta)
+    path dirpath
+    val profiles_dir
 
     output:
-        tuple val(meta), path("prosite_profiles.out")
+    tuple val(meta), stdout
 
     script:
     """
-    touch prosite_profiles.out
     find ${dirpath}/${profiles_dir} -type f | while read profile; do
-        pfsearchV3 -f -o 7 -t ${task.cpus} "\${profile}" "${fasta}" >> prosite_profiles.out
+        pfsearchV3 -f -o 7 -t ${task.cpus} "\${profile}" "${fasta}"
     done
     """
 }
@@ -30,52 +29,45 @@ process PARSE_PFSEARCH {
     executor 'local'
 
     input:
-        tuple val(meta), val(pfsearch_out)
-        val dirpath
-        val blacklist_file
+    tuple val(meta), val(pfsearch_out)
+    val signature_library
+    val dirpath
+    val blacklist_file
 
     output:
-        tuple val(meta), path("prositeprofiles.json")
+    tuple val(meta), path("pfsearch.json")
 
     exec:
     Map matches = [:]
-    SignatureLibraryRelease library = new SignatureLibraryRelease("PROSITE profiles", null)
-    def toSkip = new File("${dirpath.toString()}/${blacklist_file}").readLines()
-
-    new File(pfsearch_out.toString()).eachLine { line ->
-        if (line.trim()) {
-            line = line.split()
-            assert line.size() == 10
-            String modelAccession = line[0].split("\\|")[0]
-            if (modelAccession in toSkip) {
-                return // skip flagged accessions
-            }
-            def matchData = getMatchData(line)
-            seqId = matchData.sequenceId
-            matches.computeIfAbsent(seqId) { [:] }
-            Match matchObj = matches[seqId].computeIfAbsent(modelAccession) {
-                new Match(matchData.profile, new Signature(modelAccession, library))
-            }
-            String alignment = matchData.alignment
-            String cigarAlignment = Match.encodeCigarAlignment(alignment)
-            Location location = new Location(matchData.start, matchData.end, matchData.normScore, alignment, cigarAlignment)
-            matchObj.addLocation(location)
-        }
+    SignatureLibraryRelease library = new SignatureLibraryRelease(signature_library, null)
+    def toSkip = []
+    if (dirpath && blacklist_file) {
+        toSkip = new File("${dirpath.toString()}/${blacklist_file}").readLines()
     }
-    def outputFilePath = task.workDir.resolve("prositeprofiles.json")
+
+    pfsearch_out.eachLine { line ->
+        def fields = line.split()
+        assert fields.size() == 10
+        String modelAccession = fields[0].split("\\|")[0]
+        if (toSkip && (modelAccession in toSkip)) {
+            return // skip flagged accessions
+        }
+
+        String seqId = fields[3]
+        int start = fields[4].toInteger()
+        int end = fields[5].toInteger()
+        Double score = Double.parseDouble(fields[7])
+        String alignment = fields[9]
+        String cigarAlignment = Match.encodeCigarAlignment(alignment)
+
+        matches.computeIfAbsent(seqId) { [:] }
+        Match matchObj = matches[seqId].computeIfAbsent(modelAccession) {
+            new Match(modelAccession, new Signature(modelAccession, library))
+        }
+        Location location = new Location(start, end, score, alignment, cigarAlignment)
+        matchObj.addLocation(location)
+    }
+    def outputFilePath = task.workDir.resolve("pfsearch.json")
     def json = JsonOutput.toJson(matches)
     new File(outputFilePath.toString()).write(json)
-}
-
-Map<String, Object> getMatchData(line) {
-    def profile = line[0].split("\\|")
-    return [
-        profile     : profile[0],
-        profileName : profile[1],
-        sequenceId  : line[3],
-        start       : line[4].toInteger(),
-        end         : line[5].toInteger(),
-        normScore   : line[7].toFloat(),
-        alignment   : line[9]
-    ]
 }

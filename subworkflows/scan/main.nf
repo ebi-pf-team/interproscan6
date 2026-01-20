@@ -91,7 +91,6 @@ workflow SCAN_SEQUENCES {
         HAMAP(
             ch_seqs,
             db_releases.hamap.dirpath,
-            apps_config.hamap.hmm,
             apps_config.hamap.profiles
         )
 
