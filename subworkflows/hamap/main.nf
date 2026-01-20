@@ -1,4 +1,4 @@
-include { RUN_PFSEARCH; PARSE_PFSEARCH } from  "../../modules/prosite/profiles"
+include { RUN_PFSEARCH ; PARSE_PFSEARCH } from  "../../modules/pftools"
 
 workflow HAMAP {
     take:
