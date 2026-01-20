@@ -53,7 +53,7 @@ workflow INTERPROSCAN {
         data_dir,
         interpro_version,
         interproscan_version,
-        matches_api_url,
+        no_matches_api,
         goterms,
         pathways,
         globus
