@@ -114,7 +114,7 @@ class InterProScan {
             // Used in production. Skips identifying representative locations
         ],
         [
-            name: "skip-intepro-version-check",
+            name: "skip-interpro-version-check",
             description: null
             // Used in production. If set, disables the version compatibility check between IPRScan and InterPro data versions
         ],
