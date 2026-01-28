@@ -20,7 +20,7 @@ workflow PREPARE_APPLICATIONS {
         log.warn error
     } else if (!no_matches_api && !local_only_apps.isEmpty()) {
         log.warn "The following analyses are not available in the Matches API: " +
-                local_only_apps.join(", ") +
+                local_only_apps.join(", ") +  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
                 ". They will be executed locally."
     }
 

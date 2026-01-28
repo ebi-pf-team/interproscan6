@@ -283,13 +283,19 @@ workflow SCAN_SEQUENCES {
     }
 
     ch_results = ch_seqs.join(
-        results.groupTuple()
+        results.groupTuple(),
+        failOnDuplicate: false, // may happen when applications perfom sub-batching
+        failOnMismatch: false   // may happen when all sequences found in Matches API
     )
 
     ch_no_matches = REPORT_NO_MATCHES(ch_results)
 
     merged_results = ch_results
-        .join(ch_no_matches)
+        .join(
+            ch_no_matches,
+            failOnDuplicate: true,
+            failOnMismatch: true
+        )
         .map { meta, fasta, member_paths, no_match_path ->
             [meta, member_paths + [no_match_path]]
         }

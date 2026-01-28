@@ -52,7 +52,12 @@ workflow CATH {
 
         // Join input fasta file with superfamilies.
         ch_funfams = ch_split
-            .join(PREPARE_FUNFAM.out, by: [0, 1])
+            .join(
+                PREPARE_FUNFAM.out, 
+                by: [0, 1],
+                failOnDuplicate: true,
+                failOnMismatch: true
+            )
 
         // Search FunFam profiles, and select the best domain matches
         SEARCH_FUNFAM(

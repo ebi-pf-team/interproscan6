@@ -36,7 +36,9 @@ process PREPARE_FUNFAM {
         .flatten()
         .unique()
         .findAll { cathId ->
-            String hmmPath = cathId.split("\\.").join(File.separator) + ".hmm"
+            String hmmPath = cathId
+                .split("\\.")  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
+                .join(File.separator) + ".hmm"
             Path fullPath = rootDir.resolve(hmmPath)
             return file(fullPath.toString()).isFile()
         }
@@ -55,7 +57,9 @@ process SEARCH_FUNFAM {
     script:
     def commands = "touch hmmsearch.out\n"
     supfams.each { cathId -> 
-        String hmmFilePath = cathId.split("\\.").join(File.separator) + ".hmm"
+        String hmmFilePath = cathId
+            .split("\\.")  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
+            .join(File.separator) + ".hmm"
         String hmmPath = "${root_dir.toString()}/${hmmFilePath}"
         commands += "hmmsearch"
         commands += " -Z 65245 --cut_tc"

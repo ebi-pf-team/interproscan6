@@ -1,3 +1,4 @@
+// codenarc-disable ModuleIncludedTwiceRule
 import groovy.json.JsonSlurper
 import uk.ac.ebi.interpro.InterProScan
 
@@ -56,7 +57,7 @@ workflow PREPARE_DATABASES {
                 def dir = value.get("dir", "")
                 def parts = dir.split('/')
                 def first = parts[0]
-                def second = parts.size() > 1 ? parts[1..-1].join('/') : ""
+                def second = parts.size() > 1 ? parts[1..-1].join('/') : ""  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
                 return [key, [first, second]]
         }
 
@@ -145,7 +146,7 @@ def getInterproVersion(String interpro_version, String iprscan_version, boolean 
     } else if (!versions.contains(interpro_version) && enforce_compatibility) {
         error = "InterProScan ${iprscan_version} is not compatible with InterPro " +
                 "${interpro_version} data.\n" +
-                "Compatible versions are: ${versions.join(', ')}."
+                "Compatible versions are: ${versions.join(', ')}."  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
         log.error error
         exit 1
     }
@@ -154,5 +155,5 @@ def getInterproVersion(String interpro_version, String iprscan_version, boolean 
 }
 
 def extractMajorMinorVersion(String version) {
-    return version.split("\\.")[0..1].join(".")
+    return version.split("\\.")[0..1].join(".")  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
 }

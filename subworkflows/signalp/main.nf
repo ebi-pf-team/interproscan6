@@ -1,3 +1,4 @@
+// codenarc-disable ModuleIncludedTwiceRule
 include { RUN_SIGNALP_CPU as RUN_SIGNALP_CPU_EUK      } from  "../../modules/signalp"
 include { RUN_SIGNALP_GPU as RUN_SIGNALP_GPU_EUK      } from  "../../modules/signalp"
 include { PARSE_SIGNALP as PARSE_SIGNALP_EUK          } from  "../../modules/signalp"

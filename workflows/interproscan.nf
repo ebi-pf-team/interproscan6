@@ -1,3 +1,4 @@
+// codenarc-disable ModuleIncludedTwiceRule
 include { PREPARE_APPLICATIONS } from "../subworkflows/prepare/applications"
 include { PREPARE_DATABASES    } from "../subworkflows/prepare/databases"
 include { PREPARE_SEQUENCES    } from "../subworkflows/prepare/sequences"
