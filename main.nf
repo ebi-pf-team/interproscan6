@@ -62,7 +62,7 @@ workflow {
         params.goterms,
         params.pathways,
         params.globus,
-        !params.allowIncompatibleVersions
+        !params.skipInterProVersionCheck
     )
 
     workflow.onComplete = {
