@@ -1,3 +1,4 @@
+// codenarc-disable ModuleIncludedTwiceRule
 import groovy.json.JsonSlurper
 import uk.ac.ebi.interpro.InterProScan
 
@@ -9,20 +10,21 @@ include { VALIDATE_DATA                 } from "../../../modules/download"
 
 workflow PREPARE_DATABASES {
     take:
-    local_only_apps   // list[str], member db that are not listed in the Matches API
-    matches_api_apps  // list[str], member db that are listed in the Matches API
-    apps_config       // map, contents of conf/applications.conf
-    data_dir          // str, path to data directory
-    interpro_version  // str, InterPro data version
-    iprscan_version   // str, major.minor interproscan version number
-    no_matches_api    // boolean, whether to use the Matches API
-    add_goterms       // boolean, whether to add GO terms
-    add_pathways      // boolean, whether to add pathways
-    use_globus        // boolean, whether to use Globus for data transfer
+    local_only_apps        // list[str], member db that are not listed in the Matches API
+    matches_api_apps       // list[str], member db that are listed in the Matches API
+    apps_config            // map, contents of conf/applications.conf
+    data_dir               // str, path to data directory
+    interpro_version       // str, InterPro data version
+    iprscan_version        // str, major.minor interproscan version number
+    no_matches_api         // boolean, whether to use the Matches API
+    add_goterms            // boolean, whether to add GO terms
+    add_pathways           // boolean, whether to add pathways
+    use_globus             // boolean, whether to use Globus for data transfer
+    enforce_compatibility  // boolean, whether to enforce compatibility between IPRScan and InterPro data versions
 
     main:
     applications = local_only_apps + matches_api_apps
-    iprscan_major_minor = iprscan_version.split("\\.")[0..1].join(".")
+    iprscan_major_minor = extractMajorMinorVersion(iprscan_version)
     ch_ready = Channel.empty()
 
     if (data_dir == null && no_matches_api) {
@@ -39,14 +41,14 @@ workflow PREPARE_DATABASES {
         But we still want to use the Matches API so we need the InterPro version
         We don't need the InterPro data dir
         */
-        interpro_version = getInterproVersion(interpro_version, iprscan_major_minor, use_globus)
+        interpro_version = getInterproVersion(interpro_version, iprscan_version, use_globus, enforce_compatibility)
         ch_ready = Channel.of(["interpro", interpro_version, null])
     } else {
         /*
         Check the InterPro release version is compatible with the IPRScan version
         and if data files are needed and missing, download them
         */
-        interpro_version = getInterproVersion(interpro_version, iprscan_major_minor, use_globus)
+        interpro_version = getInterproVersion(interpro_version, iprscan_version, use_globus, enforce_compatibility)
 
         // Most members have a single dir, but CATH-Gene3D and CATH-FuNFam are collated under cath for example
         app_dirs = apps_config
@@ -55,7 +57,7 @@ workflow PREPARE_DATABASES {
                 def dir = value.get("dir", "")
                 def parts = dir.split('/')
                 def first = parts[0]
-                def second = parts.size() > 1 ? parts[1..-1].join('/') : ""
+                def second = parts.size() > 1 ? parts[1..-1].join('/') : ""  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
                 return [key, [first, second]]
         }
 
@@ -114,7 +116,8 @@ workflow PREPARE_DATABASES {
     iprscan_major_minor
 }
 
-def getInterproVersion(String interpro_version, String iprscan_major_minor, boolean use_globus) {
+def getInterproVersion(String interpro_version, String iprscan_version, boolean use_globus, boolean enforce_compatibility) {
+    def iprscan_major_minor = extractMajorMinorVersion(iprscan_version)
     versions = InterProScan.fetchCompatibleVersions(iprscan_major_minor, use_globus)
     if (versions == null) {
         if (use_globus) {
@@ -140,13 +143,17 @@ def getInterproVersion(String interpro_version, String iprscan_major_minor, bool
         }
     } else if (interpro_version == "latest") {
         interpro_version = versions[-1]
-    } else if (!versions.contains(interpro_version)) {
+    } else if (!versions.contains(interpro_version) && enforce_compatibility) {
         error = "InterProScan ${iprscan_version} is not compatible with InterPro " +
-                " ${interpro_version} data.\n" +
-                "Compatible versions are: ${versions.join(', ')}."
+                "${interpro_version} data.\n" +
+                "Compatible versions are: ${versions.join(', ')}."  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
         log.error error
         exit 1
     }
 
     return interpro_version
+}
+
+def extractMajorMinorVersion(String version) {
+    return version.split("\\.")[0..1].join(".")  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
 }

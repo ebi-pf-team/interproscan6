@@ -1,3 +1,4 @@
+// codenarc-disable ModuleIncludedTwiceRule
 include { PREPARE_APPLICATIONS } from "../subworkflows/prepare/applications"
 include { PREPARE_DATABASES    } from "../subworkflows/prepare/databases"
 include { PREPARE_SEQUENCES    } from "../subworkflows/prepare/sequences"
@@ -32,6 +33,7 @@ workflow INTERPROSCAN {
     goterms               // boolean, include GO terms in the output files
     pathways              // boolean, include pathway terms in the output files
     globus                // boolean, use Globus to download databases
+    enforce_compatibility // boolean, whether to enforce compatibility between IPRScan and InterPro data versions
 
     main:
 
@@ -56,7 +58,8 @@ workflow INTERPROSCAN {
         no_matches_api,
         goterms,
         pathways,
-        globus
+        globus,
+        enforce_compatibility
     )
     db_releases = PREPARE_DATABASES.out.versions
     iprscan_major_minor = PREPARE_DATABASES.out.iprscan_major_minor

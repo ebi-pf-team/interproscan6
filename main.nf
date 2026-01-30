@@ -61,7 +61,8 @@ workflow {
         params.skipReprLocations,
         params.goterms,
         params.pathways,
-        params.globus
+        params.globus,
+        !params.skipInterproVersionCheck
     )
 
     workflow.onComplete = {

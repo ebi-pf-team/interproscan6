@@ -1,3 +1,4 @@
+// codenarc-disable ModuleIncludedTwiceRule
 include { WRITE_GFF3; WRITE_GFF3_LOCAL                                     } from "../../modules/output/gff3"
 include { WRITE_JSON; WRITE_JSON_LOCAL                                     } from "../../modules/output/json"
 include { WRITE_JSON as WRITE_JSONL; WRITE_JSON_LOCAL as WRITE_JSONL_LOCAL } from "../../modules/output/json"

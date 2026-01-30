@@ -1,3 +1,4 @@
+// codenarc-disable AllowedDirectivesRule
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 import uk.ac.ebi.interpro.FastaFile
