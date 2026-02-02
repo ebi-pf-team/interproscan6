@@ -91,8 +91,6 @@ workflow INTERPROSCAN {
         LOOKUP(
             ch_seqs,
             matches_api_apps,
-            db_releases,
-            api_version,
             matches_api_url,
             matches_api_chunk_size,
             matches_api_max_retries

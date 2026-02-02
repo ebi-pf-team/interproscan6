@@ -6,31 +6,6 @@ import java.net.URL
 import uk.ac.ebi.interpro.FastaFile
 import uk.ac.ebi.interpro.HTTPRequest
 
-process PREPARE_LOOKUP {
-    /* A Simple process to check API and InterPro version compatibility
-    Retain as a process so that this process and the LOOKUP subworkflow wait for the
-    channels to be ready before determining if the API is available */
-    label    'mem_low', 'time_short'
-    executor 'local'
-
-    input:
-    val matches_api_apps
-    val api_interpro_version
-    val db_releases
-    val url
-
-    output:
-    val api_url
-
-    exec:
-    _url = url // reassign to avoid variable already declared error
-    if (db_releases["interpro"]["version"] != api_interpro_version) {
-            log.warn "The local InterPro version (${db_releases['interpro']}) does not match the Matches API release (${api_interpro_version}). Pre-calculated matches will not be retrieved and analyses will run locally."
-            _url = null
-    }
-    api_url = _url
-}
-
 process LOOKUP_MATCHES {
     maxForks 1
     label    'mem_low', 'time_short'
