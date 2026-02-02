@@ -29,6 +29,11 @@ workflow PREPARE_DATABASES {
     ch_ready = Channel.empty()
 
     interpro_version = getInterproVersion(interpro_version, iprscan_version, use_globus, enforce_compatibility)
+    if (use_matches_api && interpro_version != api_version) {
+            log.warn "The local InterPro version (${interpro_version}) does not match the Matches API release (${api_version}). Pre-calculated matches will not be retrieved and analyses will run locally."
+            use_matches_api = false
+    }
+
     if (data_dir == null && !use_matches_api) {
         /*
         If data_dir is not specified, we only run analyses that do not depend on data files (e.g. coils).
@@ -112,6 +117,7 @@ workflow PREPARE_DATABASES {
     VALIDATE_DATA(ch_ready)
 
     emit:
+    use_matches_api 
     versions = VALIDATE_DATA.out                // map: [ dbname: [version: <version>, path: <datapath>] ]
     iprscan_major_minor
 }

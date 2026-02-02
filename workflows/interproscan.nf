@@ -61,6 +61,7 @@ workflow INTERPROSCAN {
         globus,
         enforce_compatibility
     )
+    use_matches_api = PREPARE_DATABASES.out.use_matches_api.val
     db_releases = PREPARE_DATABASES.out.versions
     iprscan_major_minor = PREPARE_DATABASES.out.iprscan_major_minor
 
@@ -74,7 +75,7 @@ workflow INTERPROSCAN {
 
     match_results = Channel.empty()
 
-    if (no_matches_api || matches_api_apps.isEmpty()) {
+    if (!use_matches_api || matches_api_apps.isEmpty()) {
         SCAN_SEQUENCES(
             ch_seqs,
             db_releases,
