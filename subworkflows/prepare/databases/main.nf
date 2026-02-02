@@ -28,6 +28,7 @@ workflow PREPARE_DATABASES {
     use_matches_api = api_version != null
     ch_ready = Channel.empty()
 
+    interpro_version = getInterproVersion(interpro_version, iprscan_version, use_globus, enforce_compatibility)
     if (data_dir == null && !use_matches_api) {
         /*
         If data_dir is not specified, we only run analyses that do not depend on data files (e.g. coils).
@@ -42,14 +43,12 @@ workflow PREPARE_DATABASES {
         But we still want to use the Matches API so we need the InterPro version
         We don't need the InterPro data dir
         */
-        interpro_version = getInterproVersion(interpro_version, iprscan_version, use_globus, enforce_compatibility)
         ch_ready = Channel.of(["interpro", interpro_version, null])
     } else {
         /*
         Check the InterPro release version is compatible with the IPRScan version
         and if data files are needed and missing, download them
         */
-        interpro_version = getInterproVersion(interpro_version, iprscan_version, use_globus, enforce_compatibility)
 
         // Most members have a single dir, but CATH-Gene3D and CATH-FuNFam are collated under cath for example
         app_dirs = apps_config
