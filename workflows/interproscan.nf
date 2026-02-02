@@ -55,7 +55,7 @@ workflow INTERPROSCAN {
         data_dir,
         interpro_version,
         interproscan_version,
-        no_matches_api,
+        api_version,
         goterms,
         pathways,
         globus,

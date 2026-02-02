@@ -16,7 +16,7 @@ workflow PREPARE_DATABASES {
     data_dir               // str, path to data directory
     interpro_version       // str, InterPro data version
     iprscan_version        // str, major.minor interproscan version number
-    no_matches_api         // boolean, whether to use the Matches API
+    api_version            // str, Matches API InterPro data version
     add_goterms            // boolean, whether to add GO terms
     add_pathways           // boolean, whether to add pathways
     use_globus             // boolean, whether to use Globus for data transfer
@@ -25,9 +25,10 @@ workflow PREPARE_DATABASES {
     main:
     applications = local_only_apps + matches_api_apps
     iprscan_major_minor = extractMajorMinorVersion(iprscan_version)
+    use_matches_api = api_version != null
     ch_ready = Channel.empty()
 
-    if (data_dir == null && no_matches_api) {
+    if (data_dir == null && !use_matches_api) {
         /*
         If data_dir is not specified, we only run analyses that do not depend on data files (e.g. coils).
         We also don't need the InterPro version as we won't be using the Matches API either.
@@ -35,7 +36,7 @@ workflow PREPARE_DATABASES {
         We don't need the InterPro data dir
         */
         ch_ready = Channel.of(["default", "1.0", null])
-    } else if (data_dir == null && !no_matches_api) {
+    } else if (data_dir == null && use_matches_api) {
         /*
         We don't have a datadir so don't check to download data
         But we still want to use the Matches API so we need the InterPro version
