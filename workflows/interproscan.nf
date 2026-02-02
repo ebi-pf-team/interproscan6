@@ -79,7 +79,7 @@ workflow INTERPROSCAN {
         SCAN_SEQUENCES(
             ch_seqs,
             db_releases,
-            local_only_apps,
+            applications,
             apps_config,
             data_dir,
             local_only_apps,
