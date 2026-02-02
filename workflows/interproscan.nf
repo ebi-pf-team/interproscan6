@@ -63,7 +63,6 @@ workflow INTERPROSCAN {
     )
     use_matches_api = PREPARE_DATABASES.out.use_matches_api.val
     db_releases = PREPARE_DATABASES.out.versions
-    iprscan_major_minor = PREPARE_DATABASES.out.iprscan_major_minor
 
     PREPARE_SEQUENCES(
         fasta_file,
@@ -93,7 +92,6 @@ workflow INTERPROSCAN {
             ch_seqs,
             matches_api_apps,
             db_releases,
-            iprscan_major_minor,
             api_version,
             matches_api_url,
             matches_api_chunk_size,

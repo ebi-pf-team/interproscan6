@@ -119,7 +119,6 @@ workflow PREPARE_DATABASES {
     emit:
     use_matches_api 
     versions = VALIDATE_DATA.out                // map: [ dbname: [version: <version>, path: <datapath>] ]
-    iprscan_major_minor
 }
 
 def getInterproVersion(String interpro_version, String iprscan_version, boolean use_globus, boolean enforce_compatibility) {

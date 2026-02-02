@@ -6,7 +6,6 @@ workflow LOOKUP {
     ch_seqs               // channel of tuples (index, fasta) - fasta files of protein sequences to analyse
     matches_api_apps      // list[str], member db analyses to run that are in the matches API
     db_releases           // map: [db: version (str), dirpath (str)]           
-    interproscan_version  // str, major.minor interproscan version number
     api_version           // str, version of the matches API
     url                   // str, url to matches api
     chunk_size            // int
