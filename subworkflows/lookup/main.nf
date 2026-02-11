@@ -34,7 +34,6 @@ workflow LOOKUP {
             tuple(index, fasta, matches_api_apps, api_url, chunk_size, max_retries)
         }
     )
-    
     precalculatedMatches = LOOKUP_MATCHES.out[0]
 
     noMatchesFasta = LOOKUP_MATCHES.out[1]
