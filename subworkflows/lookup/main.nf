@@ -34,13 +34,7 @@ workflow LOOKUP {
             tuple(index, fasta, matches_api_apps, api_url, chunk_size, max_retries)
         }
     )
-
     precalculatedMatches = LOOKUP_MATCHES.out[0]
-        .mix(
-            api_result.unavailable.map { _, index, fasta -> 
-                tuple(index, null)
-            }
-        )
 
     noMatchesFasta = LOOKUP_MATCHES.out[1]
         .mix(
