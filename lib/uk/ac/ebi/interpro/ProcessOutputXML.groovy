@@ -426,7 +426,7 @@ class ProcessOutputXML {
                     locationAttributes = fmtDefaultLocationNode(loc)
                     break
                 case "pirsr":
-                    locationAttributes = fmtDefaultNoHbLocationNode(loc)
+                    locationAttributes = fmtDefaultLocationNode(loc)
                     break
                 case "prints":
                     locationAttributes = fmtPrintsLocationNode(loc)
@@ -438,7 +438,7 @@ class ProcessOutputXML {
                     locationAttributes = fmtMinimalistLocationWithScoreNode(loc)
                     break
                 case "sfld":
-                    locationAttributes = fmtDefaultNoHbLocationNode(loc)
+                    locationAttributes = fmtDefaultLocationNode(loc)
                     break
                 case "signalp":
                     locationAttributes = fmtSignalpLocationNode(loc)
@@ -518,21 +518,6 @@ class ProcessOutputXML {
             "hmm-end"      : loc.hmmEnd,
             "hmm-length"   : loc.hmmLength,
             "hmm-bounds"   : Location.getHmmBounds(loc.hmmBounds),
-            evalue         : loc.evalue,
-            score          : loc.score,
-            "env-start"    : loc.envelopeStart,
-            "env-end"      : loc.envelopeEnd
-        ]
-    }
-
-    static Map fmtDefaultNoHbLocationNode(Map loc) {
-        return [
-            start          : loc.start,
-            end            : loc.end,
-            representative : loc.representative,
-            "hmm-start"    : loc.hmmStart,
-            "hmm-end"      : loc.hmmEnd,
-            "hmm-length"   : loc.hmmLength,
             evalue         : loc.evalue,
             score          : loc.score,
             "env-start"    : loc.envelopeStart,
