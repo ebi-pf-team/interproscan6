@@ -16,13 +16,15 @@ class ProcessXrefs {
         def (databaseInfo, entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null, null]
         if (dbReleases?.interpro?.dirpath != null) {
             String interproDir = dbReleases.interpro.dirpath.toString()
-            String databasesPath = "${interproDir}/databases.json"
-            File databasesJson = new File(databasesPath)
+            File databasesJson = new File("${interproDir}/databases.json")
             databaseInfo = mapper.readValue(databasesJson, Map)
-            String entriesPath = "${interproDir}/entries.json"
-            File entriesJson = new File(entriesPath)
-            entries = mapper.readValue(entriesJson, Map)
-            (ipr2go, goInfo) = loadXRefFiles("${interproDir}/goterms")
+            File entriesJson = new File("${interproDir}/entries.json")
+            if (entriesJson.exists()) {
+                entries = mapper.readValue(entriesJson, Map)
+            }
+            if (addGoTerms) {
+                (ipr2go, goInfo) = loadXRefFiles("${interproDir}/goterms")
+            }
             if (addPathways) {
                 (ipr2pa, paInfo) = loadXRefFiles("${interproDir}/pathways")
             }
@@ -33,21 +35,21 @@ class ProcessXrefs {
             seqMatches.each { modelAcc, matchMap ->
                 Match match = Match.fromMap(matchMap)  // convert Map to Match object
 
-                if (match.source != "InterPro-N" && entries) {
+                if (match.source != "InterPro-N") {
                     String signatureAcc = match.signature.accession
-                    def signatureInfo = entries[signatureAcc] ?: entries[modelAcc]
+                    def signatureInfo = entries == null ? null : (entries[signatureAcc] ?: entries[modelAcc])
 
                     // Update library version
                     def version = (match.signature.signatureLibraryRelease.version == "null") ? null : match.signature.signatureLibraryRelease.version
                     if (!version && signatureInfo != null) {
-                        match.signature.signatureLibraryRelease.version = databaseInfo[signatureInfo["database"]]
+                        match.signature.signatureLibraryRelease.version = databaseInfo?.get(signatureInfo["database"])
                     } else if (match.signature.signatureLibraryRelease.library == "PIRSR") {
-                        match.signature.signatureLibraryRelease.version = databaseInfo["PIRSR"]
+                        match.signature.signatureLibraryRelease.version = databaseInfo?.get("PIRSR")
                     }
 
                     // Handle PANTHER data
                     if (match.signature.signatureLibraryRelease.library == "PANTHER") {
-                        updatePantherData(match, dbReleases.panther.dirpath, pantherPaintDirectory, signatureAcc, entries, addGoTerms ? goInfo : null)
+                        updatePantherData(match, dbReleases.panther.dirpath, pantherPaintDirectory, signatureAcc, entries, goInfo)
                     }
 
                     // Update signature info
@@ -72,7 +74,7 @@ class ProcessXrefs {
                             match.signature.entry = new Entry(
                                 interproAcc, entryInfo["name"], entryInfo["description"], entryInfo["type"]
                             )
-                            addXRefs(match, interproAcc, addGoTerms ? ipr2go : null, goInfo, ipr2pa, paInfo)
+                            addXRefs(match, interproAcc, ipr2go, goInfo, ipr2pa, paInfo)
                         }
                     }
 
@@ -95,8 +97,8 @@ class ProcessXrefs {
         File iprFile = new File("${prefix}.ipr.json")
         File infoFile = new File("${prefix}.json")
 
-        Map iprData = mapper.readValue(iprFile, Map)
-        Map infoData = mapper.readValue(infoFile, Map)
+        Map iprData = iprFile.exists() ? mapper.readValue(iprFile, Map) : null
+        Map infoData = infoFile.exists() ? mapper.readValue(infoFile, Map) : null
 
         return [iprData, infoData]
     }
@@ -104,6 +106,8 @@ class ProcessXrefs {
     static void updatePantherData(Match match, String pantherDir, String paintAnnoDir, 
                                  String signatureAcc, Map entries, Map goInfo) {
         Map<String,String> GO_PATTERN = ["P": "BIOLOGICAL_PROCESS", "C": "CELLULAR_COMPONENT", "F": "MOLECULAR_FUNCTION"]
+        Map goTerms = goInfo == null ? null : goInfo["terms"]
+        Map signatureEntry = entries == null ? null : entries[signatureAcc]
         File paintAnnotationFile = new File("${pantherDir.toString()}/${paintAnnoDir}/${signatureAcc}.json")
         assert paintAnnotationFile.exists()
         def paintAnnotationsContent = new ObjectMapper().readValue(paintAnnotationFile, Map)
@@ -111,9 +115,9 @@ class ProcessXrefs {
         def nodeData = paintAnnotationsContent[nodeId]
         if (nodeData != null) {
             match.treegrafter.subfamilyAccession = (nodeData[0] == null) ? null : nodeData[0]
-            if (nodeData[1] != null && goInfo?.terms != null) {
+            if (nodeData[1] != null && goTerms != null) {
                 nodeData[1].split(',').each { goTermId ->
-                    def term = goInfo.terms[goTermId]
+                    def term = goTerms[goTermId]
                     if (term) {
                         def (goTermName, goTermType) = term
                         match.treegrafter.addGoXRefs(
@@ -131,9 +135,9 @@ class ProcessXrefs {
             match.treegrafter.graftPoint = (nodeData[3] == null) ? null : nodeData[3]
         }
 
-        if (entries[signatureAcc]) {
-            match.treegrafter.subfamilyName = entries[signatureAcc]["name"]
-            match.treegrafter.subfamilyDescription = entries[signatureAcc]["description"]
+        if (signatureEntry != null) {
+            match.treegrafter.subfamilyName = signatureEntry["name"]
+            match.treegrafter.subfamilyDescription = signatureEntry["description"]
         }
     }
 
