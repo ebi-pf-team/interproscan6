@@ -5,7 +5,7 @@
                 "0": [
                     [
                         1,
-                        "interpro-n.json:md5,15ed0cf8677741576cef86e9e415ab2f"
+                        "interpro-n.json:md5,41c621b54337473333ac6f1e5d26921c"
                     ]
                 ]
             }
@@ -14,6 +14,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.04.7"
         },
-        "timestamp": "2025-10-18T01:45:53.706458611"
+        "timestamp": "2026-03-05T20:53:33.464312646"
     }
 }
