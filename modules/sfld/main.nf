@@ -265,15 +265,17 @@ Map<String, Match> parseBlock(
         } else {
             def fields = line.split(/\s/, 3)
             assert fields.length == 2 || fields.length == 3
-            String modelAccession = fields[0]
-            String residues = fields[1]
-            String description = fields.length == 3 ? fields[2] : null
-
-            Match match = domains.get(modelAccession)
-            if (match != null) {
-                Site site = new Site(description, residues)
-                match.addSite(site)                        
+            if (fields.length == 3) {
+                String modelAccession = fields[0]
+                String residues = fields[1]
+                String description = fields[2]
+                Match match = domains.get(modelAccession)
+                if (match != null) {
+                    Site site = new Site(description, residues)
+                    match.addSite(site)                        
+                }
             }
+            
         }
     }
 
