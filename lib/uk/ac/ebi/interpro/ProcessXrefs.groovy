@@ -1,5 +1,6 @@
 package uk.ac.ebi.interpro
 
+import java.nio.file.Files
 import java.nio.file.Path
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -22,7 +23,7 @@ class ProcessXrefs {
                 mapper.readValue(reader, Map)
             }
             Path entriesJson = interproDir.resolve("entries.json")
-            if (entriesJson.exists()) {
+            if (Files.isRegularFile(entriesJson)) {
                 entries = entriesJson.newReader().withCloseable { reader -> 
                     mapper.readValue(reader, Map)
                 }
@@ -106,14 +107,14 @@ class ProcessXrefs {
         ObjectMapper mapper = new ObjectMapper()
     
         Map iprData = null
-        if (iprFile.exists()) {
+        if (Files.isRegularFile(iprFile)) {
             iprData = iprFile.newReader().withCloseable { reader ->
                 mapper.readValue(reader, Map)
             }
         }
 
         Map infoData = null
-        if (infoFile.exists()) {
+        if (Files.isRegularFile(infoFile)) {
             iprData = infoFile.newReader().withCloseable { reader ->
                 mapper.readValue(reader, Map)
             }
@@ -129,7 +130,7 @@ class ProcessXrefs {
         Map signatureEntry = entries == null ? null : entries[signatureAcc]
 
         Path paintAnnotationFile = pantherDir.resolve("${paintAnnoDir}/${signatureAcc}.json")
-        assert paintAnnotationFile.exists()
+        assert Files.isRegularFile(paintAnnotationFile)
 
         def paintAnnotationsContent = paintAnnotationFile.newReader().withCloseable { reader ->
             new ObjectMapper().readValue(reader, Map)

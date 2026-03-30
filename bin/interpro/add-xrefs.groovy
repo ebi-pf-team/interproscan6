@@ -12,9 +12,14 @@ Path inputPath = Paths.get(args[0])
 Path metadataPath = Paths.get(args[1])
 def addGoTerms = args[2] == "true"
 def addPathways = args[3] == "true"
-Path pantherPaintDirectory = Paths.get(args[4] )
+def pantherPaintDirectory = args[4]
 Path outputPath = Paths.get(args[5])
 
 def dbReleases = new JsonSlurper().parse(metadataPath)
+dbReleases.each { _, value ->
+    if (value.dirpath && value.dirpath.getClass().equals(String)) {
+        value.dirpath = Paths.get(value.dirpath)
+    }
+}
 
 ProcessXrefs.run(inputPath, dbReleases, addGoTerms, addPathways, pantherPaintDirectory, outputPath)

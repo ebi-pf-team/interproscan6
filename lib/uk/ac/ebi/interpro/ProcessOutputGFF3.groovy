@@ -1,4 +1,5 @@
 package uk.ac.ebi.interpro
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.regex.Pattern
 import com.fasterxml.jackson.core.JsonFactory
@@ -116,7 +117,7 @@ class ProcessOutputGFF3 {
                     gff3Writer.writeLine(line)
                 }
             }
-            tempFastaFile.delete()
+            Files.delete(tempFastaFile);
         }
     }
 

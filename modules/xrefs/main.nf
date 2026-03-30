@@ -1,3 +1,4 @@
+import java.nio.file.Path
 import groovy.json.JsonOutput
 import uk.ac.ebi.interpro.ProcessXrefs
 
@@ -15,7 +16,14 @@ process XREFS {
     tuple val(meta), path('matches2xrefs.json')
 
     script:
-    def json = JsonOutput.toJson(db_releases)
+    def to_serialize = [:]
+    db_releases.each { key, value ->
+        to_serialize[key] = [
+            version: value.version,
+            dirpath: value.dirpath?.toString() 
+        ]
+    }
+    def json = JsonOutput.toJson(to_serialize)
     """
     echo '${json}' > metadata.json
     groovy -cp "${projectDir}/lib:." ${projectDir}/bin/interpro/add-xrefs.groovy \

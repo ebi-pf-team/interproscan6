@@ -13,22 +13,20 @@ if (args.size() != 7) {
 }
 
 def format = args[0]
-Path inputDir = Paths.get(args[1])
-Path metadataPath = args[2] == "-" ? null : Paths.get(args[2])
-Path databasePath = Paths.get(args[3])
+def inputDir = Paths.get(args[1])
+def metadataPath = args[2] == "-" ? null : Paths.get(args[2])
+def databasePath = Paths.get(args[3])
 def isNucleic = args[4] == "true"
 def iprscanVersion = args[5]
-Path outputPath = Paths.get(args[6])
+def outputPath = Paths.get(args[6])
 
-List<Path> inputPaths = []
-Path normalizedMetadataPath = metadataPath?.toAbsolutePath()?.normalize()
-Files.walk(inputDir).withCloseable { inputDirPaths -> 
-    inputDirPaths.forEach { Path file ->
-        if (Files.isRegularFile(file) &&
-            file.fileName.toString().endsWith('.json') &&
-            file.toAbsolutePath().normalize() != normalizedMetadataPath) {
-            inputPaths << file
-        }
+def inputPaths = [] 
+def normalizedMetadataPath = metadataPath?.toAbsolutePath()?.normalize()
+inputDir.eachFileRecurse { file ->
+    if (file.fileName.toString().endsWith('.json') && 
+        file.toAbsolutePath().normalize() != normalizedMetadataPath &&
+        file.toAbsolutePath().normalize() != outputPath.toAbsolutePath().normalize()) {
+        inputPaths << file
     }
 }
 
@@ -39,6 +37,11 @@ def dbReleases = null
 if (metadataPath != null) {
     dbReleases = metadataPath.newReader().withCloseable { reader -> 
         new JsonSlurper().parse(reader)
+    }
+    dbReleases.each { _, value ->
+        if (value.dirpath && value.dirpath.getClass().equals(String)) {
+            value.dirpath = Paths.get(value.dirpath)
+        }
     }
 }
 

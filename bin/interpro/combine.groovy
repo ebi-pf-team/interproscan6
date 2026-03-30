@@ -11,8 +11,8 @@ def inputDir = Paths.get(args[0])
 def outputPath = Paths.get(args[1])
 def inputPaths = []
 inputDir.eachFileRecurse { file ->
-    if (file.name.endsWith('.json')) {
-        inputPaths << file.absolutePath
+    if (file.fileName.toString().endsWith('.json')) {
+        inputPaths << file
     }
 }
 

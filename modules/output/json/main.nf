@@ -43,7 +43,14 @@ process WRITE_JSON {
     val output_file
 
     script:
-    def json = JsonOutput.toJson(db_releases)
+    def to_serialize = [:]
+    db_releases.each { key, value ->
+        to_serialize[key] = [
+            version: value.version,
+            dirpath: value.dirpath?.toString() 
+        ]
+    }
+    def json = JsonOutput.toJson(to_serialize)
     """
     echo '${json}' > metadata.json
     groovy -cp "${projectDir}/lib:${projectDir}/lib/*:." ${projectDir}/bin/interpro/write-output.groovy \
