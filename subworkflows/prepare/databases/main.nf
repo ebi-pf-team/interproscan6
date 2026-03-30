@@ -62,8 +62,8 @@ workflow PREPARE_DATABASES {
         }
 
         // Not all members need data, if none of the applications need data skip downloading
-        db_json_path = "${data_dir}/interpro/${interpro_version}/databases.json"
-        if (InterProScan.resolveFile(db_json_path)) {
+        db_json_path = file("${data_dir}/interpro/${interpro_version}/databases.json")
+        if (db_json_path.isFile()) {
             // JSON file of database metadata found
             FIND_MISSING_DATA(
                 ["", "", ""],  // state dependency, can be anything
@@ -73,11 +73,11 @@ workflow PREPARE_DATABASES {
                 data_dir
             )
 
-            ch_interpro = Channel.value(["interpro", interpro_version, "${data_dir}/interpro/${interpro_version}"])
+            ch_interpro = Channel.value(["interpro", interpro_version, file("${data_dir}/interpro/${interpro_version}")])
         } else {
             // Not found: download the InterPro metadata archive
             DOWNLOAD_INTERPRO(
-                ["interpro", "interpro", interpro_version, false, "${data_dir}/interpro/${interpro_version}"],
+                ["interpro", "interpro", interpro_version, false, file("${data_dir}/interpro/${interpro_version}")],
                 iprscan_major_minor,
                 use_globus,
                 data_dir

@@ -18,13 +18,13 @@ process WRITE_JSON_LOCAL {
     val output_file
 
     exec:
-    ProcessOutputJSON.run(matches_files.collect { it.toString() }, 
-                          seq_db_file.toString(), 
+    ProcessOutputJSON.run(matches_files, 
+                          seq_db_file, 
                           db_releases,
                           nucleic, 
                           interproscan_version,
                           jsonlines,
-                          output_file.toString())
+                          output_file)
 }
 
 process WRITE_JSON {
@@ -32,7 +32,7 @@ process WRITE_JSON {
 
     input:
     path(input_files, arity: '1..*', name: '?/*')
-    val output_file
+    path output_file
     path seq_db_file
     val nucleic
     val interproscan_version

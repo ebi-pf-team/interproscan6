@@ -1,14 +1,14 @@
 package uk.ac.ebi.interpro
-
+import java.nio.file.Path
 import uk.ac.ebi.interpro.Location
 import uk.ac.ebi.interpro.LocationFragment
 
 class CATH {
-    static parseAssignedFile(String filePath) {
+    static parseAssignedFile(Path filePath) {
         // For CATH-Gene3D
         def results = [:].withDefault { [] }
 
-        new File(filePath).eachLine { line ->
+        filePath.eachLine { line ->
             if (line[0] != "#") {
                 // #domain_id cath-superfamily query-id match-id score boundaries resolved aligned-regions cond-evalue indp-evalue [comment]
                 def fields = line.split("\t")
@@ -31,11 +31,11 @@ class CATH {
         return results
     }
 
-    static parseResolvedFile(String filePath) {
+    static parseResolvedFile(Path filePath) {
         // For CATH-FunFam
         def results = [:].withDefault { [] }
 
-        new File(filePath).eachLine { line ->
+        filePath.eachLine { line ->
             if (line[0] != "#") {
                 // #FIELDS query-id match-id score boundaries resolved aligned-regions cond-evalue indp-evalue
                 def fields = line.split(/\s+/)

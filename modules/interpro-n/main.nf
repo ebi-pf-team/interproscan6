@@ -39,14 +39,13 @@ process PREPARE_INTERPRO_N {
     tuple val(meta), path("sequences_*.tsv", arity: '1..*')
 
     exec:
-    def sequences = FastaFile.chunkSequences(fasta.toString(), MAX_LENGTH, CHUNK_OVERLAP)
+    def sequences = FastaFile.chunkSequences(fasta, MAX_LENGTH, CHUNK_OVERLAP)
     def fileIndex = 1
     def seqCount = 0
     def writer = null
     def openNewFile = {
         if (writer) writer.close()
-        def filePath = task.workDir.resolve("sequences_${fileIndex}.tsv").toFile()
-        writer = filePath.newWriter("UTF-8")
+        writer = task.workDir.resolve("sequences_${fileIndex}.tsv").newWriter("UTF-8")
         writer.writeLine("accession\tsequence")
         fileIndex++
         seqCount = 0
@@ -147,8 +146,7 @@ process PARSE_INTERPRO_N {
     def jsonSlurper = new JsonSlurper()
     def resultsBySeq = [:].withDefault { [] }
     json_files.each { jsonFile ->
-        def file = new File(jsonFile.toString())
-        def data = jsonSlurper.parse(file)
+        def data = jsonSlurper.parse(jsonFile)
         data.each { item ->
             def m = item.accession =~ /^(.+)_([0-9]+)$/
             assert m.size() == 1
@@ -286,9 +284,8 @@ process PARSE_INTERPRO_N {
         }
     }
 
-    def json = JsonOutput.toJson(results)
-    def outputFilePath = task.workDir.resolve("interpro-n.json")
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("interpro-n.json")
+    filepath.text = JsonOutput.toJson(results)
 }
 
 

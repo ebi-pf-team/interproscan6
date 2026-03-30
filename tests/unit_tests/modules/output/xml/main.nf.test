@@ -15,7 +15,7 @@ nextflow_process {
             process {
                 """
                 input[0] = [file("$baseDir/tests/data/channels/matches_with_representative.json")]
-                input[1] = "../../../unit_test_output.xml"
+                input[1] = file("../../../unit_test_output.xml")
                 input[2] = file("$baseDir/tests/data/sequences/sequences.db")
                 input[3] = false
                 input[4] = "6.0.0"

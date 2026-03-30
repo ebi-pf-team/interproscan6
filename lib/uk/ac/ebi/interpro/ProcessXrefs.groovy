@@ -1,5 +1,6 @@
 package uk.ac.ebi.interpro
 
+import java.nio.file.Path
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.ebi.interpro.Entry
@@ -10,27 +11,33 @@ import uk.ac.ebi.interpro.RepresentativeInfo
 
 
 class ProcessXrefs {
-    static void run(String inputPath, Map dbReleases, boolean addGoTerms, 
-                         boolean addPathways, String pantherPaintDirectory, String outputPath) {
+    static void run(Path inputPath, Map dbReleases, boolean addGoTerms, 
+                    boolean addPathways, String pantherPaintDirectory, Path outputPath) {
         ObjectMapper mapper = new ObjectMapper()
         def (databaseInfo, entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null, null]
         if (dbReleases?.interpro?.dirpath != null) {
-            String interproDir = dbReleases.interpro.dirpath.toString()
-            File databasesJson = new File("${interproDir}/databases.json")
-            databaseInfo = mapper.readValue(databasesJson, Map)
-            File entriesJson = new File("${interproDir}/entries.json")
+            Path interproDir = dbReleases.interpro.dirpath
+            Path databasesJson = interproDir.resolve("databases.json")
+            databaseInfo = databasesJson.newReader().withCloseable { reader -> 
+                mapper.readValue(reader, Map)
+            }
+            Path entriesJson = interproDir.resolve("entries.json")
             if (entriesJson.exists()) {
-                entries = mapper.readValue(entriesJson, Map)
+                entries = entriesJson.newReader().withCloseable { reader -> 
+                    mapper.readValue(reader, Map)
+                }
             }
             if (addGoTerms) {
-                (ipr2go, goInfo) = loadXRefFiles("${interproDir}/goterms")
+                (ipr2go, goInfo) = loadXRefFiles(interproDir.resolve("goterms"))
             }
             if (addPathways) {
-                (ipr2pa, paInfo) = loadXRefFiles("${interproDir}/pathways")
+                (ipr2go, goInfo) = loadXRefFiles(interproDir.resolve("pathways"))
             }
         }
 
-        def matches = mapper.readValue(new File(inputPath), Map.class)
+        def matches = inputPath.newReader().withCloseable { reader ->
+            mapper.readValue(reader, Map.class)
+        }
         matches.each { String seqMd5, Map seqMatches ->
             seqMatches.each { modelAcc, matchMap ->
                 Match match = Match.fromMap(matchMap)  // convert Map to Match object
@@ -49,7 +56,8 @@ class ProcessXrefs {
 
                     // Handle PANTHER data
                     if (match.signature.signatureLibraryRelease.library == "PANTHER") {
-                        updatePantherData(match, dbReleases.panther.dirpath, pantherPaintDirectory, signatureAcc, entries, goInfo)
+                        Path pantherDir = dbReleases.panther.dirpath
+                        updatePantherData(match, pantherDir, pantherPaintDirectory, signatureAcc, entries, goInfo)
                     }
 
                     // Update signature info
@@ -85,32 +93,47 @@ class ProcessXrefs {
         }  // end of Json reader / seq Id
 
         def jf = new JsonFactory()
-        new File(outputPath).withWriter { writer ->
+        outputPath.withWriter { writer ->
             def gen = jf.createGenerator(writer)
             mapper.writeValue(gen, matches)
             gen.close()
         }
     }
 
-    static def loadXRefFiles(String prefix) {
+    static def loadXRefFiles(Path prefix) {
+        Path iprFile = prefix.resolveSibling(prefix.fileName.toString() + ".ipr.json")
+        Path infoFile = prefix.resolveSibling(prefix.fileName.toString() + ".json")
         ObjectMapper mapper = new ObjectMapper()
-        File iprFile = new File("${prefix}.ipr.json")
-        File infoFile = new File("${prefix}.json")
+    
+        Map iprData = null
+        if (iprFile.exists()) {
+            iprData = iprFile.newReader().withCloseable { reader ->
+                mapper.readValue(reader, Map)
+            }
+        }
 
-        Map iprData = iprFile.exists() ? mapper.readValue(iprFile, Map) : null
-        Map infoData = infoFile.exists() ? mapper.readValue(infoFile, Map) : null
+        Map infoData = null
+        if (infoFile.exists()) {
+            iprData = infoFile.newReader().withCloseable { reader ->
+                mapper.readValue(reader, Map)
+            }
+        }
 
         return [iprData, infoData]
     }
 
-    static void updatePantherData(Match match, String pantherDir, String paintAnnoDir, 
+    static void updatePantherData(Match match, Path pantherDir, String paintAnnoDir, 
                                  String signatureAcc, Map entries, Map goInfo) {
         Map<String,String> GO_PATTERN = ["P": "BIOLOGICAL_PROCESS", "C": "CELLULAR_COMPONENT", "F": "MOLECULAR_FUNCTION"]
         Map goTerms = goInfo == null ? null : goInfo["terms"]
         Map signatureEntry = entries == null ? null : entries[signatureAcc]
-        File paintAnnotationFile = new File("${pantherDir.toString()}/${paintAnnoDir}/${signatureAcc}.json")
+
+        Path paintAnnotationFile = pantherDir.resolve("${paintAnnoDir}/${signatureAcc}.json")
         assert paintAnnotationFile.exists()
-        def paintAnnotationsContent = new ObjectMapper().readValue(paintAnnotationFile, Map)
+
+        def paintAnnotationsContent = paintAnnotationFile.newReader().withCloseable { reader ->
+            new ObjectMapper().readValue(reader, Map)
+        }
         String nodeId = match.treegrafter.ancestralNodeID
         def nodeData = paintAnnotationsContent[nodeId]
         if (nodeData != null) {

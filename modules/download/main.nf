@@ -11,13 +11,13 @@ process DOWNLOAD {
     label    'ips6_container'
 
     input:
-    tuple val(name), val(arcname), val(version), val(skip), val(path)
+    tuple val(name), val(arcname), val(version), val(skip), val(dirpath)
     val iprscan_version
     val use_globus
     path outdir
 
     output:
-    tuple val(name), val(version), val(path)
+    tuple val(name), val(version), path(dirpath)
 
     script:
     if (skip) {
@@ -42,19 +42,18 @@ process FIND_MISSING_DATA {
     executor 'local'
 
     input:
-    tuple val(n), val(v), val(p)  // state dependency
-    val json_database
-    val apps_to_run
-    val app_dirs
-    val datadir
+    tuple val(n), val(v), val(p)  // state dependency (str, str, str|path)
+    val json_database             // path      
+    val apps_to_run               // list[str]
+    val app_dirs                  // map
+    val datadir                   // path
 
     output:
     val with_data,          emit: with_data
     val without_data,       emit: without_data
 
     exec:
-    File file = new File(json_database)
-    def json = new JsonSlurper().parse(file)
+    def json = new JsonSlurper().parse(json_database)
     def normalised_json = [:]
     json.each { key, value ->
         normalised_json[key.replaceAll(/[\s\-]+/, '').toLowerCase()] = value
@@ -81,11 +80,11 @@ process FIND_MISSING_DATA {
             def db_dir_parts = app_dirs[normalised_name]
             def db_dir = db_dir_parts[0]
             def db_subdir = db_dir_parts[1]
-            Path path = Paths.get("${datadir}/${db_dir}/${db_version}/${db_subdir}")
-            if (Files.exists(path)) {
-                with_data.add( [ normalised_name, db_version, path.toString() ])
+            def path = datadir.resolve("${db_dir}/${db_version}/${db_subdir}")
+            if (path.isDirectory()) {
+                with_data.add( [ normalised_name, db_version, path ])
             } else {
-                without_data.add( [ normalised_name, db_dir, db_version, to_download.contains(db_dir), path.toString() ] )
+                without_data.add( [ normalised_name, db_dir, db_version, to_download.contains(db_dir), path ] )
                 to_download.add( db_dir )
             }
         }

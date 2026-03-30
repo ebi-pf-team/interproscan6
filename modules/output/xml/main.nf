@@ -17,12 +17,12 @@ process WRITE_XML_LOCAL {
     val output_file
 
     exec:
-    ProcessOutputXML.run(matches_files.collect { it.toString() }, 
-                         seq_db_file.toString(), 
+    ProcessOutputXML.run(matches_files, 
+                         seq_db_file, 
                          db_releases,
                          nucleic, 
                          interproscan_version,
-                         output_file.toString())
+                         output_file)
 }
 
 process WRITE_XML {

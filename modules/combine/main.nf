@@ -11,8 +11,7 @@ process COMBINE_MATCHES_LOCAL {
     tuple val(meta), path('combined.json')
 
     exec:
-    String outputFilePath = task.workDir.resolve('combined.json')
-    ProcessCombine.run(members_matches.collect { it.toString() }, outputFilePath)
+    ProcessCombine.run(members_matches, task.workDir.resolve('combined.json'))
 }
 
 process COMBINE_MATCHES {

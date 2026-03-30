@@ -31,12 +31,11 @@ process PARSE_COILS {
     tuple val(meta), path("coils.json")
 
     exec:
-    def outputFilePath = task.workDir.resolve("coils.json")
     def matches = [:]
     def sequenceId = null
     SignatureLibraryRelease library = new SignatureLibraryRelease("COILS", "2.2.1")
 
-    file(coils_out.toString()).eachLine { line ->
+    coils_out.eachLine { line ->
         line = line.trim()
         if (line.startsWith(">")) {
             // Coils report the full sequence header (ID + description)
@@ -53,6 +52,6 @@ process PARSE_COILS {
         }
     }
 
-    def json = JsonOutput.toJson(matches.findAll { it.value["Coil"].locations.size() > 0 })
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("coils.json")
+    filepath.text = JsonOutput.toJson(matches.findAll { it.value["Coil"].locations.size() > 0 })
 }

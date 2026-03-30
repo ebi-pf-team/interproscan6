@@ -22,10 +22,10 @@ nextflow_process {
             process {
                 """
                 input[0] = [params.n, params.v, params.p]
-                input[1] = params.json_database
+                input[1] = file(params.json_database)
                 input[2] = params.apps_to_run
                 input[3] = params.app_dirs
-                input[4] = params.datadir
+                input[4] = file(params.datadir)
                 """
             }
         }
@@ -59,10 +59,10 @@ nextflow_process {
             process {
                 """
                 input[0] = [params.n, params.v, params.p]
-                input[1] = params.json_database
+                input[1] = file(params.json_database)
                 input[2] = params.apps_to_run
                 input[3] = params.app_dirs
-                input[4] = params.datadir
+                input[4] = file(params.datadir)
                 """
             }
         }

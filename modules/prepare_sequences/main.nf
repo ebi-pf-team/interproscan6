@@ -16,7 +16,7 @@ process VALIDATE_FASTA {
     val seq_id
 
     exec:
-    seq_id = FastaFile.validate(fasta.toString(), is_nucleic)
+    seq_id = FastaFile.validate(fasta, is_nucleic)
 }
 
 process LOAD_SEQUENCES {
@@ -34,8 +34,8 @@ process LOAD_SEQUENCES {
 
     exec:
     def outputFilePath = task.workDir.resolve("sequences.db")
-    SeqDB db = new SeqDB(outputFilePath.toString())
-    db.loadFastaFile(fasta.toString(), nucleic, false)
+    def db = new SeqDB(outputFilePath)
+    db.loadFastaFile(fasta, nucleic, false)
     db.close()
 }
 
@@ -53,8 +53,8 @@ process LOAD_ORFS {
     val db_path // ensure BUILD_BATCHES runs after LOAD_ORFS
 
     exec:
-    SeqDB db = new SeqDB(db_path.toString())
-    db.loadFastaFile(translated_fasta.toString(), false, true)
+    def db = new SeqDB(db_path)
+    db.loadFastaFile(translated_fasta, false, true)
     db.close()
 }
 
@@ -73,8 +73,7 @@ process SPLIT_FASTA {
     path "*.fasta"
 
     exec:
-    String prefix = task.workDir.resolve("input").toString()
-    SeqDB db = new SeqDB(db_path.toString())
-    db.splitFasta(prefix, batch_size, nucleic)
+    def db = new SeqDB(db_path)
+    db.splitFasta(task.workDir, batch_size, nucleic)
     db.close()
 }

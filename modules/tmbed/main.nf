@@ -20,14 +20,13 @@ process PREPARE_TMBED {
     tuple val(meta), path("tmbed_*.fasta", arity: '1..*')
 
     exec:
-    def sequences = FastaFile.chunkSequences(fasta.toString(), chunk_size, chunk_overlap)
+    def sequences = FastaFile.chunkSequences(fasta, chunk_size, chunk_overlap)
     def fileIndex = 1
     def seqCount = 0
     def writer = null
     def openNewFile = {
         if (writer) writer.close()
-        def filePath = task.workDir.resolve("tmbed_${fileIndex}.fasta").toFile()
-        writer = filePath.newWriter("UTF-8")
+        writer = task.workDir.resolve("tmbed_${fileIndex}.fasta").newWriter("UTF-8")
         fileIndex++
         seqCount = 0
         return writer
@@ -116,7 +115,7 @@ process PARSE_TMBED {
     def chunkId = null
     def prediction = null
     def lineCounter = 0
-    new File(tmbed_out.toString()).eachLine { line ->
+    tmbed_out.eachLine { line ->
         line = line.trim()
         if (lineCounter % 3 == 0) {
             def m = line =~ /^>(.+)_([0-9]+)$/
@@ -236,9 +235,8 @@ process PARSE_TMBED {
         }
     }
 
-    def outputFilePath = task.workDir.resolve("tmbed.json")
-    def json = JsonOutput.toJson(hits)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("tmbed.json")
+    filepath.text = JsonOutput.toJson(hits)
 }
 
 

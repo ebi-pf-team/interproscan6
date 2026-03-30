@@ -40,17 +40,15 @@ process PARSE_PRINTS {
 
     exec:
     SignatureLibraryRelease library = new SignatureLibraryRelease("PRINTS", null)
-    String hierarchyFilePath = "${dirpath.toString()}/${hierarchydb}"
     // Build up a map of the Model ID to fingerprint hierarchies
-    Map<String, FingerPrint.HierarchyEntry> hierarchyMap = FingerPrint.HierarchyEntry.parseHierarchyDbFile(hierarchyFilePath)
+    Map<String, FingerPrint.HierarchyEntry> hierarchyMap = FingerPrint.HierarchyEntry.parseHierarchyDbFile(dirpath.resolve(hierarchydb))
 
     // Parse the prints output into simple raw prints matches
     // Each location is represented by its own Print object
-    File printsFile = new File(prints_output.toString())
-    String queryAccession = null                   // protein seq ID
+    String queryAccession = null                        // protein seq ID
     Map<String, FingerPrint> thisProteinsMatches = [:]  // modelName: FingerPrint()
-    Map<String, List<FingerPrint>> rawMatches = [:]      // <protein ID <FingerPrint()>>
-    printsFile.withReader { reader ->
+    Map<String, List<FingerPrint>> rawMatches = [:]     // <protein ID <FingerPrint()>>
+    prints_output.withReader { reader ->
         String line
         while ((line = reader.readLine()) != null) {
 
@@ -221,9 +219,8 @@ process PARSE_PRINTS {
         }
     }
 
-    def outputFilePath = task.workDir.resolve("prints.json")
-    def json = JsonOutput.toJson(matches)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("prints.json")
+    filepath.text = JsonOutput.toJson(matches)
 }
 
 List<FingerPrint> sortMatches(List<FingerPrint> matches) {

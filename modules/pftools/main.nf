@@ -81,9 +81,8 @@ process PARSE_PSSCAN {
         matchObj.addLocation(location)
     }
 
-    def outputFilePath = task.workDir.resolve("ps_scan.json")
-    def json = JsonOutput.toJson(patternsMatches)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("ps_scan.json")
+    filepath.text = JsonOutput.toJson(patternsMatches)
 }
 
 process RUN_PFSEARCH {
@@ -123,7 +122,7 @@ process PARSE_PFSEARCH {
     SignatureLibraryRelease library = new SignatureLibraryRelease(signature_library, null)
     def toSkip = []
     if (dirpath && blacklist_file) {
-        toSkip = new File("${dirpath.toString()}/${blacklist_file}").readLines()
+        toSkip = dirpath.resolve(blacklist_file).readLines()
     }
 
     pfsearch_out.eachLine { line ->
@@ -148,8 +147,7 @@ process PARSE_PFSEARCH {
         Location location = new Location(start, end, score, alignment, cigarAlignment)
         matchObj.addLocation(location)
     }
-    def outputFilePath = task.workDir.resolve("pfsearch.json")
-    def json = JsonOutput.toJson(matches)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("pfsearch.json")
+    filepath.text = JsonOutput.toJson(matches)
 }
 

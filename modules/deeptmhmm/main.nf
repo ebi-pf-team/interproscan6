@@ -71,7 +71,6 @@ process PARSE_DEEPTMHMM {
         "signal": ["Signalp Peptide", new Signature("Signal Peptide", library)],
         "TMhelix": ["Transmembrane alpha helix", new Signature("Transmembrane alpha helix", library)],
     ]
-    String tmhmmDir = tmhmm_output.toString()
     Map<String, Match> hits = [:]
     String seqId
     file("${tmhmm_output}/TMRs.gff3").eachLine { line ->
@@ -94,7 +93,6 @@ process PARSE_DEEPTMHMM {
         }
     }
 
-    def outputFilePath = task.workDir.resolve("tmhmm.json")
-    def json = JsonOutput.toJson(hits)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("tmhmm.json")
+    filepath.text = JsonOutput.toJson(hits)
 }

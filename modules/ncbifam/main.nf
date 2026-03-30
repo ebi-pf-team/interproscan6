@@ -12,10 +12,8 @@ process PARSE_NCBIFAM {
     tuple val(meta), path("ncbifam.json")
 
     exec:
-    def outputFilePath = task.workDir.resolve("ncbifam.json")
-    def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString(), "NCBIFAM")
-
-    def processedMatches = hmmerMatches.collectEntries { seqId, matches ->
+    def hmmer_matches = HMMER3.parseOutput(hmmseach_out, "NCBIFAM")
+    hmmer_matches = hmmer_matches.collectEntries { seqId, matches ->
         [seqId, matches.collectEntries { modelAccession, match ->
             def updatedModelAccession = modelAccession.split("\\.")[0]
             match.modelAccession = updatedModelAccession
@@ -24,6 +22,6 @@ process PARSE_NCBIFAM {
         }]
     }
 
-    def json = JsonOutput.toJson(processedMatches)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("ncbifam.json")
+    filepath.text = JsonOutput.toJson(hmmer_matches)
 }

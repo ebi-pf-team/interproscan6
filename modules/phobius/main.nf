@@ -16,10 +16,9 @@ process WRITE_FASTA {
     tuple val(meta), path("sequences.fasta")
 
     exec:
-    def outputFilePath = task.workDir.resolve("sequences.fasta")
     FastaFile.write(
-        fasta.toString(),
-        outputFilePath.toString(),
+        fasta,
+        task.workDir.resolve("sequences.fasta"),
         "BJOZ",
         [:]
     )
@@ -55,7 +54,6 @@ process PARSE_PHOBIUS {
     tuple val(meta), path("phobius.json")
 
     exec:
-    def outputFilePath = task.workDir.resolve("phobius.json")
     def matches = [:]
     def tmpMatches = [:]
     def sequenceId = null
@@ -79,7 +77,7 @@ process PARSE_PHOBIUS {
                                                  "Region of a membrane-bound protein predicted to be embedded in the membrane", library, null),
     ]
 
-    file(phobius_out.toString()).eachLine { line ->
+    phobius_out.eachLine { line ->
         line = line.trim()
         if (line == "//") {
             assert sequenceId != null
@@ -160,6 +158,6 @@ process PARSE_PHOBIUS {
         }
     }
 
-    def json = JsonOutput.toJson(matches)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("phobius.json")
+    filepath.text = JsonOutput.toJson(matches)
 }

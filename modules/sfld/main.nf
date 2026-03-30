@@ -1,5 +1,6 @@
 // codenarc-disable AllowedDirectivesRule
 import groovy.json.JsonOutput
+import java.nio.file.Path
 import uk.ac.ebi.interpro.HMMER3
 import uk.ac.ebi.interpro.Location
 import uk.ac.ebi.interpro.Match
@@ -52,10 +53,9 @@ process PARSE_SFLD {
     tuple val(meta), path("sfld.json")
 
     exec:
-    def outputFilePath = task.workDir.resolve("sfld.json")
-    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "SFLD")
-    def sequences = parseOutput(postprocess_out.toString(), hmmerMatches)
-    def hierarchies = getHierarchies("${dirpath.toString()}/${hierarchydb}")
+    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out, "SFLD")
+    def sequences = parseOutput(postprocess_out, hmmerMatches)
+    def hierarchies = getHierarchies(dirpath.resolve(hierarchydb))
     SignatureLibraryRelease library = new SignatureLibraryRelease("SFLD", null)
 
     sequences = sequences.collectEntries { seqId, matches -> 
@@ -171,13 +171,13 @@ process PARSE_SFLD {
         return [seqId, matches]
     }
 
-    def json = JsonOutput.toJson(sequences)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("sfld.json")
+    filepath.text = JsonOutput.toJson(sequences)
 }
 
-Map<String, Set<String>> getHierarchies(String filePath) {
+Map<String, Set<String>> getHierarchies(Path filePath) {
     def hierarchies = [:].withDefault { [] as Set }
-    new File(filePath).eachLine { line ->
+    filePath.eachLine { line ->
         def nodes = line.split(/\t/).toList()
         nodes.eachWithIndex { node, idx ->
             if (idx > 0) {
@@ -190,13 +190,12 @@ Map<String, Set<String>> getHierarchies(String filePath) {
 }
 
 Map<String, Map<String, Match>> parseOutput(
-    String outputFilePath,
+    Path filePath,
     Map<String, Map> hmmerMatches
 ) {
     // Parse the output TSV file from the SFLD postprocess bin
     def matches = [:]
-    File file = new File(outputFilePath)
-    file.withReader{ reader ->
+    filePath.withReader{ reader ->
         while (true) {
             String sequenceId = null
 

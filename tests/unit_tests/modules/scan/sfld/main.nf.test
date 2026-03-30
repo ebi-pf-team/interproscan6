@@ -16,7 +16,7 @@ nextflow_process {
             process {
                 """
                 input[0] = [1, file("$baseDir/tests/data/channels/sfld_hmmsearch.out"), file("$baseDir/tests/data/channels/sfld.tsv")]
-                input[1] = "$baseDir/tests/data/databases/sfld/4"
+                input[1] = file("$baseDir/tests/data/databases/sfld/4")
                 input[2] = "sfld_hieararchy.tsv"
                 """
             }

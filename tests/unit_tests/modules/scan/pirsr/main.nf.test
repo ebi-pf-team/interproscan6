@@ -10,7 +10,7 @@ nextflow_process {
             process {
                 """
                 input[0] = [1, file("$baseDir/tests/data/channels/pirsr.hmmsearch.out")]
-                input[1] = "$baseDir/tests/data/databases/pirsr/2025_01"
+                input[1] = file("$baseDir/tests/data/databases/pirsr/2025_01")
                 input[2] = "sr_uru.json"
                 """
             }

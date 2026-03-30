@@ -58,7 +58,7 @@ process PARSE_CDD {
     boolean inSites = false
     def hits = [:]
     def pssmHits = [:]
-    file(rpsbproc_out.toString()).eachLine { line -> 
+    rpsbproc_out.eachLine { line -> 
         if (line.startsWith("SESSION")) {
             // #SESSION        <session-ordinal>       <program>       <database>      <score-matrix>  <evalue-threshold>
             sessionId = line.split("\t")[1]
@@ -147,7 +147,6 @@ process PARSE_CDD {
         } 
     }
 
-    def outputFilePath = task.workDir.resolve("cdd.json")
-    def json = JsonOutput.toJson(hits)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("cdd.json")
+    filepath.text = JsonOutput.toJson(hits)
 }

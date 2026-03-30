@@ -1,8 +1,10 @@
 package uk.ac.ebi.interpro
 
+import java.nio.file.Path
+
+
 class HMMER3 {
-    static parseOutput(String filePath, String memberDb) {
-        File file = new File(filePath)
+    static parseOutput(Path filePath, String memberDb) {
         String line
         String queryName
         Integer queryLength
@@ -11,7 +13,7 @@ class HMMER3 {
         SignatureLibraryRelease libraryRelease = new SignatureLibraryRelease(memberDb, null)
 
         def hits = [:].withDefault { [:] }
-        file.withReader { reader ->
+        filePath.withReader { reader ->
             while (true) {
                 // Move to the next Query block
                 while (queryName == null) {

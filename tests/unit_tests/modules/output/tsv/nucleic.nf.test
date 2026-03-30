@@ -36,7 +36,7 @@ nextflow_process {
             process {
                 """
                 input[0] = [file("$baseDir/tests/data/channels/nucleic.matches_with_representative.json")]
-                input[1] = "unit_test_output"
+                input[1] = file("unit_test_output")
                 input[2] = file("$baseDir/tests/data/sequences/nt_sequences.db")
                 input[3] = true
                 """

@@ -1,3 +1,5 @@
+import java.nio.file.Path
+import java.nio.file.Paths
 import uk.ac.ebi.interpro.ProcessCombine
 
 if (args.size() != 2) {
@@ -5,8 +7,8 @@ if (args.size() != 2) {
     System.exit(1)
 }
 
-def inputDir = new File(args[0])
-def outputPath = args[1]
+def inputDir = Paths.get(args[0])
+def outputPath = Paths.get(args[1])
 def inputPaths = []
 inputDir.eachFileRecurse { file ->
     if (file.name.endsWith('.json')) {

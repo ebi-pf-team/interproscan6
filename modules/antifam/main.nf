@@ -12,8 +12,7 @@ process PARSE_ANTIFAM {
     tuple val(meta), path("antifam.json")
 
     exec:
-    def outputFilePath = task.workDir.resolve("antifam.json")
-    def matches = HMMER3.parseOutput(hmmseach_out.toString(), "AntiFam")
-    def json = JsonOutput.toJson(matches)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("antifam.json")
+    def matches = HMMER3.parseOutput(hmmseach_out, "AntiFam")
+    filepath.text = JsonOutput.toJson(matches)
 }

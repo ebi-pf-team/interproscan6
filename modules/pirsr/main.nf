@@ -19,13 +19,8 @@ process PARSE_PIRSR {
     tuple val(meta), path("pirsr.json")
 
     exec:
-    def outputFilePath = task.workDir.resolve("pirsr.json")
-    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "PIRSR")
-
-    JsonSlurper jsonSlurper = new JsonSlurper()
-    String rulesFilePath = "${dirpath.toString()}/${rulesfile}"
-    def rules = jsonSlurper.parse(new File(rulesFilePath))
-
+    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out, "PIRSR")
+    def rules = new JsonSlurper().parse(dirpath.resolve(rulesfile))
     def validMatches = [:]
     hmmerMatches.each { seqId, matches ->
         def filteredSeqMatches = [:]
@@ -123,8 +118,9 @@ process PARSE_PIRSR {
             validMatches[seqId] = filteredSeqMatches
         }
     }
-    def json = JsonOutput.toJson(validMatches)
-    new File(outputFilePath.toString()).write(json)
+
+    def filepath = task.workDir.resolve("pirsr.json")
+    filepath.text = JsonOutput.toJson(validMatches)
 }
 
 def mapHMMToSeq(int hmmStart, String querySeq, String targetSeq) {

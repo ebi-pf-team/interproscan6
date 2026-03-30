@@ -10,7 +10,7 @@ nextflow_process {
             process {
                 """
                 input[0] = [1, 1,file("$baseDir/tests/data/channels/superfamily.out")]
-                input[1] = "$baseDir/tests/data/databases/superfamily/1.75"
+                input[1] = file("$baseDir/tests/data/databases/superfamily/1.75")
                 input[2] = "model.tab"
                 input[3] = "hmmlib_1.75_minimalist"
                 """

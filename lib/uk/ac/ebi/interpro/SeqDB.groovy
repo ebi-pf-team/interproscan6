@@ -1,16 +1,17 @@
 package uk.ac.ebi.interpro
 
 import groovy.sql.Sql
+import java.nio.file.Path
 import java.security.MessageDigest
 import java.util.regex.Pattern
 
 class SeqDB {
     // This class contains the methods for querying the internal IPS6 seq db, and handling any errors
-    private String path
+    private Path path
     private Sql sql
     public static final Pattern eslDescription = ~/^source=(.+?)\s+coords=/
 
-    SeqDB(String path) {
+    SeqDB(Path path) {
         this.path = path
         this.connect()
         this.createTables()
@@ -93,8 +94,7 @@ class SeqDB {
         }
     }
 
-    void loadFastaFile(String fastaFilePath, boolean isNucleic, boolean isTranslated) {
-        File fastaFile = new File(fastaFilePath)
+    void loadFastaFile(Path fastaFile, boolean isNucleic, boolean isTranslated) {
         def currentHeader = null
         def currentSeq = new StringBuilder()
         Map<String, Set<String>> ntSequences = [:]
@@ -198,7 +198,7 @@ class SeqDB {
         return [id: id, description: description, md5: md5]
     }
 
-    void splitFasta(String outputPrefix, int maxSequencesPerFile, boolean nucleic) {
+    void splitFasta(Path outputDir, int maxSequencesPerFile, boolean nucleic) {
         String query = nucleic ? """SELECT P2N.nt_md5, S.md5, S.sequence
             FROM PROTEIN_SEQUENCE AS S
             INNER JOIN PROTEIN AS P ON S.md5 = P.md5
@@ -213,7 +213,9 @@ class SeqDB {
         this.sql.eachRow(query) { row ->
             // If we encounter a new nt_md5 and the batch is full --> write to a new batch
             if (currentMD5 && currentMD5 != row.nt_md5 && batch.size() >= maxSequencesPerFile) {
-                writer = new File("${outputPrefix}.${fileIndex}.fasta").newWriter()
+
+                Path fastaFile = outputDir.resolve("input.${fileIndex}.fasta")
+                writer = fastaFile.newWriter()
                 for (record in batch) {
                     writer.writeLine(">${record.md5}")
                     String sequence = record.sequence
@@ -242,7 +244,8 @@ class SeqDB {
 
         // write the final batch
         if (!batch.isEmpty()) {
-            writer = new File("${outputPrefix}.${fileIndex}.fasta").newWriter()
+            Path fastaFile = outputDir.resolve("input.${fileIndex}.fasta")
+            writer = fastaFile.newWriter()
             batch.each { record ->
                 writer.writeLine(">${record.md5}")
                 def seq = record.sequence

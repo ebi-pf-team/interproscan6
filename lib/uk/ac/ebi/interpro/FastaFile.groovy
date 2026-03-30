@@ -1,4 +1,5 @@
 package uk.ac.ebi.interpro
+import java.nio.file.Path
 
 class FastaFile {
     // DNA, RNA, gaps
@@ -6,12 +7,12 @@ class FastaFile {
     // 20 standard AAs, Sec, Pyl, any/unknown, Asx, Glx, Xle
     static final String PROTEIN_ALPHABET = "ACDEFGHIKLMNPQRSTVWYUOXBZJ\\s"
 
-    static Map<String, String> parse(String fastaFilePath) {
+    static Map<String, String> parse(Path fastaFile) {
         def sequences = [:]
         def md5 = null
         StringBuilder builder = null
 
-        new File(fastaFilePath).eachLine { line ->
+        fastaFile.eachLine { line ->
             if (line.startsWith(">")) {
                 if (builder) {
                     sequences[md5] = builder.toString()
@@ -28,10 +29,10 @@ class FastaFile {
         return sequences
     }
 
-    static String validate(String fastaFilePath, boolean isNucleic) {
+    static String validate(Path fastaFile, boolean isNucleic) {
         String allowed = isNucleic ? NUCLEIC_ALPHABET : PROTEIN_ALPHABET
         def pattern = ~"^[${allowed}]+\$"
-        BufferedReader reader = new BufferedReader(new FileReader(fastaFilePath))
+        BufferedReader reader = fastaFile.newReader()
         String seqId
         String line
 
@@ -55,15 +56,15 @@ class FastaFile {
         return null
     }
 
-    static void write(String inputFasta,
-                      String outputFasta,
+    static void write(Path inputFasta,
+                      Path outputFasta,
                       String extraForbidden,
                       Map<Character,Character> substitutions) {
         Set<Character> baseAllowed = PROTEIN_ALPHABET.toList() as Set
         Set<Character> forbid = extraForbidden.toList() as Set
 
-        new File(inputFasta).withReader { reader ->
-            new File(outputFasta).withWriter { writer ->
+        inputFasta.withReader { reader ->
+            outputFasta.withWriter { writer ->
                 String header = null
                 StringBuilder builder = new StringBuilder()
 
@@ -114,7 +115,7 @@ class FastaFile {
         }
     }
 
-    static List<Map> chunkSequences(String path, int chunkSize, int overlap) {
+    static List<Map> chunkSequences(Path path, int chunkSize, int overlap) {
         // Parse sequences
         def sequences = this.parse(path)
 

@@ -10,7 +10,7 @@ nextflow_process {
             process {
                 """
                 input[0] = [1, file("$baseDir/tests/data/channels/pirsf.noLookup.faa"), file("$baseDir/tests/data/channels/pirsf.hmmsearch.out")]
-                input[1] = "$baseDir/tests/data/databases/pirsf/3.10"
+                input[1] = file("$baseDir/tests/data/databases/pirsf/3.10")
                 input[2] = "pirsf.dat"
                 """
             }

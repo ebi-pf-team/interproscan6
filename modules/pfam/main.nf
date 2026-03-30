@@ -17,20 +17,19 @@ process PARSE_PFAM {
     tuple val(meta), path("pfam.json")
 
     exec:
-    int MINLENGTH = 8  // minimum length of a fragment
-    def outputFilePath = task.workDir.resolve("pfam.json")
-    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "Pfam")
-    String datPath = "${dirpath.toString()}/${datfile}"
-    Map<String, Map<String, Object>> dat = stockholmDatParser(datPath)  // [modelAcc: [clan: str, nested: [str]]]
+    def min_length = 8  // minimum length of a fragment
+    def hmmer_matches = HMMER3.parseOutput(hmmsearch_out, "Pfam")
+    def dat_path = dirpath.resolve(datfile)
+    def dat = stockholmDatParser(dat_path)  // [modelAcc: [clan: str, nested: [str]]]
 
-    Map<String, List<Match>> filteredMatches = filterMatches(hmmerMatches, dat, MINLENGTH)
-    Map<String, Map<String, Match>> processedMatches = buildFragments(filteredMatches, dat)
+    def filtered_matches = filterMatches(hmmer_matches, dat, min_length)
+    def processed_matches = buildFragments(filtered_matches, dat)
 
-    json = JsonOutput.toJson(processedMatches)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("pfam.json")
+    filepath.text = JsonOutput.toJson(processed_matches)
 }
 
-def stockholmDatParser(String pfamADatFile) {
+def stockholmDatParser(Path pfamADatFile) {
     /* Retrieve nested models and clan classifications.
     E.g. [ PF00026:[nested:[PF03489, PF05184], clan:CL0129], PF06826:[clan:CL0064, nested:[]] ]
     */
@@ -38,7 +37,7 @@ def stockholmDatParser(String pfamADatFile) {
     Map<String, List<String>> parsedDat = [:]
     String name = null
     String accession = null
-    new File(pfamADatFile).eachLine { rawLine ->
+    pfamADatFile.eachLine { rawLine ->
         def line = decode(rawLine.bytes)
         if (line.startsWith("#=GF ID")) {
             name = line.split()[2]

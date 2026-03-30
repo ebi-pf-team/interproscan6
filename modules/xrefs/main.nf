@@ -43,7 +43,16 @@ process XREFS_LOCAL {
     tuple val(meta), path('matches2xrefs.json')
 
     exec:
-    String outputFilePath = task.workDir.resolve('matches2xrefs.json')
-    ProcessXrefs.run(matches_path.toString(), db_releases, add_goterms, add_pathways, panther_paint_dir, outputFilePath)
-}
+    def output = task.workDir.resolve('matches2xrefs.json')
 
+    /*
+    nf-test doesn't seem to support casting nested objects to file(), so we keep them a strings and convert them here
+    */
+    db_releases.each { _, value ->
+        if (value.dirpath && value.dirpath.getClass().equals(String)) {
+            value.dirpath = file(value.dirpath)
+        }
+    }
+
+    ProcessXrefs.run(matches_path, db_releases, add_goterms, add_pathways, panther_paint_dir, output)
+}

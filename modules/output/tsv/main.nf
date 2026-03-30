@@ -15,10 +15,10 @@ process WRITE_TSV_LOCAL {
 
     exec:
     ProcessOutputTSV.run(
-        matches_files.collect { it.toString() },
-        seq_db_file.toString(),
+        matches_files,
+        seq_db_file,
         nucleic,
-        output_file.toString()
+        output_file
     )
 }
 

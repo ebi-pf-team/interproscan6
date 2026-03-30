@@ -1,5 +1,7 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import java.nio.file.Files
+import java.nio.file.Path
 import uk.ac.ebi.interpro.FastaFile
 import uk.ac.ebi.interpro.HMMER3
 import uk.ac.ebi.interpro.Location
@@ -32,7 +34,7 @@ process PREPARE_TREEGRAFTER {
 
     input:
     tuple val(meta), val(meta2), val(hmmseach_out)
-    val dir
+    val panther_dir
     val msf
 
     output:
@@ -40,9 +42,9 @@ process PREPARE_TREEGRAFTER {
     tuple val(meta), val(meta2), val(sequenceIds), val(familyIds), val(fastas),    emit: fasta
     
     exec:
-    def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString(), "PANTHER")
+    def hmmer_matches = HMMER3.parseOutput(hmmseach_out, "PANTHER")
 
-    hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
+    hmmer_matches = hmmer_matches.collectEntries { seqId, matches ->
         // Filter matches to only those with locations that have a score > 100
         def filteredMatches = matches
             .values()
@@ -57,9 +59,9 @@ process PREPARE_TREEGRAFTER {
                 }
 
                 // Rename model accession (PTHR23076.orig.30.pir -> PTHR23076)
-                String familyId = (m1.modelAccession =~ /^(PTHR\d+)/)[0][1]
+                def familyId = (m1.modelAccession =~ /^(PTHR\d+)/)[0][1]
                 m1.signature.accession = familyId
-                Match m2 = new Match(familyId, m1.evalue, m1.score, m1.bias, m1.signature)
+                def m2 = new Match(familyId, m1.evalue, m1.score, m1.bias, m1.signature)
                 m2.included = m1.included
                 // Only keep the domain with the highest score
                 m2.locations = [locations.max { it.score }]
@@ -69,46 +71,44 @@ process PREPARE_TREEGRAFTER {
             }
             .findAll { it != null }
 
-        Match bestMatch = filteredMatches.max { it.score }
+        def bestMatch = filteredMatches.max { it.score }
         return bestMatch ? [(seqId): [(bestMatch.modelAccession): bestMatch]] : [:]
     }
 
-    def outputFilePath = task.workDir.resolve("panther.json")
-    def json = JsonOutput.toJson(hmmerMatches)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("panther.json")
+    filepath.text = JsonOutput.toJson(hmmer_matches)
 
     familyIds = []
     fastas = []
     sequenceIds = []
-    String dirPath = dir.toString()
-    hmmerMatches.each { seqId, matches ->
+    hmmer_matches.each { seqId, matches ->
         // Ensure we only have one family
         assert matches.size() == 1
-        Match match = matches.values().first()
+        def match = matches.values().first()
         
         // Ensure we only have one domain
         assert match.locations.size() == 1
-        Location location = match.locations.first()
+        def location = match.locations.first()
         assert location.queryAlignment.length() == location.targetAlignment.length()
 
         // Get expected length of the sequence
-        String familyId = match.modelAccession
-        Path fastaPath = file("${dirPath}/${msf}/${familyId}.AN.fasta")
+        def familyId = match.modelAccession
+        def fastaPath = file("${panther_dir}/${msf}/${familyId}.AN.fasta")
         assert fastaPath.exists()
-        Map sequences = FastaFile.parse(fastaPath.toString())  // [md5 : "seq"]
-        int length = sequences.values().first().length()
+        def sequences = FastaFile.parse(fastaPath)  // [md5 : "seq"]
+        def length = sequences.values().first().length()
 
         // Query sequence to graft
-        StringBuilder sb = new StringBuilder()
+        def sb = new StringBuilder()
 
         // Pad N-terminal
         sb << ("-" * (location.hmmStart - 1))
 
         // Build sequence
-        String targetAlignment = location.targetAlignment.replaceAll(/(?i)[UO]/, 'X')
+        def targetAlignment = location.targetAlignment.replaceAll(/(?i)[UO]/, 'X')
         for (int i = 0; i < targetAlignment.length(); i++) {
-            char hmmChar = location.queryAlignment[i]
-            char seqChar = targetAlignment[i]
+            def hmmChar = location.queryAlignment[i]
+            def seqChar = targetAlignment[i]
 
             if (hmmChar != '.') {
                 sb << seqChar
@@ -122,21 +122,21 @@ process PREPARE_TREEGRAFTER {
         }
 
         assert sb.length() <= length
-        String sequence = sb.toString()
+        def sequence = sb.toString()
         assert sequence.length() == length
 
-        File fastaFile = File.createTempFile("tmp", ".fa", task.workDir.toFile())
+        def fastaFile = Files.createTempFile(task.workDir, "tmp", ".fa")
         fastaFile.withWriter { writer ->
             writer.writeLine(">${familyId}")
             for (int i = 0; i < sequence.length(); i += 80) {
-                int j = Math.min(i + 80, length) - 1
-                String line = sequence[i..j]
+                def j = Math.min(i + 80, length) - 1
+                def line = sequence[i..j]
                 writer.writeLine(line)                
             }
         }
 
         familyIds.add( familyId )
-        fastas.add( fastaFile.toString() )
+        fastas.add( fastaFile )
         sequenceIds.add( seqId )
     } 
 }
@@ -147,7 +147,7 @@ process RUN_TREEGRAFTER {
     
     input:
     tuple val(meta), val(meta2), val(sequenceIds), val(familyIds), val(fastas)
-    path dir
+    path panther_dir
     val msf
 
     output:
@@ -159,8 +159,8 @@ process RUN_TREEGRAFTER {
     [sequenceIds, familyIds, fastas]
         .transpose()
         .each { entry -> 
-            String seqID  = entry[0]
-            String family = entry[1]
+            def seqID  = entry[0]
+            def family = entry[1]
             def fastaPath = entry[2]
            
            // Run EPA-ng
@@ -168,15 +168,15 @@ process RUN_TREEGRAFTER {
             epang_command += " -G 0.05"
             epang_command += " -m WAG"
             epang_command += " -T ${task.cpus}"
-            epang_command += " -t ${dir.toString()}/${msf}/${family}.bifurcate.newick"
-            epang_command += " -s ${dir.toString()}/${msf}/${family}.AN.fasta"
+            epang_command += " -t ${panther_dir}/${msf}/${family}.bifurcate.newick"
+            epang_command += " -s ${panther_dir}/${msf}/${family}.AN.fasta"
             epang_command += " -q ${fastaPath}"
             epang_command += " --redo"
 
             // Parse results
             def py_command = "python ${projectDir}/bin/panther/parse_epang.py"
             py_command += " epa_result.jplace"
-            py_command += " ${dir.toString()}/${msf}/${family}.newick"
+            py_command += " ${panther_dir}/${msf}/${family}.newick"
 
             // Add sequence ID
             def awk_command = "awk '{print \"${seqID}\",\$0}'"
@@ -202,28 +202,25 @@ process PARSE_PANTHER {
     tuple val(meta), val(meta2), path("panther.json")
 
     exec:
-    File jsonFile = new File(hmmseach_json.toString())
-    JsonSlurper jsonSlurper = new JsonSlurper()
-    def matches = jsonSlurper.parse(jsonFile).collectEntries { seqId, jsonMatches ->
+    def matches = new JsonSlurper().parse(hmmseach_json).collectEntries { seqId, jsonMatches ->
         [(seqId): jsonMatches.collectEntries { matchId, jsonMatch ->
             [(matchId): Match.fromMap(jsonMatch)]
         }]
     }
 
-    file(epagn_tsv.toString()).eachLine { line ->
+    epagn_tsv.eachLine { line ->
         line = line.trim()
         def fields = line.split()
         assert fields.size() == 3
-        String seqId = fields[0]
-        String familyId = fields[1]
-        String nodeId = fields[2]
+        def seqId = fields[0]
+        def familyId = fields[1]
+        def nodeId = fields[2]
         
-        Match match = matches[seqId]?.get(familyId)
+        def match = matches[seqId]?.get(familyId)
         assert match != null
         match.treegrafter = new TreeGrafter(nodeId)
     }
 
-    def outputFilePath = task.workDir.resolve("panther.json")
-    def json = JsonOutput.toJson(matches)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("panther.json")
+    filepath.text = JsonOutput.toJson(matches)
 }

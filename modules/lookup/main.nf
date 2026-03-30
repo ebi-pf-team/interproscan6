@@ -40,18 +40,13 @@ process LOOKUP_MATCHES {
     tuple val(index), val(fasta), val(applications), val(url), val(chunkSize), val(maxRetries)
 
     output:
-    tuple val(index), path("calculatedMatches.json")
-    tuple val(index), path("noLookup.fasta"), optional: true
+    tuple val(index), path("matches.json")
+    tuple val(index), path("unknown.fasta"), optional: true
 
     exec:
-    def seqFasta = fasta.toString()  // reassign to avoid variable already declared error
-
-    def calculatedMatchesPath = task.workDir.resolve("calculatedMatches.json")
-    def noLookupFastaPath = task.workDir.resolve("noLookup.fasta")
-
     def calculatedMatches = [:]
     def noLookupFasta = new StringBuilder()
-    Map<String, String> sequences = FastaFile.parse(seqFasta)  // [md5: sequence]
+    Map<String, String> sequences = FastaFile.parse(fasta)  // [md5: sequence]
     def md5List = sequences.keySet().toList().sort()
     def requestChunkSize = chunkSize > 100 ? 100 : chunkSize       // API set max to 100
     def chunks = md5List.collate(requestChunkSize)
@@ -88,21 +83,24 @@ process LOOKUP_MATCHES {
         }
     }
 
+    def json_filepath = task.workDir.resolve("matches.json")
+    def fasta_filepath = task.workDir.resolve("unknown.fasta")
+
     if (success) {
         def jf = new JsonFactory()
-        new File(calculatedMatchesPath.toString()).withWriter { writer ->
-        def mapper = new ObjectMapper()
-            def gen = jf.createGenerator(writer)
-            mapper.writeValue(gen, calculatedMatches)
-            gen.close()
+        json_filepath.withWriter { writer ->
+            def mapper = new ObjectMapper()
+            jf.createGenerator(writer).withCloseable { gen ->
+                mapper.writeValue(gen, calculatedMatches)
+            }
         }
         if (noLookupFasta.length() != 0) {
-            new File(noLookupFastaPath.toString()).write(noLookupFasta.toString())
+            fasta_filepath.text = noLookupFasta.toString()
         }
     } else {
         log.warn "An error occurred while querying the Matches API, analyses will be run locally -- '${response}'"
-        new File(calculatedMatchesPath.toString()).write(JsonOutput.toJson([:]))
-        new File(noLookupFastaPath.toString()).write(new File(fasta.toString()).text)
+        json_filepath.text = JsonOutput.toJson([:])
+        fasta_filepath.text = fasta.text
     }
 }
 

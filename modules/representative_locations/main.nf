@@ -26,6 +26,6 @@ process REPRESENTATIVE_LOCATIONS_LOCAL {
     tuple val(meta), path("matches_with_representative.json")
 
     exec:
-    String outputFilePath = task.workDir.resolve('matches_with_representative.json')
-    ProcessReprLocations.run(matches_path.toString(), outputFilePath)
+    Path outputFilePath = task.workDir.resolve('matches_with_representative.json')
+    ProcessReprLocations.run(matches_path, outputFilePath)
 }

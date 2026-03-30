@@ -16,10 +16,9 @@ process PREPARE_FUNFAM {
     tuple val(meta), val(meta2), val(funfams)
     
     exec:
-    File jsonFile = new File(cathgene3d_json.toString())
     Path rootDir = file(root_dir)
     JsonSlurper jsonSlurper = new JsonSlurper()
-    funfams = jsonSlurper.parse(jsonFile)
+    funfams = jsonSlurper.parse(cathgene3d_json)
         .values()
         .collect{ jsonMatches ->
             jsonMatches
@@ -90,11 +89,10 @@ process PARSE_FUNFAM {
     tuple val(meta), val(meta2), path("cathfunfam.json")
 
     exec:
-    def memberDb = "CATH-FunFam"
-    def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString(), memberDb)
-    def funfamDomains = CATH.parseResolvedFile(resolved_tsv.toString())
-    def matches = CATH.mergeWithHmmerMatches(funfamDomains, hmmerMatches, memberDb)
-    def outputFilePath = task.workDir.resolve("cathfunfam.json")
-    def json = JsonOutput.toJson(matches)
-    new File(outputFilePath.toString()).write(json)
+    def member_db = "CATH-FunFam"
+    def hmmer_matches = HMMER3.parseOutput(hmmseach_out, member_db)
+    def funfam_domains = CATH.parseResolvedFile(resolved_tsv)
+    def matches = CATH.mergeWithHmmerMatches(funfam_domains, hmmer_matches, member_db)
+    def filepath = task.workDir.resolve("cathfunfam.json")
+    filepath.text = JsonOutput.toJson(matches)
 }

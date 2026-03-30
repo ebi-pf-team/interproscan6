@@ -194,9 +194,8 @@ class InterProScan {
         }
     }
 
-    static String getMD5Hash(String filePath) {
+    static String getMD5Hash(Path file) {
         // Get the MD5 Hash of a local file. Used to check if the correct or complete file has been downloaded
-        def file = new File(filePath)
         MessageDigest md = MessageDigest.getInstance("MD5")
         file.withInputStream { is ->
             byte[] buffer = new byte[8192]
@@ -211,20 +210,6 @@ class InterProScan {
     static String resolveFile(String filePath) {
         Path path = Paths.get(filePath)
         return Files.isRegularFile(path) ? path.toRealPath() : null
-    }
-
-    static Map getMemberDbReleases(def path, def ready) {
-        // Load the datadir/interpro/database.json file and set all keys to lowercase to match applications.config
-        if (ready == null) {
-            return
-        }
-        JsonSlurper jsonSlurper = new JsonSlurper()
-        def databaseJson = new File(path.toString())
-        def memberDbReleases = jsonSlurper.parse(databaseJson)
-        memberDbReleases = memberDbReleases.collectEntries { appName, versionNum ->
-            [(appName.toLowerCase()): versionNum]
-        }
-        return memberDbReleases
     }
 
     static List<String> getAppsWithData(List<String> applications, Map appsConfig) {
@@ -564,9 +549,9 @@ class InterProScan {
         return text.padRight(35) + "${props.description}\n"
     }
 
-    static List parseAppsConfig(Boolean useGpu, List<String> apps, String appsConfigFile) {
+    static List parseAppsConfig(Boolean useGpu, List<String> apps, Path appsConfigFile) {
         ConfigSlurper configSlurper = new ConfigSlurper()
-        def config = configSlurper.parse(new File(appsConfigFile).toURI().toURL())
+        def config = configSlurper.parse(appsConfigFile.toURI().toURL())
         def warn = null
         def appsConfig = config.params.appsConfig
         

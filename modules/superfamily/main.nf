@@ -55,7 +55,7 @@ process PARSE_SUPERFAMILY {
     exec:
     SignatureLibraryRelease library = new SignatureLibraryRelease("SUPERFAMILY", null)
     def model2sf = [:]
-    file("${dirpath.toString()}/${model_tsv}").eachLine { line ->
+    dirpath.resolve(model_tsv).eachLine { line ->
         def fields = line.trim().split(/\t/)
         String modelId = fields[0]
         String superfamilyAccession = fields[1]
@@ -66,7 +66,7 @@ process PARSE_SUPERFAMILY {
     def model2length = [:]
     String modelAc = null
     Integer length = null
-    new File("${dirpath.toString()}/${hmm}").eachLine { line ->
+    dirpath.resolve(hmm).eachLine { line ->
         line = line.trim()
         if (line.startsWith('//')) {
             assert modelAc != null && length != null
@@ -82,7 +82,7 @@ process PARSE_SUPERFAMILY {
     }
 
     def matches = [:].withDefault { [:] }
-    file(superfamily_out.toString()).eachLine { line ->
+    superfamily_out.eachLine { line ->
         line = line.trim()
         if (line) {
             def fields = line.split(/\s+/)
@@ -148,7 +148,6 @@ process PARSE_SUPERFAMILY {
         }
     }
 
-    def json = JsonOutput.toJson(matches)
-    def outputFilePath = task.workDir.resolve("superfamily.json")
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("superfamily.json")
+    filepath.text = JsonOutput.toJson(matches)
 }

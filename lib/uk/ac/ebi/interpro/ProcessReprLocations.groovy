@@ -1,5 +1,6 @@
 package uk.ac.ebi.interpro
 
+import java.nio.file.Path
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.ebi.interpro.CandidateLocation
@@ -9,14 +10,16 @@ import uk.ac.ebi.interpro.RepresentativeInfo
 
 
 class ProcessReprLocations {
-    static void run(String inputPath, String outputPath) {
+    static void run(Path inputPath, Path outputPath) {
         // only consider N "best" locations otherwise there are too many comparisons (2^locs)
         int maxLocationsPerGroup = 20
         float locationOverlapThreshold = 0.3
         List<String> representativeTypes = ["family", "domain"]
 
         ObjectMapper mapper = new ObjectMapper()
-        def matches = mapper.readValue(new File(inputPath), Map.class)
+        def matches = inputPath.newReader().withCloseable { reader ->
+            mapper.readValue(reader, Map.class)
+        }
         matches.each { String seqMd5, Map rawMatches ->
             // Deserialise all matches
             Map<String, Match> seqMatches = [:]
@@ -118,7 +121,7 @@ class ProcessReprLocations {
         }
 
         def jf = new JsonFactory()
-        new File(outputPath).withWriter { writer ->
+        outputPath.withWriter { writer ->
             def gen = jf.createGenerator(writer)
             mapper.writeValue(gen, matches)
             gen.close()

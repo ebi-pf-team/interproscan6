@@ -1,4 +1,7 @@
 import groovy.json.JsonSlurper
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import uk.ac.ebi.interpro.ProcessOutputGFF3
 import uk.ac.ebi.interpro.ProcessOutputJSON
 import uk.ac.ebi.interpro.ProcessOutputTSV
@@ -10,17 +13,22 @@ if (args.size() != 7) {
 }
 
 def format = args[0]
-def inputDir = new File(args[1])
-def metadataPath = args[2]
-def databasePath = args[3]
+Path inputDir = Paths.get(args[1])
+Path metadataPath = args[2] == "-" ? null : Paths.get(args[2])
+Path databasePath = Paths.get(args[3])
 def isNucleic = args[4] == "true"
 def iprscanVersion = args[5]
-def outputPath = args[6]
+Path outputPath = Paths.get(args[6])
 
-def inputPaths = []
-inputDir.eachFileRecurse { file ->
-    if (file.name.endsWith('.json') && file.name != metadataPath) {
-        inputPaths << file.absolutePath
+List<Path> inputPaths = []
+Path normalizedMetadataPath = metadataPath?.toAbsolutePath()?.normalize()
+Files.walk(inputDir).withCloseable { inputDirPaths -> 
+    inputDirPaths.forEach { Path file ->
+        if (Files.isRegularFile(file) &&
+            file.fileName.toString().endsWith('.json') &&
+            file.toAbsolutePath().normalize() != normalizedMetadataPath) {
+            inputPaths << file
+        }
     }
 }
 
@@ -28,10 +36,10 @@ assert ["gff3", "json", "jsonl", "tsv", "xml"].contains(format)
 assert inputPaths.size() > 0
 
 def dbReleases = null
-if (metadataPath != "-") {
-    dbReleases = new JsonSlurper().parse(new File(metadataPath))
-} else {
-    dbReleases = null
+if (metadataPath != null) {
+    dbReleases = metadataPath.newReader().withCloseable { reader -> 
+        new JsonSlurper().parse(reader)
+    }
 }
 
 if (format == "gff3") {

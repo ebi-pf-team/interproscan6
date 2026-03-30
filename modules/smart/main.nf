@@ -40,8 +40,8 @@ process PREPARE_SMART {
     /* Only run seqs against a HMMER2 model where a HMMER3 match was found.
         Return tuple val(meta), val(fastaFiles), val(smarts) where the Nth item of
         fastaFiles corresponds to the sequences to scan against the Nth element of smarts. */
-    Map<String, String> sequences = FastaFile.parse(fasta.toString())  // [md5: sequence]
-    Map<String, Map> matches = HMMER3.parseOutput(hmmseach_out.toString(), "SMART")
+    Map<String, String> sequences = FastaFile.parse(fasta)  // [md5: sequence]
+    Map<String, Map> matches = HMMER3.parseOutput(hmmseach_out, "SMART")
 
     // Map model accessions to seq Ids -> [modelAcc: [seqIds]]
     Map<String, List<String>> model2seqs = [:].withDefault { [] }
@@ -55,11 +55,10 @@ process PREPARE_SMART {
     smart_fasta_pairs = []
     // Create a FASTA file for each profile to search with
     model2seqs.each { modelAcc, seqIds ->
-        Path mdlPath = file("${dirpath.toString()}/${hmmdir}/${modelAcc}.hmm")
-        File mdlFile = new File(mdlPath.toString())
+        def mdlFile = file("${dirpath}/${hmmdir}/${modelAcc}.hmm")
         if (!mdlFile.exists()) return
-        String fasta = "${task.workDir}/${modelAcc}.fa"
-        new File(fasta).withWriter('UTF-8') { writer ->
+        Path fasta = task.workDir.resolve("${modelAcc}.fa")
+        fasta.withWriter('UTF-8') { writer ->
             seqIds.each { seqId ->
                 String seq = sequences[seqId]
                 writer.writeLine(">${seqId}")
@@ -119,11 +118,12 @@ process PARSE_SMART {
     Map<String, String> sequences = [:] // [md5: sequence]
     smart_fasta_pairs.each { pair ->
         fastaFile = pair[1]
-        sequences = sequences + FastaFile.parse(fastaFile.toString())
+        sequences = sequences + FastaFile.parse(fastaFile)
     }
 
-    def hmmLengths = HMMER2.parseHMMs("${dirpath.toString()}/${hmmdir}")
-    def matches = HMMER2.parseOutput(hmmpfam_out.toString(), hmmLengths, "SMART")
+    def hmmpath = file(dirpath).resolve(hmmdir)
+    def hmmLengths = HMMER2.parseHMMs(hmmpath)
+    def matches = HMMER2.parseOutput(hmmpfam_out, hmmLengths, "SMART")
 
     String tyrKinaseAccession = "SM00219"
     def tyrKinasePattern = ~/.*HRD[LIV][AR]\w\wN.*/
@@ -161,6 +161,5 @@ process PARSE_SMART {
     }
 
     def outputFilePath = task.workDir.resolve("smart.json")
-    def json = JsonOutput.toJson(filteredMatches)
-    new File(outputFilePath.toString()).write(json)
+    outputFilePath.text = JsonOutput.toJson(filteredMatches)
 }
