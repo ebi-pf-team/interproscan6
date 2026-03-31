@@ -1,8 +1,8 @@
 nextflow_process {
 
-    name "Test Process XREFS_LOCAL"
+    name "Test Process XREFS"
     script "modules/xrefs/main.nf"
-    process "XREFS_LOCAL"
+    process "XREFS"
 
     // use the minimal combined_matches.json as this does not contain Panther annotations
 

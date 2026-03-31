@@ -1,6 +1,6 @@
 import uk.ac.ebi.interpro.ProcessOutputTSV
 
-process WRITE_TSV_LOCAL {
+process WRITE_TSV {
     label    'mem_low', 'time_long'
     executor 'local'
 
@@ -22,8 +22,8 @@ process WRITE_TSV_LOCAL {
     )
 }
 
-process WRITE_TSV {
-    label    'mem_veryhigh', 'time_long', 'groovy_container'
+process WRITE_TSV_BULK {
+    label    'mem_veryhigh', 'time_long', 'ips6_container'
 
     input:
     path(input_files, arity: '1..*', name: '?/*')
@@ -36,7 +36,7 @@ process WRITE_TSV {
 
     script:
     """
-    groovy -cp "${projectDir}/lib:${projectDir}/lib/*:." ${projectDir}/bin/interpro/write-output.groovy \
+    groovy -cp "/opt/interproscan6/lib:/opt/interproscan6/lib/*:." /opt/interproscan6/bin/write-output.groovy \
         tsv \
         . \
         - \

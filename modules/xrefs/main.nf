@@ -2,8 +2,8 @@ import java.nio.file.Path
 import groovy.json.JsonOutput
 import uk.ac.ebi.interpro.ProcessXrefs
 
-process XREFS {
-    label    'mem_high', 'time_veryshort', 'groovy_container'
+process XREFS_BULK {
+    label    'mem_high', 'time_veryshort', 'ips6_container'
 
     input:
     tuple val(meta), path(json_combined)
@@ -26,7 +26,7 @@ process XREFS {
     def json = JsonOutput.toJson(to_serialize)
     """
     echo '${json}' > metadata.json
-    groovy -cp "${projectDir}/lib:." ${projectDir}/bin/interpro/add-xrefs.groovy \
+    groovy -cp "/opt/interproscan6/lib:." /opt/interproscan6/bin/add-xrefs.groovy \
         ${json_combined} \
         metadata.json \
         ${add_goterms ? 'true' : 'false'} \
@@ -36,7 +36,7 @@ process XREFS {
     """
 }
 
-process XREFS_LOCAL {
+process XREFS {
     label    'mem_low', 'time_veryshort'
     executor 'local'
 

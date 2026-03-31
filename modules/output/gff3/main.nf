@@ -1,7 +1,7 @@
 import uk.ac.ebi.interpro.ProcessOutputGFF3
 
 
-process WRITE_GFF3_LOCAL {
+process WRITE_GFF3 {
     label    'mem_low', 'time_long'
     executor 'local'
 
@@ -23,8 +23,8 @@ process WRITE_GFF3_LOCAL {
         output_file)
 }
 
-process WRITE_GFF3 {
-    label    'mem_veryhigh', 'time_long', 'groovy_container'
+process WRITE_GFF3_BULK {
+    label    'mem_veryhigh', 'time_long', 'ips6_container'
 
     input:
     path(input_files, arity: '1..*', name: '?/*')
@@ -38,7 +38,7 @@ process WRITE_GFF3 {
 
     script:
     """
-    groovy -cp "${projectDir}/lib:${projectDir}/lib/*:." ${projectDir}/bin/interpro/write-output.groovy \
+    groovy -cp "/opt/interproscan6/lib:/opt/interproscan6/lib/*:." /opt/interproscan6/bin/write-output.groovy \
         gff3 \
         . \
         - \

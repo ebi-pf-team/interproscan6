@@ -17,7 +17,7 @@ process DOWNLOAD {
     path outdir
 
     output:
-    tuple val(name), val(version), path(dirpath)
+    tuple val(name), val(version), val(dirpath)
 
     script:
     if (skip) {
@@ -104,6 +104,6 @@ process VALIDATE_DATA {
 
     exec:
     map_databases = list_databases.collectEntries { name, version, dirpath ->
-        [(name): [version: version, dirpath: dirpath]]
+        [(name): [version: version, dirpath: file(dirpath)]]
     } 
 }

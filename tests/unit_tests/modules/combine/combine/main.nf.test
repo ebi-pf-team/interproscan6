@@ -1,8 +1,8 @@
 nextflow_process {
 
-    name "Test Process COMBINE_MATCHES_LOCAL"
+    name "Test Process COMBINE_MATCHES"
     script "modules/combine/main.nf"
-    process "COMBINE_MATCHES_LOCAL"
+    process "COMBINE_MATCHES"
 
     test("Should run without failures") {
 

@@ -1,9 +1,9 @@
 // codenarc-disable ModuleIncludedTwiceRule
-include { WRITE_GFF3; WRITE_GFF3_LOCAL                                     } from "../../modules/output/gff3"
-include { WRITE_JSON; WRITE_JSON_LOCAL                                     } from "../../modules/output/json"
-include { WRITE_JSON as WRITE_JSONL; WRITE_JSON_LOCAL as WRITE_JSONL_LOCAL } from "../../modules/output/json"
-include { WRITE_TSV; WRITE_TSV_LOCAL                                       } from "../../modules/output/tsv"
-include { WRITE_XML; WRITE_XML_LOCAL                                       } from "../../modules/output/xml"
+include { WRITE_GFF3; WRITE_GFF3_BULK                                     } from "../../modules/output/gff3"
+include { WRITE_JSON; WRITE_JSON_BULK                                     } from "../../modules/output/json"
+include { WRITE_JSON as WRITE_JSONL; WRITE_JSON_BULK as WRITE_JSONL_BULK } from "../../modules/output/json"
+include { WRITE_TSV; WRITE_TSV_BULK                                       } from "../../modules/output/tsv"
+include { WRITE_XML; WRITE_XML_BULK                                       } from "../../modules/output/xml"
 
 workflow OUTPUT {
     take:
@@ -24,27 +24,6 @@ workflow OUTPUT {
 
     if (batch_size < 50000) {
         if (formats_upper.contains("GFF3")) {
-            WRITE_GFF3_LOCAL(ch_results, file("${outprefix}.gff3"), seq_db_path, nucleic, iprscan_version)
-            outfiles = outfiles.mix(WRITE_GFF3_LOCAL.out)
-        }
-        if (formats_upper.contains("JSON")) {
-            WRITE_JSON_LOCAL(ch_results, file("${outprefix}.json"), seq_db_path, nucleic, iprscan_version, db_releases, false)
-            outfiles = outfiles.mix(WRITE_JSON_LOCAL.out)
-        }
-        if (formats_upper.contains("JSONL")) {
-            WRITE_JSONL_LOCAL(ch_results, file("${outprefix}.jsonl"), seq_db_path, nucleic, iprscan_version, db_releases, true)
-            outfiles = outfiles.mix(WRITE_JSONL_LOCAL.out)
-        }
-        if (formats_upper.contains("TSV")) {
-            WRITE_TSV_LOCAL(ch_results, file("${outprefix}.tsv"), seq_db_path, nucleic)
-            outfiles = outfiles.mix(WRITE_TSV_LOCAL.out)
-        }
-        if (formats_upper.contains("XML")) {
-            WRITE_XML_LOCAL(ch_results, file("${outprefix}.xml"), seq_db_path, nucleic, iprscan_version, db_releases)
-            outfiles = outfiles.mix(WRITE_XML_LOCAL.out)
-        }
-    } else {
-        if (formats_upper.contains("GFF3")) {
             WRITE_GFF3(ch_results, file("${outprefix}.gff3"), seq_db_path, nucleic, iprscan_version)
             outfiles = outfiles.mix(WRITE_GFF3.out)
         }
@@ -63,6 +42,27 @@ workflow OUTPUT {
         if (formats_upper.contains("XML")) {
             WRITE_XML(ch_results, file("${outprefix}.xml"), seq_db_path, nucleic, iprscan_version, db_releases)
             outfiles = outfiles.mix(WRITE_XML.out)
+        }
+    } else {
+        if (formats_upper.contains("GFF3")) {
+            WRITE_GFF3_BULK(ch_results, file("${outprefix}.gff3"), seq_db_path, nucleic, iprscan_version)
+            outfiles = outfiles.mix(WRITE_GFF3_BULK.out)
+        }
+        if (formats_upper.contains("JSON")) {
+            WRITE_JSON_BULK(ch_results, file("${outprefix}.json"), seq_db_path, nucleic, iprscan_version, db_releases, false)
+            outfiles = outfiles.mix(WRITE_JSON_BULK.out)
+        }
+        if (formats_upper.contains("JSONL")) {
+            WRITE_JSONL_BULK(ch_results, file("${outprefix}.jsonl"), seq_db_path, nucleic, iprscan_version, db_releases, true)
+            outfiles = outfiles.mix(WRITE_JSONL_BULK.out)
+        }
+        if (formats_upper.contains("TSV")) {
+            WRITE_TSV_BULK(ch_results, file("${outprefix}.tsv"), seq_db_path, nucleic)
+            outfiles = outfiles.mix(WRITE_TSV_BULK.out)
+        }
+        if (formats_upper.contains("XML")) {
+            WRITE_XML_BULK(ch_results, file("${outprefix}.xml"), seq_db_path, nucleic, iprscan_version, db_releases)
+            outfiles = outfiles.mix(WRITE_XML_BULK.out)
         }
     }
 

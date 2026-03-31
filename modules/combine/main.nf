@@ -1,6 +1,6 @@
 import uk.ac.ebi.interpro.ProcessCombine
 
-process COMBINE_MATCHES_LOCAL {
+process COMBINE_MATCHES {
     label    'mem_low', 'time_veryshort'
     executor 'local'
 
@@ -14,8 +14,8 @@ process COMBINE_MATCHES_LOCAL {
     ProcessCombine.run(members_matches, task.workDir.resolve('combined.json'))
 }
 
-process COMBINE_MATCHES {
-    label    'mem_high', 'time_veryshort', 'groovy_container'
+process COMBINE_MATCHES_BULK {
+    label    'mem_high', 'time_veryshort', 'ips6_container'
 
     input:
     tuple val(meta), path(jsons, arity: '1..*', name: '?/*')
@@ -25,6 +25,6 @@ process COMBINE_MATCHES {
 
     script:
     """
-    groovy -cp "${projectDir}/lib:." ${projectDir}/bin/interpro/combine.groovy . combined.json
+    groovy -cp "/opt/interproscan6/lib:." /opt/interproscan6/bin/combine.groovy . combined.json
     """
 }

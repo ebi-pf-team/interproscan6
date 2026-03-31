@@ -1,8 +1,8 @@
 nextflow_process {
 
-    name "Test Process WRITE_GFF3_LOCAL"
+    name "Test Process WRITE_GFF3"
     script "modules/output/gff3/main.nf"
-    process "WRITE_GFF3_LOCAL"
+    process "WRITE_GFF3"
 
     test("Should run without failures") {
 

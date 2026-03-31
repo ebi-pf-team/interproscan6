@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 import uk.ac.ebi.interpro.ProcessOutputXML
 
-process WRITE_XML_LOCAL {
+process WRITE_XML {
     label    'mem_low', 'time_long'
     executor 'local'
 
@@ -25,8 +25,8 @@ process WRITE_XML_LOCAL {
                          output_file)
 }
 
-process WRITE_XML {
-    label    'mem_veryhigh', 'time_long', 'groovy_container'
+process WRITE_XML_BULK {
+    label    'mem_veryhigh', 'time_long', 'ips6_container'
 
     input:
     path(input_files, arity: '1..*', name: '?/*')
@@ -50,7 +50,7 @@ process WRITE_XML {
     def json = JsonOutput.toJson(to_serialize)
     """
     echo '${json}' > metadata.json
-    groovy -cp "${projectDir}/lib:${projectDir}/lib/*:." ${projectDir}/bin/interpro/write-output.groovy \
+    groovy -cp "/opt/interproscan6/lib:/opt/interproscan6/lib/*:." /opt/interproscan6/bin/write-output.groovy \
         xml \
         . \
         metadata.json \

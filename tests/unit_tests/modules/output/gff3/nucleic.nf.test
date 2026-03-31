@@ -1,8 +1,8 @@
 nextflow_process {
 
-    name "Test Process WRITE_GFF3_LOCAL [nucleic]"
+    name "Test Process WRITE_GFF3 [nucleic]"
     script "modules/output/gff3/main.nf"
-    process "WRITE_GFF3_LOCAL"
+    process "WRITE_GFF3"
 
     stage {
         symlink "tests/data/channels/nucleic.matches_with_representative.json"

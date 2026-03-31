@@ -1,8 +1,8 @@
 nextflow_process {
 
-    name "Test Process WRITE_JSONL_LOCAL"
+    name "Test Process WRITE_JSONL"
     script "modules/output/json/main.nf"
-    process "WRITE_JSON_LOCAL"
+    process "WRITE_JSON"
 
     test("Should run without failures") {
 
