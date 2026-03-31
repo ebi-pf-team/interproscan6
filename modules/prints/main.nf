@@ -19,7 +19,7 @@ process RUN_PRINTS {
 
     script:
     """
-    $projectDir/bin/prints/fingerPRINTScan \
+    fingerPRINTScan \
         ${dirpath}/${pval} \
         ${fasta} \
         -e 0.0001 -d 10 -E 257043 84355444 -fj -o 15 > prints_output

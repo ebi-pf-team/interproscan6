@@ -174,7 +174,7 @@ process RUN_TREEGRAFTER {
             epang_command += " --redo"
 
             // Parse results
-            def py_command = "python ${projectDir}/bin/panther/parse_epang.py"
+            def py_command = "parse_epang.py"
             py_command += " epa_result.jplace"
             py_command += " ${panther_dir}/${msf}/${family}.newick"
 

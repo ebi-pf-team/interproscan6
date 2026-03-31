@@ -27,7 +27,7 @@ process SEARCH_SUPERFAMILY {
         --cpu ${task.cpus} \
         ${dirpath}/${hmm} ${fasta} > hmmscan.out
 
-    perl ${projectDir}/bin/superfamily/ass3_single_threaded.pl \
+    ass3_single_threaded.pl \
         -e 0.0001 -t n -f 1 \
         -s ${dirpath}/${selfhits} \
         -r ${dirpath}/${cla} \

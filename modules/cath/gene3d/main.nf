@@ -29,7 +29,7 @@ process SEARCH_GENE3D {
         --worst-permissible-bitscore=25 \
         --output-hmmer-aln hmmsearch.out > resolved.out
 
-    python ${projectDir}/bin/cath/assign_cath_superfamilies.py \
+    assign_cath_superfamilies.py \
         ${dirpath}/${dom2fam} \
         ${dirpath}/${disc_pickle} \
         resolved.out \

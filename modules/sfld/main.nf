@@ -31,7 +31,7 @@ process SEARCH_SFLD {
         -A hmmsearch.sto \
         ${dirpath}/${hmmfile} ${fasta}
 
-    ${projectDir}/bin/sfld/sfld_postprocess \
+    sfld_postprocess \
         --alignment hmmsearch.sto \
         --dom hmmsearch.tab \
         --hmmer-out hmmsearch.out \
