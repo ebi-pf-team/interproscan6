@@ -1,3 +1,5 @@
+# Build from the root of the repo
+# docker build -t interpro/interproscan:6.x.x -f utilities/docker/interproscan/Dockerfile .
 FROM ubuntu:latest AS interproscan-base
 LABEL authors="Laise Florentino (lcf@ebi.ac.uk), Emma Hobbs (ehobbs@ebi.ac.uk), Matthias Blum (mblum@ebi.ac.uk)"
 ENV TZ=Europe/London
@@ -14,12 +16,23 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Groovy 4.0.27 + JDK 17 runtime
+FROM docker.io/groovy:4.0.27-jdk17 AS groovy-runtime
 
 # Pull pftools for HAMAP and PROSITE
 FROM sibswiss/pftools AS pftools
 
-# Final image with InterProScan and pftools
+# Final image
 FROM interproscan-base
+
+# Copy Groovy + Java from the official Groovy image
+COPY --from=groovy-runtime /opt/groovy /opt/groovy
+COPY --from=groovy-runtime /opt/java/openjdk /opt/java/openjdk
+ENV GROOVY_HOME=/opt/groovy
+ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH="/opt/groovy/bin:/opt/java/openjdk/bin:$PATH"
+
+# Copy pfsearchV3 and pfscanV3
 COPY --from=pftools /var/lib/pftools/bin/pfsearchV3 /opt/pftools/pfsearchV3
 COPY --from=pftools /var/lib/pftools/bin/pfscanV3 /opt/pftools/pfscanV3
 
@@ -101,10 +114,18 @@ WORKDIR /opt/cath-tools
 RUN curl -L -o cath-resolve-hits https://github.com/UCLOrengoGroup/cath-tools/releases/download/v0.16.10/cath-resolve-hits.ubuntu-20.04 && \
     chmod +x cath-resolve-hits
 
+# Add PRINTS and SFLD binaries
+COPY utilities/docker/interproscan/prints/ /opt/prints/
+COPY utilities/docker/interproscan/sfld/ /opt/sfld/
+
+# Add Groovy support files
+COPY lib/ /opt/interproscan6/lib/
+COPY utilities/docker/interproscan/interpro/ /opt/interproscan6/bin/
+
 WORKDIR /opt/interproscan6
 
 # Add all tool directories to PATH
-ENV PATH="/opt/hmmer3/bin:/opt/cath-tools:/opt/blast:/opt/rpsbproc/RpsbProc-x64-linux:/opt/coils:/opt/easel/miniapps:/opt/pftools:/opt/epa-ng/bin:/opt/hmmer2/bin:$PATH"
+ENV PATH="/opt/hmmer3/bin:/opt/cath-tools:/opt/blast:/opt/rpsbproc/RpsbProc-x64-linux:/opt/coils:/opt/easel/miniapps:/opt/pftools:/opt/epa-ng/bin:/opt/hmmer2/bin:/opt/prints:/opt/sfld:$PATH"
 
 # remove tools not needed for running IPS6 to reduce the final image size
 RUN apt-get remove -y autoconf automake autotools-dev bison build-essential flex git libcurl3-gnutls libdivsufsort3 liblmdb0 libdw1 libnghttp2-dev libssl-dev libtool nghttp2 zlib1g-dev && \
