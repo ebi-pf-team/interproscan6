@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Takes the output from Cath Resolve Hits and assigns CATH superfamilies based on domain id's"""
 
 
