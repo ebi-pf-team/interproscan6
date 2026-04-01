@@ -10,44 +10,34 @@ process PREPARE_FUNFAM {
 
     input:
     tuple val(meta), val(meta2), val(cathgene3d_json)
-    val root_dir
 
     output:
     tuple val(meta), val(meta2), val(funfams)
     
     exec:
-    Path rootDir = file(root_dir)
-    JsonSlurper jsonSlurper = new JsonSlurper()
-    funfams = jsonSlurper.parse(cathgene3d_json)
+    funfams = new JsonSlurper().parse(cathgene3d_json)
         .values()
         .collect{ jsonMatches ->
             jsonMatches
                 .values()
                 .collect { jsonMatch ->
-                    Match match = Match.fromMap(jsonMatch)
-                    String accession = match?.signature?.accession                       
+                    def match = Match.fromMap(jsonMatch)
+                    def accession = match?.signature?.accession                       
                     assert accession != null
                     assert accession.startsWith("G3DSA:")
-                    String cathId = accession.substring(6)
+                    def cathId = accession.substring(6)
                     return cathId
                 }
         }
         .flatten()
         .unique()
-        .findAll { cathId ->
-            String hmmPath = cathId
-                .split("\\.")  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
-                .join(File.separator) + ".hmm"
-            Path fullPath = rootDir.resolve(hmmPath)
-            return file(fullPath.toString()).isFile()
-        }
 }
 
 process SEARCH_FUNFAM {
     label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
 
     input:
-    tuple val(meta), val(meta2), path(fasta), val(supfams)
+    tuple val(meta), val(meta2), path(fasta), val(funfams)
     path root_dir
 
     output:
@@ -55,15 +45,17 @@ process SEARCH_FUNFAM {
 
     script:
     def commands = "touch hmmsearch.out\n"
-    supfams.each { cathId -> 
-        String hmmFilePath = cathId
+    funfams.each { cathId -> 
+        def leaf = cathId
             .split("\\.")  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
             .join(File.separator) + ".hmm"
-        String hmmPath = "${root_dir.toString()}/${hmmFilePath}"
-        commands += "hmmsearch"
-        commands += " -Z 65245 --cut_tc"
-        commands += " --cpu ${task.cpus}"
-        commands += " ${hmmPath} ${fasta} >> hmmsearch.out\n"
+        def hmm = root_dir.resolve(leaf)
+        if (hmm.exists()) {
+            commands += "hmmsearch"
+            commands += " -Z 65245 --cut_tc"
+            commands += " --cpu ${task.cpus}"
+            commands += " ${hmm} ${fasta} >> hmmsearch.out\n"
+        }
     }
 
     """

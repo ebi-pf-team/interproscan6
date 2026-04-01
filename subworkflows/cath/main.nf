@@ -46,8 +46,7 @@ workflow CATH {
     if (report_cathfunfam) {
         // Find unique CATH superfamilies with at least one hit
         PREPARE_FUNFAM(
-            PARSE_CATHGENE3D.out,
-            cathfunfam_dir
+            PARSE_CATHGENE3D.out
         )
 
         // Join input fasta file with superfamilies.
