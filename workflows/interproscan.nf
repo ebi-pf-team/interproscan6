@@ -16,7 +16,7 @@ workflow INTERPROSCAN {
     fasta_file            // Channel.fromPath(input fasta file)
     applications          // list[str], names of applications to run
     apps_config           // map, contents of the conf/applications.conf file
-    data_dir              // str, path to the data directory
+    data_dir              // path to the data directory
     outprefix             // str, prefix for output files
     formats               // list[str], output formats
     interpro_version      // str, version of InterPro
@@ -80,7 +80,6 @@ workflow INTERPROSCAN {
             db_releases,
             local_only_apps,
             apps_config,
-            data_dir,
             local_only_apps,
             sub_batch_size
         )
@@ -106,7 +105,6 @@ workflow INTERPROSCAN {
             db_releases,
             matches_api_apps,
             apps_config,
-            data_dir,
             matches_api_apps + local_only_apps,
             sub_batch_size
         )
@@ -116,7 +114,6 @@ workflow INTERPROSCAN {
             db_releases,
             local_only_apps,
             apps_config,
-            data_dir,
             matches_api_apps + local_only_apps,
             sub_batch_size
         )
