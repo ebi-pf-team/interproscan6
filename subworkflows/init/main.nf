@@ -95,7 +95,7 @@ workflow INIT_PIPELINE {
     fasta            // str: path to input fasta file
     apps             // list: selected applications
     apps_config      // map: updated applications configuration
-    datadir          // str: path to data directory, or null if not needed
+    datadir          // path: path to data directory, or null if not needed
     outprefix        // str: base path for output files
     formats          // set<String>: output file formats
     version          // str: InterPro version (or "latest")
