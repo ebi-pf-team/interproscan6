@@ -7,29 +7,29 @@ process REPORT_NO_MATCHES {
     executor 'local'
 
     input:
-    tuple val(meta), val(fasta), val(member_matches)
+    tuple val(meta), val(fasta), val(jsons)
 
     output:
     tuple val(meta), path("no_matches.json")
 
     exec:
-    def seqsWithMatches = [] as Set
-    member_matches.each { matchesPath ->
-        def matchesFileMap = matchesPath.newReader().withCloseable { reader ->
+    def seqs_with_matches = [] as Set
+    jsons.each { json ->
+        def matches = json.newReader().withCloseable { reader ->
             new ObjectMapper().readValue(reader, Map)
         }
-        matchesFileMap.each { String seqMd5, Map matches ->
-            seqsWithMatches.add(seqMd5)
+        matches.each { seq_md5, seq_matches ->
+            seqs_with_matches.add(seq_md5)
         }
     }
 
-    def sequences = FastaFile.parse(fasta)  // [md5: sequence]
-    def noMatches = [:]
-    sequences.each { String seqMd5, String seq ->
-        if (!seqsWithMatches.contains(seqMd5)) {
-            noMatches[seqMd5] = [:]
+    def sequences = FastaFile.parse(fasta)
+    def no_matches = [:]
+    sequences.each { seq_md5, sequence ->
+        if (!seqs_with_matches.contains(seq_md5)) {
+            no_matches[seq_md5] = [:]
         }
     }
-    def output_file = task.workDir.resolve("no_matches.json")
-    output_file.text = JsonOutput.toJson(noMatches)
+    def filepath = task.workDir.resolve("no_matches.json")
+    filepath.text = JsonOutput.toJson(no_matches)
 }

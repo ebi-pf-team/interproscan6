@@ -11,8 +11,8 @@ workflow CDD {
         rps
     )
 
-    ch_cdd = PARSE_CDD(SEARCH_CDD.out)
+    PARSE_CDD(SEARCH_CDD.out)
 
     emit:
-    ch_cdd
+    PARSE_CDD.out // [ meta, json ]
 }

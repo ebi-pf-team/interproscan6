@@ -63,5 +63,6 @@ workflow CATH {
     }
 
     emit:
-    results.map { meta, meta2, json -> tuple (meta, json) }
+    results
+        .map { meta, meta2, json -> tuple (meta, json) }  // [ meta, json ]
 }

@@ -12,7 +12,7 @@ on:
 
   pull_request:
     paths:
-      - utilities/docker/interproscan/Dockerfile
+      - docker/interproscan/Dockerfile
       - .github/workflows/docker-check.yml
 
 
@@ -39,4 +39,4 @@ jobs:
 
       - name: Test build IPS6 Docker image
         run: |
-          docker build -t interproscan6 utilities/docker/interproscan
+          docker build -t interproscan6 -f docker/interproscan/Dockerfile .

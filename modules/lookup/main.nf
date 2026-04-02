@@ -25,7 +25,7 @@ def check_matches_api(applications, api_url, version) {
                     n.toLowerCase().replaceAll("[-\\s]", "") 
                 }
                 applications.each { appl -> 
-                    if (all_appls_in_api.contains(appl) && appl != "cdd") {
+                    if (all_appls_in_api.contains(appl)) {
                         appls_in_api << appl
                     } else {
                         appls_not_in_api << appl

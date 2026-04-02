@@ -15,7 +15,7 @@ import uk.ac.ebi.interpro.SeqDB
 
 
 class ProcessOutputJSON {
-    static void run(List<Path> inputPaths, Path databasePath, Map dbReleases, boolean isNucleic, String iprscanVersion, boolean useJsonLines, Path outputPath) {
+    static void run(List<Path> inputPaths, Path databasePath, boolean isNucleic, String iprscanVersion,  String interproVersion, boolean useJsonLines, Path outputPath) {
         ObjectMapper mapper = new ObjectMapper()
         SeqDB db = new SeqDB(databasePath)
         
@@ -36,7 +36,9 @@ class ProcessOutputJSON {
                             if (!seenNucleicMd5s.contains(nucleicMd5)) {
                                 generator.writeStartObject()
                                 generator.writeStringField("interproscan-version", iprscanVersion)
-                                generator.writeStringField("interpro-version", dbReleases?.interpro?.version)
+                                if (interproVersion) {
+                                    generator.writeStringField("interpro-version", interproVersion)
+                                }
                                 generator.writeFieldName("results")
                                 generator.writeStartArray()
                                 def seqData = ntSeqDataMap[nucleicMd5]
@@ -60,7 +62,9 @@ class ProcessOutputJSON {
                             def seqData = md5ToSeqData[proteinMd5]
                             generator.writeStartObject()
                             generator.writeStringField("interproscan-version", iprscanVersion)
-                            generator.writeStringField("interpro-version", dbReleases?.interpro?.version)
+                            if (interproVersion) {
+                                generator.writeStringField("interpro-version", interproVersion)
+                            }
                             generator.writeFieldName("results")
                             generator.writeStartArray()
                             writeProtein(proteinMd5, proteinMatches, generator, seqData)
@@ -77,7 +81,9 @@ class ProcessOutputJSON {
                 generator.writeStartObject()
 
                 generator.writeStringField("interproscan-version", iprscanVersion)
-                generator.writeStringField("interpro-version", dbReleases?.interpro?.version)
+                if (interproVersion) {
+                    generator.writeStringField("interpro-version", interproVersion)
+                }
                 generator.writeFieldName("results")
                 generator.writeStartArray()  // start of results [...
                 Set<String> seenNucleicMd5s = new HashSet<>()

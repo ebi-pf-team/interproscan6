@@ -14,7 +14,7 @@ import uk.ac.ebi.interpro.Match
 import uk.ac.ebi.interpro.SeqDB
 
 class ProcessOutputXML {
-    static void run(List<Path> inputPaths, Path databasePath, Map dbReleases, boolean isNucleic, String iprscanVersion, Path outputPath) {
+    static void run(List<Path> inputPaths, Path databasePath, boolean isNucleic, String iprscanVersion, String interproVersion, Path outputPath) {
         SeqDB db = new SeqDB(databasePath)
         outputPath.withWriter { writer ->
             def xmlFactory = new XmlFactory()
@@ -28,8 +28,11 @@ class ProcessOutputXML {
                 gen.setNextIsAttribute(true);
                 gen.writeFieldName("interproscan-version");
                 gen.writeString(iprscanVersion);
-                gen.writeFieldName("interpro-version");
-                gen.writeString(dbReleases?.interpro?.version ?: "");
+                
+                if (interproVersion) {
+                    gen.writeFieldName("interpro-version");
+                    gen.writeString(interproVersion);
+                }
                 Set<String> seenNucleicMd5s = new HashSet<>()
                 ObjectMapper mapper = new ObjectMapper()
                 inputPaths.each { inputPath ->

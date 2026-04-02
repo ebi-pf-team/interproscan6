@@ -39,9 +39,9 @@ process WRITE_TSV_BULK {
     groovy -cp "/opt/interproscan6/lib:/opt/interproscan6/lib/*:." /opt/interproscan6/bin/write-output.groovy \
         tsv \
         . \
-        - \
         ${seq_db_file} \
         ${nucleic ? 'true' : 'false'} \
+        - \
         - \
         ${output_file}
     chmod 666 ${output_file}

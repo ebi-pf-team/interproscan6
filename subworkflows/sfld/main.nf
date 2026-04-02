@@ -14,5 +14,5 @@ workflow SFLD {
     PARSE_SFLD(SEARCH_SFLD.out, ch_parse)
 
     emit:
-    PARSE_SFLD.out
+    PARSE_SFLD.out  // [ meta, json ]
 }

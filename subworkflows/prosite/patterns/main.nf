@@ -10,5 +10,5 @@ workflow PROSITE_PATTERNS {
     PARSE_PSSCAN(RUN_PSSCAN.out)
 
     emit:
-    PARSE_PSSCAN.out
+    PARSE_PSSCAN.out  // [ meta, json ]
 }

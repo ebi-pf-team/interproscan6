@@ -30,5 +30,5 @@ workflow SMART {
     )
 
     emit:
-    PARSE_SMART.out
+    PARSE_SMART.out  // [ meta, json ]
 }

@@ -7,8 +7,6 @@ workflow PANTHER {
     batch_size     // int, number of sequences per sub batch for searching
 
     main:
-    results = Channel.empty()
-
     ch_split = fasta
         .map { meta, fasta ->
             fasta
@@ -35,15 +33,16 @@ workflow PANTHER {
         msf
     )
 
-    results = results.mix(PARSE_PANTHER(
+    PARSE_PANTHER(
         PREPARE_TREEGRAFTER.out.json.join(
             RUN_TREEGRAFTER.out, 
             by: [0, 1],
             failOnDuplicate: true,
             failOnMismatch: true
         )
-    ))
+    )
         
     emit:
-    results.map { meta, meta2, json -> tuple (meta, json) }
+    PARSE_PANTHER.out
+        .map { meta, meta2, json -> tuple (meta, json) }  // [ meta, json ]
 }

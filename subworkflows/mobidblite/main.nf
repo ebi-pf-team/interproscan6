@@ -6,7 +6,6 @@ workflow MOBIDBLITE {
     batch_size  // int, number of sequences per sub batch for searching
 
     main:
-    results = Channel.empty()
     ch_split = ch_seqs
         .map { meta, fasta ->
             fasta
@@ -18,8 +17,9 @@ workflow MOBIDBLITE {
 
     RUN_MOBIDBLITE(ch_split)
 
-    results = results.mix(PARSE_MOBIDBLITE(RUN_MOBIDBLITE.out))
+    PARSE_MOBIDBLITE(RUN_MOBIDBLITE.out)
 
     emit:
-    results.map { meta, meta2, json -> tuple (meta, json) }
+    PARSE_MOBIDBLITE.out
+        .map { meta, meta2, json -> tuple (meta, json) }  // [ meta, json ]
 }

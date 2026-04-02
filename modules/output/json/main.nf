@@ -6,12 +6,12 @@ process WRITE_JSON {
     executor 'local'
 
     input:
-    val matches_files  // {query prot seq md5: {model acc: match}}
+    val matches_files
     val output_file
     val seq_db_file
     val nucleic
     val interproscan_version
-    val db_releases
+    val interpro_version
     val jsonlines
 
     output:
@@ -20,9 +20,9 @@ process WRITE_JSON {
     exec:
     ProcessOutputJSON.run(matches_files, 
                           seq_db_file, 
-                          db_releases,
                           nucleic, 
                           interproscan_version,
+                          interpro_version,
                           jsonlines,
                           output_file)
 }
@@ -36,30 +36,21 @@ process WRITE_JSON_BULK {
     path seq_db_file
     val nucleic
     val interproscan_version
-    val db_releases
+    val interpro_version
     val jsonlines
 
     output:
     val output_file
 
     script:
-    def to_serialize = [:]
-    db_releases.each { key, value ->
-        to_serialize[key] = [
-            version: value.version,
-            dirpath: value.dirpath?.toString() 
-        ]
-    }
-    def json = JsonOutput.toJson(to_serialize)
     """
-    echo '${json}' > metadata.json
     groovy -cp "/opt/interproscan6/lib:/opt/interproscan6/lib/*:." /opt/interproscan6/bin/write-output.groovy \
         ${jsonlines ? 'jsonl' : 'json'} \
         . \
-        metadata.json \
         ${seq_db_file} \
         ${nucleic ? 'true' : 'false'} \
         ${interproscan_version} \
+        ${interpro_version} \
         ${output_file}
     chmod 666 ${output_file}
     """

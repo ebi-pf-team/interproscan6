@@ -75,7 +75,7 @@ process SEARCH_SMART {
     path hmmdir
 
     output:
-    tuple val(meta), path(fastas), path("hmmpfam.out")
+    tuple val(meta), path(fastas, arity: '1..*'), path("hmmpfam.out")
 
     script:
     def commands = ""

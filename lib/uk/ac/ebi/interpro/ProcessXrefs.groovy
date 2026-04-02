@@ -12,27 +12,26 @@ import uk.ac.ebi.interpro.RepresentativeInfo
 
 
 class ProcessXrefs {
-    static void run(Path inputPath, Map dbReleases, boolean addGoTerms, 
-                    boolean addPathways, String pantherPaintDirectory, Path outputPath) {
+    static void run(Path inputPath, Path interproPath, Path pantherPaintPath, 
+                    boolean addGoTerms, boolean addPathways, Path outputPath) {
         ObjectMapper mapper = new ObjectMapper()
         def (databaseInfo, entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null, null]
-        if (dbReleases?.interpro?.dirpath != null) {
-            Path interproDir = dbReleases.interpro.dirpath
-            Path databasesJson = interproDir.resolve("databases.json")
+        if (interproPath != null) {
+            Path databasesJson = interproPath.resolve("databases.json")
             databaseInfo = databasesJson.newReader().withCloseable { reader -> 
                 mapper.readValue(reader, Map)
             }
-            Path entriesJson = interproDir.resolve("entries.json")
+            Path entriesJson = interproPath.resolve("entries.json")
             if (Files.isRegularFile(entriesJson)) {
                 entries = entriesJson.newReader().withCloseable { reader -> 
                     mapper.readValue(reader, Map)
                 }
             }
             if (addGoTerms) {
-                (ipr2go, goInfo) = loadXRefFiles(interproDir.resolve("goterms"))
+                (ipr2go, goInfo) = loadXRefFiles(interproPath.resolve("goterms"))
             }
             if (addPathways) {
-                (ipr2go, goInfo) = loadXRefFiles(interproDir.resolve("pathways"))
+                (ipr2go, goInfo) = loadXRefFiles(interproPath.resolve("pathways"))
             }
         }
 
@@ -57,8 +56,7 @@ class ProcessXrefs {
 
                     // Handle PANTHER data
                     if (match.signature.signatureLibraryRelease.library == "PANTHER") {
-                        Path pantherDir = dbReleases.panther.dirpath
-                        updatePantherData(match, pantherDir, pantherPaintDirectory, signatureAcc, entries, goInfo)
+                        updatePantherData(match, pantherPaintPath, signatureAcc, entries, goInfo)
                     }
 
                     // Update signature info
@@ -123,13 +121,13 @@ class ProcessXrefs {
         return [iprData, infoData]
     }
 
-    static void updatePantherData(Match match, Path pantherDir, String paintAnnoDir, 
+    static void updatePantherData(Match match, Path pantherPaintDir,
                                  String signatureAcc, Map entries, Map goInfo) {
         Map<String,String> GO_PATTERN = ["P": "BIOLOGICAL_PROCESS", "C": "CELLULAR_COMPONENT", "F": "MOLECULAR_FUNCTION"]
         Map goTerms = goInfo == null ? null : goInfo["terms"]
         Map signatureEntry = entries == null ? null : entries[signatureAcc]
 
-        Path paintAnnotationFile = pantherDir.resolve("${paintAnnoDir}/${signatureAcc}.json")
+        Path paintAnnotationFile = pantherPaintDir.resolve("${signatureAcc}.json")
         assert Files.isRegularFile(paintAnnotationFile)
 
         def paintAnnotationsContent = paintAnnotationFile.newReader().withCloseable { reader ->

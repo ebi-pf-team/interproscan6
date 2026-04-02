@@ -68,9 +68,9 @@ workflow SCAN_SEQUENCES {
             applications.contains("cathfunfam"),
             ch_cathfunfam,
             batch_size
-        ).set{ ch_cath }
+        )
 
-        results = results.mix(ch_cath)
+        results = results.mix(CATH.out)
     }
 
     if (applications.contains("cdd")) {
@@ -284,8 +284,8 @@ workflow SCAN_SEQUENCES {
             appl_config.signalp_prok.dir,
             appl_config.signalp_prok.use_gpu,
             batch_size
-        ).set{ ch_signalp }
-        results = results.mix(ch_signalp)
+        )
+        results = results.mix(SIGNALP.out)
     }
 
     if (applications.contains("smart")) {
@@ -319,7 +319,6 @@ workflow SCAN_SEQUENCES {
             }
 
         SUPERFAMILY(fasta, ch_superfamily, batch_size)
-
         results = results.mix(SUPERFAMILY.out)
     }
 
@@ -337,24 +336,30 @@ workflow SCAN_SEQUENCES {
         results = results.mix(TMBED.out)
     }
 
-    ch_results = fasta.join(
-        results.groupTuple(),
-        failOnDuplicate: false, // may happen when applications perfom sub-batching
-        failOnMismatch: false   // may happen when all sequences found in Matches API
-    )
+    // Add a dummy null value for each fasta so there are no mismatches when calling join()
+    results = results.mix(fasta.map { meta, fasta -> tuple(meta, null) })
 
-    ch_no_matches = REPORT_NO_MATCHES(ch_results)
-
-    merged_results = ch_results
+    results = fasta
         .join(
-            ch_no_matches,
+            results.groupTuple(),
             failOnDuplicate: true,
             failOnMismatch: true
         )
-        .map { meta, fasta, member_paths, no_match_path ->
-            [meta, member_paths + [no_match_path]]
+        .map { meta, fasta, jsons ->
+            tuple(meta, fasta, jsons.collect().findAll { f -> f != null })
         }
 
+    no_matches = REPORT_NO_MATCHES(results)
+
+    results = results.join(
+        no_matches,
+        failOnDuplicate: true,
+        failOnMismatch: true
+    )
+    .map { meta, fasta, jsons, json ->
+        tuple(meta, jsons + [json])
+    }
+
     emit:
-    merged_results
+    results
 }

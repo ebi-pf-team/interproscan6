@@ -37,8 +37,8 @@ workflow INTERPRO_N {
         ch_json = RUN_INTERPRO_N_CPU.out
     }
 
-    ch_results = PARSE_INTERPRO_N(ch_json, applications)
+    PARSE_INTERPRO_N(ch_json, applications)
 
     emit:
-    ch_results
+    PARSE_INTERPRO_N.out  // [ meta, json ]
 }

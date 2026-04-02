@@ -13,10 +13,10 @@ workflow NCBIFAM {
         "-Z 61295632 --cut_tc"
     )
 
-    ch_ncbifam = PARSE_NCBIFAM(
+    PARSE_NCBIFAM(
         SEARCH_NCBIFAM.out
     )
 
     emit:
-    ch_ncbifam
+    PARSE_NCBIFAM.out  // [ meta, json ]
 }

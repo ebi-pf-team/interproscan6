@@ -3,7 +3,6 @@ include { INIT_DATABASES       } from "../subworkflows/init/databases"
 include { INIT_SEQUENCES       } from "../subworkflows/init/sequences"
 include { LOOKUP               } from "../subworkflows/lookup"
 include { SCAN_SEQUENCES as SCAN_REMAINING;
-          SCAN_SEQUENCES as SCAN_LOCALLY;
           SCAN_SEQUENCES       } from "../subworkflows/scan"
 include { COMBINE              } from "../subworkflows/combine"
 include { OUTPUT               } from "../subworkflows/output"
@@ -46,8 +45,8 @@ workflow INTERPROSCAN {
         globus,
         enforce_compatibility
     )
-    appl_dirs           = INIT_DATABASES.out.directories
-    interpro_version    = INIT_DATABASES.out.interpro_version
+    appl_dirs        = INIT_DATABASES.out.directories
+    interpro_version = INIT_DATABASES.out.interpro_version
 
     INIT_SEQUENCES(
         fasta_file,
@@ -87,7 +86,7 @@ workflow INTERPROSCAN {
             sub_batch_size
         )
 
-        SCAN_LOCALLY(
+        SCAN_SEQUENCES(
             fasta,
             appl_config,
             appl_dirs,
@@ -96,169 +95,41 @@ workflow INTERPROSCAN {
             sub_batch_size
         )
 
-        // SCAN_REMAINING.out.view()
-
-        def expandedRemainingScan = SCAN_REMAINING.out.flatMap { scan ->
-            scan[1].collect { path -> [scan[0], path] }
-        }
-
-        expandedRemainingScan.view()
-
-        def expandedLocalScan     = SCAN_LOCALLY.out.flatMap { scan ->
-            scan[1].collect { path -> [scan[0], path] }
-        }
-
-        
-
-        // expandedRemainingScan.view()
-
-        // def allExpandedScans = expandedRemainingScan.concat(expandedLocalScan)
-        // combined             = precalculated_matches.concat(allExpandedScans)
-        // match_results        = combined.groupTuple()
+        scan_results = scan_results.mix(
+            LOOKUP.out.json,
+            SCAN_REMAINING.out,
+            SCAN_SEQUENCES.out
+        )
+            .groupTuple()
+            .map { meta, jsons -> meta
+                tuple(meta, jsons.flatten())
+            }
     }
 
-    // if (no_matches_api) {
+    // Post-processing: aggregate results across all applications for each sequence and all cross-references
+    COMBINE(
+        scan_results,
+        appl_config,
+        appl_dirs,
+        goterms,
+        pathways,
+        skip_repr_locations,
+        batch_size
+    )
 
-    // } else {
+    output_files = OUTPUT(
+        COMBINE.out,
+        seqdb,
+        formats,
+        outprefix,
+        nucleic,
+        interpro_version,
+        interproscan_version,
+        batch_size
+    )
 
-    // }
-
-    // if (no_matches_api || appls_in_api.isEmpty()) {
-    //     log.info "1"
-    //     appls_in_api.view()
-    //     appls_not_in_api.view()
-    //     SCAN_SEQUENCES(
-    //         fasta,
-    //         appl_config,
-    //         appl_dirs,
-    //         appls_not_in_api,
-    //         applications,
-    //         sub_batch_size
-    //     )
-    // } else {
-    //     log.info "2"
-
-    // }
-
-    // appls_in_api.view()
-    // appls_not_in_api.view()
-
-    // PREPARE_APPLICATIONS(
-    //     applications,
-    //     no_matches_api,
-    //     matches_api_url,
-    //     interproscan_name,
-    //     interproscan_version
-    // )
-    // local_only_apps   = PREPARE_APPLICATIONS.out.local_only_apps.val
-    // matches_api_apps  = PREPARE_APPLICATIONS.out.matches_api_apps.val
-    // api_version       = PREPARE_APPLICATIONS.out.api_version.val
-
-    // PREPARE_DATABASES(
-    //     local_only_apps,
-    //     matches_api_apps,
-    //     apps_config,
-    //     data_dir,
-    //     interpro_version,
-    //     interproscan_version,
-    //     no_matches_api,
-    //     goterms,
-    //     pathways,
-    //     globus,
-    //     enforce_compatibility
-    // )
-    // datadirs = PREPARE_DATABASES.out.versions
-    // iprscan_major_minor = PREPARE_DATABASES.out.iprscan_major_minor
-
-
-
-    // match_results = Channel.empty()
-
-    // if (no_matches_api || matches_api_apps.isEmpty()) {
-    //     SCAN_SEQUENCES(
-    //         ch_seqs,
-    //         db_releases,
-    //         local_only_apps,
-    //         apps_config,
-    //         local_only_apps,
-    //         sub_batch_size
-    //     )
-    //     match_results = SCAN_SEQUENCES.out
-    // } else {
-    //     /* Retrieve precalculated matches from the Match lookup API
-    //     Then run analyses on sequences not listed in the API */
-    //     LOOKUP(
-    //         ch_seqs,
-    //         matches_api_apps,
-    //         db_releases,
-    //         iprscan_major_minor,
-    //         api_version,
-    //         matches_api_url,
-    //         matches_api_chunk_size,
-    //         matches_api_max_retries
-    //     )
-    //     precalculated_matches = LOOKUP.out.precalculatedMatches
-    //     no_matches_fastas     = LOOKUP.out.noMatchesFasta
-
-    //     SCAN_REMAINING(
-    //         no_matches_fastas,
-    //         db_releases,
-    //         matches_api_apps,
-    //         apps_config,
-    //         matches_api_apps + local_only_apps,
-    //         sub_batch_size
-    //     )
-
-    //     SCAN_LOCALLY(
-    //         ch_seqs,
-    //         db_releases,
-    //         local_only_apps,
-    //         apps_config,
-    //         matches_api_apps + local_only_apps,
-    //         sub_batch_size
-    //     )
-
-    //     def expandedRemainingScan = SCAN_REMAINING.out.flatMap { scan ->
-    //         scan[1].collect { path -> [scan[0], path] }
-    //     }
-    //     def expandedLocalScan     = SCAN_LOCALLY.out.flatMap { scan ->
-    //         scan[1].collect { path -> [scan[0], path] }
-    //     }
-
-    //     def allExpandedScans = expandedRemainingScan.concat(expandedLocalScan)
-    //     combined             = precalculated_matches.concat(allExpandedScans)
-    //     match_results        = combined.groupTuple()
-    // }
-    // // match_results format: [[meta, [member1.json, member2.json, ..., memberN.json]]
-
-    // /* COMBINE:
-    // Aggregate matches across all members for each sequence --> single JSON with all matches for the batch
-    // Add InterPro signature and entry desc and names, PAINT annotations (panther only),
-    // go terms (if enabled), and pathways (if enabled). Then identify representative domains and families
-    // */
-    // ch_results = COMBINE(
-    //     match_results,
-    //     db_releases,
-    //     goterms,
-    //     pathways,
-    //     apps_config.panther.paint,
-    //     skip_repr_locations,
-    //     batch_size
-    // )
-
-    // output_files = OUTPUT(
-    //     ch_results,
-    //     seq_db_path,
-    //     formats,
-    //     outprefix,
-    //     nucleic,
-    //     interproscan_version,
-    //     db_releases,
-    //     batch_size
-    // )
-
-    // emit:
-    // output_files
+    emit:
+    output_files
 }
 
 workflow PREPARE_INTERPROSCAN {

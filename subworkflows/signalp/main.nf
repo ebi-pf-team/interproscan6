@@ -72,5 +72,5 @@ workflow SIGNALP {
     }
 
     emit:
-    results
+    results  // [ meta, json ]
 }

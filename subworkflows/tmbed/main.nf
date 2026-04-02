@@ -31,12 +31,12 @@ workflow TMBED {
         ch_tmbed = RUN_TMBED_CPU.out
     }
 
-    ch_results = PARSE_TMBED(
+    PARSE_TMBED(
         ch_tmbed, 
         chunk_overlap, 
         smooth_window
     )
 
     emit:
-    ch_results
+    PARSE_TMBED.out  // [ meta, json ]
 }

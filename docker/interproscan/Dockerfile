@@ -1,5 +1,5 @@
 # Build from the root of the repo
-# docker build -t interpro/interproscan:6.x.x -f utilities/docker/interproscan/Dockerfile .
+# docker build -t interpro/interproscan:6.x.x -f docker/interproscan/Dockerfile .
 FROM ubuntu:latest AS interproscan-base
 LABEL authors="Laise Florentino (lcf@ebi.ac.uk), Emma Hobbs (ehobbs@ebi.ac.uk), Matthias Blum (mblum@ebi.ac.uk)"
 ENV TZ=Europe/London
@@ -36,16 +36,15 @@ ENV PATH="/opt/groovy/bin:/opt/java/openjdk/bin:$PATH"
 COPY --from=pftools /var/lib/pftools/bin/pfsearchV3 /opt/pftools/pfsearchV3
 COPY --from=pftools /var/lib/pftools/bin/pfscanV3 /opt/pftools/pfscanV3
 
-# Get binary for coils, only used by Coils
+# Install COILS
 WORKDIR /opt/coils
-RUN coils_url="https://raw.githubusercontent.com/ebi-pf-team/interproscan/master/core/jms-implementation/support-mini-x86-32/src/coils/ncoils/2.2.1" && \
-    coils_files=$(curl -s https://api.github.com/repos/ebi-pf-team/interproscan/contents/core/jms-implementation/support-mini-x86-32/src/coils/ncoils/2.2.1 | grep "name" | cut -d '"' -f 4) && \
-    for cfile in $coils_files; \
-    do \
-        curl -L -O "$coils_url/$cfile"; \
-    done && \
+COPY docker/interproscan/ncoils-2.2.1.tar.gz .
+RUN tar -xzpf ncoils-2.2.1.tar.gz && \
+    cd ncoils-2.2.1 && \
     make && \
-    find . -type f ! -name 'ncoils' -delete
+    cd .. && \
+    mv ncoils-2.2.1/ncoils . && \
+    rm -rf ncoils-2.2.1
 
 # Install NCBI BLAST, only rpsblast (for CDD)
 # Don't pull the NCBI BLAST image as its BIG! - Just get the bits we need
@@ -115,12 +114,12 @@ RUN curl -L -o cath-resolve-hits https://github.com/UCLOrengoGroup/cath-tools/re
     chmod +x cath-resolve-hits
 
 # Add PRINTS and SFLD binaries
-COPY utilities/docker/interproscan/prints/ /opt/prints/
-COPY utilities/docker/interproscan/sfld/ /opt/sfld/
+COPY docker/interproscan/prints/ /opt/prints/
+COPY docker/interproscan/sfld/ /opt/sfld/
 
 # Add Groovy support files
 COPY lib/ /opt/interproscan6/lib/
-COPY utilities/docker/interproscan/interpro/ /opt/interproscan6/bin/
+COPY docker/interproscan/groovy/ /opt/interproscan6/bin/
 
 WORKDIR /opt/interproscan6
 

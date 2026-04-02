@@ -7,7 +7,6 @@ workflow SUPERFAMILY {
     batch_size // [int]
 
     main:
-    results = channel.empty()
     ch_split = fasta
         .map { meta, fasta ->
             fasta
@@ -21,11 +20,12 @@ workflow SUPERFAMILY {
 
     ch_parse = ssf.map { dir, hmm, selfhits, cla, model, pdbj95d -> tuple (dir, hmm, model) }
 
-    results = results.mix(PARSE_SUPERFAMILY(
+    PARSE_SUPERFAMILY(
         SEARCH_SUPERFAMILY.out,
         ch_parse
-    ))
+    )
 
     emit:
-    results.map { meta, meta2, json -> tuple (meta, json) }
+    PARSE_SUPERFAMILY.out
+        .map { meta, meta2, json -> tuple (meta, json) }  // [ meta, json ]
 }

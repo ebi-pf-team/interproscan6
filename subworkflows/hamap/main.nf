@@ -11,12 +11,12 @@ workflow HAMAP {
         profiles_dir
     )
 
-    ch_hamap = PARSE_PFSEARCH(
+    PARSE_PFSEARCH(
         RUN_PFSEARCH.out,
         "HAMAP",
         "",
     )
 
     emit:
-    ch_hamap
+    PARSE_PFSEARCH.out  // [ meta, json ]
 }

@@ -13,10 +13,10 @@ workflow ANTIFAM {
         "--cut_ga"
     )
 
-    ch_antifam = PARSE_ANTIFAM(
+    PARSE_ANTIFAM(
         SEARCH_ANTIFAM.out
     )
 
     emit:
-    ch_antifam
+    PARSE_ANTIFAM.out  // [ meta, json ]
 }

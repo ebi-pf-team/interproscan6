@@ -6,33 +6,24 @@ process XREFS_BULK {
     label    'mem_high', 'time_veryshort', 'ips6_container'
 
     input:
-    tuple val(meta), path(json_combined)
-    val db_releases
+    tuple val(meta), path(json)
+    path interpro_dir
+    path panther_paint_dir
     val add_goterms
     val add_pathways
-    val panther_paint_dir
 
     output:
-    tuple val(meta), path('matches2xrefs.json')
+    tuple val(meta), path('matches-with-xrefs.json')
 
     script:
-    def to_serialize = [:]
-    db_releases.each { key, value ->
-        to_serialize[key] = [
-            version: value.version,
-            dirpath: value.dirpath?.toString() 
-        ]
-    }
-    def json = JsonOutput.toJson(to_serialize)
     """
-    echo '${json}' > metadata.json
     groovy -cp "/opt/interproscan6/lib:." /opt/interproscan6/bin/add-xrefs.groovy \
-        ${json_combined} \
-        metadata.json \
+        ${json} \
+        ${interpro_dir.name == 'DUMMY' ? '-' : interpro_dir} \
+        ${panther_paint_dir.name == 'DUMMY2' ? '-' : panther_paint_dir} \
         ${add_goterms ? 'true' : 'false'} \
         ${add_pathways ? 'true' : 'false'} \
-        ${panther_paint_dir} \
-        matches2xrefs.json
+        matches-with-xrefs.json
     """
 }
 
@@ -41,26 +32,19 @@ process XREFS {
     executor 'local'
 
     input:
-    tuple val(meta), val(matches_path)
-    val db_releases
+    tuple val(meta), val(json)
+    val interpro_dir
+    val panther_paint_dir
     val add_goterms
     val add_pathways
-    val panther_paint_dir
 
     output:
-    tuple val(meta), path('matches2xrefs.json')
+    tuple val(meta), path('matches-with-xrefs.json')
 
     exec:
-    def output = task.workDir.resolve('matches2xrefs.json')
-
-    /*
-    nf-test doesn't seem to support casting nested objects to file(), so we keep them a strings and convert them here
-    */
-    db_releases.each { _, value ->
-        if (value.dirpath && value.dirpath.getClass().equals(String)) {
-            value.dirpath = file(value.dirpath)
-        }
-    }
-
-    ProcessXrefs.run(matches_path, db_releases, add_goterms, add_pathways, panther_paint_dir, output)
+    def output = task.workDir.resolve('matches-with-xrefs.json')
+    ProcessXrefs.run(json, 
+                     interpro_dir.name == "DUMMY" ? null : interpro_dir, 
+                     panther_paint_dir.name == "DUMMY2" ? null : panther_paint_dir,
+                     add_goterms, add_pathways, output)
 }

@@ -20,5 +20,5 @@ workflow PIRSF {
     )
 
     emit:
-    PARSE_PIRSF.out
+    PARSE_PIRSF.out  // [ meta, json ]
 }

@@ -21,5 +21,5 @@ workflow PFAM {
     )
 
     emit:
-    PARSE_PFAM.out
+    PARSE_PFAM.out  // [ meta, json ]
 }

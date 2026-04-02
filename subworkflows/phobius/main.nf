@@ -13,8 +13,8 @@ workflow PHOBIUS {
         phobius_dir
     )
 
-    ch_phobius = PARSE_PHOBIUS(SEARCH_PHOBIUS.out)
+    PARSE_PHOBIUS(SEARCH_PHOBIUS.out)
 
     emit:
-    ch_phobius
+    PARSE_PHOBIUS  // [ meta, json ]
 }

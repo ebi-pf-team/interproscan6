@@ -27,8 +27,8 @@ workflow DEEPTMHMM {
         ch_deeptmhmm = RUN_DEEPTMHMM_CPU.out
     }
     
-    ch_results = PARSE_DEEPTMHMM(ch_deeptmhmm)
+    PARSE_DEEPTMHMM(ch_deeptmhmm)
 
     emit:
-    ch_results
+    PARSE_DEEPTMHMM.out  // [ meta, json ]
 }

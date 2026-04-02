@@ -24,5 +24,5 @@ workflow PRINTS {
     )
 
     emit:
-    PARSE_PRINTS.out
+    PARSE_PRINTS.out  // [ meta, json ]
 }

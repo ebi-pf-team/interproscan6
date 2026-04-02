@@ -21,5 +21,5 @@ workflow PROSITE_PROFILES {
     )
 
     emit:
-    PARSE_PFSEARCH.out
+    PARSE_PFSEARCH.out  // [ meta, json ]
 }
