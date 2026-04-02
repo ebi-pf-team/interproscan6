@@ -5,12 +5,13 @@
                 "0": [
                     [
                         1,
-                        "antifam.json:md5,52424f100891c909a7043507980a96b8"
+                        2,
+                        "cathfunfam.json:md5,99914b932bd37a50b983c5e7c90ae93b"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-04-02T22:52:58.223523256",
+        "timestamp": "2026-04-02T23:07:06.990972001",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.04.7"

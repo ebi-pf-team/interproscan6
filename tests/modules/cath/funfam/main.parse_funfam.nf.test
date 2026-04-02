@@ -1,0 +1,29 @@
+nextflow_process {
+
+    name "Test Process PARSE_FUNFAM"
+    script "modules/cath/funfam/main.nf"
+    process "PARSE_FUNFAM"
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    1, 
+                    2,
+                    file("${projectDir}/tests/data/cath/funfam/hmmsearch.out"),
+                    file("${projectDir}/tests/data/cath/funfam/resolved.out")
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

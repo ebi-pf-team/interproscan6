@@ -1,0 +1,35 @@
+nextflow_process {
+
+    name "Test Process PARSE_CATHGENE3D"
+    script "modules/cath/gene3d/main.nf"
+    process "PARSE_CATHGENE3D"
+
+    test("Should run without failures") {  
+        when {
+            process {
+                """
+                def hmmsearchGz = file("${projectDir}/tests/data/cath/gene3d/hmmsearch.out.gz")
+                def hmmsearchOut = java.nio.file.Files.createTempFile("hmmsearch.", ".out")
+                new java.util.zip.GZIPInputStream(java.nio.file.Files.newInputStream(hmmsearchGz)).withCloseable { stream ->
+                    java.nio.file.Files.copy(stream, hmmsearchOut, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+                }
+                input[0] = [
+                    1, 
+                    2,
+                    file(hmmsearchOut.toString()),
+                    file("${projectDir}/tests/data/cath/gene3d/cath.tsv")
+                ]
+                """
+            }
+        }
+
+
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}
