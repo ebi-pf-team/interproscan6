@@ -3,20 +3,17 @@ include { PREPARE_FUNFAM; SEARCH_FUNFAM; PARSE_FUNFAM  } from  "../../modules/ca
 
 workflow CATH {
     take:
-    ch_seqs               // channel of tuples (index, fasta file)
+    fasta                 // [meta, fasta]
     report_cathgene3d     // boolean to report Gene3D results
-    cathgene3d_dir        // str repr of the data directory path for Gene3D
-    cathgene3d_hmm        // str repr of the path to the HMM file in the data dir -> datadir/hmmFile
-    cathgene3d_model2sfs  // str repr of the path to the model2sf file in the data dir -> datadir/model2sfsFile
-    cathgene3d_disc_regs  // str repr of the path to the disordered regions file in the data dir -> datadir/discRegsFile
+    cathgene3d_files      // [hmm, model2sfs, disc_regs]
     report_cathfunfam     // boolean to report FunFam results
-    cathfunfam_dir        // str repr of the data directory path for FunFam
+    cathfunfam_dir        // path to the data directory path for FunFam
     batch_size            // int, number of sequences per sub batch for searching
 
     main:
     results = Channel.empty()
 
-    ch_split = ch_seqs
+    ch_split = fasta
         .map { meta, fasta ->
             fasta
                 .splitFasta( by: batch_size, file: true )
@@ -25,16 +22,12 @@ workflow CATH {
         }
         .flatMap()
     
-    // Search Gene3D profiles, selec
     /* Select Gene3D profiles,
        select the best domain matches,
        and assign CATH superfamily to matches */
     SEARCH_GENE3D(
         ch_split,
-        cathgene3d_dir,
-        cathgene3d_hmm,
-        cathgene3d_model2sfs,
-        cathgene3d_disc_regs
+        cathgene3d_files
     )
        
     PARSE_CATHGENE3D(SEARCH_GENE3D.out)

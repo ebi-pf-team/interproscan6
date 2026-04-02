@@ -24,36 +24,49 @@ include { REPORT_NO_MATCHES } from "../../modules/no_matches"
 
 workflow SCAN_SEQUENCES {
     take:
-    ch_seqs             // channel of tuples (index, fasta file)
-    db_releases         // map: [db: version, dirpath]
-    applications        // list[str], applications to run in this workflow
-    apps_config         // map of applications
-    all_appls           // list[str], applications to run across all workflows 
-    batch_size          // int, sub-batch size for computationally demanding apps
+    fasta            // [meta, fasta]
+    appl_config
+    appl_dirs  
+    applications     // application to run in this workflow
+    all_applications // all applications to run across all instances of SCAN_SEQUENCES
+    batch_size       // int, sub-batch size for computationally demanding apps
 
     main:
-    results = Channel.empty()
+    results = channel.empty()
 
     if (applications.contains("antifam")) {
-        ANTIFAM(
-            ch_seqs,
-            db_releases.antifam.dirpath,
-            apps_config.antifam.hmm
-        )
+        ch_antifam = appl_dirs
+            .filter { name, dirpath -> name == "antifam" }
+            .first()
+            .map    { name, dirpath -> dirpath.resolve(appl_config.antifam.hmm) }
 
+        ANTIFAM(fasta, ch_antifam)
         results = results.mix(ANTIFAM.out)
     }
 
     if (applications.contains("cathgene3d") || applications.contains("cathfunfam")) {
+        ch_cathgene3d = appl_dirs
+            .filter { name, dirpath -> name == "cathgene3d" }
+            .first()
+            .map    { name, dirpath ->
+                tuple(
+                    dirpath.resolve(appl_config.cathgene3d.hmm),
+                    dirpath.resolve(appl_config.cathgene3d.model2sfs),
+                    dirpath.resolve(appl_config.cathgene3d.disc_regs)
+                )
+            }
+
+        ch_cathfunfam = appl_dirs
+            .filter { name, dirpath -> name == "cathfunfam" }
+            .first()
+            .map    { name, dirpath -> dirpath }
+        
         CATH(
-            ch_seqs,
+            fasta,
             applications.contains("cathgene3d"),
-            db_releases.cathgene3d.dirpath,
-            apps_config.cathgene3d.hmm,
-            apps_config.cathgene3d.model2sfs,
-            apps_config.cathgene3d.disc_regs,
+            ch_cathgene3d,
             applications.contains("cathfunfam"),
-            db_releases.cathfunfam.dirpath,
+            ch_cathfunfam,
             batch_size
         ).set{ ch_cath }
 
@@ -61,48 +74,53 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("cdd")) {
-        CDD(
-            ch_seqs,
-            db_releases.cdd.dirpath,
-            apps_config.cdd.rpsblast_db,
-            apps_config.cdd.rpsproc_db
-        )
+        ch_cdd = appl_dirs
+            .filter { name, dirpath -> name == "cdd" }
+            .first()
+            .map    { name, dirpath ->
+                tuple(
+                    dirpath,
+                    appl_config.cdd.rpsblast_db,
+                    appl_config.cdd.rpsproc_db
+                )
+            }
 
+        CDD(fasta, ch_cdd)
         results = results.mix(CDD.out)
     }
 
     if (applications.contains("coils")) {
-        COILS(ch_seqs)
+        COILS(fasta)
         results = results.mix(COILS.out)
     }
 
     if (applications.contains("deeptmhmm")) {
         DEEPTMHMM(
-            ch_seqs,
-            apps_config.deeptmhmm.dir,
-            apps_config.deeptmhmm.use_gpu,
+            fasta,
+            appl_config.deeptmhmm.dir,
+            appl_config.deeptmhmm.use_gpu,
             batch_size
         )
         results = results.mix(DEEPTMHMM.out)
     }
 
     if (applications.contains("hamap")) {
-        HAMAP(
-            ch_seqs,
-            db_releases.hamap.dirpath,
-            apps_config.hamap.profiles
-        )
+        ch_hamap = appl_dirs
+            .filter { name, dirpath -> name == "hamap" }
+            .first()
+            .map    { name, dirpath -> dirpath.resolve(appl_config.hamap.profiles) }
 
+        HAMAP(fasta, ch_hamap)
         results = results.mix(HAMAP.out)
     }
 
     if (applications.contains("interpro_n")) {
         INTERPRO_N(
-            ch_seqs,
-            all_appls,
-            apps_config.interpro_n.dir,
-            apps_config.interpro_n.use_gpu,
-            apps_config.interpro_n.batch_size,
+            fasta,
+            all_applications,
+            appl_config.interpro_n.dir,
+            appl_config.interpro_n.use_gpu,
+            appl_config.interpro_n.batch_size,
             batch_size
         )
 
@@ -110,178 +128,216 @@ workflow SCAN_SEQUENCES {
     }
 
     if (applications.contains("mobidblite")) {
-        MOBIDBLITE(ch_seqs, batch_size)
+        MOBIDBLITE(fasta, batch_size)
         results = results.mix(MOBIDBLITE.out)
     }
 
     if (applications.contains("ncbifam")) {
-        NCBIFAM(
-            ch_seqs,
-            db_releases.ncbifam.dirpath,
-            apps_config.ncbifam.hmm
-        )
+        ch_ncbifam = appl_dirs
+            .filter { name, dirpath -> name == "ncbifam" }
+            .first()
+            .map    { name, dirpath -> dirpath.resolve(appl_config.ncbifam.hmm) }
 
+        NCBIFAM(fasta, ch_ncbifam)
         results = results.mix(NCBIFAM.out)
     }
 
     if (applications.contains("panther")) {
-        PANTHER(
-            ch_seqs,
-            db_releases.panther.dirpath,
-            apps_config.panther.hmm,
-            apps_config.panther.msf,
-            batch_size
-        )
+        ch_panther = appl_dirs
+            .filter { name, dirpath -> name == "panther" }
+            .first()
+            .map    { name, dirpath ->
+                tuple(
+                    dirpath.resolve(appl_config.panther.hmm),
+                    dirpath.resolve(appl_config.panther.msf)
+                )
+            }
 
+        PANTHER(fasta, ch_panther, batch_size)
         results = results.mix(PANTHER.out)
     }
 
     if (applications.contains("pfam")) {
-        PFAM(
-            ch_seqs,
-            db_releases.pfam.dirpath,
-            apps_config.pfam.hmm,
-            apps_config.pfam.dat
-        )
-
+        ch_pfam = appl_dirs
+            .filter { name, dirpath -> name == "pfam" }
+            .first()
+            .map    { name, dirpath ->
+                tuple(
+                    dirpath.resolve(appl_config.pfam.hmm),
+                    dirpath.resolve(appl_config.pfam.dat)
+                )
+            }
+        
+        PFAM(fasta, ch_pfam)
         results = results.mix(PFAM.out)
     }
 
     if (applications.contains("phobius")) {
         PHOBIUS(
-            ch_seqs,
-            apps_config.phobius.dir
+            fasta,
+            appl_config.phobius.dir
         )
         results = results.mix(PHOBIUS.out)
     }
 
     if (applications.contains("pirsf")) {
-        PIRSF(
-            ch_seqs,
-            db_releases.pirsf.dirpath,
-            apps_config.pirsf.hmm,
-            apps_config.pirsf.dat
-        )
+        ch_pirsf = appl_dirs
+            .filter { name, dirpath -> name == "pirsf" }
+            .first()
+            .map    { name, dirpath ->
+                tuple(
+                    dirpath.resolve(appl_config.pirsf.hmm),
+                    dirpath.resolve(appl_config.pirsf.dat)
+                )
+            }
 
+        PIRSF(fasta, ch_pirsf)
         results = results.mix(PIRSF.out)
     }
 
     if (applications.contains("pirsr")) {
-        PIRSR(
-            ch_seqs,
-            db_releases.pirsr.dirpath,
-            apps_config.pirsr.hmm,
-            apps_config.pirsr.rules
-        )
+        ch_pirsr = appl_dirs
+            .filter { name, dirpath -> name == "pirsr" }
+            .first()
+            .map    { name, dirpath ->
+                tuple(
+                    dirpath.resolve(appl_config.pirsr.hmm),
+                    dirpath.resolve(appl_config.pirsr.rules)
+                )
+            }
 
+        PIRSR(fasta, ch_pirsr)
         results = results.mix(PIRSR.out)
     }
 
     if (applications.contains("prints")) {
-        PRINTS(
-            ch_seqs,
-            db_releases.prints.dirpath,
-            apps_config.prints.pval,
-            apps_config.prints.hierarchy,
-            batch_size
-        )
+        ch_prints = appl_dirs
+            .filter { name, dirpath -> name == "prints" }
+            .first()
+            .map    { name, dirpath ->
+                tuple(
+                    dirpath.resolve(appl_config.prints.pval),
+                    dirpath.resolve(appl_config.prints.hierarchy)
+                )
+            }
 
+        PRINTS(fasta, ch_prints, batch_size)
         results = results.mix(PRINTS.out)
     }
 
     if (applications.contains("prositepatterns")) {
-        PROSITE_PATTERNS(
-            ch_seqs,
-            db_releases.prositepatterns.dirpath,
-            apps_config.prositepatterns.dat,
-            apps_config.prositepatterns.evaluator
-        )
+        ch_prositepatterns = appl_dirs
+            .filter { name, dirpath -> name == "prositepatterns" }
+            .first()
+            .map    { name, dirpath ->
+                tuple(
+                    dirpath.resolve(appl_config.prositepatterns.dat),
+                    dirpath.resolve(appl_config.prositepatterns.evaluator)
+                )
+            }
 
+        PROSITE_PATTERNS(fasta, ch_prositepatterns)
         results = results.mix(PROSITE_PATTERNS.out)
     }
 
     if (applications.contains("prositeprofiles")) {
-        PROSITE_PROFILES(
-            ch_seqs,
-            db_releases.prositeprofiles.dirpath,
-            apps_config.prositeprofiles.profiles,
-            apps_config.prositeprofiles.skip_flagged_profiles
-        )
+        ch_prositeprofiles = appl_dirs
+            .filter { name, dirpath -> name == "prositeprofiles" }
+            .first()
+            .map    { name, dirpath ->
+                tuple(
+                    dirpath.resolve(appl_config.prositeprofiles.profiles),
+                    dirpath.resolve(appl_config.prositeprofiles.skip_flagged_profiles)
+                )
+            }
 
+        PROSITE_PROFILES(fasta, ch_prositeprofiles)
         results = results.mix(PROSITE_PROFILES.out)
     }
 
     if (applications.contains("sfld")) {
-        SFLD(
-            ch_seqs,
-            db_releases.sfld.dirpath,
-            apps_config.sfld.hmm,
-            apps_config.sfld.sites_annotation,
-            apps_config.sfld.hierarchy
-        )
-
+        ch_sfld = appl_dirs
+            .filter { name, dirpath -> name == "sfld" }
+            .first()
+            .map    { name, dirpath ->
+                tuple(
+                    dirpath.resolve(appl_config.sfld.hmm),
+                    dirpath.resolve(appl_config.sfld.sites_annotation),
+                    dirpath.resolve(appl_config.sfld.hierarchy)
+                )
+            }
+    
+        SFLD(fasta, ch_sfld)
         results = results.mix(SFLD.out)
     }
 
     if (applications.contains("signalp_euk") || applications.contains("signalp_prok")) {
         SIGNALP(
-            ch_seqs,
+            fasta,
             applications,
-            apps_config.signalp_euk.organism,
-            apps_config.signalp_euk.mode,
-            apps_config.signalp_euk.dir,
-            apps_config.signalp_euk.use_gpu,
-            apps_config.signalp_prok.organism,
-            apps_config.signalp_prok.mode,
-            apps_config.signalp_prok.dir,
-            apps_config.signalp_prok.use_gpu,
+            appl_config.signalp_euk.organism,
+            appl_config.signalp_euk.mode,
+            appl_config.signalp_euk.dir,
+            appl_config.signalp_euk.use_gpu,
+            appl_config.signalp_prok.organism,
+            appl_config.signalp_prok.mode,
+            appl_config.signalp_prok.dir,
+            appl_config.signalp_prok.use_gpu,
             batch_size
         ).set{ ch_signalp }
         results = results.mix(ch_signalp)
     }
 
     if (applications.contains("smart")) {
-        SMART(
-            ch_seqs,
-            db_releases.smart.dirpath,
-            apps_config.smart.hmm3,
-            apps_config.smart.hmm2,
-            apps_config.smart.chunk_size
-        )
+        ch_smart = appl_dirs
+            .filter { name, dirpath -> name == "smart" }
+            .first()
+            .map    { name, dirpath ->
+                tuple(
+                    dirpath.resolve(appl_config.smart.hmm3),
+                    dirpath.resolve(appl_config.smart.hmm2)
+                )
+            }
 
+        SMART(fasta, ch_smart)
         results = results.mix(SMART.out)
     }
 
     if (applications.contains("superfamily")) {
-        SUPERFAMILY(
-            ch_seqs,
-            db_releases.superfamily.dirpath,
-            apps_config.superfamily.hmm,
-            apps_config.superfamily.selfhits,
-            apps_config.superfamily.cla,
-            apps_config.superfamily.model,
-            apps_config.superfamily.pdbj95d,
-            batch_size
-        )
+        ch_superfamily = appl_dirs
+            .filter { name, dirpath -> name == "superfamily" }
+            .first()
+            .map    { name, dirpath ->
+                tuple(
+                    dirpath,
+                    appl_config.superfamily.hmm,
+                    appl_config.superfamily.selfhits,
+                    appl_config.superfamily.cla,
+                    appl_config.superfamily.model,
+                    appl_config.superfamily.pdbj95d,
+                )
+            }
+
+        SUPERFAMILY(fasta, ch_superfamily, batch_size)
 
         results = results.mix(SUPERFAMILY.out)
     }
 
     if (applications.contains("tmbed")) {
         TMBED(
-            ch_seqs,
-            apps_config.tmbed.use_gpu,
-            apps_config.tmbed.chunk_size,
-            apps_config.tmbed.chunk_overlap,
-            apps_config.tmbed.smooth_window,
-            apps_config.tmbed.batch_size,
+            fasta,
+            appl_config.tmbed.use_gpu,
+            appl_config.tmbed.chunk_size,
+            appl_config.tmbed.chunk_overlap,
+            appl_config.tmbed.smooth_window,
+            appl_config.tmbed.batch_size,
             batch_size
         )
 
         results = results.mix(TMBED.out)
     }
 
-    ch_results = ch_seqs.join(
+    ch_results = fasta.join(
         results.groupTuple(),
         failOnDuplicate: false, // may happen when applications perfom sub-batching
         failOnMismatch: false   // may happen when all sequences found in Matches API

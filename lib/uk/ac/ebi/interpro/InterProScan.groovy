@@ -92,6 +92,10 @@ class InterProScan {
             description: "Comma-separated list of applications to exclude from the analysis. Default: none.",
         ],
         [
+            name: "skip-interpro-version-check",
+            description: "Disable the version compatibility check between InterProScan and InterPro data."
+        ],
+        [
             name: "use-gpu",
             description: "Enable GPU acceleration for supported ML-based applications."
         ],
@@ -112,11 +116,6 @@ class InterProScan {
             name: "skip-repr-locations",
             description: null
             // Used in production. Skips identifying representative locations
-        ],
-        [
-            name: "skip-interpro-version-check",
-            description: null
-            // Used in production. If set, disables the version compatibility check between IPRScan and InterPro data versions
         ],
         [
             name: "apps-config",
@@ -207,39 +206,9 @@ class InterProScan {
         return md.digest().collect { String.format("%02x", it)}.join()
     }
 
-    static String resolveFile(String filePath) {
-        Path path = Paths.get(filePath)
-        return Files.isRegularFile(path) ? path.toRealPath() : null
-    }
-
     static List<String> getAppsWithData(List<String> applications, Map appsConfig) {
         return applications.findAll { String appName ->
             appsConfig.get(appName)?.has_data
-        }
-    }
-
-    static resolveDirectory(String dirPath, boolean mustExist = false, boolean mustBeWritable = false) {
-        if (!dirPath && mustExist) { // triggered when data dir is needed but --datadir not used
-            return [null, "'--datadir <DATA-DIR>' is required for the selected applications."]
-        }
-        Path path = Paths.get(dirPath)
-
-        if (Files.exists(path)) {
-            if (!Files.isDirectory(path)) {
-                return [null, "Not a directory: ${dirPath}."]
-            } else if (mustBeWritable && !Files.isWritable(path)) {
-                return [null, "Directory not writable: ${dirPath}."]
-            }
-            return [path.toRealPath(), null]
-        } else if (mustExist) {
-            return [null, "Not a directory: ${dirPath}."]
-        } else {
-            try {
-                Files.createDirectories(path)
-                return [path.toRealPath(), null]
-            } catch (IOException) {
-                return [null, "Cannot create directory: ${dirPath}."]
-            }
         }
     }
 
@@ -415,27 +384,6 @@ class InterProScan {
         String url = "${baseUrl}/${majorMinorVersion}/versions.json"
         Map versions = HTTPRequest.fetch(url, null, 2, false)
         return versions?.interpro?.collect { it?.toString() } ?: null
-    }
-
-    static validateXrefFiles(String xref_dir, Map xRefsConfig, boolean goterms, boolean pathways) {
-        def error = ""
-        def addError = { type, suffix ->
-            String path = "${xref_dir}/${xRefsConfig[type]}${suffix}"
-            if (!resolveFile(path)) {
-                error << "${type}${suffix}: ${path}"
-            }
-        }
-        addError('entries',  '')  // we hard code the file ext in xrefsconfig so no suffix needed here
-        addError('databases', '')  // we hard code the file ext in xrefsconfig so no suffix needed here
-        if (goterms) {
-            addError('goterms', '.ipr.json')
-            addError('goterms', '.json')
-        }
-        if (pathways) {
-            addError('pathways', '.ipr.json')
-            addError('pathways', '.json')
-        }
-        return error ? "Could not find the following XREF data files\n${error.join('\n')}" : null
     }
 
     static Set<String> validateFormats(String userFormats) {

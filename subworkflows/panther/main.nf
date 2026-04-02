@@ -2,16 +2,14 @@ include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER } 
 
 workflow PANTHER {
     take:
-    ch_seqs    // channel of tuples (meta, fasta file)
-    dir        // str repr of the data directory path
-    hmm        // str repr of the path to the HMM file in the data dir -> datadir/hmmFile
-    msf        // str repr of the path to the MSF file in the data dir -> datadir/msfFile
-    batch_size // int, number of sequences per sub batch for searching
+    fasta          // [meta, fasta]
+    panther        // [hmm, msf]
+    batch_size     // int, number of sequences per sub batch for searching
 
     main:
     results = Channel.empty()
 
-    ch_split = ch_seqs
+    ch_split = fasta
         .map { meta, fasta ->
             fasta
                 .splitFasta( by: batch_size, file: true )
@@ -20,21 +18,20 @@ workflow PANTHER {
         }
         .flatMap()
 
+    hmm = panther.map { hmm, msf -> hmm }
     SEARCH_PANTHER(
         ch_split,
-        dir,
         hmm
     )
 
+    msf = panther.map { hmm, msf -> msf }
     PREPARE_TREEGRAFTER(
         SEARCH_PANTHER.out,
-        dir,
         msf
     )
 
     RUN_TREEGRAFTER(
         PREPARE_TREEGRAFTER.out.fasta,
-        dir,
         msf
     )
 

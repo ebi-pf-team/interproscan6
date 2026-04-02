@@ -2,28 +2,27 @@ include { RUN_PRINTS; PARSE_PRINTS } from  "../../modules/prints"
 
 workflow PRINTS {
     take:
-    ch_seqs             // channel of tuples (index, fasta file)
-    dirpath             // str repr of the data directory path
-    pvalfile            // str repr of the path to the p-value file in the data dir -> datadir/pvalFile
-    hierarchyfile       // str repr of the path to the hierarchy file in the data dir -> datadir/hierarchyFile
-    batch_size          // int, number of sequences per sub-batch for searching
+    fasta       // [meta, fasta]
+    prints      // [pval, hierarchy]
+    batch_size  // [int]
 
     main:
-    ch_split = ch_seqs
+    ch_split = fasta
         .splitFasta( by: batch_size, file: true )
+
+    pval = prints.map { pval, hierarchy -> pval }
+    hierarchy = prints.map { pval, hierarchy -> hierarchy }
 
     RUN_PRINTS(
         ch_split,
-        dirpath,
-        pvalfile
+        pval
     )
 
-    ch_prints = PARSE_PRINTS(
+    PARSE_PRINTS(
         RUN_PRINTS.out,
-        dirpath,
-        hierarchyfile
+        hierarchy
     )
 
     emit:
-    ch_prints
+    PARSE_PRINTS.out
 }

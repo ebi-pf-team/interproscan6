@@ -2,24 +2,24 @@ include { RUN_PFSEARCH ; PARSE_PFSEARCH } from  "../../../modules/pftools"
 
 workflow PROSITE_PROFILES {
     take:
-    ch_seqs        // channel of tuples (index, fasta file)
-    dirpath        // str repr of the data directory path
-    profiles_dir   // str repr of the path to the profiles directory in the data dir -> datadir/profilesDir
-    blacklist_file // str repr of the path to the blacklist file in the data dir -> datadir/blacklistFile
+    fasta       // [meta, fasta]
+    profiles    // [dir, skipped]
 
     main:
+    ch_dir = profiles. map { dir, skipped -> dir }
+    ch_skipped = profiles. map { dir, skipped -> skipped }
+
     RUN_PFSEARCH(
-        ch_seqs,
-        dirpath,
-        profiles_dir
+        fasta,
+        ch_dir
     )
-    ch_prosite = PARSE_PFSEARCH(
+
+    PARSE_PFSEARCH(
         RUN_PFSEARCH.out,
         "PROSITE profiles",
-        dirpath,
-        blacklist_file
+        ch_skipped
     )
 
     emit:
-    ch_prosite
+    PARSE_PFSEARCH.out
 }

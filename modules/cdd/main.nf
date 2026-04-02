@@ -10,9 +10,7 @@ process SEARCH_CDD {
 
     input:
     tuple val(meta), path(fasta)
-    path cdd_dir
-    val rpsblast_db
-    val rpsproc_db
+    tuple path(dir), val(rpsblast_db), val(rpsproc_db)
 
     output:
     tuple val(meta), path("rpsbproc.out")
@@ -28,14 +26,14 @@ process SEARCH_CDD {
 
     rpsblast \
         -query ${fasta} \
-        -db "${cdd_dir}/${rpsblast_db}" \
+        -db "${dir}/${rpsblast_db}" \
         -out rpsblast.out \
         -evalue 0.01 -seg no -outfmt 11
 
     rpsbproc \
         --infile rpsblast.out \
         --outfile rpsbproc.out \
-        --data-path ${cdd_dir}/${rpsproc_db} \
+        --data-path ${dir}/${rpsproc_db} \
         -m std
     """
 }

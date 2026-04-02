@@ -10,12 +10,7 @@ process SEARCH_SUPERFAMILY {
 
     input:
     tuple val(meta), val(meta2), path(fasta)
-    path dirpath
-    val hmm
-    val selfhits
-    val cla
-    val model
-    val pdbj95d
+    tuple path(dir), val(hmm), val(selfhits), val(cla), val(model), val(pdbj95d)
 
     output:
     tuple val(meta), val(meta2), path("superfamily.out")
@@ -25,14 +20,14 @@ process SEARCH_SUPERFAMILY {
     hmmscan \
         -E 10 -Z 15438 \
         --cpu ${task.cpus} \
-        ${dirpath}/${hmm} ${fasta} > hmmscan.out
+        ${dir}/${hmm} ${fasta} > hmmscan.out
 
     ass3_single_threaded.pl \
         -e 0.0001 -t n -f 1 \
-        -s ${dirpath}/${selfhits} \
-        -r ${dirpath}/${cla} \
-        -m ${dirpath}/${model} \
-        -p ${dirpath}/${pdbj95d} \
+        -s ${dir}/${selfhits} \
+        -r ${dir}/${cla} \
+        -m ${dir}/${model} \
+        -p ${dir}/${pdbj95d} \
         ${fasta} \
         hmmscan.out \
         superfamily.out
@@ -45,9 +40,7 @@ process PARSE_SUPERFAMILY {
 
     input:
     tuple val(meta), val(meta2), val(superfamily_out)
-    val dirpath
-    val model_tsv
-    val hmm
+    tuple val(dirpath), val(hmm), val(model)
 
     output:
     tuple val(meta), val(meta2), path("superfamily.json")
@@ -55,7 +48,7 @@ process PARSE_SUPERFAMILY {
     exec:
     SignatureLibraryRelease library = new SignatureLibraryRelease("SUPERFAMILY", null)
     def model2sf = [:]
-    dirpath.resolve(model_tsv).eachLine { line ->
+    dirpath.resolve(model).eachLine { line ->
         def fields = line.trim().split(/\t/)
         String modelId = fields[0]
         String superfamilyAccession = fields[1]

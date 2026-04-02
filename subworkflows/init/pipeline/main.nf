@@ -21,8 +21,8 @@ workflow INIT_PIPELINE {
 
     main:
     // Check the input
-    fasta = InterProScan.resolveFile(input)
-    if (!fasta) {
+    fasta = file(input)
+    if (!fasta.isFile()) {
         log.error "No such file: ${input}"
         exit 1
     }
@@ -60,12 +60,14 @@ workflow INIT_PIPELINE {
             log.error "'--datadir <DATA-DIR>' is required for the selected applications."
             exit 1
         }
-    
-        (datadir, error) = InterProScan.resolveDirectory(datadir, false, false)
-        if (datadir == null) {
-            log.error error
+
+        datadir = file(datadir)
+        if (datadir.isFile()) {
+            log.error "'--datadir <DATA-DIR>' is required and cannot be an existing file."
             exit 1
-        }
+        } else if (!datadir.isDirectory()) {
+            datadir.mkdirs()
+        }            
     } else {
         datadir = null
     }
@@ -76,27 +78,34 @@ workflow INIT_PIPELINE {
         exit 1
     }
 
-    (outdir, error) = InterProScan.resolveDirectory(outdir, false, false)
-    if (!outdir) {
-        log.error error
+    if (outdir == null) {
+        log.error "'--outdir <OUTPUT-DIR>' is required."
         exit 1
     }
 
+    outdir = file(outdir)
+    if (outdir.isFile()) {
+        log.error "'--outdir <OUTPUT-DIR>' is required and cannot be an existing file."
+        exit 1
+    } else if (!outdir.isDirectory()) {
+        outdir.mkdirs()
+    }
+
     if (outprefix == null) {
-        outprefix = "${outdir}/${fasta.split('/').last()}"
+        outprefix = outdir.resolve(fasta.name)
     } else if (outprefix.contains("/") || outprefix.contains(File.separator)) {
         log.error "--outprefix must not contain slashes or directory names. Use --outdir to control output location."
         exit 1
     } else {
-        outprefix = "${outdir}/${outprefix}"
+        outprefix = outdir.resolve(outprefix)
     }
 
     emit:
-    fasta            // str: path to input fasta file
+    fasta            // path: path to input fasta file
     apps             // list: selected applications
     apps_config      // map: updated applications configuration
     datadir          // path: path to data directory, or null if not needed
-    outprefix        // str: base path for output files
+    outprefix        // path: base path for output files
     formats          // set<String>: output file formats
     version          // str: InterPro version (or "latest")
 }

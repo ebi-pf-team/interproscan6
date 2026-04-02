@@ -10,8 +10,7 @@ process SEARCH_PIRSF {
 
     input:
     tuple val(meta), path(fasta)
-    path dir
-    val hmm
+    path hmm
 
     output:
     tuple val(meta), path(fasta), path("hmmsearch.out")
@@ -21,7 +20,7 @@ process SEARCH_PIRSF {
     hmmsearch \
         -E 0.01 --acc \
         --cpu ${task.cpus} \
-        ${dir}/${hmm} ${fasta} > hmmsearch.out
+        ${hmm} ${fasta} > hmmsearch.out
     """
 }
 
@@ -31,14 +30,13 @@ process PARSE_PIRSF {
 
     input:
     tuple val(meta), val(fasta), val(hmmsearch_out)
-    val dirpath
     val datfile
 
     output:
     tuple val(meta), path("pirsf.json")
 
     exec:
-    def (models, subfamilies) = parseDatFile(dirpath.resolve(datfile))
+    def (models, subfamilies) = parseDatFile(datfile)
     def hmmerMatches = HMMER3.parseOutput(hmmsearch_out, "PIRSF")
     Map<String, String> sequences = FastaFile.parse(fasta)
 

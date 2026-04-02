@@ -1,8 +1,8 @@
 nextflow_process {
 
-    name "Test Process FIND_MISSING_DATA"
+    name "Test Process FIND_DATABASES"
     script "modules/download/main.nf"
-    process "FIND_MISSING_DATA"
+    process "FIND_DATABASES"
 
     test("Should run without failures") {
 

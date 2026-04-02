@@ -13,8 +13,7 @@ process SEARCH_PANTHER {
 
     input:
     tuple val(meta), val(meta2), path(fasta)
-    path hmmdir
-    val hmmfile
+    path hmm
 
     output:
     tuple val(meta), val(meta2), path("hmmsearch.out")
@@ -24,7 +23,7 @@ process SEARCH_PANTHER {
     hmmsearch \
         -Z 65000000 -E 0.001 \
         --cpu ${task.cpus} \
-        ${hmmdir}/${hmmfile} ${fasta} > hmmsearch.out
+        ${hmm} ${fasta} > hmmsearch.out
     """
 }
 
@@ -34,7 +33,6 @@ process PREPARE_TREEGRAFTER {
 
     input:
     tuple val(meta), val(meta2), val(hmmseach_out)
-    val panther_dir
     val msf
 
     output:
@@ -93,7 +91,7 @@ process PREPARE_TREEGRAFTER {
 
         // Get expected length of the sequence
         def familyId = match.modelAccession
-        def fastaPath = file("${panther_dir}/${msf}/${familyId}.AN.fasta")
+        def fastaPath = msf.resolve("${familyId}.AN.fasta")
         assert fastaPath.exists()
         def sequences = FastaFile.parse(fastaPath)  // [md5 : "seq"]
         def length = sequences.values().first().length()
@@ -147,8 +145,7 @@ process RUN_TREEGRAFTER {
     
     input:
     tuple val(meta), val(meta2), val(sequenceIds), val(familyIds), val(fastas)
-    path panther_dir
-    val msf
+    path msf
 
     output:
     tuple val(meta), val(meta2), path("epang.tsv")
@@ -163,20 +160,20 @@ process RUN_TREEGRAFTER {
             def family = entry[1]
             def fastaPath = entry[2]
            
-           // Run EPA-ng
+            // Run EPA-ng
             def epang_command = "epa-ng"
             epang_command += " -G 0.05"
             epang_command += " -m WAG"
             epang_command += " -T ${task.cpus}"
-            epang_command += " -t ${panther_dir}/${msf}/${family}.bifurcate.newick"
-            epang_command += " -s ${panther_dir}/${msf}/${family}.AN.fasta"
+            epang_command += " -t " + msf.resolve("${family}.bifurcate.newick")
+            epang_command += " -s " + msf.resolve("${family}.AN.fasta")
             epang_command += " -q ${fastaPath}"
             epang_command += " --redo"
 
             // Parse results
             def py_command = "parse_epang.py"
             py_command += " epa_result.jplace"
-            py_command += " ${panther_dir}/${msf}/${family}.newick"
+            py_command += " " + msf.resolve("${family}.newick")
 
             // Add sequence ID
             def awk_command = "awk '{print \"${seqID}\",\$0}'"

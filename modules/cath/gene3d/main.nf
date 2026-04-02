@@ -8,10 +8,7 @@ process SEARCH_GENE3D {
 
     input:
     tuple val(meta), val(meta2), path(fasta)
-    path dirpath
-    val hmmfile
-    val dom2fam
-    val disc_pickle
+    tuple path(hmmfile), path(dom2fam), path(disc_pickle)
 
     output:
     tuple val(meta), val(meta2), path("hmmsearch.out"), path("cath.tsv")
@@ -21,7 +18,7 @@ process SEARCH_GENE3D {
     hmmsearch \
         -Z 65245 -E 0.001 \
         --cpu ${task.cpus} \
-        ${dirpath}/${hmmfile} ${fasta} > hmmsearch.out
+        ${hmmfile} ${fasta} > hmmsearch.out
 
     cath-resolve-hits \
         --input-format=hmmsearch_out \
@@ -30,8 +27,8 @@ process SEARCH_GENE3D {
         --output-hmmer-aln hmmsearch.out > resolved.out
 
     assign_cath_superfamilies.py \
-        ${dirpath}/${dom2fam} \
-        ${dirpath}/${disc_pickle} \
+        ${dom2fam} \
+        ${disc_pickle} \
         resolved.out \
         cath.tsv
     """

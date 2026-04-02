@@ -9,8 +9,7 @@ process PREFILTER_SMART {
 
     input:
     tuple val(meta), path(fasta)
-    path dirpath
-    val hmmfile
+    path hmmfile
 
     output:
     tuple val(meta), path("hmmsearch.out"), path(fasta)
@@ -19,7 +18,7 @@ process PREFILTER_SMART {
     """
     hmmsearch \
         -E 100 --domE 100 --incE 100 --incdomE 100 --cpu ${task.cpus} \
-        ${dirpath}/${hmmfile} ${fasta} > hmmsearch.out
+        ${hmmfile} ${fasta} > hmmsearch.out
     """
 }
 
@@ -29,9 +28,7 @@ process PREPARE_SMART {
 
     input:
     tuple val(meta), val(hmmseach_out), val(fasta)
-    val dirpath
     val hmmdir
-    val chunk_size
 
     output:
     tuple val(meta), path(fastas), val(models)
@@ -55,7 +52,7 @@ process PREPARE_SMART {
     models = []
     // Create a FASTA file for each profile to search with
     model2seqs.each { modelAcc, seqIds ->
-        def mdlFile = file("${dirpath}/${hmmdir}/${modelAcc}.hmm")
+        def mdlFile = hmmdir.resolve("${modelAcc}.hmm")
         if (!mdlFile.exists()) return
         def fasta = task.workDir.resolve("${modelAcc}.fa")
         fasta.withWriter('UTF-8') { writer ->
@@ -75,8 +72,7 @@ process SEARCH_SMART {
 
     input:
     tuple val(meta), path(fastas), val(models)
-    path dirpath
-    val hmmdir
+    path hmmdir
 
     output:
     tuple val(meta), path(fastas), path("hmmpfam.out")
@@ -88,7 +84,7 @@ process SEARCH_SMART {
         .each { entry -> 
             def fasta = entry[0]
             def model = entry[1]
-            def hmm = dirpath.resolve("${hmmdir}/${model}.hmm")
+            def hmm = hmmdir.resolve("${model}.hmm")
             commands += "hmmpfam"
             commands += " --acc -A 0 -E 0.01 -Z 350000 --cpu ${task.cpus}"
             commands += " ${hmm} ${fasta} >> hmmpfam.out\n"
@@ -106,7 +102,6 @@ process PARSE_SMART {
 
     input:
     tuple val(meta), val(fastas), val(hmmpfam_out)
-    val dirpath
     val hmmdir
 
     output:
@@ -119,8 +114,7 @@ process PARSE_SMART {
         sequences = sequences + FastaFile.parse(fasta)
     }
 
-    def hmmpath = file(dirpath).resolve(hmmdir)
-    def hmmLengths = HMMER2.parseHMMs(hmmpath)
+    def hmmLengths = HMMER2.parseHMMs(hmmdir)
     def matches = HMMER2.parseOutput(hmmpfam_out, hmmLengths, "SMART")
 
     String tyrKinaseAccession = "SM00219"

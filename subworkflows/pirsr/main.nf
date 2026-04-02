@@ -3,25 +3,24 @@ include { PARSE_PIRSR               } from  "../../modules/pirsr"
 
 workflow PIRSR {
     take:
-    ch_seqs           // channel of tuples (index, fasta file)
-    dirpath           // str repr of the data directory path
-    hmmfile           // str repr of the path to the HMM file in the data dir -> datadir/hmmFile
-    rulesfile         // str repr of the path to the rules file in the data dir -> datadir/rulesFile
+    fasta    // [meta, fasta]
+    pirsr    // [hmm, json]
 
     main:
+    hmm  = pirsr.map { hmm, json -> hmm }
+    json = pirsr.map { hmm, json -> json }
+
     SEARCH_PIRSR(
-        ch_seqs,
-        dirpath,
-        hmmfile,
+        fasta,
+        hmm,
         "-E 0.01 --acc"
     )
 
-    ch_pirsr = PARSE_PIRSR(
+    PARSE_PIRSR(
         SEARCH_PIRSR.out,
-        dirpath,
-        rulesfile
+        json
     )
 
     emit:
-    ch_pirsr
+    PARSE_PIRSR.out
 }

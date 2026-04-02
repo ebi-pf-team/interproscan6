@@ -13,9 +13,7 @@ process SEARCH_SFLD {
 
     input:
     tuple val(meta), path(fasta)
-    path dirpath
-    val hmmfile
-    val annofile
+    tuple path(hmm), path(sites)
 
     output:
     tuple val(meta), path("hmmsearch.out"), path("sfld.tsv")
@@ -29,13 +27,13 @@ process SEARCH_SFLD {
         -o hmmsearch.out \
         --domtblout hmmsearch.tab \
         -A hmmsearch.sto \
-        ${dirpath}/${hmmfile} ${fasta}
+        ${hmm} ${fasta}
 
     sfld_postprocess \
         --alignment hmmsearch.sto \
         --dom hmmsearch.tab \
         --hmmer-out hmmsearch.out \
-        --site-info "${dirpath}/${annofile}" \
+        --site-info ${sites} \
         --output sfld.tsv
     """
 }
@@ -46,7 +44,6 @@ process PARSE_SFLD {
 
     input:
     tuple val(meta), val(hmmsearch_out), val(postprocess_out)
-    val dirpath
     val hierarchydb
 
     output:
@@ -55,7 +52,7 @@ process PARSE_SFLD {
     exec:
     def hmmerMatches = HMMER3.parseOutput(hmmsearch_out, "SFLD")
     def sequences = parseOutput(postprocess_out, hmmerMatches)
-    def hierarchies = getHierarchies(dirpath.resolve(hierarchydb))
+    def hierarchies = getHierarchies(hierarchydb)
     SignatureLibraryRelease library = new SignatureLibraryRelease("SFLD", null)
 
     sequences = sequences.collectEntries { seqId, matches -> 

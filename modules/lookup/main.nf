@@ -6,101 +6,117 @@ import java.net.URL
 import uk.ac.ebi.interpro.FastaFile
 import uk.ac.ebi.interpro.HTTPRequest
 
-process PREPARE_LOOKUP {
-    /* A Simple process to check API and InterPro version compatibility
-    Retain as a process so that this process and the LOOKUP subworkflow wait for the
-    channels to be ready before determining if the API is available */
-    label    'mem_low', 'time_short'
-    executor 'local'
 
-    input:
-    val matches_api_apps
-    val api_interpro_version
-    val db_releases
-    val url
-
-    output:
-    val api_url
-
-    exec:
-    _url = url // reassign to avoid variable already declared error
-    if (db_releases["interpro"]["version"] != api_interpro_version) {
-            log.warn "The local InterPro version (${db_releases['interpro']}) does not match the Matches API release (${api_interpro_version}). Pre-calculated matches will not be retrieved and analyses will run locally."
-            _url = null
+def check_matches_api(applications, api_url, version) {
+    appls_in_api     = []
+    appls_not_in_api = []
+    def sanitized_url = HTTPRequest.sanitizeURL(api_url)
+    def url = "${sanitized_url}/info".toString()
+    def info = HTTPRequest.fetch(url, null, 0)
+    if (info) {
+        def api_version = info.api ?: "X.Y.Z"
+        def major_version = api_version.split("\\.")[0]
+        if (major_version != "0") {
+            log.warn "This version of InterProScan is not compatible with the Matches API at ${sanitized_url}; pre-calculated annotations will not be retrieved."
+        } else {
+            def api_interpro_version = info.release
+            if (info.analyses) {
+                def all_appls_in_api = info.analyses*.name.collect { n -> 
+                    n.toLowerCase().replaceAll("[-\\s]", "") 
+                }
+                applications.each { appl -> 
+                    if (all_appls_in_api.contains(appl) && appl != "cdd") {
+                        appls_in_api << appl
+                    } else {
+                        appls_not_in_api << appl
+                    }
+                }
+            } else {
+                log.warn "Could not retrieve the list of analyses available in the Matches API; pre-calculated annotations will not be retrieved."
+            }
+        }
+    } else {
+        log.warn "An error occurred while querying the Matches API; pre-calculated annotations will not be retrieved."
     }
-    api_url = _url
+
+    if (appls_in_api.isEmpty()) {
+        appls_not_in_api = applications.clone() as List<String>
+    }
+
+    return [appls_in_api, appls_not_in_api]
 }
 
-process LOOKUP_MATCHES {
+
+process GET_MATCHES {
     maxForks 1
     label    'mem_low', 'time_short'
     executor 'local'
 
     input:
-    tuple val(index), val(fasta), val(applications), val(url), val(chunkSize), val(maxRetries)
+    tuple val(meta), val(fasta)
+    val applications
+    val api_url
+    val chunk_size
+    val max_retries
 
     output:
-    tuple val(index), path("matches.json")
-    tuple val(index), path("unknown.fasta"), optional: true
+    tuple val(meta), path("matches.json"),                  emit: json
+    tuple val(meta), path("unknown.fasta"), optional: true, emit: fasta
 
     exec:
-    def calculatedMatches = [:]
-    def noLookupFasta = new StringBuilder()
-    Map<String, String> sequences = FastaFile.parse(fasta)  // [md5: sequence]
-    def md5List = sequences.keySet().toList().sort()
-    def requestChunkSize = chunkSize > 100 ? 100 : chunkSize       // API set max to 100
-    def chunks = md5List.collate(requestChunkSize)
-
-    String baseUrl = HTTPRequest.sanitizeURL(url.toString())
-    boolean success = true
-
-    for (chunk in chunks) {
-        data = JsonOutput.toJson([md5: chunk])
-        response = HTTPRequest.fetch("${baseUrl}/matches", data, maxRetries, true)
-
-        if (response != null) {
-            response.results.each {
-                String proteinMd5 = it.md5.toUpperCase()
-                if (it.found) {
-                    calculatedMatches[proteinMd5] = [:]
-                    it.matches.each { matchMap ->
-                        String library = matchMap.signature.signatureLibraryRelease.library
-                        String appName = library.toLowerCase().replaceAll("[-\\s]", "")
-                        if (applications.contains(appName)) {
-                            matchMap = transformMatch(matchMap, sequences[proteinMd5])
-                            calculatedMatches[proteinMd5][matchMap.modelAccession] = matchMap
-                        }
-                    }
-                } else {
-                    def seq = sequences[proteinMd5]
-                    noLookupFasta.append(">${proteinMd5}\n")
-                    noLookupFasta.append("${seq}\n")
-                }
-            }
-        } else {
-            success = false
-            break
+    def matches = [:]
+    def fasta_sb = new StringBuilder()
+    def sequences = FastaFile.parse(fasta)  // [md5: sequence]
+    def md5s = sequences.keySet().toList().sort()
+    def request_chunk_size = chunk_size > 100 ? 100 : chunk_size // API set max to 100
+    def chunks = md5s.collate(request_chunk_size)
+    def base_url = HTTPRequest.sanitizeURL(api_url.toString())
+    def response = null
+    def success = chunks.every { chunk ->
+        def data = JsonOutput.toJson([md5: chunk])
+        response = HTTPRequest.fetch("${base_url}/matches", data, max_retries, true)
+        if (response == null) {
+            return false
         }
+
+        response.results.each {
+            def seq_md5 = it.md5.toUpperCase()
+            if (it.found) {
+                matches[seq_md5] = [:]
+                it.matches.each { match ->
+                    def library = match.signature.signatureLibraryRelease.library
+                    def app_name = library.toLowerCase().replaceAll("[-\\s]", "")
+                    if (applications.contains(app_name)) {
+                        match = transformMatch(match, sequences[seq_md5])
+                        matches[seq_md5][match.modelAccession] = match
+                    }
+                }
+            } else {
+                def seq = sequences[seq_md5]
+                fasta_sb.append(">${seq_md5}\n")
+                fasta_sb.append("${seq}\n")
+            }
+        }
+        return true
     }
 
-    def json_filepath = task.workDir.resolve("matches.json")
-    def fasta_filepath = task.workDir.resolve("unknown.fasta")
+    def json_file = task.workDir.resolve("matches.json")
+    def fasta_file = task.workDir.resolve("unknown.fasta")
 
     if (success) {
         def jf = new JsonFactory()
-        json_filepath.withWriter { writer ->
-            def mapper = new ObjectMapper()
-            jf.createGenerator(writer).withCloseable { gen ->
-                mapper.writeValue(gen, calculatedMatches)
-            }
+        json_file.withWriter { writer ->
+            def gen = jf.createGenerator(writer)
+            new ObjectMapper().writeValue(gen, matches)
+            gen.close()
         }
-        if (noLookupFasta.length() != 0) {
-            fasta_filepath.text = noLookupFasta.toString()
+        if (fasta_sb.length() != 0) {
+            fasta_file.text = fasta_sb.toString()
         }
     } else {
-        log.warn "An error occurred while querying the Matches API, analyses will be run locally -- '${response}'"
-        json_filepath.text = JsonOutput.toJson([:])
-        fasta_filepath.text = fasta.text
+        log.warn "An error occurred while querying the Matches API -- '${response}'"
+        json_file.text = JsonOutput.toJson([:])
+        fasta_file.text = fasta.text
     }
 }
 

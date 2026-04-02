@@ -1,7 +1,7 @@
 nextflow_workflow {
 
     name "Test suborkflow INIT_PIPELINE"
-    script "subworkflows/init/main.nf"
+    script "subworkflows/init/pipeline/main.nf"
     workflow "INIT_PIPELINE"
 
     test("Should run without failures") {

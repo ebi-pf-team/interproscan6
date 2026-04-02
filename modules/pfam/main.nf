@@ -10,7 +10,6 @@ process PARSE_PFAM {
 
     input:
     tuple val(meta), val(hmmsearch_out)
-    val dirpath
     val datfile
 
     output:
@@ -19,8 +18,7 @@ process PARSE_PFAM {
     exec:
     def min_length = 8  // minimum length of a fragment
     def hmmer_matches = HMMER3.parseOutput(hmmsearch_out, "Pfam")
-    def dat_path = dirpath.resolve(datfile)
-    def dat = stockholmDatParser(dat_path)  // [modelAcc: [clan: str, nested: [str]]]
+    def dat = stockholmDatParser(datfile)  // [modelAcc: [clan: str, nested: [str]]]
 
     def filtered_matches = filterMatches(hmmer_matches, dat, min_length)
     def processed_matches = buildFragments(filtered_matches, dat)
