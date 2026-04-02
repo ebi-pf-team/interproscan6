@@ -1,0 +1,19 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "antifam.json:md5,ad9afdd8b8e56da5dc841caf91f045fa"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-02T19:47:09.360496333",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}
