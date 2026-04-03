@@ -1,0 +1,29 @@
+nextflow_process {
+
+    name "Test Process PARSE_PANTHER"
+    script "modules/panther/main.nf"
+    process "PARSE_PANTHER"
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    1, 
+                    2,
+                    file("${projectDir}/tests/data/panther/panther.json"),
+                    file("${projectDir}/tests/data/panther/epang.tsv"),
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

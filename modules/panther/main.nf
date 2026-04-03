@@ -123,7 +123,7 @@ process PREPARE_TREEGRAFTER {
         def sequence = sb.toString()
         assert sequence.length() == length
 
-        def fastaFile = Files.createTempFile(task.workDir, "tmp", ".fa")
+        def fastaFile = Files.createTempFile(task.workDir, "tmp", ".faa")
         fastaFile.withWriter { writer ->
             writer.writeLine(">${familyId}")
             for (int i = 0; i < sequence.length(); i += 80) {
@@ -193,7 +193,7 @@ process PARSE_PANTHER {
     executor 'local'
 
     input:
-    tuple val(meta), val(meta2), val(hmmseach_json), val(epagn_tsv)
+    tuple val(meta), val(meta2), val(hmmseach_json), val(epang_tsv)
 
     output:
     tuple val(meta), val(meta2), path("panther.json")
@@ -205,7 +205,7 @@ process PARSE_PANTHER {
         }]
     }
 
-    epagn_tsv.eachLine { line ->
+    epang_tsv.eachLine { line ->
         line = line.trim()
         def fields = line.split()
         assert fields.size() == 3

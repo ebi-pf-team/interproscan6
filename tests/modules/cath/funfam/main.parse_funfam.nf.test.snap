@@ -6,12 +6,12 @@
                     [
                         1,
                         2,
-                        "cathfunfam.json:md5,99914b932bd37a50b983c5e7c90ae93b"
+                        "cathfunfam.json:md5,1159714770f603f5480619b8ee52b594"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-04-02T23:07:06.990972001",
+        "timestamp": "2026-04-03T01:11:59.848851693",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.04.7"

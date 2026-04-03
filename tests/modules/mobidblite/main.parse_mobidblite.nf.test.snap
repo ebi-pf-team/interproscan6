@@ -1,0 +1,20 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        1,
+                        "mobidblite.json:md5,42c5c50f9dd3b64c0f892c529fb3fb6d"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T01:16:58.497119215",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

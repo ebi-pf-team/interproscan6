@@ -1,0 +1,28 @@
+nextflow_process {
+
+    name "Test Process PARSE_MOBIDBLITE"
+    script "modules/mobidblite/main.nf"
+    process "PARSE_MOBIDBLITE"
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    1, 
+                    1,
+                    file("${projectDir}/tests/data/mobidblite/output.tsv"),
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

@@ -1,0 +1,27 @@
+nextflow_process {
+
+    name "Test Process PARSE_NCBIFAM"
+    script "modules/ncbifam/main.nf"
+    process "PARSE_NCBIFAM"
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    1, 
+                    file("${projectDir}/tests/data/ncbifam/hmmsearch.out"),
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}
