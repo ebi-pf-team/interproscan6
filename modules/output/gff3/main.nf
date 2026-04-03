@@ -41,10 +41,10 @@ process WRITE_GFF3_BULK {
     groovy -cp "/opt/interproscan6/lib:/opt/interproscan6/lib/*:." /opt/interproscan6/bin/write-output.groovy \
         gff3 \
         . \
-        - \
         ${seq_db_file} \
         ${nucleic ? 'true' : 'false'} \
         ${interproscan_version} \
+        - \
         ${output_file}
     chmod 666 ${output_file}
     """

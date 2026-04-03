@@ -50,7 +50,7 @@ process WRITE_JSON_BULK {
         ${seq_db_file} \
         ${nucleic ? 'true' : 'false'} \
         ${interproscan_version} \
-        ${interpro_version} \
+        ${interpro_version ?: '-'} \
         ${output_file}
     chmod 666 ${output_file}
     """

@@ -19,10 +19,12 @@ def isNucleic = args[3] == "true"
 def iprscanVersion = args[4]
 def interproVersion = args[5]
 def outputPath = Paths.get(args[6])
+def outputPathNormalized = outputPath.toAbsolutePath().normalize()
 
 def inputPaths = [] 
 inputDir.eachFileRecurse { file ->
-    if (file.fileName.toString().endsWith('.json')) {
+    if (file.fileName.toString().endsWith('.json') &&
+        !file.toAbsolutePath().normalize().equals(outputPathNormalized)) {
         inputPaths << file
     }
 }
