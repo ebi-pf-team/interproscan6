@@ -1,0 +1,21 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        [
+                            "sequences_1.tsv:md5,db8182aed6c14851a00f932f9f9d1cb2"
+                        ]
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T22:32:37.150405888",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}
