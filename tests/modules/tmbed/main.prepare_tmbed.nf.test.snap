@@ -1,0 +1,21 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        [
+                            "tmbed_1.fasta:md5,7e9777e695feb00944279a88ca1a7785"
+                        ]
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T21:52:34.979751246",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}
