@@ -50,12 +50,11 @@ process SEARCH_FUNFAM {
             .split("\\.")  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
             .join(File.separator) + ".hmm"
         def hmm = root_dir.resolve(leaf)
-        if (hmm.exists()) {
-            commands += "hmmsearch"
-            commands += " -Z 65245 --cut_tc"
-            commands += " --cpu ${task.cpus}"
-            commands += " ${hmm} ${fasta} >> hmmsearch.out\n"
-        }
+        commands += "[ -e \"${hmm}\" ] &&"
+        commands += " hmmsearch"
+        commands += " -Z 65245 --cut_tc"
+        commands += " --cpu ${task.cpus}"
+        commands += " ${hmm} ${fasta} >> hmmsearch.out\n"
     }
 
     """
