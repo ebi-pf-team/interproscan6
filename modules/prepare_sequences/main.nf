@@ -50,7 +50,7 @@ process LOAD_ORFS {
     val db_path
 
     output:
-    val db_path // ensure BUILD_BATCHES runs after LOAD_ORFS
+    val db_path // ensure SPLIT_FASTA runs after LOAD_ORFS
 
     exec:
     def db = new SeqDB(db_path)

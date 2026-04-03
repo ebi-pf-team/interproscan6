@@ -1,0 +1,45 @@
+nextflow_process {
+
+    name "Test Process PARSE_PFAM"
+    script "modules/pfam/main.nf"
+    process "PARSE_PFAM"
+
+    test("Should run without failures") {
+
+        setup {
+            run("GUNZIP", alias: "GUNZIP1") {
+                script "../gunzip/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/pfam/hmmsearch.out.gz", checkIfExists: true)
+                    """
+                }
+            }
+
+            run("GUNZIP", alias: "GUNZIP2") {
+                script "../gunzip/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/pfam/pfam_a.dat.gz", checkIfExists: true)
+                    """
+                }
+            }
+        }
+
+        when {
+            process {
+                """
+                input[0] = GUNZIP1.out.map { file -> tuple(1, file) }
+                input[1] = GUNZIP2.out
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

@@ -1,0 +1,37 @@
+nextflow_process {
+
+    name "Test Process SPLIT_FASTA"
+    script "modules/prepare_sequences/main.nf"
+    process "SPLIT_FASTA"
+
+    test("Should run without failures") {
+
+        setup {
+            run("GUNZIP") {
+                script "../gunzip/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/sequences/fna.db.gz", checkIfExists: true)
+                    """
+                }
+            }
+        }
+
+        when {
+            process {
+                """
+                input[0] = GUNZIP.out
+                input[1] = 5000
+                input[2] = true
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

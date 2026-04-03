@@ -1,0 +1,30 @@
+{
+    "Should load protein sequences without failures": {
+        "content": [
+            {
+                "0": [
+                    "sequences.db:md5,a8bf672072f3c30dfdff0eedff453314"
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T17:53:54.347901258",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    },
+    "Should load nucleic sequences without failures": {
+        "content": [
+            {
+                "0": [
+                    "sequences.db:md5,3e244ced610721be685303f377f0e695"
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T17:53:58.264594056",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

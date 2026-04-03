@@ -1,0 +1,19 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "sequences.fasta:md5,4d2bdcabfc6b1cdba2a57b0482a45fde"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T16:18:33.743861331",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

@@ -5,16 +5,23 @@ nextflow_process {
     process "PARSE_FUNFAM"
 
     test("Should run without failures") {
+        setup {
+            run("GUNZIP") {
+                script "../../gunzip/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/cath/funfam/hmmsearch.out.gz", 
+                                    checkIfExists: true)
+                    """
+                }
+            }
+        }
 
         when {
             process {
                 """
-                input[0] = [
-                    1, 
-                    2,
-                    file("${projectDir}/tests/data/cath/funfam/hmmsearch.out"),
-                    file("${projectDir}/tests/data/cath/funfam/resolved.out")
-                ]
+                def tsv = file("${projectDir}/tests/data/cath/funfam/resolved.out", checkIfExists: true)
+                input[0] = GUNZIP.out.map { file -> tuple(1, 2, file, tsv) }
                 """
             }
         }

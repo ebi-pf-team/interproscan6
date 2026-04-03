@@ -1,0 +1,19 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "pfam.json:md5,3a8982362af84d51c95a1ef9b633ac1b"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T15:42:37.128573354",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

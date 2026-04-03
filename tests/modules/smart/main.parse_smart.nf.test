@@ -1,0 +1,49 @@
+nextflow_process {
+
+    name "Test Process PARSE_SMART"
+    script "modules/smart/main.nf"
+    process "PARSE_SMART"
+
+    test("Should run without failures") {
+
+        setup {
+            run("UNTAR", alias: "UNTAR1") {
+                script "../untar/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/smart/fasta.tar.gz", checkIfExists: true)
+                    """
+                }
+            }
+
+            run("UNTAR", alias: "UNTAR2") {
+                script "../untar/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/smart/models.tar.gz", checkIfExists: true)
+                    """
+                }
+            }
+        }        
+
+        when {
+            process {
+                """
+                def hmmpfam = file("${projectDir}/tests/data/smart/hmmpfam.out", checkIfExists: true)
+                input[0] = UNTAR1.out.map { directory -> 
+                    def fastas = directory.resolve("fasta").listFiles()
+                    tuple(1, fastas, hmmpfam)
+                }
+                input[1] = UNTAR2.out.map { directory -> directory.resolve("models") }
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

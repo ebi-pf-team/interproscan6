@@ -1,0 +1,43 @@
+nextflow_process {
+
+    name "Test Process LOAD_SEQUENCES"
+    script "modules/prepare_sequences/main.nf"
+    process "LOAD_SEQUENCES"
+
+    test("Should load protein sequences without failures") {
+
+        when {
+            process {
+                """
+                input[0] = file("${projectDir}/assets/test.faa", checkIfExists: true)
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+    test("Should load nucleic sequences without failures") {
+
+        when {
+            process {
+                """
+                input[0] = file("${projectDir}/assets/test.fna", checkIfExists: true)
+                input[1] = true
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

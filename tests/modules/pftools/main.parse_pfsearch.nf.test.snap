@@ -1,0 +1,36 @@
+{
+    "Should run without failures (HAMAP)": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "pfsearch.json:md5,0c3441f46ee73112dded6a4bec716052"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T16:09:29.021457761",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    },
+    "Should run without failures (PROSITE profiles)": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "pfsearch.json:md5,c7c914388f5d60814c375df2bcab092c"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T16:09:14.97441941",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

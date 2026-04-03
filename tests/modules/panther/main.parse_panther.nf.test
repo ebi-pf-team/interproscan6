@@ -9,12 +9,9 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = [
-                    1, 
-                    2,
-                    file("${projectDir}/tests/data/panther/panther.json"),
-                    file("${projectDir}/tests/data/panther/epang.tsv"),
-                ]
+                def json = file("${projectDir}/tests/data/panther/panther.json", checkIfExists: true)
+                def tsv  = file("${projectDir}/tests/data/panther/epang.tsv", checkIfExists: true)
+                input[0] = channel.of(tuple(1, 2, json, tsv))
                 """
             }
         }

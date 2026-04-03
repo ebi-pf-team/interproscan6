@@ -9,7 +9,7 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = [1, file("${projectDir}/tests/data/antifam/hmmsearch.out")]
+                input[0] = channel.of(tuple(1, file("${projectDir}/tests/data/antifam/hmmsearch.out", checkIfExists: true)))
                 """
             }
         }

@@ -10,7 +10,7 @@ process SEARCH_SUPERFAMILY {
 
     input:
     tuple val(meta), val(meta2), path(fasta)
-    tuple path(dir), val(hmm), val(selfhits), val(cla), val(model), val(pdbj95d)
+    tuple path(dir), val(hmm), val(selfhits), val(cla), val(model_tab), val(pdbj95d)
 
     output:
     tuple val(meta), val(meta2), path("superfamily.out")
@@ -26,7 +26,7 @@ process SEARCH_SUPERFAMILY {
         -e 0.0001 -t n -f 1 \
         -s ${dir}/${selfhits} \
         -r ${dir}/${cla} \
-        -m ${dir}/${model} \
+        -m ${dir}/${model_tab} \
         -p ${dir}/${pdbj95d} \
         ${fasta} \
         hmmscan.out \
@@ -40,7 +40,7 @@ process PARSE_SUPERFAMILY {
 
     input:
     tuple val(meta), val(meta2), val(superfamily_out)
-    tuple val(dirpath), val(hmm), val(model)
+    tuple val(dirpath), val(hmm), val(model_tab)
 
     output:
     tuple val(meta), val(meta2), path("superfamily.json")
@@ -48,7 +48,7 @@ process PARSE_SUPERFAMILY {
     exec:
     SignatureLibraryRelease library = new SignatureLibraryRelease("SUPERFAMILY", null)
     def model2sf = [:]
-    dirpath.resolve(model).eachLine { line ->
+    dirpath.resolve(model_tab).eachLine { line ->
         def fields = line.trim().split(/\t/)
         String modelId = fields[0]
         String superfamilyAccession = fields[1]

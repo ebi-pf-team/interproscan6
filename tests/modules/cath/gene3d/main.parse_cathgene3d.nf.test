@@ -4,26 +4,28 @@ nextflow_process {
     script "modules/cath/gene3d/main.nf"
     process "PARSE_CATHGENE3D"
 
-    test("Should run without failures") {  
-        when {
-            process {
-                """
-                def hmmsearchGz = file("${projectDir}/tests/data/cath/gene3d/hmmsearch.out.gz")
-                def hmmsearchOut = java.nio.file.Files.createTempFile("hmmsearch.", ".out")
-                new java.util.zip.GZIPInputStream(java.nio.file.Files.newInputStream(hmmsearchGz)).withCloseable { stream ->
-                    java.nio.file.Files.copy(stream, hmmsearchOut, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+    test("Should run without failures") { 
+        setup {
+            run("GUNZIP") {
+                script "../../gunzip/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/cath/gene3d/hmmsearch.out.gz", 
+                                    checkIfExists: true)
+                    """
                 }
-                input[0] = [
-                    1, 
-                    2,
-                    file(hmmsearchOut.toString()),
-                    file("${projectDir}/tests/data/cath/gene3d/cath.tsv")
-                ]
-                """
             }
         }
 
-
+        when {
+            process {
+                """
+                def tsv = file("${projectDir}/tests/data/cath/gene3d/cath.tsv", checkIfExists: true)
+                
+                input[0] = GUNZIP.out.map { file -> tuple(1, 2, file, tsv) }
+                """
+            }
+        }
 
         then {
             assert process.success

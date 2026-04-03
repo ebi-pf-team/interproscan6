@@ -1,0 +1,42 @@
+nextflow_process {
+
+    name "Test Process PARSE_SUPERFAMILY"
+    script "modules/superfamily/main.nf"
+    process "PARSE_SUPERFAMILY"
+
+    test("Should run without failures") {
+        setup {
+            run("UNTAR") {
+                script "../untar/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/superfamily/parse_inputs.tar.gz", checkIfExists: true)
+                    """
+                }
+            }
+        }   
+
+        when {
+            process {
+                """
+                UNTAR.out
+                    .multiMap { dir ->
+                        a: tuple(1, 1, dir.resolve("superfamily.out"))
+                        b: tuple(dir, "hmmlib.slim", "model.tab")
+                    }
+                    .set { inputs }
+
+                input[0] = inputs.a
+                input[1] = inputs.b
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

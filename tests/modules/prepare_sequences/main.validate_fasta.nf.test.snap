@@ -1,0 +1,70 @@
+{
+    "Should validate protein sequences with illegal amino acids": {
+        "content": [
+            {
+                "0": [
+                    "illegal.faa:md5,eccbb09f707bf657525ce1246ea9f8a1"
+                ],
+                "1": [
+                    "sp|Q63722|JAG1_RAT"
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T17:47:22.395820087",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    },
+    "Should validate nucleic sequences without illegal nucleic acids": {
+        "content": [
+            {
+                "0": [
+                    "test.fna:md5,f012e4f1da64666a1debe8ffb1917fde"
+                ],
+                "1": [
+                    null
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T17:47:26.131184981",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    },
+    "Should validate protein sequences without illegal amino acids": {
+        "content": [
+            {
+                "0": [
+                    "test.faa:md5,2d9eb3c40e1bb3b57ece4745d117bdf6"
+                ],
+                "1": [
+                    null
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T17:47:18.755098148",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    },
+    "Should validate nucleic sequences with illegal nucleic acids": {
+        "content": [
+            {
+                "0": [
+                    "illegal.fna:md5,0fd11d794c462af65f23bde3debdb790"
+                ],
+                "1": [
+                    "ENA|AAB06509|AAB06509.1"
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T17:47:29.705273037",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

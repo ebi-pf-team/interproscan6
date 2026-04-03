@@ -1,0 +1,24 @@
+nextflow_process {
+
+    name "Test Process PARSE_PHOBIUS"
+    script "modules/phobius/main.nf"
+    process "PARSE_PHOBIUS"
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                input[0] = channel.of(tuple(1, file("${projectDir}/tests/data/phobius/phobius.out", checkIfExists: true)))
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

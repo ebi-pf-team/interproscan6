@@ -6,13 +6,21 @@ nextflow_process {
 
     test("Should run without failures") {
 
+        setup {
+            run("GUNZIP") {
+                script "../gunzip/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/ncbifam/hmmsearch.out.gz", checkIfExists: true)
+                    """
+                }
+            }
+        }
+
         when {
             process {
                 """
-                input[0] = [
-                    1, 
-                    file("${projectDir}/tests/data/ncbifam/hmmsearch.out"),
-                ]
+                input[0] = GUNZIP.out.map { file -> tuple(1, file) }
                 """
             }
         }

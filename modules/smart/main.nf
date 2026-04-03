@@ -54,7 +54,7 @@ process PREPARE_SMART {
     model2seqs.each { modelAcc, seqIds ->
         def mdlFile = hmmdir.resolve("${modelAcc}.hmm")
         if (!mdlFile.exists()) return
-        def fasta = task.workDir.resolve("${modelAcc}.fa")
+        def fasta = task.workDir.resolve("${modelAcc}.faa")
         fasta.withWriter('UTF-8') { writer ->
             seqIds.each { seqId ->
                 String seq = sequences[seqId]

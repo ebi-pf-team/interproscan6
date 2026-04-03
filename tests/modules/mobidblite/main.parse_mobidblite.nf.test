@@ -9,11 +9,7 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = [
-                    1, 
-                    1,
-                    file("${projectDir}/tests/data/mobidblite/output.tsv"),
-                ]
+                input[0] = channel.of(tuple(1, 1, file("${projectDir}/tests/data/mobidblite/output.tsv", checkIfExists: true)))
                 """
             }
         }
