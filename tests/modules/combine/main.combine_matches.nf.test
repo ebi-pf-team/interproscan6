@@ -1,0 +1,42 @@
+nextflow_process {
+
+    name "Test Process COMBINE_MATCHES"
+    script "modules/combine/main.nf"
+    process "COMBINE_MATCHES"
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                def jsons = [
+                    file("${projectDir}/tests/data/cath/cathfunfam.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/cath/cathgene3d.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/cdd/cdd.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/coils/coils.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/hamap/hamap.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/mobidblite/mobidblite.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/ncbifam/ncbifam.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/pfam/pfam.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/pirsf/pirsf.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/pirsf/pirsf.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/prints/prints.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/prosite/prositepatterns.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/prosite/prositeprofiles.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/sfld/sfld.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/smart/smart.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/superfamily/superfamily.json", checkIfExists: true),
+                ]
+                input[0] = channel.of(tuple(1, jsons))
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}
