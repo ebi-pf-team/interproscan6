@@ -161,6 +161,11 @@ def parse_internal_json(
 ) -> set[tuple[str, str, str, str]]:
     hits = set()
     for seq_id, seq_matches in data.items():
+        if not seq_matches:
+            # No matches found in this sequence
+            hits.add((seq_id, "N/A", "N/A", ""))
+            continue
+
         for match in seq_matches.values():
             for loc in match["locations"]:
                 fragments = []
@@ -187,6 +192,8 @@ def parse_internal_json(
                         ",".join(fragments),
                     )
                 )
+
+    return hits
 
 
 def parse_jsonl(file: Path, extended: bool) -> set[tuple[str, str, str, str]]:
