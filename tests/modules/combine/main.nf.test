@@ -1,0 +1,54 @@
+nextflow_workflow {
+
+    name "Compare COMBINE and COMBINE_BULK outputs"
+    script "tests/modules/combine/main.nf"
+    workflow "run_workflow"
+    profile "docker"
+
+    test("Should run without failures") {
+
+        when {
+            workflow {
+                """
+                def jsons = [
+                    file("${projectDir}/tests/data/cath/cathfunfam.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/cath/cathgene3d.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/cdd/cdd.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/coils/coils.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/hamap/hamap.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/mobidblite/mobidblite.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/ncbifam/ncbifam.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/pfam/pfam.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/pirsf/pirsf.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/pirsf/pirsf.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/prints/prints.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/prosite/prositepatterns.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/prosite/prositeprofiles.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/sfld/sfld.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/smart/smart.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/superfamily/superfamily.json", checkIfExists: true),
+                ]
+                input[0] = channel.of(tuple(1, jsons))
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            
+            with (workflow.out.combined) {
+                assert size() == 1
+                assert get(0).size() == 3
+
+                def json1 = get(0).get(1)
+                def json2 = get(0).get(2)
+
+                def cmd  = "python tests/diff.py ${json1} ${json2}"
+                def proc = cmd.execute()
+                proc.waitFor()
+                assert proc.exitValue() == 0
+            }
+        }
+
+    }
+}
