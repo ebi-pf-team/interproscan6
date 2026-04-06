@@ -5,7 +5,6 @@ import uk.ac.ebi.interpro.InterProScan
 include { DOWNLOAD as DOWNLOAD_INTERPRO } from "../../../modules/download"
 include { DOWNLOAD as DOWNLOAD_DATABASE } from "../../../modules/download"
 include { FIND_DATABASES                } from "../../../modules/download"
-include { COLLECT_DATABASES             } from "../../../modules/download"
 
 
 workflow INIT_DATABASES {
@@ -109,9 +108,6 @@ workflow INIT_DATABASES {
     } else {
         ch_ready = Channel.of(["interpro", null])
     }
-
-    // ch_ready = ch_ready.collect(flat: false)
-    // COLLECT_DATABASES(ch_ready)
 
     emit:
     directories = ch_ready

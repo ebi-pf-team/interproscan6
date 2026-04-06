@@ -96,22 +96,3 @@ process FIND_DATABASES {
         }
     }
 }
-
-process COLLECT_DATABASES {
-    label    'mem_min', 'time_veryshort'
-    executor 'local'
-    cache false  // Stops the esotericsoftware.kryo.serializers warning
-
-    input:
-    val list_databases
-
-    output:
-    val map_databases
-
-    exec:
-    map_databases = list_databases.collectEntries { entry ->
-        def name = entry[0]
-        def path = entry[1]
-        [(name): path]
-    }
-}
