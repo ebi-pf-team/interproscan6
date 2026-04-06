@@ -1,22 +1,5 @@
 {
-    "Should run without failures (HAMAP)": {
-        "content": [
-            {
-                "0": [
-                    [
-                        1,
-                        "pfsearch.json:md5,0c3441f46ee73112dded6a4bec716052"
-                    ]
-                ]
-            }
-        ],
-        "timestamp": "2026-04-03T16:09:29.021457761",
-        "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.04.7"
-        }
-    },
-    "Should run without failures (PROSITE profiles)": {
+    "Should parse PROSITE profiles results": {
         "content": [
             {
                 "0": [
@@ -27,7 +10,24 @@
                 ]
             }
         ],
-        "timestamp": "2026-04-03T16:09:14.97441941",
+        "timestamp": "2026-04-06T19:54:23.255450382",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    },
+    "Should parse HAMAP results without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "pfsearch.json:md5,0c3441f46ee73112dded6a4bec716052"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-06T19:54:19.549692122",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.04.7"

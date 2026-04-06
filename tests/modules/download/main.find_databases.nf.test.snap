@@ -19,7 +19,7 @@
                             "pfam",
                             "38.1",
                             false,
-                            "/home/mblum/Projects/i6/interproscan6/.nf-test/tests/c8303dac5046ef968f3874e81b203271/work/b5/3cc53514c9775524d3ae947f0679b3/find-databases/pfam/38.1"
+                            "/home/mblum/Projects/i6/interproscan6/.nf-test/tests/c8303dac5046ef968f3874e81b203271/work/7f/55bc2abe41018df14398b66ff4fbb4/find-databases/pfam/38.1"
                         ]
                     ]
                 ],
@@ -30,7 +30,7 @@
                             "pfam",
                             "38.1",
                             false,
-                            "/home/mblum/Projects/i6/interproscan6/.nf-test/tests/c8303dac5046ef968f3874e81b203271/work/b5/3cc53514c9775524d3ae947f0679b3/find-databases/pfam/38.1"
+                            "/home/mblum/Projects/i6/interproscan6/.nf-test/tests/c8303dac5046ef968f3874e81b203271/work/7f/55bc2abe41018df14398b66ff4fbb4/find-databases/pfam/38.1"
                         ]
                     ]
                 ],
@@ -46,7 +46,7 @@
                 ]
             }
         ],
-        "timestamp": "2026-04-06T18:03:45.300408141",
+        "timestamp": "2026-04-06T19:50:20.634214946",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.04.7"
