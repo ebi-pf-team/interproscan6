@@ -40,7 +40,7 @@ process WRITE_JSON_BULK {
     val jsonlines
 
     output:
-    val output_file
+    path output_file
 
     script:
     """

@@ -32,7 +32,7 @@ process WRITE_TSV_BULK {
     val nucleic
 
     output:
-    val output_file
+    path output_file
 
     script:
     """

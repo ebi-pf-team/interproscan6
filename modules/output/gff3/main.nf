@@ -34,7 +34,7 @@ process WRITE_GFF3_BULK {
     val interproscan_version
 
     output:
-    val output_file
+    path output_file
 
     script:
     """

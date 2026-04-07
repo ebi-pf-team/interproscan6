@@ -37,7 +37,7 @@ process WRITE_XML_BULK {
     val interpro_version
 
     output:
-    val output_file
+    path output_file
 
     script:
     """
