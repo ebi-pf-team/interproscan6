@@ -16,5 +16,5 @@ workflow PHOBIUS {
     PARSE_PHOBIUS(SEARCH_PHOBIUS.out)
 
     emit:
-    PARSE_PHOBIUS  // [ meta, json ]
+    PARSE_PHOBIUS.out  // [ meta, json ]
 }
