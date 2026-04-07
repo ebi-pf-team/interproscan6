@@ -1,5 +1,7 @@
 include { WRITE_GFF3; WRITE_GFF3_BULK } from "${projectDir}/modules/output/gff3"
 include { WRITE_JSON; WRITE_JSON_BULK } from "${projectDir}/modules/output/json"
+include { WRITE_TSV; WRITE_TSV_BULK } from "${projectDir}/modules/output/tsv"
+include { WRITE_XML; WRITE_XML_BULK   } from "${projectDir}/modules/output/xml"
 
 
 workflow run_workflow {
@@ -22,6 +24,9 @@ workflow run_workflow {
     } else if (format == "jsonl") {
         local = WRITE_JSON(json, output, seqdb, is_nucleic, iprscan_version, interpro_version, true)
         bulk  = WRITE_JSON_BULK(json, output, seqdb, is_nucleic, iprscan_version, interpro_version, true)        
+    } else if (format == "tsv") {
+        local = WRITE_TSV(json, output, seqdb, is_nucleic)
+        bulk  = WRITE_TSV_BULK(json, output, seqdb, is_nucleic)        
     }
     
     emit:

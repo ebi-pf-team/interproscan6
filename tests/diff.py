@@ -151,12 +151,27 @@ def format_tsv(file: str) -> set[Hit]:
             values = line.split("\t")
             assert len(values) == 15
             seq_id = values[0]
+            sig_lib = values[3]
             sig_acc = values[4]
             start = int(values[6])
             end = values[7]
             source = values[9]
-            # TODO:
-            hits.add((seq_id, source, sig_acc, f"{start}-{end}"))
+            interpro_acc = values[11] if values[11] != "-" else ""
+            go_terms = set()
+            if values[13] != "-":
+                for go_term in values[13].split("|"):
+                    go_id, _ = go_term.split("(")  # GO:0003700(InterPro)
+                    go_terms.add(go_id)
+
+            hits.add((
+                seq_id, 
+                source, 
+                sig_lib,
+                sig_acc, 
+                interpro_acc,
+                ",".join(sorted(go_terms)),
+                f"{start}-{end}"
+            ))
 
     return hits
 
