@@ -27,6 +27,9 @@ workflow run_workflow {
     } else if (format == "tsv") {
         local = WRITE_TSV(json, output, seqdb, is_nucleic)
         bulk  = WRITE_TSV_BULK(json, output, seqdb, is_nucleic)        
+    } else if (format == "xml") {
+        local = WRITE_XML(json, output, seqdb, is_nucleic, iprscan_version, interpro_version)
+        bulk  = WRITE_XML_BULK(json, output, seqdb, is_nucleic, iprscan_version, interpro_version)        
     }
     
     emit:

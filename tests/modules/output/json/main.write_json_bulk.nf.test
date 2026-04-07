@@ -40,12 +40,12 @@ nextflow_process {
                 assert get(0).size() == 1
                 def expfile = "tests/data/output/test.faa.json.gz"
                 def obsfile = get(0).get(0)
-                def cmd  = "python tests/diff.py ${expfile} ${obsfile}"
+                def cmd  = "python tests/diff.py -q ${expfile} ${obsfile}"
                 def proc = cmd.execute()
                 proc.waitFor()
                 assert proc.exitValue() == 0
 
-                cmd  = "python tests/diff.py --representative-locations-only ${expfile} ${obsfile}"
+                cmd  = "python tests/diff.py -q --representative-locations-only ${expfile} ${obsfile}"
                 proc = cmd.execute()
                 proc.waitFor()
                 assert proc.exitValue() == 0
@@ -77,12 +77,12 @@ nextflow_process {
                 assert get(0).size() == 1
                 def expfile = "tests/data/output/test.faa.jsonl.gz"
                 def obsfile = get(0).get(0)
-                def cmd  = "python tests/diff.py ${expfile} ${obsfile}"
+                def cmd  = "python tests/diff.py -q ${expfile} ${obsfile}"
                 def proc = cmd.execute()
                 proc.waitFor()
                 assert proc.exitValue() == 0
 
-                cmd  = "python tests/diff.py --representative-locations-only ${expfile} ${obsfile}"
+                cmd  = "python tests/diff.py -q --representative-locations-only ${expfile} ${obsfile}"
                 proc = cmd.execute()
                 proc.waitFor()
                 assert proc.exitValue() == 0

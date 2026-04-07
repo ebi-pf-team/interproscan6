@@ -1,8 +1,9 @@
 nextflow_process {
 
-    name "Test Process WRITE_TSV"
-    script "modules/output/tsv/main.nf"
-    process "WRITE_TSV"
+    name "Test Process WRITE_XML_BULK"
+    script "modules/output/xml/main.nf"
+    process "WRITE_XML_BULK"
+    profile "docker"
 
     setup {
         run("GUNZIP") {
@@ -21,9 +22,11 @@ nextflow_process {
             process {
                 """
                 input[0] = GUNZIP.out.map { file -> [file] }
-                input[1] = file("output.tsv")
+                input[1] = file("output.xml")
                 input[2] = file("${projectDir}/tests/data/sequences/sequences.db", checkIfExists: true)
                 input[3] = false
+                input[4] = "6.0.x"
+                input[5] = "108.0"
                 """
             }
         }
@@ -35,7 +38,7 @@ nextflow_process {
             with (process.out) {
                 assert size() == 1
                 assert get(0).size() == 1
-                def expfile = "tests/data/output/test.faa.tsv.gz"
+                def expfile = "tests/data/output/test.faa.xml.gz"
                 def obsfile = get(0).get(0)
                 def cmd  = "python tests/diff.py -q ${expfile} ${obsfile}"
                 def proc = cmd.execute()

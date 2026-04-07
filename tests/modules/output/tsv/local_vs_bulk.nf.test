@@ -44,7 +44,7 @@ nextflow_workflow {
                 def file1 = get("local").get(0)
                 def file2 = get("bulk").get(0)
 
-                def cmd  = "python tests/diff.py ${file1} ${file2}"
+                def cmd  = "python tests/diff.py -q ${file1} ${file2}"
                 def proc = cmd.execute()
                 proc.waitFor()
                 assert proc.exitValue() == 0

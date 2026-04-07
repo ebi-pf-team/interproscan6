@@ -43,7 +43,7 @@ nextflow_workflow {
                 def json1 = get(0).get(1)
                 def json2 = get(0).get(2)
 
-                def cmd  = "python tests/diff.py ${json1} ${json2}"
+                def cmd  = "python tests/diff.py -q ${json1} ${json2}"
                 def proc = cmd.execute()
                 proc.waitFor()
                 assert proc.exitValue() == 0

@@ -35,13 +35,13 @@ nextflow_process {
                 assert get(0).size() == 1
                 def json1 = "tests/data/combined/combined-with-repr-locations.json.gz"
                 def json2 = get(0).get(0).get(1)
-                def cmd  = "python tests/diff.py --representative-locations-only ${json1} ${json2}"
+                def cmd  = "python tests/diff.py -q --representative-locations-only ${json1} ${json2}"
                 def proc = cmd.execute()
                 proc.waitFor()
                 assert proc.exitValue() == 0
 
                 json1 = "tests/data/combined/combined-with-xrefs.json.gz"
-                cmd  = "python tests/diff.py --representative-locations-only ${json1} ${json2}"
+                cmd  = "python tests/diff.py -q --representative-locations-only ${json1} ${json2}"
                 proc = cmd.execute()
                 proc.waitFor()
                 assert proc.exitValue() != 0

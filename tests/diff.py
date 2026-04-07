@@ -4,6 +4,7 @@ import argparse
 import gzip
 import json
 import shutil
+import sys
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from pathlib import Path
@@ -23,6 +24,7 @@ Hit = tuple[
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("-q", "--quiet", action="store_true")
     parser.add_argument("--representative-locations-only", action="store_true")
     parser.add_argument("expected", type=Path)
     parser.add_argument("observed", type=Path)
@@ -39,7 +41,14 @@ def main():
         exp_hits = parse(exp_file, extended=extended, repr_locs_only=repr_locs_only)
         obs_hits = parse(obs_file, extended=extended, repr_locs_only=repr_locs_only)
 
-    print(len(obs_hits & exp_hits), "/", len(exp_hits))
+    if not args.quiet:
+        for e in exp_hits - obs_hits:
+            print("<", *e)
+        for e in obs_hits & exp_hits:
+            print("=", *e)
+        for e in obs_hits - exp_hits:
+            print(">", *e)
+    
     assert exp_hits == obs_hits
 
 
@@ -69,7 +78,7 @@ def parse(file: Path, extended: bool, repr_locs_only: bool) -> set[Hit]:
     elif fmt == "tsv":
         return format_tsv(file)
     elif fmt == "xml":
-        return format_xml(file, extended=extended)
+        return parse_xml(file, extended=extended, repr_locs_only=repr_locs_only)
     else:
         raise NotImplementedError(f"Format not supported: {fmt}")
 
@@ -296,8 +305,8 @@ def parse_internal_json(
                     (
                         seq_id,
                         match["source"],
-                        match["signature"]["accession"],
                         f"{siglib}/{libver}" if extended else siglib,
+                        match["signature"]["accession"],
                         interpro_acc,
                         ",".join(sorted(go_terms)),
                         ",".join(fragments),
@@ -319,71 +328,54 @@ def parse_jsonl(file: Path, extended: bool, repr_locs_only: bool) -> set[Hit]:
     return hits
 
 
-def format_xml(file: Path, extended: bool) -> set[Hit]:
+def parse_xml(file: Path, extended: bool, repr_locs_only: bool) -> set[Hit]:
     hits = set()
 
-    for _, protein in ET.iterparse(file, events=("end",)):
-        if protein.tag.rsplit("}", maxsplit=1)[-1] != "protein":
-            continue
-
+    tree = ET.parse(file)
+    root = tree.getroot()
+    
+    for protein in root.iterfind("protein"):
         seq_ids = []
-        matches = None
-        for child in protein:
-            tag = child.tag.rsplit("}", maxsplit=1)[-1]
-            if tag == "xref":
-                seq_id = child.get("id")
-                if seq_id is not None:
-                    seq_ids.append(seq_id)
-            elif tag == "matches":
-                matches = child
+        for xref in protein.findall("xref"):
+            seq_ids.append(xref.attrib["id"])
 
-        if not seq_ids or matches is None:
-            protein.clear()
-            continue
+        for match in protein.findall("matches/match"):
+            source = match.attrib["source"]
+            sig = match.find("signature")
+            sig_acc = sig.attrib["ac"]
+            libojb = sig.find("signature-library-release")
+            siglib = libojb.attrib["library"]
+            libver = libojb.attrib["version"]
+            go_terms = set()
 
-        for match in matches:
-            if match.tag.rsplit("}", maxsplit=1)[-1] != "match":
-                continue
+            entry = sig.find("entry")
+            if entry is not None:
+                interpro_acc = entry.attrib["ac"]
+                for go_term in entry.findall("go-xref"):
+                    go_terms.add(go_term.attrib["id"])
+            else:
+                interpro_acc = ""
+                if sig_acc == "PS00022":
+                    print("no", file=sys.stderr)
 
-            source = match.get("source")
-            assert source is not None
+            if siglib == "PANTHER":
+                for go_term in match.findall("go-xref"):
+                    go_terms.add(go_term.attrib["id"])
 
-            sig_acc = None
-            locations = None
-            for child in match:
-                tag = child.tag.rsplit("}", maxsplit=1)[-1]
-                if tag == "signature":
-                    sig_acc = child.get("ac")
-                elif tag == "locations":
-                    locations = child
-
-            if sig_acc is None or locations is None:
-                continue
-
-            for loc in locations:
-                if loc.tag.rsplit("}", maxsplit=1)[-1] != "location":
+            for loc in match.findall("locations/location"):
+                if repr_locs_only and loc.attrib["representative"] == "false":
                     continue
 
                 fragments = []
                 if extended:
-                    for child in loc:
-                        if (
-                            child.tag.rsplit("}", maxsplit=1)[-1]
-                            != "location-fragments"
-                        ):
-                            continue
-
-                        for f in child:
-                            if f.tag.rsplit("}", maxsplit=1)[-1] != "fragment":
-                                continue
-
-                            fragments.append(
-                                (
-                                    int(f.attrib["start"]),
-                                    int(f.attrib["end"]),
-                                    f.attrib["dc-status"],
-                                )
+                    for fragment in loc.findall("location-fragments/fragment"):
+                        fragments.append(
+                            (
+                                int(fragment.attrib["start"]),
+                                int(fragment.attrib["end"]),
+                                fragment.attrib["dc-status"],
                             )
+                        )
 
                     fragments.sort(key=lambda x: (x[0], x[1]))
                     region = ",".join(
@@ -395,10 +387,17 @@ def format_xml(file: Path, extended: bool) -> set[Hit]:
                     region = f"{start}-{end}"
 
                 for seq_id in seq_ids:
-                    # TODO
-                    hits.add((seq_id, source, sig_acc, region))
-
-        protein.clear()
+                    hits.add(
+                        (
+                            seq_id,
+                            source,
+                            f"{siglib}/{libver}" if extended else siglib,
+                            sig_acc,
+                            interpro_acc,
+                            ",".join(sorted(go_terms)),
+                            region,
+                        )
+                    )
 
     return hits
 

@@ -1,6 +1,6 @@
 nextflow_workflow {
 
-    name "Compare WRITE_GFF3 and WRITE_GFF3_BULK outputs"
+    name "Compare WRITE_XML and WRITE_XML_BULK outputs"
     script "tests/modules/output/local_vs_bulk.nf"
     workflow "run_workflow"
     profile "docker"
@@ -22,13 +22,13 @@ nextflow_workflow {
         when {
             workflow {
                 """
-                input[0] = "gff3"
+                input[0] = "xml"
                 input[1] = GUNZIP.out.map { file -> [file] }
-                input[2] = file("output.gff3")
+                input[2] = file("output.xml")
                 input[3] = file("${projectDir}/tests/data/sequences/sequences.db", checkIfExists: true)
                 input[4] = false
                 input[5] = "6.0.x"
-                input[6] = "108.0
+                input[6] = "108.0"
                 """
             }
         }
