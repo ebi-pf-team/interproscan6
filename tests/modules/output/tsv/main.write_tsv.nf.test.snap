@@ -1,0 +1,16 @@
+{
+    "Write output for protein sequences": {
+        "content": [
+            {
+                "0": [
+                    "output.tsv:md5,5b58ae3547e41491de0ad64879e18bd6"
+                ]
+            }
+        ],
+        "timestamp": "2026-04-07T17:31:26.470850894",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

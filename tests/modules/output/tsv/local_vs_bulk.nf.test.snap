@@ -1,0 +1,25 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    "output.tsv:md5,5b58ae3547e41491de0ad64879e18bd6"
+                ],
+                "1": [
+                    "output.tsv:md5,5b58ae3547e41491de0ad64879e18bd6"
+                ],
+                "bulk": [
+                    "output.tsv:md5,5b58ae3547e41491de0ad64879e18bd6"
+                ],
+                "local": [
+                    "output.tsv:md5,5b58ae3547e41491de0ad64879e18bd6"
+                ]
+            }
+        ],
+        "timestamp": "2026-04-07T17:36:22.83926445",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

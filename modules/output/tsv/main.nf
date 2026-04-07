@@ -27,7 +27,7 @@ process WRITE_TSV_BULK {
 
     input:
     path(input_files, arity: '1..*', name: '?/*')
-    val output_file
+    path output_file
     path seq_db_file
     val nucleic
 
