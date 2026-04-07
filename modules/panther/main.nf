@@ -79,7 +79,7 @@ process PREPARE_TREEGRAFTER {
     familyIds = []
     fastas = []
     sequenceIds = []
-    hmmer_matches.each { seqId, matches ->
+    hmmer_matches.sort().each { seqId, matches ->
         // Ensure we only have one family
         assert matches.size() == 1
         def match = matches.values().first()
@@ -123,7 +123,7 @@ process PREPARE_TREEGRAFTER {
         def sequence = sb.toString()
         assert sequence.length() == length
 
-        def fastaFile = Files.createTempFile(task.workDir, "tmp", ".faa")
+        def fastaFile = task.workDir.resolve("${seqId}.faa")
         fastaFile.withWriter { writer ->
             writer.writeLine(">${familyId}")
             for (int i = 0; i < sequence.length(); i += 80) {
