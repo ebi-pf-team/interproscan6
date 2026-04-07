@@ -113,7 +113,7 @@ class ProcessXrefs {
 
         Map infoData = null
         if (Files.isRegularFile(infoFile)) {
-            infoFile = infoFile.newReader().withCloseable { reader ->
+            infoData = infoFile.newReader().withCloseable { reader ->
                 mapper.readValue(reader, Map)
             }
         }
