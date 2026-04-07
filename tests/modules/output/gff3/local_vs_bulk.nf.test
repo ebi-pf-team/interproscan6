@@ -28,7 +28,7 @@ nextflow_workflow {
                 input[3] = file("${projectDir}/tests/data/sequences/sequences.db", checkIfExists: true)
                 input[4] = false
                 input[5] = "6.0.x"
-                input[6] = "108.0
+                input[6] = "108.0"
                 """
             }
         }

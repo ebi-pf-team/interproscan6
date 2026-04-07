@@ -21,19 +21,10 @@ nextflow_process {
             params {
                 appl_dirs = [
                     antifam: ["antifam", ""],
+                    cdd    : ["cdd", ""],
                     pfam   : ["pfam", ""]
                 ]
-                applications = ["antifam", "pfam"]
-                n = "interpro"
-                v = "105.0"
-                p = "$baseDir/tests/data/databases/interpro/105.0"
-                json_database = "$baseDir/tests/data/databases/interpro/105.0/databases.json"
-                apps_to_run = ["antifam"]
-                app_dirs = [
-                    "antifam": ["antifam", ""],
-                    "pfam"   : ["pfam",    ""]
-                ]
-                datadir = "$baseDir/tests/data/databases"
+                applications = ["antifam", "cdd", "pfam"]
             }
 
             process {
@@ -55,7 +46,19 @@ nextflow_process {
 
         then {
             assert process.success
-            assert snapshot(process.out).match()
+            with (process.out) {
+                assert get("ready").size() == 1
+                assert get("ready").get(0).size() == 1  
+                assert get("ready").get(0).get(0).size() == 2
+                assert get("ready").get(0).get(0).get(0) == "antifam"
+                assert get("missing").size() == 1
+                assert get("missing").get(0).size() == 2
+                assert get("missing").get(0).get(0).size() == 5
+                assert get("missing").get(0).get(0).get(0) == "cdd"
+                assert get("missing").get(0).get(0).get(2) == "3.21"
+                assert get("missing").get(0).get(1).size() == 5
+                assert get("missing").get(0).get(1).get(2) == "38.1"
+            }
         }
 
     }
