@@ -62,5 +62,5 @@ jobs:
           wget -qO- https://get.nf-test.com | bash -s 0.9.3
           sudo mv nf-test /usr/local/bin/
 
-      - name: Run NF-Test unit tests
-        run: nf-test test tests/unit_tests
+      - name: Run unit tests
+        run: nf-test test tests
