@@ -1,6 +1,6 @@
 # Build from the root of the repo
 # docker build -t interpro/interproscan:6.x.x -f docker/interproscan/Dockerfile .
-FROM ubuntu:latest AS interproscan-base
+FROM ubuntu:24.04 AS interproscan-base
 LABEL authors="Laise Florentino (lcf@ebi.ac.uk), Emma Hobbs (ehobbs@ebi.ac.uk), Matthias Blum (mblum@ebi.ac.uk)"
 ENV TZ=Europe/London
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
