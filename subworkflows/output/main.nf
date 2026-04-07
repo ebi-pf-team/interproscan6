@@ -7,7 +7,7 @@ include { WRITE_XML; WRITE_XML_BULK                                       } from
 
 workflow OUTPUT {
     take:
-    json            // [ meta, [json] ]
+    json            // [json]
     seqdb
     formats
     outprefix

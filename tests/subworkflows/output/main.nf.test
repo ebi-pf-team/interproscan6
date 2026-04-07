@@ -1,0 +1,49 @@
+nextflow_workflow {
+
+    name "Test Workflow OUTPUT"
+    script "subworkflows/output/main.nf"
+    workflow "OUTPUT"
+
+    setup {
+        run("GUNZIP") {
+            script "../../modules/gunzip/main.nf"
+            process {
+                """
+                input[0] = file("${projectDir}/tests/data/combined/combined-with-repr-locations.json.gz", 
+                                checkIfExists: true)
+                """
+            }
+        }            
+    }   
+
+    test("Should run without failures") {
+
+        when {
+            workflow {
+                """
+                input[0] = GUNZIP.out.map { file -> [file] }
+                input[1] = file("${projectDir}/tests/data/sequences/sequences.db", checkIfExists: true)
+                input[2] = ["gff3", "json", "jsonl", "tsv", "xml"]
+                input[3] = "results"
+                input[4] = false
+                input[5] = "108.0"
+                input[6] = "6.0.x"
+                input[7] = 5000
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert snapshot(workflow.out).match()
+
+            with (workflow.out) {
+                view()
+                assert get(0).size() == 1
+                assert get(0).get(0).size() == 5
+            }
+        }
+
+    }
+
+}
