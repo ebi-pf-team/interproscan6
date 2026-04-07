@@ -35,12 +35,22 @@ nextflow_workflow {
 
         then {
             assert workflow.success
-            assert snapshot(workflow.out).match()
 
             with (workflow.out) {
                 view()
                 assert get(0).size() == 1
                 assert get(0).get(0).size() == 5
+
+                def basepath = "tests/data/output/test.faa"
+
+                assert get(0).get(0).every { obsfile ->
+                    def suffix = obsfile.split(/\./)[-1]
+                    def expfile = "${basepath}.${suffix}.gz"
+                    def cmd  = "python tests/diff.py -q ${expfile} ${obsfile}"
+                    def proc = cmd.execute()
+                    proc.waitFor()
+                    proc.exitValue() == 0
+                }
             }
         }
 
