@@ -1,0 +1,30 @@
+{
+    "Write JSON output for protein sequences": {
+        "content": [
+            {
+                "0": [
+                    "output.json:md5,41eaf1aece722faba029f2524e3165aa"
+                ]
+            }
+        ],
+        "timestamp": "2026-04-07T16:13:10.039402691",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    },
+    "Write JSON Lines output for protein sequences": {
+        "content": [
+            {
+                "0": [
+                    "output.jsonl:md5,c4bb035984332eb9c6bf85e67ed452b3"
+                ]
+            }
+        ],
+        "timestamp": "2026-04-07T16:13:17.277794451",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    }
+}

@@ -1,0 +1,56 @@
+nextflow_process {
+
+    name "Test Process WRITE_GFF3"
+    script "modules/output/gff3/main.nf"
+    process "WRITE_GFF3"
+
+    test("Write output for protein sequences") {
+
+        setup {
+            run("GUNZIP") {
+                script "../../gunzip/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/combined/combined-with-repr-locations.json.gz", 
+                                    checkIfExists: true)
+                    """
+                }
+            }            
+        }          
+
+        when {
+            process {
+                """
+                input[0] = GUNZIP.out.map { file -> [file] }
+                input[1] = file("output.gff3")
+                input[2] = file("${projectDir}/tests/data/sequences/sequences.db", checkIfExists: true)
+                input[3] = false
+                input[4] = "6.0.x"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+
+            with (process.out) {
+                assert size() == 1
+                assert get(0).size() == 1
+                def expfile = "tests/data/output/test.faa.gff3.gz"
+                def obsfile = get(0).get(0)
+                def cmd  = "python tests/diff.py ${expfile} ${obsfile}"
+                def proc = cmd.execute()
+                proc.waitFor()
+                assert proc.exitValue() == 0
+
+                cmd  = "python tests/diff.py --representative-locations-only ${expfile} ${obsfile}"
+                proc = cmd.execute()
+                proc.waitFor()
+                assert proc.exitValue() == 0
+            }
+        }
+
+    }
+
+}

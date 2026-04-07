@@ -1,0 +1,92 @@
+nextflow_process {
+
+    name "Test Process WRITE_JSON"
+    script "modules/output/json/main.nf"
+    process "WRITE_JSON"
+
+    setup {
+        run("GUNZIP") {
+            script "../../gunzip/main.nf"
+            process {
+                """
+                input[0] = file("${projectDir}/tests/data/combined/combined-with-repr-locations.json.gz", checkIfExists: true)
+                """
+            }
+        }            
+    }          
+
+    test("Write JSON output for protein sequences") {
+        when {
+            process {
+                """
+                input[0] = GUNZIP.out.map { file -> [file] }
+                input[1] = file("output.json")
+                input[2] = file("${projectDir}/tests/data/sequences/sequences.db", checkIfExists: true)
+                input[3] = false
+                input[4] = "6.0.x"
+                input[5] = "108.0"
+                input[6] = false
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+
+            with (process.out) {
+                assert size() == 1
+                assert get(0).size() == 1
+                def expfile = "tests/data/output/test.faa.json.gz"
+                def obsfile = get(0).get(0)
+                def cmd  = "python tests/diff.py ${expfile} ${obsfile}"
+                def proc = cmd.execute()
+                proc.waitFor()
+                assert proc.exitValue() == 0
+
+                cmd  = "python tests/diff.py --representative-locations-only ${expfile} ${obsfile}"
+                proc = cmd.execute()
+                proc.waitFor()
+                assert proc.exitValue() == 0
+            }
+        }
+    }
+
+    test("Write JSON Lines output for protein sequences") {
+        when {
+            process {
+                """
+                input[0] = GUNZIP.out.map { file -> [file] }
+                input[1] = file("output.jsonl")
+                input[2] = file("${projectDir}/tests/data/sequences/sequences.db", checkIfExists: true)
+                input[3] = false
+                input[4] = "6.0.x"
+                input[5] = "108.0"
+                input[6] = true
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+
+            with (process.out) {
+                assert size() == 1
+                assert get(0).size() == 1
+                def expfile = "tests/data/output/test.faa.jsonl.gz"
+                def obsfile = get(0).get(0)
+                def cmd  = "python tests/diff.py ${expfile} ${obsfile}"
+                def proc = cmd.execute()
+                proc.waitFor()
+                assert proc.exitValue() == 0
+
+                cmd  = "python tests/diff.py --representative-locations-only ${expfile} ${obsfile}"
+                proc = cmd.execute()
+                proc.waitFor()
+                assert proc.exitValue() == 0
+            }
+        }
+    }    
+
+}

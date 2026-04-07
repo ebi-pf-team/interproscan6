@@ -1,0 +1,25 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    "output.json:md5,41eaf1aece722faba029f2524e3165aa"
+                ],
+                "1": [
+                    "output.json:md5,41eaf1aece722faba029f2524e3165aa"
+                ],
+                "bulk": [
+                    "output.json:md5,41eaf1aece722faba029f2524e3165aa"
+                ],
+                "local": [
+                    "output.json:md5,41eaf1aece722faba029f2524e3165aa"
+                ]
+            }
+        ],
+        "timestamp": "2026-04-07T16:21:05.339369713",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    }
+}

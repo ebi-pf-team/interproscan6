@@ -1,0 +1,19 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "matches-with-repr-locations.json:md5,a6b3dac5a9070ae74fe87b3ae85f4fc8"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-07T13:22:26.427508897",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    }
+}

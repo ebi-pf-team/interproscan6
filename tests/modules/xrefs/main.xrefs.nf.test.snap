@@ -1,0 +1,53 @@
+{
+    "Add all cross-references but not GO terms": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "matches-with-xrefs.json:md5,433dd4288f9d0687edb2552da2c73eb3"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-07T13:23:24.571358958",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    },
+    "Add PANTHER cross-references": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "matches-with-xrefs.json:md5,edc703feb5e9d5970a7941ea7c4a4f91"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-07T13:23:15.651708531",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    },
+    "Add all cross-references and GO terms": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "matches-with-xrefs.json:md5,a60a9700564f3d951696f452899d2e50"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-07T13:23:33.304066607",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    }
+}

@@ -3,10 +3,10 @@ process GUNZIP {
     path file_gz
 
     output:
-    path "${file_gz.simpleName}"
+    path "${file_gz.baseName}"
 
     script:
     """
-    gunzip -c ${file_gz} > ${file_gz.simpleName}
+    gunzip -c ${file_gz} > ${file_gz.baseName}
     """
 }

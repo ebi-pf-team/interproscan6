@@ -1,0 +1,55 @@
+nextflow_workflow {
+
+    name "Compare WRITE_JSON and WRITE_JSON_BULK outputs"
+    script "tests/modules/output/local_vs_bulk.nf"
+    workflow "run_workflow"
+    profile "docker"
+
+    setup {
+        run("GUNZIP") {
+            script "../../gunzip/main.nf"
+            process {
+                """
+                input[0] = file("${projectDir}/tests/data/combined/combined-with-repr-locations.json.gz", 
+                                checkIfExists: true)
+                """
+            }
+        }            
+    }    
+
+    test("Should run without failures") {
+
+        when {
+            workflow {
+                """
+                input[0] = "json"
+                input[1] = GUNZIP.out.map { file -> [file] }
+                input[2] = file("output.json")
+                input[3] = file("${projectDir}/tests/data/sequences/sequences.db", checkIfExists: true)
+                input[4] = false
+                input[5] = "6.0.x"
+                input[6] = "108.0"
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert snapshot(workflow.out).match()
+            
+            with (workflow.out) {
+                get("local").size() == 1
+                get("bulk").size() == 1
+
+                def file1 = get("local").get(0)
+                def file2 = get("bulk").get(0)
+
+                def cmd  = "python tests/diff.py ${file1} ${file2}"
+                def proc = cmd.execute()
+                proc.waitFor()
+                assert proc.exitValue() == 0
+            }
+        }
+
+    }
+}

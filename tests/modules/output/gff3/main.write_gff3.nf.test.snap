@@ -1,0 +1,16 @@
+{
+    "Write output for protein sequences": {
+        "content": [
+            {
+                "0": [
+                    "output.gff3:md5,41cec7e2557463efd91e5d07603a3904"
+                ]
+            }
+        ],
+        "timestamp": "2026-04-07T15:04:26.006100403",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    }
+}

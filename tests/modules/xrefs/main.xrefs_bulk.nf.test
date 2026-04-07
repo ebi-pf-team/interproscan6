@@ -1,0 +1,108 @@
+nextflow_process {
+
+    name "Test Process XREFS_BULK"
+    script "modules/xrefs/main.nf"
+    process "XREFS_BULK"
+    profile "docker"
+
+    setup {
+        run("GUNZIP") {
+            script "../gunzip/main.nf"
+            process {
+                """
+                input[0] = file("${projectDir}/tests/data/combined/combined.json.gz", 
+                                checkIfExists: true)
+                """
+            }
+        }
+
+        run("UNTAR", alias: "UNTAR_PANTHER") {
+            script "../untar/main.nf"
+            process {
+                """
+                input[0] = file("${projectDir}/tests/data/panther/paint.tar.gz", checkIfExists: true)
+                """
+            }
+        }              
+    }
+
+    test("Add PANTHER cross-references") {
+        when {
+            process {
+                """
+                input[0] = GUNZIP.out.map { file -> tuple(1, file) }
+                input[1] = file("${projectDir}/assets/DUMMY", checkIfExists: true)
+                input[2] = UNTAR_PANTHER.out
+                input[3] = false
+                input[4] = false
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+    }    
+
+    test("Add all cross-references but not GO terms") {
+        setup {
+            run("UNTAR", alias: "UNTAR_INTERPRO") {
+                script "../untar/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/find-databases.tar.gz", checkIfExists: true)
+                    """
+                }
+            }                       
+        }
+
+        when {
+            process {
+                """
+                input[0] = GUNZIP.out.map { file -> tuple(1, file) }
+                input[1] = UNTAR_INTERPRO.out.map { dir ->  dir.resolve("interpro/108.0") }
+                input[2] = UNTAR_PANTHER.out
+                input[3] = false
+                input[4] = false
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+    }
+
+    test("Add all cross-references and GO terms") {
+        setup {
+            run("UNTAR", alias: "UNTAR_INTERPRO") {
+                script "../untar/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/find-databases.tar.gz", checkIfExists: true)
+                    """
+                }
+            }                       
+        }
+
+        when {
+            process {
+                """
+                input[0] = GUNZIP.out.map { file -> tuple(1, file) }
+                input[1] = UNTAR_INTERPRO.out.map { dir ->  dir.resolve("interpro/108.0") }
+                input[2] = UNTAR_PANTHER.out
+                input[3] = false
+                input[4] = false
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+    }    
+
+}
