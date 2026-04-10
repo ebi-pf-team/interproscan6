@@ -63,25 +63,30 @@ process PREPARE_FUNFAM {
     tuple val(meta), val(meta2), val(cathgene3d_json)
 
     output:
-    tuple val(meta), val(meta2), val(funfams)
+    tuple val(meta), val(meta2), path("cath.txt")
     
     exec:
-    funfams = new JsonSlurper().parse(cathgene3d_json)
-        .values()
-        .collect{ jsonMatches ->
-            jsonMatches
+    def seen = [] as Set
+    task.workDir
+        .resolve("cath.txt")
+        .withWriter { writer ->
+            new JsonSlurper().parse(cathgene3d_json)
                 .values()
-                .collect { jsonMatch ->
-                    def match = Match.fromMap(jsonMatch)
-                    def accession = match?.signature?.accession                       
-                    assert accession != null
-                    assert accession.startsWith("G3DSA:")
-                    def cathId = accession.substring(6)
-                    return cathId
+                .each { jsonMatches ->
+                    jsonMatches
+                        .values()
+                        .each { jsonMatch ->
+                            def match = Match.fromMap(jsonMatch)
+                            def accession = match?.signature?.accession
+                            assert accession != null
+                            assert accession.startsWith("G3DSA:")
+                            def cath_id = accession.substring(6)
+                            if (seen.add(cath_id)) {
+                                writer.writeLine(cath_id)
+                            }
+                        }
                 }
         }
-        .flatten()
-        .unique()
 }
 
 process SEARCH_FUNFAM {
@@ -89,28 +94,24 @@ process SEARCH_FUNFAM {
     container 'interpro/cath:0.16.10'
 
     input:
-    tuple val(meta), val(meta2), path(fasta), val(funfams)
+    tuple val(meta), val(meta2), path(fasta), path(caths_txt)
     path root_dir
 
     output:
     tuple val(meta), val(meta2), path("hmmsearch.out"), path("resolved.out")
 
     script:
-    def commands = "touch hmmsearch.out\n"
-    funfams.each { cathId -> 
-        def leaf = cathId
-            .split("\\.")  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
-            .join(File.separator) + ".hmm"
-        def hmm = root_dir.resolve(leaf)
-        commands += "[ -e \"${hmm}\" ] &&"
-        commands += " hmmsearch"
-        commands += " -Z 65245 --cut_tc"
-        commands += " --cpu ${task.cpus}"
-        commands += " ${hmm} ${fasta} >> hmmsearch.out\n"
-    }
-
     """
-    ${commands}
+    touch hmmsearch.out
+    while IFS= read -r id || [[ -n "\$id" ]]; do
+        [[ -z "\$id" ]] && continue
+        
+        hmm="${root_dir}/\$(tr '.' '/' <<< "\$id").hmm"
+        
+        if [[ -f "\$hmm" ]]; then
+            hmmsearch -Z 65245 --cut_tc --cpu ${task.cpus} "\$hmm" ${fasta} >> hmmsearch.out
+        fi
+    done < ${caths_txt}
 
     cath-resolve-hits \
         --input-format=hmmsearch_out \
