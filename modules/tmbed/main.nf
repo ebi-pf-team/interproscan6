@@ -48,7 +48,8 @@ process PREPARE_TMBED {
 }
 
 process RUN_TMBED_CPU {
-    label 'mem_high', 'time_medium', 'dynamic', 'tmbed_container'
+    label     'mem_high', 'time_medium', 'dynamic'
+    container 'interpro/tmbed:1.0.2'
 
     input:
     tuple val(meta), path(fasta)
@@ -69,7 +70,8 @@ process RUN_TMBED_CPU {
 }
 
 process RUN_TMBED_GPU {
-    label 'mem_medium', 'time_short', 'tmbed_container', 'use_gpu'
+    label     'mem_medium', 'time_short', 'use_gpu'
+    container 'interpro/tmbed:1.0.2'
 
     input:
     tuple val(meta), path(fasta)

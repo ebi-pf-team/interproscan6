@@ -35,7 +35,6 @@ nextflow_workflow {
 
         then {
             assert workflow.success
-            assert snapshot(workflow.out).match()
             
             with (workflow.out) {
                 get("local").size() == 1

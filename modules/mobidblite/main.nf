@@ -5,7 +5,8 @@ import uk.ac.ebi.interpro.Signature
 import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_MOBIDBLITE {
-    label 'mem_min', 'time_veryshort', 'dynamic', 'mobidblite_container'
+    label     'mem_min', 'time_veryshort', 'dynamic'
+    container 'interpro/idrpred:1.0.3'
 
     input:
     tuple val(meta), val(meta2), path(fasta)

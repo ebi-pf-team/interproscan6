@@ -9,7 +9,8 @@ import uk.ac.ebi.interpro.SignatureLibraryRelease
 import uk.ac.ebi.interpro.Site
 
 process SEARCH_SFLD {
-    label 'mem_min', 'time_veryshort', 'dynamic', 'ips6_container'
+    label     'mem_min', 'time_veryshort', 'dynamic'
+    container 'interpro/sfld:ebiftp'
 
     input:
     tuple val(meta), path(fasta)

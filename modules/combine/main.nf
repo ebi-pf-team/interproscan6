@@ -15,7 +15,8 @@ process COMBINE_MATCHES {
 }
 
 process COMBINE_MATCHES_BULK {
-    label    'mem_high', 'time_veryshort', 'ips6_container'
+    label     'mem_high', 'time_veryshort'
+    container 'interpro/groovy:4.0.27-1'
 
     input:
     tuple val(meta), path(json, arity: '1..*', name: '?/*')
@@ -25,6 +26,6 @@ process COMBINE_MATCHES_BULK {
 
     script:
     """
-    groovy -cp "/opt/interproscan6/lib:." /opt/interproscan6/bin/combine.groovy . combined.json
+    groovy -cp "/opt/interproscan6/lib:." /opt/interproscan6/combine.groovy . combined.json
     """
 }

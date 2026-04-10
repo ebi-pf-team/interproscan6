@@ -7,7 +7,8 @@ import uk.ac.ebi.interpro.Signature
 import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_PRINTS {
-    label 'mem_medium', 'time_short', 'ips6_container'
+    label     'mem_medium', 'time_short'
+    container 'interpro/fingerprintscan:3.597.ebiftp'
 
     input:
     tuple val(meta), path(fasta)

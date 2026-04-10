@@ -11,8 +11,8 @@ nextflow_process {
             process {
                 """
                 def jsons = [
-                    file("${projectDir}/tests/data/cath/cathfunfam.json", checkIfExists: true),
-                    file("${projectDir}/tests/data/cath/cathgene3d.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/cath/funfam/cathfunfam.json", checkIfExists: true),
+                    file("${projectDir}/tests/data/cath/gene3d/cathgene3d.json", checkIfExists: true),
                     file("${projectDir}/tests/data/cdd/cdd.json", checkIfExists: true),
                     file("${projectDir}/tests/data/coils/coils.json", checkIfExists: true),
                     file("${projectDir}/tests/data/hamap/hamap.json", checkIfExists: true),

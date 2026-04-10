@@ -23,7 +23,8 @@ process WRITE_TSV {
 }
 
 process WRITE_TSV_BULK {
-    label    'mem_veryhigh', 'time_long', 'ips6_container'
+    label     'mem_veryhigh', 'time_long'
+    container 'interpro/groovy:4.0.27-1'
 
     input:
     path(input_files, arity: '1..*', name: '?/*')
@@ -36,7 +37,7 @@ process WRITE_TSV_BULK {
 
     script:
     """
-    groovy -cp "/opt/interproscan6/lib:/opt/interproscan6/lib/*:." /opt/interproscan6/bin/write-output.groovy \
+    groovy -cp "/opt/interproscan6/lib:/opt/interproscan6/lib/*:." /opt/interproscan6/write-output.groovy \
         tsv \
         . \
         ${seq_db_file} \

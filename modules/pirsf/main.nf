@@ -6,7 +6,8 @@ import uk.ac.ebi.interpro.Location
 import uk.ac.ebi.interpro.Match
 
 process SEARCH_PIRSF {
-    label 'mem_low', 'time_short', 'dynamic', 'ips6_container'
+    label     'mem_low', 'time_short', 'dynamic'
+    container 'interpro/hmmer:3.3'
 
     input:
     tuple val(meta), path(fasta)

@@ -6,7 +6,8 @@ import uk.ac.ebi.interpro.Signature
 import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_DEEPTMHMM_CPU {
-    label       'mem_high', 'time_medium', 'deeptmhmm_container'
+    label       'mem_high', 'time_medium'
+    container   'interpro/deeptmhmm:1.0'
     stageInMode 'copy'
 
     input:
@@ -30,7 +31,8 @@ process RUN_DEEPTMHMM_CPU {
 }
 
 process RUN_DEEPTMHMM_GPU {
-    label       'mem_high', 'time_short', 'deeptmhmm_container', 'use_gpu'
+    label       'mem_high', 'time_short', 'use_gpu'
+    container   'interpro/deeptmhmm:26.04'
     stageInMode 'copy'
 
     input:

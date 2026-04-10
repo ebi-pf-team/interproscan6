@@ -6,7 +6,8 @@ import uk.ac.ebi.interpro.SignatureLibraryRelease
 import uk.ac.ebi.interpro.Site
 
 process SEARCH_CDD {
-    label 'mem_min', 'time_short', 'ips6_container'
+    label     'mem_min', 'time_short'
+    container 'interpro/rpsproc:0.5.0'
 
     input:
     tuple val(meta), path(fasta)

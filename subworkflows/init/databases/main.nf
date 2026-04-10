@@ -29,15 +29,15 @@ workflow INIT_DATABASES {
 
         def versions = InterProScan.fetchCompatibleVersions(iprscan_maj_min_version, use_globus)
         if (versions == null) {
-            def message = null
-            if (use_globus) {
-                message = "InterProScan could not retrieve compatibility information for InterPro data versions. Try disabling the compatibility check with --skip-interpro-version-check."
-            } else {
-                message = "InterProScan could not retrieve compatibility information for InterPro data versions from the EMBL-EBI FTP. Try using the Globus mirror with --globus or disabling the compatibility check with --skip-interpro-version-check."
+            if (!use_globus) {
+                // Try again, but using Globus
+                versions = InterProScan.fetchCompatibleVersions(iprscan_maj_min_version, true)
             }
 
-            log.error message
-            exit 1
+            if (versions == null) {
+                log.error "InterProScan could not retrieve compatibility information for InterPro data versions. Try disabling the compatibility check with --skip-interpro-version-check."
+                exit 1
+            }
         } else if (interpro_version == "latest") {
             interpro_version = versions[-1]
         } else if (!versions.contains(interpro_version)) {

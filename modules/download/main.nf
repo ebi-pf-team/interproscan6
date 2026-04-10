@@ -6,9 +6,9 @@ import groovy.json.JsonOutput
 import uk.ac.ebi.interpro.InterProScan
 
 process DOWNLOAD {
-    maxForks 1
-    executor 'local'
-    label    'ips6_container'
+    maxForks  1
+    executor  'local'
+    container 'interpro/download:0.1.0'
 
     input:
     tuple val(name), val(arcname), val(version), val(skip), val(dirpath)

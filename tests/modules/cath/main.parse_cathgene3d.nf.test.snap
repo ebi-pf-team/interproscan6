@@ -1,0 +1,20 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        2,
+                        "cathgene3d.json:md5,c2a3975fd92e67409d926cae1bf0ad36"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-10T11:31:28.626802001",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

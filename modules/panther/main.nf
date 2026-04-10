@@ -9,7 +9,8 @@ import uk.ac.ebi.interpro.Match
 import uk.ac.ebi.interpro.TreeGrafter
 
 process SEARCH_PANTHER {
-    label 'mem_low', 'time_short', 'dynamic', 'ips6_container'
+    label     'mem_low', 'time_short', 'dynamic'
+    container 'interpro/hmmer:3.3'
 
     input:
     tuple val(meta), val(meta2), path(fasta)
@@ -141,7 +142,8 @@ process PREPARE_TREEGRAFTER {
 
 
 process RUN_TREEGRAFTER {
-    label 'mem_medium', 'time_short', 'dynamic', 'ips6_container'
+    label     'mem_medium', 'time_short', 'dynamic'
+    container 'interpro/epa-ng:0.3.8'
     
     input:
     tuple val(meta), val(meta2), val(sequenceIds), val(familyIds), val(fastas)

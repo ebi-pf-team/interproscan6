@@ -5,7 +5,8 @@ import uk.ac.ebi.interpro.Signature
 import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_COILS {
-    label 'mem_min', 'time_veryshort', 'ips6_container'
+    label     'mem_min', 'time_veryshort'
+    container 'interpro/ncoils:2.2.1'
 
     input:
     tuple val(meta), path(fasta)

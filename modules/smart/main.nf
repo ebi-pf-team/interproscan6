@@ -5,7 +5,8 @@ import uk.ac.ebi.interpro.HMMER2
 import uk.ac.ebi.interpro.HMMER3
 
 process PREFILTER_SMART {
-    label 'mem_min', 'time_veryshort', 'dynamic', 'ips6_container'
+    label     'mem_min', 'time_veryshort', 'dynamic'
+    container 'interpro/hmmer:3.3'
 
     input:
     tuple val(meta), path(fasta)
@@ -68,14 +69,15 @@ process PREPARE_SMART {
 }
 
 process SEARCH_SMART {
-    label 'mem_min', 'time_veryshort', 'dynamic', 'ips6_container'
+    label     'mem_min', 'time_veryshort', 'dynamic'
+    container 'interpro/hmmer:2.3.2'
 
     input:
     tuple val(meta), path(fastas), val(models)
     path hmmdir
 
     output:
-    tuple val(meta), path(fastas, arity: '1..*'), path("hmmpfam.out")
+    tuple val(meta), path(fastas, arity: '0..*'), path("hmmpfam.out")
 
     script:
     def commands = ""

@@ -6,7 +6,8 @@ import uk.ac.ebi.interpro.Signature
 import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process SEARCH_SUPERFAMILY {
-    label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
+    label     'mem_min', 'time_short', 'dynamic'
+    container 'interpro/hmmer:3.3'
 
     input:
     tuple val(meta), val(meta2), path(fasta)

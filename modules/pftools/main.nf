@@ -13,7 +13,8 @@ process RUN_PSSCAN {
     pftools developers. It automates running pfscan for all provided patterns and
     includes post-processing of the hits.
     */
-    label 'mem_min', 'time_medium', 'ips6_container'
+    label     'mem_min', 'time_medium'
+    container 'interpro/pftools:3.2.12'
 
     input:
         tuple val(meta), path(fasta)
@@ -84,7 +85,8 @@ process PARSE_PSSCAN {
 }
 
 process RUN_PFSEARCH {
-    label 'mem_min', 'time_medium', 'dynamic', 'ips6_container'
+    label     'mem_min', 'time_medium', 'dynamic'
+    container 'interpro/pftools:3.2.12'
 
     input:
     tuple val(meta), path(fasta)

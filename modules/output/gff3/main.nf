@@ -24,7 +24,8 @@ process WRITE_GFF3 {
 }
 
 process WRITE_GFF3_BULK {
-    label    'mem_veryhigh', 'time_long', 'ips6_container'
+    label     'mem_veryhigh', 'time_long'
+    container 'interpro/groovy:4.0.27-1'
 
     input:
     path(input_files, arity: '1..*', name: '?/*')
@@ -38,7 +39,7 @@ process WRITE_GFF3_BULK {
 
     script:
     """
-    groovy -cp "/opt/interproscan6/lib:/opt/interproscan6/lib/*:." /opt/interproscan6/bin/write-output.groovy \
+    groovy -cp "/opt/interproscan6/lib:/opt/interproscan6/lib/*:." /opt/interproscan6/write-output.groovy \
         gff3 \
         . \
         ${seq_db_file} \

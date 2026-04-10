@@ -6,7 +6,8 @@ import uk.ac.ebi.interpro.Signature
 import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_SIGNALP_CPU {
-    label 'mem_medium', 'time_medium', 'signalp_container'
+    label     'mem_medium', 'time_medium'
+    container 'interpro/signalp:6.0i'
 
     input:
     tuple val(meta), path(fasta)
@@ -35,7 +36,8 @@ process RUN_SIGNALP_CPU {
 }
 
 process RUN_SIGNALP_GPU {
-    label 'mem_medium', 'time_short', 'signalp_container', 'use_gpu'
+    label     'mem_medium', 'time_medium', 'use_gpu'
+    container 'interpro/signalp:6.0i'
 
     input:
     tuple val(meta), path(fasta)

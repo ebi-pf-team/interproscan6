@@ -1,5 +1,5 @@
-include { SEARCH_GENE3D; PARSE_CATHGENE3D } from  "../../modules/cath/gene3d"
-include { PREPARE_FUNFAM; SEARCH_FUNFAM; PARSE_FUNFAM  } from  "../../modules/cath/funfam"
+include { SEARCH_GENE3D; PARSE_CATHGENE3D              } from  "../../modules/cath"
+include { PREPARE_FUNFAM; SEARCH_FUNFAM; PARSE_FUNFAM  } from  "../../modules/cath"
 
 workflow CATH {
     take:

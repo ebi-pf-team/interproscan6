@@ -25,8 +25,9 @@ process WRITE_FASTA {
 }
 
 process SEARCH_PHOBIUS {
-    label       'mem_min', 'time_short', 'ips6_container'
+    label       'mem_min', 'time_short'
     stageInMode 'copy'
+    container   'interpro/phobius:1.01'
 
     input:
     tuple val(meta), path(fasta)

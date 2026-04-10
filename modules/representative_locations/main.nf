@@ -1,7 +1,8 @@
 import uk.ac.ebi.interpro.ProcessReprLocations
 
 process REPRESENTATIVE_LOCATIONS_BULK {
-    label    'mem_high', 'time_short', 'ips6_container'
+    label     'mem_high', 'time_short'
+    container 'interpro/groovy:4.0.27-1'
 
     input:
     tuple val(meta), path(json)
@@ -11,7 +12,7 @@ process REPRESENTATIVE_LOCATIONS_BULK {
 
     script:
     """
-    groovy -cp "/opt/interproscan6/lib:." /opt/interproscan6/bin/select-repr-locations.groovy ${json} matches-with-repr-locations.json
+    groovy -cp "/opt/interproscan6/lib:." /opt/interproscan6/select-repr-locations.groovy ${json} matches-with-repr-locations.json
     """
 }
 

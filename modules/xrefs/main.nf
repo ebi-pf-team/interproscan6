@@ -3,7 +3,8 @@ import groovy.json.JsonOutput
 import uk.ac.ebi.interpro.ProcessXrefs
 
 process XREFS_BULK {
-    label    'mem_high', 'time_veryshort', 'ips6_container'
+    label    'mem_high', 'time_veryshort'
+    container 'interpro/groovy:4.0.27-1'
 
     input:
     tuple val(meta), path(json)
@@ -17,7 +18,7 @@ process XREFS_BULK {
 
     script:
     """
-    groovy -cp "/opt/interproscan6/lib:." /opt/interproscan6/bin/add-xrefs.groovy \
+    groovy -cp "/opt/interproscan6/lib:." /opt/interproscan6/add-xrefs.groovy \
         ${json} \
         ${interpro_dir.name == 'DUMMY' ? '-' : interpro_dir} \
         ${panther_paint_dir.name == 'DUMMY2' ? '-' : panther_paint_dir} \
