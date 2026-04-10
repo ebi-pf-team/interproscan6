@@ -1,7 +1,7 @@
 FROM interpro/hmmer:3.3
 
-LABEL name="interpro/hmmer"
-LABEL tag="2.3.2"
+LABEL name="interpro/smart"
+LABEL tag="1.0"
 
 ENV PATH="/opt/hmmer2/bin:${PATH}"
 
@@ -15,4 +15,4 @@ RUN curl -L -O http://eddylab.org/software/hmmer/2.3.2/hmmer-2.3.2.tar.gz && \
     make install && \
     cd /opt/hmmer2 && \
     rm -rf hmmer-2.3.2 hmmer2/man man  && \
-    find bin -type f ! -name 'hmmpfam'
+    find bin -type f ! -name 'hmmpfam' -delete

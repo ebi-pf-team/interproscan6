@@ -6,7 +6,7 @@ import uk.ac.ebi.interpro.HMMER3
 
 process PREFILTER_SMART {
     label     'mem_min', 'time_veryshort', 'dynamic'
-    container 'interpro/hmmer:3.3'
+    container 'interpro/smart:1.0'
 
     input:
     tuple val(meta), path(fasta)
@@ -70,7 +70,7 @@ process PREPARE_SMART {
 
 process SEARCH_SMART {
     label     'mem_min', 'time_veryshort', 'dynamic'
-    container 'interpro/hmmer:2.3.2'
+    container 'interpro/smart:1.0'
 
     input:
     tuple val(meta), path(fastas), val(models)
@@ -80,22 +80,35 @@ process SEARCH_SMART {
     tuple val(meta), path(fastas, arity: '0..*'), path("hmmpfam.out")
 
     script:
-    def commands = ""
-    [fastas, models]
-        .transpose()
-        .each { entry -> 
-            def fasta = entry[0]
-            def model = entry[1]
-            def hmm = hmmdir.resolve("${model}.hmm")
-            commands += "hmmpfam"
-            commands += " --acc -A 0 -E 0.01 -Z 350000 --cpu ${task.cpus}"
-            commands += " ${hmm} ${fasta} >> hmmpfam.out\n"
-        }
+    """
+    shopt -s nullglob
 
-    """
     touch hmmpfam.out
-    ${commands}
+    for fasta in *.faa; do
+        name=\${fasta%.faa}
+        hmmpfam \
+            --acc -A 0 -E 0.01 -Z 350000 --cpu ${task.cpus} \
+            ${hmmdir}/\${name}.hmm \${fasta} >> hmmpfam.out
+    done
     """
+
+    // script:
+    // def commands = ""
+    // [fastas, models]
+    //     .transpose()
+    //     .each { entry -> 
+    //         def fasta = entry[0]
+    //         def model = entry[1]
+    //         def hmm = hmmdir.resolve("${model}.hmm")
+    //         commands += "hmmpfam"
+    //         commands += " --acc -A 0 -E 0.01 -Z 350000 --cpu ${task.cpus}"
+    //         commands += " ${hmm} ${fasta} >> hmmpfam.out\n"
+    //     }
+
+    // """
+    // touch hmmpfam.out
+    // ${commands}
+    // """
 }
 
 process PARSE_SMART {
