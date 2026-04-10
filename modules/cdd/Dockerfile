@@ -1,7 +1,7 @@
 FROM ubuntu:24.04
 
-LABEL name="interpro/rpsproc"
-LABEL tag="0.5.0"
+LABEL name="interpro/cdd"
+LABEL tag="1.0"
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/opt/blast:/opt/rpsbproc/RpsbProc-x64-linux:${PATH}"

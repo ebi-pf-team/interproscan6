@@ -7,7 +7,7 @@ import uk.ac.ebi.interpro.Site
 
 process SEARCH_CDD {
     label     'mem_min', 'time_short'
-    container 'interpro/rpsproc:0.5.0'
+    container 'interpro/cdd:1.0'
 
     input:
     tuple val(meta), path(fasta)
