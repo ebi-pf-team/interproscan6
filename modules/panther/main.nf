@@ -10,7 +10,7 @@ import uk.ac.ebi.interpro.TreeGrafter
 
 process SEARCH_PANTHER {
     label     'mem_low', 'time_short', 'dynamic'
-    container 'interpro/hmmer:3.3'
+    container 'interpro/panther:1.0'
 
     input:
     tuple val(meta), val(meta2), path(fasta)
@@ -126,12 +126,8 @@ process PREPARE_TREEGRAFTER {
 
         def fastaFile = task.workDir.resolve("${seqId}.faa")
         fastaFile.withWriter { writer ->
-            writer.writeLine(">${familyId}")
-            for (int i = 0; i < sequence.length(); i += 80) {
-                def j = Math.min(i + 80, length) - 1
-                def line = sequence[i..j]
-                writer.writeLine(line)                
-            }
+            writer.writeLine(">${seqId}|${familyId}")
+            sequence.eachMatch(/.{1,60}/) { writer.writeLine(it) }
         }
 
         familyIds.add( familyId )
@@ -143,50 +139,18 @@ process PREPARE_TREEGRAFTER {
 
 process RUN_TREEGRAFTER {
     label     'mem_medium', 'time_short', 'dynamic'
-    container 'interpro/epa-ng:0.3.8'
+    container 'interpro/panther:1.0'
     
     input:
-    tuple val(meta), val(meta2), val(sequenceIds), val(familyIds), val(fastas)
+    tuple val(meta), val(meta2), val(sequenceIds), val(familyIds), path(fastas)
     path msf
 
     output:
     tuple val(meta), val(meta2), path("epang.tsv")
 
     script:
-    def commands = ""
-
-    [sequenceIds, familyIds, fastas]
-        .transpose()
-        .each { entry -> 
-            def seqID  = entry[0]
-            def family = entry[1]
-            def fastaPath = entry[2]
-           
-            // Run EPA-ng
-            def epang_command = "epa-ng"
-            epang_command += " -G 0.05"
-            epang_command += " -m WAG"
-            epang_command += " -T ${task.cpus}"
-            epang_command += " -t " + msf.resolve("${family}.bifurcate.newick")
-            epang_command += " -s " + msf.resolve("${family}.AN.fasta")
-            epang_command += " -q ${fastaPath}"
-            epang_command += " --redo"
-
-            // Parse results
-            def py_command = "parse_epang.py"
-            py_command += " epa_result.jplace"
-            py_command += " " + msf.resolve("${family}.newick")
-
-            // Add sequence ID
-            def awk_command = "awk '{print \"${seqID}\",\$0}'"
-
-            // Only run Python + Awk if EPA-ng doesn't fail
-            commands += "{ ${epang_command} && ${py_command} | ${awk_command} >> epang.tsv; } || :\n"
-        }
-
     """
-    touch epang.tsv
-    ${commands}
+    treegrafter.py --threads ${task.cpus} . ${msf} > epang.tsv
     """
 }
 
