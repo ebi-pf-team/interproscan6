@@ -29,7 +29,7 @@ process XREFS_BULK {
 }
 
 process XREFS {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_medium', 'time_veryshort'
     executor 'local'
 
     input:

@@ -17,7 +17,7 @@ process REPRESENTATIVE_LOCATIONS_BULK {
 }
 
 process REPRESENTATIVE_LOCATIONS {
-    label    'mem_low', 'time_short'
+    label    'mem_medium', 'time_short'
     executor 'local'
 
     input:
