@@ -1,4 +1,10 @@
 import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 import groovy.json.JsonOutput
 import uk.ac.ebi.interpro.FastaFile
 import uk.ac.ebi.interpro.HMMER2
@@ -29,42 +35,43 @@ process PREPARE_SMART {
 
     input:
     tuple val(meta), val(hmmseach_out), val(fasta)
-    val hmmdir
 
     output:
-    tuple val(meta), path(fastas), val(models)
+    tuple val(meta), path("sequences.zip")
 
     exec:
-    /* Only run seqs against a HMMER2 model where a HMMER3 match was found.
-        Return tuple val(meta), val(fastaFiles), val(smarts) where the Nth item of
-        fastaFiles corresponds to the sequences to scan against the Nth element of smarts. */
-    Map<String, String> sequences = FastaFile.parse(fasta)  // [md5: sequence]
-    Map<String, Map> matches = HMMER3.parseOutput(hmmseach_out, "SMART")
+    def sequences = FastaFile.parse(fasta)  // [md5: sequence]
+    def matches = HMMER3.parseOutput(hmmseach_out, "SMART")
 
     // Map model accessions to seq Ids -> [modelAcc: [seqIds]]
-    Map<String, List<String>> model2seqs = [:].withDefault { [] }
+    def model2seqs = [:].withDefault { [] }
     matches.each { seqId, seqMatches ->
         seqMatches.each { modelAcc, _ ->
             model2seqs[modelAcc] << seqId
         }
     }
 
-    fastas = []
-    models = []
-    // Create a FASTA file for each profile to search with
-    model2seqs.each { modelAcc, seqIds ->
-        def mdlFile = hmmdir.resolve("${modelAcc}.hmm")
-        if (!mdlFile.exists()) return
-        def fasta = task.workDir.resolve("${modelAcc}.faa")
-        fasta.withWriter('UTF-8') { writer ->
-            seqIds.each { seqId ->
-                String seq = sequences[seqId]
-                writer.writeLine(">${seqId}")
-                seq.eachMatch(/.{1,60}/) { writer.writeLine(it) }
+    def zipFile = task.workDir.resolve("sequences.zip")
+    Files.newOutputStream(zipFile).withCloseable { os ->
+        new ZipOutputStream(os).withCloseable { zip ->
+            // Create a FASTA file for each profile to search with
+            model2seqs.sort().each { modelAcc, seqIds ->
+                def fastaFile = task.workDir.resolve("${modelAcc}.faa")
+                fastaFile.withWriter { writer ->
+                    seqIds.sort().each { seqId ->
+                        def seq = sequences[seqId]
+                        writer.writeLine(">${seqId}")
+                        seq.eachMatch(/.{1,60}/) { writer.writeLine(it) }
+                    }
+                }
+
+                ZipEntry entry = new ZipEntry(fastaFile.fileName.toString())
+                zip.putNextEntry(entry)
+                Files.copy(fastaFile, zip)
+                zip.closeEntry()
+                Files.delete(fastaFile);
             }
         }
-        fastas << fasta
-        models << modelAcc
     }
 }
 
@@ -73,42 +80,33 @@ process SEARCH_SMART {
     container 'interpro/smart:1.0'
 
     input:
-    tuple val(meta), path(fastas), val(models)
+    tuple val(meta), path(seqs_zip)
     path hmmdir
 
     output:
-    tuple val(meta), path(fastas, arity: '0..*'), path("hmmpfam.out")
+    tuple val(meta), path(seqs_zip), path("smart.zip")
 
     script:
     """
     shopt -s nullglob
 
-    touch hmmpfam.out
-    for fasta in *.faa; do
-        name=\${fasta%.faa}
-        hmmpfam \
-            --acc -A 0 -E 0.01 -Z 350000 --cpu ${task.cpus} \
-            ${hmmdir}/\${name}.hmm \${fasta} >> hmmpfam.out
+    unzip -d /tmp/fasta ${seqs_zip}
+    touch /tmp/hmmpfam.out
+
+    for fasta in /tmp/fasta/*.faa; do
+        name=\${fasta##*/}   # strip directory
+        name=\${name%.faa}   # strip extension
+        hmm="${hmmdir}/\${name}.hmm"
+        if [[ -f "\$hmm" ]]; then
+            hmmpfam --acc -A 0 -E 0.01 -Z 350000 --cpu ${task.cpus} "\$hmm" "\$fasta" >> /tmp/hmmpfam.out
+            zip -jq /tmp/smart.zip "\$hmm"
+        fi
     done
+
+    zip -jq /tmp/smart.zip /tmp/hmmpfam.out
+    rm -r /tmp/fasta /tmp/hmmpfam.out
+    mv /tmp/smart.zip smart.zip
     """
-
-    // script:
-    // def commands = ""
-    // [fastas, models]
-    //     .transpose()
-    //     .each { entry -> 
-    //         def fasta = entry[0]
-    //         def model = entry[1]
-    //         def hmm = hmmdir.resolve("${model}.hmm")
-    //         commands += "hmmpfam"
-    //         commands += " --acc -A 0 -E 0.01 -Z 350000 --cpu ${task.cpus}"
-    //         commands += " ${hmm} ${fasta} >> hmmpfam.out\n"
-    //     }
-
-    // """
-    // touch hmmpfam.out
-    // ${commands}
-    // """
 }
 
 process PARSE_SMART {
@@ -116,21 +114,71 @@ process PARSE_SMART {
     executor 'local'
 
     input:
-    tuple val(meta), val(fastas), val(hmmpfam_out)
-    val hmmdir
+    tuple val(meta), val(fasta_zip), val(search_zip)
 
     output:
     tuple val(meta), path("smart.json")
 
     exec:
-    // fasta may be a single file or multiple
-    def sequences = [:] // [md5: sequence]
-    fastas.each { fasta ->
-        sequences = sequences + FastaFile.parse(fasta)
+    def sequences   = [:]
+    def hmm_lengths = [:]
+    def hmmpfam_out = null
+
+    def tmp_zip = task.workDir.resolve("temp.zip")
+    Files.newInputStream(fasta_zip).withCloseable { is ->
+        Files.copy(is, tmp_zip, StandardCopyOption.REPLACE_EXISTING)
     }
 
-    def hmmLengths = HMMER2.parseHMMs(hmmdir)
-    def matches = HMMER2.parseOutput(hmmpfam_out, hmmLengths, "SMART")
+    new ZipFile(tmp_zip.toFile()).withCloseable { zip ->
+        zip.entries().each { entry ->
+            if (entry.isDirectory()) {
+                // Should never happen
+                return
+            }
+
+            def fileName = Paths.get(entry.name).fileName.toString()
+            Path extracted = task.workDir.resolve(fileName)
+
+            zip.getInputStream(entry).withCloseable { input ->
+                Files.copy(input, extracted, StandardCopyOption.REPLACE_EXISTING)
+            }
+
+            sequences = sequences + FastaFile.parse(extracted)
+            Files.deleteIfExists(extracted)
+        }
+    }
+
+    Files.newInputStream(search_zip).withCloseable { is ->
+        Files.copy(is, tmp_zip, StandardCopyOption.REPLACE_EXISTING)
+    }
+
+    new ZipFile(tmp_zip.toFile()).withCloseable { zip ->
+        zip.entries().each { entry ->
+            if (entry.isDirectory()) {
+                // Should never happen
+                return
+            }
+
+            def fileName = Paths.get(entry.name).fileName.toString()
+            Path extracted = task.workDir.resolve(fileName)
+
+            zip.getInputStream(entry).withCloseable { input ->
+                Files.copy(input, extracted, StandardCopyOption.REPLACE_EXISTING)
+            }
+
+            if (fileName == "hmmpfam.out") {
+                hmmpfam_out = extracted
+            } else {
+                def (accession, length) = HMMER2.parseHMM(extracted)
+                hmm_lengths[accession] = length
+                Files.deleteIfExists(extracted)
+            }
+        }
+    }
+
+    Files.deleteIfExists(tmp_zip)
+   
+    def matches = HMMER2.parseOutput(hmmpfam_out, hmm_lengths, "SMART")
 
     String tyrKinaseAccession = "SM00219"
     def tyrKinasePattern = ~/.*HRD[LIV][AR]\w\wN.*/

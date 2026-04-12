@@ -15,8 +15,7 @@ workflow SMART {
     )
 
     PREPARE_SMART(
-        PREFILTER_SMART.out,
-        hmm2,
+        PREFILTER_SMART.out
     )
 
     SEARCH_SMART(
@@ -25,8 +24,7 @@ workflow SMART {
     )
 
     PARSE_SMART(
-        SEARCH_SMART.out,
-        hmm2
+        SEARCH_SMART.out
     )
 
     emit:

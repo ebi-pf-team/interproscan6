@@ -5,6 +5,11 @@ LABEL tag="1.0"
 
 ENV PATH="/opt/hmmer2/bin:${PATH}"
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends zip unzip && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /opt/hmmer2
 RUN curl -L -O http://eddylab.org/software/hmmer/2.3.2/hmmer-2.3.2.tar.gz && \
     tar -xzf hmmer-2.3.2.tar.gz && \
