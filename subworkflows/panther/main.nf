@@ -29,7 +29,7 @@ workflow PANTHER {
     )
 
     RUN_TREEGRAFTER(
-        PREPARE_TREEGRAFTER.out.fasta,
+        PREPARE_TREEGRAFTER.out.zip,
         msf
     )
 
