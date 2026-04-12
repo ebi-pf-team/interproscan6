@@ -1,5 +1,5 @@
-include { SEARCH_GENE3D; PARSE_CATHGENE3D              } from  "../../modules/cath"
-include { PREPARE_FUNFAM; SEARCH_FUNFAM; PARSE_FUNFAM  } from  "../../modules/cath"
+include { SEARCH_GENE3D; PARSE_CATHGENE3D } from  "../../modules/cath"
+include { SEARCH_FUNFAM; PARSE_FUNFAM     } from  "../../modules/cath"
 
 workflow CATH {
     take:
@@ -37,15 +37,10 @@ workflow CATH {
     }
 
     if (report_cathfunfam) {
-        // Find unique CATH superfamilies with at least one hit
-        PREPARE_FUNFAM(
-            PARSE_CATHGENE3D.out
-        )
-
-        // Join input fasta file with superfamilies.
+        // Join input fasta file with found superfamilies
         ch_funfams = ch_split
             .join(
-                PREPARE_FUNFAM.out, 
+                PARSE_CATHGENE3D.out, 
                 by: [0, 1],
                 failOnDuplicate: true,
                 failOnMismatch: true

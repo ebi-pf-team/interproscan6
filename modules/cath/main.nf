@@ -55,46 +55,12 @@ process PARSE_CATHGENE3D {
     filepath.text = JsonOutput.toJson(matches)
 }
 
-process PREPARE_FUNFAM {
-    label    'mem_low', 'time_veryshort'
-    executor 'local'
-
-    input:
-    tuple val(meta), val(meta2), val(cathgene3d_json)
-
-    output:
-    tuple val(meta), val(meta2), path("cath.txt")
-    
-    exec:
-    def seen = [] as Set
-    task.workDir
-        .resolve("cath.txt")
-        .withWriter { writer ->
-            new JsonSlurper().parse(cathgene3d_json)
-                .values()
-                .each { jsonMatches ->
-                    jsonMatches
-                        .values()
-                        .each { jsonMatch ->
-                            def match = Match.fromMap(jsonMatch)
-                            def accession = match?.signature?.accession
-                            assert accession != null
-                            assert accession.startsWith("G3DSA:")
-                            def cath_id = accession.substring(6)
-                            if (seen.add(cath_id)) {
-                                writer.writeLine(cath_id)
-                            }
-                        }
-                }
-        }
-}
-
 process SEARCH_FUNFAM {
     label     'mem_min', 'time_short', 'dynamic'
     container 'interpro/cath:0.16.10'
 
     input:
-    tuple val(meta), val(meta2), path(fasta), path(caths_txt)
+    tuple val(meta), val(meta2), path(fasta), path(cathgene3d_json)
     path root_dir
 
     output:
@@ -102,16 +68,9 @@ process SEARCH_FUNFAM {
 
     script:
     """
-    touch hmmsearch.out
-    while IFS= read -r id || [[ -n "\$id" ]]; do
-        [[ -z "\$id" ]] && continue
-        
-        hmm="${root_dir}/\$(tr '.' '/' <<< "\$id").hmm"
-        
-        if [[ -f "\$hmm" ]]; then
-            hmmsearch -Z 65245 --cut_tc --cpu ${task.cpus} "\$hmm" ${fasta} >> hmmsearch.out
-        fi
-    done < ${caths_txt}
+    pre-funfam.py -t ${task.cpus} ${fasta} ${cathgene3d_json} ${root_dir} > hmmsearch.sh
+
+    bash hmmsearch.sh > hmmsearch.out
 
     cath-resolve-hits \
         --input-format=hmmsearch_out \
