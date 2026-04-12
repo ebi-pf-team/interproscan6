@@ -1,5 +1,6 @@
 package uk.ac.ebi.interpro
 
+import java.nio.file.Files
 import java.nio.file.Path
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -10,7 +11,17 @@ import uk.ac.ebi.interpro.RepresentativeInfo
 
 
 class ProcessReprLocations {
-    static void run(Path inputPath, Path outputPath) {
+    static void run(List<Path> inputPaths, Path outputDir) {
+        Files.createDirectories(outputDir)
+
+        int fileIndex = 0
+        inputPaths.each { inputPath ->
+            Path outputPath = outputDir.resolve("${++fileIndex}.json".toString())
+            ProcessReprLocations.processFile(inputPath, outputPath)
+        }
+    }
+
+    static void processFile(Path inputPath, Path outputPath) {
         // only consider N "best" locations otherwise there are too many comparisons (2^locs)
         int maxLocationsPerGroup = 20
         float locationOverlapThreshold = 0.3

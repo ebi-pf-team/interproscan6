@@ -113,8 +113,7 @@ workflow INTERPROSCAN {
         appl_dirs,
         goterms,
         pathways,
-        skip_repr_locations,
-        batch_size
+        skip_repr_locations
     )
 
     output_files = OUTPUT(
@@ -124,8 +123,7 @@ workflow INTERPROSCAN {
         outprefix,
         nucleic,
         interpro_version,
-        interproscan_version,
-        batch_size
+        interproscan_version
     )
 
     emit:

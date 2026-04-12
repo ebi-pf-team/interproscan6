@@ -1,21 +1,3 @@
-import uk.ac.ebi.interpro.ProcessReprLocations
-
-process REPRESENTATIVE_LOCATIONS_BULK {
-    label     'mem_high', 'time_short'
-    container 'interpro/groovy:4.0.27-1'
-
-    input:
-    tuple val(meta), path(json)
-
-    output:
-    tuple val(meta), path("matches-with-repr-locations.json")
-
-    script:
-    """
-    groovy -cp "/opt/interproscan6/lib:." /opt/interproscan6/select-repr-locations.groovy ${json} matches-with-repr-locations.json
-    """
-}
-
 process REPRESENTATIVE_LOCATIONS {
     label    'mem_medium', 'time_short'
     executor 'local'
@@ -24,9 +6,10 @@ process REPRESENTATIVE_LOCATIONS {
     tuple val(meta), val(json)
 
     output:
-    tuple val(meta), path("matches-with-repr-locations.json")
+    tuple val(meta), path('repr_locs/*json', arity: '1..*')
 
     exec:
-    def output = task.workDir.resolve('matches-with-repr-locations.json')
-    ProcessReprLocations.run(json, output)
+    def outdir = task.workDir.resolve("repr_locs")
+    uk.ac.ebi.interpro.ProcessReprLocations.run(json, outdir)
 }
+

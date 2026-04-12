@@ -1,6 +1,6 @@
-include { COMBINE_MATCHES; COMBINE_MATCHES_BULK                   } from "../../modules/combine"
-include { XREFS; XREFS_BULK                                       } from "../../modules/xrefs"
-include { REPRESENTATIVE_LOCATIONS; REPRESENTATIVE_LOCATIONS_BULK } from "../../modules/representative_locations"
+include { COMBINE_MATCHES          } from "../../modules/combine"
+include { ADD_XREFS                } from "../../modules/add_xrefs"
+include { REPRESENTATIVE_LOCATIONS } from "../../modules/representative_locations"
 
 workflow COMBINE {
     take:
@@ -10,7 +10,6 @@ workflow COMBINE {
     add_goterms
     add_pathways
     skip_repr_locations
-    batch_size
 
     main:
     ch_interpro = appl_dirs
@@ -25,42 +24,27 @@ workflow COMBINE {
         .ifEmpty(file("${projectDir}/assets/DUMMY2")) 
         .first()
 
-    ch_xrefs = channel.empty()
-    if (batch_size < 50000) {
-        COMBINE_MATCHES(json)
+    COMBINE_MATCHES(json)
 
-        ch_xrefs = XREFS(
-            COMBINE_MATCHES.out,
-            ch_interpro,
-            ch_panther,
-            add_goterms,
-            add_pathways
-        )
-    } else {
-        COMBINE_MATCHES_BULK(json)
-
-        ch_xrefs = XREFS_BULK(
-            COMBINE_MATCHES_BULK.out,
-            ch_interpro,
-            ch_panther,
-            add_goterms,
-            add_pathways
-        )
-    }
+    ch_xrefs = ADD_XREFS(
+        COMBINE_MATCHES.out,
+        ch_interpro,
+        ch_panther,
+        add_goterms,
+        add_pathways
+    )
 
     ch_combined = channel.empty()
     if (skip_repr_locations) {
         ch_combined = ch_xrefs
-    } else if (batch_size < 50000) {
-        ch_combined = REPRESENTATIVE_LOCATIONS(ch_xrefs)
     } else {
-        ch_combined = REPRESENTATIVE_LOCATIONS_BULK(ch_xrefs)
+        ch_combined = REPRESENTATIVE_LOCATIONS(ch_xrefs)
     }
 
-    // Collect all JSON files into a single channel so we don't have cocurrent writing to the output files
+    // Collect all JSON files into a single channel so we don't have concurrent writing to the output files
     results = ch_combined
         .map { meta, json -> json }
-        .collect()
+        .collect(flat: true)
 
     emit:
     results

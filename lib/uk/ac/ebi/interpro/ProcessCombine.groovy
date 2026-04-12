@@ -1,12 +1,15 @@
 package uk.ac.ebi.interpro
 
+import java.nio.file.Files
 import java.nio.file.Path
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 
 
 class ProcessCombine {
-    static void run(List<Path> inputPaths, Path outputPath) {
+    static void run(List<Path> inputPaths, Path outputDir, int chunkSize) {
+        Files.createDirectories(outputDir)
+
         def mapper = new ObjectMapper()
         def aggregatedMatches = [:]  // seqMd5 -> (modelAcc -> match)
 
@@ -20,9 +23,20 @@ class ProcessCombine {
         }
 
         def jf = new JsonFactory()
-        outputPath.withWriter { writer ->
-            jf.createGenerator(writer).withCloseable { generator ->
-                mapper.writeValue(generator, aggregatedMatches)
+
+        int fileIndex = 0
+        def keys = aggregatedMatches.keySet() as List
+        keys.sort().collate(chunkSize).each { batch ->
+            def chunk = [:]
+            batch.each { key ->
+                chunk[key] = aggregatedMatches[key]
+            }
+
+            Path outputFile = outputDir.resolve("${++fileIndex}.json".toString())
+            outputFile.withWriter { writer ->
+                jf.createGenerator(writer).withCloseable { generator ->
+                    mapper.writeValue(generator, chunk)
+                }
             }
         }
     }
