@@ -139,37 +139,31 @@ class HMMER2 {
         return hits
     }
 
-    static parseHMMs(Path dirPath) {
-        def hmmLengths = [:]
+    static parseHMM(Path filePath) {
+        String modelAccession = null
+        Integer length = null
 
-        dirPath.eachFile { Path filePath ->
-            if (!filePath.isFile()) 
-                return  // skip sub‑dirs
-
-            String modelAccession = null
-            Integer length = null
-
-            filePath.eachLine { line ->
-                if (line.startsWith("ACC ")) {
-                    // We expect only one model per file
-                    assert modelAccession == null
-                    def fields = line.split(/\s+/)
-                    assert fields.size() == 2
-                    modelAccession = fields[1]
-                }
-                else if (line.startsWith("LENG ")) {
-                    def fields = line.split(/\s+/)
-                    assert fields.size() == 2
-                    length = fields[1] as Integer
-                }
-                else if (line.startsWith("//")) {
-                    assert modelAccession != null
-                    assert length != null
-                    hmmLengths[modelAccession] = length
-                }
+        filePath.eachLine { line ->
+            if (line.startsWith("ACC ")) {
+                // We expect only one model per file
+                assert modelAccession == null
+                def fields = line.split(/\s+/)
+                assert fields.size() == 2
+                modelAccession = fields[1]
+            }
+            else if (line.startsWith("LENG ")) {
+                def fields = line.split(/\s+/)
+                assert fields.size() == 2
+                length = fields[1] as Integer
+            }
+            else if (line.startsWith("//")) {
+                assert modelAccession != null
+                assert length != null
             }
         }
 
-        return hmmLengths
+        assert modelAccession != null
+        assert length != null
+        return [modelAccession, length]
     }
 }
