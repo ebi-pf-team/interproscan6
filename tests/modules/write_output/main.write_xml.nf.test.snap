@@ -3,11 +3,11 @@
         "content": [
             {
                 "0": [
-                    "output.xml:md5,1b86ee9b32f2c744f2e2bdae7139c8b7"
+                    "output.xml:md5,3f17e928e58e76d82d47e3c14933f80d"
                 ]
             }
         ],
-        "timestamp": "2026-04-07T18:36:59.380172747",
+        "timestamp": "2026-04-12T11:45:44.324410002",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.04.7"

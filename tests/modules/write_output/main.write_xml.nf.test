@@ -1,13 +1,12 @@
 nextflow_process {
 
-    name "Test Process WRITE_XML_BULK"
-    script "modules/output/xml/main.nf"
-    process "WRITE_XML_BULK"
-    profile "docker"
+    name "Test Process WRITE_XML"
+    script "modules/write_output/main.nf"
+    process "WRITE_XML"
 
     setup {
         run("GUNZIP") {
-            script "../../gunzip/main.nf"
+            script "../gunzip/main.nf"
             process {
                 """
                 input[0] = file("${projectDir}/tests/data/combined/combined-with-repr-locations.json.gz", checkIfExists: true)

@@ -3,14 +3,14 @@
         "content": [
             {
                 "0": [
-                    "output.gff3:md5,41cec7e2557463efd91e5d07603a3904"
+                    "output.gff3:md5,b2755669b1a10ade7ec4aeb946b417c2"
                 ]
             }
         ],
-        "timestamp": "2026-04-07T15:04:26.006100403",
+        "timestamp": "2026-04-12T11:46:06.605662851",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.10.2"
+            "nextflow": "25.04.7"
         }
     }
 }

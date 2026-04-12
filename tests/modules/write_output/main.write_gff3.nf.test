@@ -1,14 +1,14 @@
 nextflow_process {
 
     name "Test Process WRITE_GFF3"
-    script "modules/output/gff3/main.nf"
+    script "modules/write_output/main.nf"
     process "WRITE_GFF3"
 
     test("Write output for protein sequences") {
 
         setup {
             run("GUNZIP") {
-                script "../../gunzip/main.nf"
+                script "../gunzip/main.nf"
                 process {
                     """
                     input[0] = file("${projectDir}/tests/data/combined/combined-with-repr-locations.json.gz", 
@@ -16,7 +16,7 @@ nextflow_process {
                     """
                 }
             }            
-        }          
+        }   
 
         when {
             process {

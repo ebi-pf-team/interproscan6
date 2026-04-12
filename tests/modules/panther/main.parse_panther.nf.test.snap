@@ -6,12 +6,12 @@
                     [
                         1,
                         2,
-                        "panther.json:md5,ef06ff05876a321899e9eb1780594850"
+                        "panther.json:md5,7d0826f62c99ab50f95b20eb4e89225c"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-04-03T01:44:06.845155771",
+        "timestamp": "2026-04-12T11:49:52.303536579",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.04.7"

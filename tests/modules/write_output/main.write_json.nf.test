@@ -1,20 +1,19 @@
 nextflow_process {
 
-    name "Test Process WRITE_JSON_BULK"
-    script "modules/output/json/main.nf"
-    process "WRITE_JSON_BULK"
-    profile "docker"
+    name "Test Process WRITE_JSON"
+    script "modules/write_output/main.nf"
+    process "WRITE_JSON"
 
     setup {
         run("GUNZIP") {
-            script "../../gunzip/main.nf"
+            script "../gunzip/main.nf"
             process {
                 """
                 input[0] = file("${projectDir}/tests/data/combined/combined-with-repr-locations.json.gz", checkIfExists: true)
                 """
             }
         }            
-    }          
+    }  
 
     test("Write JSON output for protein sequences") {
         when {

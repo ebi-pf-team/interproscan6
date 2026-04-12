@@ -21,7 +21,7 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = GUNZIP.out.map { file -> tuple(1, file) }
+                input[0] = GUNZIP.out.map { file -> tuple(1, [file]) }
                 """
             }
         }
@@ -33,8 +33,12 @@ nextflow_process {
             with (process.out) {
                 assert size() == 1
                 assert get(0).size() == 1
+                assert get(0).get(0).size() == 2
+                
+                def jsons = get(0).get(0).get(1)
+                assert jsons.size() == 1
                 def json1 = "tests/data/combined/combined-with-repr-locations.json.gz"
-                def json2 = get(0).get(0).get(1)
+                def json2 = jsons.get(0)
                 def cmd  = "python tests/diff.py -q --representative-locations-only ${json1} ${json2}"
                 def proc = cmd.execute()
                 proc.waitFor()

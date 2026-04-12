@@ -3,28 +3,28 @@
         "content": [
             {
                 "0": [
-                    "output.json:md5,41eaf1aece722faba029f2524e3165aa"
+                    "output.json:md5,a3502cf4220f06ee9dcfe021609fce66"
                 ]
             }
         ],
-        "timestamp": "2026-04-07T16:14:59.875780403",
+        "timestamp": "2026-04-12T11:43:53.74274995",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.10.2"
+            "nextflow": "25.04.7"
         }
     },
     "Write JSON Lines output for protein sequences": {
         "content": [
             {
                 "0": [
-                    "output.jsonl:md5,c4bb035984332eb9c6bf85e67ed452b3"
+                    "output.jsonl:md5,a6f1ea7bbf9ee40c63b75df7c54d2561"
                 ]
             }
         ],
-        "timestamp": "2026-04-07T16:15:11.758975977",
+        "timestamp": "2026-04-12T11:43:59.362348214",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.10.2"
+            "nextflow": "25.04.7"
         }
     }
 }

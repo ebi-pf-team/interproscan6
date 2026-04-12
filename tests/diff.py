@@ -2,10 +2,12 @@
 
 import argparse
 import gzip
+import hashlib
 import json
 import shutil
 import sys
 import xml.etree.ElementTree as ET
+import zipfile
 from collections import defaultdict
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -76,9 +78,11 @@ def parse(file: Path, extended: bool, repr_locs_only: bool) -> set[Hit]:
     elif fmt == "jsonl":
         return parse_jsonl(file, extended=extended, repr_locs_only=repr_locs_only)
     elif fmt == "tsv":
-        return format_tsv(file)
+        return parse_tsv(file)
     elif fmt == "xml":
         return parse_xml(file, extended=extended, repr_locs_only=repr_locs_only)
+    elif fmt == "zip":
+        return parse_zip(file)
     else:
         raise NotImplementedError(f"Format not supported: {fmt}")
 
@@ -153,7 +157,7 @@ def parse_gff3(file: Path, repr_locs_only: bool) -> set[Hit]:
     return hits
 
 
-def format_tsv(file: str) -> set[Hit]:
+def parse_tsv(file: str) -> set[Hit]:
     hits = set()
     with file.open("rt") as fh:
         for line in map(str.rstrip, fh):
@@ -400,6 +404,31 @@ def parse_xml(file: Path, extended: bool, repr_locs_only: bool) -> set[Hit]:
                     )
 
     return hits
+
+
+def parse_zip(file: Path) -> set[Hit]:
+    files = set()
+
+    with TemporaryDirectory() as tmpdir:
+        with zipfile.ZipFile(file) as zf:
+            for member in zf.infolist():
+                if member.is_dir():
+                    continue
+
+                tmpfile = Path(tmpdir) / Path(member.filename).name
+                with zf.open(member, "r") as src, tmpfile.open("wb") as dst:
+                    shutil.copyfileobj(src, dst, length=1024 * 1024)
+
+                with tmpfile.open("rb") as fh:
+                    digest = hashlib.md5()
+                    while chunk := fh.read(1024 * 1024):
+                        digest.update(chunk)
+
+                md5 = digest.hexdigest()
+
+                files.add((member.filename, md5, "", "", "", "", ""))
+
+    return files
 
 
 if __name__ == "__main__":

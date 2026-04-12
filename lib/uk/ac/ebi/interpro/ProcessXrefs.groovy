@@ -12,8 +12,9 @@ import uk.ac.ebi.interpro.RepresentativeInfo
 
 
 class ProcessXrefs {
-    static void run(Path inputPath, Path interproPath, Path pantherPaintPath, 
-                    boolean addGoTerms, boolean addPathways, Path outputPath) {
+    static void run(List<Path> inputPaths, Path interproPath, Path pantherPaintPath, 
+                    boolean addGoTerms, boolean addPathways, Path outputDir) {
+        Files.createDirectories(outputDir)
         ObjectMapper mapper = new ObjectMapper()
         def (databaseInfo, entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null, null]
         if (interproPath != null) {
@@ -35,67 +36,71 @@ class ProcessXrefs {
             }
         }
 
-        def matches = inputPath.newReader().withCloseable { reader ->
-            mapper.readValue(reader, Map.class)
-        }
-        matches.each { String seqMd5, Map seqMatches ->
-            seqMatches.each { modelAcc, matchMap ->
-                Match match = Match.fromMap(matchMap)  // convert Map to Match object
-
-                if (match.source != "InterPro-N") {
-                    String signatureAcc = match.signature.accession
-                    def signatureInfo = entries == null ? null : (entries[signatureAcc] ?: entries[modelAcc])
-
-                    // Update library version
-                    def version = (match.signature.signatureLibraryRelease.version == "null") ? null : match.signature.signatureLibraryRelease.version
-                    if (!version && signatureInfo != null) {
-                        match.signature.signatureLibraryRelease.version = databaseInfo?.get(signatureInfo["database"])
-                    } else if (match.signature.signatureLibraryRelease.library == "PIRSR") {
-                        match.signature.signatureLibraryRelease.version = databaseInfo?.get("PIRSR")
-                    }
-
-                    // Handle PANTHER data
-                    if (match.signature.signatureLibraryRelease.library == "PANTHER") {
-                        updatePantherData(match, pantherPaintPath, signatureAcc, entries, goInfo)
-                    }
-
-                    // Update signature info
-                    if (signatureInfo != null) {
-                        match.signature.name = signatureInfo["name"]
-                        match.signature.description = signatureInfo["description"]
-                        String sigType = signatureInfo["type"]
-                        match.signature.setType(sigType)
-
-                        if (signatureInfo["representative"] != null) {
-                            match.representativeInfo = new RepresentativeInfo(
-                                signatureInfo["representative"]["type"],
-                                signatureInfo["representative"]["index"]
-                            )
-                        }
-
-                        // Handle InterPro data
-                        String interproAcc = signatureInfo["integrated"]
-                        if (interproAcc != null) {
-                            def entryInfo = entries[interproAcc]
-                            assert entryInfo != null
-                            match.signature.entry = new Entry(
-                                interproAcc, entryInfo["name"], entryInfo["description"], entryInfo["type"]
-                            )
-                            addXRefs(match, interproAcc, ipr2go, goInfo, ipr2pa, paInfo)
-                        }
-                    }
-
-                    // update the match
-                    seqMatches[modelAcc] = match
-                }  // end of if (entries)
-            } // end of seqMatches
-        }  // end of Json reader / seq Id
-
         def jf = new JsonFactory()
-        outputPath.withWriter { writer ->
-            def gen = jf.createGenerator(writer)
-            mapper.writeValue(gen, matches)
-            gen.close()
+        int fileIndex = 0
+
+        inputPaths.each { inputPath -> 
+            def matches = inputPath.newReader().withCloseable { reader ->
+                mapper.readValue(reader, Map.class)
+            }
+            matches.each { String seqMd5, Map seqMatches ->
+                seqMatches.each { modelAcc, matchMap ->
+                    Match match = Match.fromMap(matchMap)  // convert Map to Match object
+
+                    if (match.source != "InterPro-N") {
+                        String signatureAcc = match.signature.accession
+                        def signatureInfo = entries == null ? null : (entries[signatureAcc] ?: entries[modelAcc])
+
+                        // Update library version
+                        def version = (match.signature.signatureLibraryRelease.version == "null") ? null : match.signature.signatureLibraryRelease.version
+                        if (!version && signatureInfo != null) {
+                            match.signature.signatureLibraryRelease.version = databaseInfo?.get(signatureInfo["database"])
+                        } else if (match.signature.signatureLibraryRelease.library == "PIRSR") {
+                            match.signature.signatureLibraryRelease.version = databaseInfo?.get("PIRSR")
+                        }
+
+                        // Handle PANTHER data
+                        if (match.signature.signatureLibraryRelease.library == "PANTHER") {
+                            updatePantherData(match, pantherPaintPath, signatureAcc, entries, goInfo)
+                        }
+
+                        // Update signature info
+                        if (signatureInfo != null) {
+                            match.signature.name = signatureInfo["name"]
+                            match.signature.description = signatureInfo["description"]
+                            String sigType = signatureInfo["type"]
+                            match.signature.setType(sigType)
+
+                            if (signatureInfo["representative"] != null) {
+                                match.representativeInfo = new RepresentativeInfo(
+                                    signatureInfo["representative"]["type"],
+                                    signatureInfo["representative"]["index"]
+                                )
+                            }
+
+                            // Handle InterPro data
+                            String interproAcc = signatureInfo["integrated"]
+                            if (interproAcc != null) {
+                                def entryInfo = entries[interproAcc]
+                                assert entryInfo != null
+                                match.signature.entry = new Entry(
+                                    interproAcc, entryInfo["name"], entryInfo["description"], entryInfo["type"]
+                                )
+                                addXRefs(match, interproAcc, ipr2go, goInfo, ipr2pa, paInfo)
+                            }
+                        }
+
+                        seqMatches[modelAcc] = match
+                    }
+                }
+            }
+
+            def outputFile = outputDir.resolve("${++fileIndex}.json".toString())
+            outputFile.withWriter { writer ->
+                jf.createGenerator(writer).withCloseable { generator ->
+                    mapper.writeValue(generator, matches)
+                }
+            }
         }
     }
 

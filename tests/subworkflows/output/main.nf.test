@@ -28,7 +28,6 @@ nextflow_workflow {
                 input[4] = false
                 input[5] = "108.0"
                 input[6] = "6.0.x"
-                input[7] = 5000
                 """
             }
         }
@@ -37,7 +36,6 @@ nextflow_workflow {
             assert workflow.success
 
             with (workflow.out) {
-                view()
                 assert get(0).size() == 1
                 assert get(0).get(0).size() == 5
 

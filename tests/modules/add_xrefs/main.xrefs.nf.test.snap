@@ -5,15 +5,17 @@
                 "0": [
                     [
                         1,
-                        "matches-with-xrefs.json:md5,433dd4288f9d0687edb2552da2c73eb3"
+                        [
+                            "1.json:md5,fd45e54af6d8ddc1da3426ad52cdd187"
+                        ]
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-04-07T13:23:57.669548152",
+        "timestamp": "2026-04-12T11:08:11.715723169",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.10.2"
+            "nextflow": "25.04.7"
         }
     },
     "Add PANTHER cross-references": {
@@ -22,15 +24,17 @@
                 "0": [
                     [
                         1,
-                        "matches-with-xrefs.json:md5,edc703feb5e9d5970a7941ea7c4a4f91"
+                        [
+                            "1.json:md5,2a7925ed7608850e4612a53f659b123a"
+                        ]
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-04-07T13:23:44.174248381",
+        "timestamp": "2026-04-12T11:08:05.143066773",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.10.2"
+            "nextflow": "25.04.7"
         }
     },
     "Add all cross-references and GO terms": {
@@ -39,15 +43,17 @@
                 "0": [
                     [
                         1,
-                        "matches-with-xrefs.json:md5,433dd4288f9d0687edb2552da2c73eb3"
+                        [
+                            "1.json:md5,de3c19062fac69a505d3ab1f874d30b6"
+                        ]
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-04-07T13:24:10.854817442",
+        "timestamp": "2026-04-12T11:08:17.214488618",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.10.2"
+            "nextflow": "25.04.7"
         }
     }
 }
