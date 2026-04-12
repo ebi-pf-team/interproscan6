@@ -22,19 +22,18 @@ workflow PANTHER {
         hmm
     )
 
-    msf = panther.map { hmm, msf -> msf }
     PREPARE_TREEGRAFTER(
         SEARCH_PANTHER.out,
-        msf
     )
 
+    msf = panther.map { hmm, msf -> msf }
     RUN_TREEGRAFTER(
-        PREPARE_TREEGRAFTER.out.zip,
+        PREPARE_TREEGRAFTER.out,
         msf
     )
 
     PARSE_PANTHER(
-        PREPARE_TREEGRAFTER.out.json.join(
+        PREPARE_TREEGRAFTER.out.join(
             RUN_TREEGRAFTER.out, 
             by: [0, 1],
             failOnDuplicate: true,

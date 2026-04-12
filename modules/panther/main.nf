@@ -36,11 +36,9 @@ process PREPARE_TREEGRAFTER {
 
     input:
     tuple val(meta), val(meta2), val(hmmseach_out)
-    val msf
 
     output:
-    tuple val(meta), val(meta2), path("panther.json"), emit: json
-    tuple val(meta), val(meta2), path("panther.zip"),  emit: zip
+    tuple val(meta), val(meta2), path("panther.json")
     
     exec:
     def hmmer_matches = HMMER3.parseOutput(hmmseach_out, "PANTHER")
@@ -78,68 +76,6 @@ process PREPARE_TREEGRAFTER {
 
     def jsonFile = task.workDir.resolve("panther.json")
     jsonFile.text = JsonOutput.toJson(hmmer_matches)
-
-    def zipFile = task.workDir.resolve("panther.zip")
-    Files.newOutputStream(zipFile).withCloseable { os ->
-        new ZipOutputStream(os).withCloseable { zip ->
-            hmmer_matches.sort().each { seqId, matches ->
-                // Ensure we only have one family
-                assert matches.size() == 1
-                def match = matches.values().first()
-                
-                // Ensure we only have one domain
-                assert match.locations.size() == 1
-                def location = match.locations.first()
-                assert location.queryAlignment.length() == location.targetAlignment.length()
-
-                // Get expected length of the sequence
-                def familyId = match.modelAccession
-                def fastaPath = msf.resolve("${familyId}.AN.fasta")
-                assert fastaPath.exists()
-                def sequences = FastaFile.parse(fastaPath)  // [md5 : "seq"]
-                def length = sequences.values().first().length()
-
-                // Query sequence to graft
-                def sb = new StringBuilder()
-
-                // Pad N-terminal
-                sb << ("-" * (location.hmmStart - 1))
-
-                // Build sequence
-                def targetAlignment = location.targetAlignment.replaceAll(/(?i)[UO]/, 'X')
-                for (int i = 0; i < targetAlignment.length(); i++) {
-                    def hmmChar = location.queryAlignment[i]
-                    def seqChar = targetAlignment[i]
-
-                    if (hmmChar != '.') {
-                        sb << seqChar
-                    }
-                }
-
-                // Pad C-terminal
-                assert sb.length() <= length
-                while (sb.length() < length) {
-                    sb << "-"
-                }
-
-                assert sb.length() <= length
-                def sequence = sb.toString()
-                assert sequence.length() == length
-
-                def fastaFile = task.workDir.resolve("${seqId}.faa")
-                fastaFile.withWriter { writer ->
-                    writer.writeLine(">${seqId}|${familyId}")
-                    sequence.eachMatch(/.{1,60}/) { writer.writeLine(it) }
-                }
-
-                ZipEntry entry = new ZipEntry(fastaFile.fileName.toString())
-                zip.putNextEntry(entry)
-                Files.copy(fastaFile, zip)
-                zip.closeEntry()
-                Files.delete(fastaFile);
-            }
-        }    
-    }
 }
 
 
@@ -148,7 +84,7 @@ process RUN_TREEGRAFTER {
     container 'interpro/panther:1.0'
     
     input:
-    tuple val(meta), val(meta2), path(zip)
+    tuple val(meta), val(meta2), path(json)
     path msf
 
     output:
@@ -156,9 +92,7 @@ process RUN_TREEGRAFTER {
 
     script:
     """
-    unzip -d /tmp/fasta ${zip}
-    treegrafter.py --threads ${task.cpus} /tmp/fasta ${msf} > epang.tsv
-    rm -r /tmp/fasta
+    treegrafter.py --threads ${task.cpus} ${json} ${msf} > epang.tsv
     """
 }
 

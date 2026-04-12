@@ -15,46 +15,28 @@ nextflow_process {
                     """
                 }
             }
-
-            run("UNTAR") {
-                script "../untar/main.nf"
-                process {
-                    """
-                    input[0] = file("${projectDir}/tests/data/panther/msf.tar.gz", checkIfExists: true)
-                    """
-                }
-            }
         }    
 
         when {
             process {
                 """
                 input[0] = GUNZIP.out.map { file -> tuple(1, 1, file) }
-                input[1] = UNTAR.out
                 """
             }
         }
 
         then {
             assert process.success
-            // assert snapshot(process.out).match()
+            assert snapshot(process.out).match()
 
             with (process.out) {
-                assert get('json').size() == 1
-                assert get('json').get(0).size() == 3
-                def json = get('json').get(0).get(2)
+                assert size() == 1
+                assert get(0).size() == 1
+                assert get(0).get(0).size() == 3
+                def json = get(0).get(0).get(2)
 
                 def cmd  = "python tests/diff.py -q tests/data/panther/panther.json ${json}"
                 def proc = cmd.execute()
-                proc.waitFor()
-                assert proc.exitValue() == 0
-
-                assert get('zip').size() == 1
-                assert get('zip').get(0).size() == 3
-                def zip = get('zip').get(0).get(2)
-
-                cmd  = "python tests/diff.py tests/data/panther/panther.zip ${zip}"
-                proc = cmd.execute()
                 proc.waitFor()
                 assert proc.exitValue() == 0
             }
