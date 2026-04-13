@@ -25,17 +25,26 @@ class ProcessCombine {
         def jf = new JsonFactory()
 
         int fileIndex = 0
-        def keys = aggregatedMatches.keySet() as List
-        keys.sort().collate(chunkSize).each { batch ->
-            def chunk = [:]
-            batch.each { key ->
-                chunk[key] = aggregatedMatches[key]
-            }
+        if (chunkSize > 0) {
+            def keys = aggregatedMatches.keySet() as List
+            keys.sort().collate(chunkSize).each { batch ->
+                def chunk = [:]
+                batch.each { key ->
+                    chunk[key] = aggregatedMatches[key]
+                }
 
+                Path outputFile = outputDir.resolve("${++fileIndex}.json".toString())
+                outputFile.withWriter { writer ->
+                    jf.createGenerator(writer).withCloseable { generator ->
+                        mapper.writeValue(generator, chunk)
+                    }
+                }
+            }
+        } else {
             Path outputFile = outputDir.resolve("${++fileIndex}.json".toString())
             outputFile.withWriter { writer ->
                 jf.createGenerator(writer).withCloseable { generator ->
-                    mapper.writeValue(generator, chunk)
+                    mapper.writeValue(generator, aggregatedMatches)
                 }
             }
         }

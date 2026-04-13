@@ -86,9 +86,9 @@ workflow INIT_DATABASES {
 
             FIND_DATABASES(
                 ch_interpro,
-                db_json_path,
+                databases_json,
                 applications,
-                app_dirs,
+                appl_dirs,
                 data_dir
             )
         }
