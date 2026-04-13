@@ -32,7 +32,7 @@ class ProcessXrefs {
                 (ipr2go, goInfo) = loadXRefFiles(interproPath.resolve("goterms"))
             }
             if (addPathways) {
-                (ipr2go, goInfo) = loadXRefFiles(interproPath.resolve("pathways"))
+                (ipr2pa, paInfo) = loadXRefFiles(interproPath.resolve("pathways"))
             }
         }
 
@@ -169,21 +169,19 @@ class ProcessXrefs {
     }
 
     static void addXRefs(Match match, String interproAcc, def ipr2go, def goInfo, def ipr2pa, def paInfo) {
-        Map<String,String> GO_PATTERN = ["P": "BIOLOGICAL_PROCESS", "C": "CELLULAR_COMPONENT", "F": "MOLECULAR_FUNCTION"]
-        Map<String,String> PA_PATTERN = ["t": "MetaCyc", "w": "UniPathway", "k": "KEGG", "r": "Reactome"]
         if (ipr2go != null && goInfo != null && ipr2go[interproAcc] != null) {
+            def patterns = ["P": "BIOLOGICAL_PROCESS", "C": "CELLULAR_COMPONENT", "F": "MOLECULAR_FUNCTION"]
             ipr2go[interproAcc].each { goId ->
-                goId = goId
                 match.signature.entry.addGoXRefs(
-                    new GoXRefs(goInfo["terms"][goId][0], "GO", GO_PATTERN[goInfo["terms"][goId][1]], goId)
+                    new GoXRefs(goInfo["terms"][goId][0], "GO", patterns[goInfo["terms"][goId][1]], goId)
                 )
             }
         }
         if (ipr2pa != null && paInfo != null && ipr2pa[interproAcc] != null) {
+            def patterns = ["t": "MetaCyc", "w": "UniPathway", "k": "KEGG", "r": "Reactome"]
             ipr2pa[interproAcc].each { paId ->
-                paId = paId
                 match.signature.entry.addPathwayXRefs(
-                    new PathwayXRefs(paInfo[paId][1], PA_PATTERN[paInfo[paId][0]], paId)
+                    new PathwayXRefs(paInfo[paId][1], patterns[paInfo[paId][0]], paId)
                 )
             }
         }
