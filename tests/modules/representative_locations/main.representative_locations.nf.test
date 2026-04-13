@@ -3,6 +3,7 @@ nextflow_process {
     name "Test Process REPRESENTATIVE_LOCATIONS"
     script "modules/representative_locations/main.nf"
     process "REPRESENTATIVE_LOCATIONS"
+    profile "docker"
 
     test("Should run without failures") {
 

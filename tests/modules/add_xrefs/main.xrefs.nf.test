@@ -3,6 +3,7 @@ nextflow_process {
     name "Test Process ADD_XREFS"
     script "modules/add_xrefs/main.nf"
     process "ADD_XREFS"
+    profile "docker"
 
     setup {
         run("GUNZIP") {
