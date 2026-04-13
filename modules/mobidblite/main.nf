@@ -16,7 +16,7 @@ process RUN_MOBIDBLITE {
 
     script:
     """
-    idrpred --tempdir . --threads ${task.cpus} ${fasta} output.tsv
+    idrpred --threads ${task.cpus} ${fasta} output.tsv
     """
 }
 
