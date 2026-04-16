@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+  <xs:element name="interproscan" type="interproscanType"/>
+
+  <xs:simpleType name="md5Type">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[A-Fa-f0-9]{32}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="strandType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="SENSE"/>
+      <xs:enumeration value="ANTISENSE"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="levelType">
+    <xs:union memberTypes="xs:string xs:integer"/>
+  </xs:simpleType>
+
+  <xs:complexType name="interproscanType">
+    <xs:sequence>
+      <xs:element name="interproscan-version" type="xs:string"/>
+      <xs:element name="interpro-version" type="xs:string"/>
+      <xs:element name="results">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="result" type="resultType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="resultType">
+    <xs:choice>
+      <xs:element name="proteinResult" type="proteinResultType"/>
+      <xs:element name="nucleicResult" type="nucleicResultType"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="proteinResultType">
+    <xs:sequence>
+      <xs:element name="sequence" type="xs:string"/>
+      <xs:element name="md5" type="md5Type"/>
+      <xs:element name="matches">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="match" type="matchType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="xref">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="xref" type="xrefType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="nucleicResultType">
+    <xs:sequence>
+      <xs:element name="sequence" type="xs:string"/>
+      <xs:element name="md5" type="md5Type"/>
+      <xs:element name="crossReferences">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="xref" type="xrefType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="openReadingFrames">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="openReadingFrame" type="openReadingFrameType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="openReadingFrameType">
+    <xs:sequence>
+      <xs:element name="start" type="xs:integer"/>
+      <xs:element name="end" type="xs:integer"/>
+      <xs:element name="strand" type="strandType"/>
+      <xs:element name="protein" type="proteinResultType"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="xrefType">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="id" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="matchType">
+    <xs:sequence>
+      <xs:element name="signature" type="signatureType"/>
+      <xs:element name="model-ac" type="xs:string"/>
+      <xs:element name="name" type="xs:string" minOccurs="0" nillable="true"/>
+      <xs:element name="evalue" type="xs:decimal" minOccurs="0" nillable="true"/>
+      <xs:element name="score" type="xs:decimal" minOccurs="0" nillable="true"/>
+      <xs:element name="graphscan" type="xs:string" minOccurs="0" nillable="true"/>
+      <xs:element name="proteinClass" type="xs:string" minOccurs="0" nillable="true"/>
+      <xs:element name="graftPoint" type="xs:string" minOccurs="0" nillable="true"/>
+      <xs:element name="ancestralNode" type="xs:string" minOccurs="0" nillable="true"/>
+      <xs:element name="goXRefs" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="xRef" type="xRefType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="source" type="xs:string"/>
+      <xs:element name="locations">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="location" type="locationType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="signatureType">
+    <xs:sequence>
+      <xs:element name="accession" type="xs:string"/>
+      <xs:element name="name" type="xs:string" nillable="true"/>
+      <xs:element name="description" type="xs:string" nillable="true"/>
+      <xs:element name="type" type="xs:string"/>
+      <xs:element name="signatureLibraryRelease" type="signatureLibraryReleaseType"/>
+      <xs:element name="entry" type="entryType" nillable="true"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="signatureLibraryReleaseType">
+    <xs:sequence>
+      <xs:element name="library" type="xs:string"/>
+      <xs:element name="version" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="entryType">
+    <xs:sequence>
+      <xs:element name="accession" type="xs:string"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="description" type="xs:string"/>
+      <xs:element name="type" type="xs:string"/>
+      <xs:element name="goXRefs">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="xRef" type="xRefType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="pathwayXRefs">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="xRef" type="xRefType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="xRefType">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="databaseName" type="xs:string"/>
+      <xs:element name="category" type="xs:string" minOccurs="0"/>
+      <xs:element name="id" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="locationType">
+    <xs:sequence>
+      <xs:element name="start" type="xs:integer"/>
+      <xs:element name="end" type="xs:integer"/>
+      <xs:element name="representative" type="xs:boolean"/>
+      <xs:element name="hmmStart" type="xs:integer" minOccurs="0" nillable="true"/>
+      <xs:element name="hmmEnd" type="xs:integer" minOccurs="0" nillable="true"/>
+      <xs:element name="hmmLength" type="xs:integer" minOccurs="0" nillable="true"/>
+      <xs:element name="hmmBounds" type="xs:string" minOccurs="0" nillable="true"/>
+      <xs:element name="evalue" type="xs:decimal" minOccurs="0" nillable="true"/>
+      <xs:element name="score" type="xs:decimal" minOccurs="0" nillable="true"/>
+      <xs:element name="envelopeStart" type="xs:integer" minOccurs="0" nillable="true"/>
+      <xs:element name="envelopeEnd" type="xs:integer" minOccurs="0" nillable="true"/>
+      <xs:element name="pvalue" type="xs:decimal" minOccurs="0" nillable="true"/>
+      <xs:element name="motifNumber" type="xs:integer" minOccurs="0" nillable="true"/>
+      <xs:element name="level" type="levelType" minOccurs="0" nillable="true"/>
+      <xs:element name="cigarAlignment" type="xs:string" minOccurs="0" nillable="true"/>
+      <xs:element name="alignment" type="xs:string" minOccurs="0" nillable="true"/>
+      <xs:element name="sequence-feature" type="xs:string" minOccurs="0" nillable="true"/>
+      <xs:element name="sites" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="site" type="siteType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="location-fragments">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="locationFragment" type="locationFragmentType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="locationFragmentType">
+    <xs:sequence>
+      <xs:element name="start" type="xs:integer"/>
+      <xs:element name="end" type="xs:integer"/>
+      <xs:element name="dc-status" type="xs:string" nillable="true"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="siteType">
+    <xs:sequence>
+      <xs:element name="description" type="xs:string" nillable="true"/>
+      <xs:element name="numLocations" type="xs:integer" nillable="true"/>
+      <xs:element name="siteLocations">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="siteLocation" type="siteLocationType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="siteLocationType">
+    <xs:sequence>
+      <xs:element name="start" type="xs:integer"/>
+      <xs:element name="end" type="xs:integer"/>
+      <xs:element name="residue" type="xs:string" nillable="true"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

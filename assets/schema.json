@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "InterProScan 6 JSON schema",
+  "description": "JSON schema for InterProScan 6 annotations",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "interproscan-version",
+    "interpro-version",
+    "results"
+  ],
+  "properties": {
+    "interproscan-version": {
+      "type": "string"
+    },
+    "interpro-version": {
+      "type": "string"
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/result"
+      }
+    }
+  },
+  "$defs": {
+    "result": {
+      "oneOf": [
+        { "$ref": "#/$defs/proteinResult" },
+        { "$ref": "#/$defs/nucleicResult" }
+      ]
+    },
+    "proteinResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "md5", "matches", "xref"],
+      "properties": {
+        "sequence": { "type": "string" },
+        "md5": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]{32}$"
+        },
+        "matches": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/match" }
+        },
+        "xref": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/xref" }
+        }
+      }
+    },
+    "nucleicResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "md5", "crossReferences", "openReadingFrames"],
+      "properties": {
+        "sequence": { "type": "string" },
+        "md5": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]{32}$"
+        },
+        "crossReferences": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/xref" }
+        },
+        "openReadingFrames": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/openReadingFrame" }
+        }
+      }
+    },
+    "openReadingFrame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end", "strand", "protein"],
+      "properties": {
+        "start": { "type": "integer" },
+        "end": { "type": "integer" },
+        "strand": {
+          "type": "string",
+          "enum": ["SENSE", "ANTISENSE"]
+        },
+        "protein": { "$ref": "#/$defs/proteinResult" }
+      }
+    },
+    "xref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "id"],
+      "properties": {
+        "name": { "type": "string" },
+        "id": { "type": "string" }
+      }
+    },
+    "match": {
+      "type": "object",
+      "required": ["signature", "model-ac", "source", "locations"],
+      "properties": {
+        "signature": { "$ref": "#/$defs/signature" },
+        "model-ac": { "type": "string" },
+        "name": { "type": ["string", "null"] },
+        "evalue": { "type": ["number", "null"] },
+        "score": { "type": ["number", "null"] },
+        "graphscan": { "type": ["string", "null"] },
+        "proteinClass": { "type": ["string", "null"] },
+        "graftPoint": { "type": ["string", "null"] },
+        "ancestralNode": { "type": ["string", "null"] },
+        "goXRefs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/xRef" }
+        },
+        "source": { "type": "string" },
+        "locations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/location" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "signature": {
+      "type": "object",
+      "required": ["accession", "name", "description", "type", "signatureLibraryRelease", "entry"],
+      "additionalProperties": false,
+      "properties": {
+        "accession": { "type": "string" },
+        "name": { "type": ["string", "null"] },
+        "description": { "type": ["string", "null"] },
+        "type": { "type": "string" },
+        "signatureLibraryRelease": { 
+          "type": "object",
+          "required": ["library", "version"],
+          "additionalProperties": false,
+          "properties": {
+            "library": { "type": "string" },
+            "version": { "type": "string" }
+          }
+        },
+        "entry": {
+          "type": ["object", "null"],
+          "required": ["accession", "name", "description", "type", "goXRefs", "pathwayXRefs"],
+          "additionalProperties": false,
+          "properties": {
+            "accession": { "type": "string" },
+            "name": { "type": "string" },
+            "description": { "type": "string" },
+            "type": { "type": "string" },
+            "goXRefs": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/xRef" }
+            },
+            "pathwayXRefs": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/xRef" }
+            }
+          }
+        }
+      }
+    },
+    "xRef": {
+      "type": "object",
+      "required": ["name", "databaseName", "id"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "databaseName": { "type": "string" },
+        "category": { "type": "string" },
+        "id": { "type": "string" }
+      }
+    },
+    "location": {
+      "type": "object",
+      "required": ["start", "end", "representative", "location-fragments"],
+      "properties": {
+        "start": { "type": "integer" },
+        "end": { "type": "integer" },
+        "representative": { "type": "boolean" },
+        "hmmStart": { "type": ["integer", "null"] },
+        "hmmEnd": { "type": ["integer", "null"] },
+        "hmmLength": { "type": ["integer", "null"] },
+        "hmmBounds": { "type": ["string", "null"] },
+        "evalue": { "type": ["number", "null"] },
+        "score": { "type": ["number", "null"] },
+        "envelopeStart": { "type": ["integer", "null"] },
+        "envelopeEnd": { "type": ["integer", "null"] },
+        "pvalue": { "type": ["number", "null"] },
+        "motifNumber": { "type": ["integer", "null"] },
+        "level": { "type": ["string", "integer", "null"] },
+        "cigarAlignment": { "type": ["string", "null"] },
+        "alignment": { "type": ["string", "null"] },
+        "sequence-feature": { "type": ["string", "null"] },
+        "sites": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/site" }
+        },
+        "location-fragments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/locationFragment" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "locationFragment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end", "dc-status"],
+      "properties": {
+        "start": { "type": "integer" },
+        "end": { "type": "integer" },
+        "dc-status": { "type": ["string", "null"] }
+      }
+    },
+    "site": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description", "numLocations", "siteLocations"],
+      "properties": {
+        "description": { "type": ["string", "null"] },
+        "numLocations": { "type": ["integer", "null"] },
+        "siteLocations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/siteLocation" }
+        }
+      }
+    },
+    "siteLocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end", "residue"],
+      "properties": {
+        "start": { "type": "integer" },
+        "end": { "type": "integer" },
+        "residue": { "type": ["string", "null"] }
+      }
+    }
+  }
+}
