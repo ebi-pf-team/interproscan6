@@ -56,7 +56,7 @@ process PARSE_CATHGENE3D {
 }
 
 process SEARCH_FUNFAM {
-    label     'mem_min', 'time_short', 'dynamic'
+    label     'mem_min', 'time_medium', 'dynamic'
     container 'interpro/cath:0.16.10'
 
     input:
