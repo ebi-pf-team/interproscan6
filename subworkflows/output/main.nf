@@ -22,7 +22,7 @@ workflow OUTPUT {
     def formats_upper = formats.collect { it.toUpperCase() }
 
     if (formats_upper.contains("GFF3")) {
-        WRITE_GFF3(json, file("${outprefix}.gff3"), seqdb, nucleic, interproscan_version)
+        WRITE_GFF3(json, file("${outprefix}.gff3"), seqdb, nucleic, interproscan_version, interpro_version)
         outfiles = outfiles.mix(WRITE_GFF3.out)
     }
     if (formats_upper.contains("JSON")) {
