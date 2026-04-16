@@ -10,11 +10,12 @@ import uk.ac.ebi.interpro.SeqDB
 
 
 class ProcessOutputGFF3 {
-    static void run(List<Path> inputPaths, Path databasePath, boolean isNucleic, String iprscanVersion, Path outputPath) {
+    static void run(List<Path> inputPaths, Path databasePath, boolean isNucleic, String iprscanVersion, String interproVersion, Path outputPath) {
         SeqDB db = new SeqDB(databasePath)
 
         outputPath.withWriter { gff3Writer ->
             gff3Writer.writeLine("##gff-version 3.1.26")
+            gff3Writer.writeLine("##interpro-version ${interproVersion}")
             gff3Writer.writeLine("##interproscan-version ${iprscanVersion}")
 
             Path tempFastaFile = outputPath.resolveSibling(outputPath.fileName.toString() + ".fasta")

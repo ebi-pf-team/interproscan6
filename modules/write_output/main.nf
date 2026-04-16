@@ -8,6 +8,7 @@ process WRITE_GFF3 {
     val seq_db_file
     val nucleic
     val interproscan_version
+    val interpro_version
 
     output:
     val output_file
@@ -17,7 +18,8 @@ process WRITE_GFF3 {
         matches_files, 
         seq_db_file, 
         nucleic, 
-        interproscan_version, 
+        interproscan_version,
+        interpro_version,
         output_file)
 }
 
