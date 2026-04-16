@@ -13,6 +13,20 @@
             "nextflow": "25.04.7"
         }
     },
+    "Write JSON Lines output for nucleic sequences": {
+        "content": [
+            {
+                "0": [
+                    "output.jsonl:md5,eeef85205468c2402baaee12cc31124a"
+                ]
+            }
+        ],
+        "timestamp": "2026-04-16T11:37:26.518585346",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    },
     "Write JSON Lines output for protein sequences": {
         "content": [
             {
@@ -22,6 +36,20 @@
             }
         ],
         "timestamp": "2026-04-12T11:43:59.362348214",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    },
+    "Write JSON output for nucleic sequences": {
+        "content": [
+            {
+                "0": [
+                    "output.json:md5,1e02303bd4b8c1540f5282ac8ceaa7b2"
+                ]
+            }
+        ],
+        "timestamp": "2026-04-16T11:10:18.445795845",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.04.7"

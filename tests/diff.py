@@ -33,6 +33,10 @@ def main():
 
     args = parser.parse_args()
 
+    for file in [args.expected, args.observed]:
+        if not file.is_file():
+            parser.error(f"No such file or directory: {file}")
+
     with TemporaryDirectory() as tmpdir:
         exp_file = decompress_if_gzipped(args.expected, tmpdir)
         obs_file = decompress_if_gzipped(args.observed, tmpdir)
@@ -50,7 +54,7 @@ def main():
             print("=", *e)
         for e in obs_hits - exp_hits:
             print(">", *e)
-    
+
     assert exp_hits == obs_hits
 
 
@@ -105,9 +109,20 @@ def parse_gff3(file: Path, repr_locs_only: bool) -> set[Hit]:
             source = values[1]
             start = int(values[3])
             end = int(values[4])
+            strand = values[6]
             attrs = values[8]
             if source == "esl-translate":
-                # TODO: support GFF3 parsing for nucleic sequences
+                hits.add(
+                    (
+                        seq_id,
+                        source,
+                        attrs,
+                        "",
+                        "",
+                        "",
+                        f"{start}-{end}",
+                    )
+                )
                 continue
 
             d_attrs = defaultdict(list)
@@ -150,7 +165,7 @@ def parse_gff3(file: Path, repr_locs_only: bool) -> set[Hit]:
                     sig_acc,
                     interpro_acc,
                     ",".join(sorted(go_terms)),
-                    f"{start}-{end}",
+                    f"{strand}:{start}-{end}",
                 )
             )
 
@@ -176,15 +191,17 @@ def parse_tsv(file: str) -> set[Hit]:
                     go_id, _ = go_term.split("(")  # GO:0003700(InterPro)
                     go_terms.add(go_id)
 
-            hits.add((
-                seq_id, 
-                source, 
-                sig_lib,
-                sig_acc, 
-                interpro_acc,
-                ",".join(sorted(go_terms)),
-                f"{start}-{end}"
-            ))
+            hits.add(
+                (
+                    seq_id,
+                    source,
+                    sig_lib,
+                    sig_acc,
+                    interpro_acc,
+                    ",".join(sorted(go_terms)),
+                    f"{start}-{end}",
+                )
+            )
 
     return hits
 
@@ -208,55 +225,83 @@ def parse_external_json(
 ) -> set[tuple[str, str, str, str]]:
     hits = set()
     for seq in data:
-        for xref in seq["xref"]:
-            seq_id = xref["id"]
-            for match in seq["matches"]:
-                libojb = match["signature"]["signatureLibraryRelease"]
-                siglib = libojb["library"] or ""
-                libver = libojb["version"] or ""
-                interpro_acc = ""
-                go_terms = set()
+        if "openReadingFrames" in seq:
+            # nucleic sequence
+            for xref in seq["crossReferences"]:
+                seq_id = xref["id"]
 
-                if match["signature"]["entry"]:
-                    interpro_acc = match["signature"]["entry"]["accession"]
-                    for go_term in match["signature"]["entry"]["goXRefs"]:
-                        go_terms.add(go_term["id"])
+                for orf in seq["openReadingFrames"]:
+                    for xref in orf["protein"]["xref"]:
+                        orf_id = xref["id"]
 
-                if siglib == "PANTHER":
-                    for go_term in match.get("goXRefs", []):
-                        go_terms.add(go_term["id"])
-
-                for loc in match["locations"]:
-                    fragments = []
-                    if extended:
-                        for f in sorted(
-                            loc["location-fragments"],
-                            key=lambda x: (x["start"], x["end"]),
+                        for m in parse_json_matches(
+                            orf["protein"]["matches"],
+                            extended=extended,
+                            repr_locs_only=repr_locs_only,
                         ):
-                            values = []
-                            for key in ["start", "end", "dc-status"]:
-                                value = f[key]
-                                values.append(str(value))
+                            hits.add((f"{seq_id}/{orf_id}", *m))
 
-                            fragments.append("-".join(values))
-                    else:
-                        start = loc["start"]
-                        end = loc["end"]
-                        fragments.append(f"{start}-{end}")
+        else:
+            # protein sequence
+            for xref in seq["xref"]:
+                seq_id = xref["id"]
 
-                    hits.add(
-                        (
-                            seq_id,
-                            match["source"],
-                            f"{siglib}/{libver}" if extended else siglib,
-                            match["signature"]["accession"],
-                            interpro_acc,
-                            ",".join(sorted(go_terms)),
-                            ",".join(fragments),
-                        )
-                    )
+                for m in parse_json_matches(
+                    seq["matches"], extended=extended, repr_locs_only=repr_locs_only
+                ):
+                    hits.add((seq_id, *m))
 
     return hits
+
+
+def parse_json_matches(
+    matches: list[dict, str, Any], extended: bool, repr_locs_only: bool
+):
+    for match in matches:
+        libojb = match["signature"]["signatureLibraryRelease"]
+        siglib = libojb["library"] or ""
+        libver = libojb["version"] or ""
+        interpro_acc = ""
+        go_terms = set()
+
+        if match["signature"]["entry"]:
+            interpro_acc = match["signature"]["entry"]["accession"]
+            for go_term in match["signature"]["entry"]["goXRefs"]:
+                go_terms.add(go_term["id"])
+
+        if siglib == "PANTHER":
+            for go_term in match.get("goXRefs", []):
+                go_terms.add(go_term["id"])
+
+        for loc in match["locations"]:
+            if repr_locs_only and not loc["representative"]:
+                continue
+
+            fragments = []
+            if extended:
+                for f in sorted(
+                    loc["location-fragments"],
+                    key=lambda x: (x["start"], x["end"]),
+                ):
+                    values = []
+                    for key in ["start", "end", "dc-status"]:
+                        value = f[key]
+                        values.append(str(value))
+
+                    fragments.append("-".join(values))
+            else:
+                start = loc["start"]
+                end = loc["end"]
+                fragments.append(f"{start}-{end}")
+
+            yield (
+                match["source"],
+                f"{siglib}/{libver}" if extended else siglib,
+                match["signature"]["accession"],
+                interpro_acc,
+                ",".join(sorted(go_terms)),
+                ",".join(fragments),
+            )
 
 
 def parse_internal_json(
@@ -337,73 +382,91 @@ def parse_xml(file: Path, extended: bool, repr_locs_only: bool) -> set[Hit]:
 
     tree = ET.parse(file)
     root = tree.getroot()
-    
-    for protein in root.iterfind("protein"):
-        seq_ids = []
-        for xref in protein.findall("xref"):
-            seq_ids.append(xref.attrib["id"])
 
-        for match in protein.findall("matches/match"):
-            source = match.attrib["source"]
-            sig = match.find("signature")
-            sig_acc = sig.attrib["ac"]
-            libojb = sig.find("signature-library-release")
-            siglib = libojb.attrib["library"]
-            libver = libojb.attrib["version"]
-            go_terms = set()
+    if len(root.findall("nucleotide-sequence")) > 0:
+        # nucleic sequences
+        for nseq in root.findall("nucleotide-sequence"):
+            for nxref in nseq.findall("xref"):
+                seq_id = nxref.attrib["id"]
 
-            entry = sig.find("entry")
-            if entry is not None:
-                interpro_acc = entry.attrib["ac"]
-                for go_term in entry.findall("go-xref"):
-                    go_terms.add(go_term.attrib["id"])
-            else:
-                interpro_acc = ""
-                if sig_acc == "PS00022":
-                    print("no", file=sys.stderr)
+                for orf in nseq.findall("orf"):
+                    for xref in orf.findall("protein/xref"):
+                        orf_id = xref.attrib["id"]
 
-            if siglib == "PANTHER":
-                for go_term in match.findall("go-xref"):
-                    go_terms.add(go_term.attrib["id"])
+                        for m in parse_xml_matches(
+                            orf.findall("protein/matches/match"),
+                            extended=extended,
+                            repr_locs_only=repr_locs_only,
+                        ):
+                            hits.add((f"{seq_id}/{orf_id}", *m))
+    else:
+        # protein sequences
+        for protein in root.findall("protein"):
+            for xref in protein.findall("xref"):
+                seq_id = xref.attrib["id"]
 
-            for loc in match.findall("locations/location"):
-                if repr_locs_only and loc.attrib["representative"] == "false":
-                    continue
-
-                fragments = []
-                if extended:
-                    for fragment in loc.findall("location-fragments/fragment"):
-                        fragments.append(
-                            (
-                                int(fragment.attrib["start"]),
-                                int(fragment.attrib["end"]),
-                                fragment.attrib["dc-status"],
-                            )
-                        )
-
-                    fragments.sort(key=lambda x: (x[0], x[1]))
-                    region = ",".join(
-                        f"{start}-{end}-{dc}" for start, end, dc in fragments
-                    )
-                else:
-                    start = int(loc.attrib["start"])
-                    end = int(loc.attrib["end"])
-                    region = f"{start}-{end}"
-
-                for seq_id in seq_ids:
-                    hits.add(
-                        (
-                            seq_id,
-                            source,
-                            f"{siglib}/{libver}" if extended else siglib,
-                            sig_acc,
-                            interpro_acc,
-                            ",".join(sorted(go_terms)),
-                            region,
-                        )
-                    )
+                for m in parse_xml_matches(
+                    protein.findall("matches/match"),
+                    extended=extended,
+                    repr_locs_only=repr_locs_only,
+                ):
+                    hits.add((seq_id, *m))
 
     return hits
+
+
+def parse_xml_matches(matches, extended: bool, repr_locs_only: bool):
+    for match in matches:
+        source = match.attrib["source"]
+        sig = match.find("signature")
+        sig_acc = sig.attrib["ac"]
+        libojb = sig.find("signature-library-release")
+        siglib = libojb.attrib["library"]
+        libver = libojb.attrib["version"]
+        go_terms = set()
+
+        entry = sig.find("entry")
+        if entry is not None:
+            interpro_acc = entry.attrib["ac"]
+            for go_term in entry.findall("go-xref"):
+                go_terms.add(go_term.attrib["id"])
+        else:
+            interpro_acc = ""
+
+        if siglib == "PANTHER":
+            for go_term in match.findall("go-xref"):
+                go_terms.add(go_term.attrib["id"])
+
+        for loc in match.findall("locations/location"):
+            if repr_locs_only and loc.attrib["representative"] == "false":
+                continue
+
+            fragments = []
+            if extended:
+                for fragment in loc.findall("location-fragments/fragment"):
+                    fragments.append(
+                        (
+                            int(fragment.attrib["start"]),
+                            int(fragment.attrib["end"]),
+                            fragment.attrib["dc-status"],
+                        )
+                    )
+
+                fragments.sort(key=lambda x: (x[0], x[1]))
+                region = ",".join(f"{start}-{end}-{dc}" for start, end, dc in fragments)
+            else:
+                start = int(loc.attrib["start"])
+                end = int(loc.attrib["end"])
+                region = f"{start}-{end}"
+
+            yield (
+                source,
+                f"{siglib}/{libver}" if extended else siglib,
+                sig_acc,
+                interpro_acc,
+                ",".join(sorted(go_terms)),
+                region,
+            )
 
 
 def parse_zip(file: Path) -> set[Hit]:
