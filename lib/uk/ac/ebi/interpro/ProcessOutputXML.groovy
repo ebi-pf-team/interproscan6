@@ -110,8 +110,8 @@ class ProcessOutputXML {
                 gen.writeStartObject()
                 gen.setNextIsAttribute(true);
                 gen.writeNumberField("start", proteinSource.group(1) as int)
-                gen.writeNumberField("start", proteinSource.group(2) as int)
-                gen.writeStringField("start", proteinSource.group(3) as int < 4 ? "SENSE" : "ANTISENSE")  
+                gen.writeNumberField("end", proteinSource.group(2) as int)
+                gen.writeStringField("strand", proteinSource.group(3) as int < 4 ? "SENSE" : "ANTISENSE")  
                 addProteinNode(gen, proteinMd5, proteinMatches[proteinMd5], proteinSeqData)
                 gen.writeEndObject()
             }
