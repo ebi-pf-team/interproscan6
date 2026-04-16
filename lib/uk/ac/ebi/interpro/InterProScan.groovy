@@ -96,6 +96,10 @@ class InterProScan {
             description: "Disable the version compatibility check between InterProScan and InterPro data."
         ],
         [
+            name: "skip-repr-locations",
+            description: "Skips identifying representative locations."
+        ],
+        [
             name: "use-gpu",
             description: "Enable GPU acceleration for supported ML-based applications."
         ],
@@ -111,11 +115,6 @@ class InterProScan {
         [
             name: "sub-batch-size",
             description: null
-        ],
-        [
-            name: "skip-repr-locations",
-            description: null
-            // Used in production. Skips identifying representative locations
         ],
         [
             name: "apps-config",
@@ -460,13 +459,13 @@ class InterProScan {
         }
 
         result << "\nOutput control:\n"
-        ["outdir", "outprefix", "formats", "goterms", "pathways"].each { paramName ->
+        ["outdir", "outprefix", "formats", "goterms", "pathways", "skip-repr-locations"].each { paramName ->
             assert optionsMap.containsKey(paramName)
             result << this.formatOption(paramName, optionsMap[paramName])
         }
 
         result << "\nExternal services and data:\n"
-        ["interpro", "matches-api-url", "no-matches-api", "globus"].each { paramName ->
+        ["interpro", "skip-interpro-version-check", "matches-api-url", "no-matches-api", "globus"].each { paramName ->
             assert optionsMap.containsKey(paramName)
             result << this.formatOption(paramName, optionsMap[paramName])
         }
