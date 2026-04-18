@@ -1,5 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/ebi-pf-team/interproscan6/main/assets/schema.json",
   "title": "InterProScan 6 JSON schema",
   "description": "JSON schema for InterProScan 6 annotations",
   "type": "object",
