@@ -90,22 +90,24 @@ process SEARCH_SMART {
     """
     shopt -s nullglob
 
-    unzip -d /tmp/fasta ${seqs_zip}
-    touch /tmp/hmmpfam.out
+    tmpdir=\$(mktemp -d -p .)
 
-    for fasta in /tmp/fasta/*.faa; do
+    unzip -q ${seqs_zip} -d \${tmpdir}
+    touch \${tmpdir}/hmmpfam.out
+
+    for fasta in \${tmpdir}/*.faa; do
         name=\${fasta##*/}   # strip directory
         name=\${name%.faa}   # strip extension
         hmm="${hmmdir}/\${name}.hmm"
         if [[ -f "\$hmm" ]]; then
-            hmmpfam --acc -A 0 -E 0.01 -Z 350000 --cpu ${task.cpus} "\$hmm" "\$fasta" >> /tmp/hmmpfam.out
-            zip -jq /tmp/smart.zip "\$hmm"
+            hmmpfam --acc -A 0 -E 0.01 -Z 350000 --cpu ${task.cpus} "\$hmm" "\$fasta" >> \${tmpdir}/hmmpfam.out
+            zip -jq \${tmpdir}/smart.zip "\$hmm"
         fi
     done
 
-    zip -jq /tmp/smart.zip /tmp/hmmpfam.out
-    rm -r /tmp/fasta /tmp/hmmpfam.out
-    mv /tmp/smart.zip smart.zip
+    zip -jq \${tmpdir}/smart.zip \${tmpdir}/hmmpfam.out
+    mv \${tmpdir}/smart.zip smart.zip
+    rm -r \${tmpdir}
     """
 }
 
