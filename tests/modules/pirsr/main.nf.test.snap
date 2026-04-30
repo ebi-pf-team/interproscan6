@@ -5,12 +5,12 @@
                 "0": [
                     [
                         1,
-                        "pirsr.json:md5,a0677dbd066921de753804c15ef5dc7d"
+                        "pirsr.json:md5,46b01398aa2f603710c00c663ccce3d5"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-04-03T16:32:22.099019286",
+        "timestamp": "2026-05-01T00:30:07.157584923",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.04.7"
