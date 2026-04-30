@@ -120,15 +120,3 @@ nextflow run ebi-pf-team/interproscan6 \
 2. Includes pathway annotations derived from matched InterPro entries
 
 GO terms are curator-assigned to InterPro entries and describe conserved molecular functions, biological processes, or cellular locations. Pathway mappings are inferred from relationships between InterPro entries and reviewed UniProtKB proteins with EC numbers.
-
-## Advanced execution
-
-For runtime-specific deployment and performance guidance, see:
-
-- [Containers](containers.md)
-- [HPC clusters](clusters.md)
-- [Cloud](cloud.md)
-- [Performance and bulk mode](performance.md)
-- [Matches API](matches_api.md)
-
-These pages cover container runtimes, schedulers, GPU-enabled runs, cloud batch execution, and throughput-oriented settings such as the `bulk` profile.

@@ -39,11 +39,7 @@ nav:
       - Licensed applications: licensed_applications.md
       - Options / Parameters: options.md
       - Representative locations: representative_locations.md
-  # - Execution:
-  #     - Containers: containers.md
-  #     - HPC clusters: clusters.md
-  #     - Cloud: cloud.md
-  #     - Performance and bulk mode: performance.md
+      - Scaling InterProScan: scaling.md
   - Output: output.md
   - Matches API: matches_api.md
   - Migrating from InterProScan 5: interproscan5.md
