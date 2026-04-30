@@ -57,7 +57,7 @@ process PARSE_CDD {
     boolean inSites = false
     def hits = [:]
     def pssmHits = [:]
-    def seenSiteFields = [] as Set
+    def pssmSites = [:]
     rpsbproc_out.eachLine { line -> 
         if (line.startsWith("SESSION")) {
             // #SESSION        <session-ordinal>       <program>       <database>      <score-matrix>  <evalue-threshold>
@@ -76,7 +76,6 @@ process PARSE_CDD {
         } else if (line.startsWith("SITES")) {
             assert inDomains == false
             assert inSites == false
-            seenSiteFields.clear()
             inSites = true
         } else if (sequenceId && sessionId && 
                    line.startsWith(sessionId) && 
@@ -107,20 +106,19 @@ process PARSE_CDD {
                 }
             } else {
                 // #<session-ordinal>      <query-id[readingframe]>        <annot-type>    <title> <residue(coordinates)>  <complete-size> <mapped-size>   <source-domain>
-                if (!seenSiteFields.add(line)) {
-                    return
-                }
                 def fields = line.split("\t")
                 assert fields.size() == 8
-                String hitType = fields[2]
+                def hitType = fields[2]
                 if (hitType.toUpperCase() == "SPECIFIC") {
-                    String pssmId = fields[7]
+                    def pssmId = fields[7]
                     if (pssmHits.containsKey(pssmId)) {
-                        String description = fields[3]
-                        String residues = fields[4]
-                        Site site = new Site(description, residues)
-                        Match match = pssmHits[pssmId]
-                        match.addSite(site)                        
+                        def description = fields[3]
+                        def residues = pssmSites
+                            .computeIfAbsent(pssmId) { [:] }
+                            .computeIfAbsent(description) { [] as Set }
+                        fields[4].split(",").each { residue ->
+                            residues.add(residue)
+                        }
                     }
                 }
             }
@@ -131,6 +129,15 @@ process PARSE_CDD {
         } else if (line.startsWith("ENDSITES")) {
             assert inDomains == false
             assert inSites == true
+            pssmSites.each { pssmId, descriptionToResidues ->
+                def match = pssmHits[pssmId]
+                if (match != null) {
+                    descriptionToResidues.each { description, residues ->
+                        match.addSite(new Site(description, residues.join(",")))
+                    }
+                }
+            }
+            pssmSites.clear()
             inSites = false
         } else if (line.startsWith("ENDQUERY")) {
             assert sequenceId != null
