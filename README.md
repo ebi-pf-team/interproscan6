@@ -85,7 +85,7 @@ nextflow run ebi-pf-team/interproscan6 \
 
 ## Documentation
 
-Our full documentation is available on [ReadTheDocs](https://interproscan.readthedocs.io/).
+Our full documentation is available on [ReadTheDocs](https://interproscan6.readthedocs.io/).
 
 ## Support
 
