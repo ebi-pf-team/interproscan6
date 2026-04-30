@@ -57,6 +57,7 @@ process PARSE_CDD {
     boolean inSites = false
     def hits = [:]
     def pssmHits = [:]
+    def seenSiteFields = [] as Set
     rpsbproc_out.eachLine { line -> 
         if (line.startsWith("SESSION")) {
             // #SESSION        <session-ordinal>       <program>       <database>      <score-matrix>  <evalue-threshold>
@@ -75,6 +76,7 @@ process PARSE_CDD {
         } else if (line.startsWith("SITES")) {
             assert inDomains == false
             assert inSites == false
+            seenSiteFields.clear()
             inSites = true
         } else if (sequenceId && sessionId && 
                    line.startsWith(sessionId) && 
@@ -105,6 +107,9 @@ process PARSE_CDD {
                 }
             } else {
                 // #<session-ordinal>      <query-id[readingframe]>        <annot-type>    <title> <residue(coordinates)>  <complete-size> <mapped-size>   <source-domain>
+                if (!seenSiteFields.add(line)) {
+                    return
+                }
                 def fields = line.split("\t")
                 assert fields.size() == 8
                 String hitType = fields[2]
