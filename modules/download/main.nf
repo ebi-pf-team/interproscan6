@@ -7,6 +7,7 @@ import uk.ac.ebi.interpro.InterProScan
 
 process DOWNLOAD {
     maxForks  1
+    label     'mem_min', 'time_veryshort'
     executor  'local'
     container 'interpro/download:1.0'
 

@@ -133,7 +133,7 @@ process PARSE_CDD {
                 def match = pssmHits[pssmId]
                 if (match != null) {
                     descriptionToResidues.each { description, residues ->
-                        match.addSite(new Site(description, residues.join(",")))
+                        match.addSite(new Site(description, residues.join(",")))  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
                     }
                 }
             }

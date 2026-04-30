@@ -1,4 +1,8 @@
+// codenarc-disable ProcessWithoutExecEnvironmentRule
 process UNTAR {
+    cpus   1
+    memory 1.GB
+
     input:
     path archive
 
