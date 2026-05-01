@@ -4,37 +4,37 @@
 <line x1="220" y1="36.00" x2="1376" y2="36.00" stroke="#3B82F6" stroke-width="1"/>
 <text class="trackDb" x="212" y="32.00" text-anchor="end">CATH-Gene3D</text>
 <text class="trackName" x="212" y="47.00" text-anchor="end">G3DSA:2.60.40.3510</text>
-<rect x="249.42" y="29.00" width="147.11" height="14" fill="#3B82F6"><title>G3DSA:2.60.40.3510 G3DSA:2.60.40.3510: 32-187</title></rect>
+<rect x="249.42" y="29.00" width="147.11" height="14" fill="#3B82F6"><title>32 - 187</title></rect>
 <line x1="220" y1="70.00" x2="1376" y2="70.00" stroke="#3B82F6" stroke-width="1"/>
 <text class="trackDb" x="212" y="66.00" text-anchor="end">CATH-Gene3D</text>
 <text class="trackName" x="212" y="81.00" text-anchor="end">G3DSA:2.10.25.140</text>
-<rect x="397.48" y="63.00" width="42.71" height="14" fill="#3B82F6"><title>G3DSA:2.10.25.140 G3DSA:2.10.25.140: 188-233</title></rect>
+<rect x="397.48" y="63.00" width="42.71" height="14" fill="#3B82F6"><title>188 - 233</title></rect>
 <line x1="220" y1="104.00" x2="1376" y2="104.00" stroke="#3B82F6" stroke-width="1"/>
 <text class="trackDb" x="212" y="100.00" text-anchor="end">CATH-Gene3D</text>
 <text class="trackName" x="212" y="115.00" text-anchor="end">G3DSA:2.10.25.10</text>
-<rect x="441.14" y="97.00" width="60.74" height="14" fill="#3B82F6"><title>G3DSA:2.10.25.10 G3DSA:2.10.25.10: 234-298</title></rect>
-<rect x="998.26" y="97.00" width="37.01" height="14" fill="#3B82F6"><title>G3DSA:2.10.25.10 G3DSA:2.10.25.10: 821-860</title></rect>
+<rect x="441.14" y="97.00" width="60.74" height="14" fill="#3B82F6"><title>234 - 298</title></rect>
+<rect x="998.26" y="97.00" width="37.01" height="14" fill="#3B82F6"><title>821 - 860</title></rect>
 <line x1="220" y1="138.00" x2="1376" y2="138.00" stroke="#EC4899" stroke-width="1"/>
 <text class="trackDb" x="212" y="134.00" text-anchor="end">SUPERFAMILY</text>
 <text class="trackName" x="212" y="149.00" text-anchor="end">Growth_fac_rcpt_cys_sf</text>
-<rect x="526.56" y="131.00" width="123.38" height="14" fill="#EC4899"><title>IPR009030 Growth_fac_rcpt_cys_sf: 324-454</title></rect>
-<rect x="839.76" y="131.00" width="125.28" height="14" fill="#EC4899"><title>IPR009030 Growth_fac_rcpt_cys_sf: 654-786</title></rect>
+<rect x="526.56" y="131.00" width="123.38" height="14" fill="#EC4899"><title>324 - 454</title></rect>
+<rect x="839.76" y="131.00" width="125.28" height="14" fill="#EC4899"><title>654 - 786</title></rect>
 <line x1="220" y1="172.00" x2="1376" y2="172.00" stroke="#06B6D4" stroke-width="1"/>
 <text class="trackDb" x="212" y="168.00" text-anchor="end">Pfam</text>
 <text class="trackName" x="212" y="183.00" text-anchor="end">EGF_TEN</text>
-<rect x="630.01" y="165.00" width="236.33" height="14" fill="#06B6D4"><title>PF25024 EGF_TEN: 433-682</title></rect>
+<rect x="630.01" y="165.00" width="236.33" height="14" fill="#06B6D4"><title>433 - 682</title></rect>
 <line x1="220" y1="206.00" x2="1376" y2="206.00" stroke="#EC4899" stroke-width="1"/>
 <text class="trackDb" x="212" y="202.00" text-anchor="end">SUPERFAMILY</text>
 <text class="trackName" x="212" y="217.00" text-anchor="end">SSF57196</text>
-<rect x="961.24" y="199.00" width="39.86" height="14" fill="#EC4899"><title>SSF57196 SSF57196: 782-824</title></rect>
+<rect x="961.24" y="199.00" width="39.86" height="14" fill="#EC4899"><title>782 - 824</title></rect>
 <line x1="220" y1="240.00" x2="1376" y2="240.00" stroke="#8B5CF6" stroke-width="1"/>
 <text class="trackDb" x="212" y="236.00" text-anchor="end">SMART</text>
 <text class="trackName" x="212" y="251.00" text-anchor="end">VWF_dom</text>
-<rect x="1038.12" y="233.00" width="63.59" height="14" fill="#8B5CF6"><title>IPR001007 VWF_dom: 863-930</title></rect>
+<rect x="1038.12" y="233.00" width="63.59" height="14" fill="#8B5CF6"><title>863 - 930</title></rect>
 <line x1="220" y1="274.00" x2="1376" y2="274.00" stroke="#06B6D4" stroke-width="1"/>
 <text class="trackDb" x="212" y="270.00" text-anchor="end">Pfam</text>
 <text class="trackName" x="212" y="285.00" text-anchor="end">JAG1_1/2_dom</text>
-<rect x="1118.79" y="267.00" width="104.40" height="14" fill="#06B6D4"><title>IPR056986 JAG1_1/2_dom: 948-1058</title></rect>
+<rect x="1118.79" y="267.00" width="104.40" height="14" fill="#06B6D4"><title>948 - 1058</title></rect>
 <line x1="220" y1="322" x2="1376" y2="322" stroke="#374151" stroke-width="1"/>
 <line x1="220.00" y1="322" x2="220.00" y2="332" stroke="#374151" stroke-width="1"/>
 <line x1="238.98" y1="322" x2="238.98" y2="328" stroke="#374151" stroke-width="1"/>
