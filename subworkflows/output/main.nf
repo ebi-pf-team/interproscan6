@@ -16,7 +16,7 @@ workflow OUTPUT {
     interproscan_version
 
     main:
-    outfiles = Channel.empty()
+    outfiles = channel.empty()
 
     // convert to uppercase in case iprscan is imported directly into another workflow
     def formats_upper = formats.collect { it.toUpperCase() }

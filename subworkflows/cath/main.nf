@@ -11,7 +11,7 @@ workflow CATH {
     batch_size            // int, number of sequences per sub batch for searching
 
     main:
-    results = Channel.empty()
+    results = channel.empty()
 
     ch_split = fasta
         .map { meta, fasta ->
