@@ -104,8 +104,8 @@ google {
   location = '<gcp-region>'
 
   batch {
-  	spot = true           // (1)!
-	  maxSpotAttempts = 10  // (2)!
+  	spot = true// (1)!
+    maxSpotAttempts = 10 // (2)!
   }
 }
 ```
