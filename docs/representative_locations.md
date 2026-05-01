@@ -26,9 +26,13 @@ Representative domains in [JAG1_MOUSE](https://www.uniprot.org/uniprotkb/Q9QXX0/
 
 Representative selection follows a simple principle: choose a small set of matches that summarizes the protein architecture while avoiding strong redundancy.
 
-1. Candidate domain or family matches are considered for representative selection. # TODO: expand, what are candidates, how are some candidates and some are not?
-2. Matches that occur in the same region of the protein are grouped together.
-3. Within each overlapping group, InterProScan looks for a combination of matches that covers as much of the sequence as possible without keeping several strongly redundant annotations.
-4. Matches that do not overlap with any alternatives are kept automatically.
+1. InterProScan first identifies candidate matches for representative selection. These candidates are:
+
+    - protein family matches from Pfam, CDD, PROSITE-profiles, SMART, NCBIFAM, CATH-Gene3D, and SUPERFAMILY
+    - protein domain matches from Pfam, PANTHER, PIRSF, HAMAP, NCBIFAM, and SFLD
+
+2. Matches that overlap in the same region of the protein are grouped together.
+3. Within each overlapping group, InterProScan selects a combination of matches that covers as much of the sequence as possible while avoiding strongly redundant annotations.
+4. Matches that do not overlap with any alternatives are retained automatically.
 
 In practice, this means the representative view is designed to retain the main biological signal of the architecture while suppressing repeated annotations of essentially the same region.
