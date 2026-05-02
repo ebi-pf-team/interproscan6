@@ -26,29 +26,3 @@ process ADD_XREFS {
     chmod -R 777 outputs
     """
 }
-
-// process ADD_XREFS {
-//     label    'mem_medium', 'time_veryshort'
-//     executor 'local'
-
-//     input:
-//     tuple val(meta), val(json)
-//     val interpro_dir
-//     val panther_paint_dir
-//     val add_goterms
-//     val add_pathways
-
-//     output:
-//     tuple val(meta), path('xrefs/*.json', arity: '1..*')
-
-//     exec:
-//     def outdir = task.workDir.resolve("xrefs")
-//     uk.ac.ebi.interpro.ProcessXrefs.run(
-//         json, 
-//         interpro_dir.name == "DUMMY" ? null : interpro_dir, 
-//         panther_paint_dir.name == "DUMMY2" ? null : panther_paint_dir,
-//         add_goterms, 
-//         add_pathways, 
-//         outdir
-//     )
-// }
