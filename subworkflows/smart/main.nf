@@ -6,8 +6,8 @@ workflow SMART {
     ch_hmm      // [hmm3, hmm2]
 
     main:
-    ch_hmm3 = ch_hmm.map { hmm3, hmm2 -> hmm3 }
-    ch_hmm2 = ch_hmm.map { hmm3, hmm2 -> hmm2 }
+    ch_hmm3 = ch_hmm.map { hmm3, _hmm2 -> hmm3 }
+    ch_hmm2 = ch_hmm.map { _hmm3, hmm2 -> hmm2 }
 
     PREFILTER_SMART(
         ch_fasta,

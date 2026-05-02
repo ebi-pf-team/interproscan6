@@ -11,7 +11,7 @@ workflow INIT_DATABASES {
     data_dir                // path
     interpro_version        // str, version of InterPro to run
     iprscan_version         // str, version of InterProScan
-    use_matches_api         // bool, whether to use the Matches API
+    _use_matches_api        // bool, whether to use the Matches API
     use_globus              // bool, whether to use Globus instead of the EMBL-EBI FTP
     enforce_compatibility   // bool, whether we check that InterProScan and InterPro are compatible
 
@@ -49,7 +49,7 @@ workflow INIT_DATABASES {
         
         // Handle applications with a common directory (cath -> CATH-Gene3 / CATH-FunFam, prosite -> PROSITE Patterns / PROSITE Profiles)
         appl_dirs = appl_configs
-            .findAll { k, v -> v.has_data == true }
+            .findAll { _k, v -> v.has_data == true }
             .collectEntries { key, value ->
                 def dir = value.get("dir", "")
                 def parts = dir.split('/')

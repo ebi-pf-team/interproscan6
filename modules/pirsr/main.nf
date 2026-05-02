@@ -34,7 +34,7 @@ process PARSE_PIRSR {
                 def ruleSites = [] as Set
                 def rule = rules.get(modelAccession, null)
                 if (rule) {
-                    rule.Groups.each { grp, positions ->
+                    rule.Groups.each { _grp, positions ->
                         def passCount = 0
                         def positionsParsed = [] as Set
                         positions.each { pos ->

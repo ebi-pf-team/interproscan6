@@ -7,14 +7,14 @@ workflow PFAM {
     pfam     // [hmm, dat]
 
     main:
-    ch_hmm = pfam.map { hmm, dat -> hmm }
+    ch_hmm = pfam.map { hmm, _dat -> hmm }
     SEARCH_PFAM(
         ch_fasta,
         ch_hmm,
         "-Z 61295632 --cut_ga"
     )
 
-    ch_dat = pfam.map { hmm, dat -> dat }
+    ch_dat = pfam.map { _hmm, dat -> dat }
     PARSE_PFAM(
         SEARCH_PFAM.out,
         ch_dat

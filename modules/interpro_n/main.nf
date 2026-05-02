@@ -145,7 +145,7 @@ process PARSE_INTERPRO_N {
     // Merge matches for each full sequence
     def results = [:]
     resultsBySeq.each { seqId, chunks ->
-        chunks.sort { it.id }
+        chunks.sort { chunk -> chunk.id }
 
         // Collect all matched with global coordinates
         def allMatches = []
@@ -175,14 +175,14 @@ process PARSE_INTERPRO_N {
         }
 
         // Group by signature
-        def bySig = allMatches.groupBy {
-            def sig = it.signature
+        def bySig = allMatches.groupBy { match ->
+            def sig = match.signature
             def lib = sig.signatureLibraryRelease
             "${sig.accession}::${lib.library}::${lib.version}"
          }
 
         def merged = []
-        bySig.each { sigKey, matches ->
+        bySig.each { _key, matches ->
             // Sort by descending score, then ascending start
             matches.sort { a, b ->
                 def cmp = b.score <=> a.score
@@ -236,7 +236,7 @@ process PARSE_INTERPRO_N {
                 // transform to LocationFragment objects
                 def fragments = []
                 if (loc.fragments.size() > 1) {
-                    loc.fragments.sort { it.start }
+                    loc.fragments.sort { f -> f.start }
                     loc.fragments.eachWithIndex { f, i ->
                         def status
                         if (i == 0) {
@@ -270,7 +270,7 @@ process PARSE_INTERPRO_N {
 
 
 def mergeFragments(fragments) {
-    fragments.sort { it.start }.inject([]) { merged, current ->
+    fragments.sort { f -> f.start }.inject([]) { merged, current ->
         if (merged.isEmpty()) {
             merged << current.clone()
             return merged

@@ -7,8 +7,8 @@ workflow PIRSR {
     ch_pirsr    // [hmm, json]
 
     main:
-    ch_hmm  = ch_pirsr.map { hmm, json -> hmm }
-    ch_json = ch_pirsr.map { hmm, json -> json }
+    ch_hmm  = ch_pirsr.map { hmm, _json -> hmm }
+    ch_json = ch_pirsr.map { _hmm, json -> json }
 
     SEARCH_PIRSR(
         ch_fasta,

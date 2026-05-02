@@ -48,5 +48,7 @@ process PARSE_COILS {
     }
 
     def filepath = task.workDir.resolve("coils.json")
-    filepath.text = groovy.json.JsonOutput.toJson(matches.findAll { it.value["Coil"].locations.size() > 0 })
+    filepath.text = groovy.json.JsonOutput.toJson(
+        matches.findAll { m -> m.value["Coil"].locations.size() > 0 }
+    )
 }

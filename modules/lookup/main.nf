@@ -1,4 +1,4 @@
-def check_matches_api(applications, api_url, version) {
+def check_matches_api(applications, api_url, _version) {
     def appls_in_api     = []
     def appls_not_in_api = []
     def sanitized_url = uk.ac.ebi.interpro.HTTPRequest.sanitizeURL(api_url)
@@ -10,7 +10,6 @@ def check_matches_api(applications, api_url, version) {
         if (major_version != "0") {
             log.warn "This version of InterProScan is not compatible with the Matches API at ${sanitized_url}; pre-calculated annotations will not be retrieved."
         } else {
-            def api_interpro_version = info.release
             if (info.analyses) {
                 def all_appls_in_api = info.analyses*.name.collect { n -> 
                     n.toLowerCase().replaceAll("[-\\s]", "") 
@@ -70,11 +69,11 @@ process GET_MATCHES {
             return false
         }
 
-        response.results.each {
-            def seq_md5 = it.md5.toUpperCase()
-            if (it.found) {
+        response.results.each { item ->
+            def seq_md5 = item.md5.toUpperCase()
+            if (item.found) {
                 matches[seq_md5] = [:]
-                it.matches.each { match ->
+                item.matches.each { match ->
                     def library = match.signature.signatureLibraryRelease.library
                     def app_name = library.toLowerCase().replaceAll("[-\\s]", "")
                     if (applications.contains(app_name)) {
@@ -119,7 +118,7 @@ def Map transformMatch(Map match, String seq) {
         def transformedLocation = loc.clone()
         transformedLocation["sequenceFeature"] = loc["sequence-feature"]
         transformedLocation["hmmBounds"] = loc["hmmBounds"] ? getReverseHmmBounds(loc["hmmBounds"]) : null
-        transformedLocation["fragments"] = loc["location-fragments"].collect { tranformFragment(it) }
+        transformedLocation["fragments"] = loc["location-fragments"].collect { f -> tranformFragment(f) }
         transformedLocation["sites"] = loc["sites"] ?: []
         transformedLocation["targetAlignment"] = loc["cigarAlignment"] ? decodeAlignment(loc["cigarAlignment"], seq, loc["start"]) : null
         return transformedLocation

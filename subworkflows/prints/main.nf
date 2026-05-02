@@ -10,8 +10,8 @@ workflow PRINTS {
     ch_split = fasta
         .splitFasta( by: batch_size, file: true )
 
-    ch_pval = prints.map { pval, hierarchy -> pval }
-    ch_hierarchy = prints.map { pval, hierarchy -> hierarchy }
+    ch_pval = prints.map { pval, _hierarchy -> pval }
+    ch_hierarchy = prints.map { _pval, hierarchy -> hierarchy }
 
     RUN_PRINTS(
         ch_split,

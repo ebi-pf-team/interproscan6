@@ -101,7 +101,7 @@ process PARSE_SUPERFAMILY {
                 }
 
                 def start = regions[0][0]
-                def end = regions.collect { it[1] }.max()
+                def end = regions.collect { r -> r[1] }.max()
                 def hmmLength = model2length[modelId]
                 def fragments = []
                 if (regions.size() > 1) {

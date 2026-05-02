@@ -17,7 +17,7 @@ workflow INTERPROSCAN {
     formats                 // list[str], output formats
     interpro_version        // str, version of InterPro
     interproscan_version    // str, version of InterProScan
-    interproscan_name       // str, name of the InterProScan workflow: "InterProScan6"
+    _interproscan_name      // str, name of the InterProScan workflow: "InterProScan6"
     no_matches_api          // boolean, use the Matches API
     matches_api_url         // str, url to the Matches API
     matches_api_chunk_size  // int, chunk size for Matches API requests
@@ -114,7 +114,7 @@ workflow INTERPROSCAN {
         skip_repr_locations
     )
 
-    output_files = OUTPUT(
+    OUTPUT(
         COMBINE.out,
         seqdb,
         formats,
@@ -125,7 +125,7 @@ workflow INTERPROSCAN {
     )
 
     emit:
-    output_files
+    OUTPUT.out
 }
 
 workflow PREPARE_INTERPROSCAN {

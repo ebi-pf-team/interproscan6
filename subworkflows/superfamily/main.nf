@@ -18,7 +18,7 @@ workflow SUPERFAMILY {
 
     SEARCH_SUPERFAMILY(ch_split, ssf)
 
-    ch_parse = ssf.map { dir, hmm, selfhits, cla, model, pdbj95d -> tuple (dir, hmm, model) }
+    ch_parse = ssf.map { dir, hmm, _selfhits, _cla, model, _pdbj95d -> tuple (dir, hmm, model) }
 
     PARSE_SUPERFAMILY(
         SEARCH_SUPERFAMILY.out,
@@ -27,5 +27,5 @@ workflow SUPERFAMILY {
 
     emit:
     PARSE_SUPERFAMILY.out
-        .map { meta, meta2, json -> tuple (meta, json) }  // [ meta, json ]
+        .map { meta, _meta2, json -> tuple (meta, json) }  // [ meta, json ]
 }

@@ -6,8 +6,8 @@ workflow SFLD {
     files       // [hmm, sites, hierarchy]
 
     main:
-    ch_search = files.map { hmm, sites, hierarchy -> tuple(hmm, sites) }
-    ch_parse = files.map { hmm, sites, hierarchy -> hierarchy }
+    ch_search = files.map { hmm, sites, _hierarchy -> tuple(hmm, sites) }
+    ch_parse = files.map { _hmm, _sites, hierarchy -> hierarchy }
 
     SEARCH_SFLD(fasta, ch_search)
 

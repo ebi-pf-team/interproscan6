@@ -56,9 +56,9 @@ def stockholmDatParser(Path pfamADatFile) {
         }
     }
     // convert nested 'names' to 'acc'
-    parsedDat.each { acc, info ->
+    parsedDat.each { _acc, info ->
         def nestedNames = info.nested ?: []
-        def nestedAccessions = nestedNames.collect { name2acc[it] }.findAll { it != null }
+        def nestedAccessions = nestedNames.collect { n -> name2acc[n] }.findAll { acc -> acc != null }
         info.nested = nestedAccessions.unique()
     }
 
@@ -68,7 +68,7 @@ def stockholmDatParser(Path pfamADatFile) {
 def decode(byte[] b) {
     try {
         return new String(b, "UTF-8").trim()
-    } catch (Exception e) {
+    } catch (Exception _e) {
         return new String(b, "ISO-8859-1").trim()
     }
 }

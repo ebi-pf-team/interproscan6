@@ -16,20 +16,20 @@ workflow PANTHER {
         }
         .flatMap()
 
-    hmms = panther.map { hmm, msf -> hmm }
+    ch_hmm = panther.map { hmm, _msf -> hmm }
     SEARCH_PANTHER(
         ch_split,
-        hmms
+        ch_hmm
     )
 
     PREPARE_TREEGRAFTER(
         SEARCH_PANTHER.out,
     )
 
-    msfs = panther.map { hmm, msf -> msf }
+    ch_msf = panther.map { _hmm, msf -> msf }
     RUN_TREEGRAFTER(
         PREPARE_TREEGRAFTER.out,
-        msfs
+        ch_msf
     )
 
     PARSE_PANTHER(
@@ -43,5 +43,5 @@ workflow PANTHER {
         
     emit:
     PARSE_PANTHER.out
-        .map { meta, meta2, json -> tuple (meta, json) }  // [ meta, json ]
+        .map { meta, _meta2, json -> tuple (meta, json) }  // [ meta, json ]
 }

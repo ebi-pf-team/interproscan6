@@ -136,7 +136,7 @@ process PARSE_CDD {
             assert sequenceId != null
             
             def cddHits = [:]
-            pssmHits.each { key, match ->
+            pssmHits.each { _key, match ->
                 def modelAccession = match.modelAccession
                 assert !cddHits.containsKey(modelAccession)
                 cddHits[modelAccession] = match

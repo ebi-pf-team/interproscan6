@@ -86,7 +86,7 @@ process PARSE_PIRSF {
 
         // Filter family matches
         def filteredFamilyMatches = familyMatches.findAll { match ->
-            def (meanL, stdL, minS, meanS, stdS) = models[match.modelAccession]
+            def (meanL, stdL, minS, _meanS, _stdS) = models[match.modelAccession]
 
             def location = match.locations[0]
             
@@ -106,7 +106,7 @@ process PARSE_PIRSF {
         }
 
         // Select best family match
-        def familyMatch = filteredFamilyMatches ? filteredFamilyMatches.max { it.score } : null
+        def familyMatch = filteredFamilyMatches ? filteredFamilyMatches.max { m -> m.score } : null
 
         // Filter subfamily matches and select the best one
         def filteredSubfamilyMatches = subfamilyMatches.findAll { match ->
@@ -118,13 +118,13 @@ process PARSE_PIRSF {
                 return false
             }
 
-            def parentMatch = familyMatches.find { it.modelAccession == parentFamily }
+            def parentMatch = familyMatches.find { m -> m.modelAccession == parentFamily }
             if (!parentMatch) {
                 // We don't want a subfamily match if the parent family doesn't hit the sequence
                 return false
             }
 
-            def (meanL, stdL, minS, meanS, stdS) = models[match.modelAccession]
+            def (_meanL, _stdL, minS, _meanS, _stdS) = models[match.modelAccession]
             
             // Ratio over coverage of sequence and profile hmm
             def location = match.locations[0]
@@ -132,21 +132,21 @@ process PARSE_PIRSF {
             return r > LENGTH_RATIO_THRESHOLD && match.score >= minS
         }
 
-        def subfamilyMatch = filteredSubfamilyMatches ? filteredSubfamilyMatches.max { it.score } : null
+        def subfamilyMatch = filteredSubfamilyMatches ? filteredSubfamilyMatches.max { m -> m.score } : null
         
         if (subfamilyMatch && !familyMatch) {
             // Promote parent family (even if it didn't pass the cutoffs)
             def parentFamily = subfamilies[subfamilyMatch.modelAccession]
-            familyMatch = familyMatches.find { it.modelAccession == parentFamily }
+            familyMatch = familyMatches.find { m -> m.modelAccession == parentFamily }
         }
 
         if (familyMatch) {
-            results[proteinAccession] = [:].with {
-                it[familyMatch.modelAccession] = familyMatch
-                if (subfamilyMatch) {
-                    it[subfamilyMatch.modelAccession] = subfamilyMatch
-                }
-                it
+            results[proteinAccession] = [
+                (familyMatch.modelAccession): familyMatch
+            ]
+
+            if (subfamilyMatch) {
+                results[proteinAccession][subfamilyMatch.modelAccession] = subfamilyMatch
             }
         }
     }

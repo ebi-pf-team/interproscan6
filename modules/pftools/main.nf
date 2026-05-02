@@ -54,7 +54,8 @@ process PARSE_PSSCAN {
         def end = matchInfo[4].toInteger()
 
         def matchDetails = matchInfo[8].split(';')
-        def name = matchDetails[0].trim()
+        // Example of matchDetails:
+        // Name "EGF_CA" ; LevelTag "(0)" ; Sequence "DkDECskdngg........Cqqd....CvNtfgsYeC" ; SequenceDescription "EE9CDDCA84C66D7FB465CC609FD0DCCD"
         def level = matchDetails[1].trim()
         if (!level.startsWith("LevelTag") || !level.contains("0")) {
             return // skipping non-strong matches

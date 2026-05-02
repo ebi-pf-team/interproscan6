@@ -15,7 +15,7 @@ workflow INIT_PIPELINE {
     skip_applications
     goterms
     pathways
-    workflow_manifest
+    _workflow_manifest
 
     main:
     // Check the input

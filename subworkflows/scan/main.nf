@@ -36,9 +36,9 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("antifam")) {
         ch_antifam = appl_dirs
-            .filter { name, dirpath -> name == "antifam" }
+            .filter { name, _dirpath -> name == "antifam" }
             .first()
-            .map    { name, dirpath -> dirpath.resolve(appl_config.antifam.hmm) }
+            .map    { _name, dirpath -> dirpath.resolve(appl_config.antifam.hmm) }
 
         ANTIFAM(ch_fasta, ch_antifam)
         results = results.mix(ANTIFAM.out)
@@ -46,9 +46,9 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("cathgene3d") || applications.contains("cathfunfam")) {
         ch_cathgene3d = appl_dirs
-            .filter { name, dirpath -> name == "cathgene3d" }
+            .filter { name, _dirpath -> name == "cathgene3d" }
             .first()
-            .map    { name, dirpath ->
+            .map    { _name, dirpath ->
                 tuple(
                     dirpath.resolve(appl_config.cathgene3d.hmm),
                     dirpath.resolve(appl_config.cathgene3d.model2sfs),
@@ -57,9 +57,9 @@ workflow SCAN_SEQUENCES {
             }
 
         ch_cathfunfam = appl_dirs
-            .filter { name, dirpath -> name == "cathfunfam" }
+            .filter { name, _dirpath -> name == "cathfunfam" }
             .first()
-            .map    { name, dirpath -> dirpath }
+            .map    { _name, dirpath -> dirpath }
         
         CATH(
             ch_fasta,
@@ -75,9 +75,9 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("cdd")) {
         ch_cdd = appl_dirs
-            .filter { name, dirpath -> name == "cdd" }
+            .filter { name, _dirpath -> name == "cdd" }
             .first()
-            .map    { name, dirpath ->
+            .map    { _name, dirpath ->
                 tuple(
                     dirpath,
                     appl_config.cdd.rpsblast_db,
@@ -106,9 +106,9 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("hamap")) {
         ch_hamap = appl_dirs
-            .filter { name, dirpath -> name == "hamap" }
+            .filter { name, _dirpath -> name == "hamap" }
             .first()
-            .map    { name, dirpath -> dirpath.resolve(appl_config.hamap.profiles) }
+            .map    { _name, dirpath -> dirpath.resolve(appl_config.hamap.profiles) }
 
         HAMAP(ch_fasta, ch_hamap)
         results = results.mix(HAMAP.out)
@@ -134,9 +134,9 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("ncbifam")) {
         ch_ncbifam = appl_dirs
-            .filter { name, dirpath -> name == "ncbifam" }
+            .filter { name, _dirpath -> name == "ncbifam" }
             .first()
-            .map    { name, dirpath -> dirpath.resolve(appl_config.ncbifam.hmm) }
+            .map    { _name, dirpath -> dirpath.resolve(appl_config.ncbifam.hmm) }
 
         NCBIFAM(ch_fasta, ch_ncbifam)
         results = results.mix(NCBIFAM.out)
@@ -144,9 +144,9 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("panther")) {
         ch_panther = appl_dirs
-            .filter { name, dirpath -> name == "panther" }
+            .filter { name, _dirpath -> name == "panther" }
             .first()
-            .map    { name, dirpath ->
+            .map    { _name, dirpath ->
                 tuple(
                     dirpath.resolve(appl_config.panther.hmm),
                     dirpath.resolve(appl_config.panther.msf)
@@ -159,9 +159,9 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("pfam")) {
         ch_pfam = appl_dirs
-            .filter { name, dirpath -> name == "pfam" }
+            .filter { name, _dirpath -> name == "pfam" }
             .first()
-            .map    { name, dirpath ->
+            .map    { _name, dirpath ->
                 tuple(
                     dirpath.resolve(appl_config.pfam.hmm),
                     dirpath.resolve(appl_config.pfam.dat)
@@ -182,9 +182,9 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("pirsf")) {
         ch_pirsf = appl_dirs
-            .filter { name, dirpath -> name == "pirsf" }
+            .filter { name, _dirpath -> name == "pirsf" }
             .first()
-            .map    { name, dirpath ->
+            .map    { _name, dirpath ->
                 tuple(
                     dirpath.resolve(appl_config.pirsf.hmm),
                     dirpath.resolve(appl_config.pirsf.dat)
@@ -197,9 +197,9 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("pirsr")) {
         ch_pirsr = appl_dirs
-            .filter { name, dirpath -> name == "pirsr" }
+            .filter { name, _dirpath -> name == "pirsr" }
             .first()
-            .map    { name, dirpath ->
+            .map    { _name, dirpath ->
                 tuple(
                     dirpath.resolve(appl_config.pirsr.hmm),
                     dirpath.resolve(appl_config.pirsr.rules)
@@ -212,9 +212,9 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("prints")) {
         ch_prints = appl_dirs
-            .filter { name, dirpath -> name == "prints" }
+            .filter { name, _dirpath -> name == "prints" }
             .first()
-            .map    { name, dirpath ->
+            .map    { _name, dirpath ->
                 tuple(
                     dirpath.resolve(appl_config.prints.pval),
                     dirpath.resolve(appl_config.prints.hierarchy)
@@ -227,9 +227,9 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("prositepatterns")) {
         ch_prositepatterns = appl_dirs
-            .filter { name, dirpath -> name == "prositepatterns" }
+            .filter { name, _dirpath -> name == "prositepatterns" }
             .first()
-            .map    { name, dirpath ->
+            .map    { _name, dirpath ->
                 tuple(
                     dirpath.resolve(appl_config.prositepatterns.dat),
                     dirpath.resolve(appl_config.prositepatterns.evaluator)
@@ -242,9 +242,9 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("prositeprofiles")) {
         ch_prositeprofiles = appl_dirs
-            .filter { name, dirpath -> name == "prositeprofiles" }
+            .filter { name, _dirpath -> name == "prositeprofiles" }
             .first()
-            .map    { name, dirpath ->
+            .map    { _name, dirpath ->
                 tuple(
                     dirpath.resolve(appl_config.prositeprofiles.profiles),
                     dirpath.resolve(appl_config.prositeprofiles.skip_flagged_profiles)
@@ -257,9 +257,9 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("sfld")) {
         ch_sfld = appl_dirs
-            .filter { name, dirpath -> name == "sfld" }
+            .filter { name, _dirpath -> name == "sfld" }
             .first()
-            .map    { name, dirpath ->
+            .map    { _name, dirpath ->
                 tuple(
                     dirpath.resolve(appl_config.sfld.hmm),
                     dirpath.resolve(appl_config.sfld.sites_annotation),
@@ -290,9 +290,9 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("smart")) {
         ch_smart = appl_dirs
-            .filter { name, dirpath -> name == "smart" }
+            .filter { name, _dirpath -> name == "smart" }
             .first()
-            .map    { name, dirpath ->
+            .map    { _name, dirpath ->
                 tuple(
                     dirpath.resolve(appl_config.smart.hmm3),
                     dirpath.resolve(appl_config.smart.hmm2)
@@ -305,9 +305,9 @@ workflow SCAN_SEQUENCES {
 
     if (applications.contains("superfamily")) {
         ch_superfamily = appl_dirs
-            .filter { name, dirpath -> name == "superfamily" }
+            .filter { name, _dirpath -> name == "superfamily" }
             .first()
-            .map    { name, dirpath ->
+            .map    { _name, dirpath ->
                 tuple(
                     dirpath,
                     appl_config.superfamily.hmm,
@@ -337,7 +337,7 @@ workflow SCAN_SEQUENCES {
     }
 
     // Add a dummy null value for each fasta so there are no mismatches when calling join()
-    results = results.mix(ch_fasta.map { meta, fasta -> tuple(meta, null) })
+    results = results.mix(ch_fasta.map { meta, _fasta -> tuple(meta, null) })
 
     results = ch_fasta
         .join(
@@ -356,7 +356,7 @@ workflow SCAN_SEQUENCES {
         failOnDuplicate: true,
         failOnMismatch: true
     )
-    .map { meta, fasta, jsons, json ->
+    .map { meta, _fasta, jsons, json ->
         tuple(meta, jsons + [json])
     }
 

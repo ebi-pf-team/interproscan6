@@ -40,7 +40,7 @@ process PREPARE_TREEGRAFTER {
                     return null
                 }
 
-                def locations = m1.locations.findAll { it.included }
+                def locations = m1.locations.findAll { loc -> loc.included }
                 if (!locations) {
                     return null
                 }
@@ -51,14 +51,14 @@ process PREPARE_TREEGRAFTER {
                 def m2 = new uk.ac.ebi.interpro.Match(familyId, m1.evalue, m1.score, m1.bias, m1.signature)
                 m2.included = m1.included
                 // Only keep the domain with the highest score
-                m2.locations = [locations.max { it.score }]
+                m2.locations = [locations.max { loc -> loc.score }]
                 // Init empty TreeGrafter attribute
                 m2.treegrafter = new uk.ac.ebi.interpro.TreeGrafter(null)
                 return m2
             }
-            .findAll { it != null }
+            .findAll { m -> m != null }
 
-        def bestMatch = filteredMatches.max { it.score }
+        def bestMatch = filteredMatches.max { m -> m.score }
         return bestMatch ? [(seqId): [(bestMatch.modelAccession): bestMatch]] : [:]
     }
 

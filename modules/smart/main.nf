@@ -34,7 +34,7 @@ process PREPARE_SMART {
     // Map model accessions to seq Ids -> [modelAcc: [seqIds]]
     def model2seqs = [:].withDefault { [] }
     matches.each { seqId, seqMatches ->
-        seqMatches.each { modelAcc, match ->
+        seqMatches.each { modelAcc, _match ->
             model2seqs[modelAcc] << seqId
         }
     }
@@ -49,7 +49,7 @@ process PREPARE_SMART {
                     seqIds.sort().each { seqId ->
                         def seq = sequences[seqId]
                         writer.writeLine(">${seqId}")
-                        seq.eachMatch(/.{1,60}/) { writer.writeLine(it) }
+                        seq.eachMatch(/.{1,60}/) { m -> writer.writeLine(m) }
                     }
                 }
 

@@ -6,8 +6,8 @@ workflow PIRSF {
     pirsf    // [hmm, dat]
 
     main:
-    ch_hmm = pirsf.map { hmm, dat -> hmm }
-    ch_dat = pirsf.map { hmm, dat -> dat }
+    ch_hmm = pirsf.map { hmm, _dat -> hmm }
+    ch_dat = pirsf.map { _hmm, dat -> dat }
 
     SEARCH_PIRSF(
         fasta,

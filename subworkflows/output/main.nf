@@ -19,7 +19,7 @@ workflow OUTPUT {
     outfiles = channel.empty()
 
     // convert to uppercase in case iprscan is imported directly into another workflow
-    def formats_upper = formats.collect { it.toUpperCase() }
+    def formats_upper = formats.collect { fmt -> fmt.toUpperCase() }
 
     if (formats_upper.contains("GFF3")) {
         WRITE_GFF3(json, file("${outprefix}.gff3"), seqdb, nucleic, interproscan_version, interpro_version)

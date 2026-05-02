@@ -48,7 +48,7 @@ process PARSE_SFLD {
 
     sequences = sequences.collectEntries { seqId, matches -> 
         // Flatten matches (one location per match)
-        matches = matches.collectMany { key, match ->
+        matches = matches.collectMany { _key, match ->
             return match.locations.collect { location ->
                 def signature = new uk.ac.ebi.interpro.Signature(match.modelAccession, library)
                 def newMatch = new uk.ac.ebi.interpro.Match(match.modelAccession, match.evalue, match.score, match.bias, signature)
@@ -100,7 +100,7 @@ process PARSE_SFLD {
 
                     return match
                 }
-                .findAll { it != null }
+                .findAll { m -> m != null }
         }
 
         def matchesWithPromoted = matches.clone()
@@ -135,7 +135,7 @@ process PARSE_SFLD {
         }
 
         // Remove nested locations
-        matches.each { modelAccession, match ->
+        matches.each { _modelAccession, match ->
             def locations = []
             match.locations
                 .sort { a, b ->

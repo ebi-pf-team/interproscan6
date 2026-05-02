@@ -25,7 +25,7 @@ process PREPARE_TMBED {
         }
         seq.chunks.eachWithIndex { chunk, idx ->
             writer.writeLine(">${seq.id}_${idx + 1}")
-            chunk.eachMatch(/.{1,60}/) { writer.writeLine(it) }
+            chunk.eachMatch(/.{1,60}/) { m -> writer.writeLine(m) }
             seqCount += 1
         }
     }
@@ -121,7 +121,6 @@ process PARSE_TMBED {
         lineCounter += 1
     }
 
-    def mergedList = []
     def hits = [:].withDefault { [:] }
     def libRelease = new uk.ac.ebi.interpro.SignatureLibraryRelease("TMbed", "1.0.2")
     def MODEL_TYPES = [  // Sig(acc, name, desc, type, lib, entry)
@@ -244,6 +243,6 @@ def smoothString(String s, int window) {
 /** Return the most frequent character in a string */
 def mostCommonChar(String s) {
     def counts = [:].withDefault { 0 }
-    s.each { counts[it] += 1 }
-    return counts.max { it.value }.key
+    s.each { c -> counts[c] += 1 }
+    return counts.max { elem -> elem.value }.key
 }
