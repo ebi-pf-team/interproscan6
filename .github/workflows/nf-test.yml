@@ -1,8 +1,6 @@
-name: Unit Tests
-
+name: Run nf-test
 on:
   push:
-    branches: [ main ]
     paths:
       - .github/workflows/nf-tests.yml
       - bin/**
@@ -13,9 +11,7 @@ on:
       - tests/**
       - main.nf
       - nextflow.config
-
   pull_request:
-    branches: [ main ]
     paths:
       - .github/workflows/nf-tests.yml
       - bin/**
@@ -26,8 +22,11 @@ on:
       - tests/**
       - main.nf
       - nextflow.config
-
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
