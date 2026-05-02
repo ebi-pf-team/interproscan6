@@ -31,7 +31,7 @@ RUN pip install --no-cache-dir \
     Pillow==9.3.0 \
     pyparsing==3.0.9 \
     python-dateutil==2.8.2 \
-    requests==2.28.1 \
+    requests==2.33.0 \
     six==1.16.0 \
     tqdm==4.64.1 \
     urllib3==1.26.12
