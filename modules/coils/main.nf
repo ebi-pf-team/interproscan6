@@ -1,9 +1,3 @@
-import groovy.json.JsonOutput
-import uk.ac.ebi.interpro.Location  
-import uk.ac.ebi.interpro.Match
-import uk.ac.ebi.interpro.Signature
-import uk.ac.ebi.interpro.SignatureLibraryRelease
-
 process RUN_COILS {
     label     'mem_min', 'time_veryshort'
     container 'interpro/ncoils:2.2.1'
@@ -34,7 +28,7 @@ process PARSE_COILS {
     exec:
     def matches = [:]
     def sequenceId = null
-    SignatureLibraryRelease library = new SignatureLibraryRelease("COILS", "2.2.1")
+    def library = new uk.ac.ebi.interpro.SignatureLibraryRelease("COILS", "2.2.1")
 
     coils_out.eachLine { line ->
         line = line.trim()
@@ -43,16 +37,16 @@ process PARSE_COILS {
             sequenceId = line.substring(1).split()[0]
             matches[sequenceId] = [:]
 
-            Match match = new Match("Coil", new Signature("Coil", "Coil", null, library, null))
+            def match = new uk.ac.ebi.interpro.Match("Coil", new uk.ac.ebi.interpro.Signature("Coil", "Coil", null, library, null))
             matches[sequenceId]["Coil"] = match
         } else if (line != "//" && sequenceId) {
             def fields = line.split(/\s+/)
             def start = fields[0].toInteger()
             def end = fields[1].toInteger()
-            matches[sequenceId]["Coil"].addLocation(new Location(start, end))
+            matches[sequenceId]["Coil"].addLocation(new uk.ac.ebi.interpro.Location  (start, end))
         }
     }
 
     def filepath = task.workDir.resolve("coils.json")
-    filepath.text = JsonOutput.toJson(matches.findAll { it.value["Coil"].locations.size() > 0 })
+    filepath.text = groovy.json.JsonOutput.toJson(matches.findAll { it.value["Coil"].locations.size() > 0 })
 }

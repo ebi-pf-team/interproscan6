@@ -1,5 +1,3 @@
-import groovy.json.JsonOutput
-
 process RUN_HMMER {
     label     'mem_min', 'time_medium', 'dynamic'
     container 'interpro/hmmer:3.3'

@@ -7,11 +7,9 @@ include { SCAN_SEQUENCES as SCAN_REMAINING;
 include { COMBINE              } from "../subworkflows/combine"
 include { OUTPUT               } from "../subworkflows/output"
 
-import uk.ac.ebi.interpro.InterProScan
-
 workflow INTERPROSCAN {
     take:
-    fasta_file              // Channel.fromPath(input fasta file)
+    fasta_file              // channel.fromPath(input fasta file)
     applications            // list[str], names of applications to run
     appl_config             // map, contents of the conf/applications.conf file
     data_dir                // path to the data directory
@@ -138,7 +136,7 @@ workflow PREPARE_INTERPROSCAN {
     use_gpu      // boolean, use GPU acceleration where applicable
 
     main:
-    (apps_config, warn) = InterProScan.parseAppsConfig(use_gpu, applications, apps_config)
+    (apps_config, warn) = uk.ac.ebi.interpro.InterProScan.parseAppsConfig(use_gpu, applications, apps_config)
     if (warn) {
         log.warn warn
     }

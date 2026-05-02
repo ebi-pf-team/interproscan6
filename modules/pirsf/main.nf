@@ -1,10 +1,3 @@
-// codenarc-disable AllowedDirectivesRule
-import groovy.json.JsonOutput
-import uk.ac.ebi.interpro.FastaFile
-import uk.ac.ebi.interpro.HMMER3
-import uk.ac.ebi.interpro.Location
-import uk.ac.ebi.interpro.Match
-
 process SEARCH_PIRSF {
     label     'mem_low', 'time_short', 'dynamic'
     container 'interpro/hmmer:3.3'
@@ -38,30 +31,30 @@ process PARSE_PIRSF {
 
     exec:
     def (models, subfamilies) = parseDatFile(datfile)
-    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out, "PIRSF")
-    Map<String, String> sequences = FastaFile.parse(fasta)
+    def hmmerMatches = uk.ac.ebi.interpro.HMMER3.parseOutput(hmmsearch_out, "PIRSF")
+    def sequences = uk.ac.ebi.interpro.FastaFile.parse(fasta)
 
-    double LENGTH_RATIO_THRESHOLD = 0.67
-    double OVERLAP_THRESHOLD = 0.8
-    double LENGTH_DEVIATION_THRESHOLD = 3.5
-    int MINIMUM_LENGTH_DEVIATION = 50
+    def LENGTH_RATIO_THRESHOLD = 0.67
+    def OVERLAP_THRESHOLD = 0.8
+    def LENGTH_DEVIATION_THRESHOLD = 3.5
+    def MINIMUM_LENGTH_DEVIATION = 50
 
     def results = [:] // proteinAccession -> modelAccession -> Match
 
     hmmerMatches.each { proteinAccession, modelMatches ->
-        int sequenceLength = sequences[proteinAccession].length()
+        def sequenceLength = sequences[proteinAccession].length()
 
         def familyMatches = []
         def subfamilyMatches = []
 
         modelMatches.each { modelAccession, rawMatch ->
-            int seqStart = Integer.MAX_VALUE
-            int seqEnd = Integer.MIN_VALUE
-            int hmmStart = Integer.MAX_VALUE
-            int hmmEnd = Integer.MIN_VALUE
-            int envStart = 0
-            int envEnd = 0
-            double locationScore = 0.0
+            def seqStart = Integer.MAX_VALUE
+            def seqEnd = Integer.MIN_VALUE
+            def hmmStart = Integer.MAX_VALUE
+            def hmmEnd = Integer.MIN_VALUE
+            def envStart = 0
+            def envEnd = 0
+            def locationScore = 0.0
             rawMatch.locations.each { location ->
                 if (location.included) {
                     locationScore += location.score
@@ -95,16 +88,16 @@ process PARSE_PIRSF {
         def filteredFamilyMatches = familyMatches.findAll { match ->
             def (meanL, stdL, minS, meanS, stdS) = models[match.modelAccession]
 
-            Location location = match.locations[0]
+            def location = match.locations[0]
             
             // Overall length
-            double ovl = (location.end - location.start + 1) / sequenceLength
+            def ovl = (location.end - location.start + 1) / sequenceLength
 
             // Length deviation
-            double ld = Math.abs(sequenceLength - meanL)
+            def ld = Math.abs(sequenceLength - meanL)
 
             // Ratio over coverage of sequence and profile hmm
-            double r = (location.hmmEnd - location.hmmStart + 1) / (location.end - location.start + 1)
+            def r = (location.hmmEnd - location.hmmStart + 1) / (location.end - location.start + 1)
 
             return r > LENGTH_RATIO_THRESHOLD
                 && ovl >= OVERLAP_THRESHOLD
@@ -134,8 +127,8 @@ process PARSE_PIRSF {
             def (meanL, stdL, minS, meanS, stdS) = models[match.modelAccession]
             
             // Ratio over coverage of sequence and profile hmm
-            Location location = match.locations[0]
-            double r = (location.hmmEnd - location.hmmStart + 1) / (location.end - location.start + 1)
+            def location = match.locations[0]
+            def r = (location.hmmEnd - location.hmmStart + 1) / (location.end - location.start + 1)
             return r > LENGTH_RATIO_THRESHOLD && match.score >= minS
         }
 
@@ -159,7 +152,7 @@ process PARSE_PIRSF {
     }
 
     def filepath = task.workDir.resolve("pirsf.json")
-    filepath.text = JsonOutput.toJson(results)
+    filepath.text  = groovy.json.JsonOutput.toJson(results)
 }
 
 def createMatch(
@@ -171,17 +164,17 @@ def createMatch(
     int envStart,
     int envEnd,
     double locationScore) {
-    Match processedMatch = new Match(
+    def processedMatch = new uk.ac.ebi.interpro.Match(
         match.modelAccession,
         match.evalue,
         locationScore,
         match.bias,
         match.signature
     )
-    String hmmBoundStart = hmmStart == 1 ? "[" : "."
-    String hmmBoundEnd = hmmEnd == match.locations[0].hmmLength ? "]" : "."
+    def hmmBoundStart = hmmStart == 1 ? "[" : "."
+    def hmmBoundEnd = hmmEnd == match.locations[0].hmmLength ? "]" : "."
     processedMatch.addLocation(
-        new Location(
+        new uk.ac.ebi.interpro.Location(
             seqStart,
             seqEnd,
             hmmStart,

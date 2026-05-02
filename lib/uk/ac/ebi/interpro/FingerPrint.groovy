@@ -45,7 +45,7 @@ class FingerPrint {
         Double evalueCutoff
         int minMotifCount
         boolean isDomain = false
-        String[] siblingsIds = []
+        List<String> siblingsIds = []
 
         HierarchyEntry(String modelId, String modelAccession, Double evalueCutoff, int minMotifCount) {
             this.modelId = modelId
@@ -95,8 +95,7 @@ class FingerPrint {
         }
 
         void addSiblings(String siblingsString) {
-            String[] siblingsIds = siblingsString.split("\\,")
-            this.siblingsIds = siblingsIds
+            this.siblingsIds = siblingsString.split("\\,").toList()
         }
     }
 }

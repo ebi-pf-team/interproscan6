@@ -7,7 +7,7 @@ class HMMER2 {
         String line
         String querySequence
         def hits = [:].withDefault { [:] }
-        SignatureLibraryRelease library = new SignatureLibraryRelease(memberDb, null)
+        SignatureLibraryRelease library = new uk.ac.ebi.interpro.SignatureLibraryRelease(memberDb, null)
 
         filePath.withReader { reader ->
             while (true) {
@@ -69,8 +69,8 @@ class HMMER2 {
                     double evalue = Double.parseDouble(tail[1])
                     int numDomains = tail[2].toInteger()
 
-                    Signature signature = new Signature(modelAccession, library)
-                    Match match = new Match(modelAccession, evalue, score, signature)
+                    Signature signature = new uk.ac.ebi.interpro.Signature(modelAccession, library)
+                    Match match = new uk.ac.ebi.interpro.Match(modelAccession, evalue, score, signature)
                     sequenceHits[modelAccession] = match
                     domainsPerHit[modelAccession] = numDomains
                 }
@@ -107,7 +107,7 @@ class HMMER2 {
                         Integer hmmLength = hmmLengths[modelAccession]
                         assert hmmLength != null
                         
-                        Location loc = new Location(start, end, hmmStart, hmmEnd, hmmLength, hmmBounds,
+                        Location loc = new uk.ac.ebi.interpro.Location(start, end, hmmStart, hmmEnd, hmmLength, hmmBounds,
                                                     null, null, evalue, score, null)
                         
                         Match match = sequenceHits[modelAccession]

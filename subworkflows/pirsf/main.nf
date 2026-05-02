@@ -6,17 +6,17 @@ workflow PIRSF {
     pirsf    // [hmm, dat]
 
     main:
-    hmm = pirsf.map { hmm, dat -> hmm }
-    dat = pirsf.map { hmm, dat -> dat }
+    ch_hmm = pirsf.map { hmm, dat -> hmm }
+    ch_dat = pirsf.map { hmm, dat -> dat }
 
     SEARCH_PIRSF(
         fasta,
-        hmm
+        ch_hmm
     )
 
     PARSE_PIRSF(
         SEARCH_PIRSF.out,
-        dat
+        ch_dat
     )
 
     emit:

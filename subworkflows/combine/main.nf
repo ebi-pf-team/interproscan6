@@ -4,7 +4,7 @@ include { REPRESENTATIVE_LOCATIONS } from "../../modules/representative_location
 
 workflow COMBINE {
     take:
-    json                // [ meta, [json] ]
+    ch_json             // [ meta, [json] ]
     appl_config
     appl_dirs
     add_goterms
@@ -24,7 +24,7 @@ workflow COMBINE {
         .ifEmpty(file("${projectDir}/assets/DUMMY2")) 
         .first()
 
-    COMBINE_MATCHES(json)
+    COMBINE_MATCHES(ch_json)
 
     ch_xrefs = ADD_XREFS(
         COMBINE_MATCHES.out,

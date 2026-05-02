@@ -2,12 +2,12 @@ include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY } from  "../../modules/superfami
 
 workflow SUPERFAMILY {
     take:
-    fasta      // [meta, fasta]
+    ch_fasta    // [meta, fasta]
     ssf        // [dir, hmm, selfhits, cla, model, pdbj95d]
     batch_size // [int]
 
     main:
-    ch_split = fasta
+    ch_split = ch_fasta
         .map { meta, fasta ->
             fasta
                 .splitFasta( by: batch_size, file: true )

@@ -1,10 +1,3 @@
-import groovy.json.JsonSlurper
-import groovy.json.JsonOutput
-import uk.ac.ebi.interpro.Location  
-import uk.ac.ebi.interpro.Match
-import uk.ac.ebi.interpro.Signature
-import uk.ac.ebi.interpro.SignatureLibraryRelease
-
 process RUN_DEEPTMHMM_CPU {
     label       'mem_high', 'time_medium'
     container   'interpro/deeptmhmm:1.0'
@@ -66,15 +59,15 @@ process PARSE_DEEPTMHMM {
     tuple val(meta), path("tmhmm.json")
 
     exec:
-    SignatureLibraryRelease library = new SignatureLibraryRelease("DeepTMHMM", "1.0")
+    def library = new uk.ac.ebi.interpro.SignatureLibraryRelease("DeepTMHMM", "1.0")
     def MODEL_TYPES = [
-        "Beta sheet": ["Transmembrane beta barrel", new Signature("Transmembrane beta barrel", library)],
-        "periplasm": ["Periplasmic Domain", new Signature("Periplasmic Domain", library)],
-        "signal": ["Signalp Peptide", new Signature("Signal Peptide", library)],
-        "TMhelix": ["Transmembrane alpha helix", new Signature("Transmembrane alpha helix", library)],
+        "Beta sheet": ["Transmembrane beta barrel", new uk.ac.ebi.interpro.Signature("Transmembrane beta barrel", library)],
+        "periplasm": ["Periplasmic Domain", new uk.ac.ebi.interpro.Signature("Periplasmic Domain", library)],
+        "signal": ["Signalp Peptide", new uk.ac.ebi.interpro.Signature("Signal Peptide", library)],
+        "TMhelix": ["Transmembrane alpha helix", new uk.ac.ebi.interpro.Signature("Transmembrane alpha helix", library)],
     ]
-    Map<String, Match> hits = [:]
-    String seqId
+    def hits = [:]
+    def seqId
     file("${tmhmm_output}/TMRs.gff3").eachLine { line ->
         def lineData = line.split("\t")
         if (line.startsWith("//") || line.startsWith("#")) {  // stops '##gff-version 3' line breaking assert
@@ -84,17 +77,17 @@ process PARSE_DEEPTMHMM {
         if (MODEL_TYPES.containsKey(lineData[1])) { // e.g. tr_A0A009GMU8_A0A009GMU8_9GAMM periplasm 30 184
             seqId = lineData[0]
             hits.computeIfAbsent(seqId) { [:] }
-            (modelAcc, modelSig) = MODEL_TYPES[lineData[1]]
+            def (modelAcc, modelSig) = MODEL_TYPES[lineData[1]]
             hits[seqId].computeIfAbsent(modelAcc) {
-                Match match = new Match(modelAcc, modelSig)
+                def match = new uk.ac.ebi.interpro.Match(modelAcc, modelSig)
                 match
             }
-            int start = lineData[2].toInteger()
-            int end = lineData[3].toInteger()
-            hits[seqId][modelAcc].addLocation(new Location(start, end))
+            def start = lineData[2].toInteger()
+            def end = lineData[3].toInteger()
+            hits[seqId][modelAcc].addLocation(new uk.ac.ebi.interpro.Location(start, end))
         }
     }
 
     def filepath = task.workDir.resolve("tmhmm.json")
-    filepath.text = JsonOutput.toJson(hits)
+    filepath.text = groovy.json.JsonOutput.toJson(hits)
 }

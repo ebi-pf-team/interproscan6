@@ -3,22 +3,22 @@ include { PARSE_PIRSR               } from  "../../modules/pirsr"
 
 workflow PIRSR {
     take:
-    fasta    // [meta, fasta]
-    pirsr    // [hmm, json]
+    ch_fasta    // [meta, fasta]
+    ch_pirsr    // [hmm, json]
 
     main:
-    hmm  = pirsr.map { hmm, json -> hmm }
-    json = pirsr.map { hmm, json -> json }
+    ch_hmm  = ch_pirsr.map { hmm, json -> hmm }
+    ch_json = ch_pirsr.map { hmm, json -> json }
 
     SEARCH_PIRSR(
-        fasta,
-        hmm,
+        ch_fasta,
+        ch_hmm,
         "-E 0.01 --acc"
     )
 
     PARSE_PIRSR(
         SEARCH_PIRSR.out,
-        json
+        ch_json
     )
 
     emit:

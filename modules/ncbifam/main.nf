@@ -1,6 +1,3 @@
-import groovy.json.JsonOutput
-import uk.ac.ebi.interpro.HMMER3
-
 process PARSE_NCBIFAM {
     label    'mem_low', 'time_veryshort'
     executor 'local'
@@ -12,7 +9,7 @@ process PARSE_NCBIFAM {
     tuple val(meta), path("ncbifam.json")
 
     exec:
-    def hmmer_matches = HMMER3.parseOutput(hmmseach_out, "NCBIFAM")
+    def hmmer_matches = uk.ac.ebi.interpro.HMMER3.parseOutput(hmmseach_out, "NCBIFAM")
     hmmer_matches = hmmer_matches.collectEntries { seqId, matches ->
         [seqId, matches.collectEntries { modelAccession, match ->
             def updatedModelAccession = modelAccession.split("\\.")[0]
@@ -23,5 +20,5 @@ process PARSE_NCBIFAM {
     }
 
     def filepath = task.workDir.resolve("ncbifam.json")
-    filepath.text = JsonOutput.toJson(hmmer_matches)
+    filepath.text = groovy.json.JsonOutput.toJson(hmmer_matches)
 }

@@ -1,6 +1,3 @@
-import uk.ac.ebi.interpro.FastaFile
-import uk.ac.ebi.interpro.SeqDB
-
 process VALIDATE_FASTA {
     // check the formating of the intput FASTA, i.e. look for illegal characters
     label         'mem_low', 'time_short'
@@ -16,7 +13,7 @@ process VALIDATE_FASTA {
     val seq_id
 
     exec:
-    seq_id = FastaFile.validate(fasta, is_nucleic)
+    seq_id = uk.ac.ebi.interpro.FastaFile.validate(fasta, is_nucleic)
 }
 
 process LOAD_SEQUENCES {
@@ -34,7 +31,7 @@ process LOAD_SEQUENCES {
 
     exec:
     def outputFilePath = task.workDir.resolve("sequences.db")
-    def db = new SeqDB(outputFilePath)
+    def db = new uk.ac.ebi.interpro.SeqDB(outputFilePath)
     db.loadFastaFile(fasta, nucleic, false)
     db.close()
 }
@@ -53,7 +50,7 @@ process LOAD_ORFS {
     val db_path // ensure SPLIT_FASTA runs after LOAD_ORFS
 
     exec:
-    def db = new SeqDB(db_path)
+    def db = new uk.ac.ebi.interpro.SeqDB(db_path)
     db.loadFastaFile(translated_fasta, false, true)
     db.close()
 }
@@ -73,7 +70,7 @@ process SPLIT_FASTA {
     path "*.fasta"
 
     exec:
-    def db = new SeqDB(db_path)
+    def db = new uk.ac.ebi.interpro.SeqDB(db_path)
     db.splitFasta(task.workDir, batch_size, nucleic)
     db.close()
 }

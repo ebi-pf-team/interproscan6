@@ -1,13 +1,3 @@
-// codenarc-disable AllowedDirectivesRule
-import groovy.json.JsonOutput
-import java.nio.file.Path
-import uk.ac.ebi.interpro.HMMER3
-import uk.ac.ebi.interpro.Location
-import uk.ac.ebi.interpro.Match
-import uk.ac.ebi.interpro.Signature
-import uk.ac.ebi.interpro.SignatureLibraryRelease
-import uk.ac.ebi.interpro.Site
-
 process SEARCH_SFLD {
     label     'mem_min', 'time_veryshort', 'dynamic'
     container 'interpro/sfld:ebiftp'
@@ -51,17 +41,17 @@ process PARSE_SFLD {
     tuple val(meta), path("sfld.json")
 
     exec:
-    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out, "SFLD")
-    def sequences = parseOutput(postprocess_out, hmmerMatches)
-    def hierarchies = getHierarchies(hierarchydb)
-    SignatureLibraryRelease library = new SignatureLibraryRelease("SFLD", null)
+    def hmmerMatches = uk.ac.ebi.interpro.HMMER3.parseOutput(hmmsearch_out, "SFLD")
+    def sequences = uk.ac.ebi.interpro.SFLD.parseOutput(postprocess_out, hmmerMatches)
+    def hierarchies = uk.ac.ebi.interpro.SFLD.getHierarchies(hierarchydb)
+    def library = new uk.ac.ebi.interpro.SignatureLibraryRelease("SFLD", null)
 
     sequences = sequences.collectEntries { seqId, matches -> 
         // Flatten matches (one location per match)
         matches = matches.collectMany { key, match ->
             return match.locations.collect { location ->
-                Signature signature = new Signature(match.modelAccession, library)
-                Match newMatch = new Match(match.modelAccession, match.evalue, match.score, match.bias, signature)
+                def signature = new uk.ac.ebi.interpro.Signature(match.modelAccession, library)
+                def newMatch = new uk.ac.ebi.interpro.Match(match.modelAccession, match.evalue, match.score, match.bias, signature)
                 newMatch.addLocation(location.clone())
                 return newMatch
             }
@@ -69,7 +59,7 @@ process PARSE_SFLD {
 
         if (matches.size() > 1) {
             // Remove overlapping matches from models in the same hierarchy (keep the most specific)
-            Set<Integer> ignored = [] as Set
+            def ignored = [] as Set
             matches = matches
                 .collect { match ->
                     if (match.modelAccession.startsWith("SFLDF")) {
@@ -77,32 +67,29 @@ process PARSE_SFLD {
                         return match
                     }
 
-                    boolean ignore = false
-                    for (Match otherMatch: matches) {
-                        if (match.modelAccession == otherMatch.modelAccession) {
+                    def matchAccession = match.modelAccession
+                    def l1 = match.locations[0]
+                    def ignore = matches.any { otherMatch ->
+                        if (matchAccession == otherMatch.modelAccession) {
                             // Two matches/locations from the same mode: keep
-                            continue
-                        } else if (ignored.contains(otherMatch)) {
+                            return false
+                        }
+                        if (ignored.contains(otherMatch)) {
                             // otherMatch has previously been flagged as to be ignored
-                            continue
+                            return false
                         }
 
-                        Location l1 = match.locations[0]
-                        Location l2 = otherMatch.locations[0]
-
-                        if (!(l1.start > l2.end || l2.start > l1.end)) {
-                            // Matches overlap
-                            
-                            def otherParents = hierarchies.get(otherMatch.modelAccession)
-                            if (otherParents != null && otherParents.contains(match.modelAccession)) {
-                                /*
-                                    The current match overlaps a match from a more specific model:
-                                    we want to keep the most specific match, so we ignore the current match
-                                */
-                                ignore = true
-                                break
-                            }    
+                        def l2 = otherMatch.locations[0]
+                        if (l1.start > l2.end || l2.start > l1.end) {
+                            return false
                         }
+
+                        /*
+                            The current match overlaps a match from a more specific model:
+                            we want to keep the most specific match, so we ignore the current match
+                        */
+                        def otherParents = hierarchies.get(otherMatch.modelAccession)
+                        return otherParents != null && otherParents.contains(matchAccession)
                     }
 
                     if (ignore) {
@@ -126,9 +113,9 @@ process PARSE_SFLD {
                     and a sequence matches F, it should inherit the S and G annotations
                 */
                 parents.each { parent ->
-                    Signature signature = new Signature(parent, library)
-                    Match promotedMatch = new Match(parent, match.evalue, match.score, match.bias, signature)
-                    Location location = match.locations[0].clone()
+                    def signature = new uk.ac.ebi.interpro.Signature(parent, library)
+                    def promotedMatch = new uk.ac.ebi.interpro.Match(parent, match.evalue, match.score, match.bias, signature)
+                    def location = match.locations[0].clone()
                     location.sites.clear()
                     promotedMatch.addLocation(location)
                     matchesWithPromoted.add(promotedMatch)
@@ -139,7 +126,7 @@ process PARSE_SFLD {
         // Merge locations from the same model together
         matches = [:]
         matchesWithPromoted.each { match ->
-            Match mergedMatch = matches.get(match.modelAccession)
+            def mergedMatch = matches.get(match.modelAccession)
             if (mergedMatch) {
                 mergedMatch.addLocation(match.locations[0])
             } else {
@@ -155,7 +142,7 @@ process PARSE_SFLD {
                     a.start <=> b.start ?: b.end <=> a.end
                 }
                 .each { location ->
-                    boolean isContained = locations.any { loc ->
+                    def isContained = locations.any { loc ->
                         loc.start <= location.start && loc.end >= location.end
                     }
                     if (!isContained) {
@@ -170,111 +157,5 @@ process PARSE_SFLD {
     }
 
     def filepath = task.workDir.resolve("sfld.json")
-    filepath.text = JsonOutput.toJson(sequences)
-}
-
-Map<String, Set<String>> getHierarchies(Path filePath) {
-    def hierarchies = [:].withDefault { [] as Set }
-    filePath.eachLine { line ->
-        def nodes = line.split(/\t/).toList()
-        nodes.eachWithIndex { node, idx ->
-            if (idx > 0) {
-                def ancestors = nodes.subList(0, idx) as Set
-                hierarchies[node].addAll(ancestors)
-            }
-        }
-    }
-    return hierarchies
-}
-
-Map<String, Map<String, Match>> parseOutput(
-    Path filePath,
-    Map<String, Map> hmmerMatches
-) {
-    // Parse the output TSV file from the SFLD postprocess bin
-    def matches = [:]
-    filePath.withReader{ reader ->
-        while (true) {
-            String sequenceId = null
-
-            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-                def matcher = line.trim() =~ ~/^Sequence:\s+(\S+)$/
-                if (matcher.find()) {
-                    sequenceId = matcher.group(1).trim()
-                    break
-                }
-            }
-
-            if (sequenceId == null) {
-                break
-            }
-
-            assert hmmerMatches.containsKey(sequenceId)
-            def seqHmmerMatches = hmmerMatches[sequenceId]
-            matches[sequenceId] = parseBlock(reader, sequenceId, seqHmmerMatches)
-        }
-    }
-
-    return matches
-}
-
-Map<String, Match> parseBlock(
-    Reader reader,
-    String sequenceId,
-    Map<String, Map> seqHmmerMatches
-) {
-    SignatureLibraryRelease library = new SignatureLibraryRelease("SFLD", null)
-    boolean inDomains = false
-    def domains = [:]
-    while (true) {
-        String line = reader.readLine()?.trim()
-        if (!line) break
-        if (line == "Domains:") {
-            inDomains = true
-        } else if (line == "Sites:") {
-            inDomains = false
-        } else if (line == "//") {
-            break
-        } else if (inDomains) {
-            def fields = line.split(/\t/)
-            assert fields.length == 15
-            String modelAccession = fields[0]
-            Integer hmmStart = fields[4] as Integer
-            Integer hmmEnd = fields[5] as Integer
-            int aliStart = fields[7] as int
-            int aliEnd = fields[8] as int
-            Integer envStart = fields[9] as Integer
-            Integer envEnd = fields[10] as Integer
-            assert seqHmmerMatches.containsKey(modelAccession)
-            def hmmerMatch = seqHmmerMatches[modelAccession]
-            Location loc = hmmerMatch.locations.find { it.start == aliStart 
-                                                        && it.end == aliEnd 
-                                                        && it.hmmStart == hmmStart 
-                                                        && it.hmmEnd == hmmEnd 
-                                                        && it.envelopeStart == envStart 
-                                                        && it.envelopeEnd == envEnd }
-            assert loc != null
-            Match match = domains.computeIfAbsent(modelAccession, k -> {
-                Signature signature = new Signature(modelAccession, library)
-                return new Match(modelAccession, hmmerMatch.evalue, hmmerMatch.score, hmmerMatch.bias, signature)
-            });
-            match.addLocation(loc)
-        } else {
-            def fields = line.split(/\s/, 3)
-            assert fields.length == 2 || fields.length == 3
-            if (fields.length == 3) {
-                String modelAccession = fields[0]
-                String residues = fields[1]
-                String description = fields[2]
-                Match match = domains.get(modelAccession)
-                if (match != null) {
-                    Site site = new Site(description, residues)
-                    match.addSite(site)                        
-                }
-            }
-            
-        }
-    }
-
-    return domains
+    filepath.text = groovy.json.JsonOutput.toJson(sequences)
 }

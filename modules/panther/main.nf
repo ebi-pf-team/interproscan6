@@ -1,15 +1,3 @@
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
-import java.nio.file.Files
-import java.nio.file.Path
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
-import uk.ac.ebi.interpro.FastaFile
-import uk.ac.ebi.interpro.HMMER3
-import uk.ac.ebi.interpro.Location
-import uk.ac.ebi.interpro.Match
-import uk.ac.ebi.interpro.TreeGrafter
-
 process SEARCH_PANTHER {
     label     'mem_low', 'time_short', 'dynamic'
     container 'interpro/panther:1.0'
@@ -41,7 +29,7 @@ process PREPARE_TREEGRAFTER {
     tuple val(meta), val(meta2), path("panther.json")
     
     exec:
-    def hmmer_matches = HMMER3.parseOutput(hmmseach_out, "PANTHER")
+    def hmmer_matches = uk.ac.ebi.interpro.HMMER3.parseOutput(hmmseach_out, "PANTHER")
 
     hmmer_matches = hmmer_matches.collectEntries { seqId, matches ->
         // Filter matches to only those with locations that have a score > 100
@@ -60,12 +48,12 @@ process PREPARE_TREEGRAFTER {
                 // Rename model accession (PTHR23076.orig.30.pir -> PTHR23076)
                 def familyId = (m1.modelAccession =~ /^(PTHR\d+)/)[0][1]
                 m1.signature.accession = familyId
-                def m2 = new Match(familyId, m1.evalue, m1.score, m1.bias, m1.signature)
+                def m2 = new uk.ac.ebi.interpro.Match(familyId, m1.evalue, m1.score, m1.bias, m1.signature)
                 m2.included = m1.included
                 // Only keep the domain with the highest score
                 m2.locations = [locations.max { it.score }]
                 // Init empty TreeGrafter attribute
-                m2.treegrafter = new TreeGrafter(null)
+                m2.treegrafter = new uk.ac.ebi.interpro.TreeGrafter(null)
                 return m2
             }
             .findAll { it != null }
@@ -75,7 +63,7 @@ process PREPARE_TREEGRAFTER {
     }
 
     def jsonFile = task.workDir.resolve("panther.json")
-    jsonFile.text = JsonOutput.toJson(hmmer_matches)
+    jsonFile.text = groovy.json.JsonOutput.toJson(hmmer_matches)
 }
 
 
@@ -107,9 +95,9 @@ process PARSE_PANTHER {
     tuple val(meta), val(meta2), path("panther.json")
 
     exec:
-    def matches = new JsonSlurper().parse(hmmseach_json).collectEntries { seqId, jsonMatches ->
+    def matches = new groovy.json.JsonSlurper().parse(hmmseach_json).collectEntries { seqId, jsonMatches ->
         [(seqId): jsonMatches.collectEntries { matchId, jsonMatch ->
-            [(matchId): Match.fromMap(jsonMatch)]
+            [(matchId): uk.ac.ebi.interpro.Match.fromMap(jsonMatch)]
         }]
     }
 
@@ -123,9 +111,9 @@ process PARSE_PANTHER {
         
         def match = matches[seqId]?.get(familyId)
         assert match != null
-        match.treegrafter = new TreeGrafter(nodeId)
+        match.treegrafter = new uk.ac.ebi.interpro.TreeGrafter(nodeId)
     }
 
     def filepath = task.workDir.resolve("panther.json")
-    filepath.text = JsonOutput.toJson(matches)
+    filepath.text = groovy.json.JsonOutput.toJson(matches)
 }

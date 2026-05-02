@@ -1,15 +1,3 @@
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
-import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
-import java.util.zip.ZipOutputStream
-import groovy.json.JsonOutput
-import uk.ac.ebi.interpro.FastaFile
-import uk.ac.ebi.interpro.HMMER2
-import uk.ac.ebi.interpro.HMMER3
-
 process PREFILTER_SMART {
     label     'mem_min', 'time_veryshort', 'dynamic'
     container 'interpro/smart:1.0'
@@ -40,20 +28,20 @@ process PREPARE_SMART {
     tuple val(meta), path("sequences.zip")
 
     exec:
-    def sequences = FastaFile.parse(fasta)  // [md5: sequence]
-    def matches = HMMER3.parseOutput(hmmseach_out, "SMART")
+    def sequences = uk.ac.ebi.interpro.FastaFile.parse(fasta)  // [md5: sequence]
+    def matches = uk.ac.ebi.interpro.HMMER3.parseOutput(hmmseach_out, "SMART")
 
     // Map model accessions to seq Ids -> [modelAcc: [seqIds]]
     def model2seqs = [:].withDefault { [] }
     matches.each { seqId, seqMatches ->
-        seqMatches.each { modelAcc, _ ->
+        seqMatches.each { modelAcc, match ->
             model2seqs[modelAcc] << seqId
         }
     }
 
     def zipFile = task.workDir.resolve("sequences.zip")
-    Files.newOutputStream(zipFile).withCloseable { os ->
-        new ZipOutputStream(os).withCloseable { zip ->
+    java.nio.file.Files.newOutputStream(zipFile).withCloseable { os ->
+        new java.util.zip.ZipOutputStream(os).withCloseable { zip ->
             // Create a FASTA file for each profile to search with
             model2seqs.sort().each { modelAcc, seqIds ->
                 def fastaFile = task.workDir.resolve("${modelAcc}.faa")
@@ -65,11 +53,11 @@ process PREPARE_SMART {
                     }
                 }
 
-                ZipEntry entry = new ZipEntry(fastaFile.fileName.toString())
+                def entry = new java.util.zip.ZipEntry(fastaFile.fileName.toString())
                 zip.putNextEntry(entry)
-                Files.copy(fastaFile, zip)
+                java.nio.file.Files.copy(fastaFile, zip)
                 zip.closeEntry()
-                Files.delete(fastaFile);
+                java.nio.file.Files.delete(fastaFile);
             }
         }
     }
@@ -127,64 +115,64 @@ process PARSE_SMART {
     def hmmpfam_out = null
 
     def tmp_zip = task.workDir.resolve("temp.zip")
-    Files.newInputStream(fasta_zip).withCloseable { is ->
-        Files.copy(is, tmp_zip, StandardCopyOption.REPLACE_EXISTING)
+    java.nio.file.Files.newInputStream(fasta_zip).withCloseable { is ->
+        java.nio.file.Files.copy(is, tmp_zip, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
     }
 
-    new ZipFile(tmp_zip.toFile()).withCloseable { zip ->
+    new java.util.zip.ZipFile(tmp_zip.toFile()).withCloseable { zip ->
         zip.entries().each { entry ->
             if (entry.isDirectory()) {
                 // Should never happen
                 return
             }
 
-            def fileName = Paths.get(entry.name).fileName.toString()
-            Path extracted = task.workDir.resolve(fileName)
+            def fileName = java.nio.file.Paths.get(entry.name).fileName.toString()
+            def extracted = task.workDir.resolve(fileName)
 
             zip.getInputStream(entry).withCloseable { input ->
-                Files.copy(input, extracted, StandardCopyOption.REPLACE_EXISTING)
+                java.nio.file.Files.copy(input, extracted, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
             }
 
-            sequences = sequences + FastaFile.parse(extracted)
-            Files.deleteIfExists(extracted)
+            sequences = sequences + uk.ac.ebi.interpro.FastaFile.parse(extracted)
+            java.nio.file.Files.deleteIfExists(extracted)
         }
     }
 
-    Files.newInputStream(search_zip).withCloseable { is ->
-        Files.copy(is, tmp_zip, StandardCopyOption.REPLACE_EXISTING)
+    java.nio.file.Files.newInputStream(search_zip).withCloseable { is ->
+        java.nio.file.Files.copy(is, tmp_zip, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
     }
 
-    new ZipFile(tmp_zip.toFile()).withCloseable { zip ->
+    new java.util.zip.ZipFile(tmp_zip.toFile()).withCloseable { zip ->
         zip.entries().each { entry ->
             if (entry.isDirectory()) {
                 // Should never happen
                 return
             }
 
-            def fileName = Paths.get(entry.name).fileName.toString()
-            Path extracted = task.workDir.resolve(fileName)
+            def fileName = java.nio.file.Paths.get(entry.name).fileName.toString()
+            def extracted = task.workDir.resolve(fileName)
 
             zip.getInputStream(entry).withCloseable { input ->
-                Files.copy(input, extracted, StandardCopyOption.REPLACE_EXISTING)
+                java.nio.file.Files.copy(input, extracted, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
             }
 
             if (fileName == "hmmpfam.out") {
                 hmmpfam_out = extracted
             } else {
-                def (accession, length) = HMMER2.parseHMM(extracted)
+                def (accession, length) = uk.ac.ebi.interpro.HMMER2.parseHMM(extracted)
                 hmm_lengths[accession] = length
-                Files.deleteIfExists(extracted)
+                java.nio.file.Files.deleteIfExists(extracted)
             }
         }
     }
 
-    Files.deleteIfExists(tmp_zip)
+    java.nio.file.Files.deleteIfExists(tmp_zip)
    
-    def matches = HMMER2.parseOutput(hmmpfam_out, hmm_lengths, "SMART")
+    def matches = uk.ac.ebi.interpro.HMMER2.parseOutput(hmmpfam_out, hmm_lengths, "SMART")
 
-    String tyrKinaseAccession = "SM00219"
+    def tyrKinaseAccession = "SM00219"
     def tyrKinasePattern = ~/.*HRD[LIV][AR]\w\wN.*/
-    String serThrKinaseAccession = "SM00220"
+    def serThrKinaseAccession = "SM00220"
     def serThrKinasePattern = ~/.*D[LIVM]K\w\wN.*/
 
     def filteredMatches = matches.collectEntries { seqId, models ->
@@ -196,9 +184,9 @@ process PARSE_SMART {
                 have a hit against the same sequence,
                 we need to perform an additional check before selecting them
             */
-            String sequence = sequences[seqId]
-            boolean tyrKinaseOK = (sequence ==~ tyrKinasePattern)
-            boolean serThrKinaseOK = (sequence ==~ serThrKinasePattern)
+            def sequence = sequences[seqId]
+            def tyrKinaseOK = (sequence ==~ tyrKinasePattern)
+            def serThrKinaseOK = (sequence ==~ serThrKinasePattern)
 
             models.each { modelAccession, match ->
                 if (modelAccession != tyrKinaseAccession &&
@@ -218,5 +206,5 @@ process PARSE_SMART {
     }
 
     def outputFilePath = task.workDir.resolve("smart.json")
-    outputFilePath.text = JsonOutput.toJson(filteredMatches)
+    outputFilePath.text  = groovy.json.JsonOutput.toJson(filteredMatches)
 }
