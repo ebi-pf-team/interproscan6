@@ -110,7 +110,7 @@ process GET_MATCHES {
     }
 }
 
-def Map transformMatch(match, seq) {
+def transformMatch(match, seq) {
     def transformedMatch = match.clone()
     transformedMatch["modelAccession"] = match["model-ac"]
     transformedMatch["treegrafter"] = ["ancestralNodeID": match["ancestralNode"]]
@@ -157,7 +157,7 @@ def decodeAlignment(cigarAlignment, sequence, startIndex) {
     return targetAlign.toString()
 }
 
-def Map tranformFragment(Map fragment) {
+def tranformFragment(fragment) {
     return [
         "start"   : fragment["start"],
         "end"     : fragment["end"],
