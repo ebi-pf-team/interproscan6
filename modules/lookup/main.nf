@@ -110,7 +110,7 @@ process GET_MATCHES {
     }
 }
 
-def Map transformMatch(Map match, String seq) {
+def Map transformMatch(match, seq) {
     def transformedMatch = match.clone()
     transformedMatch["modelAccession"] = match["model-ac"]
     transformedMatch["treegrafter"] = ["ancestralNodeID": match["ancestralNode"]]

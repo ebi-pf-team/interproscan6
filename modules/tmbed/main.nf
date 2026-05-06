@@ -143,12 +143,12 @@ process PARSE_TMBED {
         if (chunks.size() > 1) {
             chunks.subList(1, chunks.size()).each { chunk ->
                 def chunkPred = chunk.pred
-                int chunkPredLen = chunkPred.length()
+                def chunkPredLen = chunkPred.length()
 
                 // Effective overlap might be smaller than chunk_overlap for the last chunk
-                int effOverlap = Math.min(chunk_overlap, chunkPredLen)
-                int mergedLen = mergedPred.length()
-                int overlapStart = mergedLen - effOverlap
+                def effOverlap = Math.min(chunk_overlap, chunkPredLen)
+                def mergedLen = mergedPred.length()
+                def overlapStart = mergedLen - effOverlap
 
                 // Build a "reconciled" overlap region by comparing per-residue predictions
                 def mergedOverlap = new StringBuilder(effOverlap)
@@ -160,8 +160,8 @@ process PARSE_TMBED {
                     } else {
                         /* Conflict between predictions
                            Resolve by local consensus using a +/- 2 residue window */
-                        int winStart = Math.max(0, j - 2)
-                        int winEnd = Math.min(effOverlap, j + 3)
+                        def winStart = Math.max(0, j - 2)
+                        def winEnd = Math.min(effOverlap, j + 3)
                         def winPrev = mergedPred.substring(overlapStart + winStart, overlapStart + winEnd)
                         def winNext = chunkPred.substring(winStart, winEnd)
                         def mostPrev = mostCommonChar(winPrev)
@@ -231,17 +231,17 @@ process PARSE_TMBED {
 
 
 /** Apply categorical smoothing (mode over a sliding window) */
-def smoothString(String s, int window) {
-    int half = Math.floor(window / 2) as int
+def smoothString(s, window) {
+    def half = Math.floor(window / 2) as int
     return (0..<s.size()).collect { i ->
-        int start = Math.max(0, i - half)
-        int end = Math.min(s.size(), i + half + 1)
+        def start = Math.max(0, i - half)
+        def end = Math.min(s.size(), i + half + 1)
         mostCommonChar(s.substring(start, end))
     }.join()
 }
 
 /** Return the most frequent character in a string */
-def mostCommonChar(String s) {
+def mostCommonChar(s) {
     def counts = [:].withDefault { 0 }
     s.each { c -> counts[c] += 1 }
     return counts.max { elem -> elem.value }.key

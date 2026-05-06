@@ -121,12 +121,12 @@ process PARSE_PIRSR {
     filepath.text  = groovy.json.JsonOutput.toJson(validMatches)
 }
 
-def mapHMMToSeq(int hmmStart, String querySeq, String targetSeq) {
+def mapHMMToSeq(hmmStart, querySeq, targetSeq) {
     def seqPos = 0
     def currentHmmStart = hmmStart
     def map = ([0] + (1..hmmStart).collect { -1 }) as List<Integer>
 
-    querySeq.eachWithIndex { char queryChar, int index ->
+    querySeq.eachWithIndex { queryChar, index ->
         map[currentHmmStart] = seqPos
         if (queryChar != '.') {
             currentHmmStart += 1

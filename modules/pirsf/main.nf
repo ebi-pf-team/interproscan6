@@ -156,14 +156,14 @@ process PARSE_PIRSF {
 }
 
 def createMatch(
-    Match match,
-    int seqStart,
-    int seqEnd,
-    int hmmStart,
-    int hmmEnd,
-    int envStart,
-    int envEnd,
-    double locationScore) {
+    match,
+    seqStart,
+    seqEnd,
+    hmmStart,
+    hmmEnd,
+    envStart,
+    envEnd,
+    locationScore) {
     def processedMatch = new uk.ac.ebi.interpro.Match(
         match.modelAccession,
         match.evalue,

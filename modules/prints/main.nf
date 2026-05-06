@@ -211,16 +211,16 @@ process PARSE_PRINTS {
 def sortMatches(matches) {
     // This comparator is CRITICAL to the working of PRINTS post-processing
     return matches.sort { matchA, matchB ->
-        int evalueComparison = matchA.evalue <=> matchB.evalue
+        def evalueComparison = matchA.evalue <=> matchB.evalue
         if (evalueComparison != 0) return evalueComparison
 
-        int modelAccessionComparison = matchA.modelId <=> matchB.modelId
+        def modelAccessionComparison = matchA.modelId <=> matchB.modelId
         if (modelAccessionComparison != 0) return modelAccessionComparison
 
-        int motifNumberComparison = matchA.motifNumber <=> matchB.motifNumber
+        def motifNumberComparison = matchA.motifNumber <=> matchB.motifNumber
         if (motifNumberComparison != 0) return motifNumberComparison
 
-        int startLocationComparison = matchA.locationStart <=> matchB.locationStart
+        def startLocationComparison = matchA.locationStart <=> matchB.locationStart
         if (startLocationComparison != 0) return startLocationComparison
 
         return matchA.locationEnd <=> matchB.locationEnd
