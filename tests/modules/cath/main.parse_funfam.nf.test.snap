@@ -1,0 +1,20 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        2,
+                        "cathfunfam.json:md5,1159714770f603f5480619b8ee52b594"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-10T11:31:34.378198781",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

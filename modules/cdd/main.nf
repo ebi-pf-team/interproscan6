@@ -6,13 +6,12 @@ import uk.ac.ebi.interpro.SignatureLibraryRelease
 import uk.ac.ebi.interpro.Site
 
 process SEARCH_CDD {
-    label 'mem_min', 'time_short', 'ips6_container'
+    label     'mem_min', 'time_short'
+    container 'interpro/cdd:1.0'
 
     input:
     tuple val(meta), path(fasta)
-    path cdd_dir
-    val rpsblast_db
-    val rpsproc_db
+    tuple path(dir), val(rpsblast_db), val(rpsproc_db)
 
     output:
     tuple val(meta), path("rpsbproc.out")
@@ -28,14 +27,14 @@ process SEARCH_CDD {
 
     rpsblast \
         -query ${fasta} \
-        -db "${cdd_dir}/${rpsblast_db}" \
+        -db "${dir}/${rpsblast_db}" \
         -out rpsblast.out \
         -evalue 0.01 -seg no -outfmt 11
 
     rpsbproc \
         --infile rpsblast.out \
         --outfile rpsbproc.out \
-        --data-path ${cdd_dir}/${rpsproc_db} \
+        --data-path ${dir}/${rpsproc_db} \
         -m std
     """
 }
@@ -58,7 +57,8 @@ process PARSE_CDD {
     boolean inSites = false
     def hits = [:]
     def pssmHits = [:]
-    file(rpsbproc_out.toString()).eachLine { line -> 
+    def pssmSites = [:]
+    rpsbproc_out.eachLine { line -> 
         if (line.startsWith("SESSION")) {
             // #SESSION        <session-ordinal>       <program>       <database>      <score-matrix>  <evalue-threshold>
             sessionId = line.split("\t")[1]
@@ -108,15 +108,17 @@ process PARSE_CDD {
                 // #<session-ordinal>      <query-id[readingframe]>        <annot-type>    <title> <residue(coordinates)>  <complete-size> <mapped-size>   <source-domain>
                 def fields = line.split("\t")
                 assert fields.size() == 8
-                String hitType = fields[2]
+                def hitType = fields[2]
                 if (hitType.toUpperCase() == "SPECIFIC") {
-                    String pssmId = fields[7]
+                    def pssmId = fields[7]
                     if (pssmHits.containsKey(pssmId)) {
-                        String description = fields[3]
-                        String residues = fields[4]
-                        Site site = new Site(description, residues)
-                        Match match = pssmHits[pssmId]
-                        match.addSite(site)                        
+                        def description = fields[3]
+                        def residues = pssmSites
+                            .computeIfAbsent(pssmId) { [:] }
+                            .computeIfAbsent(description) { [] as Set }
+                        fields[4].split(",").each { residue ->
+                            residues.add(residue)
+                        }
                     }
                 }
             }
@@ -127,6 +129,15 @@ process PARSE_CDD {
         } else if (line.startsWith("ENDSITES")) {
             assert inDomains == false
             assert inSites == true
+            pssmSites.each { pssmId, descriptionToResidues ->
+                def match = pssmHits[pssmId]
+                if (match != null) {
+                    descriptionToResidues.each { description, residues ->
+                        match.addSite(new Site(description, residues.join(",")))  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
+                    }
+                }
+            }
+            pssmSites.clear()
             inSites = false
         } else if (line.startsWith("ENDQUERY")) {
             assert sequenceId != null
@@ -147,7 +158,6 @@ process PARSE_CDD {
         } 
     }
 
-    def outputFilePath = task.workDir.resolve("cdd.json")
-    def json = JsonOutput.toJson(hits)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("cdd.json")
+    filepath.text = JsonOutput.toJson(hits)
 }

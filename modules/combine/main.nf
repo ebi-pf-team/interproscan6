@@ -1,31 +1,14 @@
-import uk.ac.ebi.interpro.ProcessCombine
-
-process COMBINE_MATCHES_LOCAL {
+process COMBINE_MATCHES {
     label    'mem_low', 'time_veryshort'
     executor 'local'
 
     input:
-    tuple val(meta), val(members_matches)
+    tuple val(meta), val(json)
 
     output:
-    tuple val(meta), path('combined.json')
+    tuple val(meta), path('combined/*.json', arity: '1..*')
 
     exec:
-    String outputFilePath = task.workDir.resolve('combined.json')
-    ProcessCombine.run(members_matches.collect { it.toString() }, outputFilePath)
-}
-
-process COMBINE_MATCHES {
-    label    'mem_high', 'time_veryshort', 'groovy_container'
-
-    input:
-    tuple val(meta), path(jsons, arity: '1..*', name: '?/*')
-
-    output:
-    tuple val(meta), path('combined.json')
-
-    script:
-    """
-    groovy -cp "${projectDir}/lib:." ${projectDir}/bin/interpro/combine.groovy . combined.json
-    """
+    def outdir = task.workDir.resolve("combined")
+    uk.ac.ebi.interpro.ProcessCombine.run(json, outdir, 1000)
 }

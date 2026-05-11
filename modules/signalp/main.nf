@@ -6,7 +6,8 @@ import uk.ac.ebi.interpro.Signature
 import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_SIGNALP_CPU {
-    label 'mem_medium', 'time_medium', 'signalp_container'
+    label     'mem_medium', 'time_medium'
+    container 'interpro/signalp:6.0i'
 
     input:
     tuple val(meta), path(fasta)
@@ -35,7 +36,8 @@ process RUN_SIGNALP_CPU {
 }
 
 process RUN_SIGNALP_GPU {
-    label 'mem_medium', 'time_short', 'signalp_container', 'use_gpu'
+    label     'mem_medium', 'time_medium', 'use_gpu'
+    container 'interpro/signalp:6.0i'
 
     input:
     tuple val(meta), path(fasta)
@@ -74,11 +76,9 @@ process PARSE_SIGNALP {
     tuple val(meta), path("signalp.json")
 
     exec:
-    String signalDir = signalp_out.toString()
-
-    File jsonFile = new File(signalDir, "output.json")
+    def jsonPath = signalp_out.resolve("output.json")
     def jsonSlurper = new JsonSlurper()
-    def jsonOutput = jsonSlurper.parse(jsonFile)
+    def jsonOutput = jsonSlurper.parse(jsonPath)
 
     String modelAcc = "SignalP_${mode}_${organism}"
     SignatureLibraryRelease library = new SignatureLibraryRelease("SignalP", "6.0i")
@@ -90,8 +90,9 @@ process PARSE_SIGNALP {
         "Sec/SPIII": new Signature("SignalP-Sec-SPIII", "Sec/SPIII", "Pilin signal peptide", library, null),
     ]
 
+    def gff3Path = signalp_out.resolve("output.gff3")
     def hits = [:]
-    new File(signalDir, "output.gff3").eachLine { line ->
+    gff3Path.eachLine { line ->
         if (line.startsWith("#")) {
             return
         }
@@ -119,7 +120,6 @@ process PARSE_SIGNALP {
         hits[seqId] = [(modelAcc) : match]
     }
 
-    def outputFilePath = task.workDir.resolve("signalp.json")
-    def json = JsonOutput.toJson(hits)
-    new File(outputFilePath.toString()).write(json)
+    def outputFile = task.workDir.resolve("signalp.json")
+    outputFile.text = JsonOutput.toJson(hits)
 }

@@ -6,7 +6,8 @@ import uk.ac.ebi.interpro.Signature
 import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_DEEPTMHMM_CPU {
-    label       'mem_high', 'time_medium', 'deeptmhmm_container'
+    label       'mem_high', 'time_medium'
+    container   'interpro/deeptmhmm:1.0'
     stageInMode 'copy'
 
     input:
@@ -30,7 +31,8 @@ process RUN_DEEPTMHMM_CPU {
 }
 
 process RUN_DEEPTMHMM_GPU {
-    label       'mem_high', 'time_short', 'deeptmhmm_container', 'use_gpu'
+    label       'mem_high', 'time_short', 'use_gpu'
+    container   'interpro/deeptmhmm:26.04'
     stageInMode 'copy'
 
     input:
@@ -71,7 +73,6 @@ process PARSE_DEEPTMHMM {
         "signal": ["Signalp Peptide", new Signature("Signal Peptide", library)],
         "TMhelix": ["Transmembrane alpha helix", new Signature("Transmembrane alpha helix", library)],
     ]
-    String tmhmmDir = tmhmm_output.toString()
     Map<String, Match> hits = [:]
     String seqId
     file("${tmhmm_output}/TMRs.gff3").eachLine { line ->
@@ -94,7 +95,6 @@ process PARSE_DEEPTMHMM {
         }
     }
 
-    def outputFilePath = task.workDir.resolve("tmhmm.json")
-    def json = JsonOutput.toJson(hits)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("tmhmm.json")
+    filepath.text = JsonOutput.toJson(hits)
 }

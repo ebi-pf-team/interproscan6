@@ -1,0 +1,19 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "phobius.json:md5,a97fa99ae030536ba0e8ad615eb3f78c"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T16:18:29.766419704",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

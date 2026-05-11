@@ -1,0 +1,19 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "signalp.json:md5,ce61d01411704cf945adba54150c9ee4"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T18:40:30.428651155",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

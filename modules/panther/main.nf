@@ -1,5 +1,9 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import uk.ac.ebi.interpro.FastaFile
 import uk.ac.ebi.interpro.HMMER3
 import uk.ac.ebi.interpro.Location
@@ -7,12 +11,12 @@ import uk.ac.ebi.interpro.Match
 import uk.ac.ebi.interpro.TreeGrafter
 
 process SEARCH_PANTHER {
-    label 'mem_low', 'time_short', 'dynamic', 'ips6_container'
+    label     'mem_low', 'time_short', 'dynamic'
+    container 'interpro/panther:1.0'
 
     input:
     tuple val(meta), val(meta2), path(fasta)
-    path hmmdir
-    val hmmfile
+    path hmm
 
     output:
     tuple val(meta), val(meta2), path("hmmsearch.out")
@@ -22,7 +26,7 @@ process SEARCH_PANTHER {
     hmmsearch \
         -Z 65000000 -E 0.001 \
         --cpu ${task.cpus} \
-        ${hmmdir}/${hmmfile} ${fasta} > hmmsearch.out
+        ${hmm} ${fasta} > hmmsearch.out
     """
 }
 
@@ -32,17 +36,14 @@ process PREPARE_TREEGRAFTER {
 
     input:
     tuple val(meta), val(meta2), val(hmmseach_out)
-    val dir
-    val msf
 
     output:
-    tuple val(meta), val(meta2), path("panther.json"),                             emit: json
-    tuple val(meta), val(meta2), val(sequenceIds), val(familyIds), val(fastas),    emit: fasta
+    tuple val(meta), val(meta2), path("panther.json")
     
     exec:
-    def hmmerMatches = HMMER3.parseOutput(hmmseach_out.toString(), "PANTHER")
+    def hmmer_matches = HMMER3.parseOutput(hmmseach_out, "PANTHER")
 
-    hmmerMatches = hmmerMatches.collectEntries { seqId, matches ->
+    hmmer_matches = hmmer_matches.collectEntries { seqId, matches ->
         // Filter matches to only those with locations that have a score > 100
         def filteredMatches = matches
             .values()
@@ -57,9 +58,9 @@ process PREPARE_TREEGRAFTER {
                 }
 
                 // Rename model accession (PTHR23076.orig.30.pir -> PTHR23076)
-                String familyId = (m1.modelAccession =~ /^(PTHR\d+)/)[0][1]
+                def familyId = (m1.modelAccession =~ /^(PTHR\d+)/)[0][1]
                 m1.signature.accession = familyId
-                Match m2 = new Match(familyId, m1.evalue, m1.score, m1.bias, m1.signature)
+                def m2 = new Match(familyId, m1.evalue, m1.score, m1.bias, m1.signature)
                 m2.included = m1.included
                 // Only keep the domain with the highest score
                 m2.locations = [locations.max { it.score }]
@@ -69,125 +70,29 @@ process PREPARE_TREEGRAFTER {
             }
             .findAll { it != null }
 
-        Match bestMatch = filteredMatches.max { it.score }
+        def bestMatch = filteredMatches.max { it.score }
         return bestMatch ? [(seqId): [(bestMatch.modelAccession): bestMatch]] : [:]
     }
 
-    def outputFilePath = task.workDir.resolve("panther.json")
-    def json = JsonOutput.toJson(hmmerMatches)
-    new File(outputFilePath.toString()).write(json)
-
-    familyIds = []
-    fastas = []
-    sequenceIds = []
-    String dirPath = dir.toString()
-    hmmerMatches.each { seqId, matches ->
-        // Ensure we only have one family
-        assert matches.size() == 1
-        Match match = matches.values().first()
-        
-        // Ensure we only have one domain
-        assert match.locations.size() == 1
-        Location location = match.locations.first()
-        assert location.queryAlignment.length() == location.targetAlignment.length()
-
-        // Get expected length of the sequence
-        String familyId = match.modelAccession
-        Path fastaPath = file("${dirPath}/${msf}/${familyId}.AN.fasta")
-        assert fastaPath.exists()
-        Map sequences = FastaFile.parse(fastaPath.toString())  // [md5 : "seq"]
-        int length = sequences.values().first().length()
-
-        // Query sequence to graft
-        StringBuilder sb = new StringBuilder()
-
-        // Pad N-terminal
-        sb << ("-" * (location.hmmStart - 1))
-
-        // Build sequence
-        String targetAlignment = location.targetAlignment.replaceAll(/(?i)[UO]/, 'X')
-        for (int i = 0; i < targetAlignment.length(); i++) {
-            char hmmChar = location.queryAlignment[i]
-            char seqChar = targetAlignment[i]
-
-            if (hmmChar != '.') {
-                sb << seqChar
-            }
-        }
-
-        // Pad C-terminal
-        assert sb.length() <= length
-        while (sb.length() < length) {
-            sb << "-"
-        }
-
-        assert sb.length() <= length
-        String sequence = sb.toString()
-        assert sequence.length() == length
-
-        File fastaFile = File.createTempFile("tmp", ".fa", task.workDir.toFile())
-        fastaFile.withWriter { writer ->
-            writer.writeLine(">${familyId}")
-            for (int i = 0; i < sequence.length(); i += 80) {
-                int j = Math.min(i + 80, length) - 1
-                String line = sequence[i..j]
-                writer.writeLine(line)                
-            }
-        }
-
-        familyIds.add( familyId )
-        fastas.add( fastaFile.toString() )
-        sequenceIds.add( seqId )
-    } 
+    def jsonFile = task.workDir.resolve("panther.json")
+    jsonFile.text = JsonOutput.toJson(hmmer_matches)
 }
 
 
 process RUN_TREEGRAFTER {
-    label 'mem_medium', 'time_short', 'dynamic', 'ips6_container'
+    label     'mem_medium', 'time_short', 'dynamic'
+    container 'interpro/panther:1.0'
     
     input:
-    tuple val(meta), val(meta2), val(sequenceIds), val(familyIds), val(fastas)
-    path dir
-    val msf
+    tuple val(meta), val(meta2), path(json)
+    path msf
 
     output:
     tuple val(meta), val(meta2), path("epang.tsv")
 
     script:
-    def commands = ""
-
-    [sequenceIds, familyIds, fastas]
-        .transpose()
-        .each { entry -> 
-            String seqID  = entry[0]
-            String family = entry[1]
-            def fastaPath = entry[2]
-           
-           // Run EPA-ng
-            def epang_command = "epa-ng"
-            epang_command += " -G 0.05"
-            epang_command += " -m WAG"
-            epang_command += " -T ${task.cpus}"
-            epang_command += " -t ${dir.toString()}/${msf}/${family}.bifurcate.newick"
-            epang_command += " -s ${dir.toString()}/${msf}/${family}.AN.fasta"
-            epang_command += " -q ${fastaPath}"
-            epang_command += " --redo"
-
-            // Parse results
-            def py_command = "python ${projectDir}/bin/panther/parse_epang.py"
-            py_command += " epa_result.jplace"
-            py_command += " ${dir.toString()}/${msf}/${family}.newick"
-
-            // Add sequence ID
-            def awk_command = "awk '{print \"${seqID}\",\$0}'"
-
-            // Only run Python + Awk if EPA-ng doesn't fail
-            commands += "{ ${epang_command} && ${py_command} | ${awk_command} >> epang.tsv; } || :\n"
-        }
-
     """
-    touch epang.tsv
-    ${commands}
+    treegrafter.py --threads ${task.cpus} ${json} ${msf} > epang.tsv
     """
 }
 
@@ -196,34 +101,31 @@ process PARSE_PANTHER {
     executor 'local'
 
     input:
-    tuple val(meta), val(meta2), val(hmmseach_json), val(epagn_tsv)
+    tuple val(meta), val(meta2), val(hmmseach_json), val(epang_tsv)
 
     output:
     tuple val(meta), val(meta2), path("panther.json")
 
     exec:
-    File jsonFile = new File(hmmseach_json.toString())
-    JsonSlurper jsonSlurper = new JsonSlurper()
-    def matches = jsonSlurper.parse(jsonFile).collectEntries { seqId, jsonMatches ->
+    def matches = new JsonSlurper().parse(hmmseach_json).collectEntries { seqId, jsonMatches ->
         [(seqId): jsonMatches.collectEntries { matchId, jsonMatch ->
             [(matchId): Match.fromMap(jsonMatch)]
         }]
     }
 
-    file(epagn_tsv.toString()).eachLine { line ->
+    epang_tsv.eachLine { line ->
         line = line.trim()
         def fields = line.split()
         assert fields.size() == 3
-        String seqId = fields[0]
-        String familyId = fields[1]
-        String nodeId = fields[2]
+        def seqId = fields[0]
+        def familyId = fields[1]
+        def nodeId = fields[2]
         
-        Match match = matches[seqId]?.get(familyId)
+        def match = matches[seqId]?.get(familyId)
         assert match != null
         match.treegrafter = new TreeGrafter(nodeId)
     }
 
-    def outputFilePath = task.workDir.resolve("panther.json")
-    def json = JsonOutput.toJson(matches)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("panther.json")
+    filepath.text = JsonOutput.toJson(matches)
 }

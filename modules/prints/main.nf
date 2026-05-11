@@ -7,20 +7,20 @@ import uk.ac.ebi.interpro.Signature
 import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process RUN_PRINTS {
-    label 'mem_medium', 'time_short', 'ips6_container'
+    label     'mem_medium', 'time_short'
+    container 'interpro/fingerprintscan:3.597.ebiftp'
 
     input:
     tuple val(meta), path(fasta)
-    path dirpath
-    val pval
+    path pval
 
     output:
     tuple val(meta), path("prints_output")
 
     script:
     """
-    $projectDir/bin/prints/fingerPRINTScan \
-        ${dirpath}/${pval} \
+    fingerPRINTScan \
+        ${pval} \
         ${fasta} \
         -e 0.0001 -d 10 -E 257043 84355444 -fj -o 15 > prints_output
     """
@@ -32,7 +32,6 @@ process PARSE_PRINTS {
 
     input:
     tuple val(meta), val(prints_output)
-    val dirpath
     val hierarchydb
 
     output:
@@ -40,17 +39,15 @@ process PARSE_PRINTS {
 
     exec:
     SignatureLibraryRelease library = new SignatureLibraryRelease("PRINTS", null)
-    String hierarchyFilePath = "${dirpath.toString()}/${hierarchydb}"
     // Build up a map of the Model ID to fingerprint hierarchies
-    Map<String, FingerPrint.HierarchyEntry> hierarchyMap = FingerPrint.HierarchyEntry.parseHierarchyDbFile(hierarchyFilePath)
+    Map<String, FingerPrint.HierarchyEntry> hierarchyMap = FingerPrint.HierarchyEntry.parseHierarchyDbFile(hierarchydb)
 
     // Parse the prints output into simple raw prints matches
     // Each location is represented by its own Print object
-    File printsFile = new File(prints_output.toString())
-    String queryAccession = null                   // protein seq ID
+    String queryAccession = null                        // protein seq ID
     Map<String, FingerPrint> thisProteinsMatches = [:]  // modelName: FingerPrint()
-    Map<String, List<FingerPrint>> rawMatches = [:]      // <protein ID <FingerPrint()>>
-    printsFile.withReader { reader ->
+    Map<String, List<FingerPrint>> rawMatches = [:]     // <protein ID <FingerPrint()>>
+    prints_output.withReader { reader ->
         String line
         while ((line = reader.readLine()) != null) {
 
@@ -221,9 +218,8 @@ process PARSE_PRINTS {
         }
     }
 
-    def outputFilePath = task.workDir.resolve("prints.json")
-    def json = JsonOutput.toJson(matches)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("prints.json")
+    filepath.text = JsonOutput.toJson(matches)
 }
 
 List<FingerPrint> sortMatches(List<FingerPrint> matches) {

@@ -6,12 +6,12 @@ import uk.ac.ebi.interpro.Location
 import uk.ac.ebi.interpro.Match
 
 process SEARCH_PIRSF {
-    label 'mem_low', 'time_short', 'dynamic', 'ips6_container'
+    label     'mem_low', 'time_short', 'dynamic'
+    container 'interpro/hmmer:3.3'
 
     input:
     tuple val(meta), path(fasta)
-    path dir
-    val hmm
+    path hmm
 
     output:
     tuple val(meta), path(fasta), path("hmmsearch.out")
@@ -21,7 +21,7 @@ process SEARCH_PIRSF {
     hmmsearch \
         -E 0.01 --acc \
         --cpu ${task.cpus} \
-        ${dir}/${hmm} ${fasta} > hmmsearch.out
+        ${hmm} ${fasta} > hmmsearch.out
     """
 }
 
@@ -31,17 +31,15 @@ process PARSE_PIRSF {
 
     input:
     tuple val(meta), val(fasta), val(hmmsearch_out)
-    val dirpath
     val datfile
 
     output:
     tuple val(meta), path("pirsf.json")
 
     exec:
-    def datPath = "${dirpath.toString()}/${datfile}"
-    def (models, subfamilies) = parseDatFile(datPath)
-    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "PIRSF")
-    Map<String, String> sequences = FastaFile.parse(fasta.toString())
+    def (models, subfamilies) = parseDatFile(datfile)
+    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out, "PIRSF")
+    Map<String, String> sequences = FastaFile.parse(fasta)
 
     double LENGTH_RATIO_THRESHOLD = 0.67
     double OVERLAP_THRESHOLD = 0.8
@@ -160,9 +158,8 @@ process PARSE_PIRSF {
         }
     }
 
-    def outputFilePath = task.workDir.resolve("pirsf.json")
-    def json = JsonOutput.toJson(results)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("pirsf.json")
+    filepath.text = JsonOutput.toJson(results)
 }
 
 def createMatch(
@@ -201,11 +198,9 @@ def createMatch(
     return processedMatch
 }
 
-def parseDatFile(String datPath) {
+def parseDatFile(Path datFile) {
     def models = [:]    // PIRSF -> list of 5 doubles (meanL, stdL, minS, meanS, stdS)
     def subfamilies = [:]   // child PIRSF -> parent PIRSF
-
-    File datFile = new File(datPath)
     datFile.withReader { reader ->
         def accession = null
         reader.eachLine { line ->

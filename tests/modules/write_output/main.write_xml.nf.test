@@ -1,0 +1,114 @@
+nextflow_process {
+
+    name "Test Process WRITE_XML"
+    script "modules/write_output/main.nf"
+    process "WRITE_XML"
+
+    test("Write output for protein sequences") {
+        setup {
+            run("GUNZIP") {
+                script "../gunzip/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/combined/combined-with-repr-locations.json.gz", checkIfExists: true)
+                    """
+                }
+            }            
+        }   
+
+        when {
+            process {
+                """
+                input[0] = GUNZIP.out.map { file -> [file] }
+                input[1] = file("output.xml")
+                input[2] = file("${projectDir}/tests/data/sequences/faa.db", checkIfExists: true)
+                input[3] = false
+                input[4] = "6.0.x"
+                input[5] = "108.0"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+
+            with (process.out) {
+                assert size() == 1
+                assert get(0).size() == 1
+                def expfile = "tests/data/output/test.faa.xml.gz"
+                def obsfile = get(0).get(0)
+                def cmd  = "python tests/diff.py -q ${expfile} ${obsfile}"
+                def proc = cmd.execute()
+                proc.waitFor()
+                assert proc.exitValue() == 0
+            }            
+        }
+
+    }
+
+    test("Write output for nucleic sequences") {
+        setup {
+            run("UNTAR") {
+                script "../untar/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/combined/nucleic-combined-with-repr-locations.tar.gz", 
+                                    checkIfExists: true)
+                    """
+                }
+            }
+
+            run("GUNZIP") {
+                script "../gunzip/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/sequences/fna.db.gz", checkIfExists: true)
+                    """
+                }
+            }             
+        }   
+
+        when {
+            process {
+                """
+                input[0] = UNTAR.out.map { dir -> [
+                    dir.resolve("1.json"),
+                    dir.resolve("2.json"),
+                    dir.resolve("3.json"),
+                    dir.resolve("4.json"),
+                    dir.resolve("5.json")
+                ]}
+                input[1] = file("output.xml")
+                input[2] = GUNZIP.out
+                input[3] = true
+                input[4] = "6.0.x"
+                input[5] = "108.0"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+
+            with (process.out) {
+                assert size() == 1
+                assert get(0).size() == 1
+                def expfile = "tests/data/output/test.fna.jsonl.gz"
+                def obsfile = get(0).get(0)
+                def cmd  = "python tests/diff.py -q ${expfile} ${obsfile}"
+                def proc = cmd.execute()
+                proc.waitFor()
+                assert proc.exitValue() == 0
+
+                cmd  = "python tests/diff.py -q --representative-locations-only ${expfile} ${obsfile}"
+                proc = cmd.execute()
+                proc.waitFor()
+                assert proc.exitValue() == 0
+            }
+        }
+
+    }
+
+}

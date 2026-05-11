@@ -1,0 +1,66 @@
+nextflow_process {
+
+    name "Test Process FIND_DATABASES"
+    script "modules/download/main.nf"
+    process "FIND_DATABASES"
+
+    test("Should run without failures") {
+
+        setup {
+            run("UNTAR") {
+                script "../untar/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/find-databases.tar.gz", checkIfExists: true)
+                    """
+                }
+            }
+        }    
+
+        when {
+            params {
+                appl_dirs = [
+                    antifam: ["antifam", ""],
+                    cdd    : ["cdd", ""],
+                    pfam   : ["pfam", ""]
+                ]
+                applications = ["antifam", "cdd", "pfam"]
+            }
+
+            process {
+                """
+                UNTAR.out
+                    .multiMap { dir ->
+                        databases: dir.resolve("interpro/108.0/databases.json") 
+                        directory: dir                  }
+                    .set { inputs }
+
+                input[0] = ["", ""]
+                input[1] = inputs.databases
+                input[2] = params.applications
+                input[3] = params.appl_dirs
+                input[4] = inputs.directory
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            with (process.out) {
+                assert get("ready").size() == 1
+                assert get("ready").get(0).size() == 1  
+                assert get("ready").get(0).get(0).size() == 2
+                assert get("ready").get(0).get(0).get(0) == "antifam"
+                assert get("missing").size() == 1
+                assert get("missing").get(0).size() == 2
+                assert get("missing").get(0).get(0).size() == 5
+                assert get("missing").get(0).get(0).get(0) == "cdd"
+                assert get("missing").get(0).get(0).get(2) == "3.21"
+                assert get("missing").get(0).get(1).size() == 5
+                assert get("missing").get(0).get(1).get(2) == "38.1"
+            }
+        }
+
+    }
+
+}

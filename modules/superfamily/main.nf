@@ -6,16 +6,12 @@ import uk.ac.ebi.interpro.Signature
 import uk.ac.ebi.interpro.SignatureLibraryRelease
 
 process SEARCH_SUPERFAMILY {
-    label 'mem_min', 'time_short', 'dynamic', 'ips6_container'
+    label     'mem_min', 'time_short', 'dynamic'
+    container 'interpro/hmmer:3.3'
 
     input:
     tuple val(meta), val(meta2), path(fasta)
-    path dirpath
-    val hmm
-    val selfhits
-    val cla
-    val model
-    val pdbj95d
+    tuple path(dir), val(hmm), val(selfhits), val(cla), val(model_tab), val(pdbj95d)
 
     output:
     tuple val(meta), val(meta2), path("superfamily.out")
@@ -25,14 +21,14 @@ process SEARCH_SUPERFAMILY {
     hmmscan \
         -E 10 -Z 15438 \
         --cpu ${task.cpus} \
-        ${dirpath}/${hmm} ${fasta} > hmmscan.out
+        ${dir}/${hmm} ${fasta} > hmmscan.out
 
-    perl ${projectDir}/bin/superfamily/ass3_single_threaded.pl \
+    ass3_single_threaded.pl \
         -e 0.0001 -t n -f 1 \
-        -s ${dirpath}/${selfhits} \
-        -r ${dirpath}/${cla} \
-        -m ${dirpath}/${model} \
-        -p ${dirpath}/${pdbj95d} \
+        -s ${dir}/${selfhits} \
+        -r ${dir}/${cla} \
+        -m ${dir}/${model_tab} \
+        -p ${dir}/${pdbj95d} \
         ${fasta} \
         hmmscan.out \
         superfamily.out
@@ -45,9 +41,7 @@ process PARSE_SUPERFAMILY {
 
     input:
     tuple val(meta), val(meta2), val(superfamily_out)
-    val dirpath
-    val model_tsv
-    val hmm
+    tuple val(dirpath), val(hmm), val(model_tab)
 
     output:
     tuple val(meta), val(meta2), path("superfamily.json")
@@ -55,7 +49,7 @@ process PARSE_SUPERFAMILY {
     exec:
     SignatureLibraryRelease library = new SignatureLibraryRelease("SUPERFAMILY", null)
     def model2sf = [:]
-    file("${dirpath.toString()}/${model_tsv}").eachLine { line ->
+    dirpath.resolve(model_tab).eachLine { line ->
         def fields = line.trim().split(/\t/)
         String modelId = fields[0]
         String superfamilyAccession = fields[1]
@@ -66,7 +60,7 @@ process PARSE_SUPERFAMILY {
     def model2length = [:]
     String modelAc = null
     Integer length = null
-    new File("${dirpath.toString()}/${hmm}").eachLine { line ->
+    dirpath.resolve(hmm).eachLine { line ->
         line = line.trim()
         if (line.startsWith('//')) {
             assert modelAc != null && length != null
@@ -82,7 +76,7 @@ process PARSE_SUPERFAMILY {
     }
 
     def matches = [:].withDefault { [:] }
-    file(superfamily_out.toString()).eachLine { line ->
+    superfamily_out.eachLine { line ->
         line = line.trim()
         if (line) {
             def fields = line.split(/\s+/)
@@ -148,7 +142,6 @@ process PARSE_SUPERFAMILY {
         }
     }
 
-    def json = JsonOutput.toJson(matches)
-    def outputFilePath = task.workDir.resolve("superfamily.json")
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("superfamily.json")
+    filepath.text = JsonOutput.toJson(matches)
 }

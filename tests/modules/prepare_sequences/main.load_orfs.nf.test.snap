@@ -1,0 +1,16 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    "fna:md5,dc4adf221f435c9ac29037ad97e12d17"
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T17:58:44.180298968",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

@@ -13,24 +13,23 @@ process RUN_PSSCAN {
     pftools developers. It automates running pfscan for all provided patterns and
     includes post-processing of the hits.
     */
-    label 'mem_min', 'time_medium', 'ips6_container'
+    label     'mem_min', 'time_medium'
+    container 'interpro/pftools:3.2.12'
 
     input:
         tuple val(meta), path(fasta)
-        path dirpath
-        val datfile
-        val evafile
+        tuple path(dat), path(eval)
 
     output:
         tuple val(meta), path("ps_scan.out")
 
     script:
     """
-        perl ${projectDir}/bin/prosite/ps_scan.pl \
+    ps_scan.pl \
         ${fasta} \
-        -d ${dirpath}/${datfile} \
+        -d ${dat} \
         --pfscan pfscanV3 \
-        -b ${dirpath}/${evafile} \
+        -b ${eval} \
         -r -s -o ipro > ps_scan.out
     """
 }
@@ -81,25 +80,24 @@ process PARSE_PSSCAN {
         matchObj.addLocation(location)
     }
 
-    def outputFilePath = task.workDir.resolve("ps_scan.json")
-    def json = JsonOutput.toJson(patternsMatches)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("ps_scan.json")
+    filepath.text = JsonOutput.toJson(patternsMatches)
 }
 
 process RUN_PFSEARCH {
-    label 'mem_min', 'time_medium', 'dynamic', 'ips6_container'
+    label     'mem_min', 'time_medium', 'dynamic'
+    container 'interpro/pftools:3.2.12'
 
     input:
     tuple val(meta), path(fasta)
-    path dirpath
-    val profiles_dir
+    path profiles_dir
 
     output:
     tuple val(meta), stdout
 
     script:
     """
-    find ${dirpath}/${profiles_dir} -type f | while read profile; do
+    find ${profiles_dir}/ -type f | while read profile; do
         pfsearchV3 -f -o 7 -t ${task.cpus} "\${profile}" "${fasta}"
     done
     """
@@ -112,7 +110,6 @@ process PARSE_PFSEARCH {
     input:
     tuple val(meta), val(pfsearch_out)
     val signature_library
-    val dirpath
     val blacklist_file
 
     output:
@@ -122,8 +119,8 @@ process PARSE_PFSEARCH {
     Map matches = [:]
     SignatureLibraryRelease library = new SignatureLibraryRelease(signature_library, null)
     def toSkip = []
-    if (dirpath && blacklist_file) {
-        toSkip = new File("${dirpath.toString()}/${blacklist_file}").readLines()
+    if (blacklist_file) {
+        toSkip = blacklist_file.readLines()
     }
 
     pfsearch_out.eachLine { line ->
@@ -148,8 +145,7 @@ process PARSE_PFSEARCH {
         Location location = new Location(start, end, score, alignment, cigarAlignment)
         matchObj.addLocation(location)
     }
-    def outputFilePath = task.workDir.resolve("pfsearch.json")
-    def json = JsonOutput.toJson(matches)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("pfsearch.json")
+    filepath.text = JsonOutput.toJson(matches)
 }
 

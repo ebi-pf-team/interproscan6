@@ -1,0 +1,120 @@
+nextflow_workflow {
+
+    name "Test Workflow OUTPUT"
+    script "subworkflows/output/main.nf"
+    workflow "OUTPUT"
+
+    test("Write output for protein sequences") {
+
+        setup {
+            run("GUNZIP") {
+                script "../../modules/gunzip/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/combined/combined-with-repr-locations.json.gz", 
+                                    checkIfExists: true)
+                    """
+                }
+            }            
+        }   
+
+        when {
+            workflow {
+                """
+                input[0] = GUNZIP.out.map { file -> [file] }
+                input[1] = file("${projectDir}/tests/data/sequences/faa.db", checkIfExists: true)
+                input[2] = ["gff3", "json", "jsonl", "tsv", "xml"]
+                input[3] = "results"
+                input[4] = false
+                input[5] = "108.0"
+                input[6] = "6.0.x"
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            with (workflow.out) {
+                assert get(0).size() == 1
+                assert get(0).get(0).size() == 5
+
+                def basepath = "tests/data/output/test.faa"
+
+                assert get(0).get(0).every { obsfile ->
+                    def suffix = obsfile.split(/\./)[-1]
+                    def expfile = "${basepath}.${suffix}.gz"
+                    def cmd  = "python tests/diff.py -q ${expfile} ${obsfile}"
+                    def proc = cmd.execute()
+                    proc.waitFor()
+                    proc.exitValue() == 0
+                }
+            }
+        }
+
+    }
+
+    test("Write output for nucleic sequences") {
+
+        setup {
+            run("UNTAR") {
+                script "../../modules/untar/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/combined/nucleic-combined-with-repr-locations.tar.gz", 
+                                    checkIfExists: true)
+                    """
+                }
+            }
+
+            run("GUNZIP") {
+                script "../../modules/gunzip/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/sequences/fna.db.gz", checkIfExists: true)
+                    """
+                }
+            }             
+        }    
+
+        when {
+            workflow {
+                """
+                input[0] = UNTAR.out.map { dir -> [
+                    dir.resolve("1.json"),
+                    dir.resolve("2.json"),
+                    dir.resolve("3.json"),
+                    dir.resolve("4.json"),
+                    dir.resolve("5.json")
+                ]}
+                input[1] = GUNZIP.out
+                input[2] = ["gff3", "json", "jsonl", "tsv", "xml"]
+                input[3] = "results"
+                input[4] = true
+                input[5] = "108.0"
+                input[6] = "6.0.x"
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            with (workflow.out) {
+                assert get(0).size() == 1
+                assert get(0).get(0).size() == 5
+
+                def basepath = "tests/data/output/test.fna"
+
+                assert get(0).get(0).every { obsfile ->
+                    def suffix = obsfile.split(/\./)[-1]
+                    def expfile = "${basepath}.${suffix}.gz"
+                    def cmd  = "python tests/diff.py -q ${expfile} ${obsfile}"
+                    def proc = cmd.execute()
+                    proc.waitFor()
+                    proc.exitValue() == 0
+                }
+            }
+        }
+    }
+}

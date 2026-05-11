@@ -1,0 +1,19 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "sfld.json:md5,99914b932bd37a50b983c5e7c90ae93b"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T18:33:59.994225471",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

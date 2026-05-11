@@ -1,0 +1,19 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "ncbifam.json:md5,94136383070964ba64b8611776a2b6eb"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T01:33:49.910342963",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

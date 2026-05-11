@@ -1,5 +1,6 @@
 // codenarc-disable AllowedDirectivesRule
 import groovy.json.JsonOutput
+import java.nio.file.Path
 import uk.ac.ebi.interpro.HMMER3
 import uk.ac.ebi.interpro.Location
 import uk.ac.ebi.interpro.Match
@@ -8,13 +9,12 @@ import uk.ac.ebi.interpro.SignatureLibraryRelease
 import uk.ac.ebi.interpro.Site
 
 process SEARCH_SFLD {
-    label 'mem_min', 'time_veryshort', 'dynamic', 'ips6_container'
+    label     'mem_min', 'time_veryshort', 'dynamic'
+    container 'interpro/sfld:ebiftp'
 
     input:
     tuple val(meta), path(fasta)
-    path dirpath
-    val hmmfile
-    val annofile
+    tuple path(hmm), path(sites)
 
     output:
     tuple val(meta), path("hmmsearch.out"), path("sfld.tsv")
@@ -28,13 +28,13 @@ process SEARCH_SFLD {
         -o hmmsearch.out \
         --domtblout hmmsearch.tab \
         -A hmmsearch.sto \
-        ${dirpath}/${hmmfile} ${fasta}
+        ${hmm} ${fasta}
 
-    ${projectDir}/bin/sfld/sfld_postprocess \
+    sfld_postprocess \
         --alignment hmmsearch.sto \
         --dom hmmsearch.tab \
         --hmmer-out hmmsearch.out \
-        --site-info "${dirpath}/${annofile}" \
+        --site-info ${sites} \
         --output sfld.tsv
     """
 }
@@ -45,17 +45,15 @@ process PARSE_SFLD {
 
     input:
     tuple val(meta), val(hmmsearch_out), val(postprocess_out)
-    val dirpath
     val hierarchydb
 
     output:
     tuple val(meta), path("sfld.json")
 
     exec:
-    def outputFilePath = task.workDir.resolve("sfld.json")
-    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "SFLD")
-    def sequences = parseOutput(postprocess_out.toString(), hmmerMatches)
-    def hierarchies = getHierarchies("${dirpath.toString()}/${hierarchydb}")
+    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out, "SFLD")
+    def sequences = parseOutput(postprocess_out, hmmerMatches)
+    def hierarchies = getHierarchies(hierarchydb)
     SignatureLibraryRelease library = new SignatureLibraryRelease("SFLD", null)
 
     sequences = sequences.collectEntries { seqId, matches -> 
@@ -171,13 +169,13 @@ process PARSE_SFLD {
         return [seqId, matches]
     }
 
-    def json = JsonOutput.toJson(sequences)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("sfld.json")
+    filepath.text = JsonOutput.toJson(sequences)
 }
 
-Map<String, Set<String>> getHierarchies(String filePath) {
+Map<String, Set<String>> getHierarchies(Path filePath) {
     def hierarchies = [:].withDefault { [] as Set }
-    new File(filePath).eachLine { line ->
+    filePath.eachLine { line ->
         def nodes = line.split(/\t/).toList()
         nodes.eachWithIndex { node, idx ->
             if (idx > 0) {
@@ -190,13 +188,12 @@ Map<String, Set<String>> getHierarchies(String filePath) {
 }
 
 Map<String, Map<String, Match>> parseOutput(
-    String outputFilePath,
+    Path filePath,
     Map<String, Map> hmmerMatches
 ) {
     // Parse the output TSV file from the SFLD postprocess bin
     def matches = [:]
-    File file = new File(outputFilePath)
-    file.withReader{ reader ->
+    filePath.withReader{ reader ->
         while (true) {
             String sequenceId = null
 

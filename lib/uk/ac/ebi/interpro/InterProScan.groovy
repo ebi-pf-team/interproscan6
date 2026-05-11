@@ -92,6 +92,14 @@ class InterProScan {
             description: "Comma-separated list of applications to exclude from the analysis. Default: none.",
         ],
         [
+            name: "skip-interpro-version-check",
+            description: "Disable the version compatibility check between InterProScan and InterPro data."
+        ],
+        [
+            name: "skip-repr-locations",
+            description: "Skips identifying representative locations."
+        ],
+        [
             name: "use-gpu",
             description: "Enable GPU acceleration for supported ML-based applications."
         ],
@@ -107,16 +115,6 @@ class InterProScan {
         [
             name: "sub-batch-size",
             description: null
-        ],
-        [
-            name: "skip-repr-locations",
-            description: null
-            // Used in production. Skips identifying representative locations
-        ],
-        [
-            name: "skip-interpro-version-check",
-            description: null
-            // Used in production. If set, disables the version compatibility check between IPRScan and InterPro data versions
         ],
         [
             name: "apps-config",
@@ -194,9 +192,8 @@ class InterProScan {
         }
     }
 
-    static String getMD5Hash(String filePath) {
+    static String getMD5Hash(Path file) {
         // Get the MD5 Hash of a local file. Used to check if the correct or complete file has been downloaded
-        def file = new File(filePath)
         MessageDigest md = MessageDigest.getInstance("MD5")
         file.withInputStream { is ->
             byte[] buffer = new byte[8192]
@@ -208,53 +205,9 @@ class InterProScan {
         return md.digest().collect { String.format("%02x", it)}.join()
     }
 
-    static String resolveFile(String filePath) {
-        Path path = Paths.get(filePath)
-        return Files.isRegularFile(path) ? path.toRealPath() : null
-    }
-
-    static Map getMemberDbReleases(def path, def ready) {
-        // Load the datadir/interpro/database.json file and set all keys to lowercase to match applications.config
-        if (ready == null) {
-            return
-        }
-        JsonSlurper jsonSlurper = new JsonSlurper()
-        def databaseJson = new File(path.toString())
-        def memberDbReleases = jsonSlurper.parse(databaseJson)
-        memberDbReleases = memberDbReleases.collectEntries { appName, versionNum ->
-            [(appName.toLowerCase()): versionNum]
-        }
-        return memberDbReleases
-    }
-
     static List<String> getAppsWithData(List<String> applications, Map appsConfig) {
         return applications.findAll { String appName ->
             appsConfig.get(appName)?.has_data
-        }
-    }
-
-    static resolveDirectory(String dirPath, boolean mustExist = false, boolean mustBeWritable = false) {
-        if (!dirPath && mustExist) { // triggered when data dir is needed but --datadir not used
-            return [null, "'--datadir <DATA-DIR>' is required for the selected applications."]
-        }
-        Path path = Paths.get(dirPath)
-
-        if (Files.exists(path)) {
-            if (!Files.isDirectory(path)) {
-                return [null, "Not a directory: ${dirPath}."]
-            } else if (mustBeWritable && !Files.isWritable(path)) {
-                return [null, "Directory not writable: ${dirPath}."]
-            }
-            return [path.toRealPath(), null]
-        } else if (mustExist) {
-            return [null, "Not a directory: ${dirPath}."]
-        } else {
-            try {
-                Files.createDirectories(path)
-                return [path.toRealPath(), null]
-            } catch (IOException) {
-                return [null, "Cannot create directory: ${dirPath}."]
-            }
         }
     }
 
@@ -432,27 +385,6 @@ class InterProScan {
         return versions?.interpro?.collect { it?.toString() } ?: null
     }
 
-    static validateXrefFiles(String xref_dir, Map xRefsConfig, boolean goterms, boolean pathways) {
-        def error = ""
-        def addError = { type, suffix ->
-            String path = "${xref_dir}/${xRefsConfig[type]}${suffix}"
-            if (!resolveFile(path)) {
-                error << "${type}${suffix}: ${path}"
-            }
-        }
-        addError('entries',  '')  // we hard code the file ext in xrefsconfig so no suffix needed here
-        addError('databases', '')  // we hard code the file ext in xrefsconfig so no suffix needed here
-        if (goterms) {
-            addError('goterms', '.ipr.json')
-            addError('goterms', '.json')
-        }
-        if (pathways) {
-            addError('pathways', '.ipr.json')
-            addError('pathways', '.json')
-        }
-        return error ? "Could not find the following XREF data files\n${error.join('\n')}" : null
-    }
-
     static Set<String> validateFormats(String userFormats) {
         Set<String> formats = userFormats.toUpperCase().split(',') as Set
         def invalidFormats = formats - VALID_FORMATS
@@ -527,13 +459,13 @@ class InterProScan {
         }
 
         result << "\nOutput control:\n"
-        ["outdir", "outprefix", "formats", "goterms", "pathways"].each { paramName ->
+        ["outdir", "outprefix", "formats", "goterms", "pathways", "skip-repr-locations"].each { paramName ->
             assert optionsMap.containsKey(paramName)
             result << this.formatOption(paramName, optionsMap[paramName])
         }
 
         result << "\nExternal services and data:\n"
-        ["interpro", "matches-api-url", "no-matches-api", "globus"].each { paramName ->
+        ["interpro", "skip-interpro-version-check", "matches-api-url", "no-matches-api", "globus"].each { paramName ->
             assert optionsMap.containsKey(paramName)
             result << this.formatOption(paramName, optionsMap[paramName])
         }
@@ -564,9 +496,9 @@ class InterProScan {
         return text.padRight(35) + "${props.description}\n"
     }
 
-    static List parseAppsConfig(Boolean useGpu, List<String> apps, String appsConfigFile) {
+    static List parseAppsConfig(Boolean useGpu, List<String> apps, Path appsConfigFile) {
         ConfigSlurper configSlurper = new ConfigSlurper()
-        def config = configSlurper.parse(new File(appsConfigFile).toURI().toURL())
+        def config = configSlurper.parse(appsConfigFile.toURI().toURL())
         def warn = null
         def appsConfig = config.params.appsConfig
         

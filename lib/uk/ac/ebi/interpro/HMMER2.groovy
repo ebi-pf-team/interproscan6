@@ -1,14 +1,15 @@
 package uk.ac.ebi.interpro
 
+import java.nio.file.Path
+
 class HMMER2 {
-    static parseOutput(String filePath, Map<String, Integer> hmmLengths, String memberDb) {
-        File file = new File(filePath)
+    static parseOutput(Path filePath, Map<String, Integer> hmmLengths, String memberDb) {
         String line
         String querySequence
         def hits = [:].withDefault { [:] }
         SignatureLibraryRelease library = new SignatureLibraryRelease(memberDb, null)
 
-        file.withReader { reader ->
+        filePath.withReader { reader ->
             while (true) {
                 // Move to the next Query block
                 while (querySequence == null) {
@@ -138,37 +139,31 @@ class HMMER2 {
         return hits
     }
 
-    static parseHMMs(String dirPath) {
-        def hmmLengths = [:]
+    static parseHMM(Path filePath) {
+        String modelAccession = null
+        Integer length = null
 
-        new File(dirPath).eachFile { File file ->
-            if (!file.isFile()) 
-                return  // skip sub‑dirs
-
-            String modelAccession = null
-            Integer length = null
-
-            file.eachLine { line ->
-                if (line.startsWith("ACC ")) {
-                    // We expect only one model per file
-                    assert modelAccession == null
-                    def fields = line.split(/\s+/)
-                    assert fields.size() == 2
-                    modelAccession = fields[1]
-                }
-                else if (line.startsWith("LENG ")) {
-                    def fields = line.split(/\s+/)
-                    assert fields.size() == 2
-                    length = fields[1] as Integer
-                }
-                else if (line.startsWith("//")) {
-                    assert modelAccession != null
-                    assert length != null
-                    hmmLengths[modelAccession] = length
-                }
+        filePath.eachLine { line ->
+            if (line.startsWith("ACC ")) {
+                // We expect only one model per file
+                assert modelAccession == null
+                def fields = line.split(/\s+/)
+                assert fields.size() == 2
+                modelAccession = fields[1]
+            }
+            else if (line.startsWith("LENG ")) {
+                def fields = line.split(/\s+/)
+                assert fields.size() == 2
+                length = fields[1] as Integer
+            }
+            else if (line.startsWith("//")) {
+                assert modelAccession != null
+                assert length != null
             }
         }
 
-        return hmmLengths
+        assert modelAccession != null
+        assert length != null
+        return [modelAccession, length]
     }
 }

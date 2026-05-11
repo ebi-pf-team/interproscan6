@@ -1,0 +1,19 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "pirsr.json:md5,46b01398aa2f603710c00c663ccce3d5"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-05-01T00:30:07.157584923",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

@@ -1,12 +1,12 @@
 import groovy.json.JsonOutput
 
 process RUN_HMMER {
-    label 'mem_min', 'time_medium', 'dynamic', 'ips6_container'
+    label     'mem_min', 'time_medium', 'dynamic'
+    container 'interpro/hmmer:3.3'
 
     input:
     tuple val(meta), path(fasta)
-    path hmmdir
-    val hmmfile
+    path hmm
     val options    // e.g. "-Z 65245 -E 0.001"
 
     output:
@@ -17,6 +17,6 @@ process RUN_HMMER {
     hmmsearch \
         ${options} \
         --cpu ${task.cpus} \
-        ${hmmdir}/${hmmfile} ${fasta} > hmmsearch.out
+        ${hmm} ${fasta} > hmmsearch.out
     """
 }

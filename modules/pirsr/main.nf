@@ -12,20 +12,14 @@ process PARSE_PIRSR {
 
     input:
     tuple val(meta), val(hmmsearch_out)
-    val dirpath
     val rulesfile
 
     output:
     tuple val(meta), path("pirsr.json")
 
     exec:
-    def outputFilePath = task.workDir.resolve("pirsr.json")
-    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "PIRSR")
-
-    JsonSlurper jsonSlurper = new JsonSlurper()
-    String rulesFilePath = "${dirpath.toString()}/${rulesfile}"
-    def rules = jsonSlurper.parse(new File(rulesFilePath))
-
+    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out, "PIRSR")
+    def rules = new JsonSlurper().parse(rulesfile)
     def validMatches = [:]
     hmmerMatches.each { seqId, matches ->
         def filteredSeqMatches = [:]
@@ -33,26 +27,26 @@ process PARSE_PIRSR {
             // set the signature name, which defaults to null in the HMMER3 parser
             match.signature.name = modelAccession
 
-            List<Location> sortedLocations = match.locations.sort { loc ->
+            def sortedLocations = match.locations.sort { loc ->
                 [loc.evalue, -loc.score]  // sorting by evalue ASC, score DESC
             }
-            List<Location> selectedLocations = []
+            def selectedLocations = []
             sortedLocations.each { location ->
                 if (!location.included || !location.targetAlignment || !location.queryAlignment) {
                     return
                 }
-                List<Integer> map = mapHMMToSeq(location.hmmStart,
+                def map = mapHMMToSeq(location.hmmStart,
                                                 location.queryAlignment,
                                                 location.targetAlignment)
 
-                List<Site> ruleSites = []
+                def ruleSites = [] as Set
                 def rule = rules.get(modelAccession, null)
                 if (rule) {
                     rule.Groups.each { grp, positions ->
-                        int passCount = 0
-                        List<Site> positionsParsed = []
+                        def passCount = 0
+                        def positionsParsed = [] as Set
                         positions.each { pos ->
-                            String condition = pos.condition.replaceAll(/[-()]/) { m ->
+                            def condition = pos.condition.replaceAll(/[-()]/) { m ->
                                 switch (m[0]) {
                                     case '-': return ''
                                     case '(': return '{'
@@ -60,7 +54,7 @@ process PARSE_PIRSR {
                                 }
                             }.replace('x', '.')
 
-                            String querySeq = location.targetAlignment.replaceAll('-', '')
+                            def querySeq = location.targetAlignment.replaceAll('-', '')
                             if (pos.hmmStart < map.size() && pos.hmmEnd < map.size()) {
                                 targetSeq = querySeq[map[pos.hmmStart]..<map[pos.hmmEnd] + 1]
                                 residue = location.targetAlignment[map[pos.hmmStart]..<map[pos.hmmEnd] + 1]
@@ -74,13 +68,13 @@ process PARSE_PIRSR {
                                 if (pos.end == 'Cter') pos.end = location.end
                             }
                             def (residueStart, residueEnd, residue) = [0, 0, null]
-                            Map<Integer, Integer> seqAlignmentPosMap = getPositionMap(location.targetAlignment, location.start)
-                            Map<Integer, Integer> seqAlignmentReversePosMap = seqAlignmentPosMap.collectEntries { k, v -> [(v): k] }
-                            Map<Integer, Integer> hmmAlignmentPosMap = getPositionMap(location.queryAlignment, location.hmmStart)
+                            def seqAlignmentPosMap = getPositionMap(location.targetAlignment, location.start)
+                            def seqAlignmentReversePosMap = seqAlignmentPosMap.collectEntries { k, v -> [(v): k] }
+                            def hmmAlignmentPosMap = getPositionMap(location.queryAlignment, location.hmmStart)
                             if (hmmAlignmentPosMap.containsKey(pos.hmmStart)) {
-                                int residueStartSeqAlign = hmmAlignmentPosMap[pos.hmmStart]
+                                def residueStartSeqAlign = hmmAlignmentPosMap[pos.hmmStart]
                                 if (hmmAlignmentPosMap.containsKey(pos.hmmEnd)) {
-                                    int residueEndSeqAlign = hmmAlignmentPosMap[pos.hmmEnd]
+                                    def residueEndSeqAlign = hmmAlignmentPosMap[pos.hmmEnd]
                                     residue = location.targetAlignment.substring(residueStartSeqAlign, residueEndSeqAlign + 1)
                                     if (seqAlignmentReversePosMap.containsKey(residueStartSeqAlign) &&
                                             seqAlignmentReversePosMap.containsKey(residueEndSeqAlign)) {
@@ -90,15 +84,12 @@ process PARSE_PIRSR {
                                 }
                             }
                             if (residueStart != 0 && residueEnd != 0) {
-                                SiteLocation siteLocation = new SiteLocation(residue, residueStart, residueEnd)
-                                positionsParsed << new Site(
+                                positionsParsed << [
                                     pos.desc,
-                                    pos.group as int,
-                                    pos.hmmEnd,
-                                    pos.hmmStart,
-                                    pos.label,
-                                    [siteLocation]
-                                )
+                                    residue,
+                                    residueStart,
+                                    residueEnd
+                                ]
                             }
                         }
 
@@ -108,7 +99,15 @@ process PARSE_PIRSR {
                     }
                 }
                 if (!ruleSites.isEmpty()) {
-                    location.sites = ruleSites
+                    def groupedPositions = [:]
+                    ruleSites.each { desc, residue, residueStart, residueEnd ->
+                        def siteLocations = groupedPositions.computeIfAbsent(desc) { [] }
+                        siteLocations << new SiteLocation(residue, residueStart, residueEnd)
+                    }
+                    groupedPositions.each { description, siteLocations ->
+                        siteLocations.sort { a, b -> a.start <=> b.start ?: a.end <=> b.end }
+                        location.addSite(new Site(description, siteLocations))
+                    }
                     selectedLocations << location
                 }
             }
@@ -123,8 +122,9 @@ process PARSE_PIRSR {
             validMatches[seqId] = filteredSeqMatches
         }
     }
-    def json = JsonOutput.toJson(validMatches)
-    new File(outputFilePath.toString()).write(json)
+
+    def filepath = task.workDir.resolve("pirsr.json")
+    filepath.text = JsonOutput.toJson(validMatches)
 }
 
 def mapHMMToSeq(int hmmStart, String querySeq, String targetSeq) {

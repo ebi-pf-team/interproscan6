@@ -1,4 +1,6 @@
 package uk.ac.ebi.interpro
+import java.nio.file.Files
+import java.nio.file.Path
 import java.util.regex.Pattern
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -8,14 +10,15 @@ import uk.ac.ebi.interpro.SeqDB
 
 
 class ProcessOutputGFF3 {
-    static void run(List<String> inputPaths, String databasePath, boolean isNucleic, String iprscanVersion, String outputPath) {
+    static void run(List<Path> inputPaths, Path databasePath, boolean isNucleic, String iprscanVersion, String interproVersion, Path outputPath) {
         SeqDB db = new SeqDB(databasePath)
 
-        new File(outputPath).withWriter { gff3Writer ->
+        outputPath.withWriter { gff3Writer ->
             gff3Writer.writeLine("##gff-version 3.1.26")
+            gff3Writer.writeLine("##interpro-version ${interproVersion}")
             gff3Writer.writeLine("##interproscan-version ${iprscanVersion}")
 
-            def tempFastaFile = new File("${outputPath}.fasta")
+            Path tempFastaFile = outputPath.resolveSibling(outputPath.fileName.toString() + ".fasta")
             tempFastaFile.withWriter { fastaWriter ->
                 fastaWriter.writeLine("##FASTA")
 
@@ -25,8 +28,9 @@ class ProcessOutputGFF3 {
 
                 ObjectMapper mapper = new ObjectMapper()
                 inputPaths.each { matchFile ->
-                    matchFile = new File(matchFile.toString())
-                    Map proteins = mapper.readValue(matchFile, Map)
+                    Map proteins = matchFile.newReader().withCloseable { reader -> 
+                        mapper.readValue(reader, Map)
+                    }
 
                     if (isNucleic) {
                         def (nucleicToProteinMd5, ntSeqDataMap, orfDataMap) = 
@@ -114,7 +118,7 @@ class ProcessOutputGFF3 {
                     gff3Writer.writeLine(line)
                 }
             }
-            tempFastaFile.delete()
+            Files.delete(tempFastaFile);
         }
     }
 
