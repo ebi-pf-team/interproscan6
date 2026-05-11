@@ -111,11 +111,11 @@ process GET_MATCHES {
 }
 
 def transformMatch(match, seq) {
-    def transformedMatch = match.clone()
+    def transformedMatch = [:] + match
     transformedMatch["modelAccession"] = match["model-ac"]
     transformedMatch["treegrafter"] = ["ancestralNodeID": match["ancestralNode"]]
     transformedMatch["locations"] = match["locations"].collect { loc ->
-        def transformedLocation = loc.clone()
+        def transformedLocation = [:] + loc
         transformedLocation["sequenceFeature"] = loc["sequence-feature"]
         transformedLocation["hmmBounds"] = loc["hmmBounds"] ? getReverseHmmBounds(loc["hmmBounds"]) : null
         transformedLocation["fragments"] = loc["location-fragments"].collect { f -> tranformFragment(f) }
