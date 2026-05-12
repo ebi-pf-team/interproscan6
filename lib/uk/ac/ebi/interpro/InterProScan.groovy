@@ -365,15 +365,21 @@ class InterProScan {
 
     static String validateInterProVersion(versionParam) {
         String version = null
-        if (versionParam instanceof Number) {
-            double num = ((Number) versionParam).doubleValue();
-            if (num == Math.floor(num)) {
-                version = String.format("%.1f", num);
-            } else {
-                version = Double.toString(num);
+        if (versionParam instanceof String) {
+            version = versionParam.trim()
+            if (version == "latest") {
+                return version
             }
-        } else if (versionParam instanceof String && versionParam == "latest") {
-            version = versionParam
+            try {
+                double num = Double.parseDouble(version)
+                if (num == Math.floor(num)) {
+                    version = String.format("%.1f", num)
+                } else {
+                    version = Double.toString(num)
+                }
+            } catch (NumberFormatException e) {
+                return null
+            }
         }
         return version
     }
