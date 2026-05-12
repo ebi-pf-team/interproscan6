@@ -119,7 +119,7 @@ workflow INTERPROSCAN {
         seqdb,
         formats,
         outprefix,
-        nucleic.toBoolean,
+        nucleic.toBoolean(),
         interpro_version,
         interproscan_version
     )
