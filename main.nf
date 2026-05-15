@@ -7,7 +7,7 @@ workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
     println "# ${workflow.manifest.description}\n"
 
-    if (params.keySet().any { param -> param.equalsIgnoreCase("help") }) {
+    if (params.help) {
         uk.ac.ebi.interpro.InterProScan.printHelp(params.appsConfig)
         exit 0
     }
