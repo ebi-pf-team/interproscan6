@@ -12,7 +12,7 @@ matplotlib==3.5.2
 numpy==1.23.4
 packaging==21.3
 PeptideBuilder==1.1.0
-Pillow==9.3.0
+Pillow==12.2.0
 pyparsing==3.0.9
 python-dateutil==2.8.2
 requests==2.28.1
