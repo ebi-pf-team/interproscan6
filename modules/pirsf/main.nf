@@ -24,13 +24,12 @@ process PARSE_PIRSF {
 
     input:
     tuple val(meta), val(fasta), val(hmmsearch_out)
-    val datfile
+    tuple val(models), val(subfamilies)
 
     output:
     tuple val(meta), path("pirsf.json")
 
     exec:
-    def (models, subfamilies) = parseDatFile(datfile)
     def hmmerMatches = uk.ac.ebi.interpro.HMMER3.parseOutput(hmmsearch_out, "PIRSF")
     def sequences = uk.ac.ebi.interpro.FastaFile.parse(fasta)
 
@@ -189,31 +188,4 @@ def createMatch(
         )
     )
     return processedMatch
-}
-
-def parseDatFile(Path datFile) {
-    def models = [:]    // PIRSF -> list of 5 doubles (meanL, stdL, minS, meanS, stdS)
-    def subfamilies = [:]   // child PIRSF -> parent PIRSF
-    datFile.withReader { reader ->
-        def accession = null
-        reader.eachLine { line ->
-            if (line.startsWith('>')) {
-                def parts = line.split(/\s+/)
-                accession = parts[0].replace('>', '')
-
-                def match = (line =~ /^>PIRSF\d+\schild:\s(.+)$/)
-                if (match) {
-                    match[0][1].trim().split(/\s+/).each { child ->
-                        subfamilies[child] = accession
-                    }
-                }
-
-            } else if (line ==~ /\d+\.?\d*\s+\d+\.?\d*\s+\d+\.?\d*\s+\d+\.?\d*\s+\d+\.?\d*/) {
-                def values = line.split(/\s+/)*.toDouble()
-                models[accession] = values
-            }
-        }
-    }
-
-    return [models, subfamilies]
 }

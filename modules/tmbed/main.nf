@@ -237,7 +237,7 @@ def smoothString(s, window) {
         def start = Math.max(0, i - half)
         def end = Math.min(s.size(), i + half + 1)
         mostCommonChar(s.substring(start, end))
-    }.join()
+    }.inject(new StringBuilder()) { sb, c -> sb.append(c) }.toString()
 }
 
 /** Return the most frequent character in a string */

@@ -22,7 +22,7 @@ process PARSE_PFAM {
     filepath.text = groovy.json.JsonOutput.toJson(processed_matches)
 }
 
-def stockholmDatParser(Path pfamADatFile) {
+def stockholmDatParser(pfamADatFile) {
     /* Retrieve nested models and clan classifications.
     E.g. [ PF00026:[nested:[PF03489, PF05184], clan:CL0129], PF06826:[clan:CL0064, nested:[]] ]
     */
@@ -65,7 +65,7 @@ def stockholmDatParser(Path pfamADatFile) {
     return parsedDat
 }
 
-def decode(byte[] b) {
+def decode(b) {
     try {
         return new String(b, "UTF-8").trim()
     } catch (Exception _e) {
