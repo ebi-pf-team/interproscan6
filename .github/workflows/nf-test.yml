@@ -52,7 +52,7 @@ jobs:
       - name: Set up Nextflow
         uses: nf-core/setup-nextflow@v1
         with:
-          version: '25.04.6'
+          version: '26.04.0'
 
       - name: Check help message exits cleanly
         run: |
@@ -60,7 +60,7 @@ jobs:
 
       - name: Install nf-test
         run: |
-          wget -qO- https://get.nf-test.com | bash -s 0.9.3
+          wget -qO- https://get.nf-test.com | bash -s 0.9.4
           sudo mv nf-test /usr/local/bin/
 
       - name: Run unit tests
