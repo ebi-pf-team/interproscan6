@@ -30,7 +30,9 @@ process PARSE_PIRSF {
     tuple val(meta), path("pirsf.json")
 
     exec:
-    def models, subfamilies = parseDatFile(datfile)
+    def parsed = { -> parseDatFile(datfile) }()
+    def models = parsed[0]
+    def subfamilies = parsed[1]
     def hmmerMatches = uk.ac.ebi.interpro.HMMER3.parseOutput(hmmsearch_out, "PIRSF")
     def sequences = uk.ac.ebi.interpro.FastaFile.parse(fasta)
 
