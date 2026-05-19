@@ -230,8 +230,8 @@ def parse_external_json(
                 seq_id = xref["id"]
 
                 for orf in seq["openReadingFrames"]:
-                    for xref in orf["protein"]["xref"]:
-                        orf_id = xref["id"]
+                    for orf_xref in orf["protein"]["xref"]:
+                        orf_id = orf_xref["id"]
 
                         for m in parse_json_matches(
                             orf["protein"]["matches"],
