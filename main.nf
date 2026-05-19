@@ -1,5 +1,3 @@
-nextflow.enable.dsl=2
-
 include { INIT_PIPELINE } from './subworkflows/init/pipeline'
 include { INTERPROSCAN  } from './workflows/interproscan'
 
