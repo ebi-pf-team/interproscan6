@@ -5,7 +5,6 @@ import gzip
 import hashlib
 import json
 import shutil
-import sys
 import xml.etree.ElementTree as ET
 import zipfile
 from collections import defaultdict
