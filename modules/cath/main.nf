@@ -1,5 +1,7 @@
 process SEARCH_GENE3D {
-    label     'mem_min', 'time_short', 'dynamic'
+    label     'mem_min'
+    label     'time_short'
+    label     'dynamic'
     container 'interpro/cath:0.16.10'
 
     input:
@@ -31,7 +33,8 @@ process SEARCH_GENE3D {
 }
 
 process PARSE_CATHGENE3D {
-    label    'mem_low', 'time_short'
+    label    'mem_low'
+    label    'time_short'
     executor 'local'
 
     input:
@@ -50,7 +53,9 @@ process PARSE_CATHGENE3D {
 }
 
 process SEARCH_FUNFAM {
-    label     'mem_min', 'time_medium', 'dynamic'
+    label     'mem_min'
+    label     'time_medium'
+    label     'dynamic'
     container 'interpro/cath:0.16.10'
 
     input:
@@ -76,7 +81,8 @@ process SEARCH_FUNFAM {
 
 
 process PARSE_FUNFAM {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:

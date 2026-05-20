@@ -1,5 +1,6 @@
 process RUN_COILS {
-    label     'mem_min', 'time_veryshort'
+    label     'mem_min'
+    label     'time_veryshort'
     container 'interpro/ncoils:2.2.1'
 
     input:
@@ -16,7 +17,8 @@ process RUN_COILS {
 
 
 process PARSE_COILS {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:

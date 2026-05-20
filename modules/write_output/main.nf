@@ -1,5 +1,6 @@
 process WRITE_GFF3 {
-    label    'mem_medium', 'time_long'
+    label    'mem_medium'
+    label    'time_long'
     executor 'local'
 
     input:
@@ -24,7 +25,8 @@ process WRITE_GFF3 {
 }
 
 process WRITE_JSON {
-    label    'mem_medium', 'time_long'
+    label    'mem_medium'
+    label    'time_long'
     executor 'local'
 
     input:
@@ -51,7 +53,8 @@ process WRITE_JSON {
 }
 
 process WRITE_TSV {
-    label    'mem_medium', 'time_long'
+    label    'mem_medium'
+    label    'time_long'
     executor 'local'
 
     input:
@@ -72,7 +75,8 @@ process WRITE_TSV {
 }
 
 process WRITE_XML {
-    label    'mem_medium', 'time_long'
+    label    'mem_medium'
+    label    'time_long'
     executor 'local'
 
     input:

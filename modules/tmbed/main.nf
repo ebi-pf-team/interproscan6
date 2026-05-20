@@ -1,5 +1,6 @@
 process PREPARE_TMBED {
-    label    'mem_low', 'time_short'
+    label    'mem_low'
+    label    'time_short'
     executor 'local'
 
     input:
@@ -34,7 +35,9 @@ process PREPARE_TMBED {
 }
 
 process RUN_TMBED_CPU {
-    label     'mem_high', 'time_medium', 'dynamic'
+    label     'mem_high'
+    label     'time_medium'
+    label     'dynamic'
     container 'interpro/tmbed:1.0.2'
 
     input:
@@ -56,7 +59,9 @@ process RUN_TMBED_CPU {
 }
 
 process RUN_TMBED_GPU {
-    label     'mem_medium', 'time_short', 'use_gpu'
+    label     'mem_medium'
+    label     'time_short'
+    label     'use_gpu'
     container 'interpro/tmbed:1.0.2'
 
     input:
@@ -78,7 +83,8 @@ process RUN_TMBED_GPU {
 }
 
 process PARSE_TMBED {
-    label    'mem_low', 'time_short'
+    label    'mem_low'
+    label    'time_short'
     executor 'local'
 
     input:

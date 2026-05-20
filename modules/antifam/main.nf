@@ -1,5 +1,6 @@
 process PARSE_ANTIFAM {
-    label    'mem_min','time_veryshort'
+    label    'mem_min'
+    label    'time_veryshort'
     executor 'local'
 
     input:

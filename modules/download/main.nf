@@ -1,6 +1,7 @@
 process DOWNLOAD {
     maxForks  1
-    label     'mem_min', 'time_veryshort'
+    label     'mem_min'
+    label     'time_veryshort'
     executor  'local'
     container 'interpro/download:1.0'
 
@@ -32,7 +33,8 @@ process DOWNLOAD {
 }
 
 process FIND_DATABASES {
-    label    'mem_min', 'time_veryshort'
+    label    'mem_min'
+    label    'time_veryshort'
     executor 'local'
 
     input:

@@ -1,5 +1,7 @@
 process PREFILTER_SMART {
-    label     'mem_min', 'time_veryshort', 'dynamic'
+    label     'mem_min'
+    label     'time_veryshort'
+    label     'dynamic'
     container 'interpro/smart:1.0'
 
     input:
@@ -18,7 +20,8 @@ process PREFILTER_SMART {
 }
 
 process PREPARE_SMART {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:
@@ -64,7 +67,9 @@ process PREPARE_SMART {
 }
 
 process SEARCH_SMART {
-    label     'mem_min', 'time_veryshort', 'dynamic'
+    label     'mem_min'
+    label     'time_veryshort'
+    label     'dynamic'
     container 'interpro/smart:1.0'
 
     input:
@@ -100,7 +105,8 @@ process SEARCH_SMART {
 }
 
 process PARSE_SMART {
-    label    'mem_low', 'time_short'
+    label    'mem_low'
+    label    'time_short'
     executor 'local'
 
     input:

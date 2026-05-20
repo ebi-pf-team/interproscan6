@@ -1,5 +1,7 @@
 process SEARCH_SFLD {
-    label     'mem_min', 'time_veryshort', 'dynamic'
+    label     'mem_min'
+    label     'time_veryshort'
+    label     'dynamic'
     container 'interpro/sfld:ebiftp'
 
     input:
@@ -30,7 +32,8 @@ process SEARCH_SFLD {
 }
 
 process PARSE_SFLD {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:

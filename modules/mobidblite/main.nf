@@ -1,5 +1,7 @@
 process RUN_MOBIDBLITE {
-    label     'mem_min', 'time_veryshort', 'dynamic'
+    label     'mem_min'
+    label     'time_veryshort'
+    label     'dynamic'
     container 'interpro/idrpred:1.0.3'
 
     input:
@@ -16,7 +18,8 @@ process RUN_MOBIDBLITE {
 
 
 process PARSE_MOBIDBLITE {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:

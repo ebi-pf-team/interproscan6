@@ -1,5 +1,6 @@
 process WRITE_FASTA {
-    label    'mem_min', 'time_veryshort'
+    label    'mem_min'
+    label    'time_veryshort'
     executor 'local'
 
     input:
@@ -18,7 +19,8 @@ process WRITE_FASTA {
 }
 
 process SEARCH_PHOBIUS {
-    label       'mem_min', 'time_short'
+    label       'mem_min'
+    label       'time_short'
     stageInMode 'copy'
     container   'interpro/phobius:1.01'
 
@@ -38,7 +40,8 @@ process SEARCH_PHOBIUS {
 }
 
 process PARSE_PHOBIUS {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:

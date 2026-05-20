@@ -1,5 +1,6 @@
 process PREPARE_INTERPRO_N {
-    label    'mem_low', 'time_short'
+    label    'mem_low'
+    label    'time_short'
     executor 'local'
 
     input:
@@ -35,7 +36,8 @@ process PREPARE_INTERPRO_N {
 }
 
 process RUN_INTERPRO_N_CPU {
-    label     'mem_high', 'time_medium'
+    label     'mem_high'
+    label     'time_medium'
     container 'interpro/interpro-n:1.0'
 
     input:
@@ -61,7 +63,9 @@ process RUN_INTERPRO_N_CPU {
 }
 
 process RUN_INTERPRO_N_GPU {
-    label     'mem_high', 'time_short', 'use_gpu'
+    label     'mem_high'
+    label     'time_short'
+    label     'use_gpu'
     container 'interpro/interpro-n:1.0'
 
     input:
@@ -87,7 +91,8 @@ process RUN_INTERPRO_N_GPU {
 }
 
 process PARSE_INTERPRO_N {
-    label    'mem_low', 'time_short'
+    label    'mem_low'
+    label    'time_short'
     executor 'local'
 
     input:

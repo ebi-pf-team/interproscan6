@@ -4,7 +4,8 @@ process RUN_PSSCAN {
     pftools developers. It automates running pfscan for all provided patterns and
     includes post-processing of the hits.
     */
-    label     'mem_min', 'time_medium'
+    label     'mem_min'
+    label     'time_medium'
     container 'interpro/pftools:3.2.12'
 
     input:
@@ -27,7 +28,8 @@ process RUN_PSSCAN {
 
 
 process PARSE_PSSCAN {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:
@@ -96,7 +98,8 @@ process RUN_PFSEARCH {
 }
 
 process PARSE_PFSEARCH {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:

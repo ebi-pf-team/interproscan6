@@ -1,5 +1,6 @@
 process RUN_SIGNALP_CPU {
-    label     'mem_medium', 'time_medium'
+    label     'mem_medium'
+    label     'time_medium'
     container 'interpro/signalp:6.0i'
 
     input:
@@ -29,7 +30,9 @@ process RUN_SIGNALP_CPU {
 }
 
 process RUN_SIGNALP_GPU {
-    label     'mem_medium', 'time_medium', 'use_gpu'
+    label     'mem_medium'
+    label     'time_medium'
+    label     'use_gpu'
     container 'interpro/signalp:6.0i'
 
     input:
@@ -59,7 +62,8 @@ process RUN_SIGNALP_GPU {
 }
 
 process PARSE_SIGNALP {
-    label    'mem_low', 'time_short'
+    label    'mem_low'
+    label    'time_short'
     executor 'local'
 
     input:

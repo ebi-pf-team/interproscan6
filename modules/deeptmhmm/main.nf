@@ -1,5 +1,6 @@
 process RUN_DEEPTMHMM_CPU {
-    label       'mem_high', 'time_medium'
+    label       'mem_high'
+    label       'time_medium'
     container   'interpro/deeptmhmm:1.0'
     stageInMode 'copy'
 
@@ -24,7 +25,9 @@ process RUN_DEEPTMHMM_CPU {
 }
 
 process RUN_DEEPTMHMM_GPU {
-    label       'mem_high', 'time_short', 'use_gpu'
+    label       'mem_high'
+    label       'time_short'
+    label       'use_gpu'
     container   'interpro/deeptmhmm:26.04'
     stageInMode 'copy'
 
@@ -49,7 +52,8 @@ process RUN_DEEPTMHMM_GPU {
 }
 
 process PARSE_DEEPTMHMM {
-    label    'mem_low', 'time_short'
+    label    'mem_low'
+    label    'time_short'
     executor 'local'
 
     input:

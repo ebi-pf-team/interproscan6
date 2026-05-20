@@ -1,5 +1,6 @@
 process SEARCH_CDD {
-    label     'mem_min', 'time_short'
+    label     'mem_min'
+    label     'time_short'
     container 'interpro/cdd:1.0'
 
     input:
@@ -33,7 +34,8 @@ process SEARCH_CDD {
 }
 
 process PARSE_CDD {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:

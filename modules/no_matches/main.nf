@@ -1,5 +1,6 @@
 process REPORT_NO_MATCHES {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:

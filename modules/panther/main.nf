@@ -1,5 +1,7 @@
 process SEARCH_PANTHER {
-    label     'mem_low', 'time_short', 'dynamic'
+    label     'mem_low'
+    label     'time_short'
+    label     'dynamic'
     container 'interpro/panther:1.0'
 
     input:
@@ -19,7 +21,8 @@ process SEARCH_PANTHER {
 }
 
 process PREPARE_TREEGRAFTER {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:
@@ -68,7 +71,9 @@ process PREPARE_TREEGRAFTER {
 
 
 process RUN_TREEGRAFTER {
-    label     'mem_medium', 'time_short', 'dynamic'
+    label     'mem_medium'
+    label     'time_short'
+    label     'dynamic'
     container 'interpro/panther:1.0'
     
     input:
@@ -85,7 +90,8 @@ process RUN_TREEGRAFTER {
 }
 
 process PARSE_PANTHER {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:

@@ -1,5 +1,6 @@
 process RUN_PRINTS {
-    label     'mem_medium', 'time_short'
+    label     'mem_medium'
+    label     'time_short'
     container 'interpro/fingerprintscan:3.597.ebiftp'
 
     input:
@@ -19,7 +20,8 @@ process RUN_PRINTS {
 }
 
 process PARSE_PRINTS {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:

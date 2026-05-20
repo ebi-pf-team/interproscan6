@@ -1,6 +1,7 @@
 // codenarc-disable AllowedDirectivesRule
 process PARSE_PFAM {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:

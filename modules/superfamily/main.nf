@@ -1,5 +1,7 @@
 process SEARCH_SUPERFAMILY {
-    label     'mem_min', 'time_short', 'dynamic'
+    label     'mem_min'
+    label     'time_short'
+    label     'dynamic'
     container 'interpro/hmmer:3.3'
 
     input:
@@ -29,7 +31,8 @@ process SEARCH_SUPERFAMILY {
 }
 
 process PARSE_SUPERFAMILY {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:

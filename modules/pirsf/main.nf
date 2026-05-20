@@ -1,5 +1,7 @@
 process SEARCH_PIRSF {
-    label     'mem_low', 'time_short', 'dynamic'
+    label     'mem_low'
+    label     'time_short'
+    label     'dynamic'
     container 'interpro/hmmer:3.3'
 
     input:
@@ -19,7 +21,8 @@ process SEARCH_PIRSF {
 }
 
 process PARSE_PIRSF {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:

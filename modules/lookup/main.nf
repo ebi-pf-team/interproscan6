@@ -39,7 +39,8 @@ def check_matches_api(applications, api_url, _version) {
 
 process GET_MATCHES {
     maxForks 1
-    label    'mem_low', 'time_short'
+    label    'mem_low'
+    label    'time_short'
     executor 'local'
 
     input:

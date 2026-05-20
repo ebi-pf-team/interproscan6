@@ -1,5 +1,7 @@
 process RUN_HMMER {
-    label     'mem_min', 'time_medium', 'dynamic'
+    label     'mem_min'
+    label     'time_medium'
+    label     'dynamic'
     container 'interpro/hmmer:3.3'
 
     input:
