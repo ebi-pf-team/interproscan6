@@ -1,5 +1,5 @@
 # This image contains only dependencies for DeepTMHMM. It does not include a copy of DeepTMHMM
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 LABEL name="interpro/deeptmhmm"
 LABEL tag="1.0"
@@ -31,7 +31,7 @@ RUN pip install --no-cache-dir \
     Pillow==12.2.0 \
     pyparsing==3.0.9 \
     python-dateutil==2.8.2 \
-    requests==2.33.0 \
+    requests==2.32.5 \
     six==1.16.0 \
     tqdm==4.64.1 \
     urllib3==2.7.0
