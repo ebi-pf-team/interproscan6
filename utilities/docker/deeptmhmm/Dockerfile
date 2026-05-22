@@ -1,5 +1,5 @@
 # This image contains only dependencies for DeepTMHMM. It does not include a copy of DeepTMHMM
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 ENV TZ=Europe/London
 
