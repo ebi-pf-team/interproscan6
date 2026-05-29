@@ -1,7 +1,4 @@
 // codenarc-disable ModuleIncludedTwiceRule
-import groovy.json.JsonSlurper
-import uk.ac.ebi.interpro.InterProScan
-
 include { DOWNLOAD as DOWNLOAD_INTERPRO } from "../../../modules/download"
 include { DOWNLOAD as DOWNLOAD_DATABASE } from "../../../modules/download"
 include { FIND_DATABASES                } from "../../../modules/download"
@@ -14,7 +11,7 @@ workflow INIT_DATABASES {
     data_dir                // path
     interpro_version        // str, version of InterPro to run
     iprscan_version         // str, version of InterProScan
-    use_matches_api         // bool, whether to use the Matches API
+    _use_matches_api        // bool, whether to use the Matches API
     use_globus              // bool, whether to use Globus instead of the EMBL-EBI FTP
     enforce_compatibility   // bool, whether we check that InterProScan and InterPro are compatible
 
@@ -27,11 +24,11 @@ workflow INIT_DATABASES {
         //     enforce_compatibility = true
         // }
 
-        def versions = InterProScan.fetchCompatibleVersions(iprscan_maj_min_version, use_globus)
+        def versions = uk.ac.ebi.interpro.InterProScan.fetchCompatibleVersions(iprscan_maj_min_version, use_globus)
         if (versions == null) {
             if (!use_globus) {
                 // Try again, but using Globus
-                versions = InterProScan.fetchCompatibleVersions(iprscan_maj_min_version, true)
+                versions = uk.ac.ebi.interpro.InterProScan.fetchCompatibleVersions(iprscan_maj_min_version, true)
             }
 
             if (versions == null) {
@@ -46,13 +43,13 @@ workflow INIT_DATABASES {
         }
     }
 
-    ch_ready = Channel.empty()
+    ch_ready = channel.empty()
     if (data_dir != null) {
         // At least one applications requires data files
         
         // Handle applications with a common directory (cath -> CATH-Gene3 / CATH-FunFam, prosite -> PROSITE Patterns / PROSITE Profiles)
         appl_dirs = appl_configs
-            .findAll { k, v -> v.has_data == true }
+            .findAll { _k, v -> v.has_data == true }
             .collectEntries { key, value ->
                 def dir = value.get("dir", "")
                 def parts = dir.split('/')
@@ -66,7 +63,7 @@ workflow INIT_DATABASES {
         def databases_json = interpro_dir.resolve("databases.json")
         if (databases_json.isFile()) {
             // InterPro data already downloaded (at least databases.json)
-            ch_interpro = Channel.value(["interpro", interpro_dir])
+            ch_interpro = channel.value(["interpro", interpro_dir])
 
             FIND_DATABASES(
                 ["", ""],  // state dependency, can be anything
@@ -106,7 +103,7 @@ workflow INIT_DATABASES {
 
         ch_ready = ch_ready.mix(DOWNLOAD_DATABASE.out)
     } else {
-        ch_ready = Channel.of(["interpro", null])
+        ch_ready = channel.of(["interpro", null])
     }
 
     emit:

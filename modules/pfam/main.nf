@@ -1,11 +1,7 @@
 // codenarc-disable AllowedDirectivesRule
-import groovy.json.JsonOutput
-import uk.ac.ebi.interpro.HMMER3
-import uk.ac.ebi.interpro.LocationFragment
-import uk.ac.ebi.interpro.Match
-
 process PARSE_PFAM {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:
@@ -17,24 +13,24 @@ process PARSE_PFAM {
 
     exec:
     def min_length = 8  // minimum length of a fragment
-    def hmmer_matches = HMMER3.parseOutput(hmmsearch_out, "Pfam")
+    def hmmer_matches = uk.ac.ebi.interpro.HMMER3.parseOutput(hmmsearch_out, "Pfam")
     def dat = stockholmDatParser(datfile)  // [modelAcc: [clan: str, nested: [str]]]
 
     def filtered_matches = filterMatches(hmmer_matches, dat, min_length)
     def processed_matches = buildFragments(filtered_matches, dat)
 
     def filepath = task.workDir.resolve("pfam.json")
-    filepath.text = JsonOutput.toJson(processed_matches)
+    filepath.text = groovy.json.JsonOutput.toJson(processed_matches)
 }
 
-def stockholmDatParser(Path pfamADatFile) {
+def stockholmDatParser(pfamADatFile) {
     /* Retrieve nested models and clan classifications.
     E.g. [ PF00026:[nested:[PF03489, PF05184], clan:CL0129], PF06826:[clan:CL0064, nested:[]] ]
     */
-    Map<String, String> name2acc = [:]
-    Map<String, List<String>> parsedDat = [:]
-    String name = null
-    String accession = null
+    def name2acc = [:]
+    def parsedDat = [:]
+    def name = null
+    def accession = null
     pfamADatFile.eachLine { rawLine ->
         def line = decode(rawLine.bytes)
         if (line.startsWith("#=GF ID")) {
@@ -43,43 +39,51 @@ def stockholmDatParser(Path pfamADatFile) {
             accession = line.split()[2].split("\\.")[0]
             name2acc[name] = accession
         } else if (line.startsWith("#=GF NE")) {
-            String nestedAcc = line.split()[2]
-            parsedDat[accession]?.nested?.add(nestedAcc) ?: (parsedDat[accession] = [nested: [nestedAcc]])
+            def nestedAcc = line.split()[2]
+            def family = parsedDat[accession]
+            if (family == null) {
+                parsedDat[accession] = [nested: [nestedAcc]]
+            } else {
+                def nested = family.nested
+                if (nested == null) {
+                    nested = []
+                    family.nested = nested
+                }
+                nested.add(nestedAcc)
+            }
         } else if (line.startsWith("#=GF CL")) {
-            String claAcc = line.split()[2]
+            def claAcc = line.split()[2]
             parsedDat.computeIfAbsent(accession, { [clan: claAcc] }).clan = claAcc
         }
     }
     // convert nested 'names' to 'acc'
-    parsedDat.each { acc, info ->
+    parsedDat.each { _acc, info ->
         def nestedNames = info.nested ?: []
-        def nestedAccessions = nestedNames.collect { name2acc[it] }.findAll { it != null }
+        def nestedAccessions = nestedNames.collect { n -> name2acc[n] }.findAll { acc -> acc != null }
         info.nested = nestedAccessions.unique()
     }
 
     return parsedDat
 }
 
-def decode(byte[] b) {
+def decode(b) {
     try {
         return new String(b, "UTF-8").trim()
-    } catch (Exception e) {
+    } catch (Exception _e) {
         return new String(b, "ISO-8859-1").trim()
     }
 }
 
-def filterMatches(Map<String, Map<String, Match>> hmmerMatches, 
-                  Map<String, Map<String, Object>> dat,
-                  int minLength) {
+def filterMatches(hmmerMatches, dat, minLength) {
     /*
         Remove overlapping matches, only keeping the one with the best e-value or score.
         Pfam matches are not supposed to overlap, but some families can be evolutionary related,
         especially those belonging to the same clan, so curators can whitelist overlaps using the
         NE (nested) flag.
     */
-    Map<String, List<Match>> filteredMatches = [:]
+    def filteredMatches = [:]
     hmmerMatches.each { seqId, matches ->
-        List<Match> allMatches = flattenMatchLocations(matches).findAll{ m ->
+        def allMatches = flattenMatchLocations(matches).findAll{ m ->
             m.locations[0].end - m.locations[0].start + 1 >= minLength 
         }
 
@@ -94,14 +98,14 @@ def filterMatches(Map<String, Map<String, Match>> hmmerMatches,
 
         filteredMatches[seqId] = []
         allMatches.each { match ->
-            boolean keep = true
+            def keep = true
 
-            Map<String, List<String>> candidateFamily = dat[match.modelAccession] ?: [:]
-            List<String> candidateNested = candidateFamily?.nested ?: []
+            def candidateFamily = dat[match.modelAccession] ?: [:]
+            def candidateNested = candidateFamily?.nested ?: []
 
             // Compare the current match with matches already accepted
             filteredMatches[seqId].each { filteredMatch ->
-                boolean overlapped = isOverlapping(
+                def overlapped = isOverlapping(
                         match.locations[0].start, 
                         match.locations[0].end,
                         filteredMatch.locations[0].start, 
@@ -111,12 +115,12 @@ def filterMatches(Map<String, Map<String, Match>> hmmerMatches,
                 if (overlapped) {
                     // Matches are overlapping
 
-                    Map<String, List<String>> filteredFamily = dat[filteredMatch.modelAccession] ?: [:]
-                    List<String> filteredNested = filteredFamily?.nested ?: []
+                    def filteredFamily = dat[filteredMatch.modelAccession] ?: [:]
+                    def filteredNested = filteredFamily?.nested ?: []
 
-                    boolean canBeNested = (candidateNested.contains(filteredMatch.modelAccession)
+                    def canBeNested = (candidateNested.contains(filteredMatch.modelAccession)
                                            || filteredNested.contains(match.modelAccession))
-                    boolean fullyEnclosed = isFullyEnclosed(
+                    def fullyEnclosed = isFullyEnclosed(
                             match.locations[0].start,
                             match.locations[0].end,
                             filteredMatch.locations[0].start,
@@ -142,7 +146,7 @@ def flattenMatchLocations(matches) {
     matches.collectMany { modelAccession, match ->
         modelAccession = modelAccession.split("\\.")[0]
         match.locations.collect { location ->
-            Match matchInfo = new Match(
+            def matchInfo = new uk.ac.ebi.interpro.Match(
                     modelAccession,
                     match.evalue,
                     match.score,
@@ -165,23 +169,22 @@ def isFullyEnclosed(location1Start, location1End, location2Start, location2End) 
            || (location2Start <= location1Start && location2End >= location1End)
 }
 
-def buildFragments(Map<String, Map<String, Match>> filteredMatches,
-                   Map<String, Map<String, Object>> dat) {
-    Map<String, Map<String, Match>> processedMatches = [:]
-    filteredMatches.each { String seqId, List<Match> matches ->
+def buildFragments(filteredMatches, dat) {
+    def processedMatches = [:]
+    filteredMatches.each { seqId, matches ->
         def aggregatedMatches = [:]
-        matches.each { Match match ->
+        matches.each { match ->
             // We flattened matches and locations so one location only per match here
             def location = match.locations[0]
 
-            List<String> nestedModels = dat[match.modelAccession]?.nested ?: []
+            def nestedModels = dat[match.modelAccession]?.nested ?: []
             if (nestedModels) {
                 /*
                     Find all locations belonging to matches that:
                     - overlap the current location
                     - belong to models that can be nested within the model of the current match
                 */
-                List<Map<String, Integer>> overlappingLocations = matches
+                def overlappingLocations = matches
                     .findAll { otherMatch ->
                         otherMatch.modelAccession in nestedModels 
                         && isFullyEnclosed(
@@ -199,20 +202,20 @@ def buildFragments(Map<String, Map<String, Match>> filteredMatches,
                 overlappingLocations.sort { a, b -> a.start <=> b.start ?: a.end <=> b.end }
 
                 def fragments = []
-                int start = location.start
+                def start = location.start
 
                 overlappingLocations.each { otherLocation ->
                     if (otherLocation.start > start && otherLocation.end < location.end) {
-                        String status = fragments.isEmpty() ? "C_TERMINAL_DISC" : "NC_TERMINAL_DISC"
-                        fragments.add(new LocationFragment(start, otherLocation.start - 1, status))
+                        def status = fragments.isEmpty() ? "C_TERMINAL_DISC" : "NC_TERMINAL_DISC"
+                        fragments.add(new uk.ac.ebi.interpro.LocationFragment(start, otherLocation.start - 1, status))
                         start = otherLocation.end + 1
                     }
                 }
 
                 if (fragments) {
-                    fragments.add(new LocationFragment(start, location.end, "N_TERMINAL_DISC"))
+                    fragments.add(new uk.ac.ebi.interpro.LocationFragment(start, location.end, "N_TERMINAL_DISC"))
                 } else {
-                    fragments.add(new LocationFragment(location.start, location.end, "CONTINUOUS"))
+                    fragments.add(new uk.ac.ebi.interpro.LocationFragment(location.start, location.end, "CONTINUOUS"))
                 }
 
                 location.fragments = fragments

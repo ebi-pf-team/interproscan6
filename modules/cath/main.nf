@@ -1,11 +1,7 @@
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
-import uk.ac.ebi.interpro.CATH
-import uk.ac.ebi.interpro.HMMER3
-import uk.ac.ebi.interpro.Match
-
 process SEARCH_GENE3D {
-    label     'mem_min', 'time_short', 'dynamic'
+    label     'mem_min'
+    label     'time_short'
+    label     'dynamic'
     container 'interpro/cath:0.16.10'
 
     input:
@@ -37,7 +33,8 @@ process SEARCH_GENE3D {
 }
 
 process PARSE_CATHGENE3D {
-    label    'mem_low', 'time_short'
+    label    'mem_low'
+    label    'time_short'
     executor 'local'
 
     input:
@@ -48,15 +45,17 @@ process PARSE_CATHGENE3D {
 
     exec:
     def member_db = "CATH-Gene3D"
-    def hmmer_matches = HMMER3.parseOutput(hmmseach_out, member_db)
-    def cath_domains = CATH.parseAssignedFile(cath_tsv)
-    def matches = CATH.mergeWithHmmerMatches(cath_domains, hmmer_matches, member_db)
+    def hmmer_matches = uk.ac.ebi.interpro.HMMER3.parseOutput(hmmseach_out, member_db)
+    def cath_domains = uk.ac.ebi.interpro.CATH.parseAssignedFile(cath_tsv)
+    def matches = uk.ac.ebi.interpro.CATH.mergeWithHmmerMatches(cath_domains, hmmer_matches, member_db)
     def filepath = task.workDir.resolve("cathgene3d.json")
-    filepath.text = JsonOutput.toJson(matches)
+    filepath.text = groovy.json.JsonOutput.toJson(matches)
 }
 
 process SEARCH_FUNFAM {
-    label     'mem_min', 'time_medium', 'dynamic'
+    label     'mem_min'
+    label     'time_medium'
+    label     'dynamic'
     container 'interpro/cath:0.16.10'
 
     input:
@@ -82,7 +81,8 @@ process SEARCH_FUNFAM {
 
 
 process PARSE_FUNFAM {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:
@@ -93,9 +93,9 @@ process PARSE_FUNFAM {
 
     exec:
     def member_db = "CATH-FunFam"
-    def hmmer_matches = HMMER3.parseOutput(hmmseach_out, member_db)
-    def funfam_domains = CATH.parseResolvedFile(resolved_tsv)
-    def matches = CATH.mergeWithHmmerMatches(funfam_domains, hmmer_matches, member_db)
+    def hmmer_matches = uk.ac.ebi.interpro.HMMER3.parseOutput(hmmseach_out, member_db)
+    def funfam_domains = uk.ac.ebi.interpro.CATH.parseResolvedFile(resolved_tsv)
+    def matches = uk.ac.ebi.interpro.CATH.mergeWithHmmerMatches(funfam_domains, hmmer_matches, member_db)
     def filepath = task.workDir.resolve("cathfunfam.json")
-    filepath.text = JsonOutput.toJson(matches)
+    filepath.text = groovy.json.JsonOutput.toJson(matches)
 }

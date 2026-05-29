@@ -1,13 +1,6 @@
-// codenarc-disable AllowedDirectivesRule
-import groovy.json.JsonOutput
-import uk.ac.ebi.interpro.FastaFile
-import uk.ac.ebi.interpro.Location
-import uk.ac.ebi.interpro.Match
-import uk.ac.ebi.interpro.Signature
-import uk.ac.ebi.interpro.SignatureLibraryRelease
-
 process PREPARE_TMBED {
-    label    'mem_low', 'time_short'
+    label    'mem_low'
+    label    'time_short'
     executor 'local'
 
     input:
@@ -20,35 +13,31 @@ process PREPARE_TMBED {
     tuple val(meta), path("tmbed_*.fasta", arity: '1..*')
 
     exec:
-    def sequences = FastaFile.chunkSequences(fasta, chunk_size, chunk_overlap)
+    def sequences = uk.ac.ebi.interpro.FastaFile.chunkSequences(fasta, chunk_size, chunk_overlap)
     def fileIndex = 1
     def seqCount = 0
-    def writer = null
-    def openNewFile = {
-        if (writer) writer.close()
-        writer = task.workDir.resolve("tmbed_${fileIndex}.fasta").newWriter("UTF-8")
-        fileIndex++
-        seqCount = 0
-        return writer
-    }
-
-    writer = openNewFile()
+    def writer = task.workDir.resolve("tmbed_${fileIndex}.fasta").newWriter("UTF-8")
     sequences.each { seq ->
         if (batch_size > 0 && seqCount >= batch_size) {
-            writer = openNewFile()
+            writer.close()
+            fileIndex += 1
+            seqCount = 0
+            writer = task.workDir.resolve("tmbed_${fileIndex}.fasta").newWriter("UTF-8")
         }
         seq.chunks.eachWithIndex { chunk, idx ->
             writer.writeLine(">${seq.id}_${idx + 1}")
-            chunk.eachMatch(/.{1,60}/) { writer.writeLine(it) }
-            seqCount++
+            chunk.eachMatch(/.{1,60}/) { m -> writer.writeLine(m) }
+            seqCount += 1
         }
     }
 
-    if (writer) writer.close()
+    writer.close()
 }
 
 process RUN_TMBED_CPU {
-    label     'mem_high', 'time_medium', 'dynamic'
+    label     'mem_high'
+    label     'time_medium'
+    label     'dynamic'
     container 'interpro/tmbed:1.0.2'
 
     input:
@@ -70,7 +59,9 @@ process RUN_TMBED_CPU {
 }
 
 process RUN_TMBED_GPU {
-    label     'mem_medium', 'time_short', 'use_gpu'
+    label     'mem_medium'
+    label     'time_short'
+    label     'use_gpu'
     container 'interpro/tmbed:1.0.2'
 
     input:
@@ -92,7 +83,8 @@ process RUN_TMBED_GPU {
 }
 
 process PARSE_TMBED {
-    label    'mem_low', 'time_short'
+    label    'mem_low'
+    label    'time_short'
     executor 'local'
 
     input:
@@ -135,15 +127,14 @@ process PARSE_TMBED {
         lineCounter += 1
     }
 
-    def mergedList = []
     def hits = [:].withDefault { [:] }
-    SignatureLibraryRelease libRelease = new SignatureLibraryRelease("TMbed", "1.0.2")
+    def libRelease = new uk.ac.ebi.interpro.SignatureLibraryRelease("TMbed", "1.0.2")
     def MODEL_TYPES = [  // Sig(acc, name, desc, type, lib, entry)
-        "b": new Signature("TMbeta_out-to-in", "Transmembrane beta strand (out-to-in)", null, "Region", libRelease, null),
-        "B": new Signature("TMbeta_in-to-out" ,"Transmembrane beta strand (in-to-out)", null, "Region", libRelease, null),
-        "h": new Signature("TMhelix_out-to-in", "Transmembrane alpha helix (out-to-in)", null, "Region", libRelease, null),
-        "H": new Signature("TMhelix_in-to-out", "Transmembrane alpha helix (in-to-out)", null, "Region", libRelease, null),
-        "S": new Signature("Signal_peptide", "Signal peptide", null, "Region", libRelease, null)
+        "b": new uk.ac.ebi.interpro.Signature("TMbeta_out-to-in", "Transmembrane beta strand (out-to-in)", null, "Region", libRelease, null),
+        "B": new uk.ac.ebi.interpro.Signature("TMbeta_in-to-out" ,"Transmembrane beta strand (in-to-out)", null, "Region", libRelease, null),
+        "h": new uk.ac.ebi.interpro.Signature("TMhelix_out-to-in", "Transmembrane alpha helix (out-to-in)", null, "Region", libRelease, null),
+        "H": new uk.ac.ebi.interpro.Signature("TMhelix_in-to-out", "Transmembrane alpha helix (in-to-out)", null, "Region", libRelease, null),
+        "S": new uk.ac.ebi.interpro.Signature("Signal_peptide", "Signal peptide", null, "Region", libRelease, null)
     ]
     chunksbySeqId.each { hitId, chunks ->
         // Sort chunks to ensure correct order before starting to merge 
@@ -155,43 +146,46 @@ process PARSE_TMBED {
         def mergedPred = new StringBuilder(chunks[0].pred)
 
         // Merge subsequent chunks
-        for (int i = 1; i < chunks.size(); i++) {
-            def chunkPred = chunks[i].pred
+        if (chunks.size() > 1) {
+            chunks.subList(1, chunks.size()).each { chunk ->
+                def chunkPred = chunk.pred
+                def chunkPredLen = chunkPred.length()
 
-            // Effective overlap might be smaller than chunk_overlap for the last chunk
-            int effOverlap = Math.min(chunk_overlap, chunkPred.length())
+                // Effective overlap might be smaller than chunk_overlap for the last chunk
+                def effOverlap = Math.min(chunk_overlap, chunkPredLen)
+                def mergedLen = mergedPred.length()
+                def overlapStart = mergedLen - effOverlap
 
-            // Extract overlapping regions
-            def overlapPrev = mergedPred.substring(mergedPred.length() - effOverlap)
-            def overlapNext = chunkPred.substring(0, effOverlap)
-
-            // Build a "reconciled" overlap region by comparing per-residue predictions
-            def mergedOverlap = new StringBuilder()
-            for (int j = 0; j < effOverlap; j++) {
-                def a = overlapPrev.charAt(j)
-                def b = overlapNext.charAt(j)
-                if (a == b) {
-                    mergedOverlap.append(a)
-                } else {
-                    /* Conflict between predictions
-                       Resolve by local consensus using a +/- 2 residue window */
-                    def winPrev = overlapPrev.substring(Math.max(0, j - 2), Math.min(effOverlap, j + 3))
-                    def winNext = overlapNext.substring(Math.max(0, j - 2), Math.min(effOverlap, j + 3))
-                    def mostPrev = mostCommonChar(winPrev)
-                    def mostNext = mostCommonChar(winNext)
-                    /* If the current prediction agrees with the local consensus 
-                       of the previous chunk, we prefer that prediction as 
-                       it reflects the accumulated consensus and preserves continuity 
-                       across chunk boundaries */
-                    mergedOverlap.append(mostPrev == a ? mostPrev : mostNext)
+                // Build a "reconciled" overlap region by comparing per-residue predictions
+                def mergedOverlap = new StringBuilder(effOverlap)
+                effOverlap.times { j ->
+                    def a = mergedPred.charAt(overlapStart + j)
+                    def b = chunkPred.charAt(j)
+                    if (a == b) {
+                        mergedOverlap.append(a)
+                    } else {
+                        /* Conflict between predictions
+                           Resolve by local consensus using a +/- 2 residue window */
+                        def winStart = Math.max(0, j - 2)
+                        def winEnd = Math.min(effOverlap, j + 3)
+                        def winPrev = mergedPred.substring(overlapStart + winStart, overlapStart + winEnd)
+                        def winNext = chunkPred.substring(winStart, winEnd)
+                        def mostPrev = mostCommonChar(winPrev)
+                        def mostNext = mostCommonChar(winNext)
+                        /* If the current prediction agrees with the local consensus
+                           of the previous chunk, we prefer that prediction as
+                           it reflects the accumulated consensus and preserves continuity
+                           across chunk boundaries */
+                        mergedOverlap.append(mostPrev == a ? mostPrev : mostNext)
+                    }
                 }
+
+                // Replace the overlapping region in mergedPred with the reconciled overlap
+                mergedPred.setLength(overlapStart)
+                mergedPred.append(mergedOverlap).append(chunkPred, effOverlap, chunkPredLen)
             }
-
-            // Replace the overlapping region in mergedPred with the reconciled overlap
-            mergedPred.setLength(mergedPred.length() - effOverlap)
-            mergedPred.append(mergedOverlap).append(chunkPred.substring(effOverlap))
         }
-
+        
         // Smoothing step to avoid short suprious regions introduced by merging
         def mergedPredStr = mergedPred.toString()
         if (chunks.size() > 1 && smooth_window > 1) {
@@ -199,25 +193,25 @@ process PARSE_TMBED {
         }
 
         // Parse merged predictions into Match objects
-        Match currentMatch = null
+        def currentMatch = null
         def start = null
         def end = null
         mergedPredStr.eachWithIndex { symbol, position ->
             end = position
             if (symbol != ".") { // Found a hit
                 if (!currentMatch) {  // Start a new match
-                    Signature signature = MODEL_TYPES[symbol]
+                    def signature = MODEL_TYPES[symbol]
                     currentMatch = hits[hitId].computeIfAbsent(signature.accession) {
-                        Match newMatch = new Match(signature.accession, signature)
+                        def newMatch = new uk.ac.ebi.interpro.Match(signature.accession, signature)
                         newMatch
                     }
                     start = position + 1
 
                 } else if (currentMatch.modelAccession != MODEL_TYPES[symbol].accession) { // Found a new hit
-                    currentMatch.addLocation(new Location(start, position))
-                    Signature signature = MODEL_TYPES[symbol]
+                    currentMatch.addLocation(new uk.ac.ebi.interpro.Location(start, position))
+                    def signature = MODEL_TYPES[symbol]
                     currentMatch = hits[hitId].computeIfAbsent(signature.accession) {
-                        Match newMatch = new Match(signature.accession, signature)
+                        def newMatch = new uk.ac.ebi.interpro.Match(signature.accession, signature)
                         newMatch
                     }
                     start = position + 1
@@ -225,7 +219,7 @@ process PARSE_TMBED {
                 // else, parsing another symbol from the same currentMatch/hit
             } else {
                 if (currentMatch) {
-                    currentMatch.addLocation(new Location(start, position))
+                    currentMatch.addLocation(new uk.ac.ebi.interpro.Location(start, position))
                     currentMatch = null
                 }
             }
@@ -233,31 +227,28 @@ process PARSE_TMBED {
 
         // Add the final match for this sequence
         if (currentMatch) {
-            currentMatch.addLocation(new Location(start, end))
+            currentMatch.addLocation(new uk.ac.ebi.interpro.Location(start, end))
         }
     }
 
     def filepath = task.workDir.resolve("tmbed.json")
-    filepath.text = JsonOutput.toJson(hits)
+    filepath.text  = groovy.json.JsonOutput.toJson(hits)
 }
 
 
 /** Apply categorical smoothing (mode over a sliding window) */
-def smoothString(String s, int window) {
-    int half = Math.floor(window / 2) as int
-    def out = new StringBuilder()
-    for (int i = 0; i < s.size(); i++) {
-        int start = Math.max(0, i - half)
-        int end = Math.min(s.size(), i + half + 1)
-        def windowSeq = s.substring(start, end)
-        out.append(mostCommonChar(windowSeq))
-    }
-    return out.toString()
+def smoothString(s, window) {
+    def half = Math.floor(window / 2) as int
+    return (0..<s.size()).collect { i ->
+        def start = Math.max(0, i - half)
+        def end = Math.min(s.size(), i + half + 1)
+        mostCommonChar(s.substring(start, end))
+    }.inject(new StringBuilder()) { sb, c -> sb.append(c) }.toString()
 }
 
 /** Return the most frequent character in a string */
-def mostCommonChar(String s) {
+def mostCommonChar(s) {
     def counts = [:].withDefault { 0 }
-    s.each { counts[it]++ }
-    return counts.max { it.value }.key
+    s.each { c -> counts[c] += 1 }
+    return counts.max { elem -> elem.value }.key
 }

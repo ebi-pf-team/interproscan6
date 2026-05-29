@@ -1,12 +1,7 @@
-import groovy.json.JsonOutput
-import uk.ac.ebi.interpro.Location
-import uk.ac.ebi.interpro.LocationFragment
-import uk.ac.ebi.interpro.Match
-import uk.ac.ebi.interpro.Signature
-import uk.ac.ebi.interpro.SignatureLibraryRelease
-
 process SEARCH_SUPERFAMILY {
-    label     'mem_min', 'time_short', 'dynamic'
+    label     'mem_min'
+    label     'time_short'
+    label     'dynamic'
     container 'interpro/hmmer:3.3'
 
     input:
@@ -36,7 +31,8 @@ process SEARCH_SUPERFAMILY {
 }
 
 process PARSE_SUPERFAMILY {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:
@@ -47,25 +43,26 @@ process PARSE_SUPERFAMILY {
     tuple val(meta), val(meta2), path("superfamily.json")
 
     exec:
-    SignatureLibraryRelease library = new SignatureLibraryRelease("SUPERFAMILY", null)
+    def library = new uk.ac.ebi.interpro.SignatureLibraryRelease("SUPERFAMILY", null)
     def model2sf = [:]
     dirpath.resolve(model_tab).eachLine { line ->
         def fields = line.trim().split(/\t/)
-        String modelId = fields[0]
-        String superfamilyAccession = fields[1]
+        def modelId = fields[0]
+        def superfamilyAccession = fields[1]
         assert !model2sf.containsKey(modelId)
         model2sf[modelId] = "SSF${superfamilyAccession}"
     }
 
     def model2length = [:]
-    String modelAc = null
-    Integer length = null
+    def modelAc = null
+    def length = null
     dirpath.resolve(hmm).eachLine { line ->
         line = line.trim()
         if (line.startsWith('//')) {
             assert modelAc != null && length != null
             model2length[modelAc] = length
-            modelAc = length = null
+            modelAc = null
+            length = null
         } else if (line.startsWith('N') && !modelAc) {
             def match = (line =~ ~/^NAME\s+(.+)$/)
             if (match) modelAc = match[0][1]
@@ -81,21 +78,21 @@ process PARSE_SUPERFAMILY {
         if (line) {
             def fields = line.split(/\s+/)
             assert fields.size() == 9
-            String seqId = fields[0]
-            String modelId = fields[1]
+            def seqId = fields[0]
+            def modelId = fields[1]
             if (modelId != "-") {
-                String superfamilyAccession = model2sf[modelId]
+                def superfamilyAccession = model2sf[modelId]
                 assert superfamilyAccession != null
 
-                String regionsAsString = fields[2]
-                Double evalue = Double.parseDouble(fields[3])
+                def regionsAsString = fields[2]
+                def evalue = Double.parseDouble(fields[3])
 
                 def regions = []
                 regionsAsString.split(",").each { region ->
                     def boundaries = region.split("-")
                     assert boundaries.size() == 2
-                    int start = boundaries[0].toInteger()
-                    int end = boundaries[1].toInteger()
+                    def start = boundaries[0].toInteger()
+                    def end = boundaries[1].toInteger()
                     regions.add([start, end])
                 }
 
@@ -106,14 +103,14 @@ process PARSE_SUPERFAMILY {
                     a[0] <=> b[0] ?: a[1] <=> b[1]
                 }
 
-                int start = regions[0][0]
-                int end = regions.collect { it[1] }.max()
-                Integer hmmLength = model2length[modelId]
-                List<LocationFragment> fragments = []
+                def start = regions[0][0]
+                def end = regions.collect { r -> r[1] }.max()
+                def hmmLength = model2length[modelId]
+                def fragments = []
                 if (regions.size() > 1) {
                     regions.eachWithIndex { obj, idx ->
                         def (fragStart, fragEnd) = obj
-                        String dcStatus
+                        def dcStatus
                         if (idx == 0) {
                             dcStatus = "C_TERMINAL_DISC"
                         } else if (idx == regions.size() - 1) {
@@ -121,18 +118,18 @@ process PARSE_SUPERFAMILY {
                         } else {
                             dcStatus = "NC_TERMINAL_DISC"
                         }
-                        fragments.add(new LocationFragment(fragStart, fragEnd, dcStatus))
+                        fragments.add(new uk.ac.ebi.interpro.LocationFragment(fragStart, fragEnd, dcStatus))
                     }
 
                 } else {
                     def (fragStart, fragEnd) = regions[0]
-                    fragments.add(new LocationFragment(fragStart, fragEnd, "CONTINUOUS"))
+                    fragments.add(new uk.ac.ebi.interpro.LocationFragment(fragStart, fragEnd, "CONTINUOUS"))
                 }
 
-                Location location = new Location(start, end, hmmLength, evalue, fragments)
-                Match match = matches[seqId][modelId]
+                def location = new uk.ac.ebi.interpro.Location(start, end, hmmLength, evalue, fragments)
+                def match = matches[seqId][modelId]
                 if (match == null) {
-                    match = new Match(modelId, new Signature(superfamilyAccession, library))
+                    match = new uk.ac.ebi.interpro.Match(modelId, new uk.ac.ebi.interpro.Signature(superfamilyAccession, library))
                     match.addLocation(location)
                     matches[seqId][modelId] = match
                 } else {
@@ -143,5 +140,5 @@ process PARSE_SUPERFAMILY {
     }
 
     def filepath = task.workDir.resolve("superfamily.json")
-    filepath.text = JsonOutput.toJson(matches)
+    filepath.text  = groovy.json.JsonOutput.toJson(matches)
 }

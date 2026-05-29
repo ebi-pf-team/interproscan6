@@ -24,6 +24,9 @@ on:
       - nextflow.config
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -51,7 +54,7 @@ jobs:
       - name: Set up Nextflow
         uses: nf-core/setup-nextflow@v1
         with:
-          version: '25.04.6'
+          version: '26.04.3'
 
       - name: Check help message exits cleanly
         run: |
@@ -59,7 +62,7 @@ jobs:
 
       - name: Install nf-test
         run: |
-          wget -qO- https://get.nf-test.com | bash -s 0.9.3
+          wget -qO- https://get.nf-test.com | bash -s 0.9.4
           sudo mv nf-test /usr/local/bin/
 
       - name: Run unit tests

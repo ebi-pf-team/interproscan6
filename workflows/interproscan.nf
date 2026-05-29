@@ -7,11 +7,9 @@ include { SCAN_SEQUENCES as SCAN_REMAINING;
 include { COMBINE              } from "../subworkflows/combine"
 include { OUTPUT               } from "../subworkflows/output"
 
-import uk.ac.ebi.interpro.InterProScan
-
 workflow INTERPROSCAN {
     take:
-    fasta_file              // Channel.fromPath(input fasta file)
+    fasta_file              // channel.fromPath(input fasta file)
     applications            // list[str], names of applications to run
     appl_config             // map, contents of the conf/applications.conf file
     data_dir                // path to the data directory
@@ -19,7 +17,7 @@ workflow INTERPROSCAN {
     formats                 // list[str], output formats
     interpro_version        // str, version of InterPro
     interproscan_version    // str, version of InterProScan
-    interproscan_name       // str, name of the InterProScan workflow: "InterProScan6"
+    _interproscan_name      // str, name of the InterProScan workflow: "InterProScan6"
     no_matches_api          // boolean, use the Matches API
     matches_api_url         // str, url to the Matches API
     matches_api_chunk_size  // int, chunk size for Matches API requests
@@ -41,23 +39,23 @@ workflow INTERPROSCAN {
         data_dir,
         interpro_version,
         interproscan_version,
-        !no_matches_api,
-        globus,
-        enforce_compatibility
+        !no_matches_api.toBoolean(),
+        globus.toBoolean(),
+        enforce_compatibility.toBoolean()
     )
     appl_dirs        = INIT_DATABASES.out.directories
     interpro_version = INIT_DATABASES.out.interpro_version
 
     INIT_SEQUENCES(
         fasta_file,
-        nucleic,
+        nucleic.toBoolean(),
         batch_size
     )
     fasta = INIT_SEQUENCES.out.fasta
     seqdb = INIT_SEQUENCES.out.database
 
     scan_results = channel.empty()
-    if (no_matches_api) {
+    if (no_matches_api.toBoolean()) {
         SCAN_SEQUENCES(
             fasta,
             appl_config,
@@ -111,23 +109,23 @@ workflow INTERPROSCAN {
         scan_results,
         appl_config,
         appl_dirs,
-        goterms,
-        pathways,
-        skip_repr_locations
+        goterms.toBoolean(),
+        pathways.toBoolean(),
+        skip_repr_locations.toBoolean()
     )
 
-    output_files = OUTPUT(
+    OUTPUT(
         COMBINE.out,
         seqdb,
         formats,
         outprefix,
-        nucleic,
+        nucleic.toBoolean(),
         interpro_version,
         interproscan_version
     )
 
     emit:
-    output_files
+    OUTPUT.out
 }
 
 workflow PREPARE_INTERPROSCAN {
@@ -138,7 +136,7 @@ workflow PREPARE_INTERPROSCAN {
     use_gpu      // boolean, use GPU acceleration where applicable
 
     main:
-    (apps_config, warn) = InterProScan.parseAppsConfig(use_gpu, applications, apps_config)
+    (apps_config, warn) = uk.ac.ebi.interpro.InterProScan.parseAppsConfig(use_gpu, applications, apps_config)
     if (warn) {
         log.warn warn
     }

@@ -1,13 +1,7 @@
-import java.io.File
-import java.nio.file.*
-import groovy.json.JsonSlurper
-import groovy.json.JsonOutput
-
-import uk.ac.ebi.interpro.InterProScan
-
 process DOWNLOAD {
     maxForks  1
-    label     'mem_min', 'time_veryshort'
+    label     'mem_min'
+    label     'time_veryshort'
     executor  'local'
     container 'interpro/download:1.0'
 
@@ -25,7 +19,7 @@ process DOWNLOAD {
         """
         """
     } else {
-        def base_url = use_globus ? InterProScan.GLOBUS_URL : InterProScan.FTP_URL
+        def base_url = use_globus ? uk.ac.ebi.interpro.InterProScan.GLOBUS_URL : uk.ac.ebi.interpro.InterProScan.FTP_URL
         """
         curl -OJ ${base_url}/${iprscan_version}/${arcname}/${arcname}-${version}.tar.gz
         curl -OJ ${base_url}/${iprscan_version}/${arcname}/${arcname}-${version}.tar.gz.md5
@@ -39,7 +33,8 @@ process DOWNLOAD {
 }
 
 process FIND_DATABASES {
-    label    'mem_min', 'time_veryshort'
+    label    'mem_min'
+    label    'time_veryshort'
     executor 'local'
 
     input:
@@ -54,7 +49,7 @@ process FIND_DATABASES {
     val missing,  emit: missing
 
     exec:
-    def json = new JsonSlurper().parse(databases_json)
+    def json = new groovy.json.JsonSlurper().parse(databases_json)
     def normalised_json = [:]
     json.each { key, value ->
         normalised_json[key.replaceAll(/[\s\-]+/, '').toLowerCase()] = value

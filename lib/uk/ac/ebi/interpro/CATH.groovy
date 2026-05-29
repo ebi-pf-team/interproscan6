@@ -91,7 +91,7 @@ class CATH {
                     fragments.add(fragment)
                 }
 
-                Location location = new Location(
+                Location location = new uk.ac.ebi.interpro.Location(
                     cathDomain.getResolvedStart(),
                     cathDomain.getResolvedEnd(),
                     hmmerDomain.locations[0].hmmStart,
@@ -111,8 +111,8 @@ class CATH {
                 if (sequenceDomains.containsKey(domId)) {
                     sequenceDomains[domId].addLocation(location)
                 } else {
-                    Signature sig = new Signature(cathDomain.accession, new SignatureLibraryRelease(memberDb, null))
-                    Match domain = new Match(
+                    Signature sig = new uk.ac.ebi.interpro.Signature(cathDomain.accession, new SignatureLibraryRelease(memberDb, null))
+                    Match domain = new uk.ac.ebi.interpro.Match(
                         domId, 
                         hmmerDomain.evalue,
                         hmmerDomain.score, 

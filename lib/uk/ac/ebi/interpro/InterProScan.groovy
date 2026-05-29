@@ -364,18 +364,15 @@ class InterProScan {
     }
 
     static String validateInterProVersion(versionParam) {
-        String version = null
-        if (versionParam instanceof Number) {
-            double num = ((Number) versionParam).doubleValue();
-            if (num == Math.floor(num)) {
-                version = String.format("%.1f", num);
-            } else {
-                version = Double.toString(num);
-            }
-        } else if (versionParam instanceof String && versionParam == "latest") {
-            version = versionParam
+        def version = versionParam?.toString()?.trim()
+        if (!version) return null
+        if (version == "latest") return version
+        try {
+            def num = new BigDecimal(version)
+            return num.toPlainString()
+        } catch (NumberFormatException e) {
+            return null
         }
-        return version
     }
 
     static List<String> fetchCompatibleVersions(String majorMinorVersion, boolean useGlobus = false) {

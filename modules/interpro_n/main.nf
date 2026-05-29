@@ -1,73 +1,43 @@
-// codenarc-disable AllowedDirectivesRule
-import groovy.json.JsonSlurper
-import groovy.json.JsonOutput
-import uk.ac.ebi.interpro.FastaFile
-import uk.ac.ebi.interpro.Location
-import uk.ac.ebi.interpro.LocationFragment
-import uk.ac.ebi.interpro.Match
-import uk.ac.ebi.interpro.Signature
-import uk.ac.ebi.interpro.SignatureLibraryRelease
-
-def MAX_LENGTH    = 2047  // Maximum sequence length
-def CHUNK_OVERLAP = 1000  // Number of overlapping residues between consecutive chunks
-def MATCH_OVERLAP = 0.25  // Fractional overlap threshold for merging matches
-def DATABASES = [         // Databases supported by InterPro-N
-    cathgene3d     : "CATH-Gene3D",
-    cdd            : "CDD",
-    hamap          : "HAMAP",
-    ncbifam        : "NCBIFAM",
-    panther        : "PANTHER",
-    pfam           : "Pfam",
-    pirsf          : "PIRSF",
-    prints         : "PRINTS",
-    prositeprofiles: "PROSITE profiles",
-    prositepatterns: "PROSITE patterns",
-    sfld           : "SFLD",
-    smart          : "SMART",
-    ssf            : "SUPERFAMILY",
-]
-
 process PREPARE_INTERPRO_N {
-    label    'mem_low', 'time_short'
+    label    'mem_low'
+    label    'time_short'
     executor 'local'
 
     input:
     tuple val(meta), val(fasta)
     val batch_size    // max number of sequences in output fasta files
+    val max_length
+    val chunk_overlap
 
     output:
     tuple val(meta), path("sequences_*.tsv", arity: '1..*')
 
     exec:
-    def sequences = FastaFile.chunkSequences(fasta, MAX_LENGTH, CHUNK_OVERLAP)
+    def sequences = uk.ac.ebi.interpro.FastaFile.chunkSequences(fasta, max_length, chunk_overlap)
     def fileIndex = 1
     def seqCount = 0
-    def writer = null
-    def openNewFile = {
-        if (writer) writer.close()
-        writer = task.workDir.resolve("sequences_${fileIndex}.tsv").newWriter("UTF-8")
-        writer.writeLine("accession\tsequence")
-        fileIndex++
-        seqCount = 0
-        return writer
-    }
-
-    writer = openNewFile()
+    def writer = task.workDir.resolve("sequences_${fileIndex}.tsv").newWriter("UTF-8")
+    writer.writeLine("accession\tsequence")
     sequences.each { seq ->
         if (batch_size > 0 && seqCount >= batch_size) {
-            writer = openNewFile()
+            writer.close()
+            fileIndex += 1
+            seqCount = 0
+            writer = task.workDir.resolve("sequences_${fileIndex}.tsv").newWriter("UTF-8")
+            writer.writeLine("accession\tsequence")
         }
         seq.chunks.eachWithIndex { chunk, idx ->
             writer.writeLine("${seq.id}_${idx + 1}\t${chunk}")
-            seqCount++
+            seqCount += 1
         }
     }
 
-    if (writer) writer.close()
+    writer.close()
 }
 
 process RUN_INTERPRO_N_CPU {
-    label     'mem_high', 'time_medium'
+    label     'mem_high'
+    label     'time_medium'
     container 'interpro/interpro-n:1.0'
 
     input:
@@ -93,7 +63,9 @@ process RUN_INTERPRO_N_CPU {
 }
 
 process RUN_INTERPRO_N_GPU {
-    label     'mem_high', 'time_short', 'use_gpu'
+    label     'mem_high'
+    label     'time_short'
+    label     'use_gpu'
     container 'interpro/interpro-n:1.0'
 
     input:
@@ -119,33 +91,50 @@ process RUN_INTERPRO_N_GPU {
 }
 
 process PARSE_INTERPRO_N {
-    label    'mem_low', 'time_short'
+    label    'mem_low'
+    label    'time_short'
     executor 'local'
 
     input:
     tuple val(meta), val(json_files)
     val applications
+    val max_length
+    val chunk_overlap
+    val match_overlap
 
     output:
     tuple val(meta), path("interpro-n.json")
 
     exec:
+    def supported_databases = [
+        cathgene3d     : "CATH-Gene3D",
+        cdd            : "CDD",
+        hamap          : "HAMAP",
+        ncbifam        : "NCBIFAM",
+        panther        : "PANTHER",
+        pfam           : "Pfam",
+        pirsf          : "PIRSF",
+        prints         : "PRINTS",
+        prositeprofiles: "PROSITE profiles",
+        prositepatterns: "PROSITE patterns",
+        sfld           : "SFLD",
+        smart          : "SMART",
+        ssf            : "SUPERFAMILY",
+    ]
+
     // User-requested applications
     def requested = applications.collect { name ->
-        switch(name) {
-            case "superfamily": return "ssf"
-            default           : return name
-        }
+        return name == "superfamily" ? "ssf" : name
     } as Set
 
     // Compute overlap
-    def overlappingApps = DATABASES.keySet().intersect(requested)
+    def overlappingApps = supported_databases.keySet().intersect(requested)
 
     // If none overlap, fallback to all supported applications
-    def selectedApps = overlappingApps ?: DATABASES.keySet()
+    def selectedApps = overlappingApps ?: supported_databases.keySet()
 
     // Parse all JSON files and group by sequence ID
-    def jsonSlurper = new JsonSlurper()
+    def jsonSlurper = new groovy.json.JsonSlurper()
     def resultsBySeq = [:].withDefault { [] }
     json_files.each { jsonFile ->
         def data = jsonSlurper.parse(jsonFile)
@@ -161,17 +150,17 @@ process PARSE_INTERPRO_N {
     // Merge matches for each full sequence
     def results = [:]
     resultsBySeq.each { seqId, chunks ->
-        chunks.sort { it.id }
+        chunks.sort { chunk -> chunk.id }
 
         // Collect all matched with global coordinates
         def allMatches = []
         chunks.each { chunk ->
-            def offset = chunk.id * (MAX_LENGTH - CHUNK_OVERLAP)
+            def offset = chunk.id * (max_length - chunk_overlap)
             chunk.matches.each { match ->
                 def sigLib = match.signature.signatureLibraryRelease
                 def sigLibName = sigLib.library.toLowerCase().replaceAll(/[-\s]/, "")
                 if (sigLibName in selectedApps) {
-                    sigLib.library = DATABASES[sigLibName]
+                    sigLib.library = supported_databases[sigLibName]
                 } else {
                     return
                 }
@@ -191,45 +180,39 @@ process PARSE_INTERPRO_N {
         }
 
         // Group by signature
-        def bySig = allMatches.groupBy {
-            def sig = it.signature
+        def bySig = allMatches.groupBy { match ->
+            def sig = match.signature
             def lib = sig.signatureLibraryRelease
             "${sig.accession}::${lib.library}::${lib.version}"
          }
 
         def merged = []
-        bySig.each { sigKey, matches ->
+        bySig.each { _key, matches ->
             // Sort by descending score, then ascending start
             matches.sort { a, b ->
-                int cmp = b.score <=> a.score
+                def cmp = b.score <=> a.score
                 (cmp != 0) ? cmp : (a.start <=> b.start)
             }
 
             def locations = []
             matches.each { match ->
-                boolean isMerged = false
-
-                for (other in locations) {
+                def matchLen = match.end - match.start + 1
+                def mergedLoc = locations.find { other ->
                     def overlapStart = Math.max(other.start, match.start)
                     def overlapEnd = Math.min(other.end, match.end)
                     def overlapLength = overlapEnd - overlapStart + 1
-                    if (overlapLength <= 0) continue
+                    if (overlapLength <= 0) return false
 
-                    def lenA = other.end - other.start + 1
-                    def lenB = match.end - match.start + 1
-                    def fracA = overlapLength / lenA
-                    def fracB = overlapLength / lenB
-
-                    if (fracA >= MATCH_OVERLAP || fracB >= MATCH_OVERLAP) {
-                        other.start = Math.min(other.start, match.start)
-                        other.end = Math.max(other.end, match.end)
-                        other.fragments.addAll(match.fragments)
-                        other.fragments = mergeFragments(other.fragments)
-                        isMerged = true
-                        break
-                    }
+                    def otherLen = other.end - other.start + 1
+                    overlapLength >= (match_overlap * otherLen) || overlapLength >= (match_overlap * matchLen)
                 }
-                if (!isMerged) {
+
+                if (mergedLoc) {
+                    mergedLoc.start = Math.min(mergedLoc.start, match.start)
+                    mergedLoc.end = Math.max(mergedLoc.end, match.end)
+                    mergedLoc.fragments.addAll(match.fragments)
+                    mergedLoc.fragments = mergeFragments(mergedLoc.fragments)
+                } else {
                     match.fragments = mergeFragments(match.fragments)
                     locations << match
                 }
@@ -248,19 +231,19 @@ process PARSE_INTERPRO_N {
             def sigLib = sig.signatureLibraryRelease
             def accession = sig.accession
 
-            SignatureLibraryRelease library = new SignatureLibraryRelease(sigLib.library, sigLib.version)
-            Signature signature = new Signature(accession, library)
-            Match match = new Match(accession, signature)
+            def library = new uk.ac.ebi.interpro.SignatureLibraryRelease(sigLib.library, sigLib.version)
+            def signature = new uk.ac.ebi.interpro.Signature(accession, library)
+            def match = new uk.ac.ebi.interpro.Match(accession, signature)
             // Override source set in Match constructor
             match.source = "InterPro-N"
 
             rawMatch.locations.each { loc ->
                 // transform to LocationFragment objects
-                List<LocationFragment> fragments = []
+                def fragments = []
                 if (loc.fragments.size() > 1) {
-                    loc.fragments.sort { it.start }
+                    loc.fragments.sort { f -> f.start }
                     loc.fragments.eachWithIndex { f, i ->
-                        String status
+                        def status
                         if (i == 0) {
                             status = "C_TERMINAL_DISC"
                         } else if (i + 1 < loc.fragments.size()) {
@@ -268,15 +251,15 @@ process PARSE_INTERPRO_N {
                         } else {
                             status = "N_TERMINAL_DISC"
                         }
-                        fragments << new LocationFragment(f.start, f.end, status)
+                        fragments << new uk.ac.ebi.interpro.LocationFragment(f.start, f.end, status)
                     }
                 } else {
                     def f = loc.fragments[0]
-                    fragments << new LocationFragment(f.start, f.end, "CONTINUOUS")
+                    fragments << new uk.ac.ebi.interpro.LocationFragment(f.start, f.end, "CONTINUOUS")
                 }
 
                 match.addLocation(
-                    new Location(loc.start, loc.end, loc.score, fragments)
+                    new uk.ac.ebi.interpro.Location(loc.start, loc.end, loc.score, fragments)
                 )
             }
 
@@ -287,21 +270,25 @@ process PARSE_INTERPRO_N {
     }
 
     def filepath = task.workDir.resolve("interpro-n.json")
-    filepath.text = JsonOutput.toJson(results)
+    filepath.text = groovy.json.JsonOutput.toJson(results)
 }
 
 
 def mergeFragments(fragments) {
-    def sorted = fragments.sort { it.start }
-    def merged = [sorted[0].clone()]
-    for (int i = 1; i < sorted.size(); i++) {
-        def current = sorted[i]
+    fragments.sort { f -> f.start }.inject([]) { merged, current ->
+        if (merged.isEmpty()) {
+            merged << current.clone()
+            return merged
+        }
+
         def last = merged[-1]
         if (current.start <= last.end + 1) {
-            last.end = Math.max(last.end, current.end)
+            if (current.end > last.end) {
+                last.end = current.end
+            }
         } else {
             merged << current.clone()
         }
+        merged
     }
-    return merged
 }

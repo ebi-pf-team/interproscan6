@@ -4,7 +4,7 @@ include { REPRESENTATIVE_LOCATIONS } from "../../modules/representative_location
 
 workflow COMBINE {
     take:
-    json                // [ meta, [json] ]
+    ch_json             // [ meta, [json] ]
     appl_config
     appl_dirs
     add_goterms
@@ -13,18 +13,18 @@ workflow COMBINE {
 
     main:
     ch_interpro = appl_dirs
-        .filter { name, dirpath -> name == "interpro" }
-        .map    { name, dirpath -> dirpath }
+        .filter { name, _dirpath -> name == "interpro" }
+        .map    { _name, dirpath -> dirpath }
         .ifEmpty(file("${projectDir}/assets/DUMMY")) 
         .first()
 
     ch_panther = appl_dirs
-        .filter { name, dirpath -> name == "panther" }
-        .map    { name, dirpath -> dirpath.resolve(appl_config.panther.paint) }
+        .filter { name, _dirpath -> name == "panther" }
+        .map    { _name, dirpath -> dirpath.resolve(appl_config.panther.paint) }
         .ifEmpty(file("${projectDir}/assets/DUMMY2")) 
         .first()
 
-    COMBINE_MATCHES(json)
+    COMBINE_MATCHES(ch_json)
 
     ch_xrefs = ADD_XREFS(
         COMBINE_MATCHES.out,
@@ -41,11 +41,9 @@ workflow COMBINE {
         ch_combined = REPRESENTATIVE_LOCATIONS(ch_xrefs)
     }
 
+    emit:
     // Collect all JSON files into a single channel so we don't have concurrent writing to the output files
     results = ch_combined
-        .map { meta, json -> json }
+        .map { _meta, json -> json }
         .collect(flat: true)
-
-    emit:
-    results
 }

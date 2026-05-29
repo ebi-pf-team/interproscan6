@@ -1,13 +1,6 @@
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
-import java.util.regex.Pattern
-import uk.ac.ebi.interpro.HMMER3
-import uk.ac.ebi.interpro.Location
-import uk.ac.ebi.interpro.Site
-import uk.ac.ebi.interpro.SiteLocation
-
 process PARSE_PIRSR {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:
@@ -18,8 +11,8 @@ process PARSE_PIRSR {
     tuple val(meta), path("pirsr.json")
 
     exec:
-    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out, "PIRSR")
-    def rules = new JsonSlurper().parse(rulesfile)
+    def hmmerMatches = uk.ac.ebi.interpro.HMMER3.parseOutput(hmmsearch_out, "PIRSR")
+    def rules = new groovy.json.JsonSlurper().parse(rulesfile)
     def validMatches = [:]
     hmmerMatches.each { seqId, matches ->
         def filteredSeqMatches = [:]
@@ -42,28 +35,30 @@ process PARSE_PIRSR {
                 def ruleSites = [] as Set
                 def rule = rules.get(modelAccession, null)
                 if (rule) {
-                    rule.Groups.each { grp, positions ->
+                    rule.Groups.each { _grp, positions ->
                         def passCount = 0
                         def positionsParsed = [] as Set
                         positions.each { pos ->
                             def condition = pos.condition.replaceAll(/[-()]/) { m ->
-                                switch (m[0]) {
-                                    case '-': return ''
-                                    case '(': return '{'
-                                    case ')': return '}'
+                                if (m[0] == '-') {
+                                    return ''
+                                } else if (m[0] == '(') {
+                                    return '{'
+                                } else if (m[0] == ')') {
+                                    return '}'
                                 }
                             }.replace('x', '.')
 
                             def querySeq = location.targetAlignment.replaceAll('-', '')
+                            def targetSeq
                             if (pos.hmmStart < map.size() && pos.hmmEnd < map.size()) {
                                 targetSeq = querySeq[map[pos.hmmStart]..<map[pos.hmmEnd] + 1]
-                                residue = location.targetAlignment[map[pos.hmmStart]..<map[pos.hmmEnd] + 1]
                             } else {
                                 targetSeq = ''
                             }
 
                             if (targetSeq ==~ condition) {
-                                passCount++
+                                passCount += 1
                                 if (pos.start == 'Nter') pos.start = location.start
                                 if (pos.end == 'Cter') pos.end = location.end
                             }
@@ -102,11 +97,11 @@ process PARSE_PIRSR {
                     def groupedPositions = [:]
                     ruleSites.each { desc, residue, residueStart, residueEnd ->
                         def siteLocations = groupedPositions.computeIfAbsent(desc) { [] }
-                        siteLocations << new SiteLocation(residue, residueStart, residueEnd)
+                        siteLocations << new uk.ac.ebi.interpro.SiteLocation(residue, residueStart, residueEnd)
                     }
                     groupedPositions.each { description, siteLocations ->
                         siteLocations.sort { a, b -> a.start <=> b.start ?: a.end <=> b.end }
-                        location.addSite(new Site(description, siteLocations))
+                        location.addSite(new uk.ac.ebi.interpro.Site(description, siteLocations))
                     }
                     selectedLocations << location
                 }
@@ -124,33 +119,34 @@ process PARSE_PIRSR {
     }
 
     def filepath = task.workDir.resolve("pirsr.json")
-    filepath.text = JsonOutput.toJson(validMatches)
+    filepath.text  = groovy.json.JsonOutput.toJson(validMatches)
 }
 
-def mapHMMToSeq(int hmmStart, String querySeq, String targetSeq) {
-    int seqPos = 0
-    def map = [0]
-    for (int i = 1; i <= hmmStart; i++) {
-        map << -1
-    }
-    for (int i = 0; i < querySeq.length(); i++) {
-        map = map[0..hmmStart - 1] + [seqPos]
-        if (querySeq[i] != '.') {
-            hmmStart += 1
+def mapHMMToSeq(hmmStart, querySeq, targetSeq) {
+    def seqPos = 0
+    def currentHmmStart = hmmStart
+    def map = ([0] + (1..hmmStart).collect { -1 }) as List<Integer>
+
+    querySeq.eachWithIndex { queryChar, index ->
+        map[currentHmmStart] = seqPos
+        if (queryChar != '.') {
+            currentHmmStart += 1
+            map << -1
         }
-        if (targetSeq[i] != '-') {
+        if (targetSeq[index] != '-') {
             seqPos += 1
         }
     }
+
     return map
 }
 
 def getPositionMap(alignment, position) {
-    Map<Integer, Integer> positionMap = [:]
+    def positionMap = [:]
     alignment.eachWithIndex { character, index ->
         if (Character.isLetter(character as char)) {
             positionMap[position] = index
-            position++
+            position += 1
         }
     }
     return positionMap

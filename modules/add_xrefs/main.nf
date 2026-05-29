@@ -1,5 +1,6 @@
 process ADD_XREFS {
-    label     'mem_medium', 'time_veryshort'
+    label     'mem_medium'
+    label     'time_veryshort'
     container 'interpro/groovy:4.0.27-1'
 
     input:

@@ -1,5 +1,3 @@
-import uk.ac.ebi.interpro.InterProScan
-
 workflow INIT_PIPELINE {
     // Validate pipeline input parameters
     take:
@@ -17,7 +15,7 @@ workflow INIT_PIPELINE {
     skip_applications
     goterms
     pathways
-    workflow_manifest
+    _workflow_manifest
 
     main:
     // Check the input
@@ -28,7 +26,7 @@ workflow INIT_PIPELINE {
     }
 
     // Applications validation
-    (apps, error, warn) = InterProScan.validateApplications(applications, skip_applications, applications_config, run_ml)
+    (apps, error, warn) = uk.ac.ebi.interpro.InterProScan.validateApplications(applications, skip_applications, applications_config, run_ml)
     if (!apps) {
         log.error error
         exit 1
@@ -37,7 +35,7 @@ workflow INIT_PIPELINE {
     }
 
     // Enable gpu acceleration if requested
-    (apps_config, warn) = InterProScan.enableGpuAcceleration(use_gpu, apps, applications_config)
+    (apps_config, warn) = uk.ac.ebi.interpro.InterProScan.enableGpuAcceleration(use_gpu, apps, applications_config)
     if (warn) {
         log.warn warn
     }
@@ -48,13 +46,13 @@ workflow INIT_PIPELINE {
     }
 
     // Check valid output file formats were provided
-    (formats, error) = InterProScan.validateFormats(formats)
+    (formats, error) = uk.ac.ebi.interpro.InterProScan.validateFormats(formats)
     if (error) {
         log.error error
         exit 1
     }
 
-    apps_with_data = InterProScan.getAppsWithData(apps, apps_config)
+    apps_with_data = uk.ac.ebi.interpro.InterProScan.getAppsWithData(apps, apps_config)
     if (apps_with_data.size() > 0) {
         if (datadir == null) {
             log.error "'--datadir <DATA-DIR>' is required for the selected applications."
@@ -72,7 +70,7 @@ workflow INIT_PIPELINE {
         datadir = null
     }
   
-    version = InterProScan.validateInterProVersion(interpro_version)
+    version = uk.ac.ebi.interpro.InterProScan.validateInterProVersion(interpro_version)
     if (version == null) {
         log.error "--interpro <VERSION>: invalid format; expecting number or 'latest'"
         exit 1

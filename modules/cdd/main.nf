@@ -1,12 +1,6 @@
-import groovy.json.JsonOutput
-import uk.ac.ebi.interpro.Location
-import uk.ac.ebi.interpro.Match
-import uk.ac.ebi.interpro.Signature
-import uk.ac.ebi.interpro.SignatureLibraryRelease
-import uk.ac.ebi.interpro.Site
-
 process SEARCH_CDD {
-    label     'mem_min', 'time_short'
+    label     'mem_min'
+    label     'time_short'
     container 'interpro/cdd:1.0'
 
     input:
@@ -40,7 +34,8 @@ process SEARCH_CDD {
 }
 
 process PARSE_CDD {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:
@@ -50,11 +45,11 @@ process PARSE_CDD {
     tuple val(meta), path("cdd.json")
 
     exec:
-    SignatureLibraryRelease library = new SignatureLibraryRelease("CDD", null)
-    String sessionId = null
-    String sequenceId = null
-    boolean inDomains = false
-    boolean inSites = false
+    def library = new uk.ac.ebi.interpro.SignatureLibraryRelease("CDD", null)
+    def sessionId = null
+    def sequenceId = null
+    def inDomains = false
+    def inSites = false
     def hits = [:]
     def pssmHits = [:]
     def pssmSites = [:]
@@ -84,25 +79,25 @@ process PARSE_CDD {
                 // #<session-ordinal>      <query-id[readingframe]>        <hit-type>      <PSSM-ID>       <from>  <to>    <E-Value>       <bitscore>      <accession>     <short-name>    <incomplete>    <superfamily PSSM-ID>
                 def fields = line.split("\t")
                 assert fields.size() == 12
-                String hitType = fields[2]
+                def hitType = fields[2]
                 if (hitType.toUpperCase() == "SPECIFIC") {
-                    String pssmId = fields[3]
-                    int start = fields[4].toInteger()
-                    int end = fields[5].toInteger()
-                    Double evalue = Double.parseDouble(fields[6])
-                    Double bitscore = Double.parseDouble(fields[7])
-                    String modelAccession = fields[8]
+                    def pssmId = fields[3]
+                    def start = fields[4].toInteger()
+                    def end = fields[5].toInteger()
+                    def evalue = Double.parseDouble(fields[6])
+                    def bitscore = Double.parseDouble(fields[7])
+                    def modelAccession = fields[8]
 
                     // We need to use the PSSM ID to link domains and sites
-                    Match match
+                    def match
                     if (pssmHits.containsKey(pssmId)) {
                         match = pssmHits[pssmId]
                     } else {
-                        Signature signature = new Signature(modelAccession, library)
-                        match = new Match(modelAccession, signature)
+                        def signature = new uk.ac.ebi.interpro.Signature(modelAccession, library)
+                        match = new uk.ac.ebi.interpro.Match(modelAccession, signature)
                         pssmHits[pssmId] = match
                     }
-                    match.addLocation(new Location(start, end, evalue, bitscore))
+                    match.addLocation(new uk.ac.ebi.interpro.Location(start, end, evalue, bitscore))
                 }
             } else {
                 // #<session-ordinal>      <query-id[readingframe]>        <annot-type>    <title> <residue(coordinates)>  <complete-size> <mapped-size>   <source-domain>
@@ -133,7 +128,7 @@ process PARSE_CDD {
                 def match = pssmHits[pssmId]
                 if (match != null) {
                     descriptionToResidues.each { description, residues ->
-                        match.addSite(new Site(description, residues.join(",")))  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
+                        match.addSite(new uk.ac.ebi.interpro.Site(description, residues.join(",")))  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
                     }
                 }
             }
@@ -143,7 +138,7 @@ process PARSE_CDD {
             assert sequenceId != null
             
             def cddHits = [:]
-            pssmHits.each { key, match ->
+            pssmHits.each { _key, match ->
                 def modelAccession = match.modelAccession
                 assert !cddHits.containsKey(modelAccession)
                 cddHits[modelAccession] = match
@@ -159,5 +154,5 @@ process PARSE_CDD {
     }
 
     def filepath = task.workDir.resolve("cdd.json")
-    filepath.text = JsonOutput.toJson(hits)
+    filepath.text = groovy.json.JsonOutput.toJson(hits)
 }

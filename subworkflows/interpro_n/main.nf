@@ -10,9 +10,14 @@ workflow INTERPRO_N {
     seq_batch_size      // int, number of sequences per sub batch for searching
 
     main:
+    def max_length    = 2047  // Maximum sequence length
+    def chunk_overlap = 1000  // Number of overlapping residues between consecutive chunks
+    def match_overlap = 0.25  // Fractional overlap threshold for merging matches
     PREPARE_INTERPRO_N(
         ch_seqs, 
-        use_gpu ? seq_batch_size * 10 : seq_batch_size.intdiv(5)
+        use_gpu ? seq_batch_size * 10 : seq_batch_size.intdiv(5),
+        max_length,
+        chunk_overlap
     )
 
     ch_tsv = PREPARE_INTERPRO_N.out
@@ -37,7 +42,12 @@ workflow INTERPRO_N {
         ch_json = RUN_INTERPRO_N_CPU.out
     }
 
-    PARSE_INTERPRO_N(ch_json, applications)
+    PARSE_INTERPRO_N(
+        ch_json, 
+        applications,
+        max_length,
+        chunk_overlap,
+        match_overlap)
 
     emit:
     PARSE_INTERPRO_N.out  // [ meta, json ]

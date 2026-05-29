@@ -1,5 +1,6 @@
 process ESL_TRANSLATE {
-    label     'mem_low', 'time_short'
+    label     'mem_low'
+    label     'time_short'
     container 'interpro/esl-translate:0.46'
 
     input:

@@ -2,12 +2,12 @@ include { SEARCH_PANTHER; PREPARE_TREEGRAFTER; RUN_TREEGRAFTER; PARSE_PANTHER } 
 
 workflow PANTHER {
     take:
-    fasta          // [meta, fasta]
+    ch_fasta       // [meta, fasta]
     panther        // [hmm, msf]
     batch_size     // int, number of sequences per sub batch for searching
 
     main:
-    ch_split = fasta
+    ch_split = ch_fasta
         .map { meta, fasta ->
             fasta
                 .splitFasta( by: batch_size, file: true )
@@ -16,20 +16,20 @@ workflow PANTHER {
         }
         .flatMap()
 
-    hmm = panther.map { hmm, msf -> hmm }
+    ch_hmm = panther.map { hmm, _msf -> hmm }
     SEARCH_PANTHER(
         ch_split,
-        hmm
+        ch_hmm
     )
 
     PREPARE_TREEGRAFTER(
         SEARCH_PANTHER.out,
     )
 
-    msf = panther.map { hmm, msf -> msf }
+    ch_msf = panther.map { _hmm, msf -> msf }
     RUN_TREEGRAFTER(
         PREPARE_TREEGRAFTER.out,
-        msf
+        ch_msf
     )
 
     PARSE_PANTHER(
@@ -43,5 +43,5 @@ workflow PANTHER {
         
     emit:
     PARSE_PANTHER.out
-        .map { meta, meta2, json -> tuple (meta, json) }  // [ meta, json ]
+        .map { meta, _meta2, json -> tuple (meta, json) }  // [ meta, json ]
 }

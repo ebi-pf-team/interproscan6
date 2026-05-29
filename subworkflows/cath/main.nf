@@ -3,7 +3,7 @@ include { SEARCH_FUNFAM; PARSE_FUNFAM     } from  "../../modules/cath"
 
 workflow CATH {
     take:
-    fasta                 // [meta, fasta]
+    ch_fasta              // [meta, fasta]
     report_cathgene3d     // boolean to report Gene3D results
     cathgene3d_files      // [hmm, model2sfs, disc_regs]
     report_cathfunfam     // boolean to report FunFam results
@@ -11,9 +11,9 @@ workflow CATH {
     batch_size            // int, number of sequences per sub batch for searching
 
     main:
-    results = Channel.empty()
+    results = channel.empty()
 
-    ch_split = fasta
+    ch_split = ch_fasta
         .map { meta, fasta ->
             fasta
                 .splitFasta( by: batch_size, file: true )
@@ -59,5 +59,5 @@ workflow CATH {
 
     emit:
     results
-        .map { meta, meta2, json -> tuple (meta, json) }  // [ meta, json ]
+        .map { meta, _meta2, json -> tuple (meta, json) }  // [ meta, json ]
 }

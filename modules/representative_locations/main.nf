@@ -1,5 +1,6 @@
 process REPRESENTATIVE_LOCATIONS {
-    label     'mem_medium', 'time_short'
+    label     'mem_medium'
+    label     'time_short'
     container 'interpro/groovy:4.0.27-1'
 
     input:
