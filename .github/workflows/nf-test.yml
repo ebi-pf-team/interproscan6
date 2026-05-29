@@ -54,7 +54,7 @@ jobs:
       - name: Set up Nextflow
         uses: nf-core/setup-nextflow@v1
         with:
-          version: '26.04.0'
+          version: '26.04.3'
 
       - name: Check help message exits cleanly
         run: |
