@@ -2,7 +2,7 @@ name: Run nf-test
 on:
   push:
     paths:
-      - .github/workflows/nf-tests.yml
+      - .github/workflows/nf-test.yml
       - bin/**
       - conf/**
       - lib/**
@@ -13,7 +13,7 @@ on:
       - nextflow.config
   pull_request:
     paths:
-      - .github/workflows/nf-tests.yml
+      - .github/workflows/nf-test.yml
       - bin/**
       - conf/**
       - lib/**
