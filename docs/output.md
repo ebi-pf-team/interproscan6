@@ -33,7 +33,7 @@ The GFF3 output follows the standard GFF3 format with InterProScan-specific head
 ```
 ##gff-version 3.1.26
 ##interpro-version 108.0
-##interproscan-version 6.0.0
+##interproscan-version 6.0.1
 ```
 
 ### Features
@@ -66,7 +66,7 @@ Common attributes include: `Name`, `Alias`, `Parent` (for ORF/nucleic mode), `Db
 ```gff3
 ##gff-version 3.1.26
 ##interpro-version 108.0
-##interproscan-version 6.0.0
+##interproscan-version 6.0.1
 ##sequence-region tr|A0A086JQP8|A0A086JQP8_TOXGO 1 847
 tr|A0A086JQP8|A0A086JQP8_TOXGO	COILS	coiled_coil	485	526	.	.	.	Name=Coil;type=Region;representative=false
 tr|A0A086JQP8|A0A086JQP8_TOXGO	PROSITE patterns	polypeptide_motif	106	115	.	.	.	Name=HSP90;Alias=PS00298;Dbxref=InterPro:IPR019805;type=Conserved_site;representative=false
@@ -196,7 +196,7 @@ The schema is aligned with the response returned by the [Matches API](matches_ap
 
 ```json
 {
-  "interproscan-version": "6.0.0",
+  "interproscan-version": "6.0.1",
   "interpro-version": "108.0",
   "results": [
     {
@@ -298,7 +298,7 @@ The schema is aligned with the response returned by the [Matches API](matches_ap
 
 ```json
 {
-  "interproscan-version": "6.0.0",
+  "interproscan-version": "6.0.1",
   "interpro-version": "108.0",
   "results": [
     {
@@ -405,7 +405,7 @@ Compared with the InterProScan 5 XML schema, the InterProScan 6 XML format is si
 
 ```xml
 <?xml version='1.0' encoding='UTF-8'?>
-<results interproscan-version="6.0.0" interpro-version="108.0">
+<results interproscan-version="6.0.1" interpro-version="108.0">
   <protein>
     <sequence md5="04A129E51F351B91B6373645AFDBCC58">MKAKEIREMGADEIRRKIDDSTQEMFNLRFQHATGQLENTARLNKTKKEVARLKTILKEVEQ</sequence>
     <xref id="sp|B8FES7|RL29_DESAL" name="sp|B8FES7|RL29_DESAL Large ribosomal subunit protein uL29 OS=Desulfatibacillum aliphaticivorans OX=218208 GN=rpmC PE=3 SV=1"/>
@@ -441,7 +441,7 @@ Compared with the InterProScan 5 XML schema, the InterProScan 6 XML format is si
 
 ```xml
 <?xml version='1.0' encoding='UTF-8'?>
-<results interproscan-version="6.0.0" interpro-version="108.0">
+<results interproscan-version="6.0.1" interpro-version="108.0">
   <nucleotide-sequence>
     <sequence md5="0A4E057B197C1182FD211A4BFF5271CE">ATGAGGGATTCGCCCGATGAAGTCAGCGTCGACGAGCTGGTGAACATGGCCGTGGCCGGTGGCATCGACGAAGGAACGGCGTTGGACGCCTTACAGGGTAAGCTGGACCCGTACAAGGTAATGCGGGCTGCACACGAGGCCCGACTTAAGATCGTCGGTGAACACGTCACGTTCGTGGTGAACAGGAACATCAACTTCACCAACGTGTGCATTAACAGATGTCGATTCTGTGCGTTCCGGAGGGATCCGGACGACCCGGATGCTTACCGTATGACGCCGGAGGAGGTGGGCGAGCGGGCAGCGGAAGCCCGTGACGCTGGAGCTACGGAAGTATGTCTTCAGGGCGGACTGCATCCCGAGGCGACGTTTGAGTACTACCTGGAAATGTTGGACGAGATCAAGTCCCAAGCCCCGGACATCCACGTGCACGGGTACTCACCGATGGAGGTGAAGTACTGCGCCAAGCTGGCGGGAGAGGACATCGAAGACGTACTACGAGAGCTGAAGCGAGCCGGTCTCGATTCGATGCCCGGAACGGCCGCGGAGATATTCTCCCCTGAGGTGAGGAAGCGGCTATGTCCTGATAAGTTGGAAGCCGATGAGTGGGAACATATCATCAGGATCGCGCACGAGTTGGGAATTCCCACCACTTGTACTATGATGTACGGTCACATCGACTCACCGAGGGACTGGATCGACCACATGAAGCGGCTTCGAGGGATCCAAGAGGACACGGGAGGCTTCACGGAGTTCGTGCCGCTCTCCTTCGTACATTCGAACGCACCGATTTACCGACGAGGAGGGGCGCGACCCGGAGTATCGGGTATGACGGACGTACTCGTGCACGCTGTGGCCCGATTGTACTTCGGACCGTTGATTCCGAACATACAGGCTTCCTGGGTGAAGCTCGGAGTGAAGCTGGCTCAGATGACGCTGCACGCCGGGGCGAACGATCTAGGTGGCACCCTCATGGAAGAGAACATCTCCCGGGAGGCCGGAGCGACCGAGGGCGAGCAGCTCGAGCCCGAGGAGATAGTGGAGATCATTCGGGAGGCGGGCTTCACCCCCGTGCAGCGCACCACGCTCTACGAGCCGGTGAAGGTGTACTAA</sequence>
     <xref id="ENA|AAM02110|AAM02110.1" name="ENA|AAM02110|AAM02110.1 Methanopyrus kandleri AV19 Predicted enzyme related to thiamine biosynthesis enzyme ThiH"/>

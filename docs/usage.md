@@ -6,14 +6,14 @@ The typical command for running InterProScan is as follows:
 
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.0 \ # (1)!
+  -r 6.0.1 \ # (1)!
   -profile docker \ # (2)!
   --input /path/to/sequences.faa \ # (3)!
   --datadir data \ # (4)!
   --interpro latest # (5)!
 ```
 
-1. Run InterProScan `v6.0.0`
+1. Run InterProScan `v6.0.1`
 2. Executes tasks in Docker containers
 3. Path to your input FASTA file of protein sequences
 4. Directory where to download and save the reference files
@@ -48,7 +48,7 @@ See [Analyses](analyses.md) for the full list of supported analyses.
 
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.0 \
+  -r 6.0.1 \
   -profile docker \
   --datadir data \
   --input /path/to/sequences.faa \
@@ -59,7 +59,7 @@ nextflow run ebi-pf-team/interproscan6 \
 
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.0 \
+  -r 6.0.1 \
   -profile docker \
   --datadir data \
   --input /path/to/sequences.faa \
@@ -84,7 +84,7 @@ By default, InterProScan expects protein sequences, but supports nucleotide sequ
 
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.0 \
+  -r 6.0.1 \
   -profile docker \
   --datadir data \
   --input /path/to/contigs.fna \ # (1)!
@@ -108,7 +108,7 @@ When a match is integrated into an InterPro entry, InterProScan can add those an
 
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.0 \
+  -r 6.0.1 \
   -profile docker \
   --datadir data \
   --input /path/to/sequences.faa \
