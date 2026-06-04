@@ -1,6 +1,6 @@
 # InterProScan 6
 
-[![Nextflow](https://img.shields.io/badge/%E2%89%A525.04.6-0dc09d?style=flat&logo=nextflow&label=nextflow&labelColor=f5fafe)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/%E2%89%A525.10.4-0dc09d?style=flat&logo=nextflow&label=nextflow&labelColor=f5fafe)](https://www.nextflow.io/)
 [![run with docker](https://img.shields.io/badge/docker-1D63ED?logo=docker&logoColor=1D63ED&label=run%20with&labelColor=f5fafe)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/singularity-1E4383?label=run%20with&labelColor=f5fafe)](https://sylabs.io/docs/)
 
@@ -12,7 +12,7 @@
 
 Before you begin, install:
 
-* [Nextflow](https://www.nextflow.io/) 25.04 or later
+* [Nextflow](https://www.nextflow.io/) 25.10 or later
 * A container runtime. The currently supported are:
     * [Docker](https://www.docker.com/)
     * [SingularityCE](https://sylabs.io/singularity/)
@@ -32,7 +32,7 @@ If you have Docker and Nextflow installed, you can quickly test InterProScan and
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.0 \
+  -r 6.0.1 \
   -profile docker,test \
   --datadir data \
   --interpro latest
@@ -40,7 +40,7 @@ nextflow run ebi-pf-team/interproscan6 \
 
 Explanation of parameters:
 
-* `-r 6.0.0`: Specifies the version of InterProScan to run. We strongly recommend always specifying a version to ensure consistent and reproducible results.
+* `-r 6.0.1`: Specifies the version of InterProScan to run. We strongly recommend always specifying a version to ensure consistent and reproducible results.
 * `-profile docker,test`:
   * `docker`: Executes tasks in Docker containers.
   * `test`: Uses a small test FASTA file included in the workflow.
@@ -66,7 +66,7 @@ To annotate your own sequences FASTA file, omit the `test` profile and specify `
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.0 \
+  -r 6.0.1 \
   -profile docker \
   --datadir data \
   --input /path/to/sequences.faa
@@ -76,7 +76,7 @@ For nucleotide sequences, add `--nucleic`:
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.0 \
+  -r 6.0.1 \
   -profile docker \
   --datadir data \
   --input /path/to/sequences.fna \
@@ -93,6 +93,8 @@ For further assistance, please [create an issue](https://github.com/ebi-pf-team/
 
 ## Citation
 
-If you use InterProScan in your work, please cite the following publication:
+If you use InterProScan in your work, please cite the following publications:
+
+> Blum M, Hobbs E, Florentino L, Bateman A. **InterProScan 6: a modern large-scale protein function annotation pipeline**. *Bioinform Adv*. 2026 May 21;6(1):vbag141. [doi: 10.1093/bioadv/vbag141](https://doi.org/10.1093/bioadv/vbag141).
 
 > Blum M, Andreeva A, Florentino LC, Chuguransky SR, Grego T, Hobbs E, Pinto BL, Orr A, Paysan-Lafosse T, Ponamareva I, Salazar GA, Bordin N, Bork P, Bridge A, Colwell L, Gough J, Haft DH, Letunic I, Llinares-López F, Marchler-Bauer A, Meng-Papaxanthos L, Mi H, Natale DA, Orengo CA, Pandurangan AP, Piovesan D, Rivoire C, Sigrist CJA, Thanki N, Thibaud-Nissen F, Thomas PD, Tosatto SCE, Wu CH, Bateman A. **InterPro: the protein sequence classification resource in 2025**. *Nucleic Acids Res*. 2025 Jan;53(D1):D444-D456. [doi: 10.1093/nar/gkae1082](https://doi.org/10.1093/nar/gkae1082).
