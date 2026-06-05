@@ -1,3 +1,4 @@
+// codenarc-disable AllowedDirectivesRule
 process SEARCH_PIRSF {
     label     'mem_low'
     label     'time_short'
