@@ -26,7 +26,7 @@ workflow INIT_PIPELINE {
     }
 
     // Applications validation
-    (apps, error, warn) = uk.ac.ebi.interpro.InterProScan.validateApplications(applications, skip_applications, applications_config, run_ml)
+    (apps, error, warn) = uk.ac.ebi.interpro.InterProScan.validateApplications(applications, skip_applications, applications_config, run_ml.toBoolean())
     if (!apps) {
         log.error error
         exit 1
@@ -35,7 +35,7 @@ workflow INIT_PIPELINE {
     }
 
     // Enable gpu acceleration if requested
-    (apps_config, warn) = uk.ac.ebi.interpro.InterProScan.enableGpuAcceleration(use_gpu, apps, applications_config)
+    (apps_config, warn) = uk.ac.ebi.interpro.InterProScan.enableGpuAcceleration(use_gpu.toBoolean(), apps, applications_config)
     if (warn) {
         log.warn warn
     }
