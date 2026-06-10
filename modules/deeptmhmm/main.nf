@@ -28,7 +28,7 @@ process RUN_DEEPTMHMM_GPU {
     label       'mem_high'
     label       'time_short'
     label       'use_gpu'
-    container   'interpro/deeptmhmm:26.04'
+    container   'interpro/deeptmhmm:1.0'
     stageInMode 'copy'
 
     input:
