@@ -2,18 +2,12 @@ include { SEARCH_SUPERFAMILY; PARSE_SUPERFAMILY } from  "../../modules/superfami
 
 workflow SUPERFAMILY {
     take:
-    ch_seqs      // channel of tuples (meta, fasta file)
-    dirpath      // str repr of the data directory path
-    hmm          // str repr of the path to the HMM file in the data dir -> datadir/hmm
-    selfhits     // str repr of the path to the selfhits file in the data dir -> datadir/selfhits
-    cla          // str repr of the path to the cla file in the data dir -> datadir/cla
-    model        // str repr of the path to the model dir in the data dir -> datadir/model
-    pdbj95d      // str repr of the path to the pdbj95d file in the data dir -> datadir/pdbj95d
-    batch_size   // int, number of sequences per sub-batch for searching
+    ch_fasta    // [meta, fasta]
+    ssf        // [dir, hmm, selfhits, cla, model, pdbj95d]
+    batch_size // [int]
 
     main:
-    results = Channel.empty()
-    ch_split = ch_seqs
+    ch_split = ch_fasta
         .map { meta, fasta ->
             fasta
                 .splitFasta( by: batch_size, file: true )
@@ -22,23 +16,16 @@ workflow SUPERFAMILY {
         }
         .flatMap()
 
-    SEARCH_SUPERFAMILY(
-        ch_split,
-        dirpath,
-        hmm,
-        selfhits,
-        cla,
-        model,
-        pdbj95d
+    SEARCH_SUPERFAMILY(ch_split, ssf)
+
+    ch_parse = ssf.map { dir, hmm, _selfhits, _cla, model, _pdbj95d -> tuple (dir, hmm, model) }
+
+    PARSE_SUPERFAMILY(
+        SEARCH_SUPERFAMILY.out,
+        ch_parse
     )
 
-    results = results.mix(PARSE_SUPERFAMILY(
-        SEARCH_SUPERFAMILY.out,
-        dirpath,
-        model,
-        hmm
-    ))
-
     emit:
-    results.map { meta, meta2, json -> tuple (meta, json) }
+    PARSE_SUPERFAMILY.out
+        .map { meta, _meta2, json -> tuple (meta, json) }  // [ meta, json ]
 }

@@ -1,0 +1,42 @@
+nextflow_process {
+
+    name "Test Process PARSE_SFLD"
+    script "modules/sfld/main.nf"
+    process "PARSE_SFLD"
+
+    test("Should run without failures") {
+
+        setup {
+            run("GUNZIP") {
+                script "../gunzip/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/sfld/hmmsearch.out.gz", checkIfExists: true)
+                    """
+                }
+            }
+        }    
+
+        when {
+            params {
+                // define parameters here. Example:
+                // outdir = "tests/results"
+            }
+            process {
+                """
+                def postprocess = file("${projectDir}/tests/data/sfld/hmmsearch.tab", checkIfExists: true)
+                def hierarchydb = file("${projectDir}/tests/data/sfld/sfld_hierarchy.tsv", checkIfExists: true)
+                input[0] = GUNZIP.out.map { file -> tuple(1, file, postprocess)}
+                input[1] = hierarchydb
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

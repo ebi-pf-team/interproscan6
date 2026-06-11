@@ -1,0 +1,69 @@
+name: Run nf-test
+on:
+  push:
+    paths:
+      - .github/workflows/nf-test.yml
+      - bin/**
+      - conf/**
+      - lib/**
+      - modules/**
+      - subworkflows/**
+      - tests/**
+      - main.nf
+      - nextflow.config
+  pull_request:
+    paths:
+      - .github/workflows/nf-test.yml
+      - bin/**
+      - conf/**
+      - lib/**
+      - modules/**
+      - subworkflows/**
+      - tests/**
+      - main.nf
+      - nextflow.config
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Nextflow
+        uses: nf-core/setup-nextflow@v1
+        with:
+          version: '26.04.3'
+
+      - name: Check help message exits cleanly
+        run: |
+          nextflow run main.nf --help
+
+      - name: Install nf-test
+        run: |
+          wget -qO- https://get.nf-test.com | bash -s 0.9.4
+          sudo mv nf-test /usr/local/bin/
+
+      - name: Run unit tests
+        run: nf-test test tests

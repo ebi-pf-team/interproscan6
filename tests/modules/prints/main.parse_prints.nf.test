@@ -1,0 +1,25 @@
+nextflow_process {
+
+    name "Test Process PARSE_PRINTS"
+    script "modules/prints/main.nf"
+    process "PARSE_PRINTS"
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                input[0] = channel.of(tuple(1, file("${projectDir}/tests/data/prints/prints_output", checkIfExists: true)))
+                input[1] = file("${projectDir}/tests/data/prints/FingerPRINTShierarchy.db", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

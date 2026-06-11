@@ -80,7 +80,7 @@ class Match implements Serializable {
     }
 
     static Match fromMap(Map data) {
-        Match match = new Match(data.modelAccession)
+        Match match = new uk.ac.ebi.interpro.Match(data.modelAccession)
         match.evalue = data.evalue
         match.score = data.score
         match.bias = data.bias

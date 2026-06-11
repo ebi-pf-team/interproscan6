@@ -1,31 +1,18 @@
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
-import java.util.regex.Pattern
-import uk.ac.ebi.interpro.HMMER3
-import uk.ac.ebi.interpro.Location
-import uk.ac.ebi.interpro.Site
-import uk.ac.ebi.interpro.SiteLocation
-
 process PARSE_PIRSR {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:
     tuple val(meta), val(hmmsearch_out)
-    val dirpath
     val rulesfile
 
     output:
     tuple val(meta), path("pirsr.json")
 
     exec:
-    def outputFilePath = task.workDir.resolve("pirsr.json")
-    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "PIRSR")
-
-    JsonSlurper jsonSlurper = new JsonSlurper()
-    String rulesFilePath = "${dirpath.toString()}/${rulesfile}"
-    def rules = jsonSlurper.parse(new File(rulesFilePath))
-
+    def hmmerMatches = uk.ac.ebi.interpro.HMMER3.parseOutput(hmmsearch_out, "PIRSR")
+    def rules = new groovy.json.JsonSlurper().parse(rulesfile)
     def validMatches = [:]
     hmmerMatches.each { seqId, matches ->
         def filteredSeqMatches = [:]
@@ -33,54 +20,56 @@ process PARSE_PIRSR {
             // set the signature name, which defaults to null in the HMMER3 parser
             match.signature.name = modelAccession
 
-            List<Location> sortedLocations = match.locations.sort { loc ->
+            def sortedLocations = match.locations.sort { loc ->
                 [loc.evalue, -loc.score]  // sorting by evalue ASC, score DESC
             }
-            List<Location> selectedLocations = []
+            def selectedLocations = []
             sortedLocations.each { location ->
                 if (!location.included || !location.targetAlignment || !location.queryAlignment) {
                     return
                 }
-                List<Integer> map = mapHMMToSeq(location.hmmStart,
+                def map = mapHMMToSeq(location.hmmStart,
                                                 location.queryAlignment,
                                                 location.targetAlignment)
 
-                List<Site> ruleSites = []
+                def ruleSites = [] as Set
                 def rule = rules.get(modelAccession, null)
                 if (rule) {
-                    rule.Groups.each { grp, positions ->
-                        int passCount = 0
-                        List<Site> positionsParsed = []
+                    rule.Groups.each { _grp, positions ->
+                        def passCount = 0
+                        def positionsParsed = [] as Set
                         positions.each { pos ->
-                            String condition = pos.condition.replaceAll(/[-()]/) { m ->
-                                switch (m[0]) {
-                                    case '-': return ''
-                                    case '(': return '{'
-                                    case ')': return '}'
+                            def condition = pos.condition.replaceAll(/[-()]/) { m ->
+                                if (m[0] == '-') {
+                                    return ''
+                                } else if (m[0] == '(') {
+                                    return '{'
+                                } else if (m[0] == ')') {
+                                    return '}'
                                 }
                             }.replace('x', '.')
 
-                            String querySeq = location.targetAlignment.replaceAll('-', '')
+                            def querySeq = location.targetAlignment.replaceAll('-', '')
+                            def targetSeq
                             if (pos.hmmStart < map.size() && pos.hmmEnd < map.size()) {
                                 targetSeq = querySeq[map[pos.hmmStart]..<map[pos.hmmEnd] + 1]
-                                residue = location.targetAlignment[map[pos.hmmStart]..<map[pos.hmmEnd] + 1]
                             } else {
                                 targetSeq = ''
                             }
 
                             if (targetSeq ==~ condition) {
-                                passCount++
+                                passCount += 1
                                 if (pos.start == 'Nter') pos.start = location.start
                                 if (pos.end == 'Cter') pos.end = location.end
                             }
                             def (residueStart, residueEnd, residue) = [0, 0, null]
-                            Map<Integer, Integer> seqAlignmentPosMap = getPositionMap(location.targetAlignment, location.start)
-                            Map<Integer, Integer> seqAlignmentReversePosMap = seqAlignmentPosMap.collectEntries { k, v -> [(v): k] }
-                            Map<Integer, Integer> hmmAlignmentPosMap = getPositionMap(location.queryAlignment, location.hmmStart)
+                            def seqAlignmentPosMap = getPositionMap(location.targetAlignment, location.start)
+                            def seqAlignmentReversePosMap = seqAlignmentPosMap.collectEntries { k, v -> [(v): k] }
+                            def hmmAlignmentPosMap = getPositionMap(location.queryAlignment, location.hmmStart)
                             if (hmmAlignmentPosMap.containsKey(pos.hmmStart)) {
-                                int residueStartSeqAlign = hmmAlignmentPosMap[pos.hmmStart]
+                                def residueStartSeqAlign = hmmAlignmentPosMap[pos.hmmStart]
                                 if (hmmAlignmentPosMap.containsKey(pos.hmmEnd)) {
-                                    int residueEndSeqAlign = hmmAlignmentPosMap[pos.hmmEnd]
+                                    def residueEndSeqAlign = hmmAlignmentPosMap[pos.hmmEnd]
                                     residue = location.targetAlignment.substring(residueStartSeqAlign, residueEndSeqAlign + 1)
                                     if (seqAlignmentReversePosMap.containsKey(residueStartSeqAlign) &&
                                             seqAlignmentReversePosMap.containsKey(residueEndSeqAlign)) {
@@ -90,15 +79,12 @@ process PARSE_PIRSR {
                                 }
                             }
                             if (residueStart != 0 && residueEnd != 0) {
-                                SiteLocation siteLocation = new SiteLocation(residue, residueStart, residueEnd)
-                                positionsParsed << new Site(
+                                positionsParsed << [
                                     pos.desc,
-                                    pos.group as int,
-                                    pos.hmmEnd,
-                                    pos.hmmStart,
-                                    pos.label,
-                                    [siteLocation]
-                                )
+                                    residue,
+                                    residueStart,
+                                    residueEnd
+                                ]
                             }
                         }
 
@@ -108,7 +94,15 @@ process PARSE_PIRSR {
                     }
                 }
                 if (!ruleSites.isEmpty()) {
-                    location.sites = ruleSites
+                    def groupedPositions = [:]
+                    ruleSites.each { desc, residue, residueStart, residueEnd ->
+                        def siteLocations = groupedPositions.computeIfAbsent(desc) { [] }
+                        siteLocations << new uk.ac.ebi.interpro.SiteLocation(residue, residueStart, residueEnd)
+                    }
+                    groupedPositions.each { description, siteLocations ->
+                        siteLocations.sort { a, b -> a.start <=> b.start ?: a.end <=> b.end }
+                        location.addSite(new uk.ac.ebi.interpro.Site(description, siteLocations))
+                    }
                     selectedLocations << location
                 }
             }
@@ -123,34 +117,36 @@ process PARSE_PIRSR {
             validMatches[seqId] = filteredSeqMatches
         }
     }
-    def json = JsonOutput.toJson(validMatches)
-    new File(outputFilePath.toString()).write(json)
+
+    def filepath = task.workDir.resolve("pirsr.json")
+    filepath.text  = groovy.json.JsonOutput.toJson(validMatches)
 }
 
-def mapHMMToSeq(int hmmStart, String querySeq, String targetSeq) {
-    int seqPos = 0
-    def map = [0]
-    for (int i = 1; i <= hmmStart; i++) {
-        map << -1
-    }
-    for (int i = 0; i < querySeq.length(); i++) {
-        map = map[0..hmmStart - 1] + [seqPos]
-        if (querySeq[i] != '.') {
-            hmmStart += 1
+def mapHMMToSeq(hmmStart, querySeq, targetSeq) {
+    def seqPos = 0
+    def currentHmmStart = hmmStart
+    def map = ([0] + (1..hmmStart).collect { -1 }) as List<Integer>
+
+    querySeq.eachWithIndex { queryChar, index ->
+        map[currentHmmStart] = seqPos
+        if (queryChar != '.') {
+            currentHmmStart += 1
+            map << -1
         }
-        if (targetSeq[i] != '-') {
+        if (targetSeq[index] != '-') {
             seqPos += 1
         }
     }
+
     return map
 }
 
 def getPositionMap(alignment, position) {
-    Map<Integer, Integer> positionMap = [:]
+    def positionMap = [:]
     alignment.eachWithIndex { character, index ->
         if (Character.isLetter(character as char)) {
             positionMap[position] = index
-            position++
+            position += 1
         }
     }
     return positionMap

@@ -1,0 +1,48 @@
+nextflow_process {
+
+    name "Test Process PREPARE_SMART"
+    script "modules/smart/main.nf"
+    process "PREPARE_SMART"
+
+    test("Should run without failures") {
+
+        setup {
+            run("GUNZIP") {
+                script "../gunzip/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/smart/hmmsearch.out.gz", checkIfExists: true)
+                    """
+                }
+            }
+        }
+
+        when {
+            process {
+                """
+                def fasta = file("${projectDir}/tests/data/sequences/input.1.fasta", checkIfExists: true)
+                input[0] = GUNZIP.out.map { file -> tuple(1, file, fasta) }
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            with (process.out) {
+                assert size() == 1
+                assert get(0).size() == 1
+                assert get(0).get(0).size() == 2
+                def zip = get(0).get(0).get(1)
+
+                cmd  = "python tests/diff.py -q tests/data/smart/sequences.zip ${zip}"
+                println "${cmd}"
+                proc = cmd.execute()
+                proc.waitFor()
+                assert proc.exitValue() == 0
+            }
+        }
+
+    }
+
+}

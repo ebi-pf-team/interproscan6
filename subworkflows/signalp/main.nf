@@ -21,7 +21,7 @@ workflow SIGNALP {
     batch_size     // int, number of sequences per sub-batch for searching
 
     main:
-    results = Channel.empty()
+    results = channel.empty()
 
     if (applications.contains("signalp_euk")) {
         if (euk_gpu) {
@@ -72,5 +72,5 @@ workflow SIGNALP {
     }
 
     emit:
-    results
+    results  // [ meta, json ]
 }

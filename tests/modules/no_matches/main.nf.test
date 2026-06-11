@@ -1,0 +1,28 @@
+nextflow_process {
+
+    name "Test Process REPORT_NO_MATCHES"
+    script "modules/no_matches/main.nf"
+    process "REPORT_NO_MATCHES"
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                def fasta = file("${projectDir}/tests/data/sequences/input.1.fasta", checkIfExists: true)
+                def jsons = [
+                    file("${projectDir}/tests/data/pfam/pfam.json", checkIfExists: true),
+                ]
+                input[0] = channel.of(tuple(1, fasta, jsons))
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

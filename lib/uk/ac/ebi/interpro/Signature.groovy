@@ -6,7 +6,7 @@ class Signature implements Serializable {
     String name
     String description
     String type
-    SignatureLibraryRelease signatureLibraryRelease = new SignatureLibraryRelease(null, null)
+    SignatureLibraryRelease signatureLibraryRelease = new uk.ac.ebi.interpro.SignatureLibraryRelease(null, null)
     Entry entry = null
 
     Signature(String accession) {
@@ -52,7 +52,7 @@ class Signature implements Serializable {
         if (data == null) {
             return null
         }
-        return new Signature(
+        return new uk.ac.ebi.interpro.Signature(
                 data.accession,
                 data.name,
                 data.description,

@@ -1,17 +1,13 @@
 // codenarc-disable AllowedDirectivesRule
-import groovy.json.JsonOutput
-import uk.ac.ebi.interpro.FastaFile
-import uk.ac.ebi.interpro.HMMER3
-import uk.ac.ebi.interpro.Location
-import uk.ac.ebi.interpro.Match
-
 process SEARCH_PIRSF {
-    label 'mem_low', 'time_short', 'dynamic', 'ips6_container'
+    label     'mem_low'
+    label     'time_short'
+    label     'dynamic'
+    container 'interpro/hmmer:3.3'
 
     input:
     tuple val(meta), path(fasta)
-    path dir
-    val hmm
+    path hmm
 
     output:
     tuple val(meta), path(fasta), path("hmmsearch.out")
@@ -21,49 +17,48 @@ process SEARCH_PIRSF {
     hmmsearch \
         -E 0.01 --acc \
         --cpu ${task.cpus} \
-        ${dir}/${hmm} ${fasta} > hmmsearch.out
+        ${hmm} ${fasta} > hmmsearch.out
     """
 }
 
 process PARSE_PIRSF {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:
     tuple val(meta), val(fasta), val(hmmsearch_out)
-    val dirpath
     val datfile
 
     output:
     tuple val(meta), path("pirsf.json")
 
     exec:
-    def datPath = "${dirpath.toString()}/${datfile}"
-    def (models, subfamilies) = parseDatFile(datPath)
-    def hmmerMatches = HMMER3.parseOutput(hmmsearch_out.toString(), "PIRSF")
-    Map<String, String> sequences = FastaFile.parse(fasta.toString())
+    def (models, subfamilies) = parseDatFile(datfile)
+    def hmmerMatches = uk.ac.ebi.interpro.HMMER3.parseOutput(hmmsearch_out, "PIRSF")
+    def sequences = uk.ac.ebi.interpro.FastaFile.parse(fasta)
 
-    double LENGTH_RATIO_THRESHOLD = 0.67
-    double OVERLAP_THRESHOLD = 0.8
-    double LENGTH_DEVIATION_THRESHOLD = 3.5
-    int MINIMUM_LENGTH_DEVIATION = 50
+    def LENGTH_RATIO_THRESHOLD = 0.67
+    def OVERLAP_THRESHOLD = 0.8
+    def LENGTH_DEVIATION_THRESHOLD = 3.5
+    def MINIMUM_LENGTH_DEVIATION = 50
 
     def results = [:] // proteinAccession -> modelAccession -> Match
 
     hmmerMatches.each { proteinAccession, modelMatches ->
-        int sequenceLength = sequences[proteinAccession].length()
+        def sequenceLength = sequences[proteinAccession].length()
 
         def familyMatches = []
         def subfamilyMatches = []
 
         modelMatches.each { modelAccession, rawMatch ->
-            int seqStart = Integer.MAX_VALUE
-            int seqEnd = Integer.MIN_VALUE
-            int hmmStart = Integer.MAX_VALUE
-            int hmmEnd = Integer.MIN_VALUE
-            int envStart = 0
-            int envEnd = 0
-            double locationScore = 0.0
+            def seqStart = Integer.MAX_VALUE
+            def seqEnd = Integer.MIN_VALUE
+            def hmmStart = Integer.MAX_VALUE
+            def hmmEnd = Integer.MIN_VALUE
+            def envStart = 0
+            def envEnd = 0
+            def locationScore = 0.0
             rawMatch.locations.each { location ->
                 if (location.included) {
                     locationScore += location.score
@@ -95,18 +90,18 @@ process PARSE_PIRSF {
 
         // Filter family matches
         def filteredFamilyMatches = familyMatches.findAll { match ->
-            def (meanL, stdL, minS, meanS, stdS) = models[match.modelAccession]
+            def (meanL, stdL, minS, _meanS, _stdS) = models[match.modelAccession]
 
-            Location location = match.locations[0]
+            def location = match.locations[0]
             
             // Overall length
-            double ovl = (location.end - location.start + 1) / sequenceLength
+            def ovl = (location.end - location.start + 1) / sequenceLength
 
             // Length deviation
-            double ld = Math.abs(sequenceLength - meanL)
+            def ld = Math.abs(sequenceLength - meanL)
 
             // Ratio over coverage of sequence and profile hmm
-            double r = (location.hmmEnd - location.hmmStart + 1) / (location.end - location.start + 1)
+            def r = (location.hmmEnd - location.hmmStart + 1) / (location.end - location.start + 1)
 
             return r > LENGTH_RATIO_THRESHOLD
                 && ovl >= OVERLAP_THRESHOLD
@@ -115,7 +110,7 @@ process PARSE_PIRSF {
         }
 
         // Select best family match
-        def familyMatch = filteredFamilyMatches ? filteredFamilyMatches.max { it.score } : null
+        def familyMatch = filteredFamilyMatches ? filteredFamilyMatches.max { m -> m.score } : null
 
         // Filter subfamily matches and select the best one
         def filteredSubfamilyMatches = subfamilyMatches.findAll { match ->
@@ -127,64 +122,63 @@ process PARSE_PIRSF {
                 return false
             }
 
-            def parentMatch = familyMatches.find { it.modelAccession == parentFamily }
+            def parentMatch = familyMatches.find { m -> m.modelAccession == parentFamily }
             if (!parentMatch) {
                 // We don't want a subfamily match if the parent family doesn't hit the sequence
                 return false
             }
 
-            def (meanL, stdL, minS, meanS, stdS) = models[match.modelAccession]
+            def (_meanL, _stdL, minS, _meanS, _stdS) = models[match.modelAccession]
             
             // Ratio over coverage of sequence and profile hmm
-            Location location = match.locations[0]
-            double r = (location.hmmEnd - location.hmmStart + 1) / (location.end - location.start + 1)
+            def location = match.locations[0]
+            def r = (location.hmmEnd - location.hmmStart + 1) / (location.end - location.start + 1)
             return r > LENGTH_RATIO_THRESHOLD && match.score >= minS
         }
 
-        def subfamilyMatch = filteredSubfamilyMatches ? filteredSubfamilyMatches.max { it.score } : null
+        def subfamilyMatch = filteredSubfamilyMatches ? filteredSubfamilyMatches.max { m -> m.score } : null
         
         if (subfamilyMatch && !familyMatch) {
             // Promote parent family (even if it didn't pass the cutoffs)
             def parentFamily = subfamilies[subfamilyMatch.modelAccession]
-            familyMatch = familyMatches.find { it.modelAccession == parentFamily }
+            familyMatch = familyMatches.find { m -> m.modelAccession == parentFamily }
         }
 
         if (familyMatch) {
-            results[proteinAccession] = [:].with {
-                it[familyMatch.modelAccession] = familyMatch
-                if (subfamilyMatch) {
-                    it[subfamilyMatch.modelAccession] = subfamilyMatch
-                }
-                it
+            results[proteinAccession] = [
+                (familyMatch.modelAccession): familyMatch
+            ]
+
+            if (subfamilyMatch) {
+                results[proteinAccession][subfamilyMatch.modelAccession] = subfamilyMatch
             }
         }
     }
 
-    def outputFilePath = task.workDir.resolve("pirsf.json")
-    def json = JsonOutput.toJson(results)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("pirsf.json")
+    filepath.text  = groovy.json.JsonOutput.toJson(results)
 }
 
 def createMatch(
-    Match match,
-    int seqStart,
-    int seqEnd,
-    int hmmStart,
-    int hmmEnd,
-    int envStart,
-    int envEnd,
-    double locationScore) {
-    Match processedMatch = new Match(
+    match,
+    seqStart,
+    seqEnd,
+    hmmStart,
+    hmmEnd,
+    envStart,
+    envEnd,
+    locationScore) {
+    def processedMatch = new uk.ac.ebi.interpro.Match(
         match.modelAccession,
         match.evalue,
         locationScore,
         match.bias,
         match.signature
     )
-    String hmmBoundStart = hmmStart == 1 ? "[" : "."
-    String hmmBoundEnd = hmmEnd == match.locations[0].hmmLength ? "]" : "."
+    def hmmBoundStart = hmmStart == 1 ? "[" : "."
+    def hmmBoundEnd = hmmEnd == match.locations[0].hmmLength ? "]" : "."
     processedMatch.addLocation(
-        new Location(
+        new uk.ac.ebi.interpro.Location(
             seqStart,
             seqEnd,
             hmmStart,
@@ -201,11 +195,10 @@ def createMatch(
     return processedMatch
 }
 
-def parseDatFile(String datPath) {
+def parseDatFile(datFile) {
     def models = [:]    // PIRSF -> list of 5 doubles (meanL, stdL, minS, meanS, stdS)
     def subfamilies = [:]   // child PIRSF -> parent PIRSF
 
-    File datFile = new File(datPath)
     datFile.withReader { reader ->
         def accession = null
         reader.eachLine { line ->

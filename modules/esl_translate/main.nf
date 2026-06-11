@@ -1,5 +1,7 @@
 process ESL_TRANSLATE {
-    label 'mem_low', 'time_short', 'ips6_container'
+    label     'mem_low'
+    label     'time_short'
+    container 'interpro/esl-translate:0.46'
 
     input:
     path fasta

@@ -1,0 +1,38 @@
+nextflow_process {
+
+    name "Test Process PARSE_PIRSF"
+    script "modules/pirsf/main.nf"
+    process "PARSE_PIRSF"
+
+    test("Should run without failures") {
+
+        setup {
+            run("GUNZIP") {
+                script "../gunzip/main.nf"
+                process {
+                    """
+                    input[0] = file("${projectDir}/tests/data/pirsf/hmmsearch.out.gz", checkIfExists: true)
+                    """
+                }
+            }
+        }        
+
+        when {
+            process {
+                """
+                def fasta = file("${projectDir}/tests/data/pirsf/sequences.fasta", checkIfExists: true)
+                def dat   = file("${projectDir}/tests/data/pirsf/pirsf.dat", checkIfExists: true)
+                input[0] = GUNZIP.out.map { file -> tuple(1, fasta, file) }
+                input[1] = dat
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

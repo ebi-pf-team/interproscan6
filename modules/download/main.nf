@@ -1,30 +1,25 @@
-import java.io.File
-import java.nio.file.*
-import groovy.json.JsonSlurper
-import groovy.json.JsonOutput
-
-import uk.ac.ebi.interpro.InterProScan
-
 process DOWNLOAD {
-    maxForks 1
-    executor 'local'
-    label    'ips6_container'
+    maxForks  1
+    label     'mem_min'
+    label     'time_veryshort'
+    executor  'local'
+    container 'interpro/download:1.0'
 
     input:
-    tuple val(name), val(arcname), val(version), val(skip), val(path)
+    tuple val(name), val(arcname), val(version), val(skip), val(dirpath)
     val iprscan_version
     val use_globus
     path outdir
 
     output:
-    tuple val(name), val(version), val(path)
+    tuple val(name), val(dirpath)
 
     script:
     if (skip) {
         """
         """
     } else {
-        def base_url = use_globus ? InterProScan.GLOBUS_URL : InterProScan.FTP_URL
+        def base_url = use_globus ? uk.ac.ebi.interpro.InterProScan.GLOBUS_URL : uk.ac.ebi.interpro.InterProScan.FTP_URL
         """
         curl -OJ ${base_url}/${iprscan_version}/${arcname}/${arcname}-${version}.tar.gz
         curl -OJ ${base_url}/${iprscan_version}/${arcname}/${arcname}-${version}.tar.gz.md5
@@ -37,24 +32,24 @@ process DOWNLOAD {
     
 }
 
-process FIND_MISSING_DATA {
-    label    'mem_min', 'time_veryshort'
+process FIND_DATABASES {
+    label    'mem_min'
+    label    'time_veryshort'
     executor 'local'
 
     input:
-    tuple val(n), val(v), val(p)  // state dependency
-    val json_database
-    val apps_to_run
-    val app_dirs
-    val datadir
+    tuple val(n), val(p)  // state dependency (str, str)
+    val databases_json    // path      
+    val applications      // list[str]
+    val appl_dirs         // map
+    val datadir           // path
 
     output:
-    val with_data,          emit: with_data
-    val without_data,       emit: without_data
+    val ready,    emit: ready
+    val missing,  emit: missing
 
     exec:
-    File file = new File(json_database)
-    def json = new JsonSlurper().parse(file)
+    def json = new groovy.json.JsonSlurper().parse(databases_json)
     def normalised_json = [:]
     json.each { key, value ->
         normalised_json[key.replaceAll(/[\s\-]+/, '').toLowerCase()] = value
@@ -64,47 +59,36 @@ process FIND_MISSING_DATA {
         Ugly trick to make sure that metadata for both CATH-Gene3D are CATH-FunFam
         are available even if we need only one
     */
-    def apps_to_check = apps_to_run.clone() as Set
-    if (apps_to_check.contains("cathgene3d") || apps_to_check.contains("cathfunfam")) {
-        apps_to_check.add("cathgene3d")
-        apps_to_check.add("cathfunfam")
+    def appls = applications.clone() as Set
+    if (appls.contains("cathgene3d") || appls.contains("cathfunfam")) {
+        appls.add("cathgene3d")
+        appls.add("cathfunfam")
     }
 
-    with_data = [] as Set
-    without_data = [] as Set
-    to_download = [] as Set
-    apps_to_check.each { db_name ->
-        if (app_dirs.containsKey(db_name)) {
-            def normalised_name = db_name.replaceAll(/[\s\-]+/, '').toLowerCase()
+    ready   = [] as Set
+    missing = [] as Set
+    seen    = [] as Set
+    appls.each { appl_name ->
+        if (appl_dirs.containsKey(appl_name)) {
+            def normalised_name = appl_name.replaceAll(/[\s\-]+/, '').toLowerCase()
             assert normalised_json.containsKey(normalised_name)
-            def db_version = normalised_json[normalised_name]
-            def db_dir_parts = app_dirs[normalised_name]
-            def db_dir = db_dir_parts[0]
-            def db_subdir = db_dir_parts[1]
-            Path path = Paths.get("${datadir}/${db_dir}/${db_version}/${db_subdir}")
-            if (Files.exists(path)) {
-                with_data.add( [ normalised_name, db_version, path.toString() ])
+            def appl_version = normalised_json[normalised_name]
+            def appl_dir_parts = appl_dirs[normalised_name]
+            def appl_dir = appl_dir_parts[0]
+            def appl_subdir = appl_dir_parts[1]
+            def appl_fulldir = datadir.resolve("${appl_dir}/${appl_version}/${appl_subdir}")
+            if (appl_fulldir.isDirectory()) {
+                ready.add( [ normalised_name, appl_fulldir ])
             } else {
-                without_data.add( [ normalised_name, db_dir, db_version, to_download.contains(db_dir), path.toString() ] )
-                to_download.add( db_dir )
+                missing.add( [ 
+                    normalised_name, 
+                    appl_dir, 
+                    appl_version, 
+                    seen.contains(appl_dir),
+                    appl_fulldir 
+                ] )
+                seen.add( appl_dir )
             }
         }
     }
-}
-
-process VALIDATE_DATA {
-    label    'mem_min', 'time_veryshort'
-    executor 'local'
-    cache false  // Stops the esotericsoftware.kryo.serializers warning
-
-    input:
-    val list_databases
-
-    output:
-    val map_databases
-
-    exec:
-    map_databases = list_databases.collectEntries { name, version, dirpath ->
-        [(name): [version: version, dirpath: dirpath]]
-    } 
 }

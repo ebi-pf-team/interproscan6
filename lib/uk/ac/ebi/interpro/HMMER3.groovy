@@ -1,17 +1,19 @@
 package uk.ac.ebi.interpro
 
+import java.nio.file.Path
+
+
 class HMMER3 {
-    static parseOutput(String filePath, String memberDb) {
-        File file = new File(filePath)
+    static parseOutput(Path filePath, String memberDb) {
         String line
         String queryName
         Integer queryLength
         String queryAccession
         String targetId
-        SignatureLibraryRelease libraryRelease = new SignatureLibraryRelease(memberDb, null)
+        SignatureLibraryRelease libraryRelease = new uk.ac.ebi.interpro.SignatureLibraryRelease(memberDb, null)
 
         def hits = [:].withDefault { [:] }
-        file.withReader { reader ->
+        filePath.withReader { reader ->
             while (true) {
                 // Move to the next Query block
                 while (queryName == null) {
@@ -60,12 +62,12 @@ class HMMER3 {
                     }
 
                     def fields = line.split(/\s+/)
-                    Match match = new Match(
+                    Match match = new uk.ac.ebi.interpro.Match(
                         queryAccession,
                         Double.parseDouble(fields[0]),
                         Double.parseDouble(fields[1]),
                         Double.parseDouble(fields[2]),
-                        new Signature(queryAccession, libraryRelease)
+                        new uk.ac.ebi.interpro.Signature(queryAccession, libraryRelease)
                     )
                     match.included = isIncluded
                     targetId = fields[8].trim()
@@ -112,7 +114,7 @@ class HMMER3 {
                     while (!(line = reader.readLine().trim()).isEmpty()) {
                         def fields = line.split(/\s+/)
                         assert fields.size() == 16
-                        Location location = new Location(
+                        Location location = new uk.ac.ebi.interpro.Location(
                             Integer.parseInt(fields[9]),
                             Integer.parseInt(fields[10]),
                             fields[6].toInteger(),
@@ -222,7 +224,7 @@ class HMMER3 {
         hmmerMatches.each { sequenceId, matches ->
             matches.values().each { m1 ->
                 m1.locations.each { loc ->
-                    Match m2 = new Match(
+                    Match m2 = new uk.ac.ebi.interpro.Match(
                         m1.modelAccession, 
                         m1.evalue,
                         m1.score, 

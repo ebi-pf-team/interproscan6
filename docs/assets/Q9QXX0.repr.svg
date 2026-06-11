@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="404">
+<style>text{font-family:Arial,sans-serif;fill:#1f2937}.axis{font-size:11px}.trackDb{font-size:10px;fill:#4b5563}.trackName{font-size:12px;fill:#111827}</style>
+<rect x="0" y="0" width="100%" height="100%" fill="#ffffff"/>
+<line x1="220" y1="36.00" x2="1376" y2="36.00" stroke="#3B82F6" stroke-width="1"/>
+<text class="trackDb" x="212" y="32.00" text-anchor="end">CATH-Gene3D</text>
+<text class="trackName" x="212" y="47.00" text-anchor="end">G3DSA:2.60.40.3510</text>
+<rect x="249.42" y="29.00" width="147.11" height="14" fill="#3B82F6"><title>32 - 187</title></rect>
+<line x1="220" y1="70.00" x2="1376" y2="70.00" stroke="#3B82F6" stroke-width="1"/>
+<text class="trackDb" x="212" y="66.00" text-anchor="end">CATH-Gene3D</text>
+<text class="trackName" x="212" y="81.00" text-anchor="end">G3DSA:2.10.25.140</text>
+<rect x="397.48" y="63.00" width="42.71" height="14" fill="#3B82F6"><title>188 - 233</title></rect>
+<line x1="220" y1="104.00" x2="1376" y2="104.00" stroke="#3B82F6" stroke-width="1"/>
+<text class="trackDb" x="212" y="100.00" text-anchor="end">CATH-Gene3D</text>
+<text class="trackName" x="212" y="115.00" text-anchor="end">G3DSA:2.10.25.10</text>
+<rect x="441.14" y="97.00" width="60.74" height="14" fill="#3B82F6"><title>234 - 298</title></rect>
+<rect x="998.26" y="97.00" width="37.01" height="14" fill="#3B82F6"><title>821 - 860</title></rect>
+<line x1="220" y1="138.00" x2="1376" y2="138.00" stroke="#EC4899" stroke-width="1"/>
+<text class="trackDb" x="212" y="134.00" text-anchor="end">SUPERFAMILY</text>
+<text class="trackName" x="212" y="149.00" text-anchor="end">Growth_fac_rcpt_cys_sf</text>
+<rect x="526.56" y="131.00" width="123.38" height="14" fill="#EC4899"><title>324 - 454</title></rect>
+<rect x="839.76" y="131.00" width="125.28" height="14" fill="#EC4899"><title>654 - 786</title></rect>
+<line x1="220" y1="172.00" x2="1376" y2="172.00" stroke="#06B6D4" stroke-width="1"/>
+<text class="trackDb" x="212" y="168.00" text-anchor="end">Pfam</text>
+<text class="trackName" x="212" y="183.00" text-anchor="end">EGF_TEN</text>
+<rect x="630.01" y="165.00" width="236.33" height="14" fill="#06B6D4"><title>433 - 682</title></rect>
+<line x1="220" y1="206.00" x2="1376" y2="206.00" stroke="#EC4899" stroke-width="1"/>
+<text class="trackDb" x="212" y="202.00" text-anchor="end">SUPERFAMILY</text>
+<text class="trackName" x="212" y="217.00" text-anchor="end">SSF57196</text>
+<rect x="961.24" y="199.00" width="39.86" height="14" fill="#EC4899"><title>782 - 824</title></rect>
+<line x1="220" y1="240.00" x2="1376" y2="240.00" stroke="#8B5CF6" stroke-width="1"/>
+<text class="trackDb" x="212" y="236.00" text-anchor="end">SMART</text>
+<text class="trackName" x="212" y="251.00" text-anchor="end">VWF_dom</text>
+<rect x="1038.12" y="233.00" width="63.59" height="14" fill="#8B5CF6"><title>863 - 930</title></rect>
+<line x1="220" y1="274.00" x2="1376" y2="274.00" stroke="#06B6D4" stroke-width="1"/>
+<text class="trackDb" x="212" y="270.00" text-anchor="end">Pfam</text>
+<text class="trackName" x="212" y="285.00" text-anchor="end">JAG1_1/2_dom</text>
+<rect x="1118.79" y="267.00" width="104.40" height="14" fill="#06B6D4"><title>948 - 1058</title></rect>
+<line x1="220" y1="322" x2="1376" y2="322" stroke="#374151" stroke-width="1"/>
+<line x1="220.00" y1="322" x2="220.00" y2="332" stroke="#374151" stroke-width="1"/>
+<line x1="238.98" y1="322" x2="238.98" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="257.96" y1="322" x2="257.96" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="276.95" y1="322" x2="276.95" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="295.93" y1="322" x2="295.93" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="314.91" y1="322" x2="314.91" y2="332" stroke="#374151" stroke-width="1"/>
+<line x1="333.89" y1="322" x2="333.89" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="352.87" y1="322" x2="352.87" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="371.86" y1="322" x2="371.86" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="390.84" y1="322" x2="390.84" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="409.82" y1="322" x2="409.82" y2="332" stroke="#374151" stroke-width="1"/>
+<line x1="428.80" y1="322" x2="428.80" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="447.78" y1="322" x2="447.78" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="466.77" y1="322" x2="466.77" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="485.75" y1="322" x2="485.75" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="504.73" y1="322" x2="504.73" y2="332" stroke="#374151" stroke-width="1"/>
+<line x1="523.71" y1="322" x2="523.71" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="542.69" y1="322" x2="542.69" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="561.67" y1="322" x2="561.67" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="580.66" y1="322" x2="580.66" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="599.64" y1="322" x2="599.64" y2="332" stroke="#374151" stroke-width="1"/>
+<line x1="618.62" y1="322" x2="618.62" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="637.60" y1="322" x2="637.60" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="656.58" y1="322" x2="656.58" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="675.57" y1="322" x2="675.57" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="694.55" y1="322" x2="694.55" y2="332" stroke="#374151" stroke-width="1"/>
+<line x1="713.53" y1="322" x2="713.53" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="732.51" y1="322" x2="732.51" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="751.49" y1="322" x2="751.49" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="770.48" y1="322" x2="770.48" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="789.46" y1="322" x2="789.46" y2="332" stroke="#374151" stroke-width="1"/>
+<line x1="808.44" y1="322" x2="808.44" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="827.42" y1="322" x2="827.42" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="846.40" y1="322" x2="846.40" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="865.39" y1="322" x2="865.39" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="884.37" y1="322" x2="884.37" y2="332" stroke="#374151" stroke-width="1"/>
+<line x1="903.35" y1="322" x2="903.35" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="922.33" y1="322" x2="922.33" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="941.31" y1="322" x2="941.31" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="960.30" y1="322" x2="960.30" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="979.28" y1="322" x2="979.28" y2="332" stroke="#374151" stroke-width="1"/>
+<line x1="998.26" y1="322" x2="998.26" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="1017.24" y1="322" x2="1017.24" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="1036.22" y1="322" x2="1036.22" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="1055.21" y1="322" x2="1055.21" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="1074.19" y1="322" x2="1074.19" y2="332" stroke="#374151" stroke-width="1"/>
+<line x1="1093.17" y1="322" x2="1093.17" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="1112.15" y1="322" x2="1112.15" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="1131.13" y1="322" x2="1131.13" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="1150.11" y1="322" x2="1150.11" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="1169.10" y1="322" x2="1169.10" y2="332" stroke="#374151" stroke-width="1"/>
+<line x1="1188.08" y1="322" x2="1188.08" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="1207.06" y1="322" x2="1207.06" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="1226.04" y1="322" x2="1226.04" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="1245.02" y1="322" x2="1245.02" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="1264.01" y1="322" x2="1264.01" y2="332" stroke="#374151" stroke-width="1"/>
+<line x1="1282.99" y1="322" x2="1282.99" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="1301.97" y1="322" x2="1301.97" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="1320.95" y1="322" x2="1320.95" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="1339.93" y1="322" x2="1339.93" y2="328" stroke="#374151" stroke-width="1"/>
+<line x1="1358.92" y1="322" x2="1358.92" y2="332" stroke="#374151" stroke-width="1"/>
+<line x1="1375.05" y1="322" x2="1375.05" y2="332" stroke="#374151" stroke-width="1"/>
+<text class="axis" x="220.00" y="344" text-anchor="middle">1</text>
+<text class="axis" x="314.91" y="344" text-anchor="middle">101</text>
+<text class="axis" x="409.82" y="344" text-anchor="middle">201</text>
+<text class="axis" x="504.73" y="344" text-anchor="middle">301</text>
+<text class="axis" x="599.64" y="344" text-anchor="middle">401</text>
+<text class="axis" x="694.55" y="344" text-anchor="middle">501</text>
+<text class="axis" x="789.46" y="344" text-anchor="middle">601</text>
+<text class="axis" x="884.37" y="344" text-anchor="middle">701</text>
+<text class="axis" x="979.28" y="344" text-anchor="middle">801</text>
+<text class="axis" x="1074.19" y="344" text-anchor="middle">901</text>
+<text class="axis" x="1169.10" y="344" text-anchor="middle">1001</text>
+<text class="axis" x="1264.01" y="344" text-anchor="middle">1101</text>
+<text class="axis" x="1375.05" y="344" text-anchor="middle">1218</text>
+</svg>

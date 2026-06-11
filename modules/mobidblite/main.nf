@@ -1,11 +1,8 @@
-import groovy.json.JsonOutput
-import uk.ac.ebi.interpro.Location
-import uk.ac.ebi.interpro.Match
-import uk.ac.ebi.interpro.Signature
-import uk.ac.ebi.interpro.SignatureLibraryRelease
-
 process RUN_MOBIDBLITE {
-    label 'mem_min', 'time_veryshort', 'dynamic', 'mobidblite_container'
+    label     'mem_min'
+    label     'time_veryshort'
+    label     'dynamic'
+    container 'interpro/idrpred:1.0.3'
 
     input:
     tuple val(meta), val(meta2), path(fasta)
@@ -15,13 +12,14 @@ process RUN_MOBIDBLITE {
 
     script:
     """
-    idrpred --tempdir . --threads ${task.cpus} ${fasta} output.tsv
+    idrpred --threads ${task.cpus} ${fasta} output.tsv
     """
 }
 
 
 process PARSE_MOBIDBLITE {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:
@@ -31,10 +29,9 @@ process PARSE_MOBIDBLITE {
     tuple val(meta), val(meta2), path("mobidblite.json")
 
     exec:
-    def outputFilePath = task.workDir.resolve("mobidblite.json")
-    Match match = null
+    def match = null
     def matches = [:]
-    file(mobidblite_output.toString()).eachLine { line ->
+    mobidblite_output.eachLine { line ->
         def fields = line.split(/\t/)
         assert fields.size() == 4
         def sequenceId = fields[0]
@@ -45,16 +42,16 @@ process PARSE_MOBIDBLITE {
         if (matches.containsKey(sequenceId)) {
             match = matches[sequenceId]["mobidb-lite"]
         } else {
-            SignatureLibraryRelease library = new SignatureLibraryRelease("MobiDB-lite", "4.0")
-            Signature signature = new Signature("mobidb-lite", "disorder_prediction", "consensus disorder prediction", library, null)
-            match = new Match("mobidb-lite", signature)
+            def library = new uk.ac.ebi.interpro.SignatureLibraryRelease("MobiDB-lite", "4.0")
+            def signature = new uk.ac.ebi.interpro.Signature("mobidb-lite", "disorder_prediction", "consensus disorder prediction", library, null)
+            match = new uk.ac.ebi.interpro.Match("mobidb-lite", signature)
             matches[sequenceId] = [:]
             matches[sequenceId]["mobidb-lite"] = match
         }
 
-        match.addLocation(new Location(start, end, feature))
+        match.addLocation(new uk.ac.ebi.interpro.Location(start, end, feature))
     }
 
-    def json = JsonOutput.toJson(matches)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("mobidblite.json")
+    filepath.text = groovy.json.JsonOutput.toJson(matches)
 }

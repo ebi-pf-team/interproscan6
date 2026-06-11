@@ -1,0 +1,66 @@
+site_name: InterProScan
+site_url: !ENV READTHEDOCS_CANONICAL_URL
+repo_url: https://github.com/ebi-pf-team/interproscan6
+theme:
+  name: material
+  logo: assets/embl-ebi-rgb-all-white.png
+
+  font:
+    text: IPM Plex
+
+  features:
+    - content.code.copy
+    - content.code.annotate
+    # - navigation.sections
+    # - navigation.tabs
+    # - navigation.footer
+    - navigation.top
+    - navigation.tracking
+
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: custom
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+nav:
+  - Overview: index.md
+  - Usage: 
+      - Running InterProScan: usage.md
+      - Analyses: analyses.md
+      - Licensed applications: licensed_applications.md
+      - Options / Parameters: options.md
+      - Representative locations: representative_locations.md
+      - Scaling InterProScan: scaling.md
+  - Output: output.md
+  - Matches API: matches_api.md
+  - Migrating from InterProScan 5: interproscan5.md
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - admonition
+  - pymdownx.blocks.caption
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - tables
+
+extra_css:
+  - stylesheets/extra.css

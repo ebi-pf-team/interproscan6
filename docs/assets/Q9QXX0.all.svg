@@ -1,0 +1,238 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="880">
+<style>text{font-family:Arial,sans-serif;fill:#1f2937}.axis{font-size:11px}.trackDb{font-size:10px;fill:#4b5563}.trackName{font-size:12px;fill:#111827}</style>
+<rect x="0" y="0" width="100%" height="100%" fill="#ffffff"/>
+<line x1="220" y1="36.00" x2="1376" y2="36.00" stroke="#3B82F6" stroke-width="1"/>
+<text class="trackDb" x="212" y="32.00" text-anchor="end">CATH-Gene3D</text>
+<text class="trackName" x="212" y="47.00" text-anchor="end">G3DSA:2.60.40.3510</text>
+<rect x="249.42" y="29.00" width="147.11" height="14" fill="#3B82F6"><title>32 - 187</title></rect>
+<line x1="220" y1="70.00" x2="1376" y2="70.00" stroke="#06B6D4" stroke-width="1"/>
+<text class="trackDb" x="212" y="66.00" text-anchor="end">Pfam</text>
+<text class="trackName" x="212" y="81.00" text-anchor="end">Notch_ligand_N</text>
+<rect x="249.42" y="63.00" width="145.21" height="14" fill="#06B6D4"><title>32 - 185</title></rect>
+<line x1="220" y1="104.00" x2="1376" y2="104.00" stroke="#8B5CF6" stroke-width="1"/>
+<text class="trackDb" x="212" y="100.00" text-anchor="end">SMART</text>
+<text class="trackName" x="212" y="115.00" text-anchor="end">DSL</text>
+<rect x="377.55" y="97.00" width="58.84" height="14" fill="#8B5CF6"><title>167 - 229</title></rect>
+<line x1="220" y1="138.00" x2="1376" y2="138.00" stroke="#10B981" stroke-width="1"/>
+<text class="trackDb" x="212" y="134.00" text-anchor="end">PROSITE profiles</text>
+<text class="trackName" x="212" y="149.00" text-anchor="end">DSL</text>
+<rect x="394.63" y="131.00" width="41.76" height="14" fill="#10B981"><title>185 - 229</title></rect>
+<line x1="220" y1="172.00" x2="1376" y2="172.00" stroke="#06B6D4" stroke-width="1"/>
+<text class="trackDb" x="212" y="168.00" text-anchor="end">Pfam</text>
+<text class="trackName" x="212" y="183.00" text-anchor="end">DSL</text>
+<rect x="396.53" y="165.00" width="42.71" height="14" fill="#06B6D4"><title>187 - 232</title></rect>
+<line x1="220" y1="206.00" x2="1376" y2="206.00" stroke="#3B82F6" stroke-width="1"/>
+<text class="trackDb" x="212" y="202.00" text-anchor="end">CATH-Gene3D</text>
+<text class="trackName" x="212" y="217.00" text-anchor="end">G3DSA:2.10.25.140</text>
+<rect x="397.48" y="199.00" width="42.71" height="14" fill="#3B82F6"><title>188 - 233</title></rect>
+<line x1="220" y1="240.00" x2="1376" y2="240.00" stroke="#10B981" stroke-width="1"/>
+<text class="trackDb" x="212" y="236.00" text-anchor="end">PROSITE profiles</text>
+<text class="trackName" x="212" y="251.00" text-anchor="end">EGF</text>
+<rect x="437.34" y="233.00" width="31.32" height="14" fill="#10B981"><title>230 - 263</title></rect>
+<rect x="499.98" y="233.00" width="36.07" height="14" fill="#10B981"><title>296 - 334</title></rect>
+<rect x="537.95" y="233.00" width="34.17" height="14" fill="#10B981"><title>336 - 372</title></rect>
+<rect x="574.01" y="233.00" width="34.17" height="14" fill="#10B981"><title>374 - 410</title></rect>
+<rect x="610.08" y="233.00" width="34.17" height="14" fill="#10B981"><title>412 - 448</title></rect>
+<rect x="646.14" y="233.00" width="33.22" height="14" fill="#10B981"><title>450 - 485</title></rect>
+<rect x="681.26" y="233.00" width="34.17" height="14" fill="#10B981"><title>487 - 523</title></rect>
+<rect x="717.33" y="233.00" width="34.17" height="14" fill="#10B981"><title>525 - 561</title></rect>
+<rect x="775.22" y="233.00" width="38.91" height="14" fill="#10B981"><title>586 - 627</title></rect>
+<rect x="816.03" y="233.00" width="34.17" height="14" fill="#10B981"><title>629 - 665</title></rect>
+<rect x="852.10" y="233.00" width="34.17" height="14" fill="#10B981"><title>667 - 703</title></rect>
+<rect x="888.16" y="233.00" width="34.17" height="14" fill="#10B981"><title>705 - 741</title></rect>
+<rect x="925.18" y="233.00" width="34.17" height="14" fill="#10B981"><title>744 - 780</title></rect>
+<rect x="961.24" y="233.00" width="34.17" height="14" fill="#10B981"><title>782 - 818</title></rect>
+<rect x="997.31" y="233.00" width="34.17" height="14" fill="#10B981"><title>820 - 856</title></rect>
+<line x1="220" y1="274.00" x2="1376" y2="274.00" stroke="#8B5CF6" stroke-width="1"/>
+<text class="trackDb" x="212" y="270.00" text-anchor="end">SMART</text>
+<text class="trackName" x="212" y="285.00" text-anchor="end">EGF</text>
+<rect x="440.19" y="267.00" width="28.47" height="14" fill="#8B5CF6"><title>233 - 263</title></rect>
+<rect x="469.61" y="267.00" width="28.47" height="14" fill="#8B5CF6"><title>264 - 294</title></rect>
+<rect x="502.83" y="267.00" width="33.22" height="14" fill="#8B5CF6"><title>299 - 334</title></rect>
+<rect x="540.79" y="267.00" width="31.32" height="14" fill="#8B5CF6"><title>339 - 372</title></rect>
+<rect x="576.86" y="267.00" width="31.32" height="14" fill="#8B5CF6"><title>377 - 410</title></rect>
+<rect x="612.93" y="267.00" width="31.32" height="14" fill="#8B5CF6"><title>415 - 448</title></rect>
+<rect x="648.99" y="267.00" width="30.37" height="14" fill="#8B5CF6"><title>453 - 485</title></rect>
+<rect x="684.11" y="267.00" width="31.32" height="14" fill="#8B5CF6"><title>490 - 523</title></rect>
+<rect x="720.17" y="267.00" width="31.32" height="14" fill="#8B5CF6"><title>528 - 561</title></rect>
+<rect x="766.68" y="267.00" width="47.45" height="14" fill="#8B5CF6"><title>577 - 627</title></rect>
+<rect x="818.88" y="267.00" width="31.32" height="14" fill="#8B5CF6"><title>632 - 665</title></rect>
+<rect x="854.95" y="267.00" width="31.32" height="14" fill="#8B5CF6"><title>670 - 703</title></rect>
+<rect x="891.01" y="267.00" width="31.32" height="14" fill="#8B5CF6"><title>708 - 741</title></rect>
+<rect x="928.03" y="267.00" width="31.32" height="14" fill="#8B5CF6"><title>747 - 780</title></rect>
+<rect x="964.09" y="267.00" width="31.32" height="14" fill="#8B5CF6"><title>785 - 818</title></rect>
+<rect x="1000.16" y="267.00" width="31.32" height="14" fill="#8B5CF6"><title>823 - 856</title></rect>
+<line x1="220" y1="308.00" x2="1376" y2="308.00" stroke="#3B82F6" stroke-width="1"/>
+<text class="trackDb" x="212" y="304.00" text-anchor="end">CATH-Gene3D</text>
+<text class="trackName" x="212" y="319.00" text-anchor="end">G3DSA:2.10.25.10</text>
+<rect x="441.14" y="301.00" width="60.74" height="14" fill="#3B82F6"><title>234 - 298</title></rect>
+<rect x="506.63" y="301.00" width="33.22" height="14" fill="#3B82F6"><title>303 - 338</title></rect>
+<rect x="540.79" y="301.00" width="33.22" height="14" fill="#3B82F6"><title>339 - 374</title></rect>
+<rect x="574.96" y="301.00" width="36.07" height="14" fill="#3B82F6"><title>375 - 413</title></rect>
+<rect x="611.98" y="301.00" width="37.96" height="14" fill="#3B82F6"><title>414 - 454</title></rect>
+<rect x="650.89" y="301.00" width="32.27" height="14" fill="#3B82F6"><title>455 - 489</title></rect>
+<rect x="684.11" y="301.00" width="33.22" height="14" fill="#3B82F6"><title>490 - 525</title></rect>
+<rect x="718.28" y="301.00" width="41.76" height="14" fill="#3B82F6"><title>526 - 570</title></rect>
+<rect x="780.92" y="301.00" width="35.12" height="14" fill="#3B82F6"><title>592 - 629</title></rect>
+<rect x="816.98" y="301.00" width="34.17" height="14" fill="#3B82F6"><title>630 - 666</title></rect>
+<rect x="852.10" y="301.00" width="35.12" height="14" fill="#3B82F6"><title>667 - 704</title></rect>
+<rect x="888.16" y="301.00" width="37.96" height="14" fill="#3B82F6"><title>705 - 745</title></rect>
+<rect x="927.08" y="301.00" width="35.12" height="14" fill="#3B82F6"><title>746 - 783</title></rect>
+<rect x="963.14" y="301.00" width="34.17" height="14" fill="#3B82F6"><title>784 - 820</title></rect>
+<rect x="998.26" y="301.00" width="37.01" height="14" fill="#3B82F6"><title>821 - 860</title></rect>
+<line x1="220" y1="342.00" x2="1376" y2="342.00" stroke="#06B6D4" stroke-width="1"/>
+<text class="trackDb" x="212" y="338.00" text-anchor="end">Pfam</text>
+<text class="trackName" x="212" y="353.00" text-anchor="end">EGF_DL_JAG</text>
+<rect x="477.21" y="335.00" width="23.73" height="14" fill="#06B6D4"><title>272 - 297</title></rect>
+<line x1="220" y1="376.00" x2="1376" y2="376.00" stroke="#F59E0B" stroke-width="1"/>
+<text class="trackDb" x="212" y="372.00" text-anchor="end">CDD</text>
+<text class="trackName" x="212" y="387.00" text-anchor="end">EGF_CA</text>
+<rect x="499.98" y="369.00" width="36.07" height="14" fill="#F59E0B"><title>296 - 334</title></rect>
+<rect x="544.59" y="369.00" width="26.57" height="14" fill="#F59E0B"><title>343 - 371</title></rect>
+<rect x="574.01" y="369.00" width="34.17" height="14" fill="#F59E0B"><title>374 - 410</title></rect>
+<rect x="610.08" y="369.00" width="33.22" height="14" fill="#F59E0B"><title>412 - 447</title></rect>
+<rect x="646.14" y="369.00" width="33.22" height="14" fill="#F59E0B"><title>450 - 485</title></rect>
+<rect x="681.26" y="369.00" width="34.17" height="14" fill="#F59E0B"><title>487 - 523</title></rect>
+<rect x="717.33" y="369.00" width="33.22" height="14" fill="#F59E0B"><title>525 - 560</title></rect>
+<rect x="816.03" y="369.00" width="34.17" height="14" fill="#F59E0B"><title>629 - 665</title></rect>
+<rect x="852.10" y="369.00" width="33.22" height="14" fill="#F59E0B"><title>667 - 702</title></rect>
+<rect x="896.71" y="369.00" width="24.68" height="14" fill="#F59E0B"><title>714 - 740</title></rect>
+<rect x="930.87" y="369.00" width="28.47" height="14" fill="#F59E0B"><title>750 - 780</title></rect>
+<rect x="961.24" y="369.00" width="33.22" height="14" fill="#F59E0B"><title>782 - 817</title></rect>
+<rect x="997.31" y="369.00" width="33.22" height="14" fill="#F59E0B"><title>820 - 855</title></rect>
+<line x1="220" y1="410.00" x2="1376" y2="410.00" stroke="#8B5CF6" stroke-width="1"/>
+<text class="trackDb" x="212" y="406.00" text-anchor="end">SMART</text>
+<text class="trackName" x="212" y="421.00" text-anchor="end">EGF-like_Ca-bd_dom</text>
+<rect x="499.98" y="403.00" width="36.07" height="14" fill="#8B5CF6"><title>296 - 334</title></rect>
+<rect x="541.74" y="403.00" width="30.37" height="14" fill="#8B5CF6"><title>340 - 372</title></rect>
+<rect x="574.01" y="403.00" width="34.17" height="14" fill="#8B5CF6"><title>374 - 410</title></rect>
+<rect x="610.08" y="403.00" width="34.17" height="14" fill="#8B5CF6"><title>412 - 448</title></rect>
+<rect x="646.14" y="403.00" width="33.22" height="14" fill="#8B5CF6"><title>450 - 485</title></rect>
+<rect x="681.26" y="403.00" width="34.17" height="14" fill="#8B5CF6"><title>487 - 523</title></rect>
+<rect x="717.33" y="403.00" width="34.17" height="14" fill="#8B5CF6"><title>525 - 561</title></rect>
+<rect x="764.78" y="403.00" width="49.35" height="14" fill="#8B5CF6"><title>575 - 627</title></rect>
+<rect x="816.03" y="403.00" width="34.17" height="14" fill="#8B5CF6"><title>629 - 665</title></rect>
+<rect x="852.10" y="403.00" width="34.17" height="14" fill="#8B5CF6"><title>667 - 703</title></rect>
+<rect x="891.96" y="403.00" width="30.37" height="14" fill="#8B5CF6"><title>709 - 741</title></rect>
+<rect x="928.98" y="403.00" width="30.37" height="14" fill="#8B5CF6"><title>748 - 780</title></rect>
+<rect x="961.24" y="403.00" width="34.17" height="14" fill="#8B5CF6"><title>782 - 818</title></rect>
+<rect x="997.31" y="403.00" width="34.17" height="14" fill="#8B5CF6"><title>820 - 856</title></rect>
+<line x1="220" y1="444.00" x2="1376" y2="444.00" stroke="#EC4899" stroke-width="1"/>
+<text class="trackDb" x="212" y="440.00" text-anchor="end">SUPERFAMILY</text>
+<text class="trackName" x="212" y="455.00" text-anchor="end">SSF57196</text>
+<rect x="499.98" y="437.00" width="37.01" height="14" fill="#EC4899"><title>296 - 335</title></rect>
+<rect x="816.03" y="437.00" width="39.86" height="14" fill="#EC4899"><title>629 - 671</title></rect>
+<rect x="961.24" y="437.00" width="39.86" height="14" fill="#EC4899"><title>782 - 824</title></rect>
+<line x1="220" y1="478.00" x2="1376" y2="478.00" stroke="#EC4899" stroke-width="1"/>
+<rect x="997.31" y="471.00" width="34.17" height="14" fill="#EC4899"><title>820 - 856</title></rect>
+<line x1="220" y1="512.00" x2="1376" y2="512.00" stroke="#06B6D4" stroke-width="1"/>
+<text class="trackDb" x="212" y="508.00" text-anchor="end">Pfam</text>
+<text class="trackName" x="212" y="523.00" text-anchor="end">EGF</text>
+<rect x="503.78" y="505.00" width="30.37" height="14" fill="#06B6D4"><title>300 - 332</title></rect>
+<rect x="541.74" y="505.00" width="28.47" height="14" fill="#06B6D4"><title>340 - 370</title></rect>
+<rect x="577.81" y="505.00" width="28.47" height="14" fill="#06B6D4"><title>378 - 408</title></rect>
+<rect x="928.98" y="505.00" width="27.52" height="14" fill="#06B6D4"><title>748 - 777</title></rect>
+<rect x="965.04" y="505.00" width="27.52" height="14" fill="#06B6D4"><title>786 - 815</title></rect>
+<line x1="220" y1="546.00" x2="1376" y2="546.00" stroke="#EC4899" stroke-width="1"/>
+<text class="trackDb" x="212" y="542.00" text-anchor="end">SUPERFAMILY</text>
+<text class="trackName" x="212" y="557.00" text-anchor="end">Growth_fac_rcpt_cys_sf</text>
+<rect x="526.56" y="539.00" width="123.38" height="14" fill="#EC4899"><title>324 - 454</title></rect>
+<rect x="839.76" y="539.00" width="125.28" height="14" fill="#EC4899"><title>654 - 786</title></rect>
+<line x1="220" y1="580.00" x2="1376" y2="580.00" stroke="#EC4899" stroke-width="1"/>
+<rect x="634.76" y="573.00" width="122.43" height="14" fill="#EC4899"><title>438 - 567</title></rect>
+<line x1="220" y1="614.00" x2="1376" y2="614.00" stroke="#06B6D4" stroke-width="1"/>
+<text class="trackDb" x="212" y="610.00" text-anchor="end">Pfam</text>
+<text class="trackName" x="212" y="625.00" text-anchor="end">EGF_TEN</text>
+<rect x="630.01" y="607.00" width="236.33" height="14" fill="#06B6D4"><title>433 - 682</title></rect>
+<line x1="220" y1="648.00" x2="1376" y2="648.00" stroke="#06B6D4" stroke-width="1"/>
+<text class="trackDb" x="212" y="644.00" text-anchor="end">Pfam</text>
+<text class="trackName" x="212" y="659.00" text-anchor="end">EGF-like_CS</text>
+<rect x="896.71" y="641.00" width="19.93" height="14" fill="#06B6D4"><title>714 - 735</title></rect>
+<rect x="1005.85" y="641.00" width="18.98" height="14" fill="#06B6D4"><title>829 - 849</title></rect>
+<line x1="220" y1="682.00" x2="1376" y2="682.00" stroke="#8B5CF6" stroke-width="1"/>
+<text class="trackDb" x="212" y="678.00" text-anchor="end">SMART</text>
+<text class="trackName" x="212" y="693.00" text-anchor="end">VWF_dom</text>
+<rect x="1038.12" y="675.00" width="63.59" height="14" fill="#8B5CF6"><title>863 - 930</title></rect>
+<line x1="220" y1="716.00" x2="1376" y2="716.00" stroke="#8B5CF6" stroke-width="1"/>
+<rect x="1038.12" y="709.00" width="63.59" height="14" fill="#8B5CF6"><title>863 - 930</title></rect>
+<line x1="220" y1="750.00" x2="1376" y2="750.00" stroke="#06B6D4" stroke-width="1"/>
+<text class="trackDb" x="212" y="746.00" text-anchor="end">Pfam</text>
+<text class="trackName" x="212" y="761.00" text-anchor="end">JAG1_1/2_dom</text>
+<rect x="1118.79" y="743.00" width="104.40" height="14" fill="#06B6D4"><title>948 - 1058</title></rect>
+<line x1="220" y1="798" x2="1376" y2="798" stroke="#374151" stroke-width="1"/>
+<line x1="220.00" y1="798" x2="220.00" y2="808" stroke="#374151" stroke-width="1"/>
+<line x1="238.98" y1="798" x2="238.98" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="257.96" y1="798" x2="257.96" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="276.95" y1="798" x2="276.95" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="295.93" y1="798" x2="295.93" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="314.91" y1="798" x2="314.91" y2="808" stroke="#374151" stroke-width="1"/>
+<line x1="333.89" y1="798" x2="333.89" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="352.87" y1="798" x2="352.87" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="371.86" y1="798" x2="371.86" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="390.84" y1="798" x2="390.84" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="409.82" y1="798" x2="409.82" y2="808" stroke="#374151" stroke-width="1"/>
+<line x1="428.80" y1="798" x2="428.80" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="447.78" y1="798" x2="447.78" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="466.77" y1="798" x2="466.77" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="485.75" y1="798" x2="485.75" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="504.73" y1="798" x2="504.73" y2="808" stroke="#374151" stroke-width="1"/>
+<line x1="523.71" y1="798" x2="523.71" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="542.69" y1="798" x2="542.69" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="561.67" y1="798" x2="561.67" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="580.66" y1="798" x2="580.66" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="599.64" y1="798" x2="599.64" y2="808" stroke="#374151" stroke-width="1"/>
+<line x1="618.62" y1="798" x2="618.62" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="637.60" y1="798" x2="637.60" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="656.58" y1="798" x2="656.58" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="675.57" y1="798" x2="675.57" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="694.55" y1="798" x2="694.55" y2="808" stroke="#374151" stroke-width="1"/>
+<line x1="713.53" y1="798" x2="713.53" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="732.51" y1="798" x2="732.51" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="751.49" y1="798" x2="751.49" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="770.48" y1="798" x2="770.48" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="789.46" y1="798" x2="789.46" y2="808" stroke="#374151" stroke-width="1"/>
+<line x1="808.44" y1="798" x2="808.44" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="827.42" y1="798" x2="827.42" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="846.40" y1="798" x2="846.40" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="865.39" y1="798" x2="865.39" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="884.37" y1="798" x2="884.37" y2="808" stroke="#374151" stroke-width="1"/>
+<line x1="903.35" y1="798" x2="903.35" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="922.33" y1="798" x2="922.33" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="941.31" y1="798" x2="941.31" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="960.30" y1="798" x2="960.30" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="979.28" y1="798" x2="979.28" y2="808" stroke="#374151" stroke-width="1"/>
+<line x1="998.26" y1="798" x2="998.26" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="1017.24" y1="798" x2="1017.24" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="1036.22" y1="798" x2="1036.22" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="1055.21" y1="798" x2="1055.21" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="1074.19" y1="798" x2="1074.19" y2="808" stroke="#374151" stroke-width="1"/>
+<line x1="1093.17" y1="798" x2="1093.17" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="1112.15" y1="798" x2="1112.15" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="1131.13" y1="798" x2="1131.13" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="1150.11" y1="798" x2="1150.11" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="1169.10" y1="798" x2="1169.10" y2="808" stroke="#374151" stroke-width="1"/>
+<line x1="1188.08" y1="798" x2="1188.08" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="1207.06" y1="798" x2="1207.06" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="1226.04" y1="798" x2="1226.04" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="1245.02" y1="798" x2="1245.02" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="1264.01" y1="798" x2="1264.01" y2="808" stroke="#374151" stroke-width="1"/>
+<line x1="1282.99" y1="798" x2="1282.99" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="1301.97" y1="798" x2="1301.97" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="1320.95" y1="798" x2="1320.95" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="1339.93" y1="798" x2="1339.93" y2="804" stroke="#374151" stroke-width="1"/>
+<line x1="1358.92" y1="798" x2="1358.92" y2="808" stroke="#374151" stroke-width="1"/>
+<line x1="1375.05" y1="798" x2="1375.05" y2="808" stroke="#374151" stroke-width="1"/>
+<text class="axis" x="220.00" y="820" text-anchor="middle">1</text>
+<text class="axis" x="314.91" y="820" text-anchor="middle">101</text>
+<text class="axis" x="409.82" y="820" text-anchor="middle">201</text>
+<text class="axis" x="504.73" y="820" text-anchor="middle">301</text>
+<text class="axis" x="599.64" y="820" text-anchor="middle">401</text>
+<text class="axis" x="694.55" y="820" text-anchor="middle">501</text>
+<text class="axis" x="789.46" y="820" text-anchor="middle">601</text>
+<text class="axis" x="884.37" y="820" text-anchor="middle">701</text>
+<text class="axis" x="979.28" y="820" text-anchor="middle">801</text>
+<text class="axis" x="1074.19" y="820" text-anchor="middle">901</text>
+<text class="axis" x="1169.10" y="820" text-anchor="middle">1001</text>
+<text class="axis" x="1264.01" y="820" text-anchor="middle">1101</text>
+<text class="axis" x="1375.05" y="820" text-anchor="middle">1218</text>
+</svg>

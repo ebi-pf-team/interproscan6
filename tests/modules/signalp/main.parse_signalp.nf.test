@@ -1,0 +1,29 @@
+nextflow_process {
+
+    name "Test Process PARSE_SIGNALP"
+    script "modules/signalp/main.nf"
+    process "PARSE_SIGNALP"
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                input[0] = channel.of(tuple(
+                    1,
+                    "eukarya",
+                    "fast",
+                    file("${projectDir}/tests/data/signalp", checkIfExists: true)
+                ))
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

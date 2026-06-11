@@ -1,14 +1,14 @@
 package uk.ac.ebi.interpro
-
+import java.nio.file.Path
 import uk.ac.ebi.interpro.Location
 import uk.ac.ebi.interpro.LocationFragment
 
 class CATH {
-    static parseAssignedFile(String filePath) {
+    static parseAssignedFile(Path filePath) {
         // For CATH-Gene3D
         def results = [:].withDefault { [] }
 
-        new File(filePath).eachLine { line ->
+        filePath.eachLine { line ->
             if (line[0] != "#") {
                 // #domain_id cath-superfamily query-id match-id score boundaries resolved aligned-regions cond-evalue indp-evalue [comment]
                 def fields = line.split("\t")
@@ -31,11 +31,11 @@ class CATH {
         return results
     }
 
-    static parseResolvedFile(String filePath) {
+    static parseResolvedFile(Path filePath) {
         // For CATH-FunFam
         def results = [:].withDefault { [] }
 
-        new File(filePath).eachLine { line ->
+        filePath.eachLine { line ->
             if (line[0] != "#") {
                 // #FIELDS query-id match-id score boundaries resolved aligned-regions cond-evalue indp-evalue
                 def fields = line.split(/\s+/)
@@ -91,7 +91,7 @@ class CATH {
                     fragments.add(fragment)
                 }
 
-                Location location = new Location(
+                Location location = new uk.ac.ebi.interpro.Location(
                     cathDomain.getResolvedStart(),
                     cathDomain.getResolvedEnd(),
                     hmmerDomain.locations[0].hmmStart,
@@ -111,8 +111,8 @@ class CATH {
                 if (sequenceDomains.containsKey(domId)) {
                     sequenceDomains[domId].addLocation(location)
                 } else {
-                    Signature sig = new Signature(cathDomain.accession, new SignatureLibraryRelease(memberDb, null))
-                    Match domain = new Match(
+                    Signature sig = new uk.ac.ebi.interpro.Signature(cathDomain.accession, new SignatureLibraryRelease(memberDb, null))
+                    Match domain = new uk.ac.ebi.interpro.Match(
                         domId, 
                         hmmerDomain.evalue,
                         hmmerDomain.score, 

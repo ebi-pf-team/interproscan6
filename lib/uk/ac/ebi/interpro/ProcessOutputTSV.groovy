@@ -1,6 +1,7 @@
 package uk.ac.ebi.interpro
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import java.nio.file.Path
 import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 import uk.ac.ebi.interpro.Location
@@ -8,17 +9,19 @@ import uk.ac.ebi.interpro.Match
 import uk.ac.ebi.interpro.SeqDB
 
 class ProcessOutputTSV {
-    static void run(List<String> inputPaths, String databasePath, boolean isNucleic, String outputPath) {
+    static void run(List<Path> inputPaths, Path databasePath, boolean isNucleic, Path outputPath) {
         SeqDB db = new SeqDB(databasePath)
 
         // Each line contains: seqId md5 seqLength memberDb modelAcc sigDesc start end evalue status date entryAcc entryDesc goterms pathways
         def currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
         Set<String> seenNucleicMd5s = new HashSet<>()
 
-        new File(outputPath).withWriter { writer ->
+        outputPath.withWriter { writer ->
             ObjectMapper mapper = new ObjectMapper()
             inputPaths.each { inputPath ->
-                Map proteins = mapper.readValue(new File(inputPath), Map)
+                Map proteins = inputPath.newReader().withCloseable { reader ->
+                    mapper.readValue(reader, Map)
+                }
                 if (isNucleic) {
                     def (nucleicToProteinMd5, ntSeqDataMap, orfDataMap) = 
                         db.retrieveAllNucleicSequenceData(proteins.keySet() as List)

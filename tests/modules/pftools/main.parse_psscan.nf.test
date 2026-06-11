@@ -1,0 +1,24 @@
+nextflow_process {
+
+    name "Test Process PARSE_PSSCAN"
+    script "modules/pftools/main.nf"
+    process "PARSE_PSSCAN"
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                input[0] = channel.of(tuple(1, file("${projectDir}/tests/data/prosite/psscan.out", checkIfExists: true)))
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

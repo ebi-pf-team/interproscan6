@@ -168,7 +168,7 @@ class Location implements Serializable {
     }
 
     static Location fromMap(data) {
-        Location loc = new Location(
+        Location loc = new uk.ac.ebi.interpro.Location(
                 data.start,
                 data.end,
                 data.hmmStart,
@@ -244,7 +244,7 @@ class Location implements Serializable {
     }
 
     public Object clone() {
-        Location loc = new Location(
+        Location loc = new uk.ac.ebi.interpro.Location(
             start,
             end,
             hmmStart,

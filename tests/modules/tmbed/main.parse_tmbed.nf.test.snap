@@ -1,0 +1,19 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "tmbed.json:md5,8b6569b8fcc183f7139b87f0b3ec7af5"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-03T22:28:48.685846283",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

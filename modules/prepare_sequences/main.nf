@@ -1,9 +1,7 @@
-import uk.ac.ebi.interpro.FastaFile
-import uk.ac.ebi.interpro.SeqDB
-
 process VALIDATE_FASTA {
     // check the formating of the intput FASTA, i.e. look for illegal characters
-    label         'mem_low', 'time_short'
+    label         'mem_low'
+    label         'time_short'
     executor      'local'
     errorStrategy 'terminate'
 
@@ -16,12 +14,13 @@ process VALIDATE_FASTA {
     val seq_id
 
     exec:
-    seq_id = FastaFile.validate(fasta.toString(), is_nucleic)
+    seq_id = uk.ac.ebi.interpro.FastaFile.validate(fasta, is_nucleic)
 }
 
 process LOAD_SEQUENCES {
     // Populate a native sqlite3 database with sequences from the pipeline's input FASTA file.
-    label         'mem_low', 'time_short'
+    label         'mem_low'
+    label         'time_short'
     executor      'local'
     errorStrategy 'terminate'
 
@@ -34,14 +33,15 @@ process LOAD_SEQUENCES {
 
     exec:
     def outputFilePath = task.workDir.resolve("sequences.db")
-    SeqDB db = new SeqDB(outputFilePath.toString())
-    db.loadFastaFile(fasta.toString(), nucleic, false)
+    def db = new uk.ac.ebi.interpro.SeqDB(outputFilePath)
+    db.loadFastaFile(fasta, nucleic, false)
     db.close()
 }
 
 process LOAD_ORFS {
     // add protein seqs translated from ORFS in the nt seqs to the database
-    label         'mem_low', 'time_short'
+    label         'mem_low'
+    label         'time_short'
     executor      'local'
     errorStrategy 'terminate'
 
@@ -50,17 +50,18 @@ process LOAD_ORFS {
     val db_path
 
     output:
-    val db_path // ensure BUILD_BATCHES runs after LOAD_ORFS
+    val db_path // ensure SPLIT_FASTA runs after LOAD_ORFS
 
     exec:
-    SeqDB db = new SeqDB(db_path.toString())
-    db.loadFastaFile(translated_fasta.toString(), false, true)
+    def db = new uk.ac.ebi.interpro.SeqDB(db_path)
+    db.loadFastaFile(translated_fasta, false, true)
     db.close()
 }
 
 process SPLIT_FASTA {
     // Build the FASTA file batches of unique protein sequences for the sequence analysis
-    label         'mem_low', 'time_short'
+    label         'mem_low'
+    label         'time_short'
     executor      'local'
     errorStrategy 'terminate'
 
@@ -73,8 +74,7 @@ process SPLIT_FASTA {
     path "*.fasta"
 
     exec:
-    String prefix = task.workDir.resolve("input").toString()
-    SeqDB db = new SeqDB(db_path.toString())
-    db.splitFasta(prefix, batch_size, nucleic)
+    def db = new uk.ac.ebi.interpro.SeqDB(db_path)
+    db.splitFasta(task.workDir, batch_size, nucleic)
     db.close()
 }

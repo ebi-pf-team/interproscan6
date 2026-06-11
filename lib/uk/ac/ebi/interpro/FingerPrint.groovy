@@ -1,4 +1,5 @@
 package uk.ac.ebi.interpro
+import java.nio.file.Path
 
 class FingerPrint {
     String modelName
@@ -44,7 +45,7 @@ class FingerPrint {
         Double evalueCutoff
         int minMotifCount
         boolean isDomain = false
-        String[] siblingsIds = []
+        List<String> siblingsIds = []
 
         HierarchyEntry(String modelId, String modelAccession, Double evalueCutoff, int minMotifCount) {
             this.modelId = modelId
@@ -53,10 +54,9 @@ class FingerPrint {
             this.minMotifCount = minMotifCount
         }
 
-        static parseHierarchyDbFile(String hierarchyDb) {  
+        static parseHierarchyDbFile(Path hierarchyFile) {  
             // parser the hierarchyDb in to a map of ModelID: hierarchy entry
             Map<String, HierarchyEntry> hierarchyMap = new LinkedHashMap<>()
-            File hierarchyFile = new File(hierarchyDb)
             if (!hierarchyFile.exists()){
                 System.out.println("Could not find Hierarchy DB for PRINTS")
                 System.exit 1
@@ -95,8 +95,7 @@ class FingerPrint {
         }
 
         void addSiblings(String siblingsString) {
-            String[] siblingsIds = siblingsString.split("\\,")
-            this.siblingsIds = siblingsIds
+            this.siblingsIds = siblingsString.split("\\,").toList()
         }
     }
 }

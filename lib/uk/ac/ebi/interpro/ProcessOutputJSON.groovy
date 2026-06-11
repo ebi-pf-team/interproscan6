@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import groovy.json.JsonException
+import java.nio.file.Path
 import java.util.regex.Pattern
 import uk.ac.ebi.interpro.Location
 import uk.ac.ebi.interpro.Match
@@ -14,7 +15,7 @@ import uk.ac.ebi.interpro.SeqDB
 
 
 class ProcessOutputJSON {
-    static void run(List<String> inputPaths, String databasePath, Map dbReleases, boolean isNucleic, String iprscanVersion, boolean useJsonLines, String outputPath) {
+    static void run(List<Path> inputPaths, Path databasePath, boolean isNucleic, String iprscanVersion,  String interproVersion, boolean useJsonLines, Path outputPath) {
         ObjectMapper mapper = new ObjectMapper()
         SeqDB db = new SeqDB(databasePath)
         
@@ -23,7 +24,9 @@ class ProcessOutputJSON {
                 generator.setRootValueSeparator(new SerializedString(''))
                 Set<String> seenNucleicMd5s = new HashSet<>()
                 inputPaths.each { inputPath ->
-                    Map proteins = mapper.readValue(new File(inputPath), Map)
+                    Map proteins = inputPath.newReader().withCloseable { reader ->
+                        mapper.readValue(reader, Map)
+                    }
 
                     if (isNucleic) {
                         def (nucleicToProteinMd5, ntSeqDataMap, orfDataMap) = 
@@ -33,7 +36,9 @@ class ProcessOutputJSON {
                             if (!seenNucleicMd5s.contains(nucleicMd5)) {
                                 generator.writeStartObject()
                                 generator.writeStringField("interproscan-version", iprscanVersion)
-                                generator.writeStringField("interpro-version", dbReleases?.interpro?.version)
+                                if (interproVersion) {
+                                    generator.writeStringField("interpro-version", interproVersion)
+                                }
                                 generator.writeFieldName("results")
                                 generator.writeStartArray()
                                 def seqData = ntSeqDataMap[nucleicMd5]
@@ -57,7 +62,9 @@ class ProcessOutputJSON {
                             def seqData = md5ToSeqData[proteinMd5]
                             generator.writeStartObject()
                             generator.writeStringField("interproscan-version", iprscanVersion)
-                            generator.writeStringField("interpro-version", dbReleases?.interpro?.version)
+                            if (interproVersion) {
+                                generator.writeStringField("interpro-version", interproVersion)
+                            }
                             generator.writeFieldName("results")
                             generator.writeStartArray()
                             writeProtein(proteinMd5, proteinMatches, generator, seqData)
@@ -74,12 +81,16 @@ class ProcessOutputJSON {
                 generator.writeStartObject()
 
                 generator.writeStringField("interproscan-version", iprscanVersion)
-                generator.writeStringField("interpro-version", dbReleases?.interpro?.version)
+                if (interproVersion) {
+                    generator.writeStringField("interpro-version", interproVersion)
+                }
                 generator.writeFieldName("results")
                 generator.writeStartArray()  // start of results [...
                 Set<String> seenNucleicMd5s = new HashSet<>()
                 inputPaths.each { inputPath ->
-                    Map proteins = mapper.readValue(new File(inputPath), Map)
+                    Map proteins = inputPath.newReader().withCloseable { reader ->
+                        mapper.readValue(reader, Map)
+                    }
                     if (isNucleic) {  // input was nucleic acid sequence
                         def (nucleicToProteinMd5, ntSeqDataMap, orfDataMap) = 
                             db.retrieveAllNucleicSequenceData(proteins.keySet() as List)
@@ -112,12 +123,12 @@ class ProcessOutputJSON {
 
     }
 
-    static def streamJson(String filePath, Closure closure) {
-        try (FileWriter fileWriter = new FileWriter(new File(filePath))) {
+    static def streamJson(Path filePath, Closure closure) {
+        filePath.withWriter { writer ->
             ObjectMapper mapper = new ObjectMapper()
-            try (JsonGenerator generator = mapper.getFactory().createGenerator(fileWriter)) {
+            try (JsonGenerator generator = mapper.getFactory().createGenerator(writer)) {
                 closure.call(generator)
-            }    
+            }
         }
     }
 

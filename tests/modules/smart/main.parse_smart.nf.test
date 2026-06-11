@@ -1,0 +1,41 @@
+nextflow_process {
+
+    name "Test Process PARSE_SMART"
+    script "modules/smart/main.nf"
+    process "PARSE_SMART"
+
+    test("Should run without failures") {
+    
+        when {
+            process {
+                """
+                input[0] = channel.of(tuple(
+                    1, 
+                    file("${projectDir}/tests/data/smart/sequences.zip", checkIfExists: true), 
+                    file("${projectDir}/tests/data/smart/smart.zip", checkIfExists: true)
+                ))
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+
+            with (process.out) {
+                assert size() == 1
+                assert get(0).size() == 1
+                assert get(0).get(0).size() == 2
+                def json = get(0).get(0).get(1)
+
+                cmd  = "python tests/diff.py -q tests/data/smart/smart.json ${json}"
+                println "${cmd}"
+                proc = cmd.execute()
+                proc.waitFor()
+                assert proc.exitValue() == 0
+            }
+        }
+
+    }
+
+}

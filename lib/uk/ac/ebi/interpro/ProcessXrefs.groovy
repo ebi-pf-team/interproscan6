@@ -1,5 +1,7 @@
 package uk.ac.ebi.interpro
 
+import java.nio.file.Files
+import java.nio.file.Path
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.ebi.interpro.Entry
@@ -10,107 +12,132 @@ import uk.ac.ebi.interpro.RepresentativeInfo
 
 
 class ProcessXrefs {
-    static void run(String inputPath, Map dbReleases, boolean addGoTerms, 
-                         boolean addPathways, String pantherPaintDirectory, String outputPath) {
+    static void run(List<Path> inputPaths, Path interproPath, Path pantherPaintPath, 
+                    boolean addGoTerms, boolean addPathways, Path outputDir) {
+        Files.createDirectories(outputDir)
         ObjectMapper mapper = new ObjectMapper()
         def (databaseInfo, entries, ipr2go, goInfo, ipr2pa, paInfo) = [null, null, null, null, null, null]
-        if (dbReleases?.interpro?.dirpath != null) {
-            String interproDir = dbReleases.interpro.dirpath.toString()
-            File databasesJson = new File("${interproDir}/databases.json")
-            databaseInfo = mapper.readValue(databasesJson, Map)
-            File entriesJson = new File("${interproDir}/entries.json")
-            if (entriesJson.exists()) {
-                entries = mapper.readValue(entriesJson, Map)
+        if (interproPath != null) {
+            Path databasesJson = interproPath.resolve("databases.json")
+            databaseInfo = databasesJson.newReader().withCloseable { reader -> 
+                mapper.readValue(reader, Map)
+            }
+            Path entriesJson = interproPath.resolve("entries.json")
+            if (Files.isRegularFile(entriesJson)) {
+                entries = entriesJson.newReader().withCloseable { reader -> 
+                    mapper.readValue(reader, Map)
+                }
             }
             if (addGoTerms) {
-                (ipr2go, goInfo) = loadXRefFiles("${interproDir}/goterms")
+                (ipr2go, goInfo) = loadXRefFiles(interproPath.resolve("goterms"))
             }
             if (addPathways) {
-                (ipr2pa, paInfo) = loadXRefFiles("${interproDir}/pathways")
+                (ipr2pa, paInfo) = loadXRefFiles(interproPath.resolve("pathways"))
             }
         }
 
-        def matches = mapper.readValue(new File(inputPath), Map.class)
-        matches.each { String seqMd5, Map seqMatches ->
-            seqMatches.each { modelAcc, matchMap ->
-                Match match = Match.fromMap(matchMap)  // convert Map to Match object
-
-                if (match.source != "InterPro-N") {
-                    String signatureAcc = match.signature.accession
-                    def signatureInfo = entries == null ? null : (entries[signatureAcc] ?: entries[modelAcc])
-
-                    // Update library version
-                    def version = (match.signature.signatureLibraryRelease.version == "null") ? null : match.signature.signatureLibraryRelease.version
-                    if (!version && signatureInfo != null) {
-                        match.signature.signatureLibraryRelease.version = databaseInfo?.get(signatureInfo["database"])
-                    } else if (match.signature.signatureLibraryRelease.library == "PIRSR") {
-                        match.signature.signatureLibraryRelease.version = databaseInfo?.get("PIRSR")
-                    }
-
-                    // Handle PANTHER data
-                    if (match.signature.signatureLibraryRelease.library == "PANTHER") {
-                        updatePantherData(match, dbReleases.panther.dirpath, pantherPaintDirectory, signatureAcc, entries, goInfo)
-                    }
-
-                    // Update signature info
-                    if (signatureInfo != null) {
-                        match.signature.name = signatureInfo["name"]
-                        match.signature.description = signatureInfo["description"]
-                        String sigType = signatureInfo["type"]
-                        match.signature.setType(sigType)
-
-                        if (signatureInfo["representative"] != null) {
-                            match.representativeInfo = new RepresentativeInfo(
-                                signatureInfo["representative"]["type"],
-                                signatureInfo["representative"]["index"]
-                            )
-                        }
-
-                        // Handle InterPro data
-                        String interproAcc = signatureInfo["integrated"]
-                        if (interproAcc != null) {
-                            def entryInfo = entries[interproAcc]
-                            assert entryInfo != null
-                            match.signature.entry = new Entry(
-                                interproAcc, entryInfo["name"], entryInfo["description"], entryInfo["type"]
-                            )
-                            addXRefs(match, interproAcc, ipr2go, goInfo, ipr2pa, paInfo)
-                        }
-                    }
-
-                    // update the match
-                    seqMatches[modelAcc] = match
-                }  // end of if (entries)
-            } // end of seqMatches
-        }  // end of Json reader / seq Id
-
         def jf = new JsonFactory()
-        new File(outputPath).withWriter { writer ->
-            def gen = jf.createGenerator(writer)
-            mapper.writeValue(gen, matches)
-            gen.close()
+        int fileIndex = 0
+
+        inputPaths.each { inputPath -> 
+            def matches = inputPath.newReader().withCloseable { reader ->
+                mapper.readValue(reader, Map.class)
+            }
+            matches.each { String seqMd5, Map seqMatches ->
+                seqMatches.each { modelAcc, matchMap ->
+                    Match match = Match.fromMap(matchMap)  // convert Map to Match object
+
+                    if (match.source != "InterPro-N") {
+                        String signatureAcc = match.signature.accession
+                        def signatureInfo = entries == null ? null : (entries[signatureAcc] ?: entries[modelAcc])
+
+                        // Update library version
+                        def version = (match.signature.signatureLibraryRelease.version == "null") ? null : match.signature.signatureLibraryRelease.version
+                        if (!version && signatureInfo != null) {
+                            match.signature.signatureLibraryRelease.version = databaseInfo?.get(signatureInfo["database"])
+                        } else if (match.signature.signatureLibraryRelease.library == "PIRSR") {
+                            match.signature.signatureLibraryRelease.version = databaseInfo?.get("PIRSR")
+                        }
+
+                        // Handle PANTHER data
+                        if (match.signature.signatureLibraryRelease.library == "PANTHER") {
+                            updatePantherData(match, pantherPaintPath, signatureAcc, entries, goInfo)
+                        }
+
+                        // Update signature info
+                        if (signatureInfo != null) {
+                            match.signature.name = signatureInfo["name"]
+                            match.signature.description = signatureInfo["description"]
+                            String sigType = signatureInfo["type"]
+                            match.signature.setType(sigType)
+
+                            if (signatureInfo["representative"] != null) {
+                                match.representativeInfo = new RepresentativeInfo(
+                                    signatureInfo["representative"]["type"],
+                                    signatureInfo["representative"]["index"]
+                                )
+                            }
+
+                            // Handle InterPro data
+                            String interproAcc = signatureInfo["integrated"]
+                            if (interproAcc != null) {
+                                def entryInfo = entries[interproAcc]
+                                assert entryInfo != null
+                                match.signature.entry = new Entry(
+                                    interproAcc, entryInfo["name"], entryInfo["description"], entryInfo["type"]
+                                )
+                                addXRefs(match, interproAcc, ipr2go, goInfo, ipr2pa, paInfo)
+                            }
+                        }
+
+                        seqMatches[modelAcc] = match
+                    }
+                }
+            }
+
+            def outputFile = outputDir.resolve("${++fileIndex}.json".toString())
+            outputFile.withWriter { writer ->
+                jf.createGenerator(writer).withCloseable { generator ->
+                    mapper.writeValue(generator, matches)
+                }
+            }
         }
     }
 
-    static def loadXRefFiles(String prefix) {
+    static def loadXRefFiles(Path prefix) {
+        Path iprFile = prefix.resolveSibling(prefix.fileName.toString() + ".ipr.json")
+        Path infoFile = prefix.resolveSibling(prefix.fileName.toString() + ".json")
         ObjectMapper mapper = new ObjectMapper()
-        File iprFile = new File("${prefix}.ipr.json")
-        File infoFile = new File("${prefix}.json")
+    
+        Map iprData = null
+        if (Files.isRegularFile(iprFile)) {
+            iprData = iprFile.newReader().withCloseable { reader ->
+                mapper.readValue(reader, Map)
+            }
+        }
 
-        Map iprData = iprFile.exists() ? mapper.readValue(iprFile, Map) : null
-        Map infoData = infoFile.exists() ? mapper.readValue(infoFile, Map) : null
+        Map infoData = null
+        if (Files.isRegularFile(infoFile)) {
+            infoData = infoFile.newReader().withCloseable { reader ->
+                mapper.readValue(reader, Map)
+            }
+        }
 
         return [iprData, infoData]
     }
 
-    static void updatePantherData(Match match, String pantherDir, String paintAnnoDir, 
+    static void updatePantherData(Match match, Path pantherPaintDir,
                                  String signatureAcc, Map entries, Map goInfo) {
         Map<String,String> GO_PATTERN = ["P": "BIOLOGICAL_PROCESS", "C": "CELLULAR_COMPONENT", "F": "MOLECULAR_FUNCTION"]
         Map goTerms = goInfo == null ? null : goInfo["terms"]
         Map signatureEntry = entries == null ? null : entries[signatureAcc]
-        File paintAnnotationFile = new File("${pantherDir.toString()}/${paintAnnoDir}/${signatureAcc}.json")
-        assert paintAnnotationFile.exists()
-        def paintAnnotationsContent = new ObjectMapper().readValue(paintAnnotationFile, Map)
+
+        Path paintAnnotationFile = pantherPaintDir.resolve("${signatureAcc}.json")
+        assert Files.isRegularFile(paintAnnotationFile)
+
+        def paintAnnotationsContent = paintAnnotationFile.newReader().withCloseable { reader ->
+            new ObjectMapper().readValue(reader, Map)
+        }
         String nodeId = match.treegrafter.ancestralNodeID
         def nodeData = paintAnnotationsContent[nodeId]
         if (nodeData != null) {
@@ -142,21 +169,19 @@ class ProcessXrefs {
     }
 
     static void addXRefs(Match match, String interproAcc, def ipr2go, def goInfo, def ipr2pa, def paInfo) {
-        Map<String,String> GO_PATTERN = ["P": "BIOLOGICAL_PROCESS", "C": "CELLULAR_COMPONENT", "F": "MOLECULAR_FUNCTION"]
-        Map<String,String> PA_PATTERN = ["t": "MetaCyc", "w": "UniPathway", "k": "KEGG", "r": "Reactome"]
         if (ipr2go != null && goInfo != null && ipr2go[interproAcc] != null) {
+            def patterns = ["P": "BIOLOGICAL_PROCESS", "C": "CELLULAR_COMPONENT", "F": "MOLECULAR_FUNCTION"]
             ipr2go[interproAcc].each { goId ->
-                goId = goId
                 match.signature.entry.addGoXRefs(
-                    new GoXRefs(goInfo["terms"][goId][0], "GO", GO_PATTERN[goInfo["terms"][goId][1]], goId)
+                    new GoXRefs(goInfo["terms"][goId][0], "GO", patterns[goInfo["terms"][goId][1]], goId)
                 )
             }
         }
         if (ipr2pa != null && paInfo != null && ipr2pa[interproAcc] != null) {
+            def patterns = ["t": "MetaCyc", "w": "UniPathway", "k": "KEGG", "r": "Reactome"]
             ipr2pa[interproAcc].each { paId ->
-                paId = paId
                 match.signature.entry.addPathwayXRefs(
-                    new PathwayXRefs(paInfo[paId][1], PA_PATTERN[paInfo[paId][0]], paId)
+                    new PathwayXRefs(paInfo[paId][1], patterns[paInfo[paId][0]], paId)
                 )
             }
         }

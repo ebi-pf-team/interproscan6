@@ -1,56 +1,49 @@
-include { COMBINE_MATCHES; COMBINE_MATCHES_LOCAL                   } from "../../modules/combine"
-include { XREFS; XREFS_LOCAL                                       } from "../../modules/xrefs"
-include { REPRESENTATIVE_LOCATIONS; REPRESENTATIVE_LOCATIONS_LOCAL } from "../../modules/representative_locations"
+include { COMBINE_MATCHES          } from "../../modules/combine"
+include { ADD_XREFS                } from "../../modules/add_xrefs"
+include { REPRESENTATIVE_LOCATIONS } from "../../modules/representative_locations"
 
 workflow COMBINE {
     take:
-    match_results
-    db_releases
+    ch_json             // [ meta, [json] ]
+    appl_config
+    appl_dirs
     add_goterms
     add_pathways
-    panther_paint_dir
-    skip_repr_locations      // boolean used in production
-    batch_size
+    skip_repr_locations
 
     main:
-    ch_xrefs = Channel.empty()
-    ch_combined = Channel.empty()
+    ch_interpro = appl_dirs
+        .filter { name, _dirpath -> name == "interpro" }
+        .map    { _name, dirpath -> dirpath }
+        .ifEmpty(file("${projectDir}/assets/DUMMY")) 
+        .first()
 
-    if (batch_size < 50000) {
-        COMBINE_MATCHES_LOCAL(match_results)
+    ch_panther = appl_dirs
+        .filter { name, _dirpath -> name == "panther" }
+        .map    { _name, dirpath -> dirpath.resolve(appl_config.panther.paint) }
+        .ifEmpty(file("${projectDir}/assets/DUMMY2")) 
+        .first()
 
-        ch_xrefs = XREFS_LOCAL(
-            COMBINE_MATCHES_LOCAL.out,
-            db_releases,
-            add_goterms,
-            add_pathways,
-            panther_paint_dir
-        )
-    } else {
-        COMBINE_MATCHES(match_results)
+    COMBINE_MATCHES(ch_json)
 
-        ch_xrefs = XREFS(
-            COMBINE_MATCHES.out,
-            db_releases,
-            add_goterms,
-            add_pathways,
-            panther_paint_dir
-        )
-    }
+    ch_xrefs = ADD_XREFS(
+        COMBINE_MATCHES.out,
+        ch_interpro,
+        ch_panther,
+        add_goterms,
+        add_pathways
+    )
 
+    ch_combined = channel.empty()
     if (skip_repr_locations) {
         ch_combined = ch_xrefs
-    } else if (batch_size < 50000) {
-        ch_combined = REPRESENTATIVE_LOCATIONS_LOCAL(ch_xrefs)
     } else {
         ch_combined = REPRESENTATIVE_LOCATIONS(ch_xrefs)
     }
 
-    // Collect all JSON files into a single channel so we don't have cocurrent writing to the output files
-    ch_results = ch_combined
-        .map { meta, json -> json }
-        .collect()
-
     emit:
-    ch_results
+    // Collect all JSON files into a single channel so we don't have concurrent writing to the output files
+    results = ch_combined
+        .map { _meta, json -> json }
+        .collect(flat: true)
 }

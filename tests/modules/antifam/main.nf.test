@@ -1,0 +1,25 @@
+nextflow_process {
+
+    name "Test Process PARSE_ANTIFAM"
+    script "modules/antifam/main.nf"
+    process "PARSE_ANTIFAM"
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                input[0] = channel.of(tuple(1, file("${projectDir}/tests/data/antifam/hmmsearch.out", checkIfExists: true)))
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+            
+        }
+
+    }
+
+}

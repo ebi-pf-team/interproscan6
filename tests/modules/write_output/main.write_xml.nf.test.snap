@@ -1,0 +1,30 @@
+{
+    "Write output for protein sequences": {
+        "content": [
+            {
+                "0": [
+                    "output.xml:md5,3f17e928e58e76d82d47e3c14933f80d"
+                ]
+            }
+        ],
+        "timestamp": "2026-04-16T15:29:22.450241874",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    },
+    "Write output for nucleic sequences": {
+        "content": [
+            {
+                "0": [
+                    "output.xml:md5,708ca9f9376e6fc8fbe7f65d525d6e46"
+                ]
+            }
+        ],
+        "timestamp": "2026-04-16T15:31:21.328552444",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.04.7"
+        }
+    }
+}

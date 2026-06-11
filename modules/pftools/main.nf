@@ -1,43 +1,35 @@
-import groovy.io.FileType
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
-import uk.ac.ebi.interpro.Location
-import uk.ac.ebi.interpro.Match
-import uk.ac.ebi.interpro.Signature
-import uk.ac.ebi.interpro.SignatureLibraryRelease
-
-
 process RUN_PSSCAN {
     /*
     The ps_scan.pl script is a wrapper for the pfscan tool that is provided by the
     pftools developers. It automates running pfscan for all provided patterns and
     includes post-processing of the hits.
     */
-    label 'mem_min', 'time_medium', 'ips6_container'
+    label     'mem_min'
+    label     'time_medium'
+    container 'interpro/pftools:3.2.12'
 
     input:
         tuple val(meta), path(fasta)
-        path dirpath
-        val datfile
-        val evafile
+        tuple path(dat), path(eval)
 
     output:
         tuple val(meta), path("ps_scan.out")
 
     script:
     """
-        perl ${projectDir}/bin/prosite/ps_scan.pl \
+    ps_scan.pl \
         ${fasta} \
-        -d ${dirpath}/${datfile} \
+        -d ${dat} \
         --pfscan pfscanV3 \
-        -b ${dirpath}/${evafile} \
+        -b ${eval} \
         -r -s -o ipro > ps_scan.out
     """
 }
 
 
 process PARSE_PSSCAN {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:
@@ -47,109 +39,108 @@ process PARSE_PSSCAN {
         tuple val(meta), path("ps_scan.json")
 
     exec:
-    Map<String, Map<String, Match>> patternsMatches = [:]
-    SignatureLibraryRelease library = new SignatureLibraryRelease("PROSITE patterns", null)
+    def patternsMatches = [:]
+    def library = new uk.ac.ebi.interpro.SignatureLibraryRelease("PROSITE patterns", null)
     ps_scan_out.eachLine { line ->
         line = line.trim()
         if (!line || line.startsWith("pfscanV3 is not meant to be used with a single profile")) {
             return
         }
-        List<String> matchInfo = line.split('\t')
+        def matchInfo = line.split('\t')
         if (matchInfo.size() < 9) {
             return
         }
-        String seqId = matchInfo[0]
-        String modelAccession = matchInfo[2]
-        int start = matchInfo[3].toInteger()
-        int end = matchInfo[4].toInteger()
+        def seqId = matchInfo[0]
+        def modelAccession = matchInfo[2]
+        def start = matchInfo[3].toInteger()
+        def end = matchInfo[4].toInteger()
 
-        List<String> matchDetails = matchInfo[8].split(';')
-        String name = matchDetails[0].trim()
-        String level = matchDetails[1].trim()
+        def matchDetails = matchInfo[8].split(';')
+        // Example of matchDetails:
+        // Name "EGF_CA" ; LevelTag "(0)" ; Sequence "DkDECskdngg........Cqqd....CvNtfgsYeC" ; SequenceDescription "EE9CDDCA84C66D7FB465CC609FD0DCCD"
+        def level = matchDetails[1].trim()
         if (!level.startsWith("LevelTag") || !level.contains("0")) {
             return // skipping non-strong matches
         } else {
             level = "STRONG"
         }
-        String alignment = matchDetails[2].replaceAll('Sequence ', '').replaceAll('"', '').replaceAll('\\.', '').trim()
-        String cigarAlignment = Match.encodeCigarAlignment(alignment)
+        def alignment = matchDetails[2].replaceAll('Sequence ', '').replaceAll('"', '').replaceAll('\\.', '').trim()
+        def cigarAlignment = uk.ac.ebi.interpro.Match.encodeCigarAlignment(alignment)
         patternsMatches.computeIfAbsent(seqId) { [:] }
-        Match matchObj = patternsMatches[seqId].computeIfAbsent(modelAccession) {
-            new Match(modelAccession, new Signature(modelAccession, library))
+        def matchObj = patternsMatches[seqId].computeIfAbsent(modelAccession) {
+            new uk.ac.ebi.interpro.Match(modelAccession, new uk.ac.ebi.interpro.Signature(modelAccession, library))
         }
-        Location location = new Location(start, end, level, alignment, cigarAlignment)
+        def location = new uk.ac.ebi.interpro.Location(start, end, level, alignment, cigarAlignment)
         matchObj.addLocation(location)
     }
 
-    def outputFilePath = task.workDir.resolve("ps_scan.json")
-    def json = JsonOutput.toJson(patternsMatches)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("ps_scan.json")
+    filepath.text  = groovy.json.JsonOutput.toJson(patternsMatches)
 }
 
 process RUN_PFSEARCH {
-    label 'mem_min', 'time_medium', 'dynamic', 'ips6_container'
+    label     'mem_min', 'time_medium', 'dynamic'
+    container 'interpro/pftools:3.2.12'
 
     input:
     tuple val(meta), path(fasta)
-    path dirpath
-    val profiles_dir
+    path profiles_dir
 
     output:
     tuple val(meta), stdout
 
     script:
     """
-    find ${dirpath}/${profiles_dir} -type f | while read profile; do
+    find ${profiles_dir}/ -type f | while read profile; do
         pfsearchV3 -f -o 7 -t ${task.cpus} "\${profile}" "${fasta}"
     done
     """
 }
 
 process PARSE_PFSEARCH {
-    label    'mem_low', 'time_veryshort'
+    label    'mem_low'
+    label    'time_veryshort'
     executor 'local'
 
     input:
     tuple val(meta), val(pfsearch_out)
     val signature_library
-    val dirpath
     val blacklist_file
 
     output:
     tuple val(meta), path("pfsearch.json")
 
     exec:
-    Map matches = [:]
-    SignatureLibraryRelease library = new SignatureLibraryRelease(signature_library, null)
+    def matches = [:]
+    def library = new uk.ac.ebi.interpro.SignatureLibraryRelease(signature_library, null)
     def toSkip = []
-    if (dirpath && blacklist_file) {
-        toSkip = new File("${dirpath.toString()}/${blacklist_file}").readLines()
+    if (blacklist_file) {
+        toSkip = blacklist_file.readLines()
     }
 
     pfsearch_out.eachLine { line ->
         def fields = line.split()
         assert fields.size() == 10
-        String modelAccession = fields[0].split("\\|")[0]
+        def modelAccession = fields[0].split("\\|")[0]
         if (toSkip && (modelAccession in toSkip)) {
             return // skip flagged accessions
         }
 
-        String seqId = fields[3]
-        int start = fields[4].toInteger()
-        int end = fields[5].toInteger()
-        Double score = Double.parseDouble(fields[7])
-        String alignment = fields[9]
-        String cigarAlignment = Match.encodeCigarAlignment(alignment)
+        def seqId = fields[3]
+        def start = fields[4].toInteger()
+        def end = fields[5].toInteger()
+        def score = Double.parseDouble(fields[7])
+        def alignment = fields[9]
+        def cigarAlignment = uk.ac.ebi.interpro.Match.encodeCigarAlignment(alignment)
 
         matches.computeIfAbsent(seqId) { [:] }
-        Match matchObj = matches[seqId].computeIfAbsent(modelAccession) {
-            new Match(modelAccession, new Signature(modelAccession, library))
+        def matchObj = matches[seqId].computeIfAbsent(modelAccession) {
+            new uk.ac.ebi.interpro.Match(modelAccession, new uk.ac.ebi.interpro.Signature(modelAccession, library))
         }
-        Location location = new Location(start, end, score, alignment, cigarAlignment)
+        def location = new uk.ac.ebi.interpro.Location(start, end, score, alignment, cigarAlignment)
         matchObj.addLocation(location)
     }
-    def outputFilePath = task.workDir.resolve("pfsearch.json")
-    def json = JsonOutput.toJson(matches)
-    new File(outputFilePath.toString()).write(json)
+    def filepath = task.workDir.resolve("pfsearch.json")
+    filepath.text  = groovy.json.JsonOutput.toJson(matches)
 }
 

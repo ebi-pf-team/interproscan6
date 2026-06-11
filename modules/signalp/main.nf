@@ -1,12 +1,7 @@
-import groovy.json.JsonSlurper
-import groovy.json.JsonOutput
-import uk.ac.ebi.interpro.Location
-import uk.ac.ebi.interpro.Match
-import uk.ac.ebi.interpro.Signature
-import uk.ac.ebi.interpro.SignatureLibraryRelease
-
 process RUN_SIGNALP_CPU {
-    label 'mem_medium', 'time_medium', 'signalp_container'
+    label     'mem_medium'
+    label     'time_medium'
+    container 'interpro/signalp:6.0i'
 
     input:
     tuple val(meta), path(fasta)
@@ -35,7 +30,10 @@ process RUN_SIGNALP_CPU {
 }
 
 process RUN_SIGNALP_GPU {
-    label 'mem_medium', 'time_short', 'signalp_container', 'use_gpu'
+    label     'mem_medium'
+    label     'time_medium'
+    label     'use_gpu'
+    container 'interpro/signalp:6.0i'
 
     input:
     tuple val(meta), path(fasta)
@@ -64,7 +62,8 @@ process RUN_SIGNALP_GPU {
 }
 
 process PARSE_SIGNALP {
-    label    'mem_low', 'time_short'
+    label    'mem_low'
+    label    'time_short'
     executor 'local'
 
     input:
@@ -74,52 +73,49 @@ process PARSE_SIGNALP {
     tuple val(meta), path("signalp.json")
 
     exec:
-    String signalDir = signalp_out.toString()
+    def jsonPath = signalp_out.resolve("output.json")
+    def jsonOutput = new groovy.json.JsonSlurper().parse(jsonPath)
 
-    File jsonFile = new File(signalDir, "output.json")
-    def jsonSlurper = new JsonSlurper()
-    def jsonOutput = jsonSlurper.parse(jsonFile)
-
-    String modelAcc = "SignalP_${mode}_${organism}"
-    SignatureLibraryRelease library = new SignatureLibraryRelease("SignalP", "6.0i")
+    def modelAcc = "SignalP_${mode}_${organism}"
+    def library = new uk.ac.ebi.interpro.SignatureLibraryRelease("SignalP", "6.0i")
     def signatures = [
-        "Sec/SPI"  : new Signature("SignalP-Sec-SPI", "Sec/SPI", "Sec signal peptide", library, null),
-        "Sec/SPII" : new Signature("SignalP-Sec-SPII", "Sec/SPII", "Lipoprotein signal peptide", library, null),
-        "Tat/SPI"  : new Signature("SignalP-Tat-SPI", "Tat/SPI", "Tat signal peptide", library, null),
-        "Tat/SPII" : new Signature("SignalP-Tat-SPII", "Tat/SPII", "Tat lipoprotein signal peptide", library, null),
-        "Sec/SPIII": new Signature("SignalP-Sec-SPIII", "Sec/SPIII", "Pilin signal peptide", library, null),
+        "Sec/SPI"  : new uk.ac.ebi.interpro.Signature("SignalP-Sec-SPI", "Sec/SPI", "Sec signal peptide", library, null),
+        "Sec/SPII" : new uk.ac.ebi.interpro.Signature("SignalP-Sec-SPII", "Sec/SPII", "Lipoprotein signal peptide", library, null),
+        "Tat/SPI"  : new uk.ac.ebi.interpro.Signature("SignalP-Tat-SPI", "Tat/SPI", "Tat signal peptide", library, null),
+        "Tat/SPII" : new uk.ac.ebi.interpro.Signature("SignalP-Tat-SPII", "Tat/SPII", "Tat lipoprotein signal peptide", library, null),
+        "Sec/SPIII": new uk.ac.ebi.interpro.Signature("SignalP-Sec-SPIII", "Sec/SPIII", "Pilin signal peptide", library, null),
     ]
 
+    def gff3Path = signalp_out.resolve("output.gff3")
     def hits = [:]
-    new File(signalDir, "output.gff3").eachLine { line ->
+    gff3Path.eachLine { line ->
         if (line.startsWith("#")) {
             return
         }
 
         def fields = line.split(/\t/)
         assert fields.size() == 9
-        String seqHeader = fields[0]
-        String seqId = seqHeader.split(/\s+/)[0]
-        int start = fields[3].toInteger()
-        int end = fields[4].toInteger()
+        def seqHeader = fields[0]
+        def seqId = seqHeader.split(/\s+/)[0]
+        def start = fields[3].toInteger()
+        def end = fields[4].toInteger()
         if (start < 0 || end < 0) {
             return
         }
-        Double score = Double.parseDouble(fields[5])
-        String prediction = jsonOutput["SEQUENCES"][seqHeader]["Prediction"]
+        def score = Double.parseDouble(fields[5])
+        def prediction = jsonOutput["SEQUENCES"][seqHeader]["Prediction"]
 
         def matcher = prediction =~ /\(([a-zA-Z]+\/[a-zA-Z]+)\)/
-        String spType = matcher.find() ? matcher.group(1) : null
-        Signature signature = signatures.get(spType)
+        def spType = matcher.find() ? matcher.group(1) : null
+        def signature = signatures.get(spType)
         assert signature != null
-        Match match = new Match(modelAcc, signature)
-        Location location = new Location(start, end)
+        def match = new uk.ac.ebi.interpro.Match(modelAcc, signature)
+        def location = new uk.ac.ebi.interpro.Location(start, end)
         location.score = score
         match.addLocation(location)
         hits[seqId] = [(modelAcc) : match]
     }
 
-    def outputFilePath = task.workDir.resolve("signalp.json")
-    def json = JsonOutput.toJson(hits)
-    new File(outputFilePath.toString()).write(json)
+    def outputFile = task.workDir.resolve("signalp.json")
+    outputFile.text  = groovy.json.JsonOutput.toJson(hits)
 }
