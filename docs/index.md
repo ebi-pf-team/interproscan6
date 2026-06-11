@@ -12,7 +12,7 @@ InterProScan 6 is the new implementation of InterProScan, built using [Nextflow]
 
 To get a first successful run:
 
-1. Install [Nextflow](https://www.nextflow.io/) `25.04.6` or later.
+1. Install [Nextflow](https://www.nextflow.io/) `25.10.4` or later.
 2. Install a supported container runtime such as [Docker](https://www.docker.com/), [SingularityCE](https://sylabs.io/singularity/), or [Apptainer](https://apptainer.org/).
 3. Run the following command
 
