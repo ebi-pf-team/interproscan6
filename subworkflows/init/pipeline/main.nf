@@ -1,8 +1,3 @@
-params {
-    run_ml: Boolean
-    use_gpu: Boolean
-}
-
 workflow INIT_PIPELINE {
     // Validate pipeline input parameters
     take:

@@ -7,17 +7,6 @@ include { SCAN_SEQUENCES as SCAN_REMAINING;
 include { COMBINE              } from "../subworkflows/combine"
 include { OUTPUT               } from "../subworkflows/output"
 
-params {
-    no_matches_api: Boolean
-    globus: Boolean
-    enforce_compatibility: Boolean
-    nucleic: Boolean
-    goterms: Boolean
-    pathways: Boolean
-    skip_repr_locations: Boolean
-}
-
-
 workflow INTERPROSCAN {
     take:
     fasta_file              // channel.fromPath(input fasta file)

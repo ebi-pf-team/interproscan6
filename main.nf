@@ -3,6 +3,15 @@ include { INTERPROSCAN  } from './workflows/interproscan'
 
 params {
     help: Boolean
+    globus: Boolean
+    noMatchesApi: Boolean
+    nucleic: Boolean
+    goterms: Boolean
+    pathways: Boolean
+    skipReprLocations: Boolean
+    skipInterproVersionCheck: Boolean
+    runMl: Boolean
+    useGpu: Boolean
 }
 
 workflow {
