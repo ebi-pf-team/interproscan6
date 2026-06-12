@@ -1,11 +1,15 @@
 include { INIT_PIPELINE } from './subworkflows/init/pipeline'
 include { INTERPROSCAN  } from './workflows/interproscan'
 
+params {
+    help: Boolean
+}
+
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
     println "# ${workflow.manifest.description}\n"
 
-    if (params.help.toBoolean()) {
+    if (params.help) {
         uk.ac.ebi.interpro.InterProScan.printHelp(params.appsConfig)
         exit 0
     }
