@@ -12,6 +12,21 @@ params {
     skipInterproVersionCheck: Boolean
     runMl: Boolean
     useGpu: Boolean
+    batchSize: Integer
+    subBatchSize: Integer
+    cpus: Integer
+    matchesApiChunkSize: Integer
+    matchesApiMaxRetries: Integer
+    maxWorkers: Integer
+    input: String
+    datadir: String
+    applications: String
+    formats: String
+    outdir: String
+    outprefix: String
+    skipApplications: String
+    interpro: String
+    matchesApiUrl: String
 }
 
 workflow {
