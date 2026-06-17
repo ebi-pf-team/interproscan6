@@ -81,7 +81,7 @@ process RUN_INTERPRO_N_GPU {
     WORKDIR=\$(pwd)
     INPUT=\$(readlink -e ${tsv})
     CHECKPOINT=\$(readlink -e ${ck_dir})
-    cd /workdir
+    cd /opt/interpro_n
     python3 -m interpro_n.main \
         --input_dir \${INPUT} \
         --checkpoint \${CHECKPOINT} \
