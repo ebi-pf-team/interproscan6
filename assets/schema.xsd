@@ -1,9 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  XSD for the InterProScan 6 XML output produced by
+  lib/uk/ac/ebi/interpro/ProcessOutputXML.groovy
+
+  The output is namespace-less, so this schema declares no target namespace.
+  Validate with, e.g.:
+      xmllint -noout -schema assets/schema.xsd output.xml
+
+  Two top-level shapes are supported under <results>:
+    * <protein> ...            for protein-sequence input
+    * <nucleotide-sequence>... for nucleic-acid input (proteins are nested
+                               inside <orf> elements via translated ORFs)
+-->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
            elementFormDefault="qualified"
            attributeFormDefault="unqualified">
 
-  <xs:element name="interproscan" type="interproscanType"/>
+  <xs:element name="results" type="resultsType"/>
+
+  <!-- ===================== Simple types ===================== -->
 
   <xs:simpleType name="md5Type">
     <xs:restriction base="xs:string">
@@ -18,232 +33,231 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <xs:simpleType name="levelType">
-    <xs:union memberTypes="xs:string xs:integer"/>
+  <!-- Translated from the raw HMMER bound markers by Location.getHmmBounds() -->
+  <xs:simpleType name="hmmBoundsType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="COMPLETE"/>
+      <xs:enumeration value="N_TERMINAL_COMPLETE"/>
+      <xs:enumeration value="C_TERMINAL_COMPLETE"/>
+      <xs:enumeration value="INCOMPLETE"/>
+    </xs:restriction>
   </xs:simpleType>
 
-  <xs:complexType name="interproscanType">
-    <xs:sequence>
-      <xs:element name="interproscan-version" type="xs:string"/>
-      <xs:element name="interpro-version" type="xs:string"/>
-      <xs:element name="results">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="result" type="resultType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
+  <xs:simpleType name="dcStatusType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="CONTINUOUS"/>
+      <xs:enumeration value="N_TERMINAL_DISC"/>
+      <xs:enumeration value="C_TERMINAL_DISC"/>
+      <xs:enumeration value="NC_TERMINAL_DISC"/>
+    </xs:restriction>
+  </xs:simpleType>
 
-  <xs:complexType name="resultType">
-    <xs:choice>
-      <xs:element name="proteinResult" type="proteinResultType"/>
-      <xs:element name="nucleicResult" type="nucleicResultType"/>
+  <!-- ===================== Root ===================== -->
+
+  <xs:complexType name="resultsType">
+    <!-- A run contains either protein results or nucleotide-sequence results;
+         the choice is left open so either kind validates. -->
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="protein" type="proteinType"/>
+      <xs:element name="nucleotide-sequence" type="nucleotideSequenceType"/>
     </xs:choice>
+    <xs:attribute name="interproscan-version" type="xs:string" use="required"/>
+    <xs:attribute name="interpro-version" type="xs:string" use="optional"/>
   </xs:complexType>
 
-  <xs:complexType name="proteinResultType">
-    <xs:sequence>
-      <xs:element name="sequence" type="xs:string"/>
-      <xs:element name="md5" type="md5Type"/>
-      <xs:element name="matches">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="match" type="matchType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="xref">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="xref" type="xrefType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
+  <!-- ===================== Sequence wrappers ===================== -->
 
-  <xs:complexType name="nucleicResultType">
-    <xs:sequence>
-      <xs:element name="sequence" type="xs:string"/>
-      <xs:element name="md5" type="md5Type"/>
-      <xs:element name="crossReferences">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="xref" type="xrefType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="openReadingFrames">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="openReadingFrame" type="openReadingFrameType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="openReadingFrameType">
-    <xs:sequence>
-      <xs:element name="start" type="xs:integer"/>
-      <xs:element name="end" type="xs:integer"/>
-      <xs:element name="strand" type="strandType"/>
-      <xs:element name="protein" type="proteinResultType"/>
-    </xs:sequence>
+  <!-- <sequence md5="...">PROTEIN_OR_NUCLEOTIDE_SEQUENCE</sequence> -->
+  <xs:complexType name="sequenceType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="md5" type="md5Type" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
   </xs:complexType>
 
   <xs:complexType name="xrefType">
+    <xs:attribute name="id" type="xs:string" use="required"/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="proteinType">
     <xs:sequence>
-      <xs:element name="name" type="xs:string"/>
-      <xs:element name="id" type="xs:string"/>
+      <xs:element name="sequence" type="sequenceType"/>
+      <xs:element name="xref" type="xrefType" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="matches" type="matchesType"/>
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="nucleotideSequenceType">
+    <xs:sequence>
+      <xs:element name="sequence" type="sequenceType"/>
+      <xs:element name="xref" type="xrefType" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="orf" type="orfType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="orfType">
+    <xs:sequence>
+      <xs:element name="protein" type="proteinType"/>
+    </xs:sequence>
+    <xs:attribute name="start" type="xs:integer" use="required"/>
+    <xs:attribute name="end" type="xs:integer" use="required"/>
+    <xs:attribute name="strand" type="strandType" use="required"/>
+  </xs:complexType>
+
+  <!-- ===================== Matches ===================== -->
+
+  <xs:complexType name="matchesType">
+    <xs:sequence>
+      <xs:element name="match" type="matchType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!--
+    A <match> carries application-specific attributes. Only @source is always
+    present; the rest depend on the member database:
+      * evalue/score    : most HMM-based libraries
+      * graphscan       : PRINTS
+      * ac/protein-class/graft-point/ancestral-node/name : PANTHER (TreeGrafter)
+  -->
   <xs:complexType name="matchType">
     <xs:sequence>
       <xs:element name="signature" type="signatureType"/>
       <xs:element name="model-ac" type="xs:string"/>
-      <xs:element name="name" type="xs:string" minOccurs="0" nillable="true"/>
-      <xs:element name="evalue" type="xs:decimal" minOccurs="0" nillable="true"/>
-      <xs:element name="score" type="xs:decimal" minOccurs="0" nillable="true"/>
-      <xs:element name="graphscan" type="xs:string" minOccurs="0" nillable="true"/>
-      <xs:element name="proteinClass" type="xs:string" minOccurs="0" nillable="true"/>
-      <xs:element name="graftPoint" type="xs:string" minOccurs="0" nillable="true"/>
-      <xs:element name="ancestralNode" type="xs:string" minOccurs="0" nillable="true"/>
-      <xs:element name="goXRefs" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="xRef" type="xRefType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="source" type="xs:string"/>
-      <xs:element name="locations">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="location" type="locationType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
+      <!-- GO cross-references attached directly to PANTHER matches -->
+      <xs:element name="go-xref" type="goXrefType" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="locations" type="locationsType"/>
     </xs:sequence>
+    <xs:attribute name="source" type="xs:string" use="required"/>
+    <xs:attribute name="evalue" type="xs:double" use="optional"/>
+    <xs:attribute name="score" type="xs:double" use="optional"/>
+    <xs:attribute name="graphscan" type="xs:string" use="optional"/>
+    <xs:attribute name="ac" type="xs:string" use="optional"/>
+    <xs:attribute name="protein-class" type="xs:string" use="optional"/>
+    <xs:attribute name="graft-point" type="xs:string" use="optional"/>
+    <xs:attribute name="ancestral-node" type="xs:string" use="optional"/>
+    <xs:attribute name="name" type="xs:string" use="optional"/>
   </xs:complexType>
 
   <xs:complexType name="signatureType">
     <xs:sequence>
-      <xs:element name="accession" type="xs:string"/>
-      <xs:element name="name" type="xs:string" nillable="true"/>
-      <xs:element name="description" type="xs:string" nillable="true"/>
-      <xs:element name="type" type="xs:string"/>
-      <xs:element name="signatureLibraryRelease" type="signatureLibraryReleaseType"/>
-      <xs:element name="entry" type="entryType" nillable="true"/>
+      <xs:element name="signature-library-release" type="signatureLibraryReleaseType"/>
+      <xs:element name="entry" type="entryType" minOccurs="0"/>
     </xs:sequence>
+    <xs:attribute name="ac" type="xs:string" use="required"/>
+    <xs:attribute name="name" type="xs:string" use="optional"/>
+    <xs:attribute name="desc" type="xs:string" use="optional"/>
+    <xs:attribute name="type" type="xs:string" use="optional"/>
   </xs:complexType>
 
   <xs:complexType name="signatureLibraryReleaseType">
-    <xs:sequence>
-      <xs:element name="library" type="xs:string"/>
-      <xs:element name="version" type="xs:string"/>
-    </xs:sequence>
+    <xs:attribute name="library" type="xs:string" use="required"/>
+    <xs:attribute name="version" type="xs:string" use="required"/>
   </xs:complexType>
 
+  <!-- The InterPro entry a signature is integrated into -->
   <xs:complexType name="entryType">
     <xs:sequence>
-      <xs:element name="accession" type="xs:string"/>
-      <xs:element name="name" type="xs:string"/>
-      <xs:element name="description" type="xs:string"/>
-      <xs:element name="type" type="xs:string"/>
-      <xs:element name="goXRefs">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="xRef" type="xRefType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="pathwayXRefs">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="xRef" type="xRefType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="go-xref" type="goXrefType" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="pathway-xref" type="pathwayXrefType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
+    <xs:attribute name="ac" type="xs:string" use="required"/>
+    <xs:attribute name="desc" type="xs:string" use="required"/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="type" type="xs:string" use="required"/>
   </xs:complexType>
 
-  <xs:complexType name="xRefType">
+  <xs:complexType name="goXrefType">
+    <xs:attribute name="category" type="xs:string" use="required"/>
+    <xs:attribute name="db" type="xs:string" use="required"/>
+    <xs:attribute name="id" type="xs:string" use="required"/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="pathwayXrefType">
+    <xs:attribute name="db" type="xs:string" use="required"/>
+    <xs:attribute name="id" type="xs:string" use="required"/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <!-- ===================== Locations ===================== -->
+
+  <xs:complexType name="locationsType">
     <xs:sequence>
-      <xs:element name="name" type="xs:string"/>
-      <xs:element name="databaseName" type="xs:string"/>
-      <xs:element name="category" type="xs:string" minOccurs="0"/>
-      <xs:element name="id" type="xs:string"/>
+      <xs:element name="location" type="locationType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
+  <!--
+    Every <location> carries start/end/representative (they are non-nullable
+    primitives on the underlying model and are written by every library).
+    The remaining attributes (hmm-*, env-*, evalue, score, pvalue, motifNumber,
+    level, sequence-feature) are library-specific and therefore optional.
+  -->
   <xs:complexType name="locationType">
     <xs:sequence>
-      <xs:element name="start" type="xs:integer"/>
-      <xs:element name="end" type="xs:integer"/>
-      <xs:element name="representative" type="xs:boolean"/>
-      <xs:element name="hmmStart" type="xs:integer" minOccurs="0" nillable="true"/>
-      <xs:element name="hmmEnd" type="xs:integer" minOccurs="0" nillable="true"/>
-      <xs:element name="hmmLength" type="xs:integer" minOccurs="0" nillable="true"/>
-      <xs:element name="hmmBounds" type="xs:string" minOccurs="0" nillable="true"/>
-      <xs:element name="evalue" type="xs:decimal" minOccurs="0" nillable="true"/>
-      <xs:element name="score" type="xs:decimal" minOccurs="0" nillable="true"/>
-      <xs:element name="envelopeStart" type="xs:integer" minOccurs="0" nillable="true"/>
-      <xs:element name="envelopeEnd" type="xs:integer" minOccurs="0" nillable="true"/>
-      <xs:element name="pvalue" type="xs:decimal" minOccurs="0" nillable="true"/>
-      <xs:element name="motifNumber" type="xs:integer" minOccurs="0" nillable="true"/>
-      <xs:element name="level" type="levelType" minOccurs="0" nillable="true"/>
-      <xs:element name="cigarAlignment" type="xs:string" minOccurs="0" nillable="true"/>
-      <xs:element name="alignment" type="xs:string" minOccurs="0" nillable="true"/>
-      <xs:element name="sequence-feature" type="xs:string" minOccurs="0" nillable="true"/>
-      <xs:element name="sites" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="site" type="siteType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="location-fragments">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="locationFragment" type="locationFragmentType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="location-fragments" type="locationFragmentsType" minOccurs="0"/>
+      <!-- Present for HAMAP / PROSITE patterns / PROSITE profiles matches -->
+      <xs:element name="alignment" type="xs:string" minOccurs="0"/>
+      <xs:element name="cigar-alignment" type="xs:string" minOccurs="0"/>
+      <xs:element name="sites" type="sitesType" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="start" type="xs:integer" use="required"/>
+    <xs:attribute name="end" type="xs:integer" use="required"/>
+    <xs:attribute name="representative" type="xs:boolean" use="required"/>
+    <xs:attribute name="hmm-start" type="xs:integer" use="optional"/>
+    <xs:attribute name="hmm-end" type="xs:integer" use="optional"/>
+    <xs:attribute name="hmm-length" type="xs:integer" use="optional"/>
+    <xs:attribute name="hmm-bounds" type="hmmBoundsType" use="optional"/>
+    <xs:attribute name="evalue" type="xs:double" use="optional"/>
+    <xs:attribute name="score" type="xs:double" use="optional"/>
+    <xs:attribute name="env-start" type="xs:integer" use="optional"/>
+    <xs:attribute name="env-end" type="xs:integer" use="optional"/>
+    <xs:attribute name="pvalue" type="xs:double" use="optional"/>
+    <xs:attribute name="motifNumber" type="xs:integer" use="optional"/>
+    <xs:attribute name="level" type="xs:string" use="optional"/>
+    <xs:attribute name="sequence-feature" type="xs:string" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="locationFragmentsType">
+    <xs:sequence>
+      <xs:element name="fragment" type="fragmentType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="locationFragmentType">
+  <xs:complexType name="fragmentType">
+    <xs:attribute name="start" type="xs:integer" use="required"/>
+    <xs:attribute name="end" type="xs:integer" use="required"/>
+    <xs:attribute name="dc-status" type="dcStatusType" use="optional"/>
+  </xs:complexType>
+
+  <!-- ===================== Sites ===================== -->
+
+  <xs:complexType name="sitesType">
     <xs:sequence>
-      <xs:element name="start" type="xs:integer"/>
-      <xs:element name="end" type="xs:integer"/>
-      <xs:element name="dc-status" type="xs:string" nillable="true"/>
+      <xs:element name="site" type="siteType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="siteType">
     <xs:sequence>
-      <xs:element name="description" type="xs:string" nillable="true"/>
-      <xs:element name="numLocations" type="xs:integer" nillable="true"/>
-      <xs:element name="siteLocations">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="siteLocation" type="siteLocationType" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="site-locations" type="siteLocationsType"/>
+    </xs:sequence>
+    <xs:attribute name="description" type="xs:string" use="required"/>
+    <xs:attribute name="numLocations" type="xs:integer" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="siteLocationsType">
+    <xs:sequence>
+      <xs:element name="site-location" type="siteLocationType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="siteLocationType">
-    <xs:sequence>
-      <xs:element name="start" type="xs:integer"/>
-      <xs:element name="end" type="xs:integer"/>
-      <xs:element name="residue" type="xs:string" nillable="true"/>
-    </xs:sequence>
+    <xs:attribute name="residue" type="xs:string" use="required"/>
+    <xs:attribute name="start" type="xs:integer" use="required"/>
+    <xs:attribute name="end" type="xs:integer" use="required"/>
   </xs:complexType>
 
 </xs:schema>
