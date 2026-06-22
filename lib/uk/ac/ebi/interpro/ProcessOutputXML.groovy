@@ -404,9 +404,6 @@ class ProcessOutputXML {
                 case "coils":
                     locationAttributes = fmMinimalistLocationNode(loc)
                     break
-                case "deeptmhmm":
-                    locationAttributes = []
-                    break
                 case "hamap":
                     locationAttributes = fmtMinimalistLocationWithScoreNode(loc)
                     break
