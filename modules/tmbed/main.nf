@@ -208,7 +208,7 @@ process PARSE_TMBED {
                     start = position + 1
 
                 } else if (currentMatch.modelAccession != MODEL_TYPES[symbol].accession) { // Found a new hit
-                    currentMatch.addLocation(new uk.ac.ebi.interpro.Location(start, position))
+                    addValidLocation(currentMatch, start, position)
                     def signature = MODEL_TYPES[symbol]
                     currentMatch = hits[hitId].computeIfAbsent(signature.accession) {
                         def newMatch = new uk.ac.ebi.interpro.Match(signature.accession, signature)
@@ -219,20 +219,33 @@ process PARSE_TMBED {
                 // else, parsing another symbol from the same currentMatch/hit
             } else {
                 if (currentMatch) {
-                    currentMatch.addLocation(new uk.ac.ebi.interpro.Location(start, position))
+                    addValidLocation(currentMatch, start, position)
                     currentMatch = null
                 }
             }
         }
 
-        // Add the final match for this sequence
+        // Add the final match for this sequence.
+        // Mid-sequence matches use the index of the symbol following the region
+        // as the (1-based) end; for a match reaching the last residue that index
+        // is one past the loop's last position, hence `end + 1`.
         if (currentMatch) {
-            currentMatch.addLocation(new uk.ac.ebi.interpro.Location(start, end))
+            addValidLocation(currentMatch, start, end + 1)
+        }
+    }
+
+    /* Drop matches left without any valid location, and sequences left without
+       any match, after skipping degenerate hits above */
+    def cleanedHits = [:]
+    hits.each { hitId, matches ->
+        def validMatches = matches.findAll { accession, match -> !match.locations.isEmpty() }
+        if (validMatches) {
+            cleanedHits[hitId] = validMatches
         }
     }
 
     def filepath = task.workDir.resolve("tmbed.json")
-    filepath.text  = groovy.json.JsonOutput.toJson(hits)
+    filepath.text  = groovy.json.JsonOutput.toJson(cleanedHits)
 }
 
 
@@ -251,4 +264,15 @@ def mostCommonChar(s) {
     def counts = [:].withDefault { 0 }
     s.each { c -> counts[c] += 1 }
     return counts.max { elem -> elem.value }.key
+}
+
+/**
+ * Add a location to a match, skipping degenerate hits.
+ * In extremely rare cases a TMbed prediction yields a region whose start
+ * position is greater than or equal to its end position; such hits are skipped.
+ */
+def addValidLocation(match, start, end) {
+    if (start < end) {
+        match.addLocation(new uk.ac.ebi.interpro.Location(start, end))
+    }
 }

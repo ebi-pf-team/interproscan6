@@ -5,15 +5,32 @@
                 "0": [
                     [
                         1,
-                        "tmbed.json:md5,8b6569b8fcc183f7139b87f0b3ec7af5"
+                        "tmbed.json:md5,a07fe5301ea69e0a4e0b6dc03e8e61c9"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-04-03T22:28:48.685846283",
+        "timestamp": "2026-06-24T18:30:33.633342938",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.04.7"
+            "nextflow": "26.04.3"
+        }
+    },
+    "Should skip hits where start >= end": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "tmbed.json:md5,614c2b30344b15bfca1ca6f651d75e8b"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-06-24T18:40:10.017567208",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "26.04.3"
         }
     }
 }
