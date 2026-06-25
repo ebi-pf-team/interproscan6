@@ -23,4 +23,49 @@ nextflow_process {
 
     }
 
+    test("Should skip hits where start >= end") {
+
+        when {
+            process {
+                """
+                input[0] = channel.of(tuple(1, file("${projectDir}/tests/data/tmbed/tmbed_degenerate.pred", checkIfExists: true)))
+                input[1] = 100
+                input[2] = 5
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+
+            def json = path(process.out.get(0).get(0).get(1)).json
+
+            // SEQ_A (single-residue hit in the middle) and SEQ_B (single-residue
+            // hit at the very end) yield no valid location and are dropped entirely
+            assert !json.containsKey("SEQ_A")
+            assert !json.containsKey("SEQ_B")
+
+            // SEQ_C keeps only its valid helix; the trailing single-residue helix is skipped
+            assert json.SEQ_C.keySet() == ["TMhelix_out-to-in"] as Set
+            assert json.SEQ_C."TMhelix_out-to-in".locations.size() == 1
+            assert json.SEQ_C."TMhelix_out-to-in".locations[0].start == 2
+            assert json.SEQ_C."TMhelix_out-to-in".locations[0].end == 4
+
+            // SEQ_D is a fully valid control and is kept unchanged
+            assert json.SEQ_D."TMhelix_in-to-out".locations[0].start == 2
+            assert json.SEQ_D."TMhelix_in-to-out".locations[0].end == 6
+
+            // SEQ_E drops the degenerate helix preceding a different hit type
+            assert json.SEQ_E.keySet() == ["TMhelix_in-to-out"] as Set
+            assert json.SEQ_E."TMhelix_in-to-out".locations[0].start == 3
+            assert json.SEQ_E."TMhelix_in-to-out".locations[0].end == 6
+
+            // SEQ_F ends in a 4-residue helix: the end must reach the last residue (8), not 7
+            assert json.SEQ_F."TMhelix_in-to-out".locations[0].start == 5
+            assert json.SEQ_F."TMhelix_in-to-out".locations[0].end == 8
+        }
+
+    }
+
 }
