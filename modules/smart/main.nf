@@ -85,7 +85,10 @@ process SEARCH_SMART {
 
     tmpdir=\$(mktemp -d -p .)
 
-    unzip -q ${seqs_zip} -d \${tmpdir}
+    # When PREFILTER_SMART finds no matches, PREPARE_SMART emits an empty
+    # sequences.zip; unzip warns "zipfile is empty" and exits 1. 
+    # Tolerate that but fail on real errors (>= 2).
+    unzip -q ${seqs_zip} -d \${tmpdir} || [ \$? -eq 1 ]
     touch \${tmpdir}/hmmpfam.out
 
     for fasta in \${tmpdir}/*.faa; do
