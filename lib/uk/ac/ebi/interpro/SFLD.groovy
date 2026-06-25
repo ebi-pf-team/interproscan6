@@ -89,9 +89,9 @@ class SFLD {
                 String description = fields.length == 3 ? fields[2] : null
 
                 Match match = domains.get(modelAccession)
-                if (match != null) {
+                if (match != null && description != null) {
                     Site site = new Site(description, residues)
-                    match.addSite(site)                        
+                    match.addSite(site)
                 }
             }
         }
