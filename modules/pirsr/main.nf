@@ -78,9 +78,12 @@ process PARSE_PIRSR {
                                     }
                                 }
                             }
-                            if (residueStart != 0 && residueEnd != 0) {
+                            def label = (pos.label ?: '').trim()
+                            def desc = (pos.desc ?: '').trim().replaceAll(/\.$/, '')
+                            def siteDescription = desc ? "${label}: ${desc}" : label
+                            if (residueStart != 0 && residueEnd != 0 && siteDescription) {
                                 positionsParsed << [
-                                    pos.desc,
+                                    siteDescription,
                                     residue,
                                     residueStart,
                                     residueEnd
