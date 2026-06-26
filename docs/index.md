@@ -51,5 +51,6 @@ InterProScan 6 is released under the Apache 2.0 License.
 
 If you use InterProScan in published work, please cite:
 
+- Blum M, Hobbs E, Florentino L, Bateman A. **InterProScan 6: a modern large-scale protein function annotation pipeline**. *Bioinform Adv*. 2026 May 21;6(1):vbag141. [doi: 10.1093/bioadv/vbag141](https://doi.org/10.1093/bioadv/vbag141).
 - Blum M, Andreeva A, Florentino LC, Chuguransky SR, Grego T, Hobbs E, Pinto BL, Orr A, Paysan-Lafosse T, Ponamareva I, Salazar GA, Bordin N, Bork P, Bridge A, Colwell L, Gough J, Haft DH, Letunic I, Llinares-López F, Marchler-Bauer A, Meng-Papaxanthos L, Mi H, Natale DA, Orengo CA, Pandurangan AP, Piovesan D, Rivoire C, Sigrist CJA, Thanki N, Thibaud-Nissen F, Thomas PD, Tosatto SCE, Wu CH, Bateman A. **InterPro: the protein sequence classification resource in 2025**. *Nucleic Acids Res*. 2025 Jan;53(D1):D444-D456. doi: [10.1093/nar/gkae1082](https://doi.org/10.1093/nar/gkae1082).
 
