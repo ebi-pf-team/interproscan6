@@ -18,11 +18,11 @@ params {
     matchesApiChunkSize: Integer
     matchesApiMaxRetries: Integer
     maxWorkers: Integer
-    input: String
-    datadir: String
+    input: Path
+    datadir: Path
+    outdir: Path
     applications: String
     formats: String
-    outdir: String
     outprefix: String
     skipApplications: String
     interpro: String
