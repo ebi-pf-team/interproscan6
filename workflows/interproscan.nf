@@ -39,23 +39,23 @@ workflow INTERPROSCAN {
         data_dir,
         interpro_version,
         interproscan_version,
-        !no_matches_api.toBoolean(),
-        globus.toBoolean(),
-        enforce_compatibility.toBoolean()
+        !no_matches_api,
+        globus,
+        enforce_compatibility
     )
     appl_dirs        = INIT_DATABASES.out.directories
     interpro_version = INIT_DATABASES.out.interpro_version
 
     INIT_SEQUENCES(
         fasta_file,
-        nucleic.toBoolean(),
+        nucleic,
         batch_size
     )
     fasta = INIT_SEQUENCES.out.fasta
     seqdb = INIT_SEQUENCES.out.database
 
     scan_results = channel.empty()
-    if (no_matches_api.toBoolean()) {
+    if (no_matches_api) {
         SCAN_SEQUENCES(
             fasta,
             appl_config,
@@ -109,9 +109,9 @@ workflow INTERPROSCAN {
         scan_results,
         appl_config,
         appl_dirs,
-        goterms.toBoolean(),
-        pathways.toBoolean(),
-        skip_repr_locations.toBoolean()
+        goterms,
+        pathways,
+        skip_repr_locations
     )
 
     OUTPUT(
@@ -119,7 +119,7 @@ workflow INTERPROSCAN {
         seqdb,
         formats,
         outprefix,
-        nucleic.toBoolean(),
+        nucleic,
         interpro_version,
         interproscan_version
     )

@@ -1,11 +1,39 @@
 include { INIT_PIPELINE } from './subworkflows/init/pipeline'
 include { INTERPROSCAN  } from './workflows/interproscan'
 
+params {
+    help: Boolean
+    globus: Boolean
+    noMatchesApi: Boolean
+    nucleic: Boolean
+    goterms: Boolean
+    pathways: Boolean
+    skipReprLocations: Boolean
+    skipInterproVersionCheck: Boolean
+    runMl: Boolean
+    useGpu: Boolean
+    batchSize: Integer
+    subBatchSize: Integer
+    cpus: Integer
+    matchesApiChunkSize: Integer
+    matchesApiMaxRetries: Integer
+    maxWorkers: Integer
+    input: Path
+    datadir: Path
+    outdir: Path
+    applications: String
+    formats: String
+    outprefix: String
+    skipApplications: String
+    interpro: String
+    matchesApiUrl: String
+}
+
 workflow {
     println "# ${workflow.manifest.name} ${workflow.manifest.version}"
     println "# ${workflow.manifest.description}\n"
 
-    if (params.help.toBoolean()) {
+    if (params.help) {
         uk.ac.ebi.interpro.InterProScan.printHelp(params.appsConfig)
         exit 0
     }
