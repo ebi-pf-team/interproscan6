@@ -244,7 +244,7 @@
     <xs:sequence>
       <xs:element name="site-locations" type="siteLocationsType"/>
     </xs:sequence>
-    <xs:attribute name="description" type="xs:string" use="required"/>
+    <xs:attribute name="description" type="xs:string" use="optional"/>
     <xs:attribute name="numLocations" type="xs:integer" use="required"/>
   </xs:complexType>
 
