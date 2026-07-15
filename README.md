@@ -2,7 +2,9 @@
 
 [![Nextflow](https://img.shields.io/badge/%E2%89%A525.10.4-0dc09d?style=flat&logo=nextflow&label=nextflow&labelColor=f5fafe)](https://www.nextflow.io/)
 [![run with docker](https://img.shields.io/badge/docker-1D63ED?logo=docker&logoColor=1D63ED&label=run%20with&labelColor=f5fafe)](https://www.docker.com/)
+[![run with podman](https://img.shields.io/badge/podman-1E4383?label=run%20with&labelColor=f5fafe)](https://podman.io/)
 [![run with singularity](https://img.shields.io/badge/singularity-1E4383?label=run%20with&labelColor=f5fafe)](https://sylabs.io/docs/)
+[![run with apptainer](https://img.shields.io/badge/apptainer-1E4383?label=run%20with&labelColor=f5fafe)](https://apptainer.org/)
 
 [InterPro](http://www.ebi.ac.uk/interpro/) is a database that brings together predictive information on protein function from multiple partner resources. It provides an integrated view of the families, domains and functional sites to which a given protein belongs.
 
@@ -15,6 +17,7 @@ Before you begin, install:
 * [Nextflow](https://www.nextflow.io/) 25.10 or later
 * A container runtime. The currently supported are:
     * [Docker](https://www.docker.com/)
+    * [Podman](https://podman.io/)
     * [SingularityCE](https://sylabs.io/singularity/)
     * [Apptainer](https://apptainer.org/)
 
