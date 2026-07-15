@@ -117,4 +117,34 @@ nextflow_workflow {
             }
         }
     }
+
+    test("Validate XML outputs") {
+        then {
+            def xmlFiles = [
+                "tests/data/output/test.faa.xml.gz",
+                "tests/data/output/test.fna.xml.gz"
+            ]
+            xmlFiles.each { file ->
+                def cmd = "gunzip -c ${file} | xmllint --noout --schema assets/schema.xsd -"
+                def proc = ["bash", "-c", cmd].execute()
+                proc.waitFor()
+                assert proc.exitValue() == 0
+            }
+        }
+    }
+
+    test("Validate JSON outputs") {
+        then {
+            def jsonFiles = [
+                "tests/data/output/test.faa.json.gz",
+                "tests/data/output/test.fna.json.gz"
+            ]
+            jsonFiles.each { file ->
+                def cmd = "gunzip -c ${file} | check-jsonschema --schemafile assets/schema.json /dev/stdin"
+                def proc = ["bash", "-c", cmd].execute()
+                proc.waitFor()
+                assert proc.exitValue() == 0
+            }
+        }
+    }
 }

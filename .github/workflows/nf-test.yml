@@ -65,5 +65,11 @@ jobs:
           wget -qO- https://get.nf-test.com | bash -s 0.9.4
           sudo mv nf-test /usr/local/bin/
 
+      - name: Install schema validators
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxml2-utils
+          python3 -m pip install check-jsonschema
+
       - name: Run unit tests
         run: nf-test test tests
