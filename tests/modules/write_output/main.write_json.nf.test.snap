@@ -3,56 +3,56 @@
         "content": [
             {
                 "0": [
-                    "output.json:md5,a3502cf4220f06ee9dcfe021609fce66"
+                    "output.json:md5,28bd73f740781f1bd87241a92ca3f9d0"
                 ]
             }
         ],
-        "timestamp": "2026-04-12T11:43:53.74274995",
+        "timestamp": "2026-07-16T15:44:44.529504",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.04.7"
+            "nextflow": "26.04.1"
         }
     },
     "Write JSON Lines output for nucleic sequences": {
         "content": [
             {
                 "0": [
-                    "output.jsonl:md5,eeef85205468c2402baaee12cc31124a"
+                    "output.jsonl:md5,56eaef16707f22ccbce60a141937b8ba"
                 ]
             }
         ],
-        "timestamp": "2026-04-16T11:37:26.518585346",
+        "timestamp": "2026-07-16T15:45:00.192314",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.04.7"
+            "nextflow": "26.04.1"
         }
     },
     "Write JSON Lines output for protein sequences": {
         "content": [
             {
                 "0": [
-                    "output.jsonl:md5,a6f1ea7bbf9ee40c63b75df7c54d2561"
+                    "output.jsonl:md5,e117720a4637eca09a62d7113ff19b13"
                 ]
             }
         ],
-        "timestamp": "2026-04-12T11:43:59.362348214",
+        "timestamp": "2026-07-16T15:44:49.548896",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.04.7"
+            "nextflow": "26.04.1"
         }
     },
     "Write JSON output for nucleic sequences": {
         "content": [
             {
                 "0": [
-                    "output.json:md5,1e02303bd4b8c1540f5282ac8ceaa7b2"
+                    "output.json:md5,3f06dd75c315686cb52d613ace679b2d"
                 ]
             }
         ],
-        "timestamp": "2026-04-16T11:10:18.445795845",
+        "timestamp": "2026-07-16T15:44:54.800636",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.04.7"
+            "nextflow": "26.04.1"
         }
     }
 }
