@@ -4,6 +4,36 @@ nextflow_workflow {
     script "subworkflows/output/main.nf"
     workflow "OUTPUT"
 
+    def runCmd = { cmdList ->
+        def proc = cmdList.execute()
+        def out = new StringBuilder()
+        def err = new StringBuilder()
+        proc.consumeProcessOutput(out, err)
+        proc.waitFor()
+        if (proc.exitValue() != 0) {
+            println "Command failed: ${cmdList.join(' ')}"
+            println "stdout: ${out}"
+            println "stderr: ${err}"
+        }
+        return proc.exitValue() == 0
+    }
+
+    def validateXml = { String file, boolean gzipped ->
+        String schema = "assets/schema.xsd"
+        def cmd = gzipped
+            ? "gunzip -c ${file} | xmllint --noout --schema ${schema} -"
+            : "xmllint --noout --schema ${schema} ${file}"
+        return runCmd(["bash", "-c", cmd])
+    }
+
+    def validateJson = { String file, boolean gzipped ->
+        String schema = "assets/schema.json"
+        def cmd = gzipped
+            ? "gunzip -c ${file} | check-jsonschema --schemafile ${schema} /dev/stdin"
+            : "check-jsonschema --schemafile ${schema} ${file}"
+        return runCmd(["bash", "-c", cmd])
+    }
+
     test("Write output for protein sequences") {
 
         setup {
@@ -11,12 +41,12 @@ nextflow_workflow {
                 script "../../modules/gunzip/main.nf"
                 process {
                     """
-                    input[0] = file("${projectDir}/tests/data/combined/combined-with-repr-locations.json.gz", 
+                    input[0] = file("${projectDir}/tests/data/combined/combined-with-repr-locations.json.gz",
                                     checkIfExists: true)
                     """
                 }
-            }            
-        }   
+            }
+        }
 
         when {
             workflow {
@@ -39,19 +69,27 @@ nextflow_workflow {
                 assert get(0).size() == 1
                 assert get(0).get(0).size() == 5
 
+                def obsfiles = get(0).get(0)
                 def basepath = "tests/data/output/test.faa"
 
-                assert get(0).get(0).every { obsfile ->
-                    def suffix = obsfile.split(/\./)[-1]
-                    def expfile = "${basepath}.${suffix}.gz"
-                    def cmd  = "python tests/diff.py -q ${expfile} ${obsfile}"
-                    def proc = cmd.execute()
-                    proc.waitFor()
-                    proc.exitValue() == 0
-                }
+                assertAll(
+                    {
+                        assert obsfiles.every { obsfile ->
+                            def suffix = obsfile.split(/\./)[-1]
+                            runCmd(["python", "tests/diff.py", "-q", "${basepath}.${suffix}.gz", obsfile])
+                        }
+                    },
+                    {
+                        assert obsfiles.findAll { it.endsWith(".xml") }
+                                       .every { validateXml(it, false) }
+                    },
+                    {
+                        assert obsfiles.findAll { it.endsWith(".json") }
+                                       .every { validateJson(it, false) }
+                    }
+                )
             }
         }
-
     }
 
     test("Write output for nucleic sequences") {
@@ -61,7 +99,7 @@ nextflow_workflow {
                 script "../../modules/untar/main.nf"
                 process {
                     """
-                    input[0] = file("${projectDir}/tests/data/combined/nucleic-combined-with-repr-locations.tar.gz", 
+                    input[0] = file("${projectDir}/tests/data/combined/nucleic-combined-with-repr-locations.tar.gz",
                                     checkIfExists: true)
                     """
                 }
@@ -74,8 +112,8 @@ nextflow_workflow {
                     input[0] = file("${projectDir}/tests/data/sequences/fna.db.gz", checkIfExists: true)
                     """
                 }
-            }             
-        }    
+            }
+        }
 
         when {
             workflow {
@@ -104,47 +142,44 @@ nextflow_workflow {
                 assert get(0).size() == 1
                 assert get(0).get(0).size() == 5
 
+                def obsfiles = get(0).get(0)
                 def basepath = "tests/data/output/test.fna"
 
-                assert get(0).get(0).every { obsfile ->
-                    def suffix = obsfile.split(/\./)[-1]
-                    def expfile = "${basepath}.${suffix}.gz"
-                    def cmd  = "python tests/diff.py -q ${expfile} ${obsfile}"
-                    def proc = cmd.execute()
-                    proc.waitFor()
-                    proc.exitValue() == 0
-                }
+                assertAll(
+                    {
+                        assert obsfiles.every { obsfile ->
+                            def suffix = obsfile.split(/\./)[-1]
+                            runCmd(["python", "tests/diff.py", "-q", "${basepath}.${suffix}.gz", obsfile])
+                        }
+                    },
+                    {
+                        assert obsfiles.findAll { it.endsWith(".xml") }
+                                       .every { validateXml(it, false) }
+                    },
+                    {
+                        assert obsfiles.findAll { it.endsWith(".json") }
+                                       .every { validateJson(it, false) }
+                    }
+                )
             }
         }
     }
 
     test("Validate XML outputs") {
         then {
-            def xmlFiles = [
+            assert [
                 "tests/data/output/test.faa.xml.gz",
                 "tests/data/output/test.fna.xml.gz"
-            ]
-            xmlFiles.each { file ->
-                def cmd = "gunzip -c ${file} | xmllint --noout --schema assets/schema.xsd -"
-                def proc = ["bash", "-c", cmd].execute()
-                proc.waitFor()
-                assert proc.exitValue() == 0
-            }
+            ].every { validateXml(it, true) }
         }
     }
 
     test("Validate JSON outputs") {
         then {
-            def jsonFiles = [
+            assert [
                 "tests/data/output/test.faa.json.gz",
                 "tests/data/output/test.fna.json.gz"
-            ]
-            jsonFiles.each { file ->
-                def cmd = "gunzip -c ${file} | check-jsonschema --schemafile assets/schema.json /dev/stdin"
-                def proc = ["bash", "-c", cmd].execute()
-                proc.waitFor()
-                assert proc.exitValue() == 0
-            }
+            ].every { validateJson(it, true) }
         }
     }
 }
