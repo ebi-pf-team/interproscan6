@@ -19,6 +19,7 @@ process PARSE_PIRSR {
         matches.each { modelAccession, match ->
             // set the signature name, which defaults to null in the HMMER3 parser
             match.signature.name = modelAccession
+            match.signature.type = "Region"
 
             def sortedLocations = match.locations.sort { loc ->
                 [loc.evalue, -loc.score]  // sorting by evalue ASC, score DESC
