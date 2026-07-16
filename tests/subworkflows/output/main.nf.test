@@ -4,34 +4,41 @@ nextflow_workflow {
     script "subworkflows/output/main.nf"
     workflow "OUTPUT"
 
-    def runCmd = { cmdList ->
-        def proc = cmdList.execute()
+    def runCmd = { cmd ->
+        def proc = cmd.execute()
         def out = new StringBuilder()
         def err = new StringBuilder()
         proc.consumeProcessOutput(out, err)
         proc.waitFor()
         if (proc.exitValue() != 0) {
-            println "Command failed: ${cmdList.join(' ')}"
-            println "stdout: ${out}"
-            println "stderr: ${err}"
+            println "Command failed: ${cmd.join(' ')}"
+            println "stdout:\n${out}"
+            println "stderr:\n${err}"
         }
-        return proc.exitValue() == 0
+        proc.exitValue() == 0
     }
 
-    def validateXml = { String file, boolean gzipped ->
-        String schema = "assets/schema.xsd"
-        def cmd = gzipped
-            ? "gunzip -c ${file} | xmllint --noout --schema ${schema} -"
-            : "xmllint --noout --schema ${schema} ${file}"
-        return runCmd(["bash", "-c", cmd])
+    def validateXml = { file ->
+        runCmd(["xmllint", "--noout", "--schema", "assets/schema.xsd", file])
     }
 
-    def validateJson = { String file, boolean gzipped ->
-        String schema = "assets/schema.json"
-        def cmd = gzipped
-            ? "gunzip -c ${file} | check-jsonschema --schemafile ${schema} /dev/stdin"
-            : "check-jsonschema --schemafile ${schema} ${file}"
-        return runCmd(["bash", "-c", cmd])
+    def validateJson = { file ->
+        runCmd(["check-jsonschema", "--schemafile", "assets/schema.json", file])
+    }
+
+    def validateOutputs = { obsfiles, basepath ->
+        assertAll({ assert obsfiles.every { obsfile ->
+                    def suffix = obsfile.split(/\./)[-1]
+                    runCmd([
+                        "python",
+                        "tests/diff.py",
+                        "-q",
+                        "${basepath}.${suffix}.gz",
+                        obsfile
+                    ])}},
+            { assert obsfiles.findAll { it.endsWith(".xml") }.every { validateXml(it) }},
+            {assert obsfiles.findAll { it.endsWith(".json") }.every { validateJson(it) }}
+        )
     }
 
     test("Write output for protein sequences") {
@@ -68,26 +75,7 @@ nextflow_workflow {
             with (workflow.out) {
                 assert get(0).size() == 1
                 assert get(0).get(0).size() == 5
-
-                def obsfiles = get(0).get(0)
-                def basepath = "tests/data/output/test.faa"
-
-                assertAll(
-                    {
-                        assert obsfiles.every { obsfile ->
-                            def suffix = obsfile.split(/\./)[-1]
-                            runCmd(["python", "tests/diff.py", "-q", "${basepath}.${suffix}.gz", obsfile])
-                        }
-                    },
-                    {
-                        assert obsfiles.findAll { it.endsWith(".xml") }
-                                       .every { validateXml(it, false) }
-                    },
-                    {
-                        assert obsfiles.findAll { it.endsWith(".json") }
-                                       .every { validateJson(it, false) }
-                    }
-                )
+                validateOutputs(get(0).get(0), "tests/data/output/test.faa")
             }
         }
     }
@@ -141,45 +129,8 @@ nextflow_workflow {
             with (workflow.out) {
                 assert get(0).size() == 1
                 assert get(0).get(0).size() == 5
-
-                def obsfiles = get(0).get(0)
-                def basepath = "tests/data/output/test.fna"
-
-                assertAll(
-                    {
-                        assert obsfiles.every { obsfile ->
-                            def suffix = obsfile.split(/\./)[-1]
-                            runCmd(["python", "tests/diff.py", "-q", "${basepath}.${suffix}.gz", obsfile])
-                        }
-                    },
-                    {
-                        assert obsfiles.findAll { it.endsWith(".xml") }
-                                       .every { validateXml(it, false) }
-                    },
-                    {
-                        assert obsfiles.findAll { it.endsWith(".json") }
-                                       .every { validateJson(it, false) }
-                    }
-                )
+                validateOutputs(get(0).get(0), "tests/data/output/test.fna")
             }
-        }
-    }
-
-    test("Validate XML outputs") {
-        then {
-            assert [
-                "tests/data/output/test.faa.xml.gz",
-                "tests/data/output/test.fna.xml.gz"
-            ].every { validateXml(it, true) }
-        }
-    }
-
-    test("Validate JSON outputs") {
-        then {
-            assert [
-                "tests/data/output/test.faa.json.gz",
-                "tests/data/output/test.fna.json.gz"
-            ].every { validateJson(it, true) }
         }
     }
 }
