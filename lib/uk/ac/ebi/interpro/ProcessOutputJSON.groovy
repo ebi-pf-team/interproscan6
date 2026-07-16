@@ -245,6 +245,7 @@ class ProcessOutputJSON {
                 writeDefault(match, jsonWriter)
                 break
             case "pirsr":
+                if (match.signature.type == null) { match.signature.type = "Region" }
                 writePIRSR(match, jsonWriter)
                 break
             case "prints":
@@ -260,6 +261,7 @@ class ProcessOutputJSON {
                 writeSFLD(match, jsonWriter)
                 break
             case "signalp":
+                if (match.signature.type == null) { match.signature.type = "Region" }
                 writeSignalp(match, jsonWriter)
                 break
             case "smart":
@@ -269,9 +271,11 @@ class ProcessOutputJSON {
                 writeSUPERFAMILY(match, jsonWriter)
                 break
             case "deeptmhmm":
+                if (match.signature.type == null) { match.signature.type = "Region" }
                 writeMinimalist(match, jsonWriter)
                 break
             case "tmbed":
+                if (match.signature.type == null) { match.signature.type = "Region" }
                 writeMinimalist(match, jsonWriter)
                 break
             default:
