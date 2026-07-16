@@ -65,10 +65,10 @@ process PARSE_DEEPTMHMM {
     exec:
     def library = new uk.ac.ebi.interpro.SignatureLibraryRelease("DeepTMHMM", "1.0")
     def MODEL_TYPES = [
-        "Beta sheet": ["Transmembrane beta barrel", new uk.ac.ebi.interpro.Signature("Transmembrane beta barrel", null, "Region", library, null)],
-        "periplasm": ["Periplasmic Domain", new uk.ac.ebi.interpro.Signature("Periplasmic Domain", null, "Region", library, null)],
-        "signal": ["Signalp Peptide", new uk.ac.ebi.interpro.Signature("Signal Peptide", null, "Region", library, null)],
-        "TMhelix": ["Transmembrane alpha helix", new uk.ac.ebi.interpro.Signature("Transmembrane alpha helix", null, "Region", library, null)],
+        "Beta sheet": ["Transmembrane beta barrel", new uk.ac.ebi.interpro.Signature("Transmembrane beta barrel", null, null, "Region", library, null)],
+        "periplasm": ["Periplasmic Domain", new uk.ac.ebi.interpro.Signature("Periplasmic Domain", null, null, "Region", library, null)],
+        "signal": ["Signalp Peptide", new uk.ac.ebi.interpro.Signature("Signal Peptide", null, null, "Region", library, null)],
+        "TMhelix": ["Transmembrane alpha helix", new uk.ac.ebi.interpro.Signature("Transmembrane alpha helix", null, null, "Region", library, null)],
     ]
     def hits = [:]
     def seqId
