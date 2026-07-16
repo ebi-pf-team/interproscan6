@@ -2,7 +2,6 @@ package uk.ac.ebi.interpro
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.regex.Pattern
-import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.ebi.interpro.Location
 import uk.ac.ebi.interpro.Match

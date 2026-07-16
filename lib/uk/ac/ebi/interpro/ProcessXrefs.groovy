@@ -90,6 +90,11 @@ class ProcessXrefs {
                             }
                         }
 
+                        if (match.signature.type == null & match.signature.signatureLibraryRelease.library in
+                                ["PIRSR", "TMbed", "DeepTMHMM", "SignalP"]) {
+                            match.signature.type = "Region"
+                        }
+
                         seqMatches[modelAcc] = match
                     }
                 }

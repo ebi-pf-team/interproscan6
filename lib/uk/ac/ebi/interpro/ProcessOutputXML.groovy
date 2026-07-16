@@ -5,12 +5,10 @@ import com.fasterxml.jackson.core.*
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator
 import com.fasterxml.jackson.dataformat.xml.XmlFactory
 import com.fasterxml.jackson.dataformat.xml.util.DefaultXmlPrettyPrinter
-import java.io.StringWriter
 import java.nio.file.Path
 import java.util.regex.Pattern
 import javax.xml.namespace.QName
 import uk.ac.ebi.interpro.Location
-import uk.ac.ebi.interpro.Match
 import uk.ac.ebi.interpro.SeqDB
 
 class ProcessOutputXML {
