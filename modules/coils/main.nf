@@ -39,7 +39,7 @@ process PARSE_COILS {
             sequenceId = line.substring(1).split()[0]
             matches[sequenceId] = [:]
 
-            def match = new uk.ac.ebi.interpro.Match("Coil", new uk.ac.ebi.interpro.Signature("Coil", "Coil", null, library, null))
+            def match = new uk.ac.ebi.interpro.Match("Coil", new uk.ac.ebi.interpro.Signature("Coil", "Coil", null, "Region", library, null))
             matches[sequenceId]["Coil"] = match
         } else if (line != "//" && sequenceId) {
             def fields = line.split(/\s+/)
