@@ -218,6 +218,28 @@ class HMMER3 {
         return hits
     }
 
+    static Map<String, String> parseNameToAccession(Path filePath) {
+        // Build a NAME -> ACC mapping from an HMMER3 HMM file
+        def mapping = [:]
+        String name = null
+        String accession = null
+        filePath.eachLine { line ->
+            if (line.startsWith("NAME ")) {
+                name = line.split(/\s+/)[1]
+            } else if (line.startsWith("ACC ")) {
+                accession = line.split(/\s+/)[1]
+            } else if (line.startsWith("//")) {
+                if (name != null && accession != null) {
+                    mapping[name] = accession
+                }
+                name = null
+                accession = null
+            }
+        }
+
+        return mapping
+    }
+
     static splitByLocation(hmmerMatches) {
         // This method is used by CATH-Gene3D and CATH-FunFam
         def results = [:].withDefault { [:] }
