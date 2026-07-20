@@ -6,16 +6,16 @@
                     [
                         1,
                         [
-                            "1.json:md5,ed8047e06db30036ff10e6f3f2404092"
+                            "1.json:md5,c0dd663eba95e655bea8ee0d7708ae74"
                         ]
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-04-12T12:27:01.171059146",
+        "timestamp": "2026-07-20T16:29:26.424585",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.04.7"
+            "nextflow": "26.04.1"
         }
     }
 }

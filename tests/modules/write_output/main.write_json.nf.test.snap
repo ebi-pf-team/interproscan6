@@ -3,11 +3,11 @@
         "content": [
             {
                 "0": [
-                    "output.json:md5,28bd73f740781f1bd87241a92ca3f9d0"
+                    "output.json:md5,f1ea6b81e014e063b748368d8e078918"
                 ]
             }
         ],
-        "timestamp": "2026-07-16T15:44:44.529504",
+        "timestamp": "2026-07-20T17:36:45.553138",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "26.04.1"
@@ -21,7 +21,7 @@
                 ]
             }
         ],
-        "timestamp": "2026-07-16T15:45:00.192314",
+        "timestamp": "2026-07-20T19:12:34.924992",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "26.04.1"
@@ -31,11 +31,11 @@
         "content": [
             {
                 "0": [
-                    "output.jsonl:md5,e117720a4637eca09a62d7113ff19b13"
+                    "output.jsonl:md5,41cbc8d7f0cc6accf54fe296abc9f0da"
                 ]
             }
         ],
-        "timestamp": "2026-07-16T15:44:49.548896",
+        "timestamp": "2026-07-20T17:36:51.576436",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "26.04.1"
@@ -49,7 +49,7 @@
                 ]
             }
         ],
-        "timestamp": "2026-07-16T15:44:54.800636",
+        "timestamp": "2026-07-20T19:12:29.432454",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "26.04.1"

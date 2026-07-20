@@ -245,7 +245,6 @@ class ProcessOutputJSON {
                 writeDefault(match, jsonWriter)
                 break
             case "pirsr":
-                if (match.signature.type == null) { match.signature.type = "Region" }
                 writePIRSR(match, jsonWriter)
                 break
             case "prints":

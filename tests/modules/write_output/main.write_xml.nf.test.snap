@@ -3,28 +3,28 @@
         "content": [
             {
                 "0": [
-                    "output.xml:md5,3f17e928e58e76d82d47e3c14933f80d"
+                    "output.xml:md5,5764cfe41799cff31f4099a86a472110"
                 ]
             }
         ],
-        "timestamp": "2026-04-16T15:29:22.450241874",
+        "timestamp": "2026-07-20T17:37:19.627794",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.04.7"
+            "nextflow": "26.04.1"
         }
     },
     "Write output for nucleic sequences": {
         "content": [
             {
                 "0": [
-                    "output.xml:md5,708ca9f9376e6fc8fbe7f65d525d6e46"
+                    "output.xml:md5,fc89fba7892d596554aa0561e31158a4"
                 ]
             }
         ],
-        "timestamp": "2026-04-16T15:31:21.328552444",
+        "timestamp": "2026-07-20T19:12:55.962301",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.04.7"
+            "nextflow": "26.04.1"
         }
     }
 }
