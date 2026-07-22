@@ -127,7 +127,7 @@
         "accession": { "type": "string" },
         "name": { "type": ["string", "null"] },
         "description": { "type": ["string", "null"] },
-        "type": { "type": "string" },
+        "type": { "type": ["string", "null"] },
         "signatureLibraryRelease": { 
           "type": "object",
           "required": ["library", "version"],
