@@ -96,7 +96,7 @@ process PARSE_INTERPRO_N {
     executor 'local'
 
     input:
-    tuple val(meta), val(json_files)
+    tuple val(meta), val(json_files), val(fasta)
     val applications
     val max_length
     val chunk_overlap
@@ -133,6 +133,11 @@ process PARSE_INTERPRO_N {
     // If none overlap, fallback to all supported applications
     def selectedApps = overlappingApps ?: supported_databases.keySet()
 
+    // Sequence lengths, used to discard positions past the end of a chunk
+    def lengths = uk.ac.ebi.interpro.FastaFile.parse(fasta).collectEntries { id, seq ->
+        [(id): seq.length()]
+    }
+
     // Parse all JSON files and group by sequence ID
     def jsonSlurper = new groovy.json.JsonSlurper()
     def resultsBySeq = [:].withDefault { [] }
@@ -152,10 +157,15 @@ process PARSE_INTERPRO_N {
     resultsBySeq.each { seqId, chunks ->
         chunks.sort { chunk -> chunk.id }
 
+        def seqLength = lengths[seqId]
+        assert seqLength != null
+
         // Collect all matched with global coordinates
         def allMatches = []
         chunks.each { chunk ->
             def offset = chunk.id * (max_length - chunk_overlap)
+            // Last residue covered by this chunk
+            def chunkEnd = Math.min(offset + max_length, seqLength)
             chunk.matches.each { match ->
                 def sigLib = match.signature.signatureLibraryRelease
                 def sigLibName = sigLib.library.toLowerCase().replaceAll(/[-\s]/, "")
@@ -166,13 +176,22 @@ process PARSE_INTERPRO_N {
                 }
                 assert match.locations.size() == 1
 
-                def loc = match.locations[0]   
+                def loc = match.locations[0]
+                def start = loc.start + offset
+                if (start > chunkEnd) {
+                    // Match on the end-of-sequence token only
+                    return
+                }
+
                 allMatches << [
                     signature: match.signature,
-                    start: loc.start + offset,
-                    end: loc.end + offset,
-                    fragments: loc["location-fragments"].collect { frag ->
-                        [start: frag.start + offset, end: frag.end + offset]
+                    start: start,
+                    end: Math.min(loc.end + offset, chunkEnd),
+                    fragments: loc["location-fragments"].findResults { frag ->
+                        def fragStart = frag.start + offset
+                        fragStart > chunkEnd
+                            ? null
+                            : [start: fragStart, end: Math.min(frag.end + offset, chunkEnd)]
                     },
                     score: loc.score as double  // stored as string in JSON
                 ]

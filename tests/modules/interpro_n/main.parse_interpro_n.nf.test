@@ -11,7 +11,8 @@ nextflow_process {
                 """
                 input[0] = channel.of(tuple(
                     1,
-                    [file("${projectDir}/tests/data/interpro_n/output.json", checkIfExists: true)]
+                    [file("${projectDir}/tests/data/interpro_n/output.json", checkIfExists: true)],
+                    file("${projectDir}/tests/data/sequences/input.1.fasta", checkIfExists: true)
                 ))
                 input[1] = ["cathgene3d", "pirsf", "prints", "sfld", "smart", "superfamily"]
                 input[2] = 2047
