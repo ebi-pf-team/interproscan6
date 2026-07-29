@@ -178,21 +178,30 @@ process PARSE_INTERPRO_N {
 
                 def loc = match.locations[0]
                 def start = loc.start + offset
-                if (start > chunkEnd) {
-                    // Match on the end-of-sequence token only
+                def end = Math.min(loc.end + offset, chunkEnd)
+                if (start >= end) {
+                    // Match on the end-of-sequence token only, or a single residue long
+                    return
+                }
+
+                // Fragments beyond the last residue of the chunk only cover
+                // the end-of-sequence token
+                def fragments = loc["location-fragments"].findResults { frag ->
+                    def fragStart = frag.start + offset
+                    fragStart > chunkEnd
+                        ? null
+                        : [start: fragStart, end: Math.min(frag.end + offset, chunkEnd)]
+                }
+                if (fragments.any { frag -> frag.start >= frag.end }) {
+                    // Single-residue fragments are spurious: discard the whole match
                     return
                 }
 
                 allMatches << [
                     signature: match.signature,
                     start: start,
-                    end: Math.min(loc.end + offset, chunkEnd),
-                    fragments: loc["location-fragments"].findResults { frag ->
-                        def fragStart = frag.start + offset
-                        fragStart > chunkEnd
-                            ? null
-                            : [start: fragStart, end: Math.min(frag.end + offset, chunkEnd)]
-                    },
+                    end: end,
+                    fragments: fragments,
                     score: loc.score as double  // stored as string in JSON
                 ]
             }

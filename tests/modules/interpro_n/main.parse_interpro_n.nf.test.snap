@@ -1,4 +1,21 @@
 {
+    "Should ignore single-residue matches": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "interpro-n.json:md5,8f1df16b1052755fcc64a459bd978cb3"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-07-29T17:00:02.753576765",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "26.04.3"
+        }
+    },
     "Should run without failures": {
         "content": [
             {
