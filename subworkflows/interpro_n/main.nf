@@ -42,8 +42,10 @@ workflow INTERPRO_N {
         ch_json = RUN_INTERPRO_N_CPU.out
     }
 
+    // Pair each batch of results with its input sequences, whose lengths are
+    // needed to bound match coordinates
     PARSE_INTERPRO_N(
-        ch_json, 
+        ch_json.combine(ch_seqs, by: 0),
         applications,
         max_length,
         chunk_overlap,
