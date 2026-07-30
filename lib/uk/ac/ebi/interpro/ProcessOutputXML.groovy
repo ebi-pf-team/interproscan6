@@ -165,7 +165,6 @@ class ProcessOutputXML {
                 matchNodeAttributes = fmtDefaultMatchNode(match)
                 break
             case "cdd":
-                matchNodeAttributes = fmtSourceOnlyMatchNode(match)
                 break
             case "coils":
                 break
@@ -213,7 +212,6 @@ class ProcessOutputXML {
                 matchNodeAttributes = fmtDefaultMatchNode(match)
                 break
             case "superfamily":
-                matchNodeAttributes = fmtSourceOnlyMatchNode(match)
                 break
             case "deeptmhmm":
             case "tmbed":
@@ -353,12 +351,6 @@ class ProcessOutputXML {
             evalue    : match.evalue,
             graphscan : match.graphscan,
             source    : match.source
-        ]
-    }
-
-    static Map fmtSourceOnlyMatchNode(Map match) {
-        return [
-            source : match.source
         ]
     }
 
