@@ -79,11 +79,11 @@ process PARSE_SIGNALP {
     def modelAcc = "SignalP_${mode}_${organism}"
     def library = new uk.ac.ebi.interpro.SignatureLibraryRelease("SignalP", "6.0i")
     def signatures = [
-        "Sec/SPI"  : new uk.ac.ebi.interpro.Signature("SignalP-Sec-SPI", "Sec/SPI", "Sec signal peptide", library, null),
-        "Sec/SPII" : new uk.ac.ebi.interpro.Signature("SignalP-Sec-SPII", "Sec/SPII", "Lipoprotein signal peptide", library, null),
-        "Tat/SPI"  : new uk.ac.ebi.interpro.Signature("SignalP-Tat-SPI", "Tat/SPI", "Tat signal peptide", library, null),
-        "Tat/SPII" : new uk.ac.ebi.interpro.Signature("SignalP-Tat-SPII", "Tat/SPII", "Tat lipoprotein signal peptide", library, null),
-        "Sec/SPIII": new uk.ac.ebi.interpro.Signature("SignalP-Sec-SPIII", "Sec/SPIII", "Pilin signal peptide", library, null),
+        "Sec/SPI"  : new uk.ac.ebi.interpro.Signature("SignalP-Sec-SPI", "Sec/SPI", "Sec signal peptide", "Region", library, null),
+        "Sec/SPII" : new uk.ac.ebi.interpro.Signature("SignalP-Sec-SPII", "Sec/SPII", "Lipoprotein signal peptide", "Region", library, null),
+        "Tat/SPI"  : new uk.ac.ebi.interpro.Signature("SignalP-Tat-SPI", "Tat/SPI", "Tat signal peptide", "Region", library, null),
+        "Tat/SPII" : new uk.ac.ebi.interpro.Signature("SignalP-Tat-SPII", "Tat/SPII", "Tat lipoprotein signal peptide", "Region", library, null),
+        "Sec/SPIII": new uk.ac.ebi.interpro.Signature("SignalP-Sec-SPIII", "Sec/SPIII", "Pilin signal peptide", "Region", library, null),
     ]
 
     def gff3Path = signalp_out.resolve("output.gff3")

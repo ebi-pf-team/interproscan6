@@ -17,8 +17,15 @@ process PARSE_PIRSR {
     hmmerMatches.each { seqId, matches ->
         def filteredSeqMatches = [:]
         matches.each { modelAccession, match ->
-            // set the signature name, which defaults to null in the HMMER3 parser
-            match.signature.name = modelAccession
+            // set the signature name and type, which defaults to null in the HMMER3 parser
+            match.signature = new uk.ac.ebi.interpro.Signature(
+                match.signature.accession,
+                modelAccession,
+                match.signature.description,
+                "Region",
+                match.signature.signatureLibraryRelease,
+                match.signature.entry
+            )
 
             def sortedLocations = match.locations.sort { loc ->
                 [loc.evalue, -loc.score]  // sorting by evalue ASC, score DESC

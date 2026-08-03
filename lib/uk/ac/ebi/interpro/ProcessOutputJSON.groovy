@@ -1,16 +1,12 @@
 package uk.ac.ebi.interpro
-import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.io.SerializedString
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import groovy.json.JsonException
 import java.nio.file.Path
 import java.util.regex.Pattern
 import uk.ac.ebi.interpro.Location
-import uk.ac.ebi.interpro.Match
 import uk.ac.ebi.interpro.SeqDB
 
 

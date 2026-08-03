@@ -59,18 +59,18 @@ process PARSE_PHOBIUS {
     def library = new uk.ac.ebi.interpro.SignatureLibraryRelease("Phobius", "1.01")
     def signatures = [
         "CYTOPLASMIC_DOMAIN"     : new uk.ac.ebi.interpro.Signature("CYTOPLASMIC_DOMAIN", "Cytoplasmic domain", 
-                                                 "Region of a membrane-bound protein predicted to be outside the membrane, in the cytoplasm", library, null),
+                                                 "Region of a membrane-bound protein predicted to be outside the membrane, in the cytoplasm", "Region", library, null),
         "NON_CYTOPLASMIC_DOMAIN" : new uk.ac.ebi.interpro.Signature("NON_CYTOPLASMIC_DOMAIN", "Non cytoplasmic domain", 
-                                                 "Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region", library, null),
-        "SIGNAL_PEPTIDE"         : new uk.ac.ebi.interpro.Signature("SIGNAL_PEPTIDE", "Signal Peptide", "Signal Peptide region", library, null),
+                                                 "Region of a membrane-bound protein predicted to be outside the membrane, in the extracellular region", "Region", library, null),
+        "SIGNAL_PEPTIDE"         : new uk.ac.ebi.interpro.Signature("SIGNAL_PEPTIDE", "Signal Peptide", "Signal Peptide region", "Region", library, null),
         "SIGNAL_PEPTIDE_C_REGION": new uk.ac.ebi.interpro.Signature("SIGNAL_PEPTIDE_C_REGION", "Signal peptide C-region", 
-                                                 "C-terminal region of a signal peptide", library, null),
+                                                 "C-terminal region of a signal peptide", "Region", library, null),
         "SIGNAL_PEPTIDE_H_REGION": new uk.ac.ebi.interpro.Signature("SIGNAL_PEPTIDE_H_REGION", "Signal peptide H-region", 
-                                                 "Hydrophobic region of a signal peptide", library, null),
+                                                 "Hydrophobic region of a signal peptide", "Region", library, null),
         "SIGNAL_PEPTIDE_N_REGION": new uk.ac.ebi.interpro.Signature("SIGNAL_PEPTIDE_N_REGION", "Signal peptide N-region", 
-                                                 "N-terminal region of a signal peptide", library, null),
+                                                 "N-terminal region of a signal peptide", "Region", library, null),
         "TRANSMEMBRANE"          : new uk.ac.ebi.interpro.Signature("TRANSMEMBRANE", "Transmembrane region", 
-                                                 "Region of a membrane-bound protein predicted to be embedded in the membrane", library, null),
+                                                 "Region of a membrane-bound protein predicted to be embedded in the membrane", "Region", library, null),
     ]
 
     phobius_out.eachLine { line ->

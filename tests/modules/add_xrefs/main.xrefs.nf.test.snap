@@ -6,16 +6,16 @@
                     [
                         1,
                         [
-                            "1.json:md5,fd45e54af6d8ddc1da3426ad52cdd187"
+                            "1.json:md5,8f3ed107dd1e403e47c386e8b6371e67"
                         ]
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-04-12T11:08:11.715723169",
+        "timestamp": "2026-07-20T16:12:05.200925",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.04.7"
+            "nextflow": "26.04.1"
         }
     },
     "Add PANTHER cross-references": {
@@ -25,16 +25,16 @@
                     [
                         1,
                         [
-                            "1.json:md5,2a7925ed7608850e4612a53f659b123a"
+                            "1.json:md5,b8c94afd832eb587dbdbe8ca9102ce16"
                         ]
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-04-12T11:08:05.143066773",
+        "timestamp": "2026-07-20T16:11:12.342732",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.04.7"
+            "nextflow": "26.04.1"
         }
     },
     "Add all cross-references and GO terms": {
@@ -44,16 +44,16 @@
                     [
                         1,
                         [
-                            "1.json:md5,de3c19062fac69a505d3ab1f874d30b6"
+                            "1.json:md5,d3c8bff3f169ec658abf9e3d96bc03f7"
                         ]
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-04-12T11:08:17.214488618",
+        "timestamp": "2026-07-20T16:13:10.759161",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.04.7"
+            "nextflow": "26.04.1"
         }
     }
 }

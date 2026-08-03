@@ -4,6 +4,43 @@ nextflow_workflow {
     script "subworkflows/output/main.nf"
     workflow "OUTPUT"
 
+    def runCmd = { cmd ->
+        def proc = cmd.execute()
+        def out = new StringBuilder()
+        def err = new StringBuilder()
+        proc.consumeProcessOutput(out, err)
+        proc.waitFor()
+        if (proc.exitValue() != 0) {
+            println "Command failed: ${cmd.join(' ')}"
+            println "stdout:\n${out}"
+            println "stderr:\n${err}"
+        }
+        proc.exitValue() == 0
+    }
+
+    def validateXml = { file ->
+        runCmd(["xmllint", "--noout", "--schema", "assets/schema.xsd", file])
+    }
+
+    def validateJson = { file ->
+        runCmd(["check-jsonschema", "--schemafile", "assets/schema.json", file])
+    }
+
+    def validateOutputs = { obsfiles, basepath ->
+        assertAll({ assert obsfiles.every { obsfile ->
+                    def suffix = obsfile.split(/\./)[-1]
+                    runCmd([
+                        "python",
+                        "tests/diff.py",
+                        "-q",
+                        "${basepath}.${suffix}.gz",
+                        obsfile
+                    ])}},
+            { assert obsfiles.findAll { it.endsWith(".xml") }.every { validateXml(it) }},
+            {assert obsfiles.findAll { it.endsWith(".json") }.every { validateJson(it) }}
+        )
+    }
+
     test("Write output for protein sequences") {
 
         setup {
@@ -11,12 +48,12 @@ nextflow_workflow {
                 script "../../modules/gunzip/main.nf"
                 process {
                     """
-                    input[0] = file("${projectDir}/tests/data/combined/combined-with-repr-locations.json.gz", 
+                    input[0] = file("${projectDir}/tests/data/combined/combined-with-repr-locations.json.gz",
                                     checkIfExists: true)
                     """
                 }
-            }            
-        }   
+            }
+        }
 
         when {
             workflow {
@@ -38,20 +75,9 @@ nextflow_workflow {
             with (workflow.out) {
                 assert get(0).size() == 1
                 assert get(0).get(0).size() == 5
-
-                def basepath = "tests/data/output/test.faa"
-
-                assert get(0).get(0).every { obsfile ->
-                    def suffix = obsfile.split(/\./)[-1]
-                    def expfile = "${basepath}.${suffix}.gz"
-                    def cmd  = "python tests/diff.py -q ${expfile} ${obsfile}"
-                    def proc = cmd.execute()
-                    proc.waitFor()
-                    proc.exitValue() == 0
-                }
+                validateOutputs(get(0).get(0), "tests/data/output/test.faa")
             }
         }
-
     }
 
     test("Write output for nucleic sequences") {
@@ -61,7 +87,7 @@ nextflow_workflow {
                 script "../../modules/untar/main.nf"
                 process {
                     """
-                    input[0] = file("${projectDir}/tests/data/combined/nucleic-combined-with-repr-locations.tar.gz", 
+                    input[0] = file("${projectDir}/tests/data/combined/nucleic-combined-with-repr-locations.tar.gz",
                                     checkIfExists: true)
                     """
                 }
@@ -74,8 +100,8 @@ nextflow_workflow {
                     input[0] = file("${projectDir}/tests/data/sequences/fna.db.gz", checkIfExists: true)
                     """
                 }
-            }             
-        }    
+            }
+        }
 
         when {
             workflow {
@@ -103,17 +129,7 @@ nextflow_workflow {
             with (workflow.out) {
                 assert get(0).size() == 1
                 assert get(0).get(0).size() == 5
-
-                def basepath = "tests/data/output/test.fna"
-
-                assert get(0).get(0).every { obsfile ->
-                    def suffix = obsfile.split(/\./)[-1]
-                    def expfile = "${basepath}.${suffix}.gz"
-                    def cmd  = "python tests/diff.py -q ${expfile} ${obsfile}"
-                    def proc = cmd.execute()
-                    proc.waitFor()
-                    proc.exitValue() == 0
-                }
+                validateOutputs(get(0).get(0), "tests/data/output/test.fna")
             }
         }
     }

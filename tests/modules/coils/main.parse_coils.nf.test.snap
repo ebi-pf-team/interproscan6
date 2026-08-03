@@ -5,15 +5,15 @@
                 "0": [
                     [
                         1,
-                        "coils.json:md5,77e6809dc2dd19b8cfaa3901dd148836"
+                        "coils.json:md5,685de77991be937930e6fa85bca4b875"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-04-02T23:13:53.912426876",
+        "timestamp": "2026-07-17T13:28:48.663472",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.04.7"
+            "nextflow": "26.04.1"
         }
     }
 }

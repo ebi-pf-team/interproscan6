@@ -5,15 +5,15 @@
                 "0": [
                     [
                         1,
-                        "signalp.json:md5,ce61d01411704cf945adba54150c9ee4"
+                        "signalp.json:md5,2600723adfbb20324eb218342f39f854"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-04-03T18:40:30.428651155",
+        "timestamp": "2026-07-17T09:56:35.614707",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.04.7"
+            "nextflow": "26.04.1"
         }
     }
 }

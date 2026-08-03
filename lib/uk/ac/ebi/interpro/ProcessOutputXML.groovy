@@ -5,12 +5,10 @@ import com.fasterxml.jackson.core.*
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator
 import com.fasterxml.jackson.dataformat.xml.XmlFactory
 import com.fasterxml.jackson.dataformat.xml.util.DefaultXmlPrettyPrinter
-import java.io.StringWriter
 import java.nio.file.Path
 import java.util.regex.Pattern
 import javax.xml.namespace.QName
 import uk.ac.ebi.interpro.Location
-import uk.ac.ebi.interpro.Match
 import uk.ac.ebi.interpro.SeqDB
 
 class ProcessOutputXML {
@@ -167,7 +165,6 @@ class ProcessOutputXML {
                 matchNodeAttributes = fmtDefaultMatchNode(match)
                 break
             case "cdd":
-                matchNodeAttributes = fmtSourceOnlyMatchNode(match)
                 break
             case "coils":
                 break
@@ -215,7 +212,6 @@ class ProcessOutputXML {
                 matchNodeAttributes = fmtDefaultMatchNode(match)
                 break
             case "superfamily":
-                matchNodeAttributes = fmtSourceOnlyMatchNode(match)
                 break
             case "deeptmhmm":
             case "tmbed":
@@ -358,12 +354,6 @@ class ProcessOutputXML {
         ]
     }
 
-    static Map fmtSourceOnlyMatchNode(Map match) {
-        return [
-            source : match.source
-        ]
-    }
-
     static Map fmtSignatureNode(Map match) {
         def signatureNodeAttributes = [ac: match.signature.accession]
         if (match.signature.name != null) {
@@ -403,9 +393,6 @@ class ProcessOutputXML {
                     break
                 case "coils":
                     locationAttributes = fmMinimalistLocationNode(loc)
-                    break
-                case "deeptmhmm":
-                    locationAttributes = []
                     break
                 case "hamap":
                     locationAttributes = fmtMinimalistLocationWithScoreNode(loc)

@@ -43,7 +43,7 @@ process PARSE_MOBIDBLITE {
             match = matches[sequenceId]["mobidb-lite"]
         } else {
             def library = new uk.ac.ebi.interpro.SignatureLibraryRelease("MobiDB-lite", "4.0")
-            def signature = new uk.ac.ebi.interpro.Signature("mobidb-lite", "disorder_prediction", "consensus disorder prediction", library, null)
+            def signature = new uk.ac.ebi.interpro.Signature("mobidb-lite", "disorder_prediction", "consensus disorder prediction", "Region", library, null)
             match = new uk.ac.ebi.interpro.Match("mobidb-lite", signature)
             matches[sequenceId] = [:]
             matches[sequenceId]["mobidb-lite"] = match

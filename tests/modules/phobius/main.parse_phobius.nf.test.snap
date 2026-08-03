@@ -5,15 +5,15 @@
                 "0": [
                     [
                         1,
-                        "phobius.json:md5,a97fa99ae030536ba0e8ad615eb3f78c"
+                        "phobius.json:md5,88126d886defc620a1ed67774d62464d"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-04-03T16:18:29.766419704",
+        "timestamp": "2026-07-17T13:29:41.709731",
         "meta": {
             "nf-test": "0.9.4",
-            "nextflow": "25.04.7"
+            "nextflow": "26.04.1"
         }
     }
 }
