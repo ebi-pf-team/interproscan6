@@ -36,7 +36,7 @@ process LOAD_SEQUENCES {
     def db = null
     def outputFilePath = task.workDir.resolve("sequences.db")
     try {
-        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.create("sequences.db", params.localCopyDir)
+        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.create("sequences.db", params.seqdbdir)
         db = new uk.ac.ebi.interpro.SeqDB(localDbPath)
         db.loadFastaFile(fasta, nucleic, false)
         db.close()
@@ -68,7 +68,7 @@ process LOAD_ORFS {
     def localDbPath = null
     def db = null
     try {
-        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(db_path, params.localCopyDir)
+        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(db_path, params.seqdbdir)
         db = new uk.ac.ebi.interpro.SeqDB(localDbPath)
         db.loadFastaFile(translated_fasta, false, true)
         db.close()
@@ -101,7 +101,7 @@ process SPLIT_FASTA {
     def localDbPath = null
     def db = null
     try {
-        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(db_path, params.localCopyDir)
+        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(db_path, params.seqdbdir)
         db = new uk.ac.ebi.interpro.SeqDB(localDbPath)
         db.splitFasta(task.workDir, batch_size, nucleic)
         db.close()

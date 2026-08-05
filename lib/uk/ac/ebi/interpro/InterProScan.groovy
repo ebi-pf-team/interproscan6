@@ -79,6 +79,11 @@ class InterProScan {
             description: "Base name for output files (no directory or extension). Default: input filename."
         ],
         [
+            name: "seqdbdir",
+            metavar: "<DIR>",
+            description: "Directory for temporary local copies of sequences.db used by native SQLite processes. Defaults to TMPDIR (or the system temporary directory).",
+        ],
+        [
             name: "pathways",
             description: "Include pathway annotations in output files."
         ],
