@@ -443,7 +443,7 @@ class InterProScan {
         }
 
         result << "\nExecution and resource control:\n"
-        ["cpus", "max-workers", "use-gpu"].each { paramName ->
+        ["cpus", "max-workers", "use-gpu", "seqdbdir"].each { paramName ->
             assert optionsMap.containsKey(paramName)
             result << this.formatOption(paramName, optionsMap[paramName])
         }

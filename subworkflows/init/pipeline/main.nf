@@ -99,16 +99,14 @@ workflow INIT_PIPELINE {
         outprefix = outdir.resolve(outprefix)
     }
 
-    if (seqdbdir == null) {
-        log.error "'--seqdbdir <SEQ-DB-DIR>' is required."
-        exit 1
-    }
-    seqdbdir = file(seqdbdir)
-    if (seqdbdir.isFile()) {
-        log.error "'--seqdbdir <SEQDBDIR>' is required and cannot be an existing file."
-        exit 1
-    } else if (!seqdbdir.isDirectory()) {
-        seqdbdir.mkdirs()
+    if (seqdbdir != null) {
+        seqdbdir = file(seqdbdir)
+        if (seqdbdir.isFile()) {
+            log.error "'--seqdbdir <SEQDBDIR>' cannot be an existing file."
+            exit 1
+        } else if (!seqdbdir.isDirectory()) {
+            seqdbdir.mkdirs()
+        }
     }
 
     emit:
