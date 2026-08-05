@@ -42,10 +42,12 @@ process LOAD_SEQUENCES {
         db.close()
         db = null
         uk.ac.ebi.interpro.LocalSeqDB.copyTo(localDbPath, outputFilePath)
-    } finally {
+    } catch (Throwable e) {
         db?.close()
         uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+        throw e
     }
+    uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
 }
 
 process LOAD_ORFS {
@@ -72,10 +74,12 @@ process LOAD_ORFS {
         db.close()
         db = null
         uk.ac.ebi.interpro.LocalSeqDB.copyTo(localDbPath, db_path)
-    } finally {
+    } catch (Throwable e) {
         db?.close()
         uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+        throw e
     }
+    uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
 }
 
 process SPLIT_FASTA {
@@ -102,8 +106,10 @@ process SPLIT_FASTA {
         db.splitFasta(task.workDir, batch_size, nucleic)
         db.close()
         db = null
-    } finally {
+    } catch (Throwable e) {
         db?.close()
         uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+        throw e
     }
+    uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
 }

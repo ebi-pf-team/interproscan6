@@ -25,9 +25,11 @@ process WRITE_GFF3 {
             interproscan_version,
             interpro_version,
             output_file)
-    } finally {
+    } catch (Throwable e) {
         uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+        throw e
     }
+    uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
 }
 
 process WRITE_JSON {
@@ -59,9 +61,11 @@ process WRITE_JSON {
             interpro_version,
             jsonlines,
             output_file)
-    } finally {
+    } catch (Throwable e) {
         uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+        throw e
     }
+    uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
 }
 
 process WRITE_TSV {
@@ -87,9 +91,11 @@ process WRITE_TSV {
             localDbPath,
             nucleic,
             output_file)
-    } finally {
+    } catch (Throwable e) {
         uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+        throw e
     }
+    uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
 }
 
 process WRITE_XML {
@@ -119,7 +125,9 @@ process WRITE_XML {
             interproscan_version,
             interpro_version,
             output_file)
-    } finally {
+    } catch (Throwable e) {
         uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+        throw e
     }
+    uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
 }   
