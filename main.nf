@@ -18,7 +18,7 @@ params {
     matchesApiChunkSize: Integer
     matchesApiMaxRetries: Integer
     maxWorkers: Integer
-    localSeqDbDir: Path
+    localCopyDir: Path
     input: Path
     datadir: Path
     outdir: Path

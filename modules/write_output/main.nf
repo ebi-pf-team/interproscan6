@@ -17,7 +17,7 @@ process WRITE_GFF3 {
     exec:
     def localDbPath = null
     try {
-        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(seq_db_file, params.localSeqDbDir)
+        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(seq_db_file, params.localCopyDir)
         uk.ac.ebi.interpro.ProcessOutputGFF3.run(
             matches_files,
             localDbPath,
@@ -52,7 +52,7 @@ process WRITE_JSON {
     exec:
     def localDbPath = null
     try {
-        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(seq_db_file, params.localSeqDbDir)
+        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(seq_db_file, params.localCopyDir)
         uk.ac.ebi.interpro.ProcessOutputJSON.run(
             matches_files,
             localDbPath,
@@ -85,7 +85,7 @@ process WRITE_TSV {
     exec:
     def localDbPath = null
     try {
-        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(seq_db_file, params.localSeqDbDir)
+        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(seq_db_file, params.localCopyDir)
         uk.ac.ebi.interpro.ProcessOutputTSV.run(
             matches_files,
             localDbPath,
@@ -117,7 +117,7 @@ process WRITE_XML {
     exec:
     def localDbPath = null
     try {
-        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(seq_db_file, params.localSeqDbDir)
+        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(seq_db_file, params.localCopyDir)
         uk.ac.ebi.interpro.ProcessOutputXML.run(
             matches_files,
             localDbPath,
