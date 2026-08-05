@@ -14,22 +14,49 @@ class ProcessOutputJSON {
     static void run(List<Path> inputPaths, Path databasePath, boolean isNucleic, String iprscanVersion,  String interproVersion, boolean useJsonLines, Path outputPath) {
         ObjectMapper mapper = new ObjectMapper()
         SeqDB db = new SeqDB(databasePath)
-        
-        streamJson(outputPath) { JsonGenerator generator ->
-            if (useJsonLines) {
-                generator.setRootValueSeparator(new SerializedString(''))
-                Set<String> seenNucleicMd5s = new HashSet<>()
-                inputPaths.each { inputPath ->
-                    Map proteins = inputPath.newReader().withCloseable { reader ->
-                        mapper.readValue(reader, Map)
-                    }
 
-                    if (isNucleic) {
-                        def (nucleicToProteinMd5, ntSeqDataMap, orfDataMap) = 
-                            db.retrieveAllNucleicSequenceData(proteins.keySet() as List)
+        try {
+            streamJson(outputPath) { JsonGenerator generator ->
+                if (useJsonLines) {
+                    generator.setRootValueSeparator(new SerializedString(''))
+                    Set<String> seenNucleicMd5s = new HashSet<>()
+                    inputPaths.each { inputPath ->
+                        Map proteins = inputPath.newReader().withCloseable { reader ->
+                            mapper.readValue(reader, Map)
+                        }
 
-                        nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
-                            if (!seenNucleicMd5s.contains(nucleicMd5)) {
+                        if (isNucleic) {
+                            def (nucleicToProteinMd5, ntSeqDataMap, orfDataMap) =
+                                db.retrieveAllNucleicSequenceData(proteins.keySet() as List)
+
+                            nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
+                                if (!seenNucleicMd5s.contains(nucleicMd5)) {
+                                    generator.writeStartObject()
+                                    generator.writeStringField("interproscan-version", iprscanVersion)
+                                    if (interproVersion) {
+                                        generator.writeStringField("interpro-version", interproVersion)
+                                    }
+                                    generator.writeFieldName("results")
+                                    generator.writeStartArray()
+                                    def seqData = ntSeqDataMap[nucleicMd5]
+                                    def protMd5ToOrfs = orfDataMap[nucleicMd5]
+                                    writeNucleic(nucleicMd5, proteinMd5s, proteins, generator, seqData, protMd5ToOrfs)
+                                    generator.writeEndArray()
+                                    generator.writeEndObject()
+                                    generator.writeRaw('\n')
+                                    seenNucleicMd5s.add(nucleicMd5)
+                                }
+                            }
+                        } else {
+                            def allMd5s = proteins.keySet() as List
+                            def md5ToSeqData = [:]
+                            allMd5s.collate(1000).each { batch ->
+                                def result = db.proteinMd5ToProteinSeqs(batch)
+                                md5ToSeqData.putAll(result)
+                            }
+
+                            proteins.each { String proteinMd5, Map proteinMatches ->
+                                def seqData = md5ToSeqData[proteinMd5]
                                 generator.writeStartObject()
                                 generator.writeStringField("interproscan-version", iprscanVersion)
                                 if (interproVersion) {
@@ -37,86 +64,62 @@ class ProcessOutputJSON {
                                 }
                                 generator.writeFieldName("results")
                                 generator.writeStartArray()
-                                def seqData = ntSeqDataMap[nucleicMd5]
-                                def protMd5ToOrfs = orfDataMap[nucleicMd5]
-                                writeNucleic(nucleicMd5, proteinMd5s, proteins, generator, seqData, protMd5ToOrfs)
+                                writeProtein(proteinMd5, proteinMatches, generator, seqData)
                                 generator.writeEndArray()
                                 generator.writeEndObject()
                                 generator.writeRaw('\n')
-                                seenNucleicMd5s.add(nucleicMd5)
                             }
-                        }
-                    } else {
-                        def allMd5s = proteins.keySet() as List
-                        def md5ToSeqData = [:]
-                        allMd5s.collate(1000).each { batch ->
-                            def result = db.proteinMd5ToProteinSeqs(batch)
-                            md5ToSeqData.putAll(result)
-                        }
-                        
-                        proteins.each { String proteinMd5, Map proteinMatches ->
-                            def seqData = md5ToSeqData[proteinMd5]
-                            generator.writeStartObject()
-                            generator.writeStringField("interproscan-version", iprscanVersion)
-                            if (interproVersion) {
-                                generator.writeStringField("interpro-version", interproVersion)
-                            }
-                            generator.writeFieldName("results")
-                            generator.writeStartArray()
-                            writeProtein(proteinMd5, proteinMatches, generator, seqData)
-                            generator.writeEndArray()
-                            generator.writeEndObject()
-                            generator.writeRaw('\n')
                         }
                     }
-                }
-            } else {
-                DefaultPrettyPrinter pp = new DefaultPrettyPrinter()
-                pp.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE)
-                generator.setPrettyPrinter(pp)
-                generator.writeStartObject()
+                } else {
+                    DefaultPrettyPrinter pp = new DefaultPrettyPrinter()
+                    pp.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE)
+                    generator.setPrettyPrinter(pp)
+                    generator.writeStartObject()
 
-                generator.writeStringField("interproscan-version", iprscanVersion)
-                if (interproVersion) {
-                    generator.writeStringField("interpro-version", interproVersion)
-                }
-                generator.writeFieldName("results")
-                generator.writeStartArray()  // start of results [...
-                Set<String> seenNucleicMd5s = new HashSet<>()
-                inputPaths.each { inputPath ->
-                    Map proteins = inputPath.newReader().withCloseable { reader ->
-                        mapper.readValue(reader, Map)
+                    generator.writeStringField("interproscan-version", iprscanVersion)
+                    if (interproVersion) {
+                        generator.writeStringField("interpro-version", interproVersion)
                     }
-                    if (isNucleic) {  // input was nucleic acid sequence
-                        def (nucleicToProteinMd5, ntSeqDataMap, orfDataMap) = 
-                            db.retrieveAllNucleicSequenceData(proteins.keySet() as List)
-                        nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
-                            if (!seenNucleicMd5s.contains(nucleicMd5)) {
-                                def seqData = ntSeqDataMap[nucleicMd5]
-                                def protMd5ToOrfs = orfDataMap[nucleicMd5]
-                                writeNucleic(nucleicMd5, proteinMd5s, proteins, generator, seqData, protMd5ToOrfs)
-                                seenNucleicMd5s.add(nucleicMd5)
+                    generator.writeFieldName("results")
+                    generator.writeStartArray()  // start of results [...
+                    Set<String> seenNucleicMd5s = new HashSet<>()
+                    inputPaths.each { inputPath ->
+                        Map proteins = inputPath.newReader().withCloseable { reader ->
+                            mapper.readValue(reader, Map)
+                        }
+                        if (isNucleic) {  // input was nucleic acid sequence
+                            def (nucleicToProteinMd5, ntSeqDataMap, orfDataMap) =
+                                db.retrieveAllNucleicSequenceData(proteins.keySet() as List)
+                            nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
+                                if (!seenNucleicMd5s.contains(nucleicMd5)) {
+                                    def seqData = ntSeqDataMap[nucleicMd5]
+                                    def protMd5ToOrfs = orfDataMap[nucleicMd5]
+                                    writeNucleic(nucleicMd5, proteinMd5s, proteins, generator, seqData, protMd5ToOrfs)
+                                    seenNucleicMd5s.add(nucleicMd5)
+                                }
+                            }
+                        } else {  // input was protein sequences
+                            def allMd5s = proteins.keySet() as List
+                            def md5ToSeqData = [:]
+                            allMd5s.collate(1000).each { batch ->
+                                def result = db.proteinMd5ToProteinSeqs(batch)
+                                md5ToSeqData.putAll(result)
+                            }
+
+                            proteins.each { String proteinMd5, Map proteinMatches ->
+                                def seqData = md5ToSeqData[proteinMd5]
+                                writeProtein(proteinMd5, proteinMatches, generator, seqData)
                             }
                         }
-                    } else {  // input was protein sequences
-                        def allMd5s = proteins.keySet() as List
-                        def md5ToSeqData = [:]
-                        allMd5s.collate(1000).each { batch ->
-                            def result = db.proteinMd5ToProteinSeqs(batch)
-                            md5ToSeqData.putAll(result)
-                        }
-
-                        proteins.each { String proteinMd5, Map proteinMatches ->
-                            def seqData = md5ToSeqData[proteinMd5]
-                            writeProtein(proteinMd5, proteinMatches, generator, seqData)
-                        }
                     }
+                    generator.writeEndArray() // end of "results" ...]
+                    generator.writeEndObject()
                 }
-                generator.writeEndArray() // end of "results" ...]
-                generator.writeEndObject()
             }
+        } finally {
+            db.close()
         }
-
     }
 
     static def streamJson(Path filePath, Closure closure) {

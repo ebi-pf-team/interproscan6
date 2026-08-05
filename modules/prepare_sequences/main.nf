@@ -32,10 +32,20 @@ process LOAD_SEQUENCES {
     path "sequences.db"
 
     exec:
+    def localDbPath = null
+    def db = null
     def outputFilePath = task.workDir.resolve("sequences.db")
-    def db = new uk.ac.ebi.interpro.SeqDB(outputFilePath)
-    db.loadFastaFile(fasta, nucleic, false)
-    db.close()
+    try {
+        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.create("sequences.db", params.localSeqDbDir)
+        db = new uk.ac.ebi.interpro.SeqDB(localDbPath)
+        db.loadFastaFile(fasta, nucleic, false)
+        db.close()
+        db = null
+        uk.ac.ebi.interpro.LocalSeqDB.copyTo(localDbPath, outputFilePath)
+    } finally {
+        db?.close()
+        uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+    }
 }
 
 process LOAD_ORFS {
@@ -53,9 +63,19 @@ process LOAD_ORFS {
     val db_path // ensure SPLIT_FASTA runs after LOAD_ORFS
 
     exec:
-    def db = new uk.ac.ebi.interpro.SeqDB(db_path)
-    db.loadFastaFile(translated_fasta, false, true)
-    db.close()
+    def localDbPath = null
+    def db = null
+    try {
+        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(db_path, params.localSeqDbDir)
+        db = new uk.ac.ebi.interpro.SeqDB(localDbPath)
+        db.loadFastaFile(translated_fasta, false, true)
+        db.close()
+        db = null
+        uk.ac.ebi.interpro.LocalSeqDB.copyTo(localDbPath, db_path)
+    } finally {
+        db?.close()
+        uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+    }
 }
 
 process SPLIT_FASTA {
@@ -74,7 +94,16 @@ process SPLIT_FASTA {
     path "*.fasta"
 
     exec:
-    def db = new uk.ac.ebi.interpro.SeqDB(db_path)
-    db.splitFasta(task.workDir, batch_size, nucleic)
-    db.close()
+    def localDbPath = null
+    def db = null
+    try {
+        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(db_path, params.localSeqDbDir)
+        db = new uk.ac.ebi.interpro.SeqDB(localDbPath)
+        db.splitFasta(task.workDir, batch_size, nucleic)
+        db.close()
+        db = null
+    } finally {
+        db?.close()
+        uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+    }
 }

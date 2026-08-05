@@ -14,58 +14,62 @@ import uk.ac.ebi.interpro.SeqDB
 class ProcessOutputXML {
     static void run(List<Path> inputPaths, Path databasePath, boolean isNucleic, String iprscanVersion, String interproVersion, Path outputPath) {
         SeqDB db = new SeqDB(databasePath)
-        outputPath.withWriter { writer ->
-            def xmlFactory = new XmlFactory()
-            xmlFactory.configure(ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true)
-            xmlFactory.createGenerator(writer).withCloseable { gen ->
-                gen.setPrettyPrinter(new DefaultXmlPrettyPrinter())
-                gen.initGenerator()
-                
-                gen.setNextName(new QName("results"))
-                gen.writeStartObject();
-                gen.setNextIsAttribute(true);
-                gen.writeFieldName("interproscan-version");
-                gen.writeString(iprscanVersion);
-                
-                if (interproVersion) {
-                    gen.writeFieldName("interpro-version");
-                    gen.writeString(interproVersion);
-                }
-                Set<String> seenNucleicMd5s = new HashSet<>()
-                ObjectMapper mapper = new ObjectMapper()
-                inputPaths.each { inputPath ->
-                    Map proteins = inputPath.newReader().withCloseable { reader ->
-                        mapper.readValue(reader, Map)
-                    }
-                    if (isNucleic) {
-                        def (nucleicToProteinMd5, ntSeqDataMap, orfDataMap) =
-                            db.retrieveAllNucleicSequenceData(proteins.keySet() as List)
+        try {
+            outputPath.withWriter { writer ->
+                def xmlFactory = new XmlFactory()
+                xmlFactory.configure(ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true)
+                xmlFactory.createGenerator(writer).withCloseable { gen ->
+                    gen.setPrettyPrinter(new DefaultXmlPrettyPrinter())
+                    gen.initGenerator()
 
-                        nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
-                            if (!seenNucleicMd5s.contains(nucleicMd5)) {
-                                def seqData = ntSeqDataMap[nucleicMd5]
-                                def protMd5ToOrfs = orfDataMap[nucleicMd5]
-                                addNucleotideNode(gen, nucleicMd5, proteinMd5s, proteins, seqData, protMd5ToOrfs)
-                                seenNucleicMd5s.add(nucleicMd5)
+                    gen.setNextName(new QName("results"))
+                    gen.writeStartObject();
+                    gen.setNextIsAttribute(true);
+                    gen.writeFieldName("interproscan-version");
+                    gen.writeString(iprscanVersion);
+
+                    if (interproVersion) {
+                        gen.writeFieldName("interpro-version");
+                        gen.writeString(interproVersion);
+                    }
+                    Set<String> seenNucleicMd5s = new HashSet<>()
+                    ObjectMapper mapper = new ObjectMapper()
+                    inputPaths.each { inputPath ->
+                        Map proteins = inputPath.newReader().withCloseable { reader ->
+                            mapper.readValue(reader, Map)
+                        }
+                        if (isNucleic) {
+                            def (nucleicToProteinMd5, ntSeqDataMap, orfDataMap) =
+                                db.retrieveAllNucleicSequenceData(proteins.keySet() as List)
+
+                            nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
+                                if (!seenNucleicMd5s.contains(nucleicMd5)) {
+                                    def seqData = ntSeqDataMap[nucleicMd5]
+                                    def protMd5ToOrfs = orfDataMap[nucleicMd5]
+                                    addNucleotideNode(gen, nucleicMd5, proteinMd5s, proteins, seqData, protMd5ToOrfs)
+                                    seenNucleicMd5s.add(nucleicMd5)
+                                }
+                            }
+                        } else {
+                            def allMd5s = proteins.keySet() as List
+                            def md5ToSeqData = [:]
+                            allMd5s.collate(1000).each { batch ->
+                                def result = db.proteinMd5ToProteinSeqs(batch)
+                                md5ToSeqData.putAll(result)
+                            }
+
+                            proteins.each { String proteinMd5, Map proteinMatches ->
+                                def seqData = md5ToSeqData[proteinMd5]
+                                addProteinNode(gen, proteinMd5, proteinMatches, seqData)
                             }
                         }
-                    } else {
-                        def allMd5s = proteins.keySet() as List
-                        def md5ToSeqData = [:]
-                        allMd5s.collate(1000).each { batch ->
-                            def result = db.proteinMd5ToProteinSeqs(batch)
-                            md5ToSeqData.putAll(result)
-                        }
-
-                        proteins.each { String proteinMd5, Map proteinMatches ->
-                            def seqData = md5ToSeqData[proteinMd5]
-                            addProteinNode(gen, proteinMd5, proteinMatches, seqData)
-                        }
                     }
-                }
 
-                gen.writeEndObject()  // </results>
+                    gen.writeEndObject()  // </results>
+                }
             }
+        } finally {
+            db.close()
         }
     }
 
