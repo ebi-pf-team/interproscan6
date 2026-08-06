@@ -4,13 +4,14 @@ workflow LOOKUP {
     take:
     fasta                 // [meta, fasta]
     applications          // list[str]
+    appl_config           // map, contents of the conf/applications.config file
     matches_api_url       // str, url to matches api
     chunk_size            // int
     max_retries           // int
     interproscan_version  // str
 
     main:
-    def (in_api, not_in_api) = check_matches_api(applications, matches_api_url, interproscan_version)
+    def (in_api, not_in_api) = check_matches_api(applications, appl_config, matches_api_url, interproscan_version)
 
     GET_MATCHES(
         fasta,

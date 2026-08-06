@@ -1,4 +1,16 @@
-def check_matches_api(applications, api_url, _version) {
+def is_appl_in_api(appl, api_appls, appl_config) {
+    if (uk.ac.ebi.interpro.SignalP.APPLICATIONS.contains(appl)) {
+        // A single "SignalP" analysis covers both organism variants, but the API
+        // only holds pre-calculated results for one mode
+        return api_appls.contains(
+                   uk.ac.ebi.interpro.InterProScan.normalizeName(uk.ac.ebi.interpro.SignalP.LIBRARY)
+               ) && appl_config[appl].mode == uk.ac.ebi.interpro.SignalP.API_MODE
+    }
+    return api_appls.contains(uk.ac.ebi.interpro.InterProScan.normalizeName(appl))
+}
+
+
+def check_matches_api(applications, appl_config, api_url, _version) {
     def appls_in_api     = []
     def appls_not_in_api = []
     def sanitized_url = uk.ac.ebi.interpro.HTTPRequest.sanitizeURL(api_url)
@@ -11,11 +23,11 @@ def check_matches_api(applications, api_url, _version) {
             log.warn "This version of InterProScan is not compatible with the Matches API at ${sanitized_url}; pre-calculated annotations will not be retrieved."
         } else {
             if (info.analyses) {
-                def all_appls_in_api = info.analyses*.name.collect { n -> 
-                    n.toLowerCase().replaceAll("[-\\s]", "") 
+                def all_appls_in_api = info.analyses*.name.collect { n ->
+                    uk.ac.ebi.interpro.InterProScan.normalizeName(n)
                 }
-                applications.each { appl -> 
-                    if (all_appls_in_api.contains(appl)) {
+                applications.each { appl ->
+                    if (is_appl_in_api(appl, all_appls_in_api, appl_config)) {
                         appls_in_api << appl
                     } else {
                         appls_not_in_api << appl
@@ -62,6 +74,10 @@ process GET_MATCHES {
     def request_chunk_size = chunk_size > 100 ? 100 : chunk_size // API set max to 100
     def chunks = md5s.collate(request_chunk_size)
     def base_url = uk.ac.ebi.interpro.HTTPRequest.sanitizeURL(api_url.toString())
+    // Databases to report InterPro-N matches for (null if InterPro-N was not requested)
+    def interpro_n_dbs = applications.contains("interpro_n")
+        ? uk.ac.ebi.interpro.InterProN.selectDatabases(applications)
+        : null
     def response = null
     def success = chunks.every { chunk ->
         def data = groovy.json.JsonOutput.toJson([md5: chunk])
@@ -76,11 +92,29 @@ process GET_MATCHES {
                 matches[seq_md5] = [:]
                 item.matches.each { match ->
                     def library = match.signature.signatureLibraryRelease.library
-                    def app_name = library.toLowerCase().replaceAll("[-\\s]", "")
-                    if (applications.contains(app_name)) {
-                        match = transformMatch(match, sequences[seq_md5])
-                        matches[seq_md5][match.modelAccession] = match
+                    def key
+                    if (match.source == "InterPro-N") {
+                        // InterPro-N matches report the member database as their library
+                        if (!interpro_n_dbs?.contains(uk.ac.ebi.interpro.InterProN.toLabel(library))) {
+                            return
+                        }
+                        // Use a namespaced key to avoid clashes with traditional applications
+                        key = "InterPro-N::${match.signature.accession}".toString()
+                    } else {
+                        def label
+                        if (library == uk.ac.ebi.interpro.SignalP.LIBRARY) {
+                            // One "SignalP" analysis covers both organism variants; the model
+                            // accession is what tells SignalP-Euk and SignalP-Prok apart
+                            label = uk.ac.ebi.interpro.SignalP.toLabel(match["model-ac"])
+                        } else {
+                            label = uk.ac.ebi.interpro.InterProScan.normalizeName(library)
+                        }
+                        if (!applications.contains(label)) {
+                            return
+                        }
+                        key = match["model-ac"]
                     }
+                    matches[seq_md5][key] = transformMatch(match, sequences[seq_md5])
                 }
             } else {
                 def seq = sequences[seq_md5]
@@ -113,7 +147,8 @@ process GET_MATCHES {
 
 def transformMatch(match, seq) {
     def transformedMatch = [:] + match
-    transformedMatch["modelAccession"] = match["model-ac"]
+    // InterPro-N matches have no model: fall back on the signature accession
+    transformedMatch["modelAccession"] = match["model-ac"] ?: match.signature?.accession
     transformedMatch["treegrafter"] = ["ancestralNodeID": match["ancestralNode"]]
     transformedMatch["locations"] = match["locations"].collect { loc ->
         def transformedLocation = [:] + loc
