@@ -76,8 +76,8 @@ process PARSE_SIGNALP {
     def jsonPath = signalp_out.resolve("output.json")
     def jsonOutput = new groovy.json.JsonSlurper().parse(jsonPath)
 
-    def modelAcc = "SignalP_${mode}_${organism}"
-    def library = new uk.ac.ebi.interpro.SignatureLibraryRelease("SignalP", "6.0i")
+    def modelAcc = uk.ac.ebi.interpro.SignalP.modelAccession(mode, organism)
+    def library = new uk.ac.ebi.interpro.SignatureLibraryRelease(uk.ac.ebi.interpro.SignalP.LIBRARY, "6.0i")
     def signatures = [
         "Sec/SPI"  : new uk.ac.ebi.interpro.Signature("SignalP-Sec-SPI", "Sec/SPI", "Sec signal peptide", "Region", library, null),
         "Sec/SPII" : new uk.ac.ebi.interpro.Signature("SignalP-Sec-SPII", "Sec/SPII", "Lipoprotein signal peptide", "Region", library, null),
