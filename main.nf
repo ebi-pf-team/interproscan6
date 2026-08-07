@@ -21,7 +21,6 @@ params {
     input: Path
     datadir: Path
     outdir: Path
-    seqdbdir: Path
     applications: String
     formats: String
     outprefix: String
@@ -51,7 +50,6 @@ workflow {
         params.formats,
         params.outdir,
         params.outprefix,
-        params.seqdbdir,
         params.interpro,
         params.skipReprLocations,
         params.skipApplications,

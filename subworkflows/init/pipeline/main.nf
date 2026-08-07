@@ -10,7 +10,6 @@ workflow INIT_PIPELINE {
     formats
     outdir
     outprefix
-    seqdbdir
     interpro_version
     skip_intepro
     skip_applications
@@ -97,16 +96,6 @@ workflow INIT_PIPELINE {
         exit 1
     } else {
         outprefix = outdir.resolve(outprefix)
-    }
-
-    if (seqdbdir != null) {
-        seqdbdir = file(seqdbdir)
-        if (seqdbdir.isFile()) {
-            log.error "'--seqdbdir <SEQDBDIR>' cannot be an existing file."
-            exit 1
-        } else if (!seqdbdir.isDirectory()) {
-            seqdbdir.mkdirs()
-        }
     }
 
     emit:

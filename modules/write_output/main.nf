@@ -17,7 +17,7 @@ process WRITE_GFF3 {
     exec:
     def localDbPath = null
     try {
-        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(seq_db_file, params.seqdbdir)
+        localDbPath = uk.ac.ebi.interpro.SeqDB.makeLocalCopy(seq_db_file)
         uk.ac.ebi.interpro.ProcessOutputGFF3.run(
             matches_files,
             localDbPath,
@@ -26,10 +26,10 @@ process WRITE_GFF3 {
             interpro_version,
             output_file)
     } catch (Throwable e) {
-        uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+        uk.ac.ebi.interpro.SeqDB.cleanupLocalCopy(localDbPath)
         throw e
     }
-    uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+    uk.ac.ebi.interpro.SeqDB.cleanupLocalCopy(localDbPath)
 }
 
 process WRITE_JSON {
@@ -52,7 +52,7 @@ process WRITE_JSON {
     exec:
     def localDbPath = null
     try {
-        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(seq_db_file, params.seqdbdir)
+        localDbPath = uk.ac.ebi.interpro.SeqDB.makeLocalCopy(seq_db_file)
         uk.ac.ebi.interpro.ProcessOutputJSON.run(
             matches_files,
             localDbPath,
@@ -62,10 +62,10 @@ process WRITE_JSON {
             jsonlines,
             output_file)
     } catch (Throwable e) {
-        uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+        uk.ac.ebi.interpro.SeqDB.cleanupLocalCopy(localDbPath)
         throw e
     }
-    uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+    uk.ac.ebi.interpro.SeqDB.cleanupLocalCopy(localDbPath)
 }
 
 process WRITE_TSV {
@@ -85,17 +85,17 @@ process WRITE_TSV {
     exec:
     def localDbPath = null
     try {
-        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(seq_db_file, params.seqdbdir)
+        localDbPath = uk.ac.ebi.interpro.SeqDB.makeLocalCopy(seq_db_file)
         uk.ac.ebi.interpro.ProcessOutputTSV.run(
             matches_files,
             localDbPath,
             nucleic,
             output_file)
     } catch (Throwable e) {
-        uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+        uk.ac.ebi.interpro.SeqDB.cleanupLocalCopy(localDbPath)
         throw e
     }
-    uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+    uk.ac.ebi.interpro.SeqDB.cleanupLocalCopy(localDbPath)
 }
 
 process WRITE_XML {
@@ -117,7 +117,7 @@ process WRITE_XML {
     exec:
     def localDbPath = null
     try {
-        localDbPath = uk.ac.ebi.interpro.LocalSeqDB.copyFrom(seq_db_file, params.seqdbdir)
+        localDbPath = uk.ac.ebi.interpro.SeqDB.makeLocalCopy(seq_db_file)
         uk.ac.ebi.interpro.ProcessOutputXML.run(
             matches_files,
             localDbPath,
@@ -126,8 +126,8 @@ process WRITE_XML {
             interpro_version,
             output_file)
     } catch (Throwable e) {
-        uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+        uk.ac.ebi.interpro.SeqDB.cleanupLocalCopy(localDbPath)
         throw e
     }
-    uk.ac.ebi.interpro.LocalSeqDB.cleanup(localDbPath)
+    uk.ac.ebi.interpro.SeqDB.cleanupLocalCopy(localDbPath)
 }   
