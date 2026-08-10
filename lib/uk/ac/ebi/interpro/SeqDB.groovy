@@ -394,7 +394,7 @@ class SeqDB {
         return [nucleicToProteinMd5, ntSeqDataMap, orfDataMap] as Tuple3
     }
 
-    static Path makeLocalCopy(Path source) {
+    static Path createCopy(Path source) {
         Path localPath = newLocalPath(source.fileName.toString())
         Files.copy(source, localPath, StandardCopyOption.REPLACE_EXISTING)
         return localPath
@@ -405,11 +405,11 @@ class SeqDB {
         return localDir.resolve(fileName)
     }
 
-    static void persistLocalCopy(Path localPath, Path target) {
+    static void copy(Path localPath, Path target) {
         Files.copy(localPath, target, StandardCopyOption.REPLACE_EXISTING)
     }
 
-    static void cleanupLocalCopy(Path localPath) {
+    static void cleanupCopy(Path localPath) {
         if (localPath == null) return
         ["", "-wal", "-shm", "-journal"].each { suffix ->
             Files.deleteIfExists(Paths.get(localPath.toString() + suffix))

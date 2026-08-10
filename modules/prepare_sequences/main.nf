@@ -41,13 +41,13 @@ process LOAD_SEQUENCES {
         db.loadFastaFile(fasta, nucleic, false)
         db.close()
         db = null
-        uk.ac.ebi.interpro.SeqDB.persistLocalCopy(localDbPath, outputFilePath)
+        uk.ac.ebi.interpro.SeqDB.copy(localDbPath, outputFilePath)
     } catch (Throwable e) {
         db?.close()
-        uk.ac.ebi.interpro.SeqDB.cleanupLocalCopy(localDbPath)
+        uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
         throw e
     }
-    uk.ac.ebi.interpro.SeqDB.cleanupLocalCopy(localDbPath)
+    uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
 }
 
 process LOAD_ORFS {
@@ -68,18 +68,18 @@ process LOAD_ORFS {
     def localDbPath = null
     def db = null
     try {
-        localDbPath = uk.ac.ebi.interpro.SeqDB.makeLocalCopy(db_path)
+        localDbPath = uk.ac.ebi.interpro.SeqDB.createCopy(db_path)
         db = new uk.ac.ebi.interpro.SeqDB(localDbPath)
         db.loadFastaFile(translated_fasta, false, true)
         db.close()
         db = null
-        uk.ac.ebi.interpro.SeqDB.persistLocalCopy(localDbPath, db_path)
+        uk.ac.ebi.interpro.SeqDB.copy(localDbPath, db_path)
     } catch (Throwable e) {
         db?.close()
-        uk.ac.ebi.interpro.SeqDB.cleanupLocalCopy(localDbPath)
+        uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
         throw e
     }
-    uk.ac.ebi.interpro.SeqDB.cleanupLocalCopy(localDbPath)
+    uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
 }
 
 process SPLIT_FASTA {
@@ -101,15 +101,15 @@ process SPLIT_FASTA {
     def localDbPath = null
     def db = null
     try {
-        localDbPath = uk.ac.ebi.interpro.SeqDB.makeLocalCopy(db_path)
+        localDbPath = uk.ac.ebi.interpro.SeqDB.createCopy(db_path)
         db = new uk.ac.ebi.interpro.SeqDB(localDbPath)
         db.splitFasta(task.workDir, batch_size, nucleic)
         db.close()
         db = null
     } catch (Throwable e) {
         db?.close()
-        uk.ac.ebi.interpro.SeqDB.cleanupLocalCopy(localDbPath)
+        uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
         throw e
     }
-    uk.ac.ebi.interpro.SeqDB.cleanupLocalCopy(localDbPath)
+    uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
 }
