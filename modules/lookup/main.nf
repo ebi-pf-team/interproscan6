@@ -1,7 +1,7 @@
 def is_appl_in_api(appl, api_appls, appl_config) {
     if (uk.ac.ebi.interpro.SignalP.APPLICATIONS.contains(appl)) {
-        // A single "SignalP" analysis covers both organism variants, but the API
-        // only holds pre-calculated results for one mode
+        // A single "SignalP" analysis covers both organism variants,
+        // but the API only holds pre-calculated results for one mode
         return api_appls.contains(
                    uk.ac.ebi.interpro.InterProScan.normalizeName(uk.ac.ebi.interpro.SignalP.LIBRARY)
                ) && appl_config[appl].mode == uk.ac.ebi.interpro.SignalP.API_MODE
