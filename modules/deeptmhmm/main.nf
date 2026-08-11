@@ -1,6 +1,7 @@
 process RUN_DEEPTMHMM_CPU {
     label       'mem_high'
     label       'time_medium'
+    label       'dynamic'
     container   'interpro/deeptmhmm:1.0'
     stageInMode 'copy'
 
@@ -28,6 +29,7 @@ process RUN_DEEPTMHMM_GPU {
     label       'mem_high'
     label       'time_short'
     label       'use_gpu'
+    label       'dynamic'
     container   'interpro/deeptmhmm:1.0'
     stageInMode 'copy'
 
