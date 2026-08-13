@@ -12,60 +12,64 @@ class ProcessOutputTSV {
     static void run(List<Path> inputPaths, Path databasePath, boolean isNucleic, Path outputPath) {
         SeqDB db = new SeqDB(databasePath)
 
-        // Each line contains: seqId md5 seqLength memberDb modelAcc sigDesc start end evalue status date entryAcc entryDesc goterms pathways
-        def currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
-        Set<String> seenNucleicMd5s = new HashSet<>()
+        try {
+            // Each line contains: seqId md5 seqLength memberDb modelAcc sigDesc start end evalue status date entryAcc entryDesc goterms pathways
+            def currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+            Set<String> seenNucleicMd5s = new HashSet<>()
 
-        outputPath.withWriter { writer ->
-            ObjectMapper mapper = new ObjectMapper()
-            inputPaths.each { inputPath ->
-                Map proteins = inputPath.newReader().withCloseable { reader ->
-                    mapper.readValue(reader, Map)
-                }
-                if (isNucleic) {
-                    def (nucleicToProteinMd5, ntSeqDataMap, orfDataMap) = 
-                        db.retrieveAllNucleicSequenceData(proteins.keySet() as List)
+            outputPath.withWriter { writer ->
+                ObjectMapper mapper = new ObjectMapper()
+                inputPaths.each { inputPath ->
+                    Map proteins = inputPath.newReader().withCloseable { reader ->
+                        mapper.readValue(reader, Map)
+                    }
+                    if (isNucleic) {
+                        def (nucleicToProteinMd5, ntSeqDataMap, orfDataMap) =
+                            db.retrieveAllNucleicSequenceData(proteins.keySet() as List)
 
-                    // Write TSV output
-                    nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
-                        if (!seenNucleicMd5s.contains(nucleicMd5)) {
-                            seenNucleicMd5s.add(nucleicMd5)
-                            def ntSeqData = ntSeqDataMap[nucleicMd5]
-                            ntSeqData.each { seq ->
-                                String parentId = seq.id
-                                proteinMd5s.each { String proteinMd5 ->
-                                    def proteinMatches = proteins[proteinMd5]
-                                    if (proteinMatches == null) return
+                        // Write TSV output
+                        nucleicToProteinMd5.each { String nucleicMd5, Set<String> proteinMd5s ->
+                            if (!seenNucleicMd5s.contains(nucleicMd5)) {
+                                seenNucleicMd5s.add(nucleicMd5)
+                                def ntSeqData = ntSeqDataMap[nucleicMd5]
+                                ntSeqData.each { seq ->
+                                    String parentId = seq.id
+                                    proteinMd5s.each { String proteinMd5 ->
+                                        def proteinMatches = proteins[proteinMd5]
+                                        if (proteinMatches == null) return
 
-                                    def proteinSeqData = orfDataMap[nucleicMd5][proteinMd5]
-                                    proteinMatches.each { modelAcc, matchMap ->
-                                        def match = Match.fromMap(matchMap)
-                                        writeMatch(proteinMd5, parentId, proteinSeqData, match, currentDate, writer)
+                                        def proteinSeqData = orfDataMap[nucleicMd5][proteinMd5]
+                                        proteinMatches.each { modelAcc, matchMap ->
+                                            def match = Match.fromMap(matchMap)
+                                            writeMatch(proteinMd5, parentId, proteinSeqData, match, currentDate, writer)
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                } else {
-                    // Batch query all MD5s once
-                    def allMd5s = proteins.keySet() as List
-                    def md5ToSeqData = [:]
+                    } else {
+                        // Batch query all MD5s once
+                        def allMd5s = proteins.keySet() as List
+                        def md5ToSeqData = [:]
 
-                    allMd5s.collate(1000).each { batch ->
-                        def result = db.proteinMd5ToProteinSeqs(batch)
-                        md5ToSeqData.putAll(result)
-                    }
+                        allMd5s.collate(1000).each { batch ->
+                            def result = db.proteinMd5ToProteinSeqs(batch)
+                            md5ToSeqData.putAll(result)
+                        }
 
-                    // Now reuse the lookup map
-                    proteins.each { String proteinMd5, Map proteinMatches ->
-                        def seqData = md5ToSeqData[proteinMd5]
-                        proteinMatches.each { modelAcc, match ->
-                            match = Match.fromMap(match)
-                            writeMatch(proteinMd5, null, seqData, match, currentDate, writer)
+                        // Now reuse the lookup map
+                        proteins.each { String proteinMd5, Map proteinMatches ->
+                            def seqData = md5ToSeqData[proteinMd5]
+                            proteinMatches.each { modelAcc, match ->
+                                match = Match.fromMap(match)
+                                writeMatch(proteinMd5, null, seqData, match, currentDate, writer)
+                            }
                         }
                     }
                 }
             }
+        } finally {
+            db.close()
         }
     }
 

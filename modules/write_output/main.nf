@@ -15,13 +15,21 @@ process WRITE_GFF3 {
     val output_file
 
     exec:
-    uk.ac.ebi.interpro.ProcessOutputGFF3.run(
-        matches_files, 
-        seq_db_file, 
-        nucleic, 
-        interproscan_version,
-        interpro_version,
-        output_file)
+    def localDbPath = null
+    try {
+        localDbPath = uk.ac.ebi.interpro.SeqDB.createCopy(seq_db_file)
+        uk.ac.ebi.interpro.ProcessOutputGFF3.run(
+            matches_files,
+            localDbPath,
+            nucleic,
+            interproscan_version,
+            interpro_version,
+            output_file)
+    } catch (Throwable e) {
+        uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
+        throw e
+    }
+    uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
 }
 
 process WRITE_JSON {
@@ -42,14 +50,22 @@ process WRITE_JSON {
     val output_file
 
     exec:
-    uk.ac.ebi.interpro.ProcessOutputJSON.run(
-        matches_files, 
-        seq_db_file, 
-        nucleic, 
-        interproscan_version,
-        interpro_version,
-        jsonlines,
-        output_file)
+    def localDbPath = null
+    try {
+        localDbPath = uk.ac.ebi.interpro.SeqDB.createCopy(seq_db_file)
+        uk.ac.ebi.interpro.ProcessOutputJSON.run(
+            matches_files,
+            localDbPath,
+            nucleic,
+            interproscan_version,
+            interpro_version,
+            jsonlines,
+            output_file)
+    } catch (Throwable e) {
+        uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
+        throw e
+    }
+    uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
 }
 
 process WRITE_TSV {
@@ -67,11 +83,19 @@ process WRITE_TSV {
     val output_file
 
     exec:
-    uk.ac.ebi.interpro.ProcessOutputTSV.run(
-        matches_files,
-        seq_db_file,
-        nucleic,
-        output_file)
+    def localDbPath = null
+    try {
+        localDbPath = uk.ac.ebi.interpro.SeqDB.createCopy(seq_db_file)
+        uk.ac.ebi.interpro.ProcessOutputTSV.run(
+            matches_files,
+            localDbPath,
+            nucleic,
+            output_file)
+    } catch (Throwable e) {
+        uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
+        throw e
+    }
+    uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
 }
 
 process WRITE_XML {
@@ -91,11 +115,19 @@ process WRITE_XML {
     val output_file
 
     exec:
-    uk.ac.ebi.interpro.ProcessOutputXML.run(
-        matches_files, 
-        seq_db_file, 
-        nucleic, 
-        interproscan_version,
-        interpro_version,
-        output_file)
+    def localDbPath = null
+    try {
+        localDbPath = uk.ac.ebi.interpro.SeqDB.createCopy(seq_db_file)
+        uk.ac.ebi.interpro.ProcessOutputXML.run(
+            matches_files,
+            localDbPath,
+            nucleic,
+            interproscan_version,
+            interpro_version,
+            output_file)
+    } catch (Throwable e) {
+        uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
+        throw e
+    }
+    uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
 }   

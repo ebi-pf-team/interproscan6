@@ -32,10 +32,22 @@ process LOAD_SEQUENCES {
     path "sequences.db"
 
     exec:
+    def localDbPath = null
+    def db = null
     def outputFilePath = task.workDir.resolve("sequences.db")
-    def db = new uk.ac.ebi.interpro.SeqDB(outputFilePath)
-    db.loadFastaFile(fasta, nucleic, false)
-    db.close()
+    try {
+        localDbPath = uk.ac.ebi.interpro.SeqDB.newLocalPath("sequences.db")
+        db = new uk.ac.ebi.interpro.SeqDB(localDbPath)
+        db.loadFastaFile(fasta, nucleic, false)
+        db.close()
+        db = null
+        uk.ac.ebi.interpro.SeqDB.copy(localDbPath, outputFilePath)
+    } catch (Throwable e) {
+        db?.close()
+        uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
+        throw e
+    }
+    uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
 }
 
 process LOAD_ORFS {
@@ -53,9 +65,21 @@ process LOAD_ORFS {
     val db_path // ensure SPLIT_FASTA runs after LOAD_ORFS
 
     exec:
-    def db = new uk.ac.ebi.interpro.SeqDB(db_path)
-    db.loadFastaFile(translated_fasta, false, true)
-    db.close()
+    def localDbPath = null
+    def db = null
+    try {
+        localDbPath = uk.ac.ebi.interpro.SeqDB.createCopy(db_path)
+        db = new uk.ac.ebi.interpro.SeqDB(localDbPath)
+        db.loadFastaFile(translated_fasta, false, true)
+        db.close()
+        db = null
+        uk.ac.ebi.interpro.SeqDB.copy(localDbPath, db_path)
+    } catch (Throwable e) {
+        db?.close()
+        uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
+        throw e
+    }
+    uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
 }
 
 process SPLIT_FASTA {
@@ -74,7 +98,18 @@ process SPLIT_FASTA {
     path "*.fasta"
 
     exec:
-    def db = new uk.ac.ebi.interpro.SeqDB(db_path)
-    db.splitFasta(task.workDir, batch_size, nucleic)
-    db.close()
+    def localDbPath = null
+    def db = null
+    try {
+        localDbPath = uk.ac.ebi.interpro.SeqDB.createCopy(db_path)
+        db = new uk.ac.ebi.interpro.SeqDB(localDbPath)
+        db.splitFasta(task.workDir, batch_size, nucleic)
+        db.close()
+        db = null
+    } catch (Throwable e) {
+        db?.close()
+        uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
+        throw e
+    }
+    uk.ac.ebi.interpro.SeqDB.cleanupCopy(localDbPath)
 }

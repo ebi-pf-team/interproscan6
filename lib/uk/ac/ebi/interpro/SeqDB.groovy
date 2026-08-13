@@ -2,6 +2,9 @@ package uk.ac.ebi.interpro
 
 import groovy.sql.Sql
 import java.nio.file.Path
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
 import java.util.regex.Pattern
 
@@ -389,5 +392,28 @@ class SeqDB {
         }
 
         return [nucleicToProteinMd5, ntSeqDataMap, orfDataMap] as Tuple3
+    }
+
+    static Path createCopy(Path source) {
+        Path localPath = newLocalPath(source.fileName.toString())
+        Files.copy(source, localPath, StandardCopyOption.REPLACE_EXISTING)
+        return localPath
+    }
+
+    static Path newLocalPath(String fileName) {
+        Path localDir = Files.createTempDirectory("ips6-seqdb-")
+        return localDir.resolve(fileName)
+    }
+
+    static void copy(Path localPath, Path target) {
+        Files.copy(localPath, target, StandardCopyOption.REPLACE_EXISTING)
+    }
+
+    static void cleanupCopy(Path localPath) {
+        if (localPath == null) return
+        ["", "-wal", "-shm", "-journal"].each { suffix ->
+            Files.deleteIfExists(Paths.get(localPath.toString() + suffix))
+        }
+        Files.deleteIfExists(localPath.parent)
     }
 }
