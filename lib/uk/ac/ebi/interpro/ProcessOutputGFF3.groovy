@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.ebi.interpro.Location
 import uk.ac.ebi.interpro.Match
 import uk.ac.ebi.interpro.SeqDB
+import uk.ac.ebi.interpro.SignalP
 
 
 class ProcessOutputGFF3 {
@@ -189,7 +190,7 @@ class ProcessOutputGFF3 {
             score = loc.score
         } else if (memberDb == "PRINTS") {
             score = match.evalue
-        } else if (memberDb == "SignalP" || ["HAMAP", "PROSITE profiles"].contains(memberDb)) {
+        } else if (memberDb == SignalP.LIBRARY || ["HAMAP", "PROSITE profiles"].contains(memberDb)) {
             score = loc.score
         } else {
             score = loc.evalue
@@ -206,10 +207,9 @@ class ProcessOutputGFF3 {
 
         def signalpMode = null
         def signalpOrganism = null
-        if (memberDb == "SignalP") {
-            def parts = match.modelAccession.split("_")
-            signalpMode = parts[1]
-            signalpOrganism = parts[2]
+        if (memberDb == SignalP.LIBRARY) {
+            signalpMode = SignalP.mode(match.modelAccession)
+            signalpOrganism = SignalP.organism(match.modelAccession)
         }
 
         String interproAccession = match.signature.entry?.accession

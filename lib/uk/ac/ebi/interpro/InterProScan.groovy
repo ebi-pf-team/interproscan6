@@ -226,6 +226,10 @@ class InterProScan {
         return dirs ? dirs.last().fileName.toString() : null
     }
 
+    static String normalizeName(String name) {
+        return name.toLowerCase().replaceAll(/[-_\s]/, "")
+    }
+
     static List<String>validateApplications(String applications, String skipApplications, Map appsConfig, Boolean runML) {
         // Return: [appsToRun | null, errorMessage | null, warningMessage | null]
         if (applications && runML) {
@@ -238,11 +242,9 @@ class InterProScan {
         // Normalize "catalogue" of applications
         Map<String, String> aliases = [:]
         appsConfig.each { label, cfg ->
-            def std = cfg.name.toLowerCase().replaceAll(/[-_ ]/, "")
-            aliases[std] = label
+            aliases[this.normalizeName(cfg.name)] = label
             (cfg.aliases ?: []).each { alias ->
-                def stdAlias = alias.toLowerCase().replaceAll(/[-_ ]/, "")
-                aliases[stdAlias] = label
+                aliases[this.normalizeName(alias)] = label
             }
         }
 
@@ -274,7 +276,7 @@ class InterProScan {
         // Explicit --applications
         if (applications) {
             Set<String> req = applications.split(",")
-                                          .collect { it.trim().toLowerCase().replaceAll(/[-_ ]/, "") }
+                                          .collect { this.normalizeName(it.trim()) }
                                           .findAll { it }
                                           .toSet()
             Set<String> unrec = []
@@ -305,7 +307,7 @@ class InterProScan {
         // Explicit --skip--applications
         if (skipApplications) {
             Set<String> req = skipApplications.split(",")
-                                              .collect { it.trim().toLowerCase().replaceAll(/[-_ ]/, "") }
+                                              .collect { this.normalizeName(it.trim()) }
                                               .findAll { it }
                                               .toSet()
             Set<String> unrec = []

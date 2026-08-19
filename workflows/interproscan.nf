@@ -69,6 +69,7 @@ workflow INTERPROSCAN {
         LOOKUP(
             fasta,
             applications,
+            appl_config,
             matches_api_url,
             matches_api_chunk_size,
             matches_api_max_retries,

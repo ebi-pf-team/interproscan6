@@ -106,32 +106,8 @@ process PARSE_INTERPRO_N {
     tuple val(meta), path("interpro-n.json")
 
     exec:
-    def supported_databases = [
-        cathgene3d     : "CATH-Gene3D",
-        cdd            : "CDD",
-        hamap          : "HAMAP",
-        ncbifam        : "NCBIFAM",
-        panther        : "PANTHER",
-        pfam           : "Pfam",
-        pirsf          : "PIRSF",
-        prints         : "PRINTS",
-        prositeprofiles: "PROSITE profiles",
-        prositepatterns: "PROSITE patterns",
-        sfld           : "SFLD",
-        smart          : "SMART",
-        ssf            : "SUPERFAMILY",
-    ]
-
-    // User-requested applications
-    def requested = applications.collect { name ->
-        return name == "superfamily" ? "ssf" : name
-    } as Set
-
-    // Compute overlap
-    def overlappingApps = supported_databases.keySet().intersect(requested)
-
-    // If none overlap, fallback to all supported applications
-    def selectedApps = overlappingApps ?: supported_databases.keySet()
+    // Databases to report, given the user-requested applications
+    def selectedApps = uk.ac.ebi.interpro.InterProN.selectDatabases(applications)
 
     // Sequence lengths, used to discard positions past the end of a chunk
     def lengths = uk.ac.ebi.interpro.FastaFile.parse(fasta).collectEntries { id, seq ->
@@ -168,9 +144,9 @@ process PARSE_INTERPRO_N {
             def chunkEnd = Math.min(offset + max_length, seqLength)
             chunk.matches.each { match ->
                 def sigLib = match.signature.signatureLibraryRelease
-                def sigLibName = sigLib.library.toLowerCase().replaceAll(/[-\s]/, "")
-                if (sigLibName in selectedApps) {
-                    sigLib.library = supported_databases[sigLibName]
+                def label = uk.ac.ebi.interpro.InterProN.toLabel(sigLib.library)
+                if (label in selectedApps) {
+                    sigLib.library = uk.ac.ebi.interpro.InterProN.SUPPORTED_DATABASES[label]
                 } else {
                     return
                 }
