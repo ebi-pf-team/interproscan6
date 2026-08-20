@@ -101,7 +101,7 @@ Run InterProScan with the default analyses plus all licensed deep-learning analy
 
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.1 \
+  -r 6.0.2 \
   -profile docker \
   -c licensed.conf \
   --input /path/to/sequences.faa \
@@ -114,7 +114,7 @@ Run only the licensed applications explicitly:
 
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.1 \
+  -r 6.0.2 \
   -profile docker \
   -c licensed.conf \
   --input /path/to/sequences.faa \

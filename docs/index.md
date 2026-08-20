@@ -18,7 +18,7 @@ To get a first successful run:
 
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.1 \ # (1)!
+  -r 6.0.2 \ # (1)!
   -profile docker,test \ # (2)!
   --datadir data \ # (3)!
   --interpro latest # (4)!

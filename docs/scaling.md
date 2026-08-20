@@ -29,7 +29,7 @@ Example commands:
 
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.1 \
+  -r 6.0.2 \
   -profile singularity,slurm \
   --input /path/to/sequences.faa \
   --datadir /shared/interproscan/data
@@ -37,7 +37,7 @@ nextflow run ebi-pf-team/interproscan6 \
 
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.1 \
+  -r 6.0.2 \
   -profile apptainer,lsf \
   --input /path/to/sequences.faa \
   --datadir /shared/interproscan/data
@@ -84,7 +84,7 @@ Example command:
 
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.1 \
+  -r 6.0.2 \
   -profile docker,awsbatch \
   -c aws.config \
   -bucket-dir s3://<bucket>/interproscan/work \
@@ -118,7 +118,7 @@ Example command:
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS="/path/to/creds.json"
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.1 \
+  -r 6.0.2 \
   -profile docker,googlebatch \
   -c gcp.config \
   -bucket-dir gs://<bucket>/interproscan/work \
@@ -167,7 +167,7 @@ Example command:
 
 ```bash
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.1 \
+  -r 6.0.2 \
   -c your_cluster.config \
   -profile singularity,slurm \
   --input /path/to/sequences.faa \
