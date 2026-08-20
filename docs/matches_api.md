@@ -16,9 +16,7 @@ Sequences that are not available through the API are still executed locally.
 
 Use `--no-matches-api` to disable this behaviour and force all sequences to be annotated locally.
 
-!!! warning
-
-    DeepTMHMM, SignalP-Euk, SignalP-Prok, and TMbed annotations are not yet available through the Matches API, so these analyses are executed locally.
+!!! info
 
     There are currently no plans to add DeepTMHMM annotations to the Matches API. TMbed is the selected predictor of transmembrane proteins in the InterPro production pipeline.
 
