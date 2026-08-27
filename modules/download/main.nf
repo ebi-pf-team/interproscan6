@@ -78,7 +78,7 @@ process FIND_DATABASES {
             def appl_dir_parts = appl_dirs[normalised_name]
             def appl_dir = appl_dir_parts[0]
             def appl_subdir = appl_dir_parts[1]
-            def appl_fulldir = datadir.resolve("${appl_dir}/${appl_version}/${appl_subdir}")
+            def appl_fulldir = datadir.resolve("${appl_dir}/${appl_version}/${appl_subdir}".replaceAll(/\/+$/, ''))
             if (appl_fulldir.isDirectory()) {
                 log.info "[FIND_DATABASES] ${normalised_name}: READY -> ${appl_fulldir}"
                 ready.add( [ normalised_name, appl_fulldir ])
