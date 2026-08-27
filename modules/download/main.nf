@@ -70,7 +70,6 @@ process FIND_DATABASES {
     ready   = [] as Set
     missing = [] as Set
     seen    = [] as Set
-
     appls.each { appl_name ->
         if (appl_dirs.containsKey(appl_name)) {
             def normalised_name = appl_name.replaceAll(/[\s\-]+/, '').toLowerCase()

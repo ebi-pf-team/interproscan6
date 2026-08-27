@@ -44,7 +44,6 @@ workflow INIT_DATABASES {
     ch_ready = channel.empty()
     if (data_dir != null) {
         // At least one applications requires data files
-        
         // Handle applications with a common directory (cath -> CATH-Gene3 / CATH-FunFam, prosite -> PROSITE Patterns / PROSITE Profiles)
         appl_dirs = appl_configs
             .findAll { _k, v -> v.has_data == true }
@@ -107,7 +106,6 @@ workflow INIT_DATABASES {
     directories = ch_ready
     interpro_version
 }
-
 
 
 def extractMajorMinorVersion(String version) {
