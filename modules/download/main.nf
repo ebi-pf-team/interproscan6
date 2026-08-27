@@ -21,13 +21,16 @@ process DOWNLOAD {
     } else {
         def base_url = use_globus ? uk.ac.ebi.interpro.InterProScan.GLOBUS_URL : uk.ac.ebi.interpro.InterProScan.FTP_URL
         """
-        curl -OJ ${base_url}/${iprscan_version}/${arcname}/${arcname}-${version}.tar.gz
-        curl -OJ ${base_url}/${iprscan_version}/${arcname}/${arcname}-${version}.tar.gz.md5
+        set -euo pipefail
+        curl -OJ ${base_url}/${iprscan_version}/${arcname}/${arcname}-${version}.tar.gz \
+            || { echo "Error: failed to download ${arcname}-${version}.tar.gz from ${base_url}" >&2; exit 1; }
+        curl -OJ ${base_url}/${iprscan_version}/${arcname}/${arcname}-${version}.tar.gz.md5 \
+            || { echo "Error: failed to download ${arcname}-${version}.tar.gz.md5 from ${base_url}" >&2; exit 1; }
         md5sum -c ${arcname}-${version}.tar.gz.md5 || { echo "Error: MD5 checksum failed" >&2; exit 1; }
         tar -C ${outdir} -zxf ${arcname}-${version}.tar.gz
         rm ${arcname}-${version}.tar.gz*
         chmod 777 -R ${outdir}/${arcname}
-        """        
+        """
     }
     
 }
@@ -68,6 +71,7 @@ process FIND_DATABASES {
     ready   = [] as Set
     missing = [] as Set
     seen    = [] as Set
+
     appls.each { appl_name ->
         if (appl_dirs.containsKey(appl_name)) {
             def normalised_name = appl_name.replaceAll(/[\s\-]+/, '').toLowerCase()
@@ -78,8 +82,10 @@ process FIND_DATABASES {
             def appl_subdir = appl_dir_parts[1]
             def appl_fulldir = datadir.resolve("${appl_dir}/${appl_version}/${appl_subdir}")
             if (appl_fulldir.isDirectory()) {
+                log.info "[FIND_DATABASES] ${normalised_name}: READY -> ${appl_fulldir}"
                 ready.add( [ normalised_name, appl_fulldir ])
             } else {
+                log.info "[FIND_DATABASES] ${normalised_name}: MISSING -> ${appl_fulldir} (will download)"
                 missing.add( [ 
                     normalised_name, 
                     appl_dir, 
@@ -89,6 +95,8 @@ process FIND_DATABASES {
                 ] )
                 seen.add( appl_dir )
             }
+        } else {
+            log.warn "[FIND_DATABASES] Application '${appl_name}' has no entry in appl_dirs, skipping."
         }
     }
 }
