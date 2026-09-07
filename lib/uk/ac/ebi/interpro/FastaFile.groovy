@@ -41,6 +41,7 @@ class FastaFile {
                 if (line.startsWith(">")) {
                     seqId = line.substring(1).trim()
                 } else {
+                    // DO NOT REMOVE. Seqs must be set to uppercase.
                     String seq = line.replaceAll("\\s+", "").toUpperCase()
                     if (seq.isEmpty()) {
                         continue
