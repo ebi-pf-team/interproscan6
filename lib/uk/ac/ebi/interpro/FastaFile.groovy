@@ -41,7 +41,7 @@ class FastaFile {
                 if (line.startsWith(">")) {
                     seqId = line.substring(1).trim()
                 } else {
-                    String seq = line.replaceAll("\\s+", "")
+                    String seq = line.replaceAll("\\s+", "").toUpperCase()
                     if (seq.isEmpty()) {
                         continue
                     } else if (!pattern.matcher(seq).matches()) {
