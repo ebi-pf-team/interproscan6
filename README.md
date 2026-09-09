@@ -35,7 +35,7 @@ If you have Docker and Nextflow installed, you can quickly test InterProScan and
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.2 \
+  -r 6.0.2.2 \
   -profile docker,test \
   --datadir data \
   --interpro latest
@@ -43,7 +43,7 @@ nextflow run ebi-pf-team/interproscan6 \
 
 Explanation of parameters:
 
-* `-r 6.0.2`: Specifies the version of InterProScan to run. We strongly recommend always specifying a version to ensure consistent and reproducible results.
+* `-r 6.0.2.2`: Specifies the version of InterProScan to run. We strongly recommend always specifying a version to ensure consistent and reproducible results.
 * `-profile docker,test`:
   * `docker`: Executes tasks in Docker containers.
   * `test`: Uses a small test FASTA file included in the workflow.
@@ -69,7 +69,7 @@ To annotate your own sequences FASTA file, omit the `test` profile and specify `
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.2 \
+  -r 6.0.2.2 \
   -profile docker \
   --datadir data \
   --input /path/to/sequences.faa
@@ -79,7 +79,7 @@ For nucleotide sequences, add `--nucleic`:
 
 ```sh
 nextflow run ebi-pf-team/interproscan6 \
-  -r 6.0.2 \
+  -r 6.0.2.2 \
   -profile docker \
   --datadir data \
   --input /path/to/sequences.fna \

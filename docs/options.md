@@ -24,13 +24,13 @@ The tables below describe the InterProScan 6 parameters, plus the main Nextflow 
 
 ## Core invocation options
 
-| Option | Description |
-|--------|-------------|
-| `-r`, `-revision <VERSION>` | Tells Nextflow which InterProScan version to run. Recommended for reproducibility. For example, use `-r 6.0.2` to pin a specific InterProScan release. |
-| `-profile <PROFILE>` | Selects the runtime environment, such as `docker`, `slurm`, etc. Common combinations include `docker,test` and `singularity,slurm`. |
-| `--input <FASTA>` | Path to the input FASTA file. Required unless a profile such as `test` supplies it automatically. |
-| `--datadir <DATADIR>` | Directory used for InterPro and member-database data files. |
-| `--interpro <VERSION>` | InterPro release to use. The default is `latest`. A pinned version such as `108.0` is better for reproducibility. |
+| Option | Description                                                                                                                                              |
+|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `-r`, `-revision <VERSION>` | Tells Nextflow which InterProScan version to run. Recommended for reproducibility. For example, use `-r 6.0.2.2` to pin a specific InterProScan release. |
+| `-profile <PROFILE>` | Selects the runtime environment, such as `docker`, `slurm`, etc. Common combinations include `docker,test` and `singularity,slurm`.                      |
+| `--input <FASTA>` | Path to the input FASTA file. Required unless a profile such as `test` supplies it automatically.                                                        |
+| `--datadir <DATADIR>` | Directory used for InterPro and member-database data files.                                                                                              |
+| `--interpro <VERSION>` | InterPro release to use. The default is `latest`. A pinned version such as `108.0` is better for reproducibility.                                        |
 
 !!! tip
 
