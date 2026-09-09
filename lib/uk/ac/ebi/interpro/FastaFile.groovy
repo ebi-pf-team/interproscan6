@@ -97,6 +97,7 @@ class FastaFile {
         boolean ok = true
 
         inSeq.toString().each { ch ->
+            ch = ch.toUpperCase(Locale.ROOT)
             // substitute if needed
             if (substitutions.containsKey(ch)) {
                 ch = substitutions[ch]
