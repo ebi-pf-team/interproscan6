@@ -21,4 +21,30 @@ nextflow_process {
 
     }
 
+    test("Should uppercase sequences, remove spaces and skip invalid Phobius inputs") {
+
+        when {
+            process {
+                """
+                input[0] = channel.of(tuple(1, file("${projectDir}/tests/data/phobius/formatting-and-invalid.fasta", checkIfExists: true)))
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def fasta = file(process.out[0][0][1])
+            assert fasta.readLines() == [
+                ">lowercase",
+                "ACDEFGHIKLMNPQRSTVWY",
+                ">mixed_case",
+                "ACDEFGHIKLMNPQRSTVWY",
+                ">with_spaces",
+                "ACDEFGHIKLMN"
+            ]
+        }
+
+    }
+
 }
