@@ -86,6 +86,6 @@ InterProScan 6 also adds the following analyses:
 
 | Name        | Reference                                                         | Description                                                         |
 |-------------|-------------------------------------------------------------------|---------------------------------------------------------------------|
-| DeepTMHMM   | [Krogh et al., 2001](https://doi.org/10.1101/2022.04.08.487609)   | Prediction of transmembrane helices                                 |
+| DeepTMHMM   | [Hallgren et al., 2022](https://doi.org/10.1101/2022.04.08.487609)   | Prediction of transmembrane helices                                 |
 | SignalP 6   | [Teufel et al., 2022](https://doi.org/10.1038/s41587-021-01156-3)   | Prediction of signal peptides and their cleavage sites in all domains of life |
 | TMbed       | [Bernhofer & Rost, 2022](https://doi.org/10.1186/s12859-022-04873-x) | Prediction of transmembrane proteins through Language Model embeddings |
