@@ -56,7 +56,7 @@ docker run --rm \
   -v $PWD/matches-api-data:/data \
   -e MATCHES_API_PATH=/data \
   -p 8000:8000 \
-  interpro/matches-api:0.5.0
+  interpro/matches-api:0.6.0
 ```
 
 With Singularity:
@@ -65,7 +65,7 @@ With Singularity:
 singularity run \
   -B $PWD/matches-api-data:/data \
   --env "MATCHES_API_PATH=/data" \
-  docker://interpro/matches-api:0.5.0
+  docker://interpro/matches-api:0.6.0
 ```
 
 The server listens on port `8000`.
