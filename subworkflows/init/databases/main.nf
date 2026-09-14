@@ -25,17 +25,15 @@ workflow INIT_DATABASES {
         // }
 
         def versions = uk.ac.ebi.interpro.InterProScan.fetchCompatibleVersions(iprscan_maj_min_version, use_globus)
-        if (versions == null) {
-            if (!use_globus) {
+        if (versions == null && !use_globus) {
                 // Try again, but using Globus
                 versions = uk.ac.ebi.interpro.InterProScan.fetchCompatibleVersions(iprscan_maj_min_version, true)
             }
-
-            if (versions == null) {
-                log.error "InterProScan could not retrieve compatibility information for InterPro data versions. Try disabling the compatibility check with --skip-interpro-version-check."
-                exit 1
-            }
-        } else if (interpro_version == "latest") {
+        if (versions == null) {
+            log.error "InterProScan could not retrieve compatibility information for InterPro data versions. Try disabling the compatibility check with --skip-interpro-version-check."
+            exit 1
+        }
+        if (interpro_version == "latest") {
             interpro_version = versions[-1]
         } else if (!versions.contains(interpro_version)) {
             log.error "InterProScan ${iprscan_version} is not compatible with InterPro ${interpro_version} data. Compatible versions are: ${versions.join(', ')}."  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
@@ -46,7 +44,6 @@ workflow INIT_DATABASES {
     ch_ready = channel.empty()
     if (data_dir != null) {
         // At least one applications requires data files
-        
         // Handle applications with a common directory (cath -> CATH-Gene3 / CATH-FunFam, prosite -> PROSITE Patterns / PROSITE Profiles)
         appl_dirs = appl_configs
             .findAll { _k, v -> v.has_data == true }
@@ -89,16 +86,15 @@ workflow INIT_DATABASES {
                 data_dir
             )
         }
-
         ch_ready = ch_ready.mix(ch_interpro)
         ch_ready = ch_ready.mix(FIND_DATABASES.out.ready.flatMap())
         ch_missing = FIND_DATABASES.out.missing.flatMap()
-    
+
         DOWNLOAD_DATABASE(
-            ch_missing,
-            iprscan_maj_min_version,
-            use_globus,
-            data_dir
+                ch_missing,
+                iprscan_maj_min_version,
+                use_globus,
+                data_dir
         )
 
         ch_ready = ch_ready.mix(DOWNLOAD_DATABASE.out)
