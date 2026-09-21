@@ -23,6 +23,24 @@ nextflow_process {
 
     }
 
+    test("Should validate lowercase, mixed-case and spaced protein sequences") {
+
+        when {
+            process {
+                """
+                input[0] = file("${projectDir}/tests/data/sequences/valid-protein-formatting.faa", checkIfExists: true)
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out[1].get(0) == null
+        }
+
+    }
+
     test("Should validate protein sequences with illegal amino acids") {
 
         when {
@@ -42,6 +60,24 @@ nextflow_process {
 
     }
 
+    test("Should reject dot in protein sequences") {
+
+        when {
+            process {
+                """
+                input[0] = file("${projectDir}/tests/data/sequences/illegal-protein-dot.faa", checkIfExists: true)
+                input[1] = false
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out[1].get(0) == "protein_with_dot"
+        }
+
+    }
+
     test("Should validate nucleic sequences without illegal nucleic acids") {
 
         when {
@@ -56,6 +92,24 @@ nextflow_process {
         then {
             assert process.success
             assert snapshot(process.out).match()
+        }
+
+    }
+
+    test("Should validate lowercase, mixed-case, spaced and dotted nucleic sequences") {
+
+        when {
+            process {
+                """
+                input[0] = file("${projectDir}/tests/data/sequences/valid-nucleic-formatting.fna", checkIfExists: true)
+                input[1] = true
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out[1].get(0) == null
         }
 
     }

@@ -1,0 +1,18 @@
+>lowercase
+acdefghiklmnpqrstvwy
+>mixed_case
+AcDeFgHiKlMnPqRsTvWy
+>with_spaces
+ACD EFG
+HIK	LMN
+>forbidden_b
+ACDBEFG
+>forbidden_j
+ACDJEFG
+>forbidden_o
+ACDOEFG
+>forbidden_z
+ACDZEFG
+>invalid_dot
+ACD.EFG
+

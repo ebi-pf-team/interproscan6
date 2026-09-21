@@ -1,0 +1,10 @@
+>lowercase_nucleic
+acgturymkswhbvdn
+>mixed_case_nucleic
+AcGtUrYmKsWhBvDn
+>spaced_nucleic
+ACG TUR
+YMK	SWH
+>dot_nucleic
+ACGT...URYM
+
