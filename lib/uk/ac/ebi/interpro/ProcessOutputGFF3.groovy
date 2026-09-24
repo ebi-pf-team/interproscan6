@@ -169,6 +169,28 @@ class ProcessOutputGFF3 {
                     match.signature.accession.toUpperCase() == "TRANSMEMBRANE BETA BARREL" ? "transmembrane_polypeptide_region" :
                     match.signature.accession.toUpperCase() == "PERIPLASMIC DOMAIN" ? "non_cytoplasmic_polypeptide_region" : "signal_peptide"
                 break
+            case "DeepTMHMM2":
+                switch (match.signature.accession) {
+                    case "TM_HELIX":
+                        feature_type = "transmembrane_helix"
+                        break
+                    case "TM_BETA":
+                        feature_type = "transmembrane_polypeptide_region"
+                        break
+                    case ["REENTRANT", "INTERFACIAL"]:
+                        feature_type = "intramembrane_polypeptide_region"
+                        break
+                    case ["INSIDE", "OUTSIDE"]:
+                        // Inside is not always cytoplasmic (e.g. mitochondrial matrix)
+                        feature_type = "polypeptide_region"
+                        break
+                    case "TRANSIT_PEPTIDE":
+                        feature_type = "transit_peptide"
+                        break
+                    default:
+                        feature_type = "signal_peptide"
+                }
+                break
             case "Phobius":
                 feature_type = match.signature.description.toUpperCase() == "CYTOPLASMIC DOMAIN" ? "cytoplasmic_polypeptide_region" :
                     match.signature.description.toUpperCase() == "NON CYTOPLASMIC DOMAIN" ? "non_cytoplasmic_polypeptide_region" :

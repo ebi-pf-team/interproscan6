@@ -218,6 +218,7 @@ class ProcessOutputXML {
             case "superfamily":
                 break
             case "deeptmhmm":
+            case "deeptmhmm2":
             case "tmbed":
                 break
             default:
@@ -450,6 +451,9 @@ class ProcessOutputXML {
                     break
                 case "tmhmm":
                 case "deeptmhmm":
+                    locationAttributes = fmMinimalistLocationNode(loc)
+                    break
+                case "deeptmhmm2":
                     locationAttributes = fmMinimalistLocationNode(loc)
                     break
                 case "tmbed":

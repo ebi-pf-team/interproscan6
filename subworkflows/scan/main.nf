@@ -3,6 +3,7 @@ include { CATH              } from "../cath"
 include { CDD               } from "../cdd"
 include { COILS             } from "../coils"
 include { DEEPTMHMM         } from "../deeptmhmm"
+include { DEEPTMHMM2        } from "../deeptmhmm2"
 include { HAMAP             } from "../hamap"
 include { INTERPRO_N        } from "../interpro_n"
 include { MOBIDBLITE        } from "../mobidblite"
@@ -102,6 +103,15 @@ workflow SCAN_SEQUENCES {
             batch_size
         )
         results = results.mix(DEEPTMHMM.out)
+    }
+
+    if (applications.contains("deeptmhmm2")) {
+        DEEPTMHMM2(
+            ch_fasta,
+            appl_config.deeptmhmm2.use_gpu,
+            batch_size
+        )
+        results = results.mix(DEEPTMHMM2.out)
     }
 
     if (applications.contains("hamap")) {
