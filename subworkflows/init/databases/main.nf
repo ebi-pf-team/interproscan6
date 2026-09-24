@@ -28,6 +28,9 @@ workflow INIT_DATABASES {
         if (versions == null && !use_globus) {
             // Try again, but using Globus
             versions = uk.ac.ebi.interpro.InterProScan.fetchCompatibleVersions(iprscan_maj_min_version, true)
+            if (versions != null) {
+                use_globus = true
+            }
         }
 
         if (versions == null) {
