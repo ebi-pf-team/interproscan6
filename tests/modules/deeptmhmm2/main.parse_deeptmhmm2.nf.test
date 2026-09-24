@@ -1,0 +1,46 @@
+nextflow_process {
+
+    name "Test Process PARSE_DEEPTMHMM2"
+    script "modules/deeptmhmm2/main.nf"
+    process "PARSE_DEEPTMHMM2"
+
+    test("Should run without failures") {
+
+        when {
+            process {
+                """
+                input[0] = channel.of(tuple(1, file("${projectDir}/tests/data/deeptmhmm2/predictions.json", checkIfExists: true)))
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+
+            def json = path(process.out.get(0).get(0).get(1)).json
+
+            // Globular proteins without signal/transit peptide are not reported
+            assert !json.containsKey("sp|P38398|BRCA1_HUMAN")
+
+            // Globular proteins only report their signal/transit peptide, not inside/outside
+            assert json."sp|P40225|TPO_HUMAN".keySet() == ["SIGNAL_PEPTIDE"] as Set
+            assert json."sp|O93384|RSAD2_ONCMY".keySet() == ["TRANSIT_PEPTIDE"] as Set
+
+            // Membrane proteins report their full topology
+            def erbb4 = json."sp|Q15303|ERBB4_HUMAN"
+            assert erbb4.keySet() == ["SIGNAL_PEPTIDE", "OUTSIDE", "TM_HELIX", "INSIDE"] as Set
+            assert erbb4.OUTSIDE.locations.collect { [it.start, it.end] } == [[26, 650]]
+            assert erbb4.TM_HELIX.locations.collect { [it.start, it.end] } == [[651, 674]]
+            assert erbb4.INSIDE.locations.collect { [it.start, it.end] } == [[675, 1308]]
+
+            def duox2 = json."sp|Q9ES45|DUOX2_RAT"
+            assert duox2.TM_HELIX.locations.size() == 7
+            assert duox2.INTERFACIAL.locations.collect { [it.start, it.end] } == [[993, 1006]]
+
+            assert json."sp|Q32AN6|GLPG_SHIDS".containsKey("REENTRANT")
+        }
+
+    }
+
+}
