@@ -25,17 +25,20 @@ workflow INIT_DATABASES {
         // }
 
         def versions = uk.ac.ebi.interpro.InterProScan.fetchCompatibleVersions(iprscan_maj_min_version, use_globus)
-        if (versions == null) {
-            if (!use_globus) {
-                // Try again, but using Globus
-                versions = uk.ac.ebi.interpro.InterProScan.fetchCompatibleVersions(iprscan_maj_min_version, true)
+        if (versions == null && !use_globus) {
+            // Try again, but using Globus
+            versions = uk.ac.ebi.interpro.InterProScan.fetchCompatibleVersions(iprscan_maj_min_version, true)
+            if (versions != null) {
+                use_globus = true
             }
+        }
 
-            if (versions == null) {
-                log.error "InterProScan could not retrieve compatibility information for InterPro data versions. Try disabling the compatibility check with --skip-interpro-version-check."
-                exit 1
-            }
-        } else if (interpro_version == "latest") {
+        if (versions == null) {
+            log.error "InterProScan could not retrieve compatibility information for InterPro data versions. Try disabling the compatibility check with --skip-interpro-version-check."
+            exit 1
+        }
+
+        if (interpro_version == "latest") {
             interpro_version = versions[-1]
         } else if (!versions.contains(interpro_version)) {
             log.error "InterProScan ${iprscan_version} is not compatible with InterPro ${interpro_version} data. Compatible versions are: ${versions.join(', ')}."  // codenarc-disable-line JoinMismatchRule, JoinDuplicateRule
