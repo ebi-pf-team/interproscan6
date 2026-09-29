@@ -22,8 +22,6 @@ def main():
     parser_pre.add_argument("annotation_file", type=Path,
                             help="PAINT annotation file "
                                  "(e.g. PAINT_Annotations_TOTAL.txt)")
-    parser_pre.add_argument("output_dir", type=Path,
-                            help="output directory for per-family JSON files")
     parser_pre.set_defaults(func=prepare)
 
     parser_run = subparsers.add_parser("run")
@@ -33,12 +31,7 @@ def main():
     parser_run.set_defaults(func=run)
 
     args = parser.parse_args()
-    try:
-        func = args.func
-    except AttributeError:
-        parser.error("too few arguments")
-    else:
-        func(args)
+    args.func(args)
 
 
 def run(args):
@@ -164,7 +157,7 @@ def parse_jplace(jplacefile: Path, treefile: Path):
         yield query_id, str(common_an) if common_an else "root"
 
 
-def get_alignment_width(fasta_path: Path) -> int:
+def get_alignment_width(fasta_path: Path):
     width = 0
     in_first_sequence = False
     with fasta_path.open("rt") as fh:
@@ -183,11 +176,19 @@ def get_alignment_width(fasta_path: Path) -> int:
 
 
 def prepare(args):
-    """Convert the PAINT annotation file into one JSON file per family."""
-    args.output_dir.mkdir(parents=True, exist_ok=True)
+    """Convert the PAINT annotation file into one JSON file per family.
+    The JSON files are written next to the annotation file (inside
+    PAINT_Annotations). This is only needed once per annotation release,
+    so it is skipped if the JSON files already exist.
+    """
+    assert args.annotation_file.is_file()
+    output_dir = args.annotation_file.resolve().parent
+    if next(output_dir.glob("*.json"), None):
+        return
+
     families = {}
     with args.annotation_file.open("rt") as fh:
-        for i, line in enumerate(fh):
+        for line in fh:
             fam_an_id, annotations, graft_point = line.rstrip().split("\t")
             fam_id, node_id = fam_an_id.split(":")
             fam = families.setdefault(fam_id, {})
@@ -207,7 +208,7 @@ def prepare(args):
                 graft_point
             ]
     for fam_id, obj in families.items():
-        with (args.output_dir / f"{fam_id}.json").open("wt") as fh:
+        with (output_dir / f"{fam_id}.json").open("wt") as fh:
             json.dump(obj, fh)
 
 
