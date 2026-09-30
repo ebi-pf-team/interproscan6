@@ -49,7 +49,6 @@ workflow INIT_DATABASES {
     ch_ready = channel.empty()
     if (data_dir != null) {
         // At least one applications requires data files
-        
         // Handle applications with a common directory (cath -> CATH-Gene3 / CATH-FunFam, prosite -> PROSITE Patterns / PROSITE Profiles)
         appl_dirs = appl_configs
             .findAll { _k, v -> v.has_data == true }
@@ -92,16 +91,15 @@ workflow INIT_DATABASES {
                 data_dir
             )
         }
-
         ch_ready = ch_ready.mix(ch_interpro)
         ch_ready = ch_ready.mix(FIND_DATABASES.out.ready.flatMap())
         ch_missing = FIND_DATABASES.out.missing.flatMap()
-    
+
         DOWNLOAD_DATABASE(
-            ch_missing,
-            iprscan_maj_min_version,
-            use_globus,
-            data_dir
+                ch_missing,
+                iprscan_maj_min_version,
+                use_globus,
+                data_dir
         )
 
         ch_ready = ch_ready.mix(DOWNLOAD_DATABASE.out)
