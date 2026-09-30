@@ -108,7 +108,7 @@ class ProcessOutputTSV {
             case ["hamap", "interpro-n", "prosite profiles"]:
                 scoringValue = loc.score
                 break
-            case ["coils", "mobidb-lite", "phobius", "prosite patterns", "deeptmhmm", "tmbed"]:
+            case ["coils", "mobidb-lite", "phobius", "prosite patterns", "deeptmhmm", "deeptmhmm2", "tmbed"]:
                 scoringValue = "-"
                 break
             case "panther":

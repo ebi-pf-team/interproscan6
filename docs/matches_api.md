@@ -18,7 +18,7 @@ Use `--no-matches-api` to disable this behaviour and force all sequences to be a
 
 !!! info
 
-    There are currently no plans to add DeepTMHMM annotations to the Matches API. TMbed is the selected predictor of transmembrane proteins in the InterPro production pipeline.
+    There are currently no plans to add DeepTMHMM and DeepTMHMM2 annotations to the Matches API. TMbed is the selected predictor of transmembrane proteins in the InterPro production pipeline.
 
 ## Deploying your own Matches API instance
 

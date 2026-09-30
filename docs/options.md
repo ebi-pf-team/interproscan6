@@ -34,7 +34,7 @@ The tables below describe the InterProScan 6 parameters, plus the main Nextflow 
 
 !!! tip
 
-    `--datadir` is only required when at least one selected analysis needs external data files. It is not required if you run only self-contained analyses such as COILS, MobiDB-lite, or TMbed.
+    `--datadir` is only required when at least one selected analysis needs external data files. It is not required if you run only self-contained analyses such as COILS, DeepTMHMM2, MobiDB-lite, or TMbed.
 
 ## Input interpretation
 
@@ -48,7 +48,7 @@ The tables below describe the InterProScan 6 parameters, plus the main Nextflow 
 |--------|-------------|
 | `--applications <LIST>` | Comma-separated list of analyses to run. By default, InterProScan runs all analyses except the deep-learning-based analyses. |
 | `--skip-applications <LIST>` | Comma-separated list of analyses to exclude. The default is to skip none. |
-| `--run-ml` | Enables deep-learning-based analyses such as DeepTMHMM, SignalP, and TMbed. Disabled by default because these analyses are more resource-intensive. |
+| `--run-ml` | Enables deep-learning-based analyses such as DeepTMHMM, DeepTMHMM2, SignalP, and TMbed. Disabled by default because these analyses are more resource-intensive. |
 
 !!! info
 

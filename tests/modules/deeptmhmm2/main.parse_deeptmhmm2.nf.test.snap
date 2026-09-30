@@ -1,0 +1,19 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        1,
+                        "deeptmhmm2.json:md5,b975092617873a83230fddbcb125e68f"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-09-24T22:15:49.851592785",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "26.04.3"
+        }
+    }
+}
