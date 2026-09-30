@@ -1,0 +1,41 @@
+cff-version: 1.2.0
+message: "If you use this software in your work, please cite it using the following metadata."
+title: "InterProScan 6: genome-scale protein function annotation"
+authors:
+  - family-names: Blum
+    given-names: Matthias
+  - family-names: Hobbs
+    given-names: Emma
+  - family-names: Florentino
+    given-names: Laise
+  - family-names: Bateman
+    given-names: Alex
+preferred-citation:
+  authors:
+    - family-names: Blum
+      given-names: Matthias
+    - family-names: Hobbs
+      given-names: Emma
+    - family-names: Florentino
+      given-names: Laise
+    - family-names: Bateman
+      given-names: Alex
+  doi: "10.1093/bioadv/vbag141"
+  identifiers:
+    - type: doi
+      value: 10.1093/bioadv/vbag141
+    - type: url
+      value: https://doi.org/10.1093/bioadv/vbag141
+  title: "InterProScan 6: a modern large-scale protein function annotation pipeline"
+  url: https://doi.org/10.1093/bioadv/vbag141
+  type: article
+  date-published: 2026-05-21
+  issn: 2635-0041
+  journal: "Bioinformatics Advances"
+  publisher:
+    name: "Oxford University Press (OUP)"
+  volume: 6
+  issue: 1
+  year: 2026
+  month: 5
+  
