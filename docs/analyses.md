@@ -31,6 +31,7 @@ This page lists the analyses available in InterProScan 6 and the names accepted 
 | CDD | Detects conserved domains using position-specific scoring matrices from NCBI | Yes | No |
 | COILS | Predicts coiled-coil regions based on sequence patterns | Yes | No |
 | DeepTMHMM | Predicts transmembrane helices | No | Yes |
+| DeepTMHMM2 | Predicts transmembrane topology (helices, beta strands, re-entrant regions, interfacial helices), signal peptides, and transit peptides | No | No |
 | HAMAP | Identifies high-confidence protein families in microbial and organellar proteomes | Yes | No |
 | MobiDB-lite | Predicts intrinsically disordered regions | Yes | No |
 | NCBIFAM | Matches proteins to curated HMMs from NCBI, including TIGRFAMs | Yes | No |
@@ -51,9 +52,10 @@ This page lists the analyses available in InterProScan 6 and the names accepted 
 
 ## Default selection behaviour
 
-- By default, InterProScan runs all analyses except the deep-learning-based analyses (DeepTMHMM, SignalP-Euk, SignalP-Prok, and TMbed).
-- DeepTMHMM, SignalP-Euk, SignalP-Prok, and TMbed are only run when explicitly selected with `--applications`, or when you use `--run-ml`.
+- By default, InterProScan runs all analyses except the deep-learning-based analyses (DeepTMHMM, DeepTMHMM2, SignalP-Euk, SignalP-Prok, and TMbed).
+- DeepTMHMM, DeepTMHMM2, SignalP-Euk, SignalP-Prok, and TMbed are only run when explicitly selected with `--applications`, or when you use `--run-ml`.
 - Phobius is not a deep-learning-based analysis, but it still requires separate installation before it becomes available.
+- DeepTMHMM2 is bundled with InterProScan and is free for academic use. Commercial users should contact [DTU/BioLib](https://dtu.biolib.com/DeepTMHMM2) for licensing.
 
 ## Licensed applications
 
@@ -86,6 +88,7 @@ InterProScan 6 also adds the following analyses:
 
 | Name        | Reference                                                         | Description                                                         |
 |-------------|-------------------------------------------------------------------|---------------------------------------------------------------------|
-| DeepTMHMM   | [Krogh et al., 2001](https://doi.org/10.1101/2022.04.08.487609)   | Prediction of transmembrane helices                                 |
+| DeepTMHMM   | [Hallgren et al., 2022](https://doi.org/10.1101/2022.04.08.487609)   | Prediction of transmembrane helices                                 |
+| DeepTMHMM2  | [Teufel et al., 2026](https://doi.org/10.64898/2026.08.24.746435)    | Prediction of transmembrane protein topology and membrane type                |
 | SignalP 6   | [Teufel et al., 2022](https://doi.org/10.1038/s41587-021-01156-3)   | Prediction of signal peptides and their cleavage sites in all domains of life |
 | TMbed       | [Bernhofer & Rost, 2022](https://doi.org/10.1186/s12859-022-04873-x) | Prediction of transmembrane proteins through Language Model embeddings |

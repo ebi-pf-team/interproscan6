@@ -19,8 +19,8 @@ params {
     matchesApiMaxRetries: Integer
     maxWorkers: Integer
     input: Path
-    datadir: Path
-    outdir: Path
+    datadir: String
+    outdir: String
     applications: String
     formats: String
     outprefix: String

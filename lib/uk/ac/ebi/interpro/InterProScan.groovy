@@ -84,7 +84,7 @@ class InterProScan {
         ],
         [
             name: "run-ml",
-            description: "Enable machine learning (ML) based analyses (e.g. DeepTMHMM, SignalP, TMbed). Disabled by default due to high resource usage."
+            description: "Enable machine learning (ML) based analyses (e.g. DeepTMHMM, DeepTMHMM2, SignalP, TMbed). Disabled by default due to high resource usage."
         ],
         [
             name: "skip-applications",

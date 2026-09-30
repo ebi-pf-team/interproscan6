@@ -274,6 +274,9 @@ class ProcessOutputJSON {
             case "deeptmhmm":
                 writeMinimalist(match, jsonWriter)
                 break
+            case "deeptmhmm2":
+                writeMinimalist(match, jsonWriter)
+                break
             case "tmbed":
                 writeMinimalist(match, jsonWriter)
                 break
