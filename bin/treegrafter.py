@@ -13,28 +13,11 @@ from Bio.Phylo import NewickIO
 
 def main():
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers()
-
-    parser_pre = subparsers.add_parser(
-        "prepare",
-        help="convert the PAINT annotation file into per-family JSON files"
-    )
-    parser_pre.add_argument("annotation_file", type=Path,
-                            help="PAINT annotation file "
-                                 "(e.g. PAINT_Annotations_TOTAL.txt)")
-    parser_pre.set_defaults(func=prepare)
-
-    parser_run = subparsers.add_parser("run")
-    parser_run.add_argument("-t", "--threads", type=int, default=1)
-    parser_run.add_argument("jsonfile", type=Path)
-    parser_run.add_argument("msfdir", type=Path)
-    parser_run.set_defaults(func=run)
-
+    parser.add_argument("-t", "--threads", type=int, default=1)
+    parser.add_argument("jsonfile", type=Path)
+    parser.add_argument("msfdir", type=Path)
     args = parser.parse_args()
-    args.func(args)
 
-
-def run(args):
     assert args.jsonfile.is_file()
     assert args.msfdir.is_dir()
 
@@ -61,7 +44,7 @@ def run(args):
 
         length = get_alignment_width(fasta_path)
 
-        # Init sequence, and pad N-terminal
+        # Init sequence, and pad N-terminal 
         sequence = "-" * (location["hmmStart"] - 1)
 
         # Build sequence
@@ -92,7 +75,7 @@ def run(args):
         )
 
         fasta_path.unlink()
-
+        
         if jplace:
             tree = args.msfdir / f"{family_id}.newick"
             for query_id, node_id in parse_jplace(jplace, tree):
@@ -135,7 +118,7 @@ def parse_jplace(jplacefile: Path, treefile: Path):
     newick_string = re.sub(r"AN\d+", r"", newick_string)
     newick_string = re.sub(r"BI\d+", r"", newick_string)
     mytree = Phylo.read(NewickIO.StringIO(newick_string), "newick")
-
+    
     for placement in results["placements"]:
         query_id = placement["n"][0]
         child_ids = []
@@ -157,59 +140,28 @@ def parse_jplace(jplacefile: Path, treefile: Path):
         yield query_id, str(common_an) if common_an else "root"
 
 
-def get_alignment_width(fasta_path: Path):
+def get_alignment_width(fasta_path: Path) -> int:
     width = 0
     in_first_sequence = False
+
     with fasta_path.open("rt") as fh:
         for line in map(str.rstrip, fh):
             if not line:
                 continue
+
             if line.startswith(">"):
                 if in_first_sequence:
                     break
                 in_first_sequence = True
                 continue
+
             if in_first_sequence:
                 width += len(line)
 
+    if width == 0:
+        raise ValueError(f"No sequence found in {fasta_path}")
+
     return width
-
-
-def prepare(args):
-    """Convert the PAINT annotation file into one JSON file per family.
-    The JSON files are written next to the annotation file (inside
-    PAINT_Annotations). This is only needed once per annotation release,
-    so it is skipped if the JSON files already exist.
-    """
-    assert args.annotation_file.is_file()
-    output_dir = args.annotation_file.resolve().parent
-    if next(output_dir.glob("*.json"), None):
-        return
-
-    families = {}
-    with args.annotation_file.open("rt") as fh:
-        for line in fh:
-            fam_an_id, annotations, graft_point = line.rstrip().split("\t")
-            fam_id, node_id = fam_an_id.split(":")
-            fam = families.setdefault(fam_id, {})
-            go_terms = []
-            protein_class = subfam_id = None
-            for annotation in re.split(r"\s+|;", annotations):
-                if re.fullmatch(r"PTHR\d+:(SF\d+)", annotation):
-                    subfam_id = annotation
-                elif re.fullmatch(r"GO:\d{7}", annotation):
-                    go_terms.append(annotation)
-                elif re.fullmatch(r"PC\d{5}", annotation):
-                    protein_class = annotation
-            fam[node_id] = [
-                subfam_id,
-                ",".join(go_terms) if go_terms else None,
-                protein_class,
-                graft_point
-            ]
-    for fam_id, obj in families.items():
-        with (output_dir / f"{fam_id}.json").open("wt") as fh:
-            json.dump(obj, fh)
 
 
 if __name__ == "__main__":
