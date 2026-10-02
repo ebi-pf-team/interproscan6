@@ -61,7 +61,8 @@ process PREPARE_TREEGRAFTER {
             }
             .findAll { m -> m != null }
 
-        def bestMatch = filteredMatches.max { m -> m.score }
+        // Select the highest score, if the same, choose the lowest evalue
+        def bestMatch = filteredMatches.min { a, b -> b.score <=> a.score ?: a.evalue <=> b.evalue}
         return bestMatch ? [(seqId): [(bestMatch.modelAccession): bestMatch]] : [:]
     }
 
