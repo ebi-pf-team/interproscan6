@@ -53,8 +53,8 @@ process PREPARE_TREEGRAFTER {
                 m1.signature.accession = familyId
                 def m2 = new uk.ac.ebi.interpro.Match(familyId, m1.evalue, m1.score, m1.bias, m1.signature)
                 m2.included = m1.included
-                // Only keep the domain with the highest score
-                m2.locations = [locations.max { loc -> loc.score }]
+                // Only keep the domain with the highest score (if the same, choose the lowest evalue)
+                m2.locations = [locations.min { a, b -> b.score <=> a.score ?: a.evalue <=> b.evalue}]
                 // Init empty TreeGrafter attribute
                 m2.treegrafter = new uk.ac.ebi.interpro.TreeGrafter(null)
                 return m2
