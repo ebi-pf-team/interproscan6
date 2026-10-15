@@ -89,7 +89,7 @@ workflow INIT_PIPELINE {
         outdir.mkdirs()
     }
 
-    if (outprefix == null) {
+    if (!outprefix) {
         outprefix = outdir.resolve(fasta.name)
     } else if (outprefix.contains("/") || outprefix.contains(File.separator)) {
         log.error "--outprefix must not contain slashes or directory names. Use --outdir to control output location."
