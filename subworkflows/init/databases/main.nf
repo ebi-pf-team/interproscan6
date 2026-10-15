@@ -8,7 +8,7 @@ workflow INIT_DATABASES {
     take:
     applications            // list[str] of applications
     appl_configs            // map of application config
-    data_dir                // path
+    data_dir                // path or empty string
     interpro_version        // str, version of InterPro to run
     iprscan_version         // str, version of InterProScan
     _use_matches_api        // bool, whether to use the Matches API
@@ -47,7 +47,7 @@ workflow INIT_DATABASES {
     }
 
     ch_ready = channel.empty()
-    if (data_dir != null) {
+    if (data_dir) {
         // At least one applications requires data files
         // Handle applications with a common directory (cath -> CATH-Gene3 / CATH-FunFam, prosite -> PROSITE Patterns / PROSITE Profiles)
         appl_dirs = appl_configs

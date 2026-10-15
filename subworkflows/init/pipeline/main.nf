@@ -54,7 +54,7 @@ workflow INIT_PIPELINE {
 
     apps_with_data = uk.ac.ebi.interpro.InterProScan.getAppsWithData(apps, apps_config)
     if (apps_with_data.size() > 0) {
-        if (datadir == null) {
+        if (!datadir) {
             log.error "'--datadir <DATA-DIR>' is required for the selected applications."
             exit 1
         }
@@ -67,7 +67,7 @@ workflow INIT_PIPELINE {
             datadir.mkdirs()
         }            
     } else {
-        datadir = null
+        datadir = ""
     }
   
     version = uk.ac.ebi.interpro.InterProScan.validateInterProVersion(interpro_version)
@@ -89,7 +89,7 @@ workflow INIT_PIPELINE {
         outdir.mkdirs()
     }
 
-    if (outprefix == null) {
+    if (!outprefix) {
         outprefix = outdir.resolve(fasta.name)
     } else if (outprefix.contains("/") || outprefix.contains(File.separator)) {
         log.error "--outprefix must not contain slashes or directory names. Use --outdir to control output location."
@@ -102,7 +102,7 @@ workflow INIT_PIPELINE {
     fasta            // path: path to input fasta file
     apps             // list: selected applications
     apps_config      // map: updated applications configuration
-    datadir          // path: path to data directory, or null if not needed
+    datadir          // path: path to data directory, or empty string if not needed
     outprefix        // path: base path for output files
     formats          // set<String>: output file formats
     version          // str: InterPro version (or "latest")
