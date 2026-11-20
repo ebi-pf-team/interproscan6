@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
 LABEL name="interpro/deeptmhmm2"
-LABEL tag="0.1.0-ffccb76"
+LABEL tag="0.1.0-526f6c6"
 
 WORKDIR /opt/deeptmhmm2
 
@@ -14,9 +14,9 @@ RUN apt-get -y update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* \
  && pip install --no-cache-dir torch==2.10.0 --index-url https://download.pytorch.org/whl/cu128 \
- && git clone --single-branch --branch add-threads-option https://github.com/matthiasblum/DeepTMHMM2.git \
+ && git clone https://github.com/fteufel/DeepTMHMM2.git \
  && cd DeepTMHMM2 \
- && git checkout ffccb760dbfd25af978cf3ee0b4955b9f590d9b6 \
+ && git checkout 526f6c60f93c0868c7315413da8e669d12373cc3 \
  && pip install --no-cache-dir . \
  && cd .. \
  && mv DeepTMHMM2/checkpoints/* . \
