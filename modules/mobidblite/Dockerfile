@@ -21,7 +21,7 @@ WORKDIR /opt
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
     uv python install 3.12 && \
     uv venv --python 3.12 /opt/venv && \
-    curl -L -o idrpred.zip https://github.com/matthiasblum/idrpred/archive/refs/tags/1.0.3.zip && \
+    curl -L -o idrpred.zip https://github.com/ProteinsWebTeam/idrpred/archive/refs/tags/1.0.3.zip && \
     unzip idrpred.zip && \
     uv pip install /opt/idrpred-1.0.3 && \
     rm -rf /opt/idrpred-1.0.3 /opt/idrpred.zip
