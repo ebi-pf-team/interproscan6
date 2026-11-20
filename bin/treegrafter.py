@@ -42,11 +42,7 @@ def main():
         fasta_path = args.msfdir / f"{family_id}.AN.fasta"
         assert fasta_path.is_file()
 
-        length = 0
-        with fasta_path.open("rt") as fh:
-            for line in map(str.rstrip, fh):
-                if line[0] != ">":
-                    length += len(line)
+        length = get_alignment_width(fasta_path)
 
         # Init sequence, and pad N-terminal 
         sequence = "-" * (location["hmmStart"] - 1)
@@ -142,6 +138,30 @@ def parse_jplace(jplacefile: Path, treefile: Path):
         newtree = Phylo.read(treefile, "newick")
         common_an = newtree.common_ancestor(child_ids)
         yield query_id, str(common_an) if common_an else "root"
+
+
+def get_alignment_width(fasta_path: Path) -> int:
+    width = 0
+    in_first_sequence = False
+
+    with fasta_path.open("rt") as fh:
+        for line in map(str.rstrip, fh):
+            if not line:
+                continue
+
+            if line.startswith(">"):
+                if in_first_sequence:
+                    break
+                in_first_sequence = True
+                continue
+
+            if in_first_sequence:
+                width += len(line)
+
+    if width == 0:
+        raise ValueError(f"No sequence found in {fasta_path}")
+
+    return width
 
 
 if __name__ == "__main__":
