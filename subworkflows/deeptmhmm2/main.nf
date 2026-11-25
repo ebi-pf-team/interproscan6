@@ -14,13 +14,13 @@ workflow DEEPTMHMM2 {
             .splitFasta( by: batch_size * 2, file: true )
 
         RUN_DEEPTMHMM2_GPU(ch_split)
-        ch_deeptmhmm2 = RUN_DEEPTMHMM2_GPU.out
+        ch_deeptmhmm2 = RUN_DEEPTMHMM2_GPU.out.results
     } else {
         ch_split = ch_seqs
             .splitFasta( by: batch_size.intdiv(5), file: true )
 
         RUN_DEEPTMHMM2_CPU(ch_split)
-        ch_deeptmhmm2 = RUN_DEEPTMHMM2_CPU.out
+        ch_deeptmhmm2 = RUN_DEEPTMHMM2_CPU.out.results
     }
 
     PARSE_DEEPTMHMM2(ch_deeptmhmm2)

@@ -46,7 +46,8 @@ process RUN_INTERPRO_N_CPU {
     val batch_size
 
     output:
-    tuple val(meta), path("*json", arity: '1..*')
+    tuple val(meta), path("*json", arity: '1..*'), emit: results
+    tuple val(task.process), val('interpro-n'), val('1.0'), topic: versions
 
     script:
     """
@@ -74,7 +75,8 @@ process RUN_INTERPRO_N_GPU {
     val batch_size
 
     output:
-    tuple val(meta), path("*json", arity: '1..*')
+    tuple val(meta), path("*json", arity: '1..*'), emit: results
+    tuple val(task.process), val('interpro-n'), val('1.0'), topic: versions
 
     script:
     """

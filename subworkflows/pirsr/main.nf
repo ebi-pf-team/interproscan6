@@ -17,7 +17,7 @@ workflow PIRSR {
     )
 
     PARSE_PIRSR(
-        SEARCH_PIRSR.out,
+        SEARCH_PIRSR.out.results,
         ch_json
     )
 

@@ -16,7 +16,7 @@ workflow PFAM {
 
     ch_dat = pfam.map { _hmm, dat -> dat }
     PARSE_PFAM(
-        SEARCH_PFAM.out,
+        SEARCH_PFAM.out.results,
         ch_dat
     )
 

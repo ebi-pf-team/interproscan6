@@ -17,7 +17,7 @@ workflow MOBIDBLITE {
 
     RUN_MOBIDBLITE(ch_split)
 
-    PARSE_MOBIDBLITE(RUN_MOBIDBLITE.out)
+    PARSE_MOBIDBLITE(RUN_MOBIDBLITE.out.results)
 
     emit:
     PARSE_MOBIDBLITE.out

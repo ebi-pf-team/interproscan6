@@ -8,7 +8,8 @@ process RUN_DEEPTMHMM2_CPU {
     tuple val(meta), path(fasta)
 
     output:
-    tuple val(meta), path("deeptmhmm2.json")
+    tuple val(meta), path("deeptmhmm2.json"), emit: results
+    tuple val(task.process), val('deeptmhmm2'), val('0.1.0-ffccb76'), topic: versions
 
     script:
     """
@@ -35,7 +36,8 @@ process RUN_DEEPTMHMM2_GPU {
     tuple val(meta), path(fasta)
 
     output:
-    tuple val(meta), path("deeptmhmm2.json")
+    tuple val(meta), path("deeptmhmm2.json"), emit: results
+    tuple val(task.process), val('deeptmhmm2'), val('0.1.0-ffccb76'), topic: versions
 
     script:
     """

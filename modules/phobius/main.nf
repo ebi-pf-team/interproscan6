@@ -29,7 +29,8 @@ process SEARCH_PHOBIUS {
     path phobius_dir
 
     output:
-    tuple val(meta), path("phobius.out")
+    tuple val(meta), path("phobius.out"), emit: results
+    tuple val(task.process), val('phobius'), val('1.01'), topic: versions
 
     script:
     """

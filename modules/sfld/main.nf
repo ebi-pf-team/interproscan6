@@ -9,7 +9,9 @@ process SEARCH_SFLD {
     tuple path(hmm), path(sites)
 
     output:
-    tuple val(meta), path("hmmsearch.out"), path("sfld.tsv")
+    tuple val(meta), path("hmmsearch.out"), path("sfld.tsv"), emit: results
+    tuple val(task.process), val('hmmer'), eval("software-version '^# HMMER ([^ ]+).*' hmmsearch -h"), topic: versions
+    tuple val(task.process), val('sfld_postprocess'), eval("software-version '.*[Vv]ersion[: ]+([0-9][^ ]*).*' sfld_postprocess --version"), topic: versions
 
     script:
     """

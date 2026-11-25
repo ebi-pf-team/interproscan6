@@ -11,7 +11,8 @@ process ADD_XREFS {
     val add_pathways
 
     output:
-    tuple val(meta), path('outputs/*.json', arity: '1..*')
+    tuple val(meta), path('outputs/*.json', arity: '1..*'), emit: results
+    tuple val(task.process), val('groovy'), eval("software-version '^Groovy Version: ([^ ]+).*' groovy --version"), topic: versions
 
     script:
     """

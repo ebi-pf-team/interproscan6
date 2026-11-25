@@ -25,10 +25,10 @@ workflow TMBED {
 
     if (use_gpu) {
         RUN_TMBED_GPU(ch_split, tmbed_batch_size)
-        ch_tmbed = RUN_TMBED_GPU.out
+        ch_tmbed = RUN_TMBED_GPU.out.results
     } else {
         RUN_TMBED_CPU(ch_split, tmbed_batch_size)
-        ch_tmbed = RUN_TMBED_CPU.out
+        ch_tmbed = RUN_TMBED_CPU.out.results
     }
 
     PARSE_TMBED(

@@ -21,7 +21,7 @@ workflow SUPERFAMILY {
     ch_parse = ssf.map { dir, hmm, _selfhits, _cla, model, _pdbj95d -> tuple (dir, hmm, model) }
 
     PARSE_SUPERFAMILY(
-        SEARCH_SUPERFAMILY.out,
+        SEARCH_SUPERFAMILY.out.results,
         ch_parse
     )
 

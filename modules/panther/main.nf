@@ -9,7 +9,8 @@ process SEARCH_PANTHER {
     path hmm
 
     output:
-    tuple val(meta), val(meta2), path("hmmsearch.out")
+    tuple val(meta), val(meta2), path("hmmsearch.out"), emit: results
+    tuple val(task.process), val('hmmer'), eval("software-version '^# HMMER ([^ ]+).*' hmmsearch -h"), topic: versions
 
     script:
     """
@@ -81,7 +82,8 @@ process RUN_TREEGRAFTER {
     path msf
 
     output:
-    tuple val(meta), val(meta2), path("epang.tsv")
+    tuple val(meta), val(meta2), path("epang.tsv"), emit: results
+    tuple val(task.process), val('epa-ng'), eval("software-version '.*EPA-ng[^0-9]*v?([0-9][^ ]*).*' epa-ng --version"), topic: versions
 
     script:
     """

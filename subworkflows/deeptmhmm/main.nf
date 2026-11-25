@@ -15,7 +15,7 @@ workflow DEEPTMHMM {
             ch_split,
             deeptmhmm_dir
         )
-        ch_deeptmhmm = RUN_DEEPTMHMM_GPU.out
+        ch_deeptmhmm = RUN_DEEPTMHMM_GPU.out.results
     } else {
         ch_split = ch_seqs
             .splitFasta( by: batch_size.intdiv(5), file: true )
@@ -24,7 +24,7 @@ workflow DEEPTMHMM {
             ch_split,
             deeptmhmm_dir
         )
-        ch_deeptmhmm = RUN_DEEPTMHMM_CPU.out
+        ch_deeptmhmm = RUN_DEEPTMHMM_CPU.out.results
     }
     
     PARSE_DEEPTMHMM(ch_deeptmhmm)

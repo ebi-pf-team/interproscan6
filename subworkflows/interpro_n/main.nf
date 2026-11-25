@@ -32,14 +32,14 @@ workflow INTERPRO_N {
             res_batch_size
         )
 
-        ch_json = RUN_INTERPRO_N_GPU.out
+        ch_json = RUN_INTERPRO_N_GPU.out.results
     } else {
         RUN_INTERPRO_N_CPU(
             ch_tsv,
             checkpoint_dir,
             res_batch_size
         )
-        ch_json = RUN_INTERPRO_N_CPU.out
+        ch_json = RUN_INTERPRO_N_CPU.out.results
     }
 
     // Pair each batch of results with its input sequences, whose lengths are

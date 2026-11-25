@@ -7,7 +7,8 @@ process REPRESENTATIVE_LOCATIONS {
     tuple val(meta), path(json, arity: '1..*', name: 'inputs/*')
 
     output:
-    tuple val(meta), path('outputs/*json', arity: '1..*')
+    tuple val(meta), path('outputs/*json', arity: '1..*'), emit: results
+    tuple val(task.process), val('groovy'), eval("software-version '^Groovy Version: ([^ ]+).*' groovy --version"), topic: versions
 
     script:
     """

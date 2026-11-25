@@ -10,7 +10,8 @@ process SEARCH_PIRSF {
     path hmm
 
     output:
-    tuple val(meta), path(fasta), path("hmmsearch.out")
+    tuple val(meta), path(fasta), path("hmmsearch.out"), emit: results
+    tuple val(task.process), val('hmmer'), eval("software-version '^# HMMER ([^ ]+).*' hmmsearch -h"), topic: versions
 
     script:
     """

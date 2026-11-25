@@ -9,7 +9,8 @@ process SEARCH_SUPERFAMILY {
     tuple path(dir), val(hmm), val(selfhits), val(cla), val(model_tab), val(pdbj95d)
 
     output:
-    tuple val(meta), val(meta2), path("superfamily.out")
+    tuple val(meta), val(meta2), path("superfamily.out"), emit: results
+    tuple val(task.process), val('hmmer'), eval("software-version '^# HMMER ([^ ]+).*' hmmscan -h"), topic: versions
 
     script:
     """

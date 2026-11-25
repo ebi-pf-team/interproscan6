@@ -15,7 +15,7 @@ workflow PROSITE_PROFILES {
     )
 
     PARSE_PFSEARCH(
-        RUN_PFSEARCH.out,
+        RUN_PFSEARCH.out.results,
         "PROSITE profiles",
         ch_skipped
     )

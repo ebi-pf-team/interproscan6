@@ -14,7 +14,7 @@ workflow ANTIFAM {
     )
 
     PARSE_ANTIFAM(
-        SEARCH_ANTIFAM.out
+        SEARCH_ANTIFAM.out.results
     )
 
     emit:

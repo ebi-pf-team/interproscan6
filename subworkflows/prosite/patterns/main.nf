@@ -7,7 +7,7 @@ workflow PROSITE_PATTERNS {
 
     main:
     RUN_PSSCAN(fasta, files)
-    PARSE_PSSCAN(RUN_PSSCAN.out)
+    PARSE_PSSCAN(RUN_PSSCAN.out.results)
 
     emit:
     PARSE_PSSCAN.out  // [ meta, json ]

@@ -8,7 +8,8 @@ process RUN_MOBIDBLITE {
     tuple val(meta), val(meta2), path(fasta)
 
     output:
-    tuple val(meta), val(meta2), path("output.tsv")
+    tuple val(meta), val(meta2), path("output.tsv"), emit: results
+    tuple val(task.process), val('idrpred'), eval("software-version '.*([0-9]+[.][0-9]+[.][0-9]+).*' idrpred --version"), topic: versions
 
     script:
     """

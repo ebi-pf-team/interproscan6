@@ -15,7 +15,7 @@ workflow PIRSF {
     )
 
     PARSE_PIRSF(
-        SEARCH_PIRSF.out,
+        SEARCH_PIRSF.out.results,
         ch_dat
     )
 

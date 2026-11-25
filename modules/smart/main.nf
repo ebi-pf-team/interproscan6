@@ -9,7 +9,8 @@ process PREFILTER_SMART {
     path hmmfile
 
     output:
-    tuple val(meta), path("hmmsearch.out"), path(fasta)
+    tuple val(meta), path("hmmsearch.out"), path(fasta), emit: results
+    tuple val(task.process), val('hmmer'), eval("software-version '^# HMMER ([^ ]+).*' hmmsearch -h"), topic: versions
 
     script:
     """
@@ -77,7 +78,8 @@ process SEARCH_SMART {
     path hmmdir
 
     output:
-    tuple val(meta), path(seqs_zip), path("smart.zip")
+    tuple val(meta), path(seqs_zip), path("smart.zip"), emit: results
+    tuple val(task.process), val('hmmer'), eval("software-version '^HMMER ([^ ]+).*' hmmpfam -h"), topic: versions
 
     script:
     """

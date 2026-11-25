@@ -9,7 +9,9 @@ process SEARCH_GENE3D {
     tuple path(hmmfile), path(dom2fam), path(disc_pickle)
 
     output:
-    tuple val(meta), val(meta2), path("hmmsearch.out"), path("cath.tsv")
+    tuple val(meta), val(meta2), path("hmmsearch.out"), path("cath.tsv"), emit: results
+    tuple val(task.process), val('hmmer'), eval("software-version '^# HMMER ([^ ]+).*' hmmsearch -h"), topic: versions
+    tuple val(task.process), val('cath-resolve-hits'), eval("software-version '.*v([0-9][^ ]*).*' cath-resolve-hits --version"), topic: versions
 
     script:
     """
@@ -63,7 +65,9 @@ process SEARCH_FUNFAM {
     path root_dir
 
     output:
-    tuple val(meta), val(meta2), path("hmmsearch.out"), path("resolved.out")
+    tuple val(meta), val(meta2), path("hmmsearch.out"), path("resolved.out"), emit: results
+    tuple val(task.process), val('hmmer'), eval("software-version '^# HMMER ([^ ]+).*' hmmsearch -h"), topic: versions
+    tuple val(task.process), val('cath-resolve-hits'), eval("software-version '.*v([0-9][^ ]*).*' cath-resolve-hits --version"), topic: versions
 
     script:
     """
