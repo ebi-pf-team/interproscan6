@@ -9,5 +9,3 @@ tests/integration_tests/test_outputs/current_output.tsv-pro
 tests/integration_tests/temp_expected.json
 tests/integration_tests/temp_current.json
 work/
-
-/modules/deeptmhmm/deeptmhmm_26.04.tar.gz

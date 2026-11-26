@@ -9,7 +9,7 @@ process RUN_MOBIDBLITE {
 
     output:
     tuple val(meta), val(meta2), path("output.tsv"), emit: results
-    tuple val(task.process), val('idrpred'), eval("software-version '.*([0-9]+[.][0-9]+[.][0-9]+).*' idrpred --version"), topic: versions
+    tuple val(task.process), val('idrpred'), eval("software-version '^([0-9][^ ]*).*' python -c \"from importlib.metadata import version; print(version('idrpred'))\""), topic: versions
 
     script:
     """

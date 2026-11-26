@@ -11,7 +11,6 @@ process SEARCH_SFLD {
     output:
     tuple val(meta), path("hmmsearch.out"), path("sfld.tsv"), emit: results
     tuple val(task.process), val('hmmer'), eval("software-version '^# HMMER ([^ ]+).*' hmmsearch -h"), topic: versions
-    tuple val(task.process), val('sfld_postprocess'), eval("software-version '.*[Vv]ersion[: ]+([0-9][^ ]*).*' sfld_postprocess --version"), topic: versions
 
     script:
     """

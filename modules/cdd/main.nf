@@ -10,7 +10,7 @@ process SEARCH_CDD {
     output:
     tuple val(meta), path("rpsbproc.out"), emit: results
     tuple val(task.process), val('rpsblast'), eval("software-version '^rpsblast: ([^ ]+).*' rpsblast -version"), topic: versions
-    tuple val(task.process), val('rpsbproc'), eval("software-version '.*[Vv]ersion[: ]+([0-9][^ ]*).*' rpsbproc -version"), topic: versions
+    tuple val(task.process), val('rpsbproc'), eval("software-version '^rpsbproc: ([^ ]+).*' rpsbproc -version"), topic: versions
 
     script:
     """
