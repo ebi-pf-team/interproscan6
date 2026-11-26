@@ -23,7 +23,7 @@ workflow PANTHER {
     )
 
     PREPARE_TREEGRAFTER(
-        SEARCH_PANTHER.out,
+        SEARCH_PANTHER.out.results,
     )
 
     ch_msf = panther.map { _hmm, msf -> msf }
@@ -34,7 +34,7 @@ workflow PANTHER {
 
     PARSE_PANTHER(
         PREPARE_TREEGRAFTER.out.join(
-            RUN_TREEGRAFTER.out, 
+            RUN_TREEGRAFTER.out.results,
             by: [0, 1],
             failOnDuplicate: true,
             failOnMismatch: true

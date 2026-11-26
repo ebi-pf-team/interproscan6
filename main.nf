@@ -1,5 +1,6 @@
 include { INIT_PIPELINE } from './subworkflows/init/pipeline'
 include { INTERPROSCAN  } from './workflows/interproscan'
+include { SOFTWARE_VERSIONS } from './subworkflows/software_versions'
 
 params {
     help: Boolean
@@ -87,6 +88,14 @@ workflow {
         params.pathways,
         params.globus,
         !params.skipInterproVersionCheck
+    )
+
+    SOFTWARE_VERSIONS(
+        channel.topic('versions'),
+        workflow.manifest.version,
+        workflow.commitId,
+        nextflow.version,
+        params.outdir
     )
 
     workflow.onComplete = {

@@ -8,7 +8,8 @@ process RUN_PRINTS {
     path pval
 
     output:
-    tuple val(meta), path("prints_output")
+    tuple val(meta), path("prints_output"), emit: results
+    tuple val(task.process), val('fingerPRINTScan'), val('3.597.ebiftp'), topic: versions
 
     script:
     """

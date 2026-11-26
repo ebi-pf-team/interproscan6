@@ -7,7 +7,8 @@ process ESL_TRANSLATE {
     path fasta
 
     output:
-    path "translated.fasta"
+    path "translated.fasta", emit: results
+    tuple val(task.process), val('easel'), eval("software-version '^# Easel ([^ ]+).*' esl-translate -h"), topic: versions
 
     script:
     """

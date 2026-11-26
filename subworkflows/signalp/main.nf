@@ -31,7 +31,7 @@ workflow SIGNALP {
                 euk_mode,
                 euk_dir
             )
-            ch_euk = RUN_SIGNALP_GPU_EUK.out
+            ch_euk = RUN_SIGNALP_GPU_EUK.out.results
         } else {
             ch_euk_split = ch_seqs
                 .splitFasta( by: batch_size * 10, file: true )
@@ -41,7 +41,7 @@ workflow SIGNALP {
                 euk_mode,
                 euk_dir
             )
-            ch_euk = RUN_SIGNALP_CPU_EUK.out
+            ch_euk = RUN_SIGNALP_CPU_EUK.out.results
         }
         PARSE_SIGNALP_EUK(ch_euk)
         results = results.mix(PARSE_SIGNALP_EUK.out)
@@ -55,7 +55,7 @@ workflow SIGNALP {
                 prok_mode,
                 prok_dir
             )
-            ch_prok = RUN_SIGNALP_GPU_PROK.out
+            ch_prok = RUN_SIGNALP_GPU_PROK.out.results
         } else {
             ch_prok_split = ch_seqs
                 .splitFasta( by: batch_size * 10, file: true )
@@ -65,7 +65,7 @@ workflow SIGNALP {
                 prok_mode,
                 prok_dir
             )
-            ch_prok = RUN_SIGNALP_CPU_PROK.out
+            ch_prok = RUN_SIGNALP_CPU_PROK.out.results
         }
         PARSE_SIGNALP_PROK(ch_prok)
         results = results.mix(PARSE_SIGNALP_PROK.out)

@@ -10,7 +10,8 @@ process RUN_DEEPTMHMM_CPU {
     path tmhmm_dir
 
     output:
-    tuple val(meta), path("outdir")
+    tuple val(meta), path("outdir"), emit: results
+    tuple val(task.process), val('deeptmhmm'), val('1.0'), topic: versions
 
     script:
     """
@@ -38,7 +39,8 @@ process RUN_DEEPTMHMM_GPU {
     path tmhmm_dir
 
     output:
-    tuple val(meta), path("outdir")
+    tuple val(meta), path("outdir"), emit: results
+    tuple val(task.process), val('deeptmhmm'), val('1.0'), topic: versions
 
     script:
     """

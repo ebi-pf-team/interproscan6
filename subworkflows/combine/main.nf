@@ -26,19 +26,21 @@ workflow COMBINE {
 
     COMBINE_MATCHES(ch_json)
 
-    ch_xrefs = ADD_XREFS(
+    ADD_XREFS(
         COMBINE_MATCHES.out,
         ch_interpro,
         ch_panther,
         add_goterms,
         add_pathways
     )
+    ch_xrefs = ADD_XREFS.out.results
 
     ch_combined = channel.empty()
     if (skip_repr_locations) {
         ch_combined = ch_xrefs
     } else {
-        ch_combined = REPRESENTATIVE_LOCATIONS(ch_xrefs)
+        REPRESENTATIVE_LOCATIONS(ch_xrefs)
+        ch_combined = REPRESENTATIVE_LOCATIONS.out.results
     }
 
     emit:

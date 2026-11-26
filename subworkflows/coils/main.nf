@@ -6,7 +6,7 @@ workflow COILS {
 
     main:
     RUN_COILS(ch_seqs)
-    PARSE_COILS(RUN_COILS.out)
+    PARSE_COILS(RUN_COILS.out.results)
 
     emit:
     PARSE_COILS.out // [ meta, json ]

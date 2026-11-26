@@ -30,7 +30,7 @@ workflow CATH {
         cathgene3d_files
     )
        
-    PARSE_CATHGENE3D(SEARCH_GENE3D.out)
+    PARSE_CATHGENE3D(SEARCH_GENE3D.out.results)
 
     if (report_cathgene3d) {
         results = results.mix(PARSE_CATHGENE3D.out)
@@ -53,7 +53,7 @@ workflow CATH {
         )
 
         // Parse results
-        PARSE_FUNFAM(SEARCH_FUNFAM.out)
+        PARSE_FUNFAM(SEARCH_FUNFAM.out.results)
         results = results.mix(PARSE_FUNFAM.out)
     }
 

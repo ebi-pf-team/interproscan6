@@ -10,7 +10,8 @@ process RUN_SIGNALP_CPU {
     path signalp_dir
 
     output:
-    tuple val(meta), val(organism), val(mode), path("outdir")
+    tuple val(meta), val(organism), val(mode), path("outdir"), emit: results
+    tuple val(task.process), val('signalp'), val('6.0i'), topic: versions
 
     script:
     """
@@ -42,7 +43,8 @@ process RUN_SIGNALP_GPU {
     path signalp_dir
 
     output:
-    tuple val(meta), val(organism), val(mode), path("outdir")
+    tuple val(meta), val(organism), val(mode), path("outdir"), emit: results
+    tuple val(task.process), val('signalp'), val('6.0i'), topic: versions
 
     script:
     """

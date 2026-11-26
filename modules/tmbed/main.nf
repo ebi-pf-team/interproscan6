@@ -45,7 +45,8 @@ process RUN_TMBED_CPU {
     val batch_size
 
     output:
-    tuple val(meta), path("tmbed.pred")
+    tuple val(meta), path("tmbed.pred"), emit: results
+    tuple val(task.process), val('tmbed'), val('1.0.2'), topic: versions
 
     script:
     """
@@ -69,7 +70,8 @@ process RUN_TMBED_GPU {
     val batch_size
 
     output:
-    tuple val(meta), path("tmbed.pred")
+    tuple val(meta), path("tmbed.pred"), emit: results
+    tuple val(task.process), val('tmbed'), val('1.0.2'), topic: versions
 
     script:
     """

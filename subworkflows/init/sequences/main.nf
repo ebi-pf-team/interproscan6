@@ -28,7 +28,7 @@ workflow INIT_SEQUENCES {
         ESL_TRANSLATE(ch_fasta)
 
         // Store sequences in the sequence database
-        seq_db = LOAD_ORFS(ESL_TRANSLATE.out, LOAD_SEQUENCES.out)
+        seq_db = LOAD_ORFS(ESL_TRANSLATE.out.results, LOAD_SEQUENCES.out)
     } else {
         // Store the input seqs in the internal ips6 seq db
         seq_db = LOAD_SEQUENCES(ch_fasta, is_nucleic)

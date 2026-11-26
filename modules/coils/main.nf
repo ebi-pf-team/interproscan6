@@ -7,7 +7,8 @@ process RUN_COILS {
     tuple val(meta), path(fasta)
 
     output:
-    tuple val(meta), path("coils.out")
+    tuple val(meta), path("coils.out"), emit: results
+    tuple val(task.process), val('ncoils'), val('2.2.1'), topic: versions
 
     script:
     """

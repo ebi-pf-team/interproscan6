@@ -41,7 +41,7 @@ nextflow_process {
 
         then {
             assert process.success
-            assert snapshot(process.out).match()
+            assert snapshot(["0": process.out.results]).match()
         }
     }    
 
@@ -71,7 +71,7 @@ nextflow_process {
 
         then {
             assert process.success
-            assert snapshot(process.out).match()
+            assert snapshot(["0": process.out.results]).match()
         }
     }
 
@@ -101,9 +101,9 @@ nextflow_process {
 
         then {
             assert process.success
-            assert snapshot(process.out).match()
+            assert snapshot(["0": process.out.results]).match()
 
-            with (process.out) {
+            with ([process.out.results]) {
                 assert size() == 1
                 assert get(0).size() == 1
                 def json1 = "tests/data/combined/combined-with-xrefs.json.gz"

@@ -11,7 +11,7 @@ workflow SFLD {
 
     SEARCH_SFLD(fasta, ch_search)
 
-    PARSE_SFLD(SEARCH_SFLD.out, ch_parse)
+    PARSE_SFLD(SEARCH_SFLD.out.results, ch_parse)
 
     emit:
     PARSE_SFLD.out  // [ meta, json ]

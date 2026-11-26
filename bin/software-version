@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Extract a version from stdout or stderr, including help commands that exit 1.
+# An unavailable version must not turn a successful analysis into a failure.
+pattern=$1
+shift
+output=$("$@" 2>&1) || true
+version=$(printf '%s\n' "$output" | sed -nE "s/${pattern}/\1/p" | head -n 1)
+if [[ -n "$version" ]]; then
+    printf '%s\n' "$version"
+else
+    printf 'unknown\n'
+fi

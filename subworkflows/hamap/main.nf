@@ -12,7 +12,7 @@ workflow HAMAP {
     )
 
     PARSE_PFSEARCH(
-        RUN_PFSEARCH.out,
+        RUN_PFSEARCH.out.results,
         "HAMAP",
         "",
     )

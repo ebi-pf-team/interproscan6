@@ -13,7 +13,9 @@ process RUN_PSSCAN {
         tuple path(dat), path(eval)
 
     output:
-        tuple val(meta), path("ps_scan.out")
+        tuple val(meta), path("ps_scan.out"), emit: results
+        tuple val(task.process), val('pftools'), eval("software-version '.*[Vv]ersion[: ]+([0-9][^ ]*).*' pfscanV3 -h"), topic: versions
+        tuple val(task.process), val('ps_scan'), eval("software-version '^ps_scan version ([^ ]+).*' ps_scan.pl -h"), topic: versions
 
     script:
     """
@@ -87,7 +89,8 @@ process RUN_PFSEARCH {
     path profiles_dir
 
     output:
-    tuple val(meta), stdout
+    tuple val(meta), stdout, emit: results
+    tuple val(task.process), val('pftools'), eval("software-version '.*[Vv]ersion[: ]+([0-9][^ ]*).*' pfsearchV3 -h"), topic: versions
 
     script:
     """

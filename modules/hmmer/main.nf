@@ -10,7 +10,8 @@ process RUN_HMMER {
     val options    // e.g. "-Z 65245 -E 0.001"
 
     output:
-    tuple val(meta), path("hmmsearch.out")
+    tuple val(meta), path("hmmsearch.out"), emit: results
+    tuple val(task.process), val('hmmer'), eval("software-version '^# HMMER ([^ ]+).*' hmmsearch -h"), topic: versions
 
     script:
     """

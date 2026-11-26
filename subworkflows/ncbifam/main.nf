@@ -14,7 +14,7 @@ workflow NCBIFAM {
     )
 
     PARSE_NCBIFAM(
-        SEARCH_NCBIFAM.out
+        SEARCH_NCBIFAM.out.results
     )
 
     emit:

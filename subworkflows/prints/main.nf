@@ -19,7 +19,7 @@ workflow PRINTS {
     )
 
     PARSE_PRINTS(
-        RUN_PRINTS.out,
+        RUN_PRINTS.out.results,
         ch_hierarchy
     )
 
